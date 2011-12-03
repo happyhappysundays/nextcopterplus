@@ -16,7 +16,7 @@ A number of changes have been made to the way the code runs:
 - RC inputs were originally compressed into 8 bits but now are processed without loss of resolution
 
 Here is a picture of my hand-made acc board add-on. The final version will use Dan's module and be much neater.
-[IMG]http://i.imgur.com/A153J.jpg[/IMG] 
+http://i.imgur.com/A153J.jpg
 
 Here is an early picture of the GUI showing the gyro and accelerometer outputs being graphed on screen.
 [IMG]http://i.imgur.com/YNhDO.jpg[/IMG]
