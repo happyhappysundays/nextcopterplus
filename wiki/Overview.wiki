@@ -1,6 +1,6 @@
 Introduction
 ------------
-The NeXtcopter open source code for the KK boards was just a starting point for my ultimate goal: bringing the much-requested [B]auto-level[/B] feature to KK-level boards.
+The NeXtcopter open source code for the KK boards was just a starting point for my ultimate goal: bringing the much-requested *auto-level* feature to KK-level boards.
 Doing so was a long journey! Over the last few months I have been working on bringing the most current open-sourced KK software up to date. Along the way a number of great new features, some unique to NeXtcopter Plus, have been added. 
 These include:
 - PID loop control on all axis (Just P for auto-level)
@@ -40,7 +40,7 @@ A quick picture of the LCD menu splash screen
 
 Hardware requirements
 ---------------------
-[B]Will this code run on a regular KK board?[/B]
+*Will this code run on a regular KK board?*
 Not fully. You need a few things on the board to set it up and for the accelerometer functions to work.
  - LCD or GUI interface. The code outputs both the LCD and GUI serial data out the MISO line.
    You need a board with access to that pin on the interface header.
@@ -52,7 +52,7 @@ Not fully. You need a few things on the board to set it up and for the accelerom
 You'll have to remove a couple of resistors in order for the accelerometer outputs to be made available.
 [IMG]http://i.imgur.com/si9Oh.jpg[/IMG]
 
-[B]What do I need to get the GUI running?[/B]
+*What do I need to get the GUI running?*
 You need a MKUSB-type serial interface for the GUI to communicate to the board.
 Because of the limitations of the KK board, a non-standard cable is required.
 
@@ -70,11 +70,11 @@ It's a very simple cable and once you've played with the GUI for a while you'll 
 Dan's KK+ boards have both the LCD and serial ports available and has made accelerometer connection easy.
 This is what I have used to develop the code.
 
-[B]Why can't I change the gyro direction?[/B]
+*Why can't I change the gyro direction?*
 Why would you? There's only one hardware platform this code will run on and the gyro direction for that is well known.
 If you really want to change the direction, just change the source code (in gyros.c).
 
-[B]What do the Gain pots do?[/B]
+*What do the Gain pots do?*
 Roll Gain:	Not used
 Pitch Gain:	Not used
 Yaw Gain:	used to select ESC cailbration mode or Stick centering mode at power-on
@@ -213,7 +213,8 @@ Videos
 ------
 Sorry, I've been too busy to take many videos. Hope to have more up soon.
 Auto-level torture test:
-[URL="http://www.youtube.com/watch?v=TCGdvMnb_SI"]http://www.youtube.com/watch?v=TCGdvMnb_SI[/URL]
+http://www.youtube.com/watch?v=TCGdvMnb_SI
+
 
 What's next?
 -----------
