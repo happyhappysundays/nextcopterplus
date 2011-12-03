@@ -1,0 +1,76 @@
+/*********************************************************************
+ * typedefs.h
+ ********************************************************************/
+
+#ifndef TYPE_DEFS_H_
+#define TYPE_DEFS_H_
+
+/*********************************************************************
+ * Type definitions
+ ********************************************************************/
+
+#define INPUT 	0
+#define OUTPUT 	1
+
+typedef enum _BOOL { FALSE = 0, TRUE } BOOL;
+
+typedef struct
+{
+	uint8_t	setup;						// Byte to identify if already setup
+
+	uint16_t	RxChannel1ZeroOffset;	// Zero offsets (stick centering)
+	uint16_t	RxChannel2ZeroOffset;
+	uint16_t	RxChannel3ZeroOffset;	// Currently throttle is fixed
+	uint16_t	RxChannel4ZeroOffset;
+	uint8_t		AccRollZeroTrim;		// User-set ACC trim (0~255 -> +/-127 @ GUI)
+	uint8_t		AccPitchZeroTrim;
+	uint16_t	AccRollZero;			// Acc calibration results
+	uint16_t	AccPitchZero;
+	uint8_t		P_mult_roll;			// PID gain settings
+	uint8_t		I_mult_roll;
+	uint8_t		D_mult_roll;
+	uint8_t		P_mult_pitch;
+	uint8_t		I_mult_pitch;
+	uint8_t		D_mult_pitch;
+	uint8_t		P_mult_yaw;
+	uint8_t		I_mult_yaw;
+	uint8_t		D_mult_yaw;
+	uint8_t		P_mult_level;
+	uint8_t		I_mult_level;
+	uint8_t		D_mult_level;
+	//
+	uint8_t		RC_rate;				// Not currently used
+	uint8_t		RC_expo;				// Not currently used
+	uint8_t		RollPitchRate;
+	uint8_t		Yawrate;
+	uint16_t	PowerTrigger;
+	uint8_t		Modes;
+	uint16_t	AutoTuneRX;				// Auto-tuned rate for UART RX
+	uint16_t	AutoTuneTX;				// Auto-tuned rate for UART TX
+
+} CONFIG_STRUCT;
+
+typedef struct
+{
+  int16_t lower;						// Lower limit for menu item
+  int16_t upper;						// Upper limit for menu item
+} menu_range_t; 
+
+
+// The following code courtesy of: stu_san on AVR Freaks
+
+typedef struct
+{
+  unsigned int bit0:1;
+  unsigned int bit1:1;
+  unsigned int bit2:1;
+  unsigned int bit3:1;
+  unsigned int bit4:1;
+  unsigned int bit5:1;
+  unsigned int bit6:1;
+  unsigned int bit7:1;
+} _io_reg; 
+
+#define REGISTER_BIT(rg,bt) ((volatile _io_reg*)&rg)->bit##bt
+
+#endif
