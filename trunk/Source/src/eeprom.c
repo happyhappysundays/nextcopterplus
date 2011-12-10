@@ -92,9 +92,10 @@ void Set_EEPROM_Default_Config(void)
 	Config.P_mult_yaw = 50;
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
-	Config.P_mult_level = 150;
-	Config.I_mult_level = 30;
-	Config.D_mult_level = 0;
+	Config.P_mult_glevel = 150;
+	Config.I_mult_glevel = 0;
+	Config.P_mult_alevel = 30;
+	Config.I_mult_alevel = 0;
 	//
 	Config.RC_rate = 50;
 	Config.RC_expo = 68;

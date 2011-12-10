@@ -170,35 +170,36 @@ Quad X
 //* Code and Data variables
 //***********************************************************
 
-int32_t	IntegralPitch;			// PID I-terms for each axis
+int32_t	IntegralPitch;				// PID I-terms for each axis
 int32_t	IntegralRoll;
 int32_t	IntegralYaw;
-int32_t	IntegralRollAngle;		// Constantly integrated roll angle I-term
-int32_t	IntegralPitchAngle; 	// Constantly integrated pitch angle I-term
-uint16_t cycletime;			// Data TX cycle counter
-bool AutoLevel;				// AutoLevel = 1
+int32_t	IntegralRollAngle;			// Constantly integrated roll angle I-term
+int32_t	IntegralPitchAngle; 		// Constantly integrated pitch angle I-term
+uint16_t cycletime;					// Data TX cycle counter
+bool AutoLevel;						// AutoLevel = 1
 bool GUIconnected;
+uint8_t flight_mode;				// Global flight mode flag
 //
-int16_t AvgAccRoll[AVGLENGTH];			// Circular buffer of historical accelerometer roll readings
-int16_t AvgAccPitch[AVGLENGTH];			// Circular buffer of historical accelerometer pitch readings
+int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer roll readings
+int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
 //
-uint16_t Change_Arming;		// Arming timers
+uint16_t Change_Arming;				// Arming timers
 uint16_t Change_LCD;
 uint8_t Arming_TCNT2;
 //
-bool LCD_active;				// Mode flags
+bool LCD_active;					// Mode flags
 bool freshmenuvalue;
 bool firsttimeflag;
-char pBuffer[16];						// Print buffer
+char pBuffer[16];					// Print buffer
 //
-int32_t Roll;							// Calculated P-terms for each axis
+int32_t Roll;						// Calculated P-terms for each axis
 int32_t Pitch;
 int32_t Yaw;
 int32_t I_term_Roll;				// Calculated I-terms for each axis
 int32_t I_term_Pitch;
 int32_t I_term_Yaw;
 //
-int16_t currentGyroError[3];	// Used with lastGyroError to keep track of D-Terms in PID calculations
+int16_t currentGyroError[3];		// Used with lastGyroError to keep track of D-Terms in PID calculations
 int16_t lastGyroError[3];
 int16_t DifferentialGyro;			// Holds difference between last two gyro errors (angular acceleration)
 uint16_t uber_loop_count;			// Used to count main loops for everything else :)
@@ -209,8 +210,7 @@ int8_t AccPitchTrim;
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
-
-
+//
 int8_t AvgIndex;
 int8_t OldIndex;
 int32_t AvgRollSum;					// Can be 16-bit
@@ -227,9 +227,8 @@ int main(void)
 {
 	OldIndex = 1;
 	firsttimeflag = true;
-
 	//
-	init();									// Do all init tasks
+	init();								// Do all init tasks
 
 
 //************************************************************
@@ -423,12 +422,12 @@ if (0) {
 					LCD_Display_Menu(MenuItem);						// Display menu top line
 					LCDprint_line2("          <-Save");				// Setup save line
 					LCDgoTo(17);									// Position cursor at nice spot
-					if (MenuItem == 17) 							// Special case for LVA mode
+					if (MenuItem == 19) 							// Special case for LVA mode
 					{
 						if (MenuValue == 0) LCDprintstr("LED");
 						else LCDprintstr("Buzzer");
 					}
-					else if ((MenuItem > 0) && (MenuItem != 18)) LCDprintstr(itoa(MenuValue,pBuffer,10)); // Print value to change (except for base menu)
+					else if ((MenuItem > 0) && (MenuItem < 20)) LCDprintstr(itoa(MenuValue,pBuffer,10)); // Print value to change (except for base menu)
 
 					// Stick volume variable delay (four speeds)
 					if 	   ((RxInRoll > STICKARM_POINT+150) || (RxInRoll < -STICKARM_POINT-150)) _delay_ms(10);
@@ -495,12 +494,14 @@ if (0) {
 					{
 						Config.RollPitchRate = ACRO_ROLL_PITCH_STICK_SCALE;
 						Config.Yawrate = ACRO_YAW_STICK_SCALE;
+						flight_mode |= 4;
 						nBlink = 3;
 		 			}
 			 		else if (RxInPitch < -STICKARM_POINT) 	// WARTHOX
 			 		{
 						Config.RollPitchRate = WARTHOX_ROLL_PITCH_STICK_SCALE;
 						Config.Yawrate = WARTHOX_YAW_STICK_SCALE;
+						flight_mode |= 8;
 						nBlink = 2;
 			 		}
 					else if (RxInRoll > STICKARM_POINT) 	// Autolevel
@@ -508,6 +509,7 @@ if (0) {
 						AutoLevel = true;
 						Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
 						Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+						flight_mode |= 1;
 						nBlink = 5;
 					}
 					else if (RxInRoll < -STICKARM_POINT)	// Autotune mode
@@ -524,6 +526,7 @@ if (0) {
 			 		else // NORMAL
 			 		{
 						// Use user-defined rates set from LCD or GUI
+						flight_mode |= 2;
 						nBlink = 1;
 			 		}
 
@@ -544,6 +547,7 @@ if (0) {
 					AutoLevel = false;
 					GUIconnected = false;		// Disconnect GUI
 					LED = 0;
+					flight_mode = 0;
 				}
 			} // if (Change_Arming)
 		} // if ( RxInCollective == 0)
@@ -593,11 +597,11 @@ if (0) {
 
 		if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 		{
-			Roll *= Config.P_mult_level;						// Multiply P-term (Max gain of 256)
+			Roll *= Config.P_mult_glevel;						// Multiply P-term (Max gain of 256)
 			Roll = Roll * 3;									// Multiply by 3, so max effective gain is 768
 			Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
 
-			I_term_Roll = AvgRoll * Config.I_mult_level;		// Not an I-term, just the acc offset
+			I_term_Roll = AvgRoll * Config.P_mult_alevel;		// Not an I-term, just the acc offset
 			I_term_Roll = I_term_Roll >> 4;
 
 			if (I_term_Roll > PR_LIMIT) I_term_Roll = PR_LIMIT;		
@@ -655,11 +659,11 @@ if (0) {
 
 		if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 		{
-			Pitch *= Config.P_mult_level;						// Multiply P-term (Max gain of 256)
+			Pitch *= Config.P_mult_glevel;						// Multiply P-term (Max gain of 256)
 			Pitch = Pitch * 3;									// Multiply by 3, so max effective gain is 768
 			Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
 
-			I_term_Pitch = AvgPitch * Config.I_mult_level;		// Not an I-term, just the acc offset
+			I_term_Pitch = AvgPitch * Config.P_mult_alevel;		// Not an I-term, just the acc offset
 			I_term_Pitch = I_term_Pitch >> 4;
 			
 			if (I_term_Pitch > PR_LIMIT) I_term_Pitch = PR_LIMIT;		

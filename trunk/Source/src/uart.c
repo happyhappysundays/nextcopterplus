@@ -112,7 +112,7 @@ uint16_t rx_word(void)
 	return(word);
 }
 
-void get_multwii_data(void) // 21 bytes
+void get_multwii_data(void) // 22 bytes
 {
 	Config.P_mult_roll = rx_byte();
 	Config.I_mult_roll = rx_byte();
@@ -123,20 +123,21 @@ void get_multwii_data(void) // 21 bytes
 	Config.P_mult_yaw = rx_byte();
 	Config.I_mult_yaw = rx_byte();
 	Config.D_mult_yaw = rx_byte();
-	Config.P_mult_level = rx_byte();
-	Config.I_mult_level = rx_byte();
-	Config.D_mult_level = rx_byte();	//12
+	Config.P_mult_glevel = rx_byte();
+	Config.I_mult_glevel = rx_byte();
+	Config.P_mult_alevel = rx_byte();
+	Config.I_mult_alevel = rx_byte();	//
 	Config.RC_rate = rx_byte();
-	Config.RC_expo = rx_byte();			//14
+	Config.RC_expo = rx_byte();			//
 	Config.RollPitchRate = rx_byte();
-	Config.Yawrate = rx_byte();			//16
-	Config.PowerTrigger = rx_word();	//18
-	Config.Modes = rx_byte();			//19
-	Config.AccRollZeroTrim = rx_byte();	//20
-	Config.AccPitchZeroTrim = rx_byte();//21
+	Config.Yawrate = rx_byte();			//
+	Config.PowerTrigger = rx_word();	//
+	Config.Modes = rx_byte();			//
+	Config.AccRollZeroTrim = rx_byte();	//
+	Config.AccPitchZeroTrim = rx_byte();//22
 }
 
-void send_multwii_data(void)
+void send_multwii_data(void) // 66 bytes
 {
 	uint8_t i;
 
@@ -145,7 +146,7 @@ void send_multwii_data(void)
     for (i = 0; i < 2; i++)
 	send_word(accADC[i]<<2);	// Scaled acc 
 	send_byte(0);
-	send_byte(0);				// 7
+	send_byte(0);				// 7 - Dummy word for ACC (Z)
     for (i = 0; i < 3; i++)
 	send_word(gyroADC[i]); 		// Gyro 13
 	send_word(MotorOut1*10); 	// Motors 25
@@ -158,20 +159,15 @@ void send_multwii_data(void)
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 
 	send_word(RxChannel4); 		// 33
-	i = 0;						
-	if (AutoLevel) i = i | 1;	// Present 34 (1 = Autolevel,2 = Normal,4 = Acro,8 = UFO)
-	if (Config.Yawrate == NORMAL_YAW_STICK_SCALE) i = i | 2;
-	if (Config.Yawrate == ACRO_YAW_STICK_SCALE) i = i | 4;
-	if (Config.Yawrate == WARTHOX_YAW_STICK_SCALE) i = i | 8;
-	if ((Config.Modes &16) > 0) i = i | 16; // 16 = LVA mode 1 = buzzer, 0 = LED
-	send_byte(i);
-	send_byte(0);		 		// accMode 35 unused?
-	send_word(cycletime);		// cycleTime 37
-	send_byte(20);
-	send_byte(0);				// anglex 39
-	send_byte(15);
-	send_byte(0);				// angley 41
-	send_byte(MULTITYPE);		// Multitype 42
+	send_word(RxChannel5);
+	send_word(RxChannel6); 
+	send_word(RxChannel7); 
+	send_word(RxChannel8); 		// 41
+	// Add CH5 to CH8
+	if ((Config.Modes &16) > 0) flight_mode |= 16; // 16 = LVA mode 1 = buzzer, 0 = LED
+	send_byte(flight_mode);
+	send_word(cycletime);		// cycleTime 44
+	send_byte(MULTITYPE);		// Multitype 45
 	send_byte(Config.P_mult_roll);
 	send_byte(Config.I_mult_roll);
 	send_byte(Config.D_mult_roll);
@@ -181,18 +177,19 @@ void send_multwii_data(void)
 	send_byte(Config.P_mult_yaw);
 	send_byte(Config.I_mult_yaw);
 	send_byte(Config.D_mult_yaw);
-	send_byte(Config.P_mult_level);
-	send_byte(Config.I_mult_level);
-	send_byte(Config.D_mult_level); 	//54
+	send_byte(Config.P_mult_glevel);
+	send_byte(Config.I_mult_glevel);
+	send_byte(Config.P_mult_alevel);
+	send_byte(Config.I_mult_alevel);	// 
     send_byte(Config.RC_rate);			// RC rate (50 = 1 in GUI)
     send_byte(Config.RC_expo);			// RC Expo ('10' shows as 0.10 in GUI)
     send_byte(Config.RollPitchRate);	// rollPitchRate
-    send_byte(Config.Yawrate);			// yawRate 58
+    send_byte(Config.Yawrate);			// yawRate 
 	send_word(vBat);					// Send battery voltage (1000 = 10.0V)
-	send_word(Config.PowerTrigger);		// intPowerTrigger1 62
+	send_word(Config.PowerTrigger);		// intPowerTrigger1 
 	send_byte(Config.AccRollZeroTrim);
-	send_byte(Config.AccPitchZeroTrim); // 64
-    send_byte('M');						// 65 Send trailer signature byte
+	send_byte(Config.AccPitchZeroTrim); // 
+    send_byte('M');						// 69 ??Send trailer signature byte
 }
 
 void autotune(void)
