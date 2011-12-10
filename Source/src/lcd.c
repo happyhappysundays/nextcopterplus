@@ -51,18 +51,21 @@ const char MenuItem9[] PROGMEM = "PID Pitch D-term";
 const char MenuItem10[] PROGMEM = "PID Yaw P-term  ";
 const char MenuItem11[] PROGMEM = "PID Yaw I-term  ";
 const char MenuItem12[] PROGMEM = "PID Yaw D-term  ";
-const char MenuItem13[] PROGMEM = "PID Level P-term";
-const char MenuItem14[] PROGMEM = "PID Level I-term";
-const char MenuItem15[] PROGMEM = "Roll/Pitch rate ";
-const char MenuItem16[] PROGMEM = "Yaw rate        ";
-const char MenuItem17[] PROGMEM = "LVA voltage     ";
-const char MenuItem18[] PROGMEM = "LVA mode        ";
-const char MenuItem19[] PROGMEM = "Calibrate Accel.";
+const char MenuItem13[] PROGMEM = "Gyr level P-term";
+const char MenuItem14[] PROGMEM = "Gyr level I-term";
+const char MenuItem15[] PROGMEM = "Acc level P-term";
+const char MenuItem16[] PROGMEM = "Acc level I-term";
+const char MenuItem17[] PROGMEM = "Roll/Pitch rate ";
+const char MenuItem18[] PROGMEM = "Yaw rate        ";
+const char MenuItem19[] PROGMEM = "LVA voltage     ";
+const char MenuItem20[] PROGMEM = "LVA mode        ";
+const char MenuItem21[] PROGMEM = "Calibrate Accel.";
+const char MenuItem22[] PROGMEM = "Center sticks   ";
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18, MenuItem19}; 
+	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -80,10 +83,13 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{0,255},
 	{0,255},
 	{0,255},
+	{0,255},
+	{0,255},
 	{0,5},
 	{0,5},
 	{700,2000},
 	{0,1},
+	{0,0},
 	{0,0}
 };
 
@@ -144,25 +150,33 @@ int16_t get_menu_item(uint8_t menuitem)
 			value = (int16_t) Config.D_mult_yaw;
 			break;
 		case 12:
-			value = (int16_t) Config.P_mult_level;
+			value = (int16_t) Config.P_mult_glevel;
 			break;
 		case 13:
-			value = (int16_t) Config.I_mult_level;
+			value = (int16_t) Config.I_mult_glevel;
 			break;
 		case 14:
-			value = (int16_t) Config.RollPitchRate;
+			value = (int16_t) Config.P_mult_alevel;
 			break;
 		case 15:
-			value = (int16_t) Config.Yawrate;
+			value = (int16_t) Config.I_mult_alevel;
 			break;
 		case 16:
-			value = (int16_t) Config.PowerTrigger;
+			value = (int16_t) Config.RollPitchRate;
 			break;
 		case 17:
+			value = (int16_t) Config.Yawrate;
+			break;
+		case 18:
+			value = (int16_t) Config.PowerTrigger;
+			break;
+		case 19:
 			if ((Config.Modes & 0x10) > 0) value = 1;
 			else value = 0;
 			break;
-		case 18:
+		case 20:
+			break;
+		case 21:
 			break;
 		default:
 			break;
@@ -210,21 +224,27 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			Config.D_mult_yaw = (uint8_t) value;
 			break;
 		case 12:
-			Config.P_mult_level = (uint8_t) value;
+			Config.P_mult_glevel = (uint8_t) value;
 			break;
 		case 13:
-			Config.I_mult_level = (uint8_t) value;
+			Config.I_mult_glevel = (uint8_t) value;
 			break;
 		case 14:
-			Config.RollPitchRate = (uint8_t) value;
+			Config.P_mult_alevel = (uint8_t) value;
 			break;
 		case 15:
-			Config.Yawrate = (uint8_t) value;
+			Config.I_mult_alevel = (uint8_t) value;
 			break;
 		case 16:
-			Config.PowerTrigger = (uint16_t) value;
+			Config.RollPitchRate = (uint8_t) value;
 			break;
 		case 17:
+			Config.Yawrate = (uint8_t) value;
+			break;
+		case 18:
+			Config.PowerTrigger = (uint16_t) value;
+			break;
+		case 19:
 			// 1 = Autolevel, 2 = Normal, 4 = Acro, 8 = UFO, bit 4 (16) = LVA mode 1 = buzzer, 0 = LED
 			if (value == 0) {
 				Config.Modes = Config.Modes & 0xEF;				// LVA mode = buzzer (bit 4)
@@ -233,8 +253,11 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 				Config.Modes = Config.Modes | 0x10;
 			}
 			break;
-		case 18:
+		case 20:
 			CalibrateAcc();
+			break;
+		case 21:
+			CenterSticks();
 			break;
 		default:
 			break;
