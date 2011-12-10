@@ -23,14 +23,12 @@ void GetVbat(void);
 //************************************************************
 
 uint16_t	GainInADC[3];	// Pot readings
-int8_t		GainIn[3];		// Resulting gain
 uint16_t	vBat;			// Battery voltage
 
 void ReadGainValues(void)
 {
 	read_adc(YAW_POT);							// Read yaw gain ADC5 
 	GainInADC[YAW] = ADCW;
-	GainIn[YAW] = GainInADC[YAW] >> 3;			// 1024 / 8 = 0~128 range
 }
 
 void GetVbat(void)								// Get battery voltage

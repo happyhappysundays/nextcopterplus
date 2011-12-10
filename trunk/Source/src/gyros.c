@@ -27,7 +27,7 @@ void CalibrateGyros(void);
 
 bool	GyroCalibrated;
 int16_t gyroADC[3];						// Holds Gyro ADCs
-int16_t gyroZero[3] = {0,0,0};			// Used for calibrating Gyros on ground
+int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
 
 void ReadGyros(void)

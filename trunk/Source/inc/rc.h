@@ -3,11 +3,12 @@
  ********************************************************************/
 
 // STICKSCALE constants
-#define NORMAL_ROLL_PITCH_STICK_SCALE	2	// Experimental values
-#define NORMAL_YAW_STICK_SCALE			2	// Reducing value by 1 doubles stick sensitivity
-#define ACRO_ROLL_PITCH_STICK_SCALE		1
-#define ACRO_YAW_STICK_SCALE			1
-#define UFO_YAW_STICK_SCALE				0
+#define NORMAL_ROLL_PITCH_STICK_SCALE	3	// Experimental values
+#define NORMAL_YAW_STICK_SCALE			3	// Reducing value by 1 doubles stick sensitivity
+#define ACRO_ROLL_PITCH_STICK_SCALE		2
+#define ACRO_YAW_STICK_SCALE			2
+#define WARTHOX_ROLL_PITCH_STICK_SCALE	1
+#define WARTHOX_YAW_STICK_SCALE			1
 
 
 //***********************************************************

@@ -34,7 +34,6 @@ void output_motor_ppm(void);
 //************************************************************
 
 int16_t	PWM_Low_Pulse_Interval = PWM_LOW_PULSE_INTERVAL;
-bool output_motor_high = false;
 
 int16_t MotorOut1;		// Motor speed variables
 int16_t MotorOut2;

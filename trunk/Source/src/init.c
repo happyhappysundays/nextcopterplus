@@ -45,7 +45,7 @@ bool	Armed;
 
 void init(void)
 {
-	uint16_t i;
+	uint8_t i;
 
 	MCUCR |= (1<<PUD);			// Pull-up Disable
 
@@ -77,17 +77,25 @@ void init(void)
 	RX_COLL 	= 0;
 	RX_YAW		= 0;
 
-	// Pin change interrupt enables
-	PCICR |= (1 << PCIE0);				// PCINT07		
-	PCICR |= (1 << PCIE2);				// PCINT1623
+#ifndef PPM_MODE 
+	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
+	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
+	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
+	PCMSK0 |= (1 << PCINT7);			// PB7 (Rudder/Yaw pin change mask)
+	PCMSK2 |= (1 << PCINT17);			// PD1 (Aileron/Roll pin change mask)
 
-	// Pin change masks
-	PCMSK0 |= (1 << PCINT7);			// PB7
-	PCMSK2 |= (1 << PCINT17);			// PD1
-	// External interrupts
-	EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1
-	EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register
-	EIFR |= (1 << INTF0) | (1 << INTF1);
+	// External interrupts INT0 and INT1 (Pitch, Collective)
+	EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
+	EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
+	EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
+
+#else
+	// External interrupts INT0 (Pitch input - PD2)
+	EICRA = (1 << ISC01);				// Falling edge of INT0
+	EIMSK = (1 << INT0);				// Enable INT0
+	EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
+
+#endif
 
 	// Timer0 (8bit) - run @ 8MHz
 	// Used to control ESC/servo pulse length
@@ -119,8 +127,6 @@ void init(void)
 	IntegralPitch = 0;	 				
 	IntegralRoll = 0;
 	IntegralYaw = 0;
-	IntegralPitchAngle = 0;
-	IntegralRollAngle = 0;
 	AutoLevel = false;
 
 	RxChannelsUpdatedFlag = 0;
@@ -193,7 +199,7 @@ void init(void)
 // Probably a better place for this subroutine than init.c but...
 void CenterSticks(void)		
 {
-	uint16_t i;
+	uint8_t i;
 
 	// Flash LED 3 times
 	for (i=0;i<3;i++)

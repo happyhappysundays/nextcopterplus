@@ -16,6 +16,7 @@
 #include "..\inc\init.h"
 #include "..\inc\eeprom.h"
 #include "..\inc\acc.h"
+#include <avr/pgmspace.h> 
 
 //************************************************************
 // Prototypes
@@ -32,35 +33,38 @@ void set_menu_item(uint8_t menuitem, int16_t value);
 int16_t get_menu_item(uint8_t menuitem);
 void LCD_Display_Menu (uint8_t menuitem);
 menu_range_t get_menu_range (uint8_t menuitem);
+void LCDprint_Menu_P(const char *s);
 
 //************************************************************
 // LCD menu system
 //************************************************************
-//#define MENUITEMS 19
-const char *lcd_menu[MENUITEMS] = 
-{
-	"NeXtcopter Menu ",
-	"Acc Trim (Roll) ", 
-	"Acc Trim (Pitch)",
-	"PID Roll P-term ",
-	"PID Roll I-term ",
-	"PID Roll D-term ",
-	"PID Pitch P-term",
-	"PID Pitch I-term",
-	"PID Pitch D-term",
-	"PID Yaw P-term  ",
-	"PID Yaw I-term  ",
-	"PID Yaw D-term  ",
-	"PID Level P-term",
-	"PID Level I-term",
-	"Roll/Pitch rate ",
-	"Yaw rate        ",
-	"LVA voltage     ",
-	"LVA mode        ",
-	"Calibrate Accel."
-};
 
-const menu_range_t menu_ranges[MENUITEMS] = 
+const char MenuItem1[] PROGMEM = "NeXtcopter Menu ";
+const char MenuItem2[] PROGMEM = "Acc Trim (Roll) "; 
+const char MenuItem3[] PROGMEM = "Acc Trim (Pitch)";
+const char MenuItem4[] PROGMEM = "PID Roll P-term ";
+const char MenuItem5[] PROGMEM = "PID Roll I-term ";
+const char MenuItem6[] PROGMEM = "PID Roll D-term ";
+const char MenuItem7[] PROGMEM = "PID Pitch P-term";
+const char MenuItem8[] PROGMEM = "PID Pitch I-term";
+const char MenuItem9[] PROGMEM = "PID Pitch D-term";
+const char MenuItem10[] PROGMEM = "PID Yaw P-term  ";
+const char MenuItem11[] PROGMEM = "PID Yaw I-term  ";
+const char MenuItem12[] PROGMEM = "PID Yaw D-term  ";
+const char MenuItem13[] PROGMEM = "PID Level P-term";
+const char MenuItem14[] PROGMEM = "PID Level I-term";
+const char MenuItem15[] PROGMEM = "Roll/Pitch rate ";
+const char MenuItem16[] PROGMEM = "Yaw rate        ";
+const char MenuItem17[] PROGMEM = "LVA voltage     ";
+const char MenuItem18[] PROGMEM = "LVA mode        ";
+const char MenuItem19[] PROGMEM = "Calibrate Accel.";
+
+const char *lcd_menu[MENUITEMS] PROGMEM = 
+	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
+	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
+	 MenuItem17, MenuItem18, MenuItem19}; 
+
+const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
 	{0,0},
 	{-50,50},
@@ -76,21 +80,27 @@ const menu_range_t menu_ranges[MENUITEMS] =
 	{0,255},
 	{0,255},
 	{0,255},
-	{0,4},
-	{0,4},
+	{0,5},
+	{0,5},
 	{700,2000},
 	{0,1},
 	{0,0}
 };
 
+// Get LCD data from Program memory
 void LCD_Display_Menu (uint8_t menuitem)
 {
-	LCDprint_line1(lcd_menu[menuitem]);
+	LCDprint_Menu_P((char*)pgm_read_word(&lcd_menu[menuitem]));
 }
 
+// Get range from Program memory
 menu_range_t get_menu_range (uint8_t menuitem)
 {
-	return (menu_ranges[menuitem]);
+	menu_range_t	range;
+	range.upper =	pgm_read_word(&menu_ranges[menuitem].upper);
+	range.lower =	pgm_read_word(&menu_ranges[menuitem].lower);
+
+	return (range);
 }
 
 int16_t get_menu_item(uint8_t menuitem)
@@ -239,8 +249,6 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 
 
 
-
-
 //************************************************************
 // LCD code snippets from Mike Barton.
 // Borrowed from Arduino SoftUsart and the Sparkfun datasheet
@@ -285,6 +293,15 @@ void LCDgoTo(uint8_t position)
 	{
 		LCDgoTo(0);
 	}
+}
+
+void LCDprint_Menu_P(const char *s)
+{
+	LCDclearLine(1);
+	LCDgoTo(0);
+
+	while (pgm_read_byte(s) != 0x00) 
+		LCDprint(pgm_read_byte(s++)); 
 }
 
 void LCDprint_line1(const char *s)
