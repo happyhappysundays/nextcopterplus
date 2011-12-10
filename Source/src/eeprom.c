@@ -80,26 +80,26 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccRollZeroTrim	= 127;	// User-set ACC trim (127-127 = 0)
 	Config.AccPitchZeroTrim	= 127;
 	//
-	Config.AccRollZero	= 578;		// Acc calibration deafults
+	Config.AccRollZero	= 578;		// Acc calibration defaults
 	Config.AccPitchZero	= 585;
 	//
 	Config.P_mult_roll = 150;			// PID defaults
-	Config.I_mult_roll = 100;
+	Config.I_mult_roll = 30;
 	Config.D_mult_roll = 0;
 	Config.P_mult_pitch = 150;
-	Config.I_mult_pitch = 100;
+	Config.I_mult_pitch = 30;
 	Config.D_mult_pitch = 0;
-	Config.P_mult_yaw = 20;
-	Config.I_mult_yaw = 20;
+	Config.P_mult_yaw = 50;
+	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
-	Config.P_mult_level = 80;
-	Config.I_mult_level = 25;
+	Config.P_mult_level = 150;
+	Config.I_mult_level = 30;
 	Config.D_mult_level = 0;
 	//
 	Config.RC_rate = 50;
 	Config.RC_expo = 68;
-	Config.RollPitchRate = 2;
-	Config.Yawrate = 2;
+	Config.RollPitchRate = 3;
+	Config.Yawrate = 3;
 	Config.PowerTrigger = 1100; 
 	Config.Modes = 16; 				// LVA mode = buzzer (bit 4)
 	Config.AutoTuneRX = 25;			// Default best fit for 19,200

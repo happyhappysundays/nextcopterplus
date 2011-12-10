@@ -64,7 +64,7 @@
 // ------------
 // YAW LEFT + PITCH NEUTRAL = Arm (Normal)
 // YAW LEFT + PITCH FWD		= Arm (Acro)
-// YAW LEFT + PITCH BACK	= Arm (UFO)
+// YAW LEFT + PITCH BACK	= Arm (Warthox)
 // YAW LEFT + ROLL RIGHT	= Arm (Autolevel)
 // YAW LEFT + ROLL LEFT		= Arm + AUTOTUNE MODE (Needs GUI)
 // YAW RIGHT 				= Disarm
@@ -75,12 +75,16 @@
 // Version History
 // ===============
 // V1.0a	Based on NeXtcopter V1.0a code
-// V1.1a 	Includes PID loop control on all axis.
+// V1.1a 	Includes PID loop control on all axis
 //			Added code for accelerometers and auto-level functions
 //			Added support for custom MultiWii GUI
 //			Added LCD menu system
 //			Added Low Voltage Alarm support for LEDs or piezo buzzer
 //			Increased RC input resolution through the FC calculations
+// V1.1b	Fixed D-term, rate set bugs
+//			Added support for 8-ch CPPM input on ELEV input
+//			Removed UFO mode, replaced with Warthox mode
+//			Moved all Menu text and support routines to Program memory
 //
 //***********************************************************
 //* Flight configurations (Motor number and rotation)
@@ -148,7 +152,7 @@ Quad X
 // This allows gyros to stabilise better when full throttle applied
 #define MAX_COLLECTIVE 190
 #define MOTOR_IDLE 20				// Minimum motor speed allowed.
-#define DEAD_BAND 2					// Centre region of RC input where no activity is processed
+#define DEAD_BAND 10				// Centre region of RC input where no activity is processed
 
 // PID constants
 #define ITERM_LIMIT_RP 250			// Max I-term sum for Roll/Pitch axis in normal modes
@@ -166,14 +170,54 @@ Quad X
 //* Code and Data variables
 //***********************************************************
 
-int32_t	IntegralPitch = 0;			// PID I-terms for each axis
-int32_t	IntegralRoll = 0;
-int32_t	IntegralYaw = 0;
-int32_t	IntegralRollAngle = 0;		// Constantly integrated roll angle I-term
-int32_t	IntegralPitchAngle = 0; 	// Constantly integrated pitch angle I-term
-uint16_t cycletime = 0;				// Data TX cycle counter
-bool AutoLevel = false;				// AutoLevel = 1
-bool GUIconnected = false;
+int32_t	IntegralPitch;			// PID I-terms for each axis
+int32_t	IntegralRoll;
+int32_t	IntegralYaw;
+int32_t	IntegralRollAngle;		// Constantly integrated roll angle I-term
+int32_t	IntegralPitchAngle; 	// Constantly integrated pitch angle I-term
+uint16_t cycletime;			// Data TX cycle counter
+bool AutoLevel;				// AutoLevel = 1
+bool GUIconnected;
+//
+int16_t AvgAccRoll[AVGLENGTH];			// Circular buffer of historical accelerometer roll readings
+int16_t AvgAccPitch[AVGLENGTH];			// Circular buffer of historical accelerometer pitch readings
+//
+uint16_t Change_Arming;		// Arming timers
+uint16_t Change_LCD;
+uint8_t Arming_TCNT2;
+//
+bool LCD_active;				// Mode flags
+bool freshmenuvalue;
+bool firsttimeflag;
+char pBuffer[16];						// Print buffer
+//
+int32_t Roll;							// Calculated P-terms for each axis
+int32_t Pitch;
+int32_t Yaw;
+int32_t I_term_Roll;				// Calculated I-terms for each axis
+int32_t I_term_Pitch;
+int32_t I_term_Yaw;
+//
+int16_t currentGyroError[3];	// Used with lastGyroError to keep track of D-Terms in PID calculations
+int16_t lastGyroError[3];
+int16_t DifferentialGyro;			// Holds difference between last two gyro errors (angular acceleration)
+uint16_t uber_loop_count;			// Used to count main loops for everything else :)
+//
+int8_t AccRollTrim;					// Normalised acc trim 
+int8_t AccPitchTrim;
+//
+uint8_t rxin;
+uint8_t MenuItem;
+int16_t MenuValue;
+
+
+int8_t AvgIndex;
+int8_t OldIndex;
+int32_t AvgRollSum;					// Can be 16-bit
+int32_t AvgPitchSum;
+int16_t AvgRoll;
+int16_t AvgPitch;
+
 
 //************************************************************
 // Main loop
@@ -181,45 +225,61 @@ bool GUIconnected = false;
 
 int main(void)
 {
-	static uint16_t Change_Arming=0;		// Arming timers
-	static uint16_t Change_LCD=0;
-	static uint8_t Arming_TCNT2=0;
-	//
-	bool LCD_active = false;				// Mode flags
-	bool freshmenuvalue = false;
-	bool firsttimeflag = true;
-	char pBuffer[16];						// Print buffer
-	//
-	int32_t Roll;							// Calculated P-terms for each axis
-	int32_t Pitch;
-	int32_t Yaw;
-	int32_t I_term_Roll = 0;				// Calculated I-terms for each axis
-	int32_t I_term_Pitch = 0;
-	int32_t I_term_Yaw = 0;
-	//
-	int16_t currentGyroError[3] = {0,0,0};	// Used with lastGyroError to keep track of D-Terms in PID calculations
-	int16_t lastGyroError[3] = {0,0,0}; 
-	int16_t DifferentialGyro = 0;			// Holds difference between last two gyro errors (angular acceleration)
-	uint16_t uber_loop_count = 0;			// Used to count main loops for everything else :)
-	//
-	int8_t AccRollTrim = 0;					// Normalised acc trim 
-	int8_t AccPitchTrim = 0;
-	//
-	uint8_t rxin = 0;
-	uint8_t MenuItem = 0;
-	int16_t MenuValue = 0;
-	
-	// Rolling average variables
-	int16_t AvgAccRoll[AVGLENGTH];			// Circular buffer of historical accelerometer roll readings
-	int16_t AvgAccPitch[AVGLENGTH];			// Circular buffer of historical accelerometer pitch readings
-	int8_t AvgIndex = 0;
-	int8_t OldIndex = 1;
-	int32_t AvgRollSum = 0;					// Can be 16-bit
-	int32_t AvgPitchSum = 0;
-	int16_t AvgRoll = 0;
-	int16_t AvgPitch = 0;
+	OldIndex = 1;
+	firsttimeflag = true;
+
 	//
 	init();									// Do all init tasks
+
+
+//************************************************************
+// Test code - PPM input test
+//************************************************************
+if (0) {
+	_delay_ms(1500);					// To get past LCD splash screen
+	char pBuffer[16];					// Print buffer
+	int8_t i;
+	while (1) 
+	{
+		// Print CH1 to CH4
+		for (i=0; i < 50; i++)
+		{
+			LCDprint_line1("1:      2:      ");	
+			LCDprint_line2("3:      4:      ");
+			LCDgoTo(2);
+			LCDprintstr(itoa(RxChannel1,pBuffer,10));
+			LCDgoTo(10);
+			LCDprintstr(itoa(RxChannel2,pBuffer,10));
+			LCDgoTo(18);
+			LCDprintstr(itoa(RxChannel3,pBuffer,10));
+			LCDgoTo(26);
+			LCDprintstr(itoa(RxChannel4,pBuffer,10));
+			_delay_ms(100);
+		}
+
+		// Print RC inputs
+		for (i=0; i < 50; i++)
+		{
+			LCDprint_line1("A:      E:      ");	
+			LCDprint_line2("T:      Y:      ");	
+			RxGetChannels();
+			LCDgoTo(2);
+			LCDprintstr(itoa(RxInRoll,pBuffer,10));
+			LCDgoTo(10);
+			LCDprintstr(itoa(RxInPitch,pBuffer,10));
+			LCDgoTo(18);
+			LCDprintstr(itoa(RxInCollective,pBuffer,10));
+			LCDgoTo(26);
+			LCDprintstr(itoa(RxInYaw,pBuffer,10));
+			_delay_ms(100);
+		}
+	}
+}
+//************************************************************
+// Test code - PPM input test
+//************************************************************
+
+
 	//
 	for (int i = 0; i < AVGLENGTH; i++)		// Shouldn't need to do this but... we do
 	{
@@ -231,7 +291,7 @@ int main(void)
 	// Main loop
 	while (1)
 	{
-		AccRollTrim = Config.AccRollZeroTrim - 127;
+		AccRollTrim = Config.AccRollZeroTrim - 127; // GUI I/F bug won't pass signed numbers...
 		AccPitchTrim = Config.AccPitchZeroTrim - 127;
 
 		RxGetChannels();
@@ -252,7 +312,7 @@ int main(void)
 		else if ((Config.Modes &16) == 0)	// LED mode
 		{	// Flash LEDs if Vbat lower than trigger
 			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
-			else LVA = 1;					// Otherwise leave on LEDs
+			else LVA = 1;					// Otherwise leave LEDs on
 		}
 
 		// Check to see if any requests are coming from the GUI
@@ -415,8 +475,6 @@ int main(void)
 			IntegralPitch = 0;	 
 			IntegralRoll = 0;
 			IntegralYaw = 0;
-			IntegralPitchAngle = 0;
-			IntegralRollAngle = 0;
 
 			// 1 sec, about 8000. (8000 * 1/7812Hz = 1.024s)
 			if (Change_Arming > 8000)
@@ -430,25 +488,19 @@ int main(void)
 					IntegralPitch = 0;	 
 					IntegralRoll = 0;
 					IntegralYaw = 0;
-					IntegralPitchAngle = 0;
-					IntegralRollAngle = 0;
 					
 					uint8_t nBlink = 1;
 
 					if (RxInPitch > STICKARM_POINT) 		// ACRO
 					{
-						//Config.RollPitchRate = ACRO_ROLL_PITCH_STICK_SCALE;
-						//Config.Yawrate = ACRO_YAW_STICK_SCALE;
-						Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE; // Debug - stop going into acro mode!
-						Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+						Config.RollPitchRate = ACRO_ROLL_PITCH_STICK_SCALE;
+						Config.Yawrate = ACRO_YAW_STICK_SCALE;
 						nBlink = 3;
 		 			}
-			 		else if (RxInPitch < -STICKARM_POINT) 	// UFO
+			 		else if (RxInPitch < -STICKARM_POINT) 	// WARTHOX
 			 		{
-						//Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
-						//Config.Yawrate = UFO_YAW_STICK_SCALE;
-						Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE; // Debug - stop going into UFO mode!
-						Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+						Config.RollPitchRate = WARTHOX_ROLL_PITCH_STICK_SCALE;
+						Config.Yawrate = WARTHOX_YAW_STICK_SCALE;
 						nBlink = 2;
 			 		}
 					else if (RxInRoll > STICKARM_POINT) 	// Autolevel
@@ -471,8 +523,7 @@ int main(void)
 					}
 			 		else // NORMAL
 			 		{
-						Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
-						Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+						// Use user-defined rates set from LCD or GUI
 						nBlink = 1;
 			 		}
 
@@ -511,10 +562,10 @@ int main(void)
 		MotorOut4 = RxInCollective; 
 
 		// Accelerometer low-pass filter
-		if (AutoLevel)
-		{
+		if (AutoLevel) {
+
 			// Average accelerometer readings properly to create a genuine low-pass filter
-			// Note that this has exactly the same effect as most "complementary filters" but with vastly less overhead.
+			// Note that this has exactly the same effect as a complementary filter but with vastly less overhead.
 			AvgAccRoll[AvgIndex] = accADC[ROLL];
 			AvgAccPitch[AvgIndex] = accADC[PITCH];	// Add new values into buffer
 
@@ -536,6 +587,7 @@ int main(void)
 		// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 		//***********************************************************************
 
+		if ((RxInRoll < DEAD_BAND) && (RxInRoll > -DEAD_BAND)) RxInRoll = 0; // Reduce RxIn noise into the I-term
 		RxInRoll = RxInRoll >> Config.RollPitchRate;			// Reduce RxInRoll rate per flying mode
 		Roll = RxInRoll + gyroADC[ROLL];
 
@@ -565,12 +617,14 @@ int main(void)
 			I_term_Roll = IntegralRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
 			I_term_Roll = I_term_Roll >> 2;				// Divide by 4, so max effective gain is 64
 
-			currentGyroError[ROLL] = gyroADC[ROLL];		// D-term
+			//currentGyroError[ROLL] = gyroADC[ROLL];		// D-term
+			currentGyroError[ROLL] = Roll;				// D-term
 			DifferentialGyro = currentGyroError[ROLL] - lastGyroError[ROLL];
 			lastGyroError[ROLL] = currentGyroError[ROLL];
 			
 			DifferentialGyro *= Config.D_mult_roll;		// Multiply D-term by up to 1024
-			DifferentialGyro = DifferentialGyro << 2;
+			//DifferentialGyro = DifferentialGyro << 2;
+
 	
 			Roll = Roll + I_term_Roll + DifferentialGyro;// P + I + D
 			Roll = Roll >> 7;							// Divide by 128 to rescale values back to normal
@@ -595,6 +649,7 @@ int main(void)
 		// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 		//***********************************************************************
 
+		if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise into the I-term
 		RxInPitch = RxInPitch >> Config.RollPitchRate;			// Reduce RxInPitch rate per flying mode
 		Pitch = RxInPitch + gyroADC[PITCH];
 
@@ -624,12 +679,13 @@ int main(void)
 			I_term_Pitch = IntegralPitch * Config.I_mult_pitch;	// Multiply I-term (Max gain of 256)
 			I_term_Pitch = I_term_Pitch >> 3;				// Divide by 8, so max effective gain is 16
 
-			currentGyroError[PITCH] = gyroADC[PITCH];		// D-term
+			currentGyroError[PITCH] = Pitch;		// D-term
+			//currentGyroError[PITCH] = gyroADC[PITCH];		// D-term
 			DifferentialGyro = currentGyroError[PITCH] - lastGyroError[PITCH];
 			lastGyroError[PITCH] = currentGyroError[PITCH];	
 	
 			DifferentialGyro *= Config.D_mult_pitch;		// Multiply D-term by up to 1024
-			DifferentialGyro = DifferentialGyro << 2;
+			//DifferentialGyro = DifferentialGyro << 2;
 
 			Pitch = Pitch + I_term_Pitch + DifferentialGyro;// P + I + D
 			Pitch = Pitch >> 7;								// Divide by 128 to rescale values back to normal
@@ -669,12 +725,13 @@ int main(void)
 		I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
 		I_term_Yaw = I_term_Yaw >> 3;					// Divide by 8, so max effective gain is 16
 
-		currentGyroError[YAW] = gyroADC[YAW];			// D-term
+		//currentGyroError[YAW] = gyroADC[YAW];			// D-term
+		currentGyroError[YAW] = Yaw;					// D-term
 		DifferentialGyro = currentGyroError[YAW] - lastGyroError[YAW];
 		lastGyroError[YAW] = currentGyroError[YAW];	
 	
 		DifferentialGyro *= Config.D_mult_yaw;			// Multiply D-term by up to 1024
-		DifferentialGyro = DifferentialGyro << 2;
+		//DifferentialGyro = DifferentialGyro << 2;
 
 		Yaw = Yaw - I_term_Yaw - DifferentialGyro;		// P + I + D
 		Yaw = Yaw >> 7;									// Divide by 128 to rescale values back to normal

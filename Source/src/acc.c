@@ -29,8 +29,8 @@ void CalibrateAcc(void);
 // Code
 //************************************************************
 
-int16_t accADC[2] = {0,0};		// Holds Acc ADC values
-int16_t accZero[2] = {0,0};		// Used for calibrating Accs on ground
+int16_t accADC[2];				// Holds Acc ADC values
+int16_t accZero[2];				// Used for calibrating Accs on ground
 
 bool AccCalibrated;
 

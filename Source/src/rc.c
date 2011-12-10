@@ -31,8 +31,7 @@ int16_t  RxInYaw;
 //--- Get and scale RX channel inputs ---
 void RxGetChannels(void)
 {
-	int16_t RxChannel;
-
+	int16_t  RxChannel;
 	do
 	{
 		RxChannelsUpdatedFlag = false;
