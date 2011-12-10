@@ -162,7 +162,7 @@ void send_multwii_data(void)
 	if (AutoLevel) i = i | 1;	// Present 34 (1 = Autolevel,2 = Normal,4 = Acro,8 = UFO)
 	if (Config.Yawrate == NORMAL_YAW_STICK_SCALE) i = i | 2;
 	if (Config.Yawrate == ACRO_YAW_STICK_SCALE) i = i | 4;
-	if (Config.Yawrate == UFO_YAW_STICK_SCALE) i = i | 8;
+	if (Config.Yawrate == WARTHOX_YAW_STICK_SCALE) i = i | 8;
 	if ((Config.Modes &16) > 0) i = i | 16; // 16 = LVA mode 1 = buzzer, 0 = LED
 	send_byte(i);
 	send_byte(0);		 		// accMode 35 unused?
