@@ -6,10 +6,13 @@
 //* Externals
 //***********************************************************
 
-extern bool AutoLevel;
-extern bool GUIconnected;	
-extern int32_t IntegralPitch;	// PID I-terms for each axis
-extern int32_t IntegralRoll;
-extern int32_t IntegralYaw;
-extern uint16_t cycletime;
-extern uint8_t flight_mode;
+extern bool	AutoLevel;
+extern bool	GUIconnected;	
+extern int32_t	IntegralgPitch;
+extern int32_t	IntegralgRoll;
+extern int32_t	IntegralaPitch;
+extern int32_t	IntegralaRoll;
+extern int32_t	IntegralYaw;
+extern uint16_t	cycletime;
+extern uint8_t	flight_mode;
+extern char pBuffer[16];

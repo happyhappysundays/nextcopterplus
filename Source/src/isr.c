@@ -35,7 +35,7 @@ uint16_t RxChannel6Start;
 uint16_t RxChannel7Start;
 uint16_t RxChannel8Start;
 
-#ifdef PPM_MODE
+#ifdef CPPM_MODE
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Channel number
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
@@ -45,7 +45,7 @@ volatile uint8_t ch_num;			// Channel number
 // Standard mode
 //************************************************************
 
-#ifndef PPM_MODE  	// Normal RX mode
+#ifndef CPPM_MODE  	// Normal RX mode
 ISR(PCINT2_vect)
 {
 	if (RX_ROLL)	// Rising

@@ -31,11 +31,13 @@ void ReadGainValues(void)
 	GainInADC[YAW] = ADCW;
 }
 
-void GetVbat(void)								// Get battery voltage
+void GetVbat(void)								// Get battery voltage (VBAT on ADC6)
 {	
-	read_adc(VBAT);								// Read VBAT on ADC6 
-												// 1024 = 1.63V
-												// 1.63/1024 = about 1.6mV per bit
-	vBat = ADCW * 7 / 4;						// 10V reads as 571 * 1.75 = 1000
-												// NB: This will have to be adjusted if the ADC ref is adjusted away from 1.64V.
+	read_adc(VBAT);								// Normal Vreg is 1.64/1024 = about 1.6mV per bit
+												// MEMS module Vreg is 2.72V = about 2.65mV per bit
+#ifndef MEMS_MODULE
+	vBat = ADCW * 7 / 4;						// Vbat/11/1.6mV * 7/4 = Voltage (decimal)
+#else
+	vBat = ADCW * 3;							// Vbat/11/2.72mV * 3  = Voltage (decimal)
+#endif
 }

@@ -12,4 +12,4 @@ extern void CenterSticks(void);
 extern CONFIG_STRUCT Config;
 extern bool	Armed;
 
-#define MENUITEMS 22
+#define MENUITEMS 24
