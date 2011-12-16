@@ -61,9 +61,17 @@
 #define LVA_DIR			REGISTER_BIT(DDRD,4)
 
 
-//#define PPM_MODE // Uncomment this for PPM support on CH2 (elevator)
+//***********************************************************
+//* Compilation options
+//***********************************************************
+//
+//#define QUAD_COPTER		// Choose this for + config
+#define QUAD_X_COPTER		// Choose this for X config
+//#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
+#define MEMS_MODULE 	// Uncomment this when using the MEMS module
+//
+//***********************************************************
 
-enum GyroDirection { GYRO_NORMAL = 0, GYRO_REVERSED };
 enum GyroArrayIndex { ROLL = 0, PITCH, YAW };
 enum ADCInputs {YAW_GYRO = 0, PITCH_GYRO, ROLL_GYRO, ROLL_POT, PITCH_POT, YAW_POT, VBAT };
 

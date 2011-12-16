@@ -10,6 +10,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\acc.h"
@@ -20,6 +21,7 @@
 #include "..\inc\main.h"
 #include "..\inc\isr.h"
 #include "..\inc\pots.h"
+#include "..\inc\lcd.h"
 
 //************************************************************
 // Prototypes
@@ -48,7 +50,7 @@ void variable_delay(uint8_t count);
 
 #ifdef QUAD_COPTER			// Pass copter type to MultiWii GUI
 	#define MULTITYPE 2
-#elif QUAD_X_COPTER
+#elif defined(QUAD_X_COPTER)
 	#define MULTITYPE 3
 #else
 	#define MULTITYPE 3		// Default to Quad-X
@@ -189,7 +191,7 @@ void send_multwii_data(void) // 66 bytes
 	send_word(Config.PowerTrigger);		// intPowerTrigger1 
 	send_byte(Config.AccRollZeroTrim);
 	send_byte(Config.AccPitchZeroTrim); // 
-    send_byte('M');						// 69 ??Send trailer signature byte
+    send_byte('M');						// 69 Send trailer signature byte
 }
 
 void autotune(void)
@@ -249,6 +251,16 @@ void autotune(void)
 		test_speed = min_speed + ((max_speed - min_speed) >> 1);
 		Config.AutoTuneTX = test_speed; 
 	}
+
+	// Print out autotune result for debugging
+	LCDprint_line1("UTX:    URX:    ");	
+	LCDprint_line2("LCDTX:          ");
+	LCDgoTo(4);
+	LCDprintstr(itoa(Config.AutoTuneTX,pBuffer,10));
+	LCDgoTo(12);
+	LCDprintstr(itoa(Config.AutoTuneRX,pBuffer,10));
+	LCDgoTo(22);
+	LCDprintstr(itoa((Config.AutoTuneTX << 1),pBuffer,10));
 }
 
 void variable_delay(uint8_t count)

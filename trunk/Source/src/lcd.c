@@ -34,6 +34,7 @@ int16_t get_menu_item(uint8_t menuitem);
 void LCD_Display_Menu (uint8_t menuitem);
 menu_range_t get_menu_range (uint8_t menuitem);
 void LCDprint_Menu_P(const char *s);
+void variable_lcd_delay(uint8_t count);
 
 //************************************************************
 // LCD menu system
@@ -57,15 +58,17 @@ const char MenuItem15[] PROGMEM = "Acc level P-term";
 const char MenuItem16[] PROGMEM = "Acc level I-term";
 const char MenuItem17[] PROGMEM = "Roll/Pitch rate ";
 const char MenuItem18[] PROGMEM = "Yaw rate        ";
-const char MenuItem19[] PROGMEM = "LVA voltage     ";
-const char MenuItem20[] PROGMEM = "LVA mode        ";
-const char MenuItem21[] PROGMEM = "Calibrate Accel.";
-const char MenuItem22[] PROGMEM = "Center sticks   ";
+const char MenuItem19[] PROGMEM = "RC Expo (%)     ";
+const char MenuItem20[] PROGMEM = "LVA voltage     ";
+const char MenuItem21[] PROGMEM = "LVA mode        ";
+const char MenuItem22[] PROGMEM = "Battery voltage ";
+const char MenuItem23[] PROGMEM = "Calibrate Accel.";
+const char MenuItem24[] PROGMEM = "Center sticks   ";
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22}; 
+	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22, MenuItem23, MenuItem24}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -85,10 +88,12 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{0,255},
 	{0,255},
 	{0,255},
-	{0,5},
-	{0,5},
-	{700,2000},
+	{0,5},		// Change this to alter max Roll/Pitch rate
+	{0,5},		// Change this to alter max Yaw rate
+	{0,99},
+	{700,2000},	// 7.00 to 20.00 Volts
 	{0,1},
+	{2000,0},	// This makes the battery voltage display unadjustable
 	{0,0},
 	{0,0}
 };
@@ -168,15 +173,22 @@ int16_t get_menu_item(uint8_t menuitem)
 			value = (int16_t) Config.Yawrate;
 			break;
 		case 18:
-			value = (int16_t) Config.PowerTrigger;
+			value = (int16_t) Config.RC_expo;
 			break;
 		case 19:
+			value = (int16_t) Config.PowerTrigger;
+			break;
+		case 20:
 			if ((Config.Modes & 0x10) > 0) value = 1;
 			else value = 0;
 			break;
-		case 20:
-			break;
 		case 21:
+			GetVbat();
+			value = (int16_t) vBat;
+			break;
+		case 22:
+			break;
+		case 23:
 			break;
 		default:
 			break;
@@ -242,9 +254,12 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			Config.Yawrate = (uint8_t) value;
 			break;
 		case 18:
-			Config.PowerTrigger = (uint16_t) value;
+			Config.RC_expo = (uint16_t) value;
 			break;
 		case 19:
+			Config.PowerTrigger = (uint16_t) value;
+			break;
+		case 20:
 			// 1 = Autolevel, 2 = Normal, 4 = Acro, 8 = UFO, bit 4 (16) = LVA mode 1 = buzzer, 0 = LED
 			if (value == 0) {
 				Config.Modes = Config.Modes & 0xEF;				// LVA mode = buzzer (bit 4)
@@ -253,10 +268,12 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 				Config.Modes = Config.Modes | 0x10;
 			}
 			break;
-		case 20:
+		case 21:
+			break;
+		case 22:
 			CalibrateAcc();
 			break;
-		case 21:
+		case 23:
 			CenterSticks();
 			break;
 		default:
@@ -277,26 +294,30 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 // Borrowed from Arduino SoftUsart and the Sparkfun datasheet
 //************************************************************
 
-// 1000000 / 9600  = 104 microseconds at 9600 baud.
-// This won't work for really bad KK boards.
-// Best to get this value from the UART autotune value in the future.
+// LCD timing value from calculated from the UART autotune value.
+// Config.AutoTuneTX  -> 51 is the default, x 2 = 102
 
-#define LCD_BIT_DELAY 102 	// Allow for interrupts
+//#define LCD_BIT_DELAY 102 	// Allow for interrupts
 
 void LCDprint(uint8_t i)
 {
-	uint8_t mask;
+	uint8_t mask, delay;
+	delay = Config.AutoTuneTX << 1;
+
 	LCD_TX = 0;
-	_delay_us(LCD_BIT_DELAY);
+	variable_lcd_delay(delay);
+	//_delay_us(LCD_BIT_DELAY);
 
 	for (mask = 0x01; mask; mask <<= 1) 
 	{
 		if (i & mask) LCD_TX = 1; 
 		else LCD_TX = 0;
-		_delay_us(LCD_BIT_DELAY);
+		variable_lcd_delay(delay);
+		//_delay_us(LCD_BIT_DELAY);
 	}
 	LCD_TX = 1;
-	_delay_us(LCD_BIT_DELAY);
+	variable_lcd_delay(delay);
+	//_delay_us(LCD_BIT_DELAY);
 }
 
 // Position = line 1: 0-15, line 2: 16-31, 31+ defaults back to 0
@@ -363,4 +384,52 @@ void LCDclearLine(uint8_t line)
 void LCDprintstr(const char *s)
 {
 	while (*s) LCDprint(*s++);
+}
+
+void variable_lcd_delay(uint8_t count)
+{
+	switch(count) {
+		case 96:				// 
+			_delay_us(96);
+			break;
+		case 97:				// 
+			_delay_us(97);
+			break;
+		case 98:				// 
+			_delay_us(98);
+			break;
+		case 99:				// 
+			_delay_us(99);
+			break;
+		case 100:				// 
+			_delay_us(100);
+			break;
+		case 101:				// 
+			_delay_us(101);
+			break;
+		case 102:				// 
+			_delay_us(102);
+			break;
+		case 103:				// 
+			_delay_us(103);
+			break;
+		case 104:				// 
+			_delay_us(104);
+			break;
+		case 105:				// 
+			_delay_us(105);
+			break;
+		case 106:				// 
+			_delay_us(106);
+			break;
+		case 107:				// 
+			_delay_us(107);
+			break;
+		case 108:				// 
+			_delay_us(108);
+			break;
+		default:
+			_delay_us(102); 	// Same as case 102
+			break;
+	}
 }

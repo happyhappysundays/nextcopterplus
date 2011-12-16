@@ -77,7 +77,7 @@ void init(void)
 	RX_COLL 	= 0;
 	RX_YAW		= 0;
 
-#ifndef PPM_MODE 
+#ifndef CPPM_MODE 
 	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
 	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
 	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
@@ -124,8 +124,10 @@ void init(void)
 	GyroCalibrated = true;
 	AccCalibrated = false;
 	Armed = false;
-	IntegralPitch = 0;	 				
-	IntegralRoll = 0;
+	IntegralgPitch = 0;	 
+	IntegralgRoll = 0;
+	IntegralaPitch = 0;	 
+	IntegralaRoll = 0;
 	IntegralYaw = 0;
 	AutoLevel = false;
 

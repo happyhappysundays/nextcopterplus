@@ -37,17 +37,26 @@ void ReadGyros(void)
 	read_adc(ROLL_GYRO);				// Read roll gyro ADC2
 	gyro = ADCW;
 	gyro -= gyroZero[ROLL]; 			// Remove offset from gyro output
+#ifndef MEMS_MODULE
 	gyroADC[ROLL] = -gyro;				// Reverse gyro on KK boards
+#else
+	gyroADC[ROLL] = gyro;				// Normal gyro on MEMS module
+#endif
 
 	read_adc(PITCH_GYRO);				// Read pitch gyro ADC1
 	gyro = ADCW;
 	gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
+#ifndef MEMS_MODULE
 	gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
+#else
+	gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
+#endif
 
 	read_adc(YAW_GYRO);					// Read yaw gyro ADC0
 	gyro = ADCW;
 	gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
-	gyroADC[YAW] = gyro;				
+	gyroADC[YAW] = gyro;				// Normal gyro on all boards
+	
 }
 
 void CalibrateGyros(void)

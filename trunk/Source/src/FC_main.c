@@ -81,10 +81,21 @@
 //			Added LCD menu system
 //			Added Low Voltage Alarm support for LEDs or piezo buzzer
 //			Increased RC input resolution through the FC calculations
-// V1.1b	Fixed D-term, rate set bugs
-//			Added support for 8-ch CPPM input on ELEV input
+// V1.1b	Fixed D-term, rate set bugs. Autolevel now 2 x PI loops
+//			Added support for 8-ch CPPM input on ELEV input (use CPPM_MODE define)
 //			Removed UFO mode, replaced with Warthox mode
-//			Moved all Menu text and support routines to Program memory
+//			Moved all menu text and support routines to Program memory
+// V1.1c	Added exponential rate system. Autotune now updates LCD TX rate
+//			Added formatted battery displays to menu
+//			Added support for V1.1 MEMS module (use MEMS_MODULE define)
+//
+//***********************************************************
+//* To do
+//***********************************************************
+//
+//	1. In CPPM mode, add switch to activate autolevel with CH5 			- DONE
+//	2. Add filtered link from CH6, CH7 and CH8 to P and I multipliers
+//	3. 
 //
 //***********************************************************
 //* Flight configurations (Motor number and rotation)
@@ -123,6 +134,7 @@ Quad X
 #include <stdlib.h>
 #include <stdbool.h>
 #include <util/delay.h>
+#include <string.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\eeprom.h"
 #include "..\inc\adc.h"
@@ -137,13 +149,6 @@ Quad X
 #include "..\inc\isr.h" // Debug
 
 //***********************************************************
-//* Compilation options
-//***********************************************************
-
-//#define QUAD_COPTER		// Choose this for + config
-#define QUAD_X_COPTER		// Choose this for X config
-
-//***********************************************************
 //* Defines
 //***********************************************************
 
@@ -156,8 +161,8 @@ Quad X
 
 // PID constants
 #define ITERM_LIMIT_RP 250			// Max I-term sum for Roll/Pitch axis in normal modes
-#define ITERM_LIMIT_YAW 5000		// Max I-term sum for Yaw axis (Heading hold)
-#define ITERM_LIMIT_LEVEL 1000		// Max I-term sum for Roll/Pitch axis in AUTOLEVEL mode
+#define ITERM_LIMIT_YAW 500			// Max I-term sum for Yaw axis (Heading hold)
+#define ITERM_LIMIT_LEVEL 250		// Max I-term sum for Roll/Pitch axis in AUTOLEVEL mode
 #define PR_LIMIT 50					// Limit pitch/roll contribution of I-term to avoid saturation
 #define YAW_LIMIT 50				// Limit yaw contribution to avoid saturation
 #define AVGLENGTH 65				// Accelerometer filter buffer length + 1 (64 new + 1 old)
@@ -170,54 +175,58 @@ Quad X
 //* Code and Data variables
 //***********************************************************
 
-int32_t	IntegralPitch;				// PID I-terms for each axis
-int32_t	IntegralRoll;
-int32_t	IntegralYaw;
-int32_t	IntegralRollAngle;			// Constantly integrated roll angle I-term
-int32_t	IntegralPitchAngle; 		// Constantly integrated pitch angle I-term
-uint16_t cycletime;					// Data TX cycle counter
-bool AutoLevel;						// AutoLevel = 1
-bool GUIconnected;
-uint8_t flight_mode;				// Global flight mode flag
-//
+// Axis variables
+int16_t Roll;						// Temp axis values
+int16_t Pitch;
+int16_t Yaw;
+int8_t AccRollTrim;					// Normalised acc trim 
+int8_t AccPitchTrim;
+int8_t AvgIndex;
+int8_t OldIndex;
+int32_t AvgRollSum;	
+int32_t AvgPitchSum;
+int16_t AvgRoll;
+int16_t AvgPitch;
 int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer roll readings
 int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
-//
-uint16_t Change_Arming;				// Arming timers
-uint16_t Change_LCD;
-uint8_t Arming_TCNT2;
-//
+
+// PID variables
+int32_t	IntegralgPitch;				// PID I-terms (gyro) for each axis
+int32_t	IntegralgRoll;
+int32_t	IntegralaPitch;				// PID I-terms (acc.) for each axis
+int32_t	IntegralaRoll;
+int32_t	IntegralYaw;
+int32_t P_term_gRoll;				// Calculated P-terms (gyro) for each axis
+int32_t P_term_gPitch;
+int32_t P_term_aRoll;				// Calculated P-terms (acc.) for each axis
+int32_t P_term_aPitch;
+int32_t I_term_gRoll;				// Calculated I-terms (gyro) for each axis
+int32_t I_term_gPitch;
+int32_t I_term_aRoll;				// Calculated I-terms (acc.) for each axis
+int32_t I_term_aPitch;
+int32_t I_term_Yaw;
+int16_t currentGyroError[3];		// Used with lastGyroError to keep track of D-Terms in PID calculations
+int16_t lastGyroError[3];
+int16_t DifferentialGyro;			// Holds difference between last two gyro errors (angular acceleration)
+
+// GUI variables
+bool GUIconnected;
+uint8_t flight_mode;				// Global flight mode flag
+uint16_t cycletime;					// Data TX cycle counter
+
+// Misc
+bool AutoLevel;						// AutoLevel = 1
 bool LCD_active;					// Mode flags
 bool freshmenuvalue;
 bool firsttimeflag;
 char pBuffer[16];					// Print buffer
-//
-int32_t Roll;						// Calculated P-terms for each axis
-int32_t Pitch;
-int32_t Yaw;
-int32_t I_term_Roll;				// Calculated I-terms for each axis
-int32_t I_term_Pitch;
-int32_t I_term_Yaw;
-//
-int16_t currentGyroError[3];		// Used with lastGyroError to keep track of D-Terms in PID calculations
-int16_t lastGyroError[3];
-int16_t DifferentialGyro;			// Holds difference between last two gyro errors (angular acceleration)
-uint16_t uber_loop_count;			// Used to count main loops for everything else :)
-//
-int8_t AccRollTrim;					// Normalised acc trim 
-int8_t AccPitchTrim;
-//
+uint16_t Change_Arming;				// Arming timers
+uint16_t Change_LCD;
+uint8_t Arming_TCNT2;
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
-//
-int8_t AvgIndex;
-int8_t OldIndex;
-int32_t AvgRollSum;					// Can be 16-bit
-int32_t AvgPitchSum;
-int16_t AvgRoll;
-int16_t AvgPitch;
-
+uint16_t uber_loop_count;			// Used to count main loops for everything else :)
 
 //************************************************************
 // Main loop
@@ -294,6 +303,14 @@ if (0) {
 		AccPitchTrim = Config.AccPitchZeroTrim - 127;
 
 		RxGetChannels();
+
+#ifdef CPPM_MODE
+		if (RxChannel5 > 1800)
+		{									// When CH5 is activated
+			AutoLevel = true;				// Activate autotune mode
+			flight_mode = 1;				// Notify GUI that mode has changed
+		}
+#endif
 
 		// Do LVA-related tasks
 		LVA = 0;
@@ -418,16 +435,40 @@ if (0) {
 					// Get stored value of current item
 					if (freshmenuvalue) MenuValue = get_menu_item(MenuItem);// Get current value only when not being changed
 					
-					// Refresh changed data prior to delay to make LCD more repsonsive
+					// Refresh changed data prior to delay to make LCD more responsive
 					LCD_Display_Menu(MenuItem);						// Display menu top line
-					LCDprint_line2("          <-Save");				// Setup save line
-					LCDgoTo(17);									// Position cursor at nice spot
-					if (MenuItem == 19) 							// Special case for LVA mode
+					if (MenuItem == 20) 							// Special case for LVA mode
 					{
+						LCDprint_line2("          <-Save");			// Setup save line
+						LCDgoTo(17);								// Position cursor at nice spot
 						if (MenuValue == 0) LCDprintstr("LED");
 						else LCDprintstr("Buzzer");
 					}
-					else if ((MenuItem > 0) && (MenuItem < 20)) LCDprintstr(itoa(MenuValue,pBuffer,10)); // Print value to change (except for base menu)
+					else if ((MenuItem == 19)||(MenuItem == 21))	// Special case for voltages
+					{
+						LCDprint_line2("         Volts  ");			// Setup placeholder
+						LCDgoTo(19);								// Position cursor at nice spot
+						if (MenuValue >= 100)
+						{
+							itoa(MenuValue,pBuffer,10);				// Put voltage text in buffer
+							char length = strlen(pBuffer);			// Shift digits right (including null byte)
+							memcpy(pBuffer + (length-1), pBuffer + (length-2),2);				
+							pBuffer[length-2] = '.';				// Insert a decimal point
+							if (length == 3) pBuffer[length+1] = ' '; // Bodge for trailing digits :(
+							LCDprintstr(pBuffer);					// Print battery voltage string
+						}
+						else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
+					}
+					else if ((MenuItem > 0) && (MenuItem < 22)) 	// Print value to change (except for base menu)
+					{
+						LCDprint_line2("          <-Save");			// Setup save line
+						LCDgoTo(17);								// Position cursor at nice spot
+						LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
+					}
+					else if (MenuItem >= 22)						// For commands
+					{
+						LCDprint_line2("      <- Execute");	
+					}
 
 					// Stick volume variable delay (four speeds)
 					if 	   ((RxInRoll > STICKARM_POINT+150) || (RxInRoll < -STICKARM_POINT-150)) _delay_ms(10);
@@ -471,8 +512,10 @@ if (0) {
 			}
 
 			// Reset I-term sums at rest.
-			IntegralPitch = 0;	 
-			IntegralRoll = 0;
+			IntegralgPitch = 0;	 
+			IntegralgRoll = 0;
+			IntegralaPitch = 0;	 
+			IntegralaRoll = 0;
 			IntegralYaw = 0;
 
 			// 1 sec, about 8000. (8000 * 1/7812Hz = 1.024s)
@@ -484,8 +527,10 @@ if (0) {
 				if (Armed) 
 				{
 					CalibrateGyros();						// Initialise everything
-					IntegralPitch = 0;	 
-					IntegralRoll = 0;
+					IntegralgPitch = 0;	 
+					IntegralgRoll = 0;
+					IntegralaPitch = 0;	 
+					IntegralaRoll = 0;
 					IntegralYaw = 0;
 					
 					uint8_t nBlink = 1;
@@ -595,43 +640,48 @@ if (0) {
 		RxInRoll = RxInRoll >> Config.RollPitchRate;			// Reduce RxInRoll rate per flying mode
 		Roll = RxInRoll + gyroADC[ROLL];
 
+		IntegralgRoll += Roll;									// Gyro I-term
+		if (IntegralgRoll > ITERM_LIMIT_RP) IntegralgRoll = ITERM_LIMIT_RP; // Anti wind-up limit
+		else if (IntegralgRoll < -ITERM_LIMIT_RP) IntegralgRoll = -ITERM_LIMIT_RP;
+
 		if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 		{
-			Roll *= Config.P_mult_glevel;						// Multiply P-term (Max gain of 256)
-			Roll = Roll * 3;									// Multiply by 3, so max effective gain is 768
+			// Gyro PI terms
+			P_term_gRoll = Roll * Config.P_mult_glevel;			// Multiply P-term (Max gain of 256)
+			P_term_gRoll = P_term_gRoll * 3;					// Multiply by 3, so max effective gain is 768
+			I_term_gRoll = IntegralgRoll * Config.I_mult_glevel;// Multiply I-term (Max gain of 256)
+			I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
+
+			// Acc PI terms
+			P_term_aRoll = AvgRoll * Config.P_mult_alevel;		// P-term of accelerometer (Max gain of 256)
+			IntegralaRoll += AvgRoll;							// Acc I-term
+			if (IntegralaRoll > ITERM_LIMIT_LEVEL) IntegralaRoll = ITERM_LIMIT_LEVEL; // Anti wind-up limit
+			else if (IntegralaRoll < -ITERM_LIMIT_LEVEL) IntegralaRoll = -ITERM_LIMIT_LEVEL;
+			I_term_aRoll = IntegralaRoll * Config.I_mult_alevel;// Multiply I-term (Max gain of 256)
+			I_term_aRoll = I_term_aRoll >> 3;					// Divide by 8, so max effective gain is 16
+	
+			// Sum Gyro P and I terms + Acc P and I terms
+			Roll = P_term_gRoll + I_term_gRoll - P_term_aRoll - I_term_aRoll;
 			Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
 
-			I_term_Roll = AvgRoll * Config.P_mult_alevel;		// Not an I-term, just the acc offset
-			I_term_Roll = I_term_Roll >> 4;
-
-			if (I_term_Roll > PR_LIMIT) I_term_Roll = PR_LIMIT;		
-			else if (I_term_Roll < -PR_LIMIT) I_term_Roll = -PR_LIMIT; 	// Apply Roll limit to PID calculation
-	
-			Roll = Roll - I_term_Roll;							// P + Acc correction offset
 		}
 		else // Normal mode (Just use raw gyro errors to guess at attitude)
 		{
-			IntegralRoll += Roll;						// I-term (32-bit)
-			if (IntegralRoll > ITERM_LIMIT_RP) IntegralRoll = ITERM_LIMIT_RP;
-			else if (IntegralRoll < -ITERM_LIMIT_RP) IntegralRoll = -ITERM_LIMIT_RP;// Anti wind-up
+			// Gyro PID terms
+			P_term_gRoll = Roll * Config.P_mult_roll;			// Multiply P-term (	Max gain of 256)
+			P_term_gRoll = P_term_gRoll * 3;					// Multiply by 3, so max effective gain is 768
 
-			Roll *= Config.P_mult_roll;					// Multiply P-term (-Max gain of 256)
-			Roll = Roll * 3;							// Multiply by 3, so max effective gain is 768
+			I_term_gRoll = IntegralgRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
+			I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
 
-			I_term_Roll = IntegralRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
-			I_term_Roll = I_term_Roll >> 2;				// Divide by 4, so max effective gain is 64
-
-			//currentGyroError[ROLL] = gyroADC[ROLL];		// D-term
-			currentGyroError[ROLL] = Roll;				// D-term
+			currentGyroError[ROLL] = Roll;						// D-term
 			DifferentialGyro = currentGyroError[ROLL] - lastGyroError[ROLL];
 			lastGyroError[ROLL] = currentGyroError[ROLL];
-			
-			DifferentialGyro *= Config.D_mult_roll;		// Multiply D-term by up to 1024
-			//DifferentialGyro = DifferentialGyro << 2;
+			DifferentialGyro *= Config.D_mult_roll;				// Multiply D-term by up to 256
 
-	
-			Roll = Roll + I_term_Roll + DifferentialGyro;// P + I + D
-			Roll = Roll >> 7;							// Divide by 128 to rescale values back to normal
+			// Sum	
+			Roll = P_term_gRoll + I_term_gRoll + DifferentialGyro; // P + I + D
+			Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
 		}
 
 		//--- (Add)Adjust roll gyro output to motors
@@ -657,42 +707,47 @@ if (0) {
 		RxInPitch = RxInPitch >> Config.RollPitchRate;			// Reduce RxInPitch rate per flying mode
 		Pitch = RxInPitch + gyroADC[PITCH];
 
+		IntegralgPitch += Pitch;								// I-term (32-bit)
+		if (IntegralgPitch > ITERM_LIMIT_RP) IntegralgPitch = ITERM_LIMIT_RP; // Anti wind-up limit
+		else if (IntegralgPitch < -ITERM_LIMIT_RP) IntegralgPitch = -ITERM_LIMIT_RP;
+
 		if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 		{
-			Pitch *= Config.P_mult_glevel;						// Multiply P-term (Max gain of 256)
-			Pitch = Pitch * 3;									// Multiply by 3, so max effective gain is 768
+			// Gyro PI terms
+			P_term_gPitch = Pitch * Config.P_mult_glevel;		// Multiply P-term (Max gain of 256)
+			P_term_gPitch = P_term_gPitch * 3;					// Multiply by 3, so max effective gain is 768
+			I_term_gPitch = IntegralgPitch * Config.I_mult_glevel;// Multiply I-term (Max gain of 256)
+			I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
+	
+			// Acc PI terms
+			P_term_aPitch = AvgPitch * Config.P_mult_alevel;	// P-term of accelerometer (Max gain of 256)
+			IntegralaPitch += AvgPitch;							// Acc I-term
+			if (IntegralaPitch > ITERM_LIMIT_LEVEL) IntegralaPitch = ITERM_LIMIT_LEVEL; // Anti wind-up limit
+			else if (IntegralaPitch < -ITERM_LIMIT_LEVEL) IntegralaPitch = -ITERM_LIMIT_LEVEL;
+			I_term_aPitch = IntegralaPitch * Config.I_mult_alevel;// Multiply I-term (Max gain of 256)
+			I_term_aPitch = I_term_aPitch >> 3;					// Divide by 8, so max effective gain is 16
+
+			// Sum Gyro P and I terms + Acc P and I terms
+			Pitch = P_term_gPitch + I_term_gPitch - P_term_aPitch - I_term_aPitch;
 			Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
-
-			I_term_Pitch = AvgPitch * Config.P_mult_alevel;		// Not an I-term, just the acc offset
-			I_term_Pitch = I_term_Pitch >> 4;
-			
-			if (I_term_Pitch > PR_LIMIT) I_term_Pitch = PR_LIMIT;		
-			else if (I_term_Pitch < -PR_LIMIT) I_term_Pitch = -PR_LIMIT; // Apply Pitch limit to calculation
-
-			Pitch = Pitch - I_term_Pitch;						// P + Acc correction offset
 		}
 		else // Normal mode (Just use raw gyro errors to guess at attitude)
 		{
-			IntegralPitch += Pitch;							// I-term (32-bit)
-			if (IntegralPitch > ITERM_LIMIT_RP) IntegralPitch = ITERM_LIMIT_RP;
-			else if (IntegralPitch < -ITERM_LIMIT_RP) IntegralPitch = -ITERM_LIMIT_RP;// Anti wind-up
+			// Gyro PID terms
+			P_term_gPitch = Pitch * Config.P_mult_pitch;		// Multiply P-term (Max gain of 256)
+			P_term_gPitch = P_term_gPitch * 3;					// Multiply by 3, so max effective gain is 768
 
-			Pitch *= Config.P_mult_pitch;					// Multiply P-term (Max gain of 256)
-			Pitch = Pitch * 3;								// Multiply by 3, so max effective gain is 768
+			I_term_gPitch = IntegralgPitch * Config.I_mult_pitch;// Multiply I-term (Max gain of 256)
+			I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
 
-			I_term_Pitch = IntegralPitch * Config.I_mult_pitch;	// Multiply I-term (Max gain of 256)
-			I_term_Pitch = I_term_Pitch >> 3;				// Divide by 8, so max effective gain is 16
-
-			currentGyroError[PITCH] = Pitch;		// D-term
-			//currentGyroError[PITCH] = gyroADC[PITCH];		// D-term
+			currentGyroError[PITCH] = Pitch;					// D-term
 			DifferentialGyro = currentGyroError[PITCH] - lastGyroError[PITCH];
 			lastGyroError[PITCH] = currentGyroError[PITCH];	
-	
-			DifferentialGyro *= Config.D_mult_pitch;		// Multiply D-term by up to 1024
-			//DifferentialGyro = DifferentialGyro << 2;
+			DifferentialGyro *= Config.D_mult_pitch;			// Multiply D-term by up to 256
 
-			Pitch = Pitch + I_term_Pitch + DifferentialGyro;// P + I + D
-			Pitch = Pitch >> 7;								// Divide by 128 to rescale values back to normal
+			// Sum
+			Pitch = P_term_gPitch + I_term_gPitch + DifferentialGyro;// P + I + D
+			Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
 		}
 
 		//--- (Add)Adjust pitch gyro output to motors
@@ -715,33 +770,29 @@ if (0) {
 		//***********************************************************************
 
 		if ((RxInYaw < DEAD_BAND) && (RxInYaw > -DEAD_BAND)) RxInYaw = 0; // Reduce RxIn noise into the I-term
-
-		RxInYaw = RxInYaw >> Config.Yawrate;			// Reduce RxInYaw rate per flying mode
+		RxInYaw = RxInYaw >> Config.Yawrate;				// Reduce RxInYaw rate per flying mode
 		Yaw = RxInYaw + gyroADC[YAW];	
 
-		IntegralYaw += Yaw;								// I-term (32-bit)
+		IntegralYaw += Yaw;									// I-term (32-bit)
 		if (IntegralYaw > ITERM_LIMIT_YAW) IntegralYaw = ITERM_LIMIT_YAW;
 		else if (IntegralYaw < -ITERM_LIMIT_YAW) IntegralYaw = -ITERM_LIMIT_YAW;// Anti wind-up (Experiment with value)
 
-		Yaw *= Config.P_mult_yaw;						// Multiply P-term (Max gain of 768)
-		Yaw *= 3;
+		Yaw *= Config.P_mult_yaw;							// Multiply P-term (Max gain of 768)
+		Yaw *= 3;	
 
-		I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
-		I_term_Yaw = I_term_Yaw >> 3;					// Divide by 8, so max effective gain is 16
+		I_term_Yaw = IntegralYaw * Config.I_mult_yaw;		// Multiply IntegralYaw by up to 256
+		I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
-		//currentGyroError[YAW] = gyroADC[YAW];			// D-term
-		currentGyroError[YAW] = Yaw;					// D-term
+		currentGyroError[YAW] = Yaw;						// D-term
 		DifferentialGyro = currentGyroError[YAW] - lastGyroError[YAW];
 		lastGyroError[YAW] = currentGyroError[YAW];	
-	
-		DifferentialGyro *= Config.D_mult_yaw;			// Multiply D-term by up to 1024
-		//DifferentialGyro = DifferentialGyro << 2;
+		DifferentialGyro *= Config.D_mult_yaw;				// Multiply D-term by up to 256
 
-		Yaw = Yaw - I_term_Yaw - DifferentialGyro;		// P + I + D
-		Yaw = Yaw >> 7;									// Divide by 128 to rescale values back to normal
+		Yaw = Yaw - I_term_Yaw - DifferentialGyro;			// P + I + D
+		Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
 
 		if (Yaw > YAW_LIMIT) Yaw = YAW_LIMIT;		
-		else if (Yaw < -YAW_LIMIT) Yaw = -YAW_LIMIT; 	// Apply YAW limit to PID calculation
+		else if (Yaw < -YAW_LIMIT) Yaw = -YAW_LIMIT; 		// Apply YAW limit to PID calculation
 
 		//--- (Add)Adjust yaw gyro output to motors
 		#ifdef QUAD_COPTER

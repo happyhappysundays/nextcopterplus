@@ -77,10 +77,10 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxChannel3ZeroOffset	= 1120;
 	Config.RxChannel4ZeroOffset	= 1520;
 	//
-	Config.AccRollZeroTrim	= 127;	// User-set ACC trim (127-127 = 0)
+	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
 	Config.AccPitchZeroTrim	= 127;
 	//
-	Config.AccRollZero	= 578;		// Acc calibration defaults
+	Config.AccRollZero	= 578;			// Acc calibration defaults
 	Config.AccPitchZero	= 585;
 	//
 	Config.P_mult_roll = 150;			// PID defaults
@@ -93,18 +93,18 @@ void Set_EEPROM_Default_Config(void)
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
 	Config.P_mult_glevel = 150;
-	Config.I_mult_glevel = 0;
-	Config.P_mult_alevel = 30;
-	Config.I_mult_alevel = 0;
+	Config.I_mult_glevel = 30;
+	Config.P_mult_alevel = 50;
+	Config.I_mult_alevel = 00;
 	//
-	Config.RC_rate = 50;
-	Config.RC_expo = 68;
+	Config.RC_rate = 50;				// Not used
+	Config.RC_expo = 0;
 	Config.RollPitchRate = 3;
 	Config.Yawrate = 3;
 	Config.PowerTrigger = 1100; 
-	Config.Modes = 16; 				// LVA mode = buzzer (bit 4)
-	Config.AutoTuneRX = 25;			// Default best fit for 19,200
-	Config.AutoTuneTX = 51;			// Default best fit for 19,200
+	Config.Modes = 16; 					// LVA mode = buzzer (bit 4)
+	Config.AutoTuneRX = 25;				// Default best fit for 19,200
+	Config.AutoTuneTX = 51;				// Default best fit for 19,200
 }
 
 void Save_Config_to_EEPROM(void)
