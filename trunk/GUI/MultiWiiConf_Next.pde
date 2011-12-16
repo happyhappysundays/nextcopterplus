@@ -248,9 +248,9 @@ void setup() {
   yawRate.setDirection(Controller.HORIZONTAL);yawRate.setMin(0);yawRate.setMax(5);yawRate.setColorBackground(grey_); 
   
   confRC_RATE = controlP5.addNumberbox("RC RATE",1,xParam+223,yParam+109,42,14);confRC_RATE.setDecimalPrecision(2);confRC_RATE.setMultiplier(0.02);confRC_RATE.setLabel("");
-  confRC_RATE.setDirection(Controller.HORIZONTAL);confRC_RATE.setMin(0);confRC_RATE.setMax(5);confRC_RATE.setColorBackground(grey_);
-  confRC_EXPO = controlP5.addNumberbox("RC EXPO",0,xParam+310,yParam+109,42,14);confRC_EXPO.setDecimalPrecision(2);confRC_EXPO.setMultiplier(0.01);confRC_EXPO.setLabel("");
-  confRC_EXPO.setDirection(Controller.HORIZONTAL);confRC_EXPO.setMin(0);confRC_EXPO.setMax(1);confRC_EXPO.setColorBackground(grey_);
+  confRC_RATE.setDirection(Controller.HORIZONTAL);confRC_RATE.setMin(0);confRC_RATE.setMax(5);confRC_RATE.setColorBackground(grey_);confRC_RATE.hide();
+  confRC_EXPO = controlP5.addNumberbox("RC EXPO",0,xParam+305,yParam+109,42,14);confRC_EXPO.setDecimalPrecision(2);confRC_EXPO.setMultiplier(0.01);confRC_EXPO.setLabel("");
+  confRC_EXPO.setDirection(Controller.HORIZONTAL);confRC_EXPO.setMin(0);confRC_EXPO.setMax(0.99);confRC_EXPO.setColorBackground(grey_);
 
   buttonREAD =        controlP5.addButton("READ",1,xParam+10,yParam+172,39,16);buttonREAD.setColorBackground(red_);
   buttonWRITE =       controlP5.addButton("WRITE",1,xParam+128,yParam+172,46,16);buttonWRITE.setColorBackground(red_);
@@ -307,7 +307,7 @@ void draw() {
 
   textFont(font12);
   text("Based on MultiWii",3,450);text("by Alexander Dubus",3,465);
-  text("Ver. 0.1b3",720,465);
+  text("Ver. 0.2b1",720,465);
    
   textFont(font12);
   //text("Power:",xGraph-5,yGraph-30); text(pMeterSum,xGraph+50,yGraph-30);
@@ -676,8 +676,8 @@ void draw() {
   textFont(font15);    
   text("P",xParam+48,yParam+15);text("I",xParam+93,yParam+15);text("D",xParam+132,yParam+15);
   textFont(font12);
-  text("RATE",xParam+191,yParam+122);
-  text("EXPO",xParam+275,yParam+122);
+  //text("RATE",xParam+191,yParam+122);
+  text("EXPO",xParam+270,yParam+122);
   text("----------- CALIBRATE -----------",xParam+185,yParam+167);
   text("---- FLIGHT PARAMETERS ----",xParam+12,yParam+167);
 
@@ -779,10 +779,11 @@ public void WRITE() {
   if((writeEnable == false) || (graph_on == 1)) {return;} //Debug - Don't allow writing while graphing
 
   for(int i=0;i<4;i++) {byteP[i] = (round(confP[i].value()));}
-  //  for(int i=0;i<4;i++) {byteP[i] = (round(confP[i].value()*10));}
   for(int i=0;i<4;i++) {byteI[i] = (round(confI[i].value()*1000));}
   for(int i=0;i<4;i++) {byteD[i] = (round(confD[i].value()));}
-
+  byteP[4] = (round(confP[4].value()));
+  byteI[4] = (round(confI[4].value()*1000));
+ 
   byteRC_RATE = (round(confRC_RATE.value()*50));
   byteRC_EXPO = (round(confRC_EXPO.value()*100));
   byteRollPitchRate = (round(rollPitchRate.value()));
@@ -806,10 +807,10 @@ public void WRITE() {
   int[] s = new int[32];
   
   int p = 0;
-   s[p++] = 'W'; //1 write to Eeprom @ arduino
+   s[p++] = 'W'; //1 write to Eeprom @ KK
    for(int i=0;i<3;i++) {s[p++] = byteP[i];  s[p++] = byteI[i];  s[p++] =  byteD[i];} //10
-   s[p++] = byteP[3];  s[p++] = byteI[3]; //12
-   s[p++] = byteP[4];  s[p++] = byteI[4]; //14
+   s[p++] = byteP[3];  s[p++] = byteI[3]; //12 glevel
+   s[p++] = byteP[4];  s[p++] = byteI[4]; //14 alevel
    s[p++] = byteRC_RATE;
    s[p++] = byteRC_EXPO; //16
    s[p++] = byteRollPitchRate; 
