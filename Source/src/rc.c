@@ -52,18 +52,22 @@ const char Expo[10][16] PROGMEM =
 // Get expo'd RC value
 int16_t get_expo_value (int16_t RCvalue)
 {
-	int8_t	range, mult,expo_level;
-	int32_t RCcalc;										// Max values are +/-65536
+	int8_t	range, expo_level;
+	int32_t RCcalc, RCsum, mult;						// Max values are around+/-75000
 
 	if (Config.RC_expo == 0) return (RCvalue);			// No need to calculate if expo is zero
 
 	range 	= abs(RCvalue) >> 5;						// Work out which band the RCinput is in (16 values)
 	if (range > 15) range = 15;
 	if (range <  0) range = 0;
-	expo_level = Config.RC_expo/10;						// Work out which expo level to use (0~100 -> 0~10)				
-	mult	= pgm_read_byte(&Expo[expo_level][range]); 	// Get the multiplier from the table
-	RCcalc 	= RCvalue * mult;							// Do the multiply
-	RCvalue = (int16_t) RCcalc >> 7;					// Divide by 128 to get the expo'd value
+	expo_level = Config.RC_expo/10;						// Work out which expo level to use (0~100 -> 0~10)	
+				
+	mult = pgm_read_byte(&Expo[expo_level][range]); 	// Get the multiplier from the table 
+
+	RCsum 	= RCvalue;									// Promote RCvalue to 32 bits as GCC is broken :(
+	RCcalc 	= RCsum * mult;								// Do the 32-bit x 32-bit multiply
+	RCcalc	= RCcalc >> 7;
+	RCvalue = (int16_t) RCcalc;							// Divide by 128 to get the expo'd value
 
 	return (RCvalue);
 }
@@ -74,6 +78,7 @@ void RxGetChannels(void)
 	do
 	{
 		RxChannelsUpdatedFlag = false;
+		//RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
 		RxInRoll = get_expo_value(RxChannel1 - Config.RxChannel1ZeroOffset);
 	} 
 	while (RxChannelsUpdatedFlag); 	// Re-get if updated
@@ -101,39 +106,3 @@ void RxGetChannels(void)
 	} 
 	while (RxChannelsUpdatedFlag);
 }
-/*
-
-//--- Get and scale RX channel inputs ---
-void RxGetChannels(void)
-{
-	int16_t  RxChannel;
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag); 	// Re-get if updated
-
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInPitch = RxChannel2 - Config.RxChannel2ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag);
-
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset;	
-		if (RxChannel < 0) RxInCollective = 0; 	
-		else RxInCollective = (RxChannel >> 2); 	// Scale 0->256
-	} 
-	while (RxChannelsUpdatedFlag);
-	
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag);
-}*/

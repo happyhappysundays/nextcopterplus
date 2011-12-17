@@ -67,7 +67,7 @@
 //
 //#define QUAD_COPTER		// Choose this for + config
 #define QUAD_X_COPTER		// Choose this for X config
-//#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
+#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
 #define MEMS_MODULE 	// Uncomment this when using the MEMS module
 //
 //***********************************************************

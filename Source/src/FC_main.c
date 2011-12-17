@@ -95,6 +95,7 @@
 //
 //	1. In CPPM mode, add switch to activate autolevel with CH5 			- DONE
 //	2. Add filtered link from CH6, CH7 and CH8 to P and I multipliers
+//	   so that PID values can be changed in flight :)
 //	3. 
 //
 //***********************************************************
@@ -176,9 +177,9 @@ Quad X
 //***********************************************************
 
 // Axis variables
-int16_t Roll;						// Temp axis values
-int16_t Pitch;
-int16_t Yaw;
+int32_t Roll;						// Temp axis values. Seems we need 32 bits here.
+int32_t Pitch;
+int32_t Yaw;
 int8_t AccRollTrim;					// Normalised acc trim 
 int8_t AccPitchTrim;
 int8_t AvgIndex;
@@ -236,59 +237,21 @@ int main(void)
 {
 	OldIndex = 1;
 	firsttimeflag = true;
-	//
 	init();								// Do all init tasks
 
 
 //************************************************************
-// Test code - PPM input test
+// Test code
 //************************************************************
-if (0) {
-	_delay_ms(1500);					// To get past LCD splash screen
-	char pBuffer[16];					// Print buffer
-	int8_t i;
-	while (1) 
-	{
-		// Print CH1 to CH4
-		for (i=0; i < 50; i++)
-		{
-			LCDprint_line1("1:      2:      ");	
-			LCDprint_line2("3:      4:      ");
-			LCDgoTo(2);
-			LCDprintstr(itoa(RxChannel1,pBuffer,10));
-			LCDgoTo(10);
-			LCDprintstr(itoa(RxChannel2,pBuffer,10));
-			LCDgoTo(18);
-			LCDprintstr(itoa(RxChannel3,pBuffer,10));
-			LCDgoTo(26);
-			LCDprintstr(itoa(RxChannel4,pBuffer,10));
-			_delay_ms(100);
-		}
+if (0) 
+{
 
-		// Print RC inputs
-		for (i=0; i < 50; i++)
-		{
-			LCDprint_line1("A:      E:      ");	
-			LCDprint_line2("T:      Y:      ");	
-			RxGetChannels();
-			LCDgoTo(2);
-			LCDprintstr(itoa(RxInRoll,pBuffer,10));
-			LCDgoTo(10);
-			LCDprintstr(itoa(RxInPitch,pBuffer,10));
-			LCDgoTo(18);
-			LCDprintstr(itoa(RxInCollective,pBuffer,10));
-			LCDgoTo(26);
-			LCDprintstr(itoa(RxInYaw,pBuffer,10));
-			_delay_ms(100);
-		}
-	}
 }
+
 //************************************************************
-// Test code - PPM input test
+// Test code
 //************************************************************
 
-
-	//
 	for (int i = 0; i < AVGLENGTH; i++)		// Shouldn't need to do this but... we do
 	{
 		AvgAccRoll[i] = 0;					// Initialise all elements of the averaging arrays
@@ -305,10 +268,17 @@ if (0) {
 		RxGetChannels();
 
 #ifdef CPPM_MODE
-		if (RxChannel5 > 1800)
+		if (RxChannel5 > 1600)
 		{									// When CH5 is activated
 			AutoLevel = true;				// Activate autotune mode
-			flight_mode = 1;				// Notify GUI that mode has changed
+			flight_mode |= 1;				// Notify GUI that mode has changed
+			Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
+			Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+		}
+		else
+		{
+			AutoLevel = false;				// Activate autotune mode
+			flight_mode &= 0xfe;			// Notify GUI that mode has changed
 		}
 #endif
 
