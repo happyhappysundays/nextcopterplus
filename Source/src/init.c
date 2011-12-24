@@ -52,7 +52,7 @@ void init(void)
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
 	RX_COLL_DIR		= INPUT;
-	RX_YAW_DIR		= INPUT;
+	//RX_YAW_DIR		= INPUT;	// See conditional compiles below
 
 	GYRO_YAW_DIR	= INPUT;
 	GYRO_PITCH_DIR	= INPUT;
@@ -65,6 +65,10 @@ void init(void)
 	M2_DIR			= OUTPUT;
 	M3_DIR			= OUTPUT;
 	M4_DIR			= OUTPUT;
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	M5_DIR			= OUTPUT;
+	M6_DIR			= OUTPUT;
+	#endif
 	LED_DIR			= OUTPUT;
 	LCD_TX_DIR		= OUTPUT;
 	LVA_DIR			= OUTPUT;
@@ -75,9 +79,31 @@ void init(void)
 	RX_ROLL 	= 0;
 	RX_PITCH 	= 0;
 	RX_COLL 	= 0;
-	RX_YAW		= 0;
+	//RX_YAW		= 0;
 
-#ifndef CPPM_MODE 
+// Conditional builds for interrupt and pin function setup
+#ifdef CPPM_MODE 
+	// Proximity module only available in CPPM mode
+	#ifdef PROX_MODULE
+		PING_DIR = OUTPUT;					// PB7 is PING output in Proximity mode
+		ECHO_DIR = INPUT;					// PD3 is ECHO input in Proximity mode
+		PING = 0;
+		ECHO = 0;
+		// External interrupts INT0 (CPPM input) and INT1 (Proximity module pulse)
+		EICRA = (1 << ISC01) | (1 << ISC10);// Falling edge of INT0, both edges of INT1
+		EIMSK = (1 << INT0) | (1 << INT1);	// Enable INT0 and INT1
+		EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
+	#else 
+		PING_DIR = INPUT;					// PB7 is PING output in Proximity mode
+		ECHO_DIR = INPUT;					// PD3 is ECHO input in Proximity mode
+		// External interrupts INT0 (CPPM input)
+		EICRA = (1 << ISC01);				// Falling edge of INT0
+		EIMSK = (1 << INT0);				// Enable INT0
+		EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
+	#endif
+#else // Non-CPPM mode
+	RX_YAW_DIR	= INPUT;				// PB7 is rudder input in non-CPPM mode
+	RX_YAW		= 0;
 	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
 	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
 	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
@@ -88,14 +114,8 @@ void init(void)
 	EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
 	EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
 	EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
-
-#else
-	// External interrupts INT0 (Pitch input - PD2)
-	EICRA = (1 << ISC01);				// Falling edge of INT0
-	EIMSK = (1 << INT0);				// Enable INT0
-	EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
-
 #endif
+
 
 	// Timer0 (8bit) - run @ 8MHz
 	// Used to control ESC/servo pulse length
@@ -192,6 +212,10 @@ void init(void)
 			MotorOut2 = RxInCollective;
 			MotorOut3 = RxInCollective;
 			MotorOut4 = RxInCollective;
+			#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+			MotorOut5 = RxInCollective;
+			MotorOut6 = RxInCollective;
+			#endif
 			output_motor_ppm();	// This regulates rate at which we output signals
 		}
 	}

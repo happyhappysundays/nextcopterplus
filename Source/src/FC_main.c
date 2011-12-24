@@ -1,17 +1,16 @@
 // **************************************************************************
 // NeXtcopter Plus software
 // ========================
-// Version 1.1a
+// Version 1.1d
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
 // Includes PID and Auto-level functions inspired by the open-sourced MultiWiiproject
-//
 // Compatible with KK Plus boards fitted with X and Y accelerometers 
 // on Roll/Pitch pot inputs. LCD board or GUI required for setup of PID constants.
 //
 // Tested only on ATmega168 boards (KK+)
-// Only QUAD(+) and QUAD(X) supported at this stage
+// Only QUAD(+), QUAD(X), HEXACOPTER and HEXACOPTER(X) supported at this stage
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -86,15 +85,17 @@
 //			Removed UFO mode, replaced with Warthox mode
 //			Moved all menu text and support routines to Program memory
 // V1.1c	Added exponential rate system. Autotune now updates LCD TX rate
-//			Added formatted battery displays to menu
+//			Added formatted battery voltage displays to menu
 //			Added support for V1.1 MEMS module (use MEMS_MODULE define)
+// V1.1d	Preliminary support for proximity module (use PROX_MODULE define)
+//			Height set when entering Autolevel mode
+//			Added Hexacopter, Hexacopter-X support, Vref now assumed to be 2.4V
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	1. In CPPM mode, add switch to activate autolevel with CH5 			- DONE
-//	2. Add filtered link from CH6, CH7 and CH8 to P and I multipliers
+//	1. Add filtered link from CH6, CH7 and CH8 to P and I multipliers
 //	   so that PID values can be changed in flight :)
 //	3. 
 //
@@ -103,26 +104,30 @@
 //***********************************************************
 
 /*
-Quad +
+Quad +                Quad X
       M1 CW
-        |
-        |
-      +---+
-M2 ---|   |----M3
-CCW   +---+    CCW
-        |
-        |
+        |             M1 CW     M2 CCW
+        |                \        / 
+      +---+                \ -- /
+M2 ---|   |----M3          |    |
+CCW   +---+    CCW         / -- \
+        |                /        \ 
+        |             M4 CCW    M3 CW
       M4 CW
 
-Quad X
+Hexacopter            Hexacopter-X
  		 
-  M1 CW   M2 CCW
-    \        / 
-      \ -- /
-      |    |
-      / -- \
-    /        \ 
-  M4 CCW  M3 CW
+       M1 CW
+         |
+M6 CCW   |     M2 CCW        M1 CW      M2 CCW
+   \     |      /               \         /
+     \ +---+  /                   \_____/
+      -|   |-                     |     |
+     / +---+  \       M6 CCW -----|     |----- M3 CW
+   /	 |      \                 |_____|
+M5 CW    |     M3 CW              /     \ 
+         |                      /         \
+       M4 CCW                M5 CW      M4 CCW
 
 */
 
@@ -147,7 +152,8 @@ Quad X
 #include "..\inc\acc.h"
 #include "..\inc\lcd.h"
 #include "..\inc\uart.h"
-#include "..\inc\isr.h" // Debug
+#include "..\inc\isr.h"
+#include "..\inc\proximity.h"
 
 //***********************************************************
 //* Defines
@@ -167,6 +173,11 @@ Quad X
 #define PR_LIMIT 50					// Limit pitch/roll contribution of I-term to avoid saturation
 #define YAW_LIMIT 50				// Limit yaw contribution to avoid saturation
 #define AVGLENGTH 65				// Accelerometer filter buffer length + 1 (64 new + 1 old)
+
+#ifdef PROX_MODULE
+// Altitude constants
+#define MAX_HEIGHT 350				// Maximum allowable height (in cm) in alt-hold mode
+#endif
 
 // Stick Arming
 // If you cannot either arm or disarm, lower this value
@@ -190,6 +201,10 @@ int16_t AvgRoll;
 int16_t AvgPitch;
 int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer roll readings
 int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
+#ifdef PROX_MODULE
+int16_t Altitude;					// Current height as measured by the proximity module
+int16_t Set_height;					// Desired height
+#endif
 
 // PID variables
 int32_t	IntegralgPitch;				// PID I-terms (gyro) for each axis
@@ -206,9 +221,9 @@ int32_t I_term_gPitch;
 int32_t I_term_aRoll;				// Calculated I-terms (acc.) for each axis
 int32_t I_term_aPitch;
 int32_t I_term_Yaw;
-int16_t currentGyroError[3];		// Used with lastGyroError to keep track of D-Terms in PID calculations
-int16_t lastGyroError[3];
-int16_t DifferentialGyro;			// Holds difference between last two gyro errors (angular acceleration)
+int16_t currentError[4];			// Used with lastError to keep track of D-Terms in PID calculations
+int16_t lastError[4];
+int16_t DifferentialGyro;			// Holds difference between last two errors (angular acceleration)
 
 // GUI variables
 bool GUIconnected;
@@ -245,7 +260,20 @@ int main(void)
 //************************************************************
 if (0) 
 {
+	uint16_t dist = 0;
+	_delay_ms(1500);
+	while (1)
+	{
+		LCDprint_line1("Pinging...      ");	
+		Ping();								// Send out burst
+		_delay_ms(50);						// Wait for response
 
+		dist = GetDistance();				// Get latest distance measurement
+		LCDprint_line2("Dist.       (cm)");
+		LCDgoTo(22);
+		LCDprintstr(itoa(dist,pBuffer,10));
+		_delay_ms(50);						// Mustn't sent out pulse within 50ms of previous pulse
+	}
 }
 
 //************************************************************
@@ -267,20 +295,28 @@ if (0)
 
 		RxGetChannels();
 
-#ifdef CPPM_MODE
+		#ifdef CPPM_MODE
 		if (RxChannel5 > 1600)
 		{									// When CH5 is activated
 			AutoLevel = true;				// Activate autotune mode
 			flight_mode |= 1;				// Notify GUI that mode has changed
 			Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
 			Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+			#ifdef PROX_MODULE
+			if (firsttimeflag) {
+				Altitude = GetDistance();	// Get latest distance measurement
+				Set_height = Altitude;		// Use this as target height
+				firsttimeflag = false;		// Reset flag
+			}
+			#endif
 		}
 		else
 		{
 			AutoLevel = false;				// Activate autotune mode
 			flight_mode &= 0xfe;			// Notify GUI that mode has changed
+			firsttimeflag = true;			// Reset flag
 		}
-#endif
+		#endif
 
 		// Do LVA-related tasks
 		LVA = 0;
@@ -579,6 +615,10 @@ if (0)
 		MotorOut2 = RxInCollective;
 		MotorOut3 = RxInCollective;
 		MotorOut4 = RxInCollective; 
+		#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+		MotorOut5 = RxInCollective;
+		MotorOut6 = RxInCollective;
+		#endif
 
 		// Accelerometer low-pass filter
 		if (AutoLevel) {
@@ -644,9 +684,9 @@ if (0)
 			I_term_gRoll = IntegralgRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
 			I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
 
-			currentGyroError[ROLL] = Roll;						// D-term
-			DifferentialGyro = currentGyroError[ROLL] - lastGyroError[ROLL];
-			lastGyroError[ROLL] = currentGyroError[ROLL];
+			currentError[ROLL] = Roll;							// D-term
+			DifferentialGyro = currentError[ROLL] - lastError[ROLL];
+			lastError[ROLL] = currentError[ROLL];
 			DifferentialGyro *= Config.D_mult_roll;				// Multiply D-term by up to 256
 
 			// Sum	
@@ -664,6 +704,20 @@ if (0)
 		MotorOut2 -= Roll;
 		MotorOut3 -= Roll;
 		MotorOut4 += Roll;
+		#elif defined(HEXA_COPTER)
+		Roll	= (Roll * 7) >> 3;	//RxInRoll  *= 0.875 (Sine 60 = 0.866)
+		MotorOut2 -= Roll;
+		MotorOut3 -= Roll;
+		MotorOut5 += Roll;
+		MotorOut6 += Roll;
+		#elif defined(HEXA_X_COPTER)
+		MotorOut3 -= Roll;
+		MotorOut6 += Roll;
+		Roll	= (Roll >> 1);		//RxInRoll  *= 0.5 (Sine 30 = 0.5)
+		MotorOut1 += Roll;
+		MotorOut2 -= Roll;
+		MotorOut4 -= Roll;
+		MotorOut5 += Roll;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -710,9 +764,9 @@ if (0)
 			I_term_gPitch = IntegralgPitch * Config.I_mult_pitch;// Multiply I-term (Max gain of 256)
 			I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
 
-			currentGyroError[PITCH] = Pitch;					// D-term
-			DifferentialGyro = currentGyroError[PITCH] - lastGyroError[PITCH];
-			lastGyroError[PITCH] = currentGyroError[PITCH];	
+			currentError[PITCH] = Pitch;						// D-term
+			DifferentialGyro = currentError[PITCH] - lastError[PITCH];
+			lastError[PITCH] = currentError[PITCH];	
 			DifferentialGyro *= Config.D_mult_pitch;			// Multiply D-term by up to 256
 
 			// Sum
@@ -730,6 +784,20 @@ if (0)
 		MotorOut2 += Pitch;
 		MotorOut3 -= Pitch;
 		MotorOut4 -= Pitch;
+		#elif defined(HEXA_COPTER)
+		MotorOut1 += Pitch;
+		MotorOut4 -= Pitch;
+		Pitch = (Pitch >> 1); 		// (Sine 30 = 0.5)
+		MotorOut2 += Pitch;	
+		MotorOut3 -= Pitch;
+		MotorOut5 -= Pitch;
+		MotorOut6 += Pitch;
+		#elif defined(HEXA_X_COPTER)
+		Pitch	= (Pitch * 7) >> 3;	//RxInPitch  *= 0.875 (Sine 60 = 0.866)
+		MotorOut1 += Roll;
+		MotorOut2 += Roll;
+		MotorOut4 -= Roll;
+		MotorOut5 -= Roll;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -753,9 +821,9 @@ if (0)
 		I_term_Yaw = IntegralYaw * Config.I_mult_yaw;		// Multiply IntegralYaw by up to 256
 		I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
-		currentGyroError[YAW] = Yaw;						// D-term
-		DifferentialGyro = currentGyroError[YAW] - lastGyroError[YAW];
-		lastGyroError[YAW] = currentGyroError[YAW];	
+		currentError[YAW] = Yaw;							// D-term
+		DifferentialGyro = currentError[YAW] - lastError[YAW];
+		lastError[YAW] = currentError[YAW];	
 		DifferentialGyro *= Config.D_mult_yaw;				// Multiply D-term by up to 256
 
 		Yaw = Yaw - I_term_Yaw - DifferentialGyro;			// P + I + D
@@ -775,16 +843,75 @@ if (0)
 		MotorOut2 += Yaw;
 		MotorOut3 -= Yaw;
 		MotorOut4 += Yaw;
+		#elif defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+		MotorOut1 -= Yaw;
+		MotorOut2 += Yaw;
+		MotorOut3 -= Yaw;
+		MotorOut4 += Yaw;
+		MotorOut5 -= Yaw;
+		MotorOut6 += Yaw;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
+
+		#ifdef PROX_MODULE
+		//***********************************************************************
+		//                 --- Calculate height adjustment ---
+		// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
+		//***********************************************************************
+
+		Altitude = GetDistance();							// Get latest distance measurement
+		currentError[ALT] = Altitude;						// D-term
+		if (Altitude > MAX_HEIGHT) Altitude = MAX_HEIGHT;
+		if (Altitude < 0) Altitude = 0;
+		Altitude = Set_height - Altitude;					// Calculate target height error
+
+		DifferentialGyro = currentError[ALT] - lastError[ALT]; // Moderate acceleration up or down 
+		lastError[ALT] = currentError[ALT];					// Adds when falling, subtracts when rising
+
+		Altitude = Altitude - DifferentialGyro;				// P + D
+		Altitude = Altitude >> 1;							// Average P and D terms
+
+		if (Altitude > PR_LIMIT) Altitude = PR_LIMIT;		
+		else if (Altitude < -PR_LIMIT) Altitude = -PR_LIMIT;// Apply YAW limit to PID calculation
+
+		// Only in Autolevel mode and when height under maximum controllable
+		if ((AutoLevel) && (currentError[ALT] <= MAX_HEIGHT))
+		{
+			//--- (Add)Adjust Altitude output to motors
+			#ifdef QUAD_COPTER
+			MotorOut1 += Altitude;
+			MotorOut2 += Altitude;
+			MotorOut3 += Altitude;
+			MotorOut4 += Altitude;
+			#elif defined(QUAD_X_COPTER)
+			MotorOut1 += Altitude;
+			MotorOut2 += Altitude;
+			MotorOut3 += Altitude;
+			MotorOut4 += Altitude;
+			#elif defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+			MotorOut1 += Altitude;
+			MotorOut2 += Altitude;
+			MotorOut3 += Altitude;
+			MotorOut4 += Altitude;
+			MotorOut5 += Altitude;
+			MotorOut6 += Altitude;
+			#else
+			#error No Copter configuration defined !!!!
+			#endif
+		}
+
+		#endif // PROX_MODULE
 
 		//--- Limit the lowest value to avoid stopping of motor if motor value is under-saturated ---
 		if ( MotorOut1 < MOTOR_IDLE )	MotorOut1 = MOTOR_IDLE;	
 		if ( MotorOut2 < MOTOR_IDLE )	MotorOut2 = MOTOR_IDLE;	
 		if ( MotorOut3 < MOTOR_IDLE )	MotorOut3 = MOTOR_IDLE;
 		if ( MotorOut4 < MOTOR_IDLE )	MotorOut4 = MOTOR_IDLE;
-	
+		#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+		if ( MotorOut5 < MOTOR_IDLE )	MotorOut5 = MOTOR_IDLE;	
+		if ( MotorOut6 < MOTOR_IDLE )	MotorOut6 = MOTOR_IDLE;	
+		#endif	
 		//--- Output to motor ESC's ---
 		if (RxInCollective < 1 || !Armed)	// Turn off motors if collective below 1% 
 		{		
@@ -792,6 +919,10 @@ if (0)
 			MotorOut2 = 0;
 			MotorOut3 = 0;
 			MotorOut4 = 0;
+			#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+			MotorOut5 = 0;
+			MotorOut6 = 0;
+			#endif
 		}
 
 		if (Armed) output_motor_ppm();		// Output ESC signal

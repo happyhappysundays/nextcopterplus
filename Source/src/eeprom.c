@@ -98,7 +98,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.I_mult_alevel = 00;
 	//
 	Config.RC_rate = 50;				// Not used
-	Config.RC_expo = 0;
+	Config.RC_expo = 20;
 	Config.RollPitchRate = 3;
 	Config.Yawrate = 3;
 	Config.PowerTrigger = 1100; 
