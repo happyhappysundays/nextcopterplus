@@ -17,29 +17,35 @@
 
 volatile bool RxChannelsUpdatedFlag;
 
-volatile uint16_t RxChannel1;
-volatile uint16_t RxChannel2;
-volatile uint16_t RxChannel3;
+volatile uint16_t RxChannel1; // These variables are local but defining them 
+volatile uint16_t RxChannel2; // here means that there is less pushing/popping from
+volatile uint16_t RxChannel3; // the stack
 volatile uint16_t RxChannel4;
+uint16_t RxChannel1Start;	
+uint16_t RxChannel2Start;	
+uint16_t RxChannel3Start;	
+uint16_t RxChannel4Start;
+
+#ifdef CPPM_MODE
 volatile uint16_t RxChannel5;
 volatile uint16_t RxChannel6;
 volatile uint16_t RxChannel7;
 volatile uint16_t RxChannel8;
-
-uint16_t RxChannel1Start;	// These eight variables are local but defining them 
-uint16_t RxChannel2Start;	// here means that there is less pushing/popping from
-uint16_t RxChannel3Start;	// the stack
-uint16_t RxChannel4Start;
 uint16_t RxChannel5Start;
 uint16_t RxChannel6Start;
 uint16_t RxChannel7Start;
 uint16_t RxChannel8Start;
 
-#ifdef CPPM_MODE
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Channel number
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
+
+#ifdef PROX_MODULE
+volatile uint16_t EchoTime;			// Sonar echo duration
+uint16_t EchoTimeStart;				// Sonar echo start
 #endif
+
+#endif //CPPM_MODE
 
 //************************************************************
 // Standard mode
@@ -166,4 +172,17 @@ ISR(INT0_vect)
 	} // Switch
 } // ISR(INT0_vect)
 
+#ifdef PROX_MODULE
+ISR(INT1_vect)
+{
+	if (ECHO)		// Echo pulse just started
+	{
+		EchoTimeStart = TCNT1;
+	} 
+	else 
+	{				// Echo pulse completed
+		EchoTime = TCNT1 - EchoTimeStart;
+	}
+} // ISR(INT1_vect)
+#endif
 #endif

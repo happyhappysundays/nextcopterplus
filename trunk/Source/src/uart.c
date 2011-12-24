@@ -161,10 +161,17 @@ void send_multwii_data(void) // 66 bytes
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 
 	send_word(RxChannel4); 		// 33
+#ifdef CPPM_MODE
 	send_word(RxChannel5);
 	send_word(RxChannel6); 
 	send_word(RxChannel7); 
 	send_word(RxChannel8); 		// 41
+#else
+	send_word(1500);
+	send_word(1500); 
+	send_word(1500); 
+	send_word(1500); 			// 41
+#endif
 	// Add CH5 to CH8
 	if ((Config.Modes &16) > 0) flight_mode |= 16; // 16 = LVA mode 1 = buzzer, 0 = LED
 	send_byte(flight_mode);

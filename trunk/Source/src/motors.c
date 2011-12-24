@@ -47,6 +47,9 @@ void output_motor_ppm(void)
 	uint8_t i;
 	static uint16_t MotorStartTCNT1, ElapsedTCNT1, CurrentTCNT1;
 	uint8_t m1,m2,m3,m4;
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	uint8_t m5,m6;
+	#endif
 
 	// Only enable motors when armed or not connected to the GUI
 	if (!Armed || GUIconnected) return; 
@@ -88,6 +91,16 @@ void output_motor_ppm(void)
 	else if ( MotorOut4 > 200 ) m4 = 200;
 	else m4 = MotorOut4;
 
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	if ( MotorOut5 < 0 ) m5 = 0;
+	else if ( MotorOut5 > 200 ) m5 = 200;
+	else m5 = MotorOut5;
+
+	if ( MotorOut6 < 0 ) m6 = 0;
+	else if ( MotorOut6 > 200 ) m6 = 200;
+	else m6 = MotorOut6;
+	#endif
+
 	// T0 = 8 bit @ 8MHz, so 1 count per 125ns, max of 32us
 	// T1 = 16 bit @ 1MHz, so 1 count per us, max of 65,539us or 65.5ms
 	// CurrentTCNT1 = TCNT1; // Snapshot
@@ -99,6 +112,10 @@ void output_motor_ppm(void)
 	M2 = 1;
 	M3 = 1;
 	M4 = 1;
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	M5 = 1;
+	M6 = 1;
+	#endif
 
 	// Measure period of ESC rate from here
 	MotorStartTCNT1 = TCNT1;
@@ -125,6 +142,10 @@ void output_motor_ppm(void)
 		if (i==m2) M2 = 0;
 		if (i==m3) M3 = 0;
 		if (i==m4) M4 = 0;
+		#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+		if (i==m5) M5 = 0;
+		if (i==m6) M6 = 0;
+		#endif
 	} 
 	// Pulse done, now back to waiting about...
 }
