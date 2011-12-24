@@ -57,8 +57,14 @@
 #define LCD_TX 			REGISTER_BIT(PORTB,4)
 #define LCD_TX_DIR		REGISTER_BIT(DDRB,4)
 
-#define LVA				REGISTER_BIT(PORTD,4)
+#define LVA				REGISTER_BIT(PORTD,4)	// LVA analog input
 #define LVA_DIR			REGISTER_BIT(DDRD,4)
+
+#define PING			REGISTER_BIT(PINB,7)	// Proximity sensor input (from KK+)
+#define PING_DIR 		REGISTER_BIT(DDRB,7)
+
+#define ECHO			REGISTER_BIT(PIND,3)	// Proximity sensor output (to KK+)
+#define ECHO_DIR 		REGISTER_BIT(DDRD,3)
 
 
 //***********************************************************
@@ -67,12 +73,17 @@
 //
 //#define QUAD_COPTER		// Choose this for + config
 #define QUAD_X_COPTER		// Choose this for X config
-#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
-#define MEMS_MODULE 	// Uncomment this when using the MEMS module
+//#define HEXA_COPTER		// Choose this for Hexacopter
+//#define HEXA_X_COPTER		// Choose this for Hexacopter X
+
+#define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
+#define MEMS_MODULE 		// Uncomment this when using the MEMS module
+//#define PROX_MODULE			// Uncomment this when using a Proximity module 
+								// (NB: *MUST* select CPPM mode as well)
 //
 //***********************************************************
 
-enum GyroArrayIndex { ROLL = 0, PITCH, YAW };
+enum GyroArrayIndex { ROLL = 0, PITCH, YAW, ALT };
 enum ADCInputs {YAW_GYRO = 0, PITCH_GYRO, ROLL_GYRO, ROLL_POT, PITCH_POT, YAW_POT, VBAT };
 
 #endif //IO_CFG_H
