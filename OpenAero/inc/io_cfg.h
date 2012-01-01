@@ -67,8 +67,8 @@
 //
 #define STANDARD			// Standard aeroplane config
 //
-//#define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
-#define MEMS_MODULE 		// Uncomment this when using the MEMS module
+#define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
+//#define MEMS_MODULE 		// Uncomment this when using the MEMS module
 
 //
 //***********************************************************

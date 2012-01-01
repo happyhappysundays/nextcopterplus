@@ -149,12 +149,12 @@ void send_multwii_data(void) // 66 bytes
 	send_byte(0);				// 7 - Dummy word for ACC (Z)
     for (i = 0; i < 3; i++)
 	send_word(gyroADC[i]); 		// Gyro 13
-	send_word(ServoOut1*10); 	// Motors 25
-	send_word(ServoOut2*10);
-	send_word(ServoOut3*10);	// Re-span to normal values
-	send_word(ServoOut4*10);
-	send_word(ServoOut5*10);
-	send_word(ServoOut6*10);
+	send_word(ServoOut1); 		// Motors 25
+	send_word(ServoOut2);
+	send_word(ServoOut3);
+	send_word(ServoOut4);
+	send_word(ServoOut5);
+	send_word(ServoOut6);
 	send_word(RxChannel1);
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 

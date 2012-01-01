@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.0a
+// Version 1.01a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -66,13 +66,15 @@
 // ===============
 // V1.0a	Based on NeXtcopter V1.1d code
 //			Initial code base.
+// V1.01a	First release candidate
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	Add 500Hz loop governor
-//	Add enable switch/pass-through mode
+//	Calibrate servos pulse timing
+//	Reduce servo jitter/noise in the servo output
+//	
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -245,15 +247,92 @@ if (0)
 	// Main loop
 	while (1)
 	{
+		AccRollTrim = Config.AccRollZeroTrim - 127; // GUI I/F bug won't pass signed numbers...
+		AccPitchTrim = Config.AccPitchZeroTrim - 127;
+
+		RxGetChannels();
+
 		#ifdef CPPM_MODE
-		if (RxChannel7 > 1600)				// AUX 1 over-rides stability
+		if (RxChannel5 > 1600)
+		{									// When CH5 is activated
+			AutoLevel = true;				// Activate autotune mode
+			flight_mode |= 1;				// Notify GUI that mode has changed
+		}
+		else
+		{
+			AutoLevel = false;				// Activate autotune mode
+			flight_mode &= 0xfe;			// Notify GUI that mode has changed
+			firsttimeflag = true;			// Reset flag
+		}
+		#endif
+
+		// Do LVA-related tasks
+		LVA = 0;
+		if ((uber_loop_count &128) > 0)		// Check every 500ms or so
+		{ 
+			GetVbat();						// Get battery voltage
+		}
+
+		if ((Config.Modes &16) > 0)			// Buzzer mode
+		{
+			// Beep buzzer if Vbat lower than trigger
+			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA = 1; 	
+			else LVA = 0;					// Otherwise turn off buzzer
+		}
+		else if ((Config.Modes &16) == 0)	// LED mode
+		{	// Flash LEDs if Vbat lower than trigger
+			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
+			else LVA = 1;					// Otherwise leave LEDs on
+		}
+
+		// Check to see if any requests are coming from the GUI
+		if (UCSR0A & (1 << RXC0)) 			// Data waiting in RX buffer
+		{
+			GUIconnected = true;			// Set GUI flag so that servos can be disabled
+			rxin = rx_byte();				// Get RX byte
+			switch(rxin) 
+			{
+				case 'M':					// Send MultiWii data
+					ReadGyros();
+					ReadAcc();
+					send_multwii_data();	
+					cycletime++;
+					break;
+				case 'E':					// Calibrate gyros
+					CalibrateGyros();
+					break;
+				case 'S':
+					CalibrateAcc();			// Calibrate accelerometers
+					break;
+				case 'W':					// Receive data from GUI and save to eeProm
+					get_multwii_data();
+					Save_Config_to_EEPROM();
+					LED = !LED;
+					_delay_ms(500);
+					LED = !LED;
+					break;
+				case 'D':					// Load eeProm defaults
+					Set_EEPROM_Default_Config();
+					break;
+				case 'C':
+					CenterSticks();			// Do stick centering
+					break;
+				default:
+					break;
+			}
+		} // GUI
+
+		#ifdef CPPM_MODE
+		if (RxChannel7 > 1600)				// AUX 1 over-rides stability, menu and GUI
 		{
 			ServoOut1 = RxChannel4;
 			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			ServoOut3 = RxChannel3;
-			ServoOut4 = Config.RxChannel3ZeroOffset - RxInRoll;
+			ServoOut3 = RxChannel1;
+			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
 			ServoOut5 = RxChannel2;
 			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+
+			flight_mode &= 0xf7;			// Notify GUI that mode has changed
 		}
 		#else
 		if(0)
@@ -263,80 +342,7 @@ if (0)
 
 		else
 		{
-			AccRollTrim = Config.AccRollZeroTrim - 127; // GUI I/F bug won't pass signed numbers...
-			AccPitchTrim = Config.AccPitchZeroTrim - 127;
-
-			RxGetChannels();
-
-			#ifdef CPPM_MODE
-			if (RxChannel5 > 1600)
-			{									// When CH5 is activated
-				AutoLevel = true;				// Activate autotune mode
-				flight_mode |= 1;				// Notify GUI that mode has changed
-			}
-			else
-			{
-				AutoLevel = false;				// Activate autotune mode
-				flight_mode &= 0xfe;			// Notify GUI that mode has changed
-				firsttimeflag = true;			// Reset flag
-			}
-			#endif
-
-			// Do LVA-related tasks
-			LVA = 0;
-			if ((uber_loop_count &128) > 0)		// Check every 500ms or so
-			{ 
-				GetVbat();						// Get battery voltage
-			}
-
-			if ((Config.Modes &16) > 0)			// Buzzer mode
-			{
-				// Beep buzzer if Vbat lower than trigger
-				if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA = 1; 	
-				else LVA = 0;					// Otherwise turn off buzzer
-			}
-			else if ((Config.Modes &16) == 0)	// LED mode
-			{	// Flash LEDs if Vbat lower than trigger
-				if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
-				else LVA = 1;					// Otherwise leave LEDs on
-			}
-
-			// Check to see if any requests are coming from the GUI
-			if ((UCSR0A & (1 << RXC0)) && (RxInCollective == 0)) // Data waiting in RX buffer
-			{
-				GUIconnected = true;			// Set GUI flag so that Servos can be disabled
-				rxin = rx_byte();				// Get RX byte
-				switch(rxin) 
-				{
-					case 'M':					// Send MultiWii data
-						ReadGyros();
-						ReadAcc();
-						send_multwii_data();	
-						cycletime++;
-						break;
-					case 'E':					// Calibrate gyros
-						CalibrateGyros();
-						break;
-					case 'S':
-						CalibrateAcc();			// Calibrate accelerometers
-						break;
-					case 'W':					// Receive data from GUI and save to eeProm
-						get_multwii_data();
-						Save_Config_to_EEPROM();
-						LED = !LED;
-						_delay_ms(500);
-						LED = !LED;
-						break;
-					case 'D':					// Load eeProm defaults
-						Set_EEPROM_Default_Config();
-						break;
-					case 'C':
-						CenterSticks();			// Do stick centering
-						break;
-					default:
-						break;
-				}
-			} // GUI
+			flight_mode |= 8;				// Notify GUI that mode has changed to stability mode
 
 			// LCD menu system - enter with pitch up and yaw right in stable mode
 			if (RxInCollective == 0) 
@@ -485,8 +491,8 @@ if (0)
 			//--- Start mixing by setting servos to RX inputs ---
 			ServoOut1 = RxChannel4;
 			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			ServoOut3 = RxChannel3;
-			ServoOut4 = Config.RxChannel3ZeroOffset - RxInRoll;
+			ServoOut3 = RxChannel1;
+			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
 			ServoOut5 = RxChannel2;
 			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
 
@@ -513,11 +519,11 @@ if (0)
 
 			//***********************************************************************
 			//                --- Calculate roll gyro output ---
-			// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 			//***********************************************************************
 
 			if ((RxInRoll < DEAD_BAND) && (RxInRoll > -DEAD_BAND)) RxInRoll = 0; // Reduce RxIn noise into the I-term
-			Roll = RxInRoll + gyroADC[ROLL];
+			//Roll = RxInRoll + gyroADC[ROLL];
+			Roll = gyroADC[ROLL];
 
 			IntegralgRoll += Roll;									// Gyro I-term
 			if (IntegralgRoll > ITERM_LIMIT_RP) IntegralgRoll = ITERM_LIMIT_RP; // Anti wind-up limit
@@ -568,11 +574,11 @@ if (0)
 
 			//***********************************************************************
 			//                --- Calculate pitch gyro output ---
-			// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 			//***********************************************************************
 
 			if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise into the I-term
-			Pitch = RxInPitch + gyroADC[PITCH];
+			//Pitch = RxInPitch + gyroADC[PITCH];
+			Pitch = gyroADC[PITCH];
 
 			IntegralgPitch += Pitch;								// I-term (32-bit)
 			if (IntegralgPitch > ITERM_LIMIT_RP) IntegralgPitch = ITERM_LIMIT_RP; // Anti wind-up limit
@@ -622,11 +628,11 @@ if (0)
 
 			//***********************************************************************
 			//                 --- Calculate yaw gyro output ---
-			// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 			//***********************************************************************
 
 			if ((RxInYaw < DEAD_BAND) && (RxInYaw > -DEAD_BAND)) RxInYaw = 0; // Reduce RxIn noise into the I-term
-			Yaw = RxInYaw + gyroADC[YAW];	
+			//Yaw = RxInYaw + gyroADC[YAW];	
+			Yaw = gyroADC[YAW];
 
 			IntegralYaw += Yaw;									// I-term (32-bit)
 			if (IntegralYaw > ITERM_LIMIT_YAW) IntegralYaw = ITERM_LIMIT_YAW;
@@ -690,8 +696,8 @@ if (0)
 			}
 		}
 
-
 		// If SERVO_RATE due, update servos, otherwise keep looping
+		// Inhibit servos while GUI connected
 		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
 		{
 			servo_skip = 0;

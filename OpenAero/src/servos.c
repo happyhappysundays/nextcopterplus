@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include "..\inc\io_cfg.h"
@@ -113,6 +114,7 @@ void output_servo_ppm(void)
 	// Measure period of servo rate from here to the start of the next pulse
 	ServoStartTCNT1 = TCNT1;
 
+	//cli();
 	// Create the base pulse
 	TIFR0 &= ~(1 << TOV0);		// Clear overflow
 	TCNT0 = 0;					// Reset counter
@@ -121,7 +123,8 @@ void output_servo_ppm(void)
 		while (TCNT0 < 64);		// 8MHz * 64 = 8us
 		TCNT0 -= 64;
 	}
-
+	//sei();
+	//cli();
 	// Now switch off the pulses as required
 	TCNT0 = 0;
 	for (i=904;i<2200;i+=4)		// Tweak this
@@ -136,5 +139,6 @@ void output_servo_ppm(void)
 		if (i>m5) M5 = 0;
 		if (i>m6) M6 = 0;
 	} 
+	//sei();
 	// Pulse done, now back to waiting about...
 }
