@@ -8,6 +8,7 @@
 //***********************************************************
 
 extern volatile bool RxChannelsUpdatedFlag;
+extern volatile bool Interrupted;
 
 extern volatile uint16_t RxChannel1;
 extern volatile uint16_t RxChannel2;

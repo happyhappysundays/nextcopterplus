@@ -9,13 +9,14 @@
 #include <stdbool.h>
 #include <avr/interrupt.h>
 #include "..\inc\io_cfg.h"
-#include "..\inc\main.h"
+//#include "..\inc\main.h"
 
 //************************************************************
 // Interrupt vectors
 //************************************************************
 
 volatile bool RxChannelsUpdatedFlag;
+volatile bool Interrupted;
 
 volatile uint16_t RxChannel1; // These variables are local but defining them 
 volatile uint16_t RxChannel2; // here means that there is less pushing/popping from
@@ -95,6 +96,7 @@ ISR(PCINT0_vect)
 	else 
 	{				// Falling
 		RxChannel4 = TCNT1 - RxChannel4Start;
+		Interrupted = true;						// Signal that interrupt block has finished
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -111,6 +113,7 @@ ISR(PCINT0_vect)
 ISR(INT0_vect)
 {	// Check to see if previous period was a sync pulse
 	// If so, reset channel number
+
 	if ((TCNT1 - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
 	PPMSyncStart = TCNT1;
 	switch(ch_num)
@@ -161,6 +164,7 @@ ISR(INT0_vect)
 		case 8:
 			RxChannel8 = TCNT1 - RxChannel8Start;	// Ch8 - AUX3
 			ch_num++;
+			Interrupted = true;						// Signal that interrupt block has finished
 			break;
 		default:
 			break;

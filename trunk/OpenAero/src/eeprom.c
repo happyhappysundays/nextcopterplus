@@ -83,10 +83,10 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccRollZero	= 578;			// Acc calibration defaults
 	Config.AccPitchZero	= 585;
 	//
-	Config.P_mult_roll = 100;			// PID defaults
+	Config.P_mult_roll = 150;			// PID defaults
 	Config.I_mult_roll = 0;
 	Config.D_mult_roll = 0;
-	Config.P_mult_pitch = 100;
+	Config.P_mult_pitch = 150;
 	Config.I_mult_pitch = 0;
 	Config.D_mult_pitch = 0;
 	Config.P_mult_yaw = 150;

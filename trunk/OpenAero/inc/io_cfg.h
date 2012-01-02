@@ -64,11 +64,14 @@
 //* Compilation options
 //***********************************************************
 //
-//
+// Type of model (Choose one)
 #define STANDARD			// Standard aeroplane config
+//#define FWING				// Flying Wing config (TBD)
 //
-#define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
-//#define MEMS_MODULE 		// Uncomment this when using the MEMS module
+// Optional extensions (if fitted)
+//#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
+//#define ACCELLEROMETER	// Uncomment this when using an accelerometer module
+//#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
 
 //
 //***********************************************************
