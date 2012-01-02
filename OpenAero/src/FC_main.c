@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.01a
+// Version 1.02a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -67,6 +67,7 @@
 // V1.0a	Based on NeXtcopter V1.1d code
 //			Initial code base.
 // V1.01a	First release candidate
+// V1.02a	Much improved servo jitter!
 //
 //***********************************************************
 //* To do
@@ -91,6 +92,20 @@ M3/M4 -----+----- Aileron
            |
          M1/M2    Rudder
 
+
+Flying Wing (TBD)
+
+         __/^\__
+        /       \
+      /           \
+     |______|______|
+     |_____/|\_____|
+
+      M3/M4   M5/M6 (Elevons/Flaperons)
+       Left   Right
+
+          M1/M2
+          Rudder
 */
 
 //***********************************************************
@@ -151,10 +166,10 @@ M3/M4 -----+----- Aileron
 int32_t Roll;						// Temp axis values. Seems we need 32 bits here.
 int32_t Pitch;
 int32_t Yaw;
-int8_t AccRollTrim;					// Normalised acc trim 
-int8_t AccPitchTrim;
-int8_t AvgIndex;
-int8_t OldIndex;
+int8_t  AccRollTrim;					// Normalised acc trim 
+int8_t  AccPitchTrim;
+int8_t  AvgIndex;
+int8_t  OldIndex;
 int32_t AvgRollSum;	
 int32_t AvgPitchSum;
 int16_t AvgRoll;
@@ -182,16 +197,16 @@ int16_t lastError[4];
 int16_t DifferentialGyro;			// Holds difference between last two errors (angular acceleration)
 
 // GUI variables
-bool GUIconnected;
+bool 	GUIconnected;
 uint8_t flight_mode;				// Global flight mode flag
 uint16_t cycletime;					// Data TX cycle counter
 
 // Misc
-bool AutoLevel;						// AutoLevel = 1
-bool LCD_active;					// Mode flags
-bool freshmenuvalue;
-bool firsttimeflag;
-char pBuffer[16];					// Print buffer
+bool 	AutoLevel;					// AutoLevel = 1
+bool 	LCD_active;					// Mode flags
+bool 	freshmenuvalue;
+bool 	firsttimeflag;
+char 	pBuffer[16];				// Print buffer
 uint16_t Change_Arming;				// Arming timers
 uint16_t Change_LCD;
 uint8_t Arming_TCNT2;
@@ -212,7 +227,6 @@ int main(void)
 	firsttimeflag = true;
 	init();								// Do all init tasks
 
-
 //************************************************************
 // Test code
 //************************************************************
@@ -221,12 +235,16 @@ if (0)
 	// Test new servo code
 	while(1)
 	{
+		RxGetChannels();
 		ServoOut1 = 920;
 		ServoOut2 = 1000;
 		ServoOut3 = 1200;
 		ServoOut4 = 1500;
 		ServoOut5 = 1500;
-		ServoOut6 = RxChannel1;
+		ServoOut6 = RxInCollective + 1200;
+		while (Interrupted == false){};
+		Interrupted = false;
+		//_delay_ms(30);
 		output_servo_ppm();	
 	}
 }
@@ -252,10 +270,11 @@ if (0)
 
 		RxGetChannels();
 
-		#ifdef CPPM_MODE
+		// Autolevel is only available if you have an Accellerometer and a CPPM receiver connected
+		#if (defined(CPPM_MODE) && defined(ACCELLEROMETER))
 		if (RxChannel5 > 1600)
 		{									// When CH5 is activated
-			AutoLevel = true;				// Activate autotune mode
+			AutoLevel = true;				// Activate autolevel mode
 			flight_mode |= 1;				// Notify GUI that mode has changed
 		}
 		else
@@ -639,16 +658,13 @@ if (0)
 			else if (IntegralYaw < -ITERM_LIMIT_YAW) IntegralYaw = -ITERM_LIMIT_YAW;// Anti wind-up (Experiment with value)
 
 			Yaw *= Config.P_mult_yaw;							// Multiply P-term (Max gain of 768)
-			Yaw *= 3;	
+			Yaw = Yaw * 3;	
 
 			I_term_Yaw = IntegralYaw * Config.I_mult_yaw;		// Multiply IntegralYaw by up to 256
 			I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
 			Yaw = Yaw - I_term_Yaw;								// P + I
 			Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
-
-			if (Yaw > YAW_LIMIT) Yaw = YAW_LIMIT;		
-			else if (Yaw < -YAW_LIMIT) Yaw = -YAW_LIMIT; 		// Apply YAW limit to PID calculation
 
 			//--- (Add)Adjust yaw gyro output to servos
 			#ifdef STANDARD
@@ -675,6 +691,7 @@ if (0)
 		if ( ServoOut5 > MAX_TRAVEL )	ServoOut5 = MAX_TRAVEL;	
 		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;	
 
+
 		// Loop governor is here so that output_servo_ppm() is only called every 20ms
 		// and the loop is regulated to LOOP_RATE Hz. This is important for the averaging filters.
 		// Also, handle the odd case where the TCNT1 rolls over and TCNT1 < LoopStartTCNT1
@@ -700,7 +717,10 @@ if (0)
 		// Inhibit servos while GUI connected
 		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
 		{
+			Interrupted = false;
 			servo_skip = 0;
+			while (Interrupted == false){};	// Wait here for any interrupts to complete
+			Interrupted = false;
 			output_servo_ppm();			// Output servo signal
 		}
 

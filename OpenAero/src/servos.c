@@ -52,7 +52,7 @@ void output_servo_ppm(void)
 	uint16_t i;
 	static uint16_t ServoStartTCNT1, ElapsedTCNT1, CurrentTCNT1;
 	uint16_t m1,m2,m3,m4,m5,m6;
-
+/*
 	// Make sure we have spent enough time between pulses
 	// Also, handle the odd case where the TCNT1 rolls over and TCNT1 < ServoStartTCNT1
 	CurrentTCNT1 = TCNT1;
@@ -72,7 +72,7 @@ void output_servo_ppm(void)
 			TCNT0 -= 64;
 		}
 	}
-
+*/
 	// Set Servo limits (MIN_PULSE -> MAX_PULSE)
 	if ( ServoOut1 < MIN_PULSE ) m1 = MIN_PULSE;
 	else if ( ServoOut1 > MAX_PULSE ) m1 = MAX_PULSE;
@@ -114,7 +114,7 @@ void output_servo_ppm(void)
 	// Measure period of servo rate from here to the start of the next pulse
 	ServoStartTCNT1 = TCNT1;
 
-	//cli();
+	cli();						// Debug - protect PWM pulses from interruption
 	// Create the base pulse
 	TIFR0 &= ~(1 << TOV0);		// Clear overflow
 	TCNT0 = 0;					// Reset counter
@@ -123,8 +123,7 @@ void output_servo_ppm(void)
 		while (TCNT0 < 64);		// 8MHz * 64 = 8us
 		TCNT0 -= 64;
 	}
-	//sei();
-	//cli();
+
 	// Now switch off the pulses as required
 	TCNT0 = 0;
 	for (i=904;i<2200;i+=4)		// Tweak this
@@ -139,6 +138,6 @@ void output_servo_ppm(void)
 		if (i>m5) M5 = 0;
 		if (i>m6) M6 = 0;
 	} 
-	//sei();
+	sei();
 	// Pulse done, now back to waiting about...
 }
