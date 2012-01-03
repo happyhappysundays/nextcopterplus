@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.02a
+// Version 1.03a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -68,13 +68,13 @@
 //			Initial code base.
 // V1.01a	First release candidate
 // V1.02a	Much improved servo jitter!
+// V1.03a   Calibrated servos
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	Calibrate servos pulse timing
-//	Reduce servo jitter/noise in the servo output
+//	Add flying wing mode
 //	
 //
 //***********************************************************
