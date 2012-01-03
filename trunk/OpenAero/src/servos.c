@@ -29,7 +29,7 @@ void output_servo_ppm(void);
 #define SERVO_RATE 50	// in Hz
 #define PWM_LOW_PULSE_INTERVAL (1000000 / SERVO_RATE ) // 20,000
 //#define BASE_PULSE (904 / 8) // 904us / 8us = 113 * 8us groups
-#define BASE_PULSE (512 / 8)
+#define BASE_PULSE (848 / 8)
 
 #define MIN_PULSE 904
 #define MAX_PULSE 2200
@@ -126,7 +126,7 @@ void output_servo_ppm(void)
 
 	// Now switch off the pulses as required
 	TCNT0 = 0;
-	for (i=904;i<2200;i+=4)		// Tweak this
+	for (i=904;i<2200;i+=5)		// Tweak this
 	{
 		while (TCNT0 < 8);		// 8MHz * 8 = 1us + overhead
 		TCNT0 -= 8;				// Tweak until a 2000 pulse is close to 2ms long
