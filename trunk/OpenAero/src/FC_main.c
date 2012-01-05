@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.04a
+// Version 1.05a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -74,12 +74,13 @@
 //			Pitch pot 	= Roll/Pitch I-term
 //			Yaw pot 	= Yaw P-term (Watch out you don't leave it near either end 
 //						as that activates special modes)
+// V1.05a	Reversed gyros for FWING mode
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	Add flying wing mode
+//	Add gyro reversing from LCD
 //	
 //
 //***********************************************************
@@ -610,10 +611,10 @@ if (0)
 			ServoOut3 -= Roll;
 			ServoOut4 += Roll;
 			#elif defined(FWING)
-			ServoOut3 -= Roll;
-			ServoOut4 += Roll;
-			ServoOut5 += Roll;
-			ServoOut6 -= Roll;
+			ServoOut3 += Roll;
+			ServoOut4 -= Roll;
+			ServoOut5 -= Roll;
+			ServoOut6 += Roll;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -676,10 +677,10 @@ if (0)
 			ServoOut5 -= Pitch;
 			ServoOut6 += Pitch;
 			#elif defined(FWING)
-			ServoOut3 -= Pitch;
-			ServoOut4 += Pitch;
-			ServoOut5 -= Pitch;
-			ServoOut6 += Pitch;
+			ServoOut3 += Pitch;
+			ServoOut4 -= Pitch;
+			ServoOut5 += Pitch;
+			ServoOut6 -= Pitch;
 			#else
 			#error No configuration defined !!!!
 			#endif

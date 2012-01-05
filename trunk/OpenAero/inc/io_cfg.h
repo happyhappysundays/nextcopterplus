@@ -65,8 +65,8 @@
 //***********************************************************
 //
 // Type of model (Choose one)
-#define STANDARD			// Standard aeroplane config
-//#define FWING				// Flying Wing config (TBD)
+//#define STANDARD			// Standard aeroplane config
+#define FWING				// Flying Wing config (TBD)
 //
 // Optional extensions (if fitted)
 //#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
