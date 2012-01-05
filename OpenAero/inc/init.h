@@ -11,4 +11,4 @@ extern void CenterSticks(void);
 
 extern CONFIG_STRUCT Config;
 
-#define MENUITEMS 18
+#define MENUITEMS 19

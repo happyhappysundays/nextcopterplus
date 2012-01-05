@@ -56,13 +56,15 @@ const char MenuItem13[] PROGMEM = "Acc level I-term";
 const char MenuItem14[] PROGMEM = "LVA voltage     ";
 const char MenuItem15[] PROGMEM = "LVA mode        ";
 const char MenuItem16[] PROGMEM = "Battery voltage ";
-const char MenuItem17[] PROGMEM = "Calibrate Accel.";
-const char MenuItem18[] PROGMEM = "Center sticks   ";
+const char MenuItem17[] PROGMEM = "Pot mode        ";
+const char MenuItem18[] PROGMEM = "Calibrate Accel.";
+const char MenuItem19[] PROGMEM = "Center sticks   ";
+
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18}; 
+	 MenuItem17, MenuItem18, MenuItem19}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -82,6 +84,11 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{700,2000},	// 7.00 to 20.00 Volts
 	{0,1},
 	{2000,0},	// This makes the battery voltage display unadjustable
+#ifndef ACCELLEROMETER
+	{0,1},
+#else
+	{1,1},		// Leave pot mode set to "eeprom"
+#endif
 	{0,0},
 	{0,0}
 };
@@ -157,8 +164,12 @@ int16_t get_menu_item(uint8_t menuitem)
 			value = (int16_t) vBat;
 			break;
 		case 16:
+			if ((Config.Modes & 4) > 0) value = 1;
+			else value = 0;
 			break;
 		case 17:
+			break;
+		case 18:
 			break;
 		default:
 			break;
@@ -212,7 +223,7 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			Config.PowerTrigger = (uint16_t) value;
 			break;
 		case 14:
-			// 1 = Autolevel, 2 = Normal, 4 = Acro, 8 = UFO, bit 4 (16) = LVA mode 1 = buzzer, 0 = LED
+			// 1 = Autolevel, 2 = Unused, 4 = Pot mode, 8 = Stability, 16 = LVA mode 1 = buzzer, 0 = LED
 			if (value == 0) {
 				Config.Modes = Config.Modes & 0xEF;				// LVA mode = buzzer (bit 4)
 			}
@@ -223,9 +234,18 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 		case 15:
 			break;
 		case 16:
-			CalibrateAcc();
+			// 1 = Autolevel, 2 = Unused, 4 = Pot mode (0 = Adjustable, 1 = Unused), 8 = Stability, 16 = LVA mode
+			if (value == 0) {
+				Config.Modes = Config.Modes & 0xFB;				// Pot mode = Adjustable (bit 2)
+			}
+			else {
+				Config.Modes = Config.Modes | 4;
+			}
 			break;
 		case 17:
+			CalibrateAcc();
+			break;
+		case 18:
 			CenterSticks();
 			break;
 		default:

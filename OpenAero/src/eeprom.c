@@ -102,7 +102,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.RollPitchRate = 3;
 	Config.Yawrate = 3;
 	Config.PowerTrigger = 733; 			// 7.33V for 2S, 11.0V for 3S are good values here
-	Config.Modes = 16; 					// LVA mode = buzzer (bit 4)
+	Config.Modes = 16; 					// LVA mode = buzzer (bit 4), 
+										// Stability mode (bit 3),
+										// Pot mode = active (bit 2)
+										// (bit 1) unused
+										// Autolevel = inactive (bit 0);
 	Config.AutoTuneRX = 25;				// Default best fit for 19,200
 	Config.AutoTuneTX = 51;				// Default best fit for 19,200
 }
