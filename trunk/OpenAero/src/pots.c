@@ -27,7 +27,14 @@ uint16_t	vBat;			// Battery voltage
 
 void ReadGainValues(void)
 {
-	read_adc(YAW_POT);		// Read yaw gain ADC5 
+#ifndef ACCELLEROMETER		// Allow pot usage without accellerometer
+	read_adc(ROLL_POT);		// Read roll pot value 0 - 256
+	GainInADC[ROLL] = ADCW >> 2;
+
+	read_adc(PITCH_POT);	// Read pitch pot value 0 - 256
+	GainInADC[PITCH] = ADCW >> 2;
+#endif
+	read_adc(YAW_POT);		// Read yaw pot value 0 - 1024
 	GainInADC[YAW] = ADCW;
 }
 

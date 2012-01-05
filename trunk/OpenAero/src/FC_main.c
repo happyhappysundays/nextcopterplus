@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.03a
+// Version 1.04a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -68,7 +68,12 @@
 //			Initial code base.
 // V1.01a	First release candidate
 // V1.02a	Much improved servo jitter!
-// V1.03a   Calibrated servos
+// V1.03a   Calibrated servos - first flow version
+// V1.04a	Added ability to use pots to adjust roll/pitch/yaw P and I terms if selected fom menu
+//			Roll pot 	= Roll/Pitch P-term
+//			Pitch pot 	= Roll/Pitch I-term
+//			Yaw pot 	= Yaw P-term (Watch out you don't leave it near either end 
+//						as that activates special modes)
 //
 //***********************************************************
 //* To do
@@ -456,13 +461,20 @@ if (0)
 							}
 							else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
 						}
-						else if ((MenuItem > 0) && (MenuItem < 16)) 	// Print value to change (except for base menu)
+						else if (MenuItem == 16) 							// Special case for LVA mode
+						{
+							LCDprint_line2("          <-Save");			// Setup save line
+							LCDgoTo(16);								// Position cursor at nice spot
+							if (MenuValue == 0) LCDprintstr("Use pots");
+							else LCDprintstr("Use eeprom");
+						}
+						else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
 						{
 							LCDprint_line2("          <-Save");			// Setup save line
 							LCDgoTo(17);								// Position cursor at nice spot
 							LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
 						}
-						else if (MenuItem >= 16)						// For commands
+						else if (MenuItem >= 17)						// For commands
 						{
 							LCDprint_line2("      <- Execute");	
 						}
@@ -500,7 +512,10 @@ if (0)
 				IntegralaRoll = 0;
 				IntegralYaw = 0;
 			}
-
+			if ((Config.Modes &4) == 0)		// Pots mode
+			{
+				ReadGainValues();
+			}
 
 			//--- Read sensors ---
 			ReadGyros();
@@ -572,10 +587,17 @@ if (0)
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
 			{
 				// Gyro PID terms
-				P_term_gRoll = Roll * Config.P_mult_roll;			// Multiply P-term (	Max gain of 256)
+				if ((Config.Modes &4) > 0)							// eeprom mode
+				{
+					P_term_gRoll = Roll * Config.P_mult_roll;		// Multiply P-term (Max gain of 256)
+					I_term_gRoll = IntegralgRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
+				}
+				else 
+				{
+					P_term_gRoll = Roll * GainInADC[ROLL];			// Multiply P-term (Max gain of 256)
+					I_term_gRoll = IntegralgRoll * GainInADC[PITCH];// Multiply I-term (Max gain of 256)
+				}
 				P_term_gRoll = P_term_gRoll * 3;					// Multiply by 3, so max effective gain is 768
-
-				I_term_gRoll = IntegralgRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
 				I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
 
 				// Sum	
@@ -587,6 +609,11 @@ if (0)
 			#ifdef STANDARD
 			ServoOut3 -= Roll;
 			ServoOut4 += Roll;
+			#elif defined(FWING)
+			ServoOut3 -= Roll;
+			ServoOut4 += Roll;
+			ServoOut5 += Roll;
+			ServoOut6 -= Roll;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -626,10 +653,17 @@ if (0)
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
 			{
 				// Gyro PID terms
-				P_term_gPitch = Pitch * Config.P_mult_pitch;		// Multiply P-term (Max gain of 256)
+				if ((Config.Modes &4) > 0)							// eeprom mode
+				{
+					P_term_gPitch = Pitch * Config.P_mult_pitch;	// Multiply P-term (Max gain of 256)
+					I_term_gPitch = IntegralgPitch * Config.I_mult_pitch;// Multiply I-term (Max gain of 256)
+				}
+				else
+				{
+					P_term_gPitch = Pitch * GainInADC[ROLL];		// Multiply P-term (Max gain of 256)
+					I_term_gPitch = IntegralgPitch * GainInADC[PITCH];// Multiply I-term (Max gain of 256)
+				}
 				P_term_gPitch = P_term_gPitch * 3;					// Multiply by 3, so max effective gain is 768
-
-				I_term_gPitch = IntegralgPitch * Config.I_mult_pitch;// Multiply I-term (Max gain of 256)
 				I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
 
 				// Sum
@@ -639,6 +673,11 @@ if (0)
 
 			//--- (Add)Adjust pitch gyro output to Servos
 			#ifdef STANDARD
+			ServoOut5 -= Pitch;
+			ServoOut6 += Pitch;
+			#elif defined(FWING)
+			ServoOut3 -= Pitch;
+			ServoOut4 += Pitch;
 			ServoOut5 -= Pitch;
 			ServoOut6 += Pitch;
 			#else
@@ -657,17 +696,24 @@ if (0)
 			if (IntegralYaw > ITERM_LIMIT_YAW) IntegralYaw = ITERM_LIMIT_YAW;
 			else if (IntegralYaw < -ITERM_LIMIT_YAW) IntegralYaw = -ITERM_LIMIT_YAW;// Anti wind-up (Experiment with value)
 
-			Yaw *= Config.P_mult_yaw;							// Multiply P-term (Max gain of 768)
+			if ((Config.Modes &4) > 0)							// eeprom mode
+			{
+				Yaw *= Config.P_mult_yaw;						// Multiply P-term (Max gain of 768)
+				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
+			}
+			else
+			{
+				Yaw *= GainInADC[YAW];							// Multiply P-term (Max gain of 768)
+				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
+			}
 			Yaw = Yaw * 3;	
-
-			I_term_Yaw = IntegralYaw * Config.I_mult_yaw;		// Multiply IntegralYaw by up to 256
 			I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
 			Yaw = Yaw - I_term_Yaw;								// P + I
 			Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
 
 			//--- (Add)Adjust yaw gyro output to servos
-			#ifdef STANDARD
+			#if (defined(STANDARD) || defined(FWING))
 			ServoOut1 -= Yaw;
 			ServoOut2 += Yaw;
 			#else

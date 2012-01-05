@@ -49,9 +49,9 @@ void variable_delay(uint8_t count);
 #define VERSION 10			// OpenAero version number
 
 #ifdef STANDARD				// Pass model type to MultiWii GUI
-	#define MULTITYPE 8		// Default to Flying wing
+	#define MULTITYPE 12	// Aeroplane mode
 #else
-	#define MULTITYPE 8		// Default to Flying wing
+	#define MULTITYPE 8		// Flying wing
 #endif
 
 void init_uart(void)						// Initialise UART with adjusted bitrate
