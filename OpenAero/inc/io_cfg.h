@@ -68,6 +68,9 @@
 //#define STANDARD			// Standard aeroplane config
 #define FWING				// Flying Wing config (TBD)
 //
+// Board orientation options
+//#define VERTICAL			// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
+//
 // Optional extensions (if fitted)
 //#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
 //#define ACCELLEROMETER	// Uncomment this when using an accelerometer module

@@ -57,14 +57,17 @@ const char MenuItem14[] PROGMEM = "LVA voltage     ";
 const char MenuItem15[] PROGMEM = "LVA mode        ";
 const char MenuItem16[] PROGMEM = "Battery voltage ";
 const char MenuItem17[] PROGMEM = "Pot mode        ";
-const char MenuItem18[] PROGMEM = "Calibrate Accel.";
-const char MenuItem19[] PROGMEM = "Center sticks   ";
+const char MenuItem18[] PROGMEM = "Roll gyro       ";
+const char MenuItem19[] PROGMEM = "Pitch gyro      ";
+const char MenuItem20[] PROGMEM = "Yaw gyro        ";
+const char MenuItem21[] PROGMEM = "Calibrate Accel.";
+const char MenuItem22[] PROGMEM = "Center sticks   ";
 
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18, MenuItem19}; 
+	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -89,6 +92,9 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 #else
 	{1,1},		// Leave pot mode set to "eeprom"
 #endif
+	{0,1},
+	{0,1},
+	{0,1},
 	{0,0},
 	{0,0}
 };
@@ -168,8 +174,17 @@ int16_t get_menu_item(uint8_t menuitem)
 			else value = 0;
 			break;
 		case 17:
+			value = (int16_t) Config.RollGyro;
 			break;
 		case 18:
+			value = (int16_t) Config.PitchGyro;
+			break;
+		case 19:
+			value = (int16_t) Config.YawGyro;
+			break;
+		case 20:
+			break;
+		case 21:
 			break;
 		default:
 			break;
@@ -243,9 +258,18 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			}
 			break;
 		case 17:
-			CalibrateAcc();
+			Config.RollGyro = (uint8_t) value;
 			break;
 		case 18:
+			Config.PitchGyro = (uint8_t) value;
+			break;
+		case 19:
+			Config.YawGyro = (uint8_t) value;
+			break;
+		case 20:
+			CalibrateAcc();
+			break;
+		case 21:
 			CenterSticks();
 			break;
 		default:

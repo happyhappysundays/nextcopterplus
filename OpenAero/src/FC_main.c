@@ -68,19 +68,21 @@
 //			Initial code base.
 // V1.01a	First release candidate
 // V1.02a	Much improved servo jitter!
-// V1.03a   Calibrated servos - first flow version
+// V1.03a   Calibrated servos - first flown version
 // V1.04a	Added ability to use pots to adjust roll/pitch/yaw P and I terms if selected fom menu
 //			Roll pot 	= Roll/Pitch P-term
 //			Pitch pot 	= Roll/Pitch I-term
 //			Yaw pot 	= Yaw P-term (Watch out you don't leave it near either end 
 //						as that activates special modes)
 // V1.05a	Reversed gyros for FWING mode
+// V1.06a	Added gyro reversing via the LCD menu and VERTCAL orientation option
+//			Fixed Flying Wing mode mixing
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	Add gyro reversing from LCD
+// 
 //	
 //
 //***********************************************************
@@ -462,12 +464,19 @@ if (0)
 							}
 							else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
 						}
-						else if (MenuItem == 16) 							// Special case for LVA mode
+						else if (MenuItem == 16) 						// Special case for LVA mode
 						{
 							LCDprint_line2("          <-Save");			// Setup save line
 							LCDgoTo(16);								// Position cursor at nice spot
 							if (MenuValue == 0) LCDprintstr("Use pots");
 							else LCDprintstr("Use eeprom");
+						}
+						else if ((MenuItem >= 17) && (MenuItem < 20)) 	// Print value to change
+						{
+							LCDprint_line2("          <-Save");			// Setup save line
+							LCDgoTo(17);								// Position cursor at nice spot
+							if (MenuValue == 0) LCDprintstr("Normal");
+							else LCDprintstr("Reversed");	
 						}
 						else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
 						{
@@ -475,7 +484,7 @@ if (0)
 							LCDgoTo(17);								// Position cursor at nice spot
 							LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
 						}
-						else if (MenuItem >= 17)						// For commands
+						else if (MenuItem >= 20)						// For commands
 						{
 							LCDprint_line2("      <- Execute");	
 						}
@@ -613,8 +622,8 @@ if (0)
 			#elif defined(FWING)
 			ServoOut3 += Roll;
 			ServoOut4 -= Roll;
-			ServoOut5 -= Roll;
-			ServoOut6 += Roll;
+			ServoOut5 += Roll;
+			ServoOut6 -= Roll;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -677,8 +686,8 @@ if (0)
 			ServoOut5 -= Pitch;
 			ServoOut6 += Pitch;
 			#elif defined(FWING)
-			ServoOut3 += Pitch;
-			ServoOut4 -= Pitch;
+			ServoOut3 -= Pitch;
+			ServoOut4 += Pitch;
 			ServoOut5 += Pitch;
 			ServoOut6 -= Pitch;
 			#else

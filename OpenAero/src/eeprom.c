@@ -109,6 +109,9 @@ void Set_EEPROM_Default_Config(void)
 										// Autolevel = inactive (bit 0);
 	Config.AutoTuneRX = 25;				// Default best fit for 19,200
 	Config.AutoTuneTX = 51;				// Default best fit for 19,200
+	Config.RollGyro = 0;
+	Config.PitchGyro = 0;				// default to normal (not reversed)
+	Config.YawGyro = 0;
 }
 
 void Save_Config_to_EEPROM(void)

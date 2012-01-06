@@ -49,6 +49,9 @@ typedef struct
 	uint8_t		Modes;
 	uint16_t	AutoTuneRX;				// Auto-tuned rate for UART RX
 	uint16_t	AutoTuneTX;				// Auto-tuned rate for UART TX
+	uint8_t		RollGyro;
+	uint8_t		PitchGyro;
+	uint8_t		YawGyro;
 
 } CONFIG_STRUCT;
 
