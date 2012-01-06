@@ -24,40 +24,126 @@ void CalibrateGyros(void);
 //************************************************************
 // Code
 //************************************************************
+//
+// Vertical mode: Old Roll = Yaw; Old Pitch = Roll; Old Yaw = Pitch;
+//
+//************************************************************
 
 bool	GyroCalibrated;
-int16_t gyroADC[3];						// Holds Gyro ADCs
-int16_t gyroZero[3];					// Used for calibrating Gyros on ground
+int16_t gyroADC[3];							// Holds Gyro ADCs
+int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 
 
-void ReadGyros(void)
-{
-	int16_t gyro;
+#ifdef VERTICAL
+	void ReadGyros(void)					// Vertical orientation
+	{
+		int16_t gyro;
 
-	read_adc(ROLL_GYRO);				// Read roll gyro ADC2
-	gyro = ADCW;
-	gyro -= gyroZero[ROLL]; 			// Remove offset from gyro output
-#ifndef MEMS_MODULE
-	gyroADC[ROLL] = -gyro;				// Reverse gyro on KK boards
+		// Roll
+		read_adc(PITCH_GYRO);				// Read pitch gyro ADC2 for roll
+		gyro = ADCW;
+		gyro -= gyroZero[ROLL]; 			// Remove offset from gyro output
+		if(Config.RollGyro) {				// Reverse gyro
+	#ifndef MEMS_MODULE
+		gyroADC[ROLL] = gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[ROLL] = -gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+		else {								// Normal gyro
+	#ifndef MEMS_MODULE
+		gyroADC[ROLL] = -gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[ROLL] = gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+
+		// Pitch
+		read_adc(YAW_GYRO);					// Read yaw gyro ADC1 for pitch
+		gyro = ADCW;
+		gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
+		if(Config.PitchGyro) {				// Reverse gyro
+	#ifndef MEMS_MODULE
+		gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+		else {								// Normal gyro
+	#ifndef MEMS_MODULE
+		gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+
+		// Yaw
+		read_adc(ROLL_GYRO);				// Read roll gyro ADC0 for yaw
+		gyro = ADCW;
+		gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
+		if(Config.YawGyro) {
+			gyroADC[YAW] = -gyro;			// Reverse gyro
+		}
+		else {
+			gyroADC[YAW] = gyro;			// Normal gyro
+		}
+	}
+
 #else
-	gyroADC[ROLL] = gyro;				// Normal gyro on MEMS module
-#endif
+	void ReadGyros(void)					// Conventional orientation
+	{
+		int16_t gyro;
 
-	read_adc(PITCH_GYRO);				// Read pitch gyro ADC1
-	gyro = ADCW;
-	gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
-#ifndef MEMS_MODULE
-	gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
-#else
-	gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
-#endif
+		// Roll
+		read_adc(ROLL_GYRO);				// Read roll gyro ADC2
+		gyro = ADCW;
+		gyro -= gyroZero[ROLL]; 			// Remove offset from gyro output
+		if(Config.RollGyro) {				// Reverse gyro
+	#ifndef MEMS_MODULE
+		gyroADC[ROLL] = gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[ROLL] = -gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+		else {								// Normal gyro
+	#ifndef MEMS_MODULE
+		gyroADC[ROLL] = -gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[ROLL] = gyro;				// Normal gyro on MEMS module
+	#endif
+		}
 
-	read_adc(YAW_GYRO);					// Read yaw gyro ADC0
-	gyro = ADCW;
-	gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
-	gyroADC[YAW] = gyro;				// Normal gyro on all boards
-	
-}
+		// Pitch
+		read_adc(PITCH_GYRO);				// Read pitch gyro ADC1
+		gyro = ADCW;
+		gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
+		if(Config.PitchGyro) {				// Reverse gyro
+	#ifndef MEMS_MODULE
+		gyroADC[PITCH] = gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[PITCH] = -gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+		else {								// Normal gyro
+	#ifndef MEMS_MODULE
+		gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
+	#else
+		gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
+	#endif
+		}
+
+		// Yaw
+		read_adc(YAW_GYRO);					// Read yaw gyro ADC0
+		gyro = ADCW;
+		gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
+		if(Config.YawGyro) {
+			gyroADC[YAW] = -gyro;			// Reverse gyro
+		}
+		else {
+			gyroADC[YAW] = gyro;			// Normal gyro
+		}
+	}
+#endif
 
 void CalibrateGyros(void)
 {
