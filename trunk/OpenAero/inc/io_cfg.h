@@ -65,15 +65,15 @@
 //***********************************************************
 //
 // Type of model (Choose one)
-//#define STANDARD			// Standard aeroplane config
-#define FWING				// Flying Wing config (TBD)
+#define STANDARD			// Standard aeroplane config
+//#define FWING				// Flying Wing config (TBD)
 //
 // Board orientation options
 //#define VERTICAL			// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
 //
 // Optional extensions (if fitted)
 //#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
-//#define ACCELLEROMETER	// Uncomment this when using an accelerometer module
+#define ACCELLEROMETER	// Uncomment this when using an accelerometer module
 //#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
 
 //
@@ -81,5 +81,6 @@
 
 enum GyroArrayIndex { ROLL = 0, PITCH, YAW, ALT };
 enum ADCInputs {YAW_GYRO = 0, PITCH_GYRO, ROLL_GYRO, ROLL_POT, PITCH_POT, YAW_POT, VBAT };
+enum GyroDirection {GYRO_NORMAL = 0, GYRO_REVERSED};
 
 #endif //IO_CFG_H

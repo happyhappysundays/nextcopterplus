@@ -56,6 +56,14 @@
 // Restore gain pot
 // Restart
 //
+// Gyro direction reversing
+// ------------------------
+// Set Roll Gain pot to zero
+// Power on
+// LED flashes 3 times
+// Move stick Up/Left for Normal, Down/Right for reverse
+// eg: to set Roll Gyro Normal, move Tx Roll stick left, or to reverse it move stick right
+//
 // Menu modes (with throttle off)
 // ------------
 // YAW RIGHT + PITCH FWD	= Enter LCD menu
@@ -77,6 +85,7 @@
 // V1.05a	Reversed gyros for FWING mode
 // V1.06a	Added gyro reversing via the LCD menu and VERTCAL orientation option
 //			Fixed Flying Wing mode mixing
+// V1.07a	Re-added pot-based gyro direction reversing
 //
 //***********************************************************
 //* To do

@@ -176,6 +176,54 @@ void init(void)
 		while(1); 				// Loop forever
 	}
 
+#ifndef ACCELLEROMETER			// Allow gyro reversing via pot without accellerometer
+	// Gyro direction reversing
+	if (GainInADC[ROLL] < 13)	// less than 5% 
+	{
+		// flash LED 3 times
+		for (int i=0;i<3;i++)
+		{
+			LED = 1;
+			_delay_ms(25);
+			LED = 0;
+			_delay_ms(25);
+		}
+
+		while(1)
+		{
+			RxGetChannels();
+
+			if (RxInRoll < -200) {			// Normal(left)
+				Config.RollGyro = GYRO_NORMAL;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			} if (RxInRoll > 200) {			// Reverse(right)
+				Config.RollGyro = GYRO_REVERSED;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			} else if (RxInPitch < -200) {	// Normal(up)
+				Config.PitchGyro = GYRO_NORMAL;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			} else if (RxInPitch > 200) {	// Reverse(down)
+				Config.PitchGyro = GYRO_REVERSED;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			} else if (RxInYaw < -200) {	// Normal(left)
+				Config.YawGyro = GYRO_NORMAL;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			} else if (RxInYaw > 200) {		// Reverse(right)
+				Config.YawGyro = GYRO_REVERSED;
+				Save_Config_to_EEPROM();
+				LED = 1;
+			}
+
+			_delay_ms(50);
+			LED = 0;
+		}
+	} //if (GainInADC[ROLL] < 70)
+#endif
 
 } // init()
 
