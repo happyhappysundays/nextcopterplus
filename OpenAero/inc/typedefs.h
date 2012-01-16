@@ -52,6 +52,9 @@ typedef struct
 	uint8_t		RollGyro;
 	uint8_t		PitchGyro;
 	uint8_t		YawGyro;
+	uint8_t		RollServo;
+	uint8_t		PitchServo;
+	uint8_t		YawServo;
 
 } CONFIG_STRUCT;
 

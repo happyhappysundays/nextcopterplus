@@ -50,7 +50,8 @@ int16_t ServoOut6;
 void output_servo_ppm(void)
 {
 	uint16_t i;
-	static uint16_t ServoStartTCNT1, ElapsedTCNT1, CurrentTCNT1;
+	static uint16_t ServoStartTCNT1;
+//	static uint16_t ElapsedTCNT1, CurrentTCNT1;
 	uint16_t m1,m2,m3,m4,m5,m6;
 /*
 	// Make sure we have spent enough time between pulses
