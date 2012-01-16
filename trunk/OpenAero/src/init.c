@@ -165,7 +165,7 @@ void init(void)
 	}
 
 	// Autotune
-	if (GainInADC[YAW] < 70)	// Less than 5%
+	else if (GainInADC[YAW] < 70)	// Less than 5%
 	{
 		autotune();
 		init_uart();
@@ -176,9 +176,18 @@ void init(void)
 		while(1); 				// Loop forever
 	}
 
-#ifndef ACCELLEROMETER			// Allow gyro reversing via pot without accellerometer
+	RxGetChannels();
+
+	// GUI enable
+	if ((RxInYaw < 100) && (RxInYaw > -100))
+	{
+		// Block any further attempts to use GUI mode
+		BlockGUI = true;
+	}
+
+#ifndef ACCELEROMETER			// Allow gyro reversing via pot without accelerometer
 	// Gyro direction reversing
-	if (GainInADC[ROLL] < 13)	// less than 5% 
+	if (GainInADC[ROLL] < 15)	// less than 5% 
 	{
 		// flash LED 3 times
 		for (int i=0;i<3;i++)
@@ -262,7 +271,7 @@ void CenterSticks(void)
 
 	Config.RxChannel1ZeroOffset = RxChannel1ZeroOffset >> 3; // Divide by 8
 	Config.RxChannel2ZeroOffset = RxChannel2ZeroOffset >> 3;
-	Config.RxChannel3ZeroOffset = 1120;						 // Cheat for throttle
+	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH4 - we just need a guaranteed switch here
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
 
 	Save_Config_to_EEPROM();

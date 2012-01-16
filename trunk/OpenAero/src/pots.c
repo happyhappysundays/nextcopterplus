@@ -27,7 +27,7 @@ uint16_t	vBat;			// Battery voltage
 
 void ReadGainValues(void)
 {
-#ifndef ACCELLEROMETER		// Allow pot usage without accellerometer
+#ifndef ACCELEROMETER		// Allow pot usage without accelerometer
 	read_adc(ROLL_POT);		// Read roll pot value 0 - 256
 	GainInADC[ROLL] = ADCW >> 2;
 

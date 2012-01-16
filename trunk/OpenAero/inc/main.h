@@ -7,7 +7,8 @@
 //***********************************************************
 
 extern bool	AutoLevel;
-extern bool	GUIconnected;	
+extern bool	GUIconnected;
+extern bool BlockGUI;	
 extern int32_t	IntegralgPitch;
 extern int32_t	IntegralgRoll;
 extern int32_t	IntegralaPitch;

@@ -102,16 +102,29 @@ void Set_EEPROM_Default_Config(void)
 	Config.RollPitchRate = 3;
 	Config.Yawrate = 3;
 	Config.PowerTrigger = 733; 			// 7.33V for 2S, 11.0V for 3S are good values here
+
+	#ifdef ACCELEROMETER
+	Config.Modes = 20; 					// LVA mode = buzzer (bit 4), 
+										// Stability mode (bit 3),
+										// Pot mode = inactive (bit 2)
+										// (bit 1) unused
+										// Autolevel = inactive (bit 0);
+	#else
 	Config.Modes = 16; 					// LVA mode = buzzer (bit 4), 
 										// Stability mode (bit 3),
 										// Pot mode = active (bit 2)
 										// (bit 1) unused
 										// Autolevel = inactive (bit 0);
+	#endif
+
 	Config.AutoTuneRX = 25;				// Default best fit for 19,200
 	Config.AutoTuneTX = 51;				// Default best fit for 19,200
 	Config.RollGyro = 0;
-	Config.PitchGyro = 0;				// default to normal (not reversed)
+	Config.PitchGyro = 0;				// Default to normal (not reversed)
 	Config.YawGyro = 0;
+	Config.RollServo = 0;
+	Config.PitchServo = 0;				// Default to normal (not reversed)
+	Config.YawServo = 0;
 }
 
 void Save_Config_to_EEPROM(void)

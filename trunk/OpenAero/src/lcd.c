@@ -35,20 +35,21 @@ void LCD_Display_Menu (uint8_t menuitem);
 menu_range_t get_menu_range (uint8_t menuitem);
 void LCDprint_Menu_P(const char *s);
 void variable_lcd_delay(uint8_t count);
+void LCD_fixBL(void);
 
 //************************************************************
 // LCD menu system
 //************************************************************
 
-const char MenuItem1[] PROGMEM = "  OpenAero Menu ";
-const char MenuItem2[] PROGMEM = "Acc Trim (Roll) "; 
-const char MenuItem3[] PROGMEM = "Acc Trim (Pitch)";
-const char MenuItem4[] PROGMEM = "PID Roll P-term ";
-const char MenuItem5[] PROGMEM = "PID Roll I-term ";
-const char MenuItem6[] PROGMEM = "PID Pitch P-term";
-const char MenuItem7[] PROGMEM = "PID Pitch I-term";
-const char MenuItem8[] PROGMEM = "PID Yaw P-term  ";
-const char MenuItem9[] PROGMEM = "PID Yaw I-term  ";
+const char MenuItem1[]  PROGMEM = "  OpenAero Menu ";
+const char MenuItem2[]  PROGMEM = "Acc Trim (Roll) "; 
+const char MenuItem3[]  PROGMEM = "Acc Trim (Pitch)";
+const char MenuItem4[]  PROGMEM = "PID Roll P-term ";
+const char MenuItem5[]  PROGMEM = "PID Roll I-term ";
+const char MenuItem6[]  PROGMEM = "PID Pitch P-term";
+const char MenuItem7[]  PROGMEM = "PID Pitch I-term";
+const char MenuItem8[]  PROGMEM = "PID Yaw P-term  ";
+const char MenuItem9[]  PROGMEM = "PID Yaw I-term  ";
 const char MenuItem10[] PROGMEM = "Gyr level P-term";
 const char MenuItem11[] PROGMEM = "Gyr level I-term";
 const char MenuItem12[] PROGMEM = "Acc level P-term";
@@ -60,14 +61,17 @@ const char MenuItem17[] PROGMEM = "Pot mode        ";
 const char MenuItem18[] PROGMEM = "Roll gyro       ";
 const char MenuItem19[] PROGMEM = "Pitch gyro      ";
 const char MenuItem20[] PROGMEM = "Yaw gyro        ";
-const char MenuItem21[] PROGMEM = "Calibrate Accel.";
-const char MenuItem22[] PROGMEM = "Center sticks   ";
+const char MenuItem21[] PROGMEM = "Roll servo      ";
+const char MenuItem22[] PROGMEM = "Pitch servo     ";
+const char MenuItem23[] PROGMEM = "Yaw servo       ";
+const char MenuItem24[] PROGMEM = "Calibrate Accel.";
+const char MenuItem25[] PROGMEM = "Center sticks   ";
 
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22}; 
+	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22, MenuItem23, MenuItem24, MenuItem25}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -87,11 +91,14 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{700,2000},	// 7.00 to 20.00 Volts
 	{0,1},
 	{2000,0},	// This makes the battery voltage display unadjustable
-#ifndef ACCELLEROMETER
+#ifndef ACCELEROMETER
 	{0,1},
 #else
 	{1,1},		// Leave pot mode set to "eeprom"
 #endif
+	{0,1},
+	{0,1},
+	{0,1},
 	{0,1},
 	{0,1},
 	{0,1},
@@ -183,8 +190,17 @@ int16_t get_menu_item(uint8_t menuitem)
 			value = (int16_t) Config.YawGyro;
 			break;
 		case 20:
+			value = (int16_t) Config.RollServo;
 			break;
 		case 21:
+			value = (int16_t) Config.PitchServo;
+			break;
+		case 22:
+			value = (int16_t) Config.YawServo;
+			break;
+		case 23:
+			break;
+		case 24:
 			break;
 		default:
 			break;
@@ -267,9 +283,18 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			Config.YawGyro = (uint8_t) value;
 			break;
 		case 20:
-			CalibrateAcc();
+			Config.RollServo = (uint8_t) value;
 			break;
 		case 21:
+			Config.PitchServo = (uint8_t) value;
+			break;
+		case 22:
+			Config.YawServo = (uint8_t) value;
+			break;
+		case 23:
+			CalibrateAcc();
+			break;
+		case 24:
 			CenterSticks();
 			break;
 		default:
@@ -364,6 +389,12 @@ void LCDclear(void)
 {
 	LCDprint(0xFE);
 	LCDprint(0x01);
+}
+
+void LCD_fixBL(void)
+{
+	LCDprint(0x7C);
+	LCDprint(157);
 }
 
 void LCDclearLine(uint8_t line)

@@ -27,7 +27,7 @@ void RxGetChannels(void);
 
 int16_t  RxInRoll;					// RC axis values
 int16_t  RxInPitch;
-uint16_t RxInCollective;
+uint16_t RxInAux;
 int16_t  RxInYaw;
 
 //--- Get and scale RX channel inputs ---
@@ -51,9 +51,9 @@ void RxGetChannels(void)
 	do
 	{
 		RxChannelsUpdatedFlag = false;
-		RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1120
-		if (RxChannel < 0) RxInCollective = 0;
-		else RxInCollective = RxChannel;
+		RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1500
+		if (RxChannel < 0) RxInAux = 0;
+		else RxInAux = RxChannel;
 	} 
 	while (RxChannelsUpdatedFlag);
 	

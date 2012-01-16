@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.05a
+// Version 1.08a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -9,8 +9,7 @@
 // Compatible with KK boards fitted with X and Y accelerometers 
 // on Roll/Pitch pot inputs. LCD board or GUI required for setup of PID constants.
 //
-// Tested only on ATmega168 boards (KK+)
-// Only STANDARD config supported at this stage
+// Tested only on Atmega168P boards (KK+)
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -56,7 +55,7 @@
 // Restore gain pot
 // Restart
 //
-// Gyro direction reversing
+// Gyro direction reversing (non Accelerometer versions only)
 // ------------------------
 // Set Roll Gain pot to zero
 // Power on
@@ -64,10 +63,10 @@
 // Move stick Up/Left for Normal, Down/Right for reverse
 // eg: to set Roll Gyro Normal, move Tx Roll stick left, or to reverse it move stick right
 //
-// Menu modes (with throttle off)
-// ------------
-// YAW RIGHT + PITCH FWD	= Enter LCD menu
-// YAW RIGHT + PITCH BACK	= Leave LCD menu
+// Menu modes
+// ----------
+// YAW RIGHT + PITCH FWD + ROLL LEFT	= Enter LCD menu
+// YAW RIGHT + PITCH BACK				= Leave LCD menu
 // 
 // **************************************************************************
 // Version History
@@ -77,22 +76,25 @@
 // V1.01a	First release candidate
 // V1.02a	Much improved servo jitter!
 // V1.03a   Calibrated servos - first flown version
-// V1.04a	Added ability to use pots to adjust roll/pitch/yaw P and I terms if selected fom menu
+// V1.04a	Added ability to use pots to adjust roll/pitch/yaw P and I terms 
+//			if selected fom menu
 //			Roll pot 	= Roll/Pitch P-term
 //			Pitch pot 	= Roll/Pitch I-term
-//			Yaw pot 	= Yaw P-term (Watch out you don't leave it near either end 
-//						as that activates special modes)
+//			Yaw pot 	= Yaw P-term (Watch out you don't leave it near either 
+//						  end as that activates special modes)
 // V1.05a	Reversed gyros for FWING mode
-// V1.06a	Added gyro reversing via the LCD menu and VERTCAL orientation option
+// V1.06a	Added gyro reversing via the LCD menu and VERTICAL orientation option
 //			Fixed Flying Wing mode mixing
 // V1.07a	Re-added pot-based gyro direction reversing
+// V1.08a   Added LCD-based servo reversing, added fix for corrupted LCD backlights
+//			Former throttle input now switches stability when not in CPPM mode 
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// 
-//	
+// - Camera stabilsation version
+// - Full flying surface version (4-servo wings)
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -101,16 +103,16 @@
 /*
 Standard mode
 
-           |
-M3/M4 -----+----- Aileron
-           |
-           |
-  M5/M6 ---+---   Elevator
-           |
-         M1/M2    Rudder
+             |
+  M3/M4 -----+----- Aileron
+             |
+             |
+    M5/M6 ---+---   Elevator
+             |
+           M1/M2    Rudder
 
 
-Flying Wing (TBD)
+Flying Wing - Assumes mixing done in the transmitter
 
          __/^\__
         /       \
@@ -122,7 +124,7 @@ Flying Wing (TBD)
        Left   Right
 
           M1/M2
-          Rudder
+          Rudder (if fitted)
 */
 
 //***********************************************************
@@ -154,13 +156,15 @@ Flying Wing (TBD)
 // Sets the rate of the main loop (Normally 500Hz)
 #define LOOP_RATE 500				// in Hz
 #define LOOP_INTERVAL (1000000 / LOOP_RATE ) // 3,333
+
 // Defines output rate to the servo (Normally 50Hz)
 #define SERVO_RATE 50				// in Hz
-//
+
 // Servo travel limits
 #define MAX_TRAVEL 2200				// Maximum travel allowed
 #define MIN_TRAVEL 900				// Minimum travel allowed
-//
+
+// Misc
 #define DEAD_BAND 10				// Centre region of RC input where no activity is processed
 
 // PID constants
@@ -214,7 +218,8 @@ int16_t lastError[4];
 int16_t DifferentialGyro;			// Holds difference between last two errors (angular acceleration)
 
 // GUI variables
-bool 	GUIconnected;
+bool 	GUIconnected;				// Set when ever GUI activated (suppresses servos)
+bool 	BlockGUI;					// Set to prevent GUI being entered unless rebooted;
 uint8_t flight_mode;				// Global flight mode flag
 uint16_t cycletime;					// Data TX cycle counter
 
@@ -245,7 +250,7 @@ int main(void)
 	init();								// Do all init tasks
 
 //************************************************************
-// Test code
+// Test code - start
 //************************************************************
 if (0) 
 {
@@ -258,7 +263,7 @@ if (0)
 		ServoOut3 = 1200;
 		ServoOut4 = 1500;
 		ServoOut5 = 1500;
-		ServoOut6 = RxInCollective + 1200;
+		ServoOut6 = RxInAux + 1200;
 		while (Interrupted == false){};
 		Interrupted = false;
 		//_delay_ms(30);
@@ -267,7 +272,7 @@ if (0)
 }
 
 //************************************************************
-// Test code
+// Test code - end
 //************************************************************
 
 	for (int i = 0; i < AVGLENGTH; i++)		// Shouldn't need to do this but... we do
@@ -287,8 +292,8 @@ if (0)
 
 		RxGetChannels();
 
-		// Autolevel is only available if you have an Accellerometer and a CPPM receiver connected
-		#if (defined(CPPM_MODE) && defined(ACCELLEROMETER))
+		// Autolevel is only available if you have an Accelerometer and a CPPM receiver connected
+		#if (defined(CPPM_MODE) && defined(ACCELEROMETER))
 		if (RxChannel5 > 1600)
 		{									// When CH5 is activated
 			AutoLevel = true;				// Activate autolevel mode
@@ -322,7 +327,7 @@ if (0)
 		}
 
 		// Check to see if any requests are coming from the GUI
-		if (UCSR0A & (1 << RXC0)) 			// Data waiting in RX buffer
+		if ((UCSR0A & (1 << RXC0)) && (BlockGUI == false))	// Data waiting in RX buffer
 		{
 			GUIconnected = true;			// Set GUI flag so that servos can be disabled
 			rxin = rx_byte();				// Get RX byte
@@ -358,179 +363,200 @@ if (0)
 			}
 		} // GUI
 
-		#ifdef CPPM_MODE
-		if (RxChannel7 > 1600)				// AUX 1 over-rides stability, menu and GUI
-		{
-			ServoOut1 = RxChannel4;
-			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			ServoOut3 = RxChannel1;
-			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
-			ServoOut5 = RxChannel2;
-			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+		// LCD menu system - enter with pitch up, roll left and yaw right in stable mode
+		// Check for stick hold
+		Change_LCD += (uint8_t) (TCNT2 - Arming_TCNT2);
+		Arming_TCNT2 = TCNT2;
 
-			flight_mode &= 0xf7;			// Notify GUI that mode has changed
+		if ((RxInPitch > -STICKARM_POINT) || 	// Reset count if not up enough
+			(RxInYaw < STICKARM_POINT) ||		// Reset count if not right yaw enough
+			(RxInRoll > -STICKARM_POINT))		// Reset count if not left roll enough
+		{														
+			Change_LCD = 0;			
 		}
-		#else
-		if(0)
-		{
-		}
-		#endif
 
-		else
-		{
-			flight_mode |= 8;				// Notify GUI that mode has changed to stability mode
+		LCD_active = true;
+		freshmenuvalue = true;
+		firsttimeflag = true;
 
-			// LCD menu system - enter with pitch up and yaw right in stable mode
-			if (RxInCollective == 0) 
+		// 1 sec, about 8000. (8000 * 1/7812Hz = 1.024s)
+		// 2 sec, about 15624. (15624 * 1/7812Hz = 1.0s)
+		if (Change_LCD > 15624)
+		{	
+			MenuItem = 0;
+			while (LCD_active)									// Keep option of bailing out
 			{
-				// Check for stick hold
-				Change_LCD += (uint8_t) (TCNT2 - Arming_TCNT2);
-				Arming_TCNT2 = TCNT2;
-
-				if ((RxInPitch > -STICKARM_POINT) || 					// Reset count if not up enough
-					(RxInYaw < STICKARM_POINT))	
-				{														// Reset count if not right enough
-					Change_LCD = 0;			
+				// Wait for sticks to move back from initial state, display splash
+				if (firsttimeflag) 
+				{
+					LCD_fixBL();
+					LCD_Display_Menu(MenuItem);
+					LCDprint_line2("V1.08a  (c) 2012");
+					_delay_ms(1000);
+					firsttimeflag = false;
+					GUIconnected = false;
+					MenuItem = 1;
+				}
+				//
+				RxGetChannels();								// Check sticks
+				//
+				if (RxInPitch >= STICKARM_POINT) 
+				{	// Move up through menu list
+					if (MenuItem == (MENUITEMS-1)) MenuItem = 1;// Wrap back to start	
+					else MenuItem += 1;
+					freshmenuvalue = true;
+				}
+				if (RxInPitch <= -STICKARM_POINT) 
+				{	// Pitch down to move down menu
+					if  (MenuItem <= 1) MenuItem = (MENUITEMS-1);// Wrap back to end
+					else MenuItem -= 1;
+					freshmenuvalue = true;
+				}
+				if (RxInRoll > STICKARM_POINT-100) 
+				{	// Increase value if within range
+					freshmenuvalue = false;
+					if (MenuValue < get_menu_range(MenuItem).upper) MenuValue += 1;
+				}
+				if (RxInRoll < -STICKARM_POINT+100) 
+				{	// Decrease value
+					freshmenuvalue = false;
+					if (MenuValue > get_menu_range(MenuItem).lower) MenuValue -= 1;
+				}
+				if (RxInYaw < -STICKARM_POINT) 
+				{	// Save value when Yaw left
+					set_menu_item(MenuItem, MenuValue);
+					LCDprint_line2("  Value saved   ");
+					_delay_ms(1000);	
+					freshmenuvalue = true;						// OK to get new values
 				}
 
-				LCD_active = true;
-				freshmenuvalue = true;
-				firsttimeflag = true;
-
-				// 1 sec, about 8000. (8000 * 1/7812Hz = 1.024s)
-				if (Change_LCD > 8000)
-				{	
-					MenuItem = 0;
-					while ((LCD_active) && (RxInCollective == 0))		// Keep option of bailing out
-					//while (LCD_active)									// Keep option of bailing out
+				// Get stored value of current item
+				if (freshmenuvalue) MenuValue = get_menu_item(MenuItem);// Get current value only when not being changed
+		
+				// Refresh changed data prior to delay to make LCD more responsive
+				LCD_Display_Menu(MenuItem);						// Display menu top line
+				if (MenuItem == 14) 							// Special case for LVA mode
+				{
+					LCDprint_line2("          <-Save");			// Setup save line
+					LCDgoTo(17);								// Position cursor at nice spot
+					if (MenuValue == 0) LCDprintstr("LED");
+					else LCDprintstr("Buzzer");
+				}
+				else if ((MenuItem == 13)||(MenuItem == 15))	// Special case for voltages
+				{
+					LCDprint_line2("         Volts  ");			// Setup placeholder
+					LCDgoTo(19);								// Position cursor at nice spot
+					if (MenuValue >= 100)
 					{
-						// Wait for sticks to move back from initial state, display splash
-						if (firsttimeflag) 
-						{
-							LCD_Display_Menu(MenuItem);
-							LCDprint_line2("    (c) 2012    ");
-							_delay_ms(1000);
-							firsttimeflag = false;
-							MenuItem = 1;
-						}
-						//
-						RxGetChannels();								// Check sticks
-						//
-						if (RxInPitch >= STICKARM_POINT) 
-						{	// Move up through menu list
-							if (MenuItem == (MENUITEMS-1)) MenuItem = 1;// Wrap back to start	
-							else MenuItem += 1;
-							freshmenuvalue = true;
-						}
-						if (RxInPitch <= -STICKARM_POINT) 
-						{	// Pitch down to move down menu
-							if  (MenuItem <= 1) MenuItem = (MENUITEMS-1);// Wrap back to end
-							else MenuItem -= 1;
-							freshmenuvalue = true;
-						}
-						if (RxInRoll > STICKARM_POINT-100) 
-						{	// Increase value if within range
-							freshmenuvalue = false;
-							if (MenuValue < get_menu_range(MenuItem).upper) MenuValue += 1;
-						}
-						if (RxInRoll < -STICKARM_POINT+100) 
-						{	// Decrease value
-							freshmenuvalue = false;
-							if (MenuValue > get_menu_range(MenuItem).lower) MenuValue -= 1;
-						}
-						if (RxInYaw < -STICKARM_POINT) 
-						{	// Save value when Yaw left
-							set_menu_item(MenuItem, MenuValue);
-							LCDprint_line2("  Value saved   ");
-							_delay_ms(1000);	
-							freshmenuvalue = true;						// OK to get new values
-						}
+						itoa(MenuValue,pBuffer,10);				// Put voltage text in buffer
+						char length = strlen(pBuffer);			// Shift digits right (including null byte)
+						memcpy(pBuffer + (length-1), pBuffer + (length-2),2);				
+						pBuffer[length-2] = '.';				// Insert a decimal point
+						if (length == 3) pBuffer[length+1] = ' '; // Bodge for trailing digits :(
+						LCDprintstr(pBuffer);					// Print battery voltage string
+					}
+					else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
+				}
+				else if (MenuItem == 16) 						// Special case for LVA mode
+				{
+					LCDprint_line2("          <-Save");			// Setup save line
+					LCDgoTo(16);								// Position cursor at nice spot
+					if (MenuValue == 0) LCDprintstr("Use pots");
+					else LCDprintstr("Use eeprom");
+				}
+				else if ((MenuItem >= 17) && (MenuItem < 23)) 	// Print value to change
+				{
+					LCDprint_line2("          <-Save");			// Setup save line
+					LCDgoTo(17);								// Position cursor at nice spot
+					if (MenuValue == 0) LCDprintstr("Normal");
+					else LCDprintstr("Reversed");	
+				}
+				else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
+				{
+					LCDprint_line2("          <-Save");			// Setup save line
+					LCDgoTo(17);								// Position cursor at nice spot
+					LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
+				}
+				else if (MenuItem >= 23)						// For commands
+				{
+					LCDprint_line2("      <- Execute");	
+				}
 
-						// Get stored value of current item
-						if (freshmenuvalue) MenuValue = get_menu_item(MenuItem);// Get current value only when not being changed
-					
-						// Refresh changed data prior to delay to make LCD more responsive
-						LCD_Display_Menu(MenuItem);						// Display menu top line
-						if (MenuItem == 14) 							// Special case for LVA mode
-						{
-							LCDprint_line2("          <-Save");			// Setup save line
-							LCDgoTo(17);								// Position cursor at nice spot
-							if (MenuValue == 0) LCDprintstr("LED");
-							else LCDprintstr("Buzzer");
-						}
-						else if ((MenuItem == 13)||(MenuItem == 15))	// Special case for voltages
-						{
-							LCDprint_line2("         Volts  ");			// Setup placeholder
-							LCDgoTo(19);								// Position cursor at nice spot
-							if (MenuValue >= 100)
-							{
-								itoa(MenuValue,pBuffer,10);				// Put voltage text in buffer
-								char length = strlen(pBuffer);			// Shift digits right (including null byte)
-								memcpy(pBuffer + (length-1), pBuffer + (length-2),2);				
-								pBuffer[length-2] = '.';				// Insert a decimal point
-								if (length == 3) pBuffer[length+1] = ' '; // Bodge for trailing digits :(
-								LCDprintstr(pBuffer);					// Print battery voltage string
-							}
-							else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
-						}
-						else if (MenuItem == 16) 						// Special case for LVA mode
-						{
-							LCDprint_line2("          <-Save");			// Setup save line
-							LCDgoTo(16);								// Position cursor at nice spot
-							if (MenuValue == 0) LCDprintstr("Use pots");
-							else LCDprintstr("Use eeprom");
-						}
-						else if ((MenuItem >= 17) && (MenuItem < 20)) 	// Print value to change
-						{
-							LCDprint_line2("          <-Save");			// Setup save line
-							LCDgoTo(17);								// Position cursor at nice spot
-							if (MenuValue == 0) LCDprintstr("Normal");
-							else LCDprintstr("Reversed");	
-						}
-						else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
-						{
-							LCDprint_line2("          <-Save");			// Setup save line
-							LCDgoTo(17);								// Position cursor at nice spot
-							LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
-						}
-						else if (MenuItem >= 20)						// For commands
-						{
-							LCDprint_line2("      <- Execute");	
-						}
+				// Stick volume variable delay (four speeds)
+				if 	   ((RxInRoll > STICKARM_POINT+150) || (RxInRoll < -STICKARM_POINT-150)) _delay_ms(10);
+				else if ((RxInRoll > STICKARM_POINT+50) || (RxInRoll < -STICKARM_POINT-50)) _delay_ms(50);
+				else if ((RxInRoll > STICKARM_POINT-50) || (RxInRoll < -STICKARM_POINT+50)) _delay_ms(250);
+				else _delay_ms(500);
 
-						// Stick volume variable delay (four speeds)
-						if 	   ((RxInRoll > STICKARM_POINT+150) || (RxInRoll < -STICKARM_POINT-150)) _delay_ms(10);
-						else if ((RxInRoll > STICKARM_POINT+50) || (RxInRoll < -STICKARM_POINT-50)) _delay_ms(50);
-						else if ((RxInRoll > STICKARM_POINT-50) || (RxInRoll < -STICKARM_POINT+50)) _delay_ms(250);
-						else _delay_ms(500);
+				// Exit if Yaw right and Pitch down for at least 500ms
+				if ((RxInYaw > STICKARM_POINT) && (RxInPitch > STICKARM_POINT)) 
+				{
+					_delay_ms(1000);	
+					RxGetChannels();							// Check sticks
+					if ((RxInYaw > STICKARM_POINT) && (RxInPitch > STICKARM_POINT))  
+					{
+						LCD_active = false;
+						GUIconnected = false;
+					}
+					else LCD_active = true;
+				}
+			} // While LCD mode
+			LCDclear();			// Clear and reset LCD entry mode
+			Change_LCD = 0;
+			Change_Arming = 0;
+		} // LCD activated (if (Change_LCD > 8000))
 
-						// Exit if Yaw right and Pitch down for at least 500ms
-						if ((RxInYaw > STICKARM_POINT) && (RxInPitch > STICKARM_POINT)) 
-						{
-							_delay_ms(1000);	
-							RxGetChannels();							// Check sticks
-							if ((RxInYaw > STICKARM_POINT) && (RxInPitch > STICKARM_POINT))  
-							{
-								LCD_active = false;
-							}
-							else LCD_active = true;
-						}
-					} // While LCD mode
-					LCDclear();			// Clear and reset LCD entry mode
-					Change_LCD = 0;
-					Change_Arming = 0;
-				} // LCD activated (if (Change_LCD > 8000))
-			} // LCD menu system
+
+		// Stability mode OFF
+		#ifdef CPPM_MODE
+		if (RxChannel7 > 1600)				// AUX 1 over-rides stability
+		#else
+		if (RxInAux > 0)					// RxInAux (formerly throttle) over-rides stability
+		#endif
+		{
+			// Reverse servo outputs as required
+			if(Config.YawServo) {
+				ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 
+				ServoOut2 = RxChannel4;
+			}
+			else {
+				ServoOut1 = RxChannel4;
+				ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
+			}
+			if(Config.RollServo) {
+				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut4 = RxChannel1;
+			}
+			else {
+				ServoOut3 = RxChannel1;
+				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
+			}
+			if(Config.PitchServo) {
+				ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
+				ServoOut6 = RxChannel2;
+			}
+			else {
+				ServoOut5 = RxChannel2;
+				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+			}
+
+			// Notify GUI that mode has changed
+			flight_mode &= 0xf7;
 
 			// Reset I-terms when stabilise is off
-			if (RxInCollective == 0) 
-			{
-				IntegralgPitch = 0;	 
-				IntegralgRoll = 0;
-				IntegralaPitch = 0;	 
-				IntegralaRoll = 0;
-				IntegralYaw = 0;
-			}
+			IntegralgPitch = 0;	 
+			IntegralgRoll = 0;
+			IntegralaPitch = 0;	 
+			IntegralaRoll = 0;
+			IntegralYaw = 0;
+		}
+
+		// Stability mode ON
+		else
+		{
+			// Notify GUI that mode has changed to stability mode
+			flight_mode |= 8;				
+
 			if ((Config.Modes &4) == 0)		// Pots mode
 			{
 				ReadGainValues();
@@ -541,13 +567,32 @@ if (0)
 			// Only read Accs if in AutoLevel mode
 			if (AutoLevel) ReadAcc();
 
+
 			//--- Start mixing by setting servos to RX inputs ---
-			ServoOut1 = RxChannel4;
-			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			ServoOut3 = RxChannel1;
-			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
-			ServoOut5 = RxChannel2;
-			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+			if(Config.YawServo) {
+				ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; // Reverse servo outputs as required
+				ServoOut2 = RxChannel4;
+			}
+			else {
+				ServoOut1 = RxChannel4;
+				ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
+			}
+			if(Config.RollServo) {
+				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut4 = RxChannel1;
+			}
+			else {
+				ServoOut3 = RxChannel1;
+				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
+			}
+			if(Config.PitchServo) {
+				ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
+				ServoOut6 = RxChannel2;
+			}
+			else {
+				ServoOut5 = RxChannel2;
+				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+			}
 
 			// Accelerometer low-pass filter
 			if (AutoLevel) {

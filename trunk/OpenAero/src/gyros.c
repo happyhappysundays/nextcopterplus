@@ -25,7 +25,9 @@ void CalibrateGyros(void);
 // Code
 //************************************************************
 //
-// Vertical mode: Old Roll = Yaw; Old Pitch = Roll; Old Yaw = Pitch;
+// Vertical mode:	Pitch gyro used for Roll
+//					Roll gyro used for Yaw; 
+//				 	Yaw gyro used for Pitch 
 //
 //************************************************************
 
