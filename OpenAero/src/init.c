@@ -50,7 +50,11 @@ void init(void)
 
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
-	RX_COLL_DIR		= INPUT;
+#ifdef CPPM_MODE
+	THR_DIR			= OUTPUT;	// In CPPM mode the THR pin is an output
+#else
+	RX_COLL_DIR		= INPUT;	// In non-CPPM mode the THR pin is an input
+#endif
 	RX_YAW_DIR		= INPUT;
 
 	GYRO_YAW_DIR	= INPUT;
@@ -76,7 +80,9 @@ void init(void)
 	LED 		= 0;
 	RX_ROLL 	= 0;
 	RX_PITCH 	= 0;
+#ifndef CPPM_MODE 
 	RX_COLL 	= 0;
+#endif
 	RX_YAW		= 0;
 
 // Conditional builds for interrupt and pin function setup

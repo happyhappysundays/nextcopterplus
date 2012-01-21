@@ -16,3 +16,4 @@ extern int16_t ServoOut3;
 extern int16_t ServoOut4;
 extern int16_t ServoOut5;
 extern int16_t ServoOut6;
+extern int16_t Throttle;

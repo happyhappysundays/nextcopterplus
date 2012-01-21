@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.08a
+// Version 1.09a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -88,6 +88,8 @@
 // V1.07a	Re-added pot-based gyro direction reversing
 // V1.08a   Added LCD-based servo reversing, added fix for corrupted LCD backlights
 //			Former throttle input now switches stability when not in CPPM mode 
+// V1.09a	Added Throttle pass-through to THR in CPPM mode
+//			Fixed LVA mode bug in GUI
 //
 //***********************************************************
 //* To do
@@ -103,6 +105,7 @@
 /*
 Standard mode
 
+			 X <-- THR (Throttle - CPPM mode)
              |
   M3/M4 -----+----- Aileron
              |
@@ -114,6 +117,7 @@ Standard mode
 
 Flying Wing - Assumes mixing done in the transmitter
 
+		 	X <-- THR (Throttle - CPPM mode)
          __/^\__
         /       \
       /           \
@@ -124,7 +128,7 @@ Flying Wing - Assumes mixing done in the transmitter
        Left   Right
 
           M1/M2
-          Rudder (if fitted)
+          Rudder
 */
 
 //***********************************************************
@@ -252,18 +256,19 @@ int main(void)
 //************************************************************
 // Test code - start
 //************************************************************
-if (0) 
+if (1) 
 {
 	// Test new servo code
-	while(1)
+	while(0)
 	{
 		RxGetChannels();
-		ServoOut1 = 920;
+		ServoOut1 = RxChannel3;
 		ServoOut2 = 1000;
 		ServoOut3 = 1200;
 		ServoOut4 = 1500;
 		ServoOut5 = 1500;
 		ServoOut6 = RxInAux + 1200;
+		Throttle = RxChannel3;
 		while (Interrupted == false){};
 		Interrupted = false;
 		//_delay_ms(30);
@@ -391,7 +396,7 @@ if (0)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2("V1.08a  (c) 2012");
+					LCDprint_line2("V1.09a  (c) 2012");
 					_delay_ms(1000);
 					firsttimeflag = false;
 					GUIconnected = false;
@@ -539,6 +544,7 @@ if (0)
 				ServoOut5 = RxChannel2;
 				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
 			}
+			Throttle = RxChannel3;
 
 			// Notify GUI that mode has changed
 			flight_mode &= 0xf7;
@@ -593,6 +599,7 @@ if (0)
 				ServoOut5 = RxChannel2;
 				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
 			}
+			Throttle = RxChannel3;
 
 			// Accelerometer low-pass filter
 			if (AutoLevel) {

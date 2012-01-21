@@ -44,12 +44,16 @@
 #define M4				REGISTER_BIT(PORTD,7)
 #define M5				REGISTER_BIT(PORTD,6)
 #define M6				REGISTER_BIT(PORTD,5)
+
 #define M1_DIR 			REGISTER_BIT(DDRB,2)
 #define M2_DIR 			REGISTER_BIT(DDRB,1)
 #define M3_DIR 			REGISTER_BIT(DDRB,0)
 #define M4_DIR 			REGISTER_BIT(DDRD,7)
 #define M5_DIR 			REGISTER_BIT(DDRD,6)
 #define M6_DIR 			REGISTER_BIT(DDRD,5)
+
+#define THR				REGISTER_BIT(PORTD,3)	// THR output for throttle
+#define THR_DIR 		REGISTER_BIT(DDRD,3)
 
 #define LED 			REGISTER_BIT(PORTB,6)
 #define LED_DIR 		REGISTER_BIT(DDRB,6)
@@ -72,8 +76,8 @@
 //#define VERTICAL			// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
 
 // Optional extensions (Choose where fitted)
-//#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
-//#define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
+#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
+#define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
 //#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
 //#define CAMERA			// Uncomment this for using M4 to M6 for camera control
 

@@ -256,10 +256,10 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 		case 14:
 			// 1 = Autolevel, 2 = Unused, 4 = Pot mode, 8 = Stability, 16 = LVA mode 1 = buzzer, 0 = LED
 			if (value == 0) {
-				Config.Modes = Config.Modes & 0xEF;				// LVA mode = buzzer (bit 4)
+				Config.Modes = Config.Modes & 0xEF;				// LVA mode = LED (bit 4 = 0)
 			}
 			else {
-				Config.Modes = Config.Modes | 0x10;
+				Config.Modes = Config.Modes | 0x10;				// LVA mode = BUZZER (bit 4 = 1)
 			}
 			break;
 		case 15:

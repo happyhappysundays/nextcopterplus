@@ -170,8 +170,22 @@ void send_multwii_data(void) // 66 bytes
 	send_word(1500); 
 	send_word(1500); 			// 41
 #endif
-	// Add CH5 to CH8
-	if ((Config.Modes &16) > 0) flight_mode |= 16; // 16 = LVA mode 1 = buzzer, 0 = LED
+	if ((Config.Modes &16) > 0) 
+	{
+		flight_mode |= 16;		// 16 = LVA mode 1 = buzzer, 0 = LED
+	}
+	else
+	{
+		flight_mode &= 0xef;
+	}
+	if ((Config.Modes &4)  > 0) 
+	{
+		flight_mode |= 4;  		//  4 = Pot mode 1 = eeprom, 0 = Pots
+	}
+	else
+	{
+		flight_mode &= 0xfb;
+	}
 	send_byte(flight_mode);
 	send_word(cycletime);		// cycleTime 44
 	send_byte(MULTITYPE);		// Multitype 45
