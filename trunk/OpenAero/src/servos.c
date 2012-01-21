@@ -13,7 +13,6 @@
 #include "..\inc\init.h"
 #include "..\inc\main.h"
 #include "..\inc\lcd.h"
-#include <stdlib.h> //debug
 
 //************************************************************
 // Prototypes
@@ -46,34 +45,14 @@ int16_t ServoOut3;
 int16_t ServoOut4;
 int16_t ServoOut5;
 int16_t ServoOut6;
+int16_t Throttle;
 
 void output_servo_ppm(void)
 {
 	uint16_t i;
 	static uint16_t ServoStartTCNT1;
-//	static uint16_t ElapsedTCNT1, CurrentTCNT1;
-	uint16_t m1,m2,m3,m4,m5,m6;
-/*
-	// Make sure we have spent enough time between pulses
-	// Also, handle the odd case where the TCNT1 rolls over and TCNT1 < ServoStartTCNT1
-	CurrentTCNT1 = TCNT1;
-	if (CurrentTCNT1 > ServoStartTCNT1) ElapsedTCNT1 = CurrentTCNT1 - ServoStartTCNT1;
-	else ElapsedTCNT1 = (0xffff - ServoStartTCNT1) + CurrentTCNT1;
+	uint16_t m1,m2,m3,m4,m5,m6,thr;
 
-	// If period less than 1/SERVO_RATE, pad it out. (NB: blocking code)
-	PWM_Low_Pulse_Interval = (PWM_LOW_PULSE_INTERVAL - ElapsedTCNT1) / 8;
-
-	if (PWM_Low_Pulse_Interval > 0)
-	{
-		TIFR0 &= ~(1 << TOV0);		// Clear overflow
-		TCNT0 = 0;					// Reset counter
-		for (i=0;i<PWM_Low_Pulse_Interval;i++)
-		{
-			while (TCNT0 < 64);		// 8MHz * 64 = 8us
-			TCNT0 -= 64;
-		}
-	}
-*/
 	// Set Servo limits (MIN_PULSE -> MAX_PULSE)
 	if ( ServoOut1 < MIN_PULSE ) m1 = MIN_PULSE;
 	else if ( ServoOut1 > MAX_PULSE ) m1 = MAX_PULSE;
@@ -99,6 +78,9 @@ void output_servo_ppm(void)
 	else if ( ServoOut6 > MAX_PULSE ) m6 = MAX_PULSE;
 	else m6 = ServoOut6;
 
+	thr = Throttle; // Just copy throttle value
+
+
 	// T0 = 8 bit @ 8MHz, so 1 count per 125ns, max of 32us
 	// T1 = 16 bit @ 1MHz, so 1 count per us, max of 65,539us or 65.5ms
 
@@ -111,12 +93,16 @@ void output_servo_ppm(void)
 	M4 = 1;
 	M5 = 1;
 	M6 = 1;
+	#ifdef CPPM_MODE
+	THR = 1;
+	#endif
 
 	// Measure period of servo rate from here to the start of the next pulse
 	ServoStartTCNT1 = TCNT1;
 
-	cli();						// Debug - protect PWM pulses from interruption
+
 	// Create the base pulse
+	cli();
 	TIFR0 &= ~(1 << TOV0);		// Clear overflow
 	TCNT0 = 0;					// Reset counter
 	for (i=0;i<BASE_PULSE;i++)	// BASE_PULSE * 8us = 1ms
@@ -138,6 +124,9 @@ void output_servo_ppm(void)
 		if (i>m4) M4 = 0;
 		if (i>m5) M5 = 0;
 		if (i>m6) M6 = 0;
+		#ifdef CPPM_MODE
+		if (i>thr) THR = 0;
+		#endif
 	} 
 	sei();
 	// Pulse done, now back to waiting about...

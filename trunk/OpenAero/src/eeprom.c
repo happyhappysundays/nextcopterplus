@@ -104,17 +104,17 @@ void Set_EEPROM_Default_Config(void)
 	Config.PowerTrigger = 733; 			// 7.33V for 2S, 11.0V for 3S are good values here
 
 	#ifdef ACCELEROMETER
-	Config.Modes = 20; 					// LVA mode = buzzer (bit 4), 
-										// Stability mode (bit 3),
-										// Pot mode = inactive (bit 2)
-										// (bit 1) unused
-										// Autolevel = inactive (bit 0);
+	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 
+										// Stability mode (0) (bit 3),
+										// Pot mode (1) = inactive (bit 2) eeprom mode
+										// (bit 1) (0) unused
+										// Autolevel (0) = inactive (bit 0);
 	#else
-	Config.Modes = 16; 					// LVA mode = buzzer (bit 4), 
-										// Stability mode (bit 3),
-										// Pot mode = active (bit 2)
-										// (bit 1) unused
-										// Autolevel = inactive (bit 0);
+	Config.Modes = 16; 					// LVA mode (1) = buzzer (bit 4), 
+										// Stability mode (0) (bit 3),
+										// Pot mode (0) = active (bit 2)
+										// (bit 1) (0) unused
+										// Autolevel (0) = inactive (bit 0);
 	#endif
 
 	Config.AutoTuneRX = 25;				// Default best fit for 19,200
