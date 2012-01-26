@@ -52,9 +52,14 @@ void variable_delay(uint8_t count);
 	#define MULTITYPE 2
 #elif defined(QUAD_X_COPTER)
 	#define MULTITYPE 3
+#elif defined(HEXA_COPTER)
+	#define MULTITYPE 7
+#elif defined(HEXA_X_COPTER)
+	#define MULTITYPE 10
 #else
 	#define MULTITYPE 3		// Default to Quad-X
 #endif
+
 
 void init_uart(void)						// Initialise UART with adjusted bitrate
 {
@@ -129,7 +134,7 @@ void get_multwii_data(void) // 22 bytes
 	Config.I_mult_glevel = rx_byte();
 	Config.P_mult_alevel = rx_byte();
 	Config.I_mult_alevel = rx_byte();	//
-	Config.RC_rate = rx_byte();
+	Config.ACC_expo = rx_byte();
 	Config.RC_expo = rx_byte();			//
 	Config.RollPitchRate = rx_byte();
 	Config.Yawrate = rx_byte();			//
@@ -146,11 +151,10 @@ void send_multwii_data(void) // 66 bytes
     send_byte('M');				// Send signature byte
     send_byte(VERSION);			// NeXtcopter Firmware version 1
     for (i = 0; i < 2; i++)
-	send_word(accADC[i]<<2);	// Scaled acc 
-	send_byte(0);
-	send_byte(0);				// 7 - Dummy word for ACC (Z)
+		send_word(accADC[i]<<2);// Scaled acc values
+	send_word(0);				// 7 - Dummy word for ACC (Z)
     for (i = 0; i < 3; i++)
-	send_word(gyroADC[i]); 		// Gyro 13
+		send_word(gyroADC[i]); 	// Gyro 13
 	send_word(MotorOut1*10); 	// Motors 25
 	send_word(MotorOut2*10);
 	send_word(MotorOut3*10);	// Re-span to normal values
@@ -172,7 +176,6 @@ void send_multwii_data(void) // 66 bytes
 	send_word(1500); 
 	send_word(1500); 			// 41
 #endif
-	// Add CH5 to CH8
 	if ((Config.Modes &16) > 0) flight_mode |= 16; // 16 = LVA mode 1 = buzzer, 0 = LED
 	send_byte(flight_mode);
 	send_word(cycletime);		// cycleTime 44
@@ -190,7 +193,7 @@ void send_multwii_data(void) // 66 bytes
 	send_byte(Config.I_mult_glevel);
 	send_byte(Config.P_mult_alevel);
 	send_byte(Config.I_mult_alevel);	// 
-    send_byte(Config.RC_rate);			// RC rate (50 = 1 in GUI)
+    send_byte(Config.ACC_expo);			// ACC Expo ('10' shows as 0.10 in GUI)
     send_byte(Config.RC_expo);			// RC Expo ('10' shows as 0.10 in GUI)
     send_byte(Config.RollPitchRate);	// rollPitchRate
     send_byte(Config.Yawrate);			// yawRate 

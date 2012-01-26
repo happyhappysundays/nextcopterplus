@@ -21,6 +21,7 @@
 
 void RxGetChannels(void);
 int16_t get_expo_value (int16_t RCvalue);
+int16_t get_acc_expo_value (int16_t ACCvalue);
 
 //************************************************************
 // Code
@@ -71,6 +72,30 @@ int16_t get_expo_value (int16_t RCvalue)
 
 	return (RCvalue);
 }
+
+// Get expo'd Accelerometer value
+int16_t get_acc_expo_value (int16_t ACCvalue)
+{
+	int8_t	range, expo_level;
+	int32_t ACCcalc, ACCsum, mult;						// Max values are around+/-75000
+
+	if (Config.ACC_expo == 0) return (ACCvalue);		// No need to calculate if expo is zero
+
+	range 	= abs(ACCvalue) >> 3;						// Work out which band the ACCvalue is in (16 values)
+	if (range > 15) range = 15;
+	if (range <  0) range = 0;
+	expo_level = Config.ACC_expo/10;					// Work out which expo level to use (0~100 -> 0~10)	
+					
+	mult = pgm_read_byte(&Expo[expo_level][range]); 	// Get the multiplier from the table 
+
+	ACCsum 	= ACCvalue;									// Promote ACCvalue to 32 bits as GCC is broken :(
+	ACCcalc = ACCsum * mult;							// Do the 32-bit x 32-bit multiply
+	ACCcalc	= ACCcalc >> 7;
+	ACCvalue = (int16_t) ACCcalc;						// Divide by 128 to get the expo'd value
+
+	return (ACCvalue);
+}
+
 //--- Get and scale RX channel inputs ---
 void RxGetChannels(void)
 {
@@ -78,7 +103,6 @@ void RxGetChannels(void)
 	do
 	{
 		RxChannelsUpdatedFlag = false;
-		//RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
 		RxInRoll = get_expo_value(RxChannel1 - Config.RxChannel1ZeroOffset);
 	} 
 	while (RxChannelsUpdatedFlag); 	// Re-get if updated

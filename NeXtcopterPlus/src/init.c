@@ -65,10 +65,9 @@ void init(void)
 	M2_DIR			= OUTPUT;
 	M3_DIR			= OUTPUT;
 	M4_DIR			= OUTPUT;
-	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
 	M5_DIR			= OUTPUT;
 	M6_DIR			= OUTPUT;
-	#endif
+
 	LED_DIR			= OUTPUT;
 	LCD_TX_DIR		= OUTPUT;
 	LVA_DIR			= OUTPUT;
@@ -94,8 +93,8 @@ void init(void)
 		EIMSK = (1 << INT0) | (1 << INT1);	// Enable INT0 and INT1
 		EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
 	#else 
-		PING_DIR = INPUT;					// PB7 is PING output in Proximity mode
-		ECHO_DIR = INPUT;					// PD3 is ECHO input in Proximity mode
+		PING_DIR = INPUT;					// 
+		ECHO_DIR = INPUT;					// 
 		// External interrupts INT0 (CPPM input)
 		EICRA = (1 << ISC01);				// Falling edge of INT0
 		EIMSK = (1 << INT0);				// Enable INT0
@@ -212,10 +211,8 @@ void init(void)
 			MotorOut2 = RxInCollective;
 			MotorOut3 = RxInCollective;
 			MotorOut4 = RxInCollective;
-			#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
 			MotorOut5 = RxInCollective;
 			MotorOut6 = RxInCollective;
-			#endif
 			output_motor_ppm();	// This regulates rate at which we output signals
 		}
 	}
