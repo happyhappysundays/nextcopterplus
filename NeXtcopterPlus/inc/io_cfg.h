@@ -57,13 +57,13 @@
 #define LCD_TX 			REGISTER_BIT(PORTB,4)
 #define LCD_TX_DIR		REGISTER_BIT(DDRB,4)
 
-#define LVA				REGISTER_BIT(PORTD,4)	// LVA analog input
+#define LVA				REGISTER_BIT(PORTD,4)	// LVA output
 #define LVA_DIR			REGISTER_BIT(DDRD,4)
 
-#define PING			REGISTER_BIT(PINB,7)	// Proximity sensor input (from KK+)
+#define PING			REGISTER_BIT(PINB,7)	// Proximity sensor input  (Yaw - from KK+)
 #define PING_DIR 		REGISTER_BIT(DDRB,7)
 
-#define ECHO			REGISTER_BIT(PIND,3)	// Proximity sensor output (to KK+)
+#define ECHO			REGISTER_BIT(PIND,3)	// Proximity sensor output (Coll - to KK+)
 #define ECHO_DIR 		REGISTER_BIT(DDRD,3)
 
 
@@ -79,7 +79,7 @@
 #define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
 #define MEMS_MODULE 		// Uncomment this when using the MEMS module
 //#define PROX_MODULE			// Uncomment this when using a Proximity module 
-								// (NB: *MUST* select CPPM mode as well)
+							// (NB: *MUST* select CPPM mode as well)
 //
 //***********************************************************
 
