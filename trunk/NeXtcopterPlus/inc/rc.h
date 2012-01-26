@@ -16,6 +16,8 @@
 //***********************************************************
 
 extern void RxGetChannels(void);
+extern int16_t get_expo_value (int16_t RCvalue);
+extern int16_t get_acc_expo_value (int16_t ACCvalue);
 
 extern int16_t	RxInRoll;		// RC axis values
 extern int16_t	RxInPitch;

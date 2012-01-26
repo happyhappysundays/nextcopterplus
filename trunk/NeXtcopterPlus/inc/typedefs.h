@@ -40,8 +40,8 @@ typedef struct
 	uint8_t		P_mult_alevel;			// Autolevel acc P-term
 	uint8_t		I_mult_alevel;			// Autolevel acc I-term
 	//
-	uint8_t		RC_rate;				// Not currently used
-	uint8_t		RC_expo;				
+	uint8_t		ACC_expo;
+	uint8_t		RC_expo;
 	//
 	uint8_t		RollPitchRate;
 	uint8_t		Yawrate;
