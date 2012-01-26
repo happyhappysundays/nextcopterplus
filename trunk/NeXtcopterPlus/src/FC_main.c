@@ -1,7 +1,7 @@
 // **************************************************************************
 // NeXtcopter Plus software
 // ========================
-// Version 1.1d
+// Version 1.1e
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -15,7 +15,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2011 David Thompson, based on work by Rolf R Bakke,
+// * Copyright (C) 2012 David Thompson, based on work by Rolf R Bakke,
 // * Mike Barton and others
 // * 
 // * This program is free software: you can redistribute it and/or modify
@@ -88,16 +88,17 @@
 //			Added formatted battery voltage displays to menu
 //			Added support for V1.1 MEMS module (use MEMS_MODULE define)
 // V1.1d	Preliminary support for proximity module (use PROX_MODULE define)
-//			Height set when entering Autolevel mode
+//			Height set when entering HeightHold mode (CH7 > 50%)
 //			Added Hexacopter, Hexacopter-X support, Vref now assumed to be 2.4V
+// V1.1e	Added exponential setting for accelerometer.
+//			Added GUI lockout after about 10 seconds after power-up.
+//			Added lost model alarm. Fixed stick centering bug.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	1. Add filtered link from CH6, CH7 and CH8 to P and I multipliers
-//	   so that PID values can be changed in flight :)
-//	3. 
+//	1. Get proximity sensor and Altitude Hold working
 //
 //***********************************************************
 //* Flight configurations (Motor number and rotation)
@@ -159,10 +160,8 @@ M5 CW    |     M3 CW              /     \
 //* Defines
 //***********************************************************
 
-// Max Collective
-// Limits the maximum stick collective (range 160->200 200=Off)
-// This allows gyros to stabilise better when full throttle applied
-#define MAX_COLLECTIVE 190
+// Motors
+#define MAX_COLLECTIVE 190			// Limits the maximum stick collective (range 160->200 200=Off)
 #define MOTOR_IDLE 20				// Minimum motor speed allowed.
 #define DEAD_BAND 10				// Centre region of RC input where no activity is processed
 
@@ -170,18 +169,22 @@ M5 CW    |     M3 CW              /     \
 #define ITERM_LIMIT_RP 250			// Max I-term sum for Roll/Pitch axis in normal modes
 #define ITERM_LIMIT_YAW 500			// Max I-term sum for Yaw axis (Heading hold)
 #define ITERM_LIMIT_LEVEL 250		// Max I-term sum for Roll/Pitch axis in AUTOLEVEL mode
-#define PR_LIMIT 50					// Limit pitch/roll contribution of I-term to avoid saturation
+#define ALT_FALL_LIMIT 100			// Limit altitude contribution to avoid saturation (falling)
+#define ALT_RISE_LIMIT 25			// Limit altitude contribution to avoid saturation (rising)
 #define YAW_LIMIT 50				// Limit yaw contribution to avoid saturation
 #define AVGLENGTH 65				// Accelerometer filter buffer length + 1 (64 new + 1 old)
+
+//#define AVGLENGTH 17
 
 #ifdef PROX_MODULE
 // Altitude constants
 #define MAX_HEIGHT 350				// Maximum allowable height (in cm) in alt-hold mode
 #endif
 
-// Stick Arming
-// If you cannot either arm or disarm, lower this value
+// Misc
 #define STICKARM_POINT 200			// Defines how far stick must be moved (for 16-bit accurate RC)
+#define GUI_TIMEOUT 3000			// Time after which GUI entry is impossible (3000 ~ 10 sec)
+#define MAXDELTA 5					// Maximum instantaneous change allowed for raw ACC readings 
 
 //***********************************************************
 //* Code and Data variables
@@ -204,7 +207,18 @@ int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer 
 #ifdef PROX_MODULE
 int16_t Altitude;					// Current height as measured by the proximity module
 int16_t Set_height;					// Desired height
+int16_t AvgAltitude[AVGLENGTH];		// Circular buffer of historical altimeter readings
+int32_t AvgAltSum;
+int16_t AvgAlt;
+uint8_t AltIndex;
+uint8_t OldAltIndex;
+uint8_t AltLimit; 
 #endif
+
+int16_t TargetRoll;
+int16_t OldTargetRoll;
+int16_t TargetPitch;
+int16_t OldTargetPitch;
 
 // PID variables
 int32_t	IntegralgPitch;				// PID I-terms (gyro) for each axis
@@ -232,13 +246,19 @@ uint16_t cycletime;					// Data TX cycle counter
 
 // Misc
 bool AutoLevel;						// AutoLevel = 1
+bool HeightHold;					// HeightHold = 1
 bool LCD_active;					// Mode flags
 bool freshmenuvalue;
+bool GUI_lockout;					// Lockout the GUI after GUI_TIMEOUT
+bool Model_lost;					// Model lost flag
 bool firsttimeflag;
 char pBuffer[16];					// Print buffer
 uint16_t Change_Arming;				// Arming timers
 uint16_t Change_LCD;
+uint32_t Change_LostModel;
 uint8_t Arming_TCNT2;
+uint8_t LCD_TCNT2;
+uint8_t Lost_TCNT2;
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
@@ -251,6 +271,7 @@ uint16_t uber_loop_count;			// Used to count main loops for everything else :)
 int main(void)
 {
 	OldIndex = 1;
+	GUI_lockout = false;
 	firsttimeflag = true;
 	init();								// Do all init tasks
 
@@ -266,24 +287,27 @@ if (0)
 	{
 		LCDprint_line1("Pinging...      ");	
 		Ping();								// Send out burst
-		_delay_ms(50);						// Wait for response
+	//	_delay_ms(50);						// Wait for response
 
 		dist = GetDistance();				// Get latest distance measurement
 		LCDprint_line2("Dist.       (cm)");
 		LCDgoTo(22);
 		LCDprintstr(itoa(dist,pBuffer,10));
-		_delay_ms(50);						// Mustn't sent out pulse within 50ms of previous pulse
+	//	_delay_ms(50);						// Mustn't sent out pulse within 50ms of previous pulse
 	}
 }
 
 //************************************************************
-// Test code
+// /Test code
 //************************************************************
 
 	for (int i = 0; i < AVGLENGTH; i++)		// Shouldn't need to do this but... we do
 	{
 		AvgAccRoll[i] = 0;					// Initialise all elements of the averaging arrays
 		AvgAccPitch[i] = 0;
+		#ifdef PROX_MODULE
+		AvgAltitude[i] = 0;
+		#endif
 	}
 	rxin = UDR0;							// Flush RX buffer
 
@@ -295,28 +319,83 @@ if (0)
 
 		RxGetChannels();
 
+		// Assign TX channels to functions
 		#ifdef CPPM_MODE
-		if (RxChannel5 > 1600)
-		{									// When CH5 is activated
-			AutoLevel = true;				// Activate autotune mode
-			flight_mode |= 1;				// Notify GUI that mode has changed
-			Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
-			Config.Yawrate = NORMAL_YAW_STICK_SCALE;
 			#ifdef PROX_MODULE
-			if (firsttimeflag) {
-				Altitude = GetDistance();	// Get latest distance measurement
-				Set_height = Altitude;		// Use this as target height
-				firsttimeflag = false;		// Reset flag
+				if (RxChannel7 > 1600)				// AUX 1 controls altitude hold
+				{
+					if (firsttimeflag) {
+						HeightHold = true;
+						Altitude = GetDistance();	// Get latest distance measurement
+						Set_height = Altitude;		// Use this as target height
+						firsttimeflag = false;		// Reset flag
+					}
+				}
+				else
+				{
+					HeightHold = false;
+					firsttimeflag = true;			// Set flag
+				}
+			#endif //PROX_MODULE
+
+			if (RxChannel5 > 1600)					// CH5 controls autolevel
+			{										// When CH5 is activated
+				AutoLevel = true;					// Activate autolevel mode
+				flight_mode |= 1;					// Notify GUI that mode has changed
+				Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
+				Config.Yawrate = NORMAL_YAW_STICK_SCALE;
 			}
-			#endif
-		}
-		else
-		{
-			AutoLevel = false;				// Activate autotune mode
-			flight_mode &= 0xfe;			// Notify GUI that mode has changed
-			firsttimeflag = true;			// Reset flag
+			else
+			{	
+				AutoLevel = false;					// Deactivate autolevel mode
+				flight_mode &= 0xfe;				// Notify GUI that mode has changed
+			}
+		#endif //CPPM_MODE
+
+		// Process proximity module data if fitted
+		#ifdef PROX_MODULE
+		if ((uber_loop_count &8) > 0)				// Check every 16ms or so (0.016 * 64 = 1.024s)
+		{ 
+			Ping();									// Get Altitude
+			Altitude = GetDistance();
+
+			// Average height readings properly to create a genuine low-pass filter
+			AvgAltitude[AltIndex] = Altitude;		// Add new values into buffer
+
+			//Calculate rolling average with latest 64 values
+			AvgAltSum = AvgAltSum + Altitude - AvgAltitude[OldAltIndex]; // Add new value to sum, subtract oldest
+			AvgAlt = (AvgAltSum >> 6); 				// Divide by 64 to get rolling average
+
+			AltIndex ++;
+			if (AltIndex >= AVGLENGTH) AltIndex = 0; // Wrap both indexes properly to create circular buffer
+			OldAltIndex = AltIndex + 1;
+			if (OldAltIndex >= AVGLENGTH) OldAltIndex = 0;
 		}
 		#endif
+
+		// Lock GUI out after 10 seconds or so if not already in GUI mode
+		if ((uber_loop_count > GUI_TIMEOUT) && (!GUIconnected)) 
+		{
+			GUI_lockout = true;
+		}
+
+		// Lost model alarm
+		Change_LostModel += (uint8_t) (TCNT2 - Lost_TCNT2);
+		Lost_TCNT2 = TCNT2;
+		// Reset count if throttle non-zero or LCD/GUI active
+		if ((RxInCollective > 0) || (LCD_active) || (GUIconnected))	
+		{														
+			Change_LostModel = 0;			
+		}
+		// Wait for 60s then trigger lost model alarm (468720 * 1/7812Hz = 60s)
+		if (Change_LostModel > 468720)	Model_lost = true; //468720
+		if (((uber_loop_count &128) > 0) && (Model_lost))
+		{
+			LVA = 1;
+			//LED = !LED;
+		} 	
+		else LVA = 0;						// Otherwise turn off buzzer
+
 
 		// Do LVA-related tasks
 		LVA = 0;
@@ -325,20 +404,20 @@ if (0)
 			GetVbat();						// Get battery voltage
 		}
 
-		if ((Config.Modes &16) > 0)			// Buzzer mode
+		if (((Config.Modes &16) > 0) && (!Model_lost))	// Buzzer mode
 		{
 			// Beep buzzer if Vbat lower than trigger
 			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA = 1; 	
 			else LVA = 0;					// Otherwise turn off buzzer
 		}
-		else if ((Config.Modes &16) == 0)	// LED mode
+		else if (((Config.Modes &16) == 0) && (!Model_lost))	// LED mode
 		{	// Flash LEDs if Vbat lower than trigger
 			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
 			else LVA = 1;					// Otherwise leave LEDs on
 		}
 
 		// Check to see if any requests are coming from the GUI
-		if (UCSR0A & (1 << RXC0)) 			// Data waiting in RX buffer (add test for (RxInCollective == 0))
+		if ((UCSR0A & (1 << RXC0)) && (!GUI_lockout)) // Data waiting in RX buffer and GUI not yet locked out
 		{
 			GUIconnected = true;			// Set GUI flag so that motors can be disabled
 			rxin = rx_byte();				// Get RX byte
@@ -375,10 +454,11 @@ if (0)
 		} // GUI
 
 		// LCD menu system - enter when not armed and pitch up and yaw right
-		if ((RxInCollective == 0) && !Armed) {
-
+		if ((RxInCollective == 0) && !Armed) 
+		{
 			// Check for stick hold
-			Change_LCD += (uint8_t) (TCNT2 - Arming_TCNT2);
+			Change_LCD += (uint8_t) (TCNT2 - LCD_TCNT2);
+			LCD_TCNT2 = TCNT2;
 
 			if ((RxInPitch > -STICKARM_POINT) || 					// Reset count if not up enough
 				(RxInYaw < STICKARM_POINT))	
@@ -386,13 +466,13 @@ if (0)
 				Change_LCD = 0;			
 			}
 
-			LCD_active = true;
 			freshmenuvalue = true;
 			firsttimeflag = true;
 
 			// 6000 * 1/7812Hz = 0.768s)
 			if (Change_LCD > 6000)									// Has to be quicker than ARM timer
 			{	
+				LCD_active = true;
 				MenuItem = 0;
 				while (LCD_active) 									// Keep option of bailing out
 				{
@@ -400,14 +480,14 @@ if (0)
 					if (firsttimeflag) 
 					{
 						LCD_Display_Menu(MenuItem);
-						LCDprint_line2("   (c) 2011     ");
+						LCDprint_line2(" V1.1e (c) 2012 ");
 						_delay_ms(1000);
 						firsttimeflag = false;
 						MenuItem = 1;
 					}
-					//
+					
 					RxGetChannels();								// Check sticks
-					//
+					
 					if (RxInPitch >= STICKARM_POINT) 
 					{	// Move up through menu list
 						if (MenuItem == (MENUITEMS-1)) MenuItem = 1;// Wrap back to start	
@@ -443,14 +523,14 @@ if (0)
 					
 					// Refresh changed data prior to delay to make LCD more responsive
 					LCD_Display_Menu(MenuItem);						// Display menu top line
-					if (MenuItem == 20) 							// Special case for LVA mode
+					if (MenuItem == 21) 							// Special case for LVA mode
 					{
 						LCDprint_line2("          <-Save");			// Setup save line
 						LCDgoTo(17);								// Position cursor at nice spot
 						if (MenuValue == 0) LCDprintstr("LED");
 						else LCDprintstr("Buzzer");
 					}
-					else if ((MenuItem == 19)||(MenuItem == 21))	// Special case for voltages
+					else if ((MenuItem == 20)||(MenuItem == 22))	// Special case for voltages
 					{
 						LCDprint_line2("         Volts  ");			// Setup placeholder
 						LCDgoTo(19);								// Position cursor at nice spot
@@ -465,13 +545,13 @@ if (0)
 						}
 						else LCDprintstr("LOW");					// Even bigger bodge for less than 3 digits lol
 					}
-					else if ((MenuItem > 0) && (MenuItem < 22)) 	// Print value to change (except for base menu)
+					else if ((MenuItem > 0) && (MenuItem < 23)) 	// Print value to change (except for base menu and commands)
 					{
 						LCDprint_line2("          <-Save");			// Setup save line
 						LCDgoTo(17);								// Position cursor at nice spot
 						LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
 					}
-					else if (MenuItem >= 22)						// For commands
+					else if (MenuItem >= 23)						// For commands
 					{
 						LCDprint_line2("      <- Execute");	
 					}
@@ -615,30 +695,60 @@ if (0)
 		MotorOut2 = RxInCollective;
 		MotorOut3 = RxInCollective;
 		MotorOut4 = RxInCollective; 
-		#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
 		MotorOut5 = RxInCollective;
 		MotorOut6 = RxInCollective;
-		#endif
 
-		// Accelerometer low-pass filter
-		if (AutoLevel) {
+		// Accelerometer low-pass filter + magic
+		if (AutoLevel) 
+		{
+			// Prefilter the raw ACC data coming in to remove spikes, limit slew rate
+			if ((AvgRoll - accADC[ROLL]) >  10 ) accADC[ROLL] = AvgRoll - MAXDELTA; // Lower than avg
+			if ((AvgRoll - accADC[ROLL]) < -10 ) accADC[ROLL] = AvgRoll + MAXDELTA; // Higher than avg
+			if ((AvgPitch - accADC[PITCH]) >  10 ) accADC[PITCH] = AvgPitch - MAXDELTA; // Lower than avg
+			if ((AvgPitch - accADC[PITCH]) < -10 ) accADC[PITCH] = AvgPitch + MAXDELTA; // Higher than avg
 
 			// Average accelerometer readings properly to create a genuine low-pass filter
 			// Note that this has exactly the same effect as a complementary filter but with vastly less overhead.
 			AvgAccRoll[AvgIndex] = accADC[ROLL];
 			AvgAccPitch[AvgIndex] = accADC[PITCH];	// Add new values into buffer
 
-			//Calculate rolling average with latest 64 values
+			//Calculate rolling average with latest values
 			AvgRollSum = AvgRollSum + accADC[ROLL] - AvgAccRoll[OldIndex]; // Add new value to sum, subtract oldest
 			AvgPitchSum = AvgPitchSum + accADC[PITCH] - AvgAccPitch[OldIndex];
 
 			AvgRoll = ((AvgRollSum >> 6) - AccRollTrim); // Divide by 64 to get rolling average then adjust for acc trim
 			AvgPitch = ((AvgPitchSum >> 6) - AccPitchTrim);
 
+			//AvgRoll = ((AvgRollSum >> 4) - AccRollTrim); // Divide by 16 to get rolling average then adjust for acc trim
+			//AvgPitch = ((AvgPitchSum >> 4) - AccPitchTrim);
+
 			AvgIndex ++;
 			if (AvgIndex >= AVGLENGTH) AvgIndex = 0; // Wrap both indexes properly to create circular buffer
 			OldIndex = AvgIndex + 1;
 			if (OldIndex >= AVGLENGTH) OldIndex = 0;
+
+			// Dynamic damping about level point
+			// For Avg values between -10 and 10, only allow a gradual change in value
+			if ((AvgRoll > 10) || (AvgRoll < -10)) TargetRoll = AvgRoll;
+			else if (TargetRoll > OldTargetRoll) 
+			{
+				AvgRoll += 1;
+			}
+			else if (TargetRoll < OldTargetRoll) 
+			{
+				AvgRoll -= 1;
+			}
+
+			if ((AvgPitch > 10) || (AvgPitch < -10)) TargetPitch = AvgPitch;
+			else if (TargetPitch > OldTargetPitch) 
+			{
+				AvgPitch += 1;
+			}
+			else if (TargetPitch < OldTargetPitch) 
+			{
+				AvgPitch -= 1;
+			}
+			OldTargetPitch = TargetPitch;
 		}
 
 		//***********************************************************************
@@ -663,7 +773,8 @@ if (0)
 			I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
 
 			// Acc PI terms
-			P_term_aRoll = AvgRoll * Config.P_mult_alevel;		// P-term of accelerometer (Max gain of 256)
+			P_term_aRoll = get_acc_expo_value(AvgRoll) * Config.P_mult_alevel;		// P-term of accelerometer (Max gain of 256)
+
 			IntegralaRoll += AvgRoll;							// Acc I-term
 			if (IntegralaRoll > ITERM_LIMIT_LEVEL) IntegralaRoll = ITERM_LIMIT_LEVEL; // Anti wind-up limit
 			else if (IntegralaRoll < -ITERM_LIMIT_LEVEL) IntegralaRoll = -ITERM_LIMIT_LEVEL;
@@ -744,7 +855,8 @@ if (0)
 			I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
 	
 			// Acc PI terms
-			P_term_aPitch = AvgPitch * Config.P_mult_alevel;	// P-term of accelerometer (Max gain of 256)
+			P_term_aPitch = get_acc_expo_value(AvgPitch) * Config.P_mult_alevel;	// P-term of accelerometer (Max gain of 256)
+
 			IntegralaPitch += AvgPitch;							// Acc I-term
 			if (IntegralaPitch > ITERM_LIMIT_LEVEL) IntegralaPitch = ITERM_LIMIT_LEVEL; // Anti wind-up limit
 			else if (IntegralaPitch < -ITERM_LIMIT_LEVEL) IntegralaPitch = -ITERM_LIMIT_LEVEL;
@@ -794,10 +906,10 @@ if (0)
 		MotorOut6 += Pitch;
 		#elif defined(HEXA_X_COPTER)
 		Pitch	= (Pitch * 7) >> 3;	//RxInPitch  *= 0.875 (Sine 60 = 0.866)
-		MotorOut1 += Roll;
-		MotorOut2 += Roll;
-		MotorOut4 -= Roll;
-		MotorOut5 -= Roll;
+		MotorOut1 += Pitch;
+		MotorOut2 += Pitch;
+		MotorOut4 -= Pitch;
+		MotorOut5 -= Pitch;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -860,23 +972,34 @@ if (0)
 		// NB: IF YOU CHANGE THIS CODE, YOU MUST REMOVE PROPS BEFORE TESTING !!!
 		//***********************************************************************
 
-		Altitude = GetDistance();							// Get latest distance measurement
-		currentError[ALT] = Altitude;						// D-term
-		if (Altitude > MAX_HEIGHT) Altitude = MAX_HEIGHT;
-		if (Altitude < 0) Altitude = 0;
-		Altitude = Set_height - Altitude;					// Calculate target height error
+		currentError[ALT] = AvgAlt;							// Save current height
+		if (AvgAlt > MAX_HEIGHT) AvgAlt = MAX_HEIGHT;
+		if (AvgAlt < 0) AvgAlt = 0;
 
-		DifferentialGyro = currentError[ALT] - lastError[ALT]; // Moderate acceleration up or down 
-		lastError[ALT] = currentError[ALT];					// Adds when falling, subtracts when rising
+		Altitude = Set_height - AvgAlt;						// Calculate target height error (-ve = too high, +ve = too low)
+		DifferentialGyro = currentError[ALT] - lastError[ALT]; 	// Moderate acceleration up or down 
+																// +ve = falling, -ve = rising
+		Altitude *= 10;										// Multiply gain
 
-		Altitude = Altitude - DifferentialGyro;				// P + D
+		if (DifferentialGyro < 0)							// Reduce power limit when rising
+		{
+			AltLimit = ALT_RISE_LIMIT;
+		}
+		else												// Increase power limit when falling
+		{
+			AltLimit = ALT_FALL_LIMIT;
+		}
+
+		lastError[ALT] = currentError[ALT];					// Save previous error 
+
+		Altitude = Altitude - DifferentialGyro;				// P + D - Adds when falling, subtracts when rising
 		Altitude = Altitude >> 1;							// Average P and D terms
 
-		if (Altitude > PR_LIMIT) Altitude = PR_LIMIT;		
-		else if (Altitude < -PR_LIMIT) Altitude = -PR_LIMIT;// Apply YAW limit to PID calculation
+		if (Altitude > AltLimit) Altitude = AltLimit;		
+		else if (Altitude < -AltLimit) Altitude = -AltLimit;// Apply ALT_LIMIT to PID calculation
 
-		// Only in Autolevel mode and when height under maximum controllable
-		if ((AutoLevel) && (currentError[ALT] <= MAX_HEIGHT))
+		// Only in HeightHold mode and when height under maximum controllable
+		if ((HeightHold) && (currentError[ALT] <= MAX_HEIGHT))
 		{
 			//--- (Add)Adjust Altitude output to motors
 			#ifdef QUAD_COPTER
@@ -908,10 +1031,9 @@ if (0)
 		if ( MotorOut2 < MOTOR_IDLE )	MotorOut2 = MOTOR_IDLE;	
 		if ( MotorOut3 < MOTOR_IDLE )	MotorOut3 = MOTOR_IDLE;
 		if ( MotorOut4 < MOTOR_IDLE )	MotorOut4 = MOTOR_IDLE;
-		#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
 		if ( MotorOut5 < MOTOR_IDLE )	MotorOut5 = MOTOR_IDLE;	
 		if ( MotorOut6 < MOTOR_IDLE )	MotorOut6 = MOTOR_IDLE;	
-		#endif	
+
 		//--- Output to motor ESC's ---
 		if (RxInCollective < 1 || !Armed)	// Turn off motors if collective below 1% 
 		{		
@@ -919,10 +1041,8 @@ if (0)
 			MotorOut2 = 0;
 			MotorOut3 = 0;
 			MotorOut4 = 0;
-			#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
 			MotorOut5 = 0;
 			MotorOut6 = 0;
-			#endif
 		}
 
 		if (Armed) output_motor_ppm();		// Output ESC signal
