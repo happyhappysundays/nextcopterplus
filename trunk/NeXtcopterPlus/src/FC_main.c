@@ -1,7 +1,7 @@
 // **************************************************************************
 // NeXtcopter Plus software
 // ========================
-// Version 1.1e
+// Version 1.1f
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -93,6 +93,7 @@
 // V1.1e	Added exponential setting for accelerometer.
 //			Added GUI lockout after about 10 seconds after power-up.
 //			Added lost model alarm. Fixed stick centering bug.
+// V1.1f	Fixed GUI lockout bug when disarming during GUI mode.
 //
 //***********************************************************
 //* To do
@@ -251,6 +252,8 @@ bool LCD_active;					// Mode flags
 bool freshmenuvalue;
 bool GUI_lockout;					// Lockout the GUI after GUI_TIMEOUT
 bool Model_lost;					// Model lost flag
+bool LMA_Alarm;						// Lost model alarm active
+bool LVA_Alarm;						// Low voltage alarm active
 bool firsttimeflag;
 char pBuffer[16];					// Print buffer
 uint16_t Change_Arming;				// Arming timers
@@ -319,6 +322,10 @@ if (0)
 
 		RxGetChannels();
 
+		//************************************************************
+		//* Switchable flight modes
+		//************************************************************
+
 		// Assign TX channels to functions
 		#ifdef CPPM_MODE
 			#ifdef PROX_MODULE
@@ -352,6 +359,10 @@ if (0)
 			}
 		#endif //CPPM_MODE
 
+		//************************************************************
+		//* Proximity module
+		//************************************************************
+
 		// Process proximity module data if fitted
 		#ifdef PROX_MODULE
 		if ((uber_loop_count &8) > 0)				// Check every 16ms or so (0.016 * 64 = 1.024s)
@@ -373,11 +384,19 @@ if (0)
 		}
 		#endif
 
-		// Lock GUI out after 10 seconds or so if not already in GUI mode
-		if ((uber_loop_count > GUI_TIMEOUT) && (!GUIconnected)) 
+		//************************************************************
+		//* GUI lockout
+		//************************************************************
+
+		// Lock GUI out after 10 seconds or so if not already in GUI mode and if armed
+		if ((uber_loop_count > GUI_TIMEOUT) && (!GUIconnected) && (Armed)) 
 		{
 			GUI_lockout = true;
 		}
+
+		//************************************************************
+		//* Alarms
+		//************************************************************
 
 		// Lost model alarm
 		Change_LostModel += (uint8_t) (TCNT2 - Lost_TCNT2);
@@ -385,20 +404,19 @@ if (0)
 		// Reset count if throttle non-zero or LCD/GUI active
 		if ((RxInCollective > 0) || (LCD_active) || (GUIconnected))	
 		{														
-			Change_LostModel = 0;			
+			Change_LostModel = 0;	
+			Model_lost = false;																																																																																																																																																		
 		}
 		// Wait for 60s then trigger lost model alarm (468720 * 1/7812Hz = 60s)
 		if (Change_LostModel > 468720)	Model_lost = true; //468720
 		if (((uber_loop_count &128) > 0) && (Model_lost))
 		{
-			LVA = 1;
-			//LED = !LED;
+			LMA_Alarm = 1;
 		} 	
-		else LVA = 0;						// Otherwise turn off buzzer
+		else LMA_Alarm = 0;					// Otherwise turn off lost model alarm
 
 
 		// Do LVA-related tasks
-		LVA = 0;
 		if ((uber_loop_count &128) > 0)		// Check every 500ms or so
 		{ 
 			GetVbat();						// Get battery voltage
@@ -407,14 +425,25 @@ if (0)
 		if (((Config.Modes &16) > 0) && (!Model_lost))	// Buzzer mode
 		{
 			// Beep buzzer if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA = 1; 	
-			else LVA = 0;					// Otherwise turn off buzzer
+			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA_Alarm = 1; 	
+			else LVA_Alarm = 0;					// Otherwise turn off buzzer
 		}
 		else if (((Config.Modes &16) == 0) && (!Model_lost))	// LED mode
 		{	// Flash LEDs if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
-			else LVA = 1;					// Otherwise leave LEDs on
+			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA_Alarm = 0; 	
+			else LVA_Alarm = 1;					// Otherwise leave LEDs on
 		}
+
+		if (LVA_Alarm || LMA_Alarm)
+		{
+			LVA = 1;
+		}
+		else LVA = 0;
+
+
+		//************************************************************
+		//* GUI
+		//************************************************************
 
 		// Check to see if any requests are coming from the GUI
 		if ((UCSR0A & (1 << RXC0)) && (!GUI_lockout)) // Data waiting in RX buffer and GUI not yet locked out
@@ -453,6 +482,10 @@ if (0)
 			}
 		} // GUI
 
+		//************************************************************
+		//* LCD
+		//************************************************************
+
 		// LCD menu system - enter when not armed and pitch up and yaw right
 		if ((RxInCollective == 0) && !Armed) 
 		{
@@ -480,7 +513,7 @@ if (0)
 					if (firsttimeflag) 
 					{
 						LCD_Display_Menu(MenuItem);
-						LCDprint_line2(" V1.1e (c) 2012 ");
+						LCDprint_line2(" V1.1f (c) 2012 ");
 						_delay_ms(1000);
 						firsttimeflag = false;
 						MenuItem = 1;
@@ -579,6 +612,10 @@ if (0)
 				} // While LCD mode
 			} // LCD activated
 		} // LCD menu system
+
+		//************************************************************
+		//* Arming modes
+		//************************************************************
 
 		// Process arming and stick-selected flight modes
 		if (RxInCollective == 0) {
@@ -683,6 +720,9 @@ if (0)
 			} // if (Change_Arming)
 		} // if ( RxInCollective == 0)
 
+		//************************************************************
+		//* Flight control
+		//************************************************************
 
 		//--- Read sensors ---
 		ReadGyros();
