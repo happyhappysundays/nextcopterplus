@@ -25,15 +25,20 @@ void RxGetChannels(void);
 // Code
 //************************************************************
 
-int16_t  RxInRoll;					// RC axis values
-int16_t  RxInPitch;
-uint16_t RxInAux;
-int16_t  RxInYaw;
+int16_t		RxInRoll;					// RC axis values
+int16_t		RxInPitch;
+uint16_t	RxInAux;
+int16_t		RxInYaw;
+int32_t		RxSum, OldRxSum;			// Sum of all major channels
+bool		RxActivity;
+
+#define		NOISE_THRESH	50			// Max RX noise threshold. Increase if lost alarm keeps being reset.
 
 //--- Get and scale RX channel inputs ---
 void RxGetChannels(void)
 {
 	int16_t  RxChannel;
+	int32_t	 RxSumDiff;
 	do
 	{
 		RxChannelsUpdatedFlag = false;
@@ -63,4 +68,11 @@ void RxGetChannels(void)
 		RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
 	} 
 	while (RxChannelsUpdatedFlag);
+
+	RxSum = RxInRoll + RxInPitch + RxInAux + RxInYaw;
+	RxSumDiff = RxSum - OldRxSum;
+
+	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) RxActivity = true;
+	else RxActivity = false;
+	OldRxSum = RxSum;
 }

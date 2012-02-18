@@ -40,11 +40,8 @@ typedef struct
 	uint8_t		P_mult_alevel;			// Autolevel acc P-term
 	uint8_t		I_mult_alevel;			// Autolevel acc I-term
 	//
-	uint8_t		RC_rate;				// Not currently used
-	uint8_t		RC_expo;				
-	//
-	uint8_t		RollPitchRate;
-	uint8_t		Yawrate;
+	uint8_t		StabMode;
+	uint8_t		ALMode;
 	uint16_t	PowerTrigger;
 	uint8_t		Modes;
 	uint16_t	AutoTuneRX;				// Auto-tuned rate for UART RX

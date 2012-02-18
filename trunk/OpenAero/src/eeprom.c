@@ -97,11 +97,9 @@ void Set_EEPROM_Default_Config(void)
 	Config.P_mult_alevel = 50;
 	Config.I_mult_alevel = 00;
 	//
-	Config.RC_rate = 50;				// Not used
-	Config.RC_expo = 20;
-	Config.RollPitchRate = 3;
-	Config.Yawrate = 3;
-	Config.PowerTrigger = 733; 			// 7.33V for 2S, 11.0V for 3S are good values here
+	Config.StabMode = 0;				// Stability mode for non-CPPM RX. 0 = stability disables with THR input **, 1 = stability always on
+	Config.ALMode = 1;					// Autolevel mode for non-CPPM RX. 0 = Autolevel enables with THR input, 1 = Autolevel always off **
+	Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
 
 	#ifdef ACCELEROMETER
 	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 

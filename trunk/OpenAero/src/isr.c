@@ -56,7 +56,9 @@ ISR(PCINT2_vect)
 	} 
 	else 
 	{				// Falling
-		RxChannel1 = TCNT1 - RxChannel1Start;
+		if (TCNT1 > RxChannel1Start) RxChannel1 = TCNT1 - RxChannel1Start;
+		else RxChannel1 = (0xffff - RxChannel1Start) + TCNT1;
+		//RxChannel1 = TCNT1 - RxChannel1Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -69,7 +71,9 @@ ISR(INT0_vect)
 	} 
 	else 
 	{				// Falling
-		RxChannel2 = TCNT1 - RxChannel2Start;
+		if (TCNT1 > RxChannel2Start) RxChannel2 = TCNT1 - RxChannel2Start;
+		else RxChannel2 = (0xffff - RxChannel2Start) + TCNT1;
+		//RxChannel2 = TCNT1 - RxChannel2Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -82,7 +86,9 @@ ISR(INT1_vect)
 	} 
 	else 
 	{				// Falling
-		RxChannel3 = TCNT1 - RxChannel3Start;
+		if (TCNT1 > RxChannel3Start) RxChannel3 = TCNT1 - RxChannel3Start;
+		else RxChannel3 = (0xffff - RxChannel3Start) + TCNT1;
+		//RxChannel3 = TCNT1 - RxChannel3Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -95,7 +101,9 @@ ISR(PCINT0_vect)
 	} 
 	else 
 	{				// Falling
-		RxChannel4 = TCNT1 - RxChannel4Start;
+		if (TCNT1 > RxChannel4Start) RxChannel4 = TCNT1 - RxChannel4Start;
+		else RxChannel4 = (0xffff - RxChannel4Start) + TCNT1;
+		//RxChannel4 = TCNT1 - RxChannel4Start;
 		Interrupted = true;						// Signal that interrupt block has finished
 	}
 	RxChannelsUpdatedFlag = true;

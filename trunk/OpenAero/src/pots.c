@@ -34,8 +34,8 @@ void ReadGainValues(void)
 	read_adc(PITCH_POT);	// Read pitch pot value 0 - 256
 	GainInADC[PITCH] = ADCW >> 2;
 #endif
-	read_adc(YAW_POT);		// Read yaw pot value 0 - 1024
-	GainInADC[YAW] = ADCW;
+	read_adc(YAW_POT);		// Read yaw pot value 0 - 256
+	GainInADC[YAW] = ADCW >> 2;
 }
 
 void GetVbat(void)			// Get battery voltage (VBAT on ADC6)

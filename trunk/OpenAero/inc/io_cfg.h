@@ -78,7 +78,7 @@
 // Optional extensions (Choose where fitted)
 #define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
 #define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
-//#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
+#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
 //#define CAMERA			// Uncomment this for using M4 to M6 for camera control
 
 //***********************************************************
