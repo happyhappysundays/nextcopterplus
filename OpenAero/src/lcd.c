@@ -66,12 +66,14 @@ const char MenuItem22[] PROGMEM = "Pitch servo     ";
 const char MenuItem23[] PROGMEM = "Yaw servo       ";
 const char MenuItem24[] PROGMEM = "Calibrate Accel.";
 const char MenuItem25[] PROGMEM = "Center sticks   ";
-
+const char MenuItem26[] PROGMEM = "Stability mode  ";
+const char MenuItem27[] PROGMEM = "Autolevel mode  ";
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
-	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22, MenuItem23, MenuItem24, MenuItem25}; 
+	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22, MenuItem23, MenuItem24, 
+	 MenuItem25, MenuItem26, MenuItem27}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -103,7 +105,9 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{0,1},
 	{0,1},
 	{0,0},
-	{0,0}
+	{0,0},
+	{0,1},
+	{0,1}
 };
 
 // Get LCD data from Program memory
@@ -202,6 +206,12 @@ int16_t get_menu_item(uint8_t menuitem)
 			break;
 		case 24:
 			break;
+		case 25:
+			value = (int16_t) Config.StabMode;
+			break;
+		case 26:
+			value = (int16_t) Config.ALMode;
+			break;
 		default:
 			break;
 	} // Switch
@@ -297,6 +307,14 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 		case 24:
 			CenterSticks();
 			break;
+		case 25:
+			// 0 = Stability switchable, 1 = Always on
+			Config.StabMode = (uint8_t) value;
+			break;
+		case 26:
+			// 0 = Autolevel switchable, 1 = Always off
+			Config.ALMode = (uint8_t) value;
+			break;
 		default:
 			break;
 	} // Switch
@@ -341,7 +359,7 @@ void LCDprint(uint8_t i)
 	//_delay_us(LCD_BIT_DELAY);
 }
 
-// Position = line 1: 0-15, line 2: 16-31, 31+ defaults back to 0
+// Position = line 1: 0-15, line 2: 16-31
 void LCDgoTo(uint8_t position) 
 {
 	if (position<16)
@@ -349,14 +367,10 @@ void LCDgoTo(uint8_t position)
 		LCDprint(0xFE);
 		LCDprint(position+0x80);
 	}
-	else if (position<32)
+	else
 	{
 		LCDprint(0xFE);
 		LCDprint(position+0x80+0x30);
-	}
-	else 
-	{
-		LCDgoTo(0);
 	}
 }
 
@@ -400,11 +414,20 @@ void LCD_fixBL(void)
 void LCDclearLine(uint8_t line)
 {
 	int8_t j;
-	LCDprint(0xFE);
-	LCDprint((line<<4)|0x80);
+
+	if (line == 1)
+	{
+		LCDprint(0xFE); // Line 1
+		LCDprint(0x80);
+	}
+	else
+	{
+		LCDprint(0xFE); // Line 2
+		LCDprint(0xC0);
+	}
 	for(j=0;j<16;j++)
 	{
-		LCDprint(0x20);
+		LCDprint(0x20);	// Clear line
 	}
 }
 

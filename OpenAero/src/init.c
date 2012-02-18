@@ -182,26 +182,67 @@ void init(void)
 		while(1); 				// Loop forever
 	}
 
+// If ACC fitted, allow the switchability of the stability mode with the THR input
+#ifdef ACCELEROMETER
 	RxGetChannels();
-
-	// GUI enable
-	if ((RxInYaw < 100) && (RxInYaw > -100))
+	// Manual stability mode selection
+	if ((RxInYaw > 200) || (RxInYaw < -200))
 	{
-		// Block any further attempts to use GUI mode
-		BlockGUI = true;
+		// flash LED 3 times
+		for (int i=0;i<3;i++)
+		{
+			LED = 1;
+			_delay_ms(150);
+			LED = 0;
+			_delay_ms(150);
+		}
+
+		if (Config.StabMode == 1) Config.StabMode = 0;	// Stability switchable
+		else Config.StabMode = 1; 						// Stability always ON
+
+		Save_Config_to_EEPROM();
+
+		LED = !LED;
+		_delay_ms(500);
+		LED = !LED;
+
 	}
+
+	// Manual autolevel mode selection
+	if ((RxInRoll > 200) || (RxInRoll < -200))
+	{
+		// flash LED 3 times
+		for (int i=0;i<3;i++)
+		{
+			LED = 1;
+			_delay_ms(150);
+			LED = 0;
+			_delay_ms(150);
+		}
+
+		if (Config.ALMode == 1) Config.ALMode = 0;		// Autolevel switchable
+		else Config.ALMode = 1; 						// Autolevel always ON
+
+		Save_Config_to_EEPROM();
+
+		LED = !LED;
+		_delay_ms(500);
+		LED = !LED;
+
+	}
+#endif
 
 #ifndef ACCELEROMETER			// Allow gyro reversing via pot without accelerometer
 	// Gyro direction reversing
 	if (GainInADC[ROLL] < 15)	// less than 5% 
 	{
 		// flash LED 3 times
-		for (int i=0;i<3;i++)
+		for (int i=0;i<5;i++)
 		{
 			LED = 1;
-			_delay_ms(25);
+			_delay_ms(150);
 			LED = 0;
-			_delay_ms(25);
+			_delay_ms(150);
 		}
 
 		while(1)

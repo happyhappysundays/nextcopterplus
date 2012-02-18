@@ -127,10 +127,10 @@ void get_multwii_data(void) // 22 bytes
 	Config.I_mult_glevel = rx_byte();
 	Config.P_mult_alevel = rx_byte();
 	Config.I_mult_alevel = rx_byte();	//
-	Config.RC_rate = rx_byte();
-	Config.RC_expo = rx_byte();			//
-	Config.RollPitchRate = rx_byte();
-	Config.Yawrate = rx_byte();			//
+	rx_byte();							// Was RC_Rate
+	rx_byte();							// Was RC_Expo
+	rx_byte();							// Was RollPitchRate
+	rx_byte();							// Was YawRate
 	Config.PowerTrigger = rx_word();	//
 	Config.Modes = rx_byte();			//
 	Config.AccRollZeroTrim = rx_byte();	//
@@ -202,10 +202,10 @@ void send_multwii_data(void) // 66 bytes
 	send_byte(Config.I_mult_glevel);
 	send_byte(Config.P_mult_alevel);
 	send_byte(Config.I_mult_alevel);	// 
-    send_byte(Config.RC_rate);			// RC rate (50 = 1 in GUI)
-    send_byte(Config.RC_expo);			// RC Expo ('10' shows as 0.10 in GUI)
-    send_byte(Config.RollPitchRate);	// rollPitchRate
-    send_byte(Config.Yawrate);			// yawRate 
+    send_byte(0);						// Was RC rate
+    send_byte(0);						// Was RC Expo
+    send_byte(0);						// No longer used
+    send_byte(0);						// No longer used
 	send_word(vBat);					// Send battery voltage (1000 = 10.0V)
 	send_word(Config.PowerTrigger);		// intPowerTrigger1 
 	send_byte(Config.AccRollZeroTrim);

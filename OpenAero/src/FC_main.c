@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.09a
+// Version 1.10a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -90,13 +90,15 @@
 //			Former throttle input now switches stability when not in CPPM mode 
 // V1.09a	Added Throttle pass-through to THR in CPPM mode
 //			Fixed LVA mode bug in GUI
+// V1.10a	Added lost model alarm and changed GUI lockout system
+//			Added configurable stability and autolevel switch modes.
+//			Fixed cycle timer. Corrected Yaw pot gain imbalance.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// - Camera stabilsation version
-// - Full flying surface version (4-servo wings)
+// - Camera stabilisation version
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -182,6 +184,7 @@ Flying Wing - Assumes mixing done in the transmitter
 // Stick Arming
 // If you cannot either arm or disarm, lower this value
 #define STICKARM_POINT 200			// Defines how far stick must be moved (for 16-bit accurate RC)
+#define GUI_TIMEOUT 3000			// Time after which GUI entry is impossible (3000 ~ 10 sec)
 
 //***********************************************************
 //* Code and Data variables
@@ -223,19 +226,25 @@ int16_t DifferentialGyro;			// Holds difference between last two errors (angular
 
 // GUI variables
 bool 	GUIconnected;				// Set when ever GUI activated (suppresses servos)
-bool 	BlockGUI;					// Set to prevent GUI being entered unless rebooted;
+bool 	GUI_lockout;				// Lockout the GUI after GUI_TIMEOUT
 uint8_t flight_mode;				// Global flight mode flag
-uint16_t cycletime;					// Data TX cycle counter
+uint16_t cycletime;					// Loop time in microseconds
 
 // Misc
 bool 	AutoLevel;					// AutoLevel = 1
 bool 	LCD_active;					// Mode flags
 bool 	freshmenuvalue;
+bool 	Model_lost;					// Model lost flag
+bool 	LMA_Alarm;					// Lost model alarm active
+bool 	LVA_Alarm;					// Low voltage alarm active
 bool 	firsttimeflag;
 char 	pBuffer[16];				// Print buffer
-uint16_t Change_Arming;				// Arming timers
-uint16_t Change_LCD;
-uint8_t Arming_TCNT2;
+
+uint16_t Change_LCD;				// Long timers for LCD entry and LMA
+uint32_t Change_LostModel;
+uint8_t LCD_TCNT2;
+uint8_t Lost_TCNT2;
+//
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
@@ -250,13 +259,14 @@ uint16_t loop_padding, servo_skip;
 int main(void)
 {
 	OldIndex = 1;
+	GUI_lockout = false;
 	firsttimeflag = true;
 	init();								// Do all init tasks
 
 //************************************************************
 // Test code - start
 //************************************************************
-if (1) 
+if (0) 
 {
 	// Test new servo code
 	while(0)
@@ -297,23 +307,79 @@ if (1)
 
 		RxGetChannels();
 
-		// Autolevel is only available if you have an Accelerometer and a CPPM receiver connected
-		#if (defined(CPPM_MODE) && defined(ACCELEROMETER))
-		if (RxChannel5 > 1600)
-		{									// When CH5 is activated
-			AutoLevel = true;				// Activate autolevel mode
-			flight_mode |= 1;				// Notify GUI that mode has changed
-		}
-		else
-		{
-			AutoLevel = false;				// Activate autotune mode
+		//************************************************************
+		//* Autolevel mode selection
+		//************************************************************
+
+		// Autolevel is only available if you have an Accelerometer
+		#if defined(ACCELEROMETER)
+
+			// For CPPM mode, use separate switch for Autolevel (CH5)
+			#if defined(CPPM_MODE)
+
+				if (RxChannel5 > 1600)
+				{									// When CH5 is activated
+					AutoLevel = true;				// Activate autolevel mode
+					flight_mode |= 1;				// Notify GUI that mode has changed
+				}
+				else
+				{
+					AutoLevel = false;				// De-activate autolevel mode
+					flight_mode &= 0xfe;			// Notify GUI that mode has changed
+					firsttimeflag = true;			// Reset flag
+				}
+
+			// For non-CPPM mode, use same switch for Autolevel as for stability (THR)
+			// RxInAux (formerly throttle) enables Autolevel if Config.ALMode = 0
+			// Autolevel always OFF if Config.ALMode = 1 (default)
+			#else
+
+				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and THR is activated
+				{
+					AutoLevel = true;				// Activate autolevel mode
+					flight_mode |= 1;				// Notify GUI that mode has changed
+				}
+				else
+				{
+					AutoLevel = false;				// De-activate autolevel mode
+					flight_mode &= 0xfe;			// Notify GUI that mode has changed
+					firsttimeflag = true;			// Reset flag
+				}
+
+			#endif // Non-CPPM mode
+
+		#else // No accelerometer fitted
+
+			AutoLevel = false;				// De-activate autolevel mode
 			flight_mode &= 0xfe;			// Notify GUI that mode has changed
 			firsttimeflag = true;			// Reset flag
-		}
-		#endif
 
-		// Do LVA-related tasks
-		LVA = 0;
+		#endif // #if defined(ACCELEROMETER)
+
+		//************************************************************
+		//* Alarms
+		//************************************************************
+
+		// Lost model alarm
+		Change_LostModel += (uint8_t) (TCNT2 - Lost_TCNT2);
+		Lost_TCNT2 = TCNT2;
+
+		// Reset count if any RX activity or LCD/GUI active
+		if ((RxActivity) || (LCD_active) || (GUIconnected))	
+		{														
+			Change_LostModel = 0;
+			Model_lost = false;			
+		}
+		// Wait for 60s then trigger lost model alarm (468720 * 1/7812Hz = 60s)
+		if (Change_LostModel > 468720)	Model_lost = true;
+		if (((uber_loop_count &128) > 0) && (Model_lost))
+		{
+			LMA_Alarm = true;				// Turn on buzzer
+		} 	
+		else LMA_Alarm = false;				// Otherwise turn off buzzer
+
+
+		// Low-voltage alarm (LVA)
 		if ((uber_loop_count &128) > 0)		// Check every 500ms or so
 		{ 
 			GetVbat();						// Get battery voltage
@@ -322,17 +388,37 @@ if (1)
 		if ((Config.Modes &16) > 0)			// Buzzer mode
 		{
 			// Beep buzzer if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0))	LVA = 1; 	
-			else LVA = 0;					// Otherwise turn off buzzer
+			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0)) LVA_Alarm = true;
+			else LVA_Alarm = false;				// Otherwise turn off buzzer
 		}
 		else if ((Config.Modes &16) == 0)	// LED mode
 		{	// Flash LEDs if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0))	LVA = 0; 	
-			else LVA = 1;					// Otherwise leave LEDs on
+			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0)) LVA_Alarm = false;	
+			else LVA_Alarm = true;				// Otherwise leave LEDs on
+		}
+
+		// Turn on buzzer if in alarm state
+		if ((LVA_Alarm) || (LMA_Alarm))
+		{
+			LVA = 1;
+		}
+		else
+		{
+			LVA = 0;
+		}
+
+		//************************************************************
+		//* GUI
+		//************************************************************
+
+		// Lock GUI out after 10 seconds or so if not already in GUI mode
+		if ((uber_loop_count > GUI_TIMEOUT) && (!GUIconnected)) 
+		{
+			GUI_lockout = true;
 		}
 
 		// Check to see if any requests are coming from the GUI
-		if ((UCSR0A & (1 << RXC0)) && (BlockGUI == false))	// Data waiting in RX buffer
+		if ((UCSR0A & (1 << RXC0)) && (!GUI_lockout)) // Data waiting in RX buffer and GUI not yet locked out
 		{
 			GUIconnected = true;			// Set GUI flag so that servos can be disabled
 			rxin = rx_byte();				// Get RX byte
@@ -342,7 +428,6 @@ if (1)
 					ReadGyros();
 					ReadAcc();
 					send_multwii_data();	
-					cycletime++;
 					break;
 				case 'E':					// Calibrate gyros
 					CalibrateGyros();
@@ -368,10 +453,14 @@ if (1)
 			}
 		} // GUI
 
+		//************************************************************
+		//* LCD
+		//************************************************************
+
 		// LCD menu system - enter with pitch up, roll left and yaw right in stable mode
 		// Check for stick hold
-		Change_LCD += (uint8_t) (TCNT2 - Arming_TCNT2);
-		Arming_TCNT2 = TCNT2;
+		Change_LCD += (uint8_t) (TCNT2 - LCD_TCNT2);
+		LCD_TCNT2 = TCNT2;
 
 		if ((RxInPitch > -STICKARM_POINT) || 	// Reset count if not up enough
 			(RxInYaw < STICKARM_POINT) ||		// Reset count if not right yaw enough
@@ -380,7 +469,6 @@ if (1)
 			Change_LCD = 0;			
 		}
 
-		LCD_active = true;
 		freshmenuvalue = true;
 		firsttimeflag = true;
 
@@ -389,6 +477,7 @@ if (1)
 		if (Change_LCD > 15624)
 		{	
 			MenuItem = 0;
+			LCD_active = true;
 			while (LCD_active)									// Keep option of bailing out
 			{
 				// Wait for sticks to move back from initial state, display splash
@@ -396,8 +485,8 @@ if (1)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2("V1.09a  (c) 2012");
-					_delay_ms(1000);
+					LCDprint_line2("V1.10a  (c) 2012");
+					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
 					MenuItem = 1;
@@ -437,12 +526,14 @@ if (1)
 
 				// Get stored value of current item
 				if (freshmenuvalue) MenuValue = get_menu_item(MenuItem);// Get current value only when not being changed
-		
+
 				// Refresh changed data prior to delay to make LCD more responsive
 				LCD_Display_Menu(MenuItem);						// Display menu top line
 				if (MenuItem == 14) 							// Special case for LVA mode
 				{
-					LCDprint_line2("          <-Save");			// Setup save line
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
 					LCDgoTo(17);								// Position cursor at nice spot
 					if (MenuValue == 0) LCDprintstr("LED");
 					else LCDprintstr("Buzzer");
@@ -464,27 +555,51 @@ if (1)
 				}
 				else if (MenuItem == 16) 						// Special case for LVA mode
 				{
-					LCDprint_line2("          <-Save");			// Setup save line
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
 					LCDgoTo(16);								// Position cursor at nice spot
 					if (MenuValue == 0) LCDprintstr("Use pots");
 					else LCDprintstr("Use eeprom");
 				}
 				else if ((MenuItem >= 17) && (MenuItem < 23)) 	// Print value to change
 				{
-					LCDprint_line2("          <-Save");			// Setup save line
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
 					LCDgoTo(17);								// Position cursor at nice spot
 					if (MenuValue == 0) LCDprintstr("Normal");
 					else LCDprintstr("Reversed");	
 				}
 				else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
 				{
-					LCDprint_line2("          <-Save");			// Setup save line
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
 					LCDgoTo(17);								// Position cursor at nice spot
 					LCDprintstr(itoa(MenuValue,pBuffer,10)); 	
 				}
-				else if (MenuItem >= 23)						// For commands
+				else if ((MenuItem >= 23) && (MenuItem < 25))	// For commands
 				{
 					LCDprint_line2("      <- Execute");	
+				}
+				else if (MenuItem == 25) 						// Special case for StabMode
+				{
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
+					LCDgoTo(16);								// Position cursor at nice spot
+					if (MenuValue == 0) LCDprintstr("Switchable");
+					else LCDprintstr("Always ON ");
+				}
+				else if (MenuItem >= 26) 						// Special case for ALMode
+				{
+					LCDclearLine(2);
+					LCDgoTo(26);
+					LCDprintstr("<-Save");						// Setup save line
+					LCDgoTo(16);								// Position cursor at nice spot
+					if (MenuValue == 0) LCDprintstr("Switchable");
+					else LCDprintstr("Always OFF");
 				}
 
 				// Stick volume variable delay (four speeds)
@@ -508,44 +623,47 @@ if (1)
 			} // While LCD mode
 			LCDclear();			// Clear and reset LCD entry mode
 			Change_LCD = 0;
-			Change_Arming = 0;
 		} // LCD activated (if (Change_LCD > 8000))
 
+		//************************************************************
+		//* Flight code
+		//************************************************************
 
-		// Stability mode OFF
+		// Reverse servo outputs as required
+		if(Config.YawServo) {
+			ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 
+			ServoOut2 = RxChannel4;
+		}
+		else {
+			ServoOut1 = RxChannel4;
+			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
+		}
+		if(Config.RollServo) {
+			ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
+			ServoOut4 = RxChannel1;
+		}
+		else {
+			ServoOut3 = RxChannel1;
+			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
+		}
+		if(Config.PitchServo) {
+			ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
+			ServoOut6 = RxChannel2;
+		}
+		else {
+			ServoOut5 = RxChannel2;
+			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+		}
+		Throttle = RxChannel3;
+
+		// For CPPM mode, use separate switch for Stability (CH7)
+		// Stability mode OFF (RxInAux > 0)
 		#ifdef CPPM_MODE
-		if (RxChannel7 > 1600)				// AUX 1 over-rides stability
+		if (RxChannel7 > 1600)							// AUX 1 over-rides stability
 		#else
-		if (RxInAux > 0)					// RxInAux (formerly throttle) over-rides stability
-		#endif
+		if ((RxInAux < 200) && (Config.StabMode == 0))	// RxInAux (formerly throttle) enables stability if Config.StabMode = 0 (default)
+		#endif											// Stability always ON if Config.StabMode = 1
 		{
-			// Reverse servo outputs as required
-			if(Config.YawServo) {
-				ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 
-				ServoOut2 = RxChannel4;
-			}
-			else {
-				ServoOut1 = RxChannel4;
-				ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			}
-			if(Config.RollServo) {
-				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
-				ServoOut4 = RxChannel1;
-			}
-			else {
-				ServoOut3 = RxChannel1;
-				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
-			}
-			if(Config.PitchServo) {
-				ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
-				ServoOut6 = RxChannel2;
-			}
-			else {
-				ServoOut5 = RxChannel2;
-				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
-			}
-			Throttle = RxChannel3;
-
 			// Notify GUI that mode has changed
 			flight_mode &= 0xf7;
 
@@ -557,7 +675,7 @@ if (1)
 			IntegralYaw = 0;
 		}
 
-		// Stability mode ON
+		// Stability mode ON (RxInAux >= 200)
 		else
 		{
 			// Notify GUI that mode has changed to stability mode
@@ -572,34 +690,6 @@ if (1)
 			ReadGyros();
 			// Only read Accs if in AutoLevel mode
 			if (AutoLevel) ReadAcc();
-
-
-			//--- Start mixing by setting servos to RX inputs ---
-			if(Config.YawServo) {
-				ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; // Reverse servo outputs as required
-				ServoOut2 = RxChannel4;
-			}
-			else {
-				ServoOut1 = RxChannel4;
-				ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
-			}
-			if(Config.RollServo) {
-				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
-				ServoOut4 = RxChannel1;
-			}
-			else {
-				ServoOut3 = RxChannel1;
-				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
-			}
-			if(Config.PitchServo) {
-				ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
-				ServoOut6 = RxChannel2;
-			}
-			else {
-				ServoOut5 = RxChannel2;
-				ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
-			}
-			Throttle = RxChannel3;
 
 			// Accelerometer low-pass filter
 			if (AutoLevel) {
@@ -841,10 +931,14 @@ if (1)
 			output_servo_ppm();			// Output servo signal
 		}
 
+		// Update cycle time for GUI
+		cycletime = LoopElapsedTCNT1;
+
 		// Measure period of loop from here
 		LoopStartTCNT1 = TCNT1;
 		uber_loop_count++;
 		servo_skip++;
+
 	} // main loop
 } // main()
 
