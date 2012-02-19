@@ -17,32 +17,34 @@
 
 volatile bool RxChannelsUpdatedFlag;
 
-volatile uint16_t RxChannel1; // These variables are local but defining them 
-volatile uint16_t RxChannel2; // here means that there is less pushing/popping from
-volatile uint16_t RxChannel3; // the stack
+volatile uint16_t RxChannel1; 	// These variables are local but defining them 
+volatile uint16_t RxChannel2; 	// here means that there is less pushing/popping from
+volatile uint16_t RxChannel3; 	// the stack
 volatile uint16_t RxChannel4;
+volatile uint16_t RxChannel5;
 uint16_t RxChannel1Start;	
 uint16_t RxChannel2Start;	
 uint16_t RxChannel3Start;	
 uint16_t RxChannel4Start;
+uint16_t RxChannel5Start;
+
+#ifndef CPPM_MODE
+volatile uint8_t PCINT2_state;	// Need to keep track of previous PCINT2_state to separate RX_ROLL and RX_AUX
+#endif
 
 #ifdef CPPM_MODE
-volatile uint16_t RxChannel5;
 volatile uint16_t RxChannel6;
 volatile uint16_t RxChannel7;
 volatile uint16_t RxChannel8;
-uint16_t RxChannel5Start;
 uint16_t RxChannel6Start;
 uint16_t RxChannel7Start;
 uint16_t RxChannel8Start;
-
-volatile uint16_t PPMSyncStart;		// Sync pulse timer
-volatile uint8_t ch_num;			// Channel number
-#define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
-
+volatile uint16_t PPMSyncStart;	// Sync pulse timer
+volatile uint8_t ch_num;		// Channel number
+#define SYNCPULSEWIDTH 3000		// Sync pulse must be more than 3ms long
 #ifdef PROX_MODULE
-volatile uint16_t EchoTime;			// Sonar echo duration
-uint16_t EchoTimeStart;				// Sonar echo start
+volatile uint16_t EchoTime;		// Sonar echo duration
+uint16_t EchoTimeStart;			// Sonar echo start
 #endif
 
 #endif //CPPM_MODE
@@ -52,17 +54,58 @@ uint16_t EchoTimeStart;				// Sonar echo start
 //************************************************************
 
 #ifndef CPPM_MODE  	// Normal RX mode
+
+// For PCINT2 we have to somehow work out which interrupt (RX_ROLL or RX_AUX/CH5) triggered this.
+// Since there is no interrupt flag, we have to create a state machine to keep track of both these
+// signals. It seems to work well. I guess some people *really* wanted five PWM RX inputs :) 
 ISR(PCINT2_vect)
 {
-	if (RX_ROLL)	// Rising
+	// Only one source of interrupt when we need all six motor outputs 
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	if (RX_ROLL)						// Rising
 	{
 		RxChannel1Start = TCNT1;
 	} 
 	else 
-	{				// Falling
+	{									// Falling
 		RxChannel1 = TCNT1 - RxChannel1Start;
 	}
 	RxChannelsUpdatedFlag = true;
+
+	// Use M6 as a fifth RC input channel
+	#else
+	switch(PCINT2_state)
+	{
+		case 0:							// Default state. Assume both RX_ROLL and RX_AUX were low
+			if (RX_ROLL)				// RX_ROLL rising
+			{
+				RxChannel1Start = TCNT1;
+				PCINT2_state = 1;		// Set state to RX_ROLL running
+			} 
+			else if (RX_AUX)			// RX_AUX rising
+			{
+				RxChannel5Start = TCNT1;
+				PCINT2_state = 2;		// Set state to RX_AUX running
+			}
+			else PCINT2_state = 0;		// Otherwise reset state to both low
+			break;
+
+		case 1:							// RX_ROLL running -> falling edge
+			RxChannel1 = TCNT1 - RxChannel1Start;
+			RxChannelsUpdatedFlag = true;
+			PCINT2_state = 0;
+			break;
+		case 2: 						// RX_AUX running -> falling edge
+			RxChannel5 = TCNT1 - RxChannel5Start;
+			RxChannelsUpdatedFlag = true;
+			PCINT2_state = 0;
+			break;
+		default:
+			PCINT2_state = 0;			// Reset PCINT2_state if lost
+			break;
+	}
+	#endif
+
 }
 
 ISR(INT0_vect)

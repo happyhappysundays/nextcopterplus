@@ -90,7 +90,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.I_mult_pitch = 30;
 	Config.D_mult_pitch = 50;
 	Config.P_mult_yaw = 30;
-	Config.I_mult_yaw = 20;
+	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
 	Config.P_mult_glevel = 50;
 	Config.I_mult_glevel = 30;
