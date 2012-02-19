@@ -52,7 +52,6 @@ void init(void)
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
 	RX_COLL_DIR		= INPUT;
-	//RX_YAW_DIR		= INPUT;	// See conditional compiles below
 
 	GYRO_YAW_DIR	= INPUT;
 	GYRO_PITCH_DIR	= INPUT;
@@ -66,7 +65,6 @@ void init(void)
 	M3_DIR			= OUTPUT;
 	M4_DIR			= OUTPUT;
 	M5_DIR			= OUTPUT;
-	M6_DIR			= OUTPUT;
 
 	LED_DIR			= OUTPUT;
 	LCD_TX_DIR		= OUTPUT;
@@ -78,43 +76,55 @@ void init(void)
 	RX_ROLL 	= 0;
 	RX_PITCH 	= 0;
 	RX_COLL 	= 0;
-	//RX_YAW		= 0;
 
 // Conditional builds for interrupt and pin function setup
 #ifdef CPPM_MODE 
+	M6_DIR	= OUTPUT;					// M6 is motor output only
 	// Proximity module only available in CPPM mode
 	#ifdef PROX_MODULE
-		PING_DIR = OUTPUT;					// PB7 is PING output in Proximity mode
-		ECHO_DIR = INPUT;					// PD3 is ECHO input in Proximity mode
-		PING = 0;
-		ECHO = 0;
-		// External interrupts INT0 (CPPM input) and INT1 (Proximity module pulse)
-		EICRA = (1 << ISC01) | (1 << ISC10);// Falling edge of INT0, both edges of INT1
-		EIMSK = (1 << INT0) | (1 << INT1);	// Enable INT0 and INT1
-		EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
+	PING_DIR = OUTPUT;					// PB7 is PING output in Proximity mode
+	ECHO_DIR = INPUT;					// PD3 is ECHO input in Proximity mode
+	PING = 0;
+	ECHO = 0;							// Disable pull-ups
+
+	// External interrupts INT0 (CPPM input) and INT1 (Proximity module pulse)
+	EICRA = (1 << ISC01) | (1 << ISC10);// Falling edge of INT0, both edges of INT1
+	EIMSK = (1 << INT0) | (1 << INT1);	// Enable INT0 and INT1
+	EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
 	#else 
-		PING_DIR = INPUT;					// 
-		ECHO_DIR = INPUT;					// 
-		// External interrupts INT0 (CPPM input)
-		EICRA = (1 << ISC01);				// Falling edge of INT0
-		EIMSK = (1 << INT0);				// Enable INT0
-		EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
+	PING_DIR = INPUT;					// Set PING_DIR to input
+	ECHO_DIR = INPUT;					// Set ECHO_DIR to input
+
+	// External interrupts INT0 (CPPM input)
+	EICRA = (1 << ISC01);				// Falling edge of INT0
+	EIMSK = (1 << INT0);				// Enable INT0
+	EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
 	#endif
+
 #else // Non-CPPM mode
 	RX_YAW_DIR	= INPUT;				// PB7 is rudder input in non-CPPM mode
-	RX_YAW		= 0;
+	RX_YAW		= 0;					// Disable pull-ups
 	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
 	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
 	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
 	PCMSK0 |= (1 << PCINT7);			// PB7 (Rudder/Yaw pin change mask)
 	PCMSK2 |= (1 << PCINT17);			// PD1 (Aileron/Roll pin change mask)
 
-	// External interrupts INT0 and INT1 (Pitch, Collective)
-	EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
-	EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
-	EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
-#endif
+	// Pin change interrupt enables PCINT2 (Rx_Aux)
+	#if defined(HEXA_COPTER) || defined(HEXA_X_COPTER)
+	M6_DIR	= OUTPUT;					// M6 is motor output only
+	#else								// When M6 is free, use as RX_AUX input (CH5)
+	PCMSK2 |= (1 << PCINT21);			// PD5 (RX_AUX pin change mask)
+	M6_DIR	= INPUT;
+	RX_AUX	= INPUT;
+	RX_AUX	= 0;						// Disable pull-ups
+	#endif
 
+	// External interrupts INT0 and INT1 (Pitch, Collective)
+	EICRA = (1 << ISC00) | (1 << ISC10);	// Any change INT0, INT1 
+	EIMSK = (1 << INT0) | (1 << INT1);		// External Interrupt Mask Register - enable INT0 and INT1
+	EIFR |= (1 << INTF0) | (1 << INTF1);	// Clear both INT0 and INT1 interrupt flags
+#endif
 
 	// Timer0 (8bit) - run @ 8MHz
 	// Used to control ESC/servo pulse length
@@ -156,6 +166,10 @@ void init(void)
 	RxChannel2 = Config.RxChannel2ZeroOffset;	// 1520;
 	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1120;
 	RxChannel4 = Config.RxChannel4ZeroOffset;	// 1520;
+	RxChannel5 = 1500;
+
+	RollPitchRate = Config.RollPitchRate;		// Preset User-set stick sensitivity
+	Yawrate = Config.Yawrate;
 
 	CalibrateGyros();
 

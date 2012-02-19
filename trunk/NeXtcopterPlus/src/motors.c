@@ -12,7 +12,6 @@
 #include "..\inc\init.h"
 #include "..\inc\main.h"
 #include "..\inc\lcd.h"
-#include <stdlib.h> //debug
 
 //************************************************************
 // Prototypes

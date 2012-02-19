@@ -56,6 +56,8 @@ void variable_delay(uint8_t count);
 	#define MULTITYPE 7
 #elif defined(HEXA_X_COPTER)
 	#define MULTITYPE 10
+#elif defined(Y4)
+	#define MULTITYPE 9
 #else
 	#define MULTITYPE 3		// Default to Quad-X
 #endif
@@ -165,13 +167,12 @@ void send_multwii_data(void) // 66 bytes
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 
 	send_word(RxChannel4); 		// 33
-#ifdef CPPM_MODE
 	send_word(RxChannel5);
+#ifdef CPPM_MODE
 	send_word(RxChannel6); 
 	send_word(RxChannel7); 
 	send_word(RxChannel8); 		// 41
 #else
-	send_word(1500);
 	send_word(1500); 
 	send_word(1500); 
 	send_word(1500); 			// 41
@@ -195,8 +196,13 @@ void send_multwii_data(void) // 66 bytes
 	send_byte(Config.I_mult_alevel);	// 
     send_byte(Config.ACC_expo);			// ACC Expo ('10' shows as 0.10 in GUI)
     send_byte(Config.RC_expo);			// RC Expo ('10' shows as 0.10 in GUI)
-    send_byte(Config.RollPitchRate);	// rollPitchRate
-    send_byte(Config.Yawrate);			// yawRate 
+	//
+    send_byte(RollPitchRate);			// Send current rollPitchRate
+    send_byte(Yawrate);					// Send currentyawRate 
+	//
+    //send_byte(Config.RollPitchRate);	// User mode rollPitchRate
+    //send_byte(Config.Yawrate);		// User mode yawRate 
+	//
 	send_word(vBat);					// Send battery voltage (1000 = 10.0V)
 	send_word(Config.PowerTrigger);		// intPowerTrigger1 
 	send_byte(Config.AccRollZeroTrim);

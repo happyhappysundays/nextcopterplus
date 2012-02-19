@@ -1,7 +1,7 @@
 // **************************************************************************
 // NeXtcopter Plus software
 // ========================
-// Version 1.1f
+// Version 1.1g
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -64,7 +64,6 @@
 // YAW LEFT + PITCH NEUTRAL = Arm (Normal)
 // YAW LEFT + PITCH FWD		= Arm (Acro)
 // YAW LEFT + PITCH BACK	= Arm (Warthox)
-// YAW LEFT + ROLL RIGHT	= Arm (Autolevel)
 // YAW LEFT + ROLL LEFT		= Arm + AUTOTUNE MODE (Needs GUI)
 // YAW RIGHT 				= Disarm
 // YAW RIGHT + PITCH FWD	= Enter LCD menu
@@ -94,19 +93,24 @@
 //			Added GUI lockout after about 10 seconds after power-up.
 //			Added lost model alarm. Fixed stick centering bug.
 // V1.1f	Fixed GUI lockout bug when disarming during GUI mode.
+// V1.1g	Updated default PID settings. Fixed GUI cycle count.
+//			Changed "Normal" sensitivity mode to "User" mode, fixed mode change issues.
+//			Added experimental Y4 mode. Added CH5 input on M6 option in quad, Y4 modes.
+//			As autolevel now switchable with both CPPM and 5-channel PWM, removed
+//			Autolevel arming mode.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//	1. Get proximity sensor and Altitude Hold working
+//	1. Get proximity sensor and Altitude Hold working, maybe...
 //
 //***********************************************************
 //* Flight configurations (Motor number and rotation)
 //***********************************************************
 
 /*
-Quad +                Quad X
+Quad+                 Quad X
       M1 CW
         |             M1 CW     M2 CCW
         |                \        / 
@@ -130,6 +134,19 @@ M6 CCW   |     M2 CCW        M1 CW      M2 CCW
 M5 CW    |     M3 CW              /     \ 
          |                      /         \
        M4 CCW                M5 CW      M4 CCW
+
+
+Y4
+
+ M1CW        M2 CCW
+    \         / 
+      \ ___ /
+       /   \
+       \___/
+         |
+         |
+        / \
+   M4CCW   M3CW <-- Mounted at 30 degrees from vertical
 
 */
 
@@ -215,6 +232,8 @@ uint8_t AltIndex;
 uint8_t OldAltIndex;
 uint8_t AltLimit; 
 #endif
+uint8_t	RollPitchRate;				// Current Roll/Pitch rate
+uint8_t	Yawrate;					// Current Yaw rate
 
 int16_t TargetRoll;
 int16_t OldTargetRoll;
@@ -244,6 +263,7 @@ int16_t DifferentialGyro;			// Holds difference between last two errors (angular
 bool GUIconnected;
 uint8_t flight_mode;				// Global flight mode flag
 uint16_t cycletime;					// Data TX cycle counter
+uint16_t LoopStartTCNT1, LoopElapsedTCNT1, LoopCurrentTCNT1;
 
 // Misc
 bool AutoLevel;						// AutoLevel = 1
@@ -267,6 +287,11 @@ uint8_t MenuItem;
 int16_t MenuValue;
 uint16_t uber_loop_count;			// Used to count main loops for everything else :)
 
+// Test code
+uint8_t lcd_temp;
+uint16_t lcd_tempi;
+
+
 //************************************************************
 // Main loop
 //************************************************************
@@ -284,6 +309,41 @@ int main(void)
 //************************************************************
 if (0) 
 {
+	while(1)
+	{
+		// Display results
+		LCDgoTo(2);								
+		LCDprintstr(" ");
+		LCDgoTo(2);
+		if (M5) LCDprintstr("1");
+		else LCDprintstr("0");
+		//
+		LCDgoTo(4);								
+		LCDprintstr("     ");
+		LCDgoTo(4);
+		LCDprintstr(itoa(RxChannel5,pBuffer,10));
+		//
+		LCDgoTo(12);					
+		LCDprintstr("    ");
+		LCDgoTo(12);
+		LCDprintstr(itoa(RxChannel1,pBuffer,10));
+		//
+		lcd_tempi = accADC[ROLL];			
+		LCDgoTo(20);
+		LCDprintstr("    ");
+		LCDgoTo(20);
+		LCDprintstr(itoa(RxChannel2,pBuffer,10));
+		//
+		lcd_tempi = gyroADC[ROLL];			
+		LCDgoTo(28);
+		LCDprintstr("    ");
+		LCDgoTo(28);
+		LCDprintstr(itoa(RxChannel4,pBuffer,10));
+		//
+		_delay_ms(200);		
+	}
+
+/*
 	uint16_t dist = 0;
 	_delay_ms(1500);
 	while (1)
@@ -298,6 +358,8 @@ if (0)
 		LCDprintstr(itoa(dist,pBuffer,10));
 	//	_delay_ms(50);						// Mustn't sent out pulse within 50ms of previous pulse
 	}
+*/
+
 }
 
 //************************************************************
@@ -327,37 +389,37 @@ if (0)
 		//************************************************************
 
 		// Assign TX channels to functions
-		#ifdef CPPM_MODE
-			#ifdef PROX_MODULE
-				if (RxChannel7 > 1600)				// AUX 1 controls altitude hold
-				{
-					if (firsttimeflag) {
-						HeightHold = true;
-						Altitude = GetDistance();	// Get latest distance measurement
-						Set_height = Altitude;		// Use this as target height
-						firsttimeflag = false;		// Reset flag
-					}
+		#if defined(CPPM_MODE) && defined(PROX_MODULE)
+			if (RxChannel7 > 1600)					// AUX 1 controls altitude hold
+			{
+				if (firsttimeflag) {
+					HeightHold = true;
+					Altitude = GetDistance();		// Get latest distance measurement
+					Set_height = Altitude;			// Use this as target height
+					firsttimeflag = false;			// Reset flag
 				}
-				else
-				{
-					HeightHold = false;
-					firsttimeflag = true;			// Set flag
-				}
-			#endif //PROX_MODULE
+			}
+			else
+			{
+				HeightHold = false;
+				firsttimeflag = true;				// Reset first time flag
+			}
+		#endif // CPPM_MODE && PROX_MODULE
 
+		#if defined(QUAD_COPTER) || defined(QUAD_X_COPTER) || defined(Y4) || defined(CPPM_MODE) // Where M6 is free
 			if (RxChannel5 > 1600)					// CH5 controls autolevel
 			{										// When CH5 is activated
 				AutoLevel = true;					// Activate autolevel mode
 				flight_mode |= 1;					// Notify GUI that mode has changed
-				Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
-				Config.Yawrate = NORMAL_YAW_STICK_SCALE;
+				RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
+				Yawrate = NORMAL_YAW_STICK_SCALE;
 			}
 			else
 			{	
 				AutoLevel = false;					// Deactivate autolevel mode
 				flight_mode &= 0xfe;				// Notify GUI that mode has changed
 			}
-		#endif //CPPM_MODE
+		#endif // M6 is free
 
 		//************************************************************
 		//* Proximity module
@@ -513,7 +575,7 @@ if (0)
 					if (firsttimeflag) 
 					{
 						LCD_Display_Menu(MenuItem);
-						LCDprint_line2(" V1.1f (c) 2012 ");
+						LCDprint_line2(" V1.1g (c) 2012 ");
 						_delay_ms(1000);
 						firsttimeflag = false;
 						MenuItem = 1;
@@ -660,26 +722,18 @@ if (0)
 
 					if (RxInPitch > STICKARM_POINT) 		// ACRO
 					{
-						Config.RollPitchRate = ACRO_ROLL_PITCH_STICK_SCALE;
-						Config.Yawrate = ACRO_YAW_STICK_SCALE;
+						RollPitchRate = ACRO_ROLL_PITCH_STICK_SCALE;
+						Yawrate = ACRO_YAW_STICK_SCALE;
 						flight_mode |= 4;
 						nBlink = 3;
 		 			}
 			 		else if (RxInPitch < -STICKARM_POINT) 	// WARTHOX
 			 		{
-						Config.RollPitchRate = WARTHOX_ROLL_PITCH_STICK_SCALE;
-						Config.Yawrate = WARTHOX_YAW_STICK_SCALE;
+						RollPitchRate = WARTHOX_ROLL_PITCH_STICK_SCALE;
+						Yawrate = WARTHOX_YAW_STICK_SCALE;
 						flight_mode |= 8;
 						nBlink = 2;
 			 		}
-					else if (RxInRoll > STICKARM_POINT) 	// Autolevel
-					{
-						AutoLevel = true;
-						Config.RollPitchRate = NORMAL_ROLL_PITCH_STICK_SCALE;
-						Config.Yawrate = NORMAL_YAW_STICK_SCALE;
-						flight_mode |= 1;
-						nBlink = 5;
-					}
 					else if (RxInRoll < -STICKARM_POINT)	// Autotune mode
 					{
 						Armed = 0;							// Disarm for Autotune
@@ -694,6 +748,8 @@ if (0)
 			 		else // NORMAL
 			 		{
 						// Use user-defined rates set from LCD or GUI
+						RollPitchRate = Config.RollPitchRate;
+						Yawrate = Config.Yawrate;
 						flight_mode |= 2;
 						nBlink = 1;
 			 		}
@@ -797,7 +853,7 @@ if (0)
 		//***********************************************************************
 
 		if ((RxInRoll < DEAD_BAND) && (RxInRoll > -DEAD_BAND)) RxInRoll = 0; // Reduce RxIn noise into the I-term
-		RxInRoll = RxInRoll >> Config.RollPitchRate;			// Reduce RxInRoll rate per flying mode
+		RxInRoll = RxInRoll >> RollPitchRate;					// Reduce RxInRoll rate per flying mode
 		Roll = RxInRoll + gyroADC[ROLL];
 
 		IntegralgRoll += Roll;									// Gyro I-term
@@ -869,6 +925,9 @@ if (0)
 		MotorOut2 -= Roll;
 		MotorOut4 -= Roll;
 		MotorOut5 += Roll;
+		#elif defined(Y4)
+		MotorOut1 += Roll;
+		MotorOut2 -= Roll;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -879,7 +938,7 @@ if (0)
 		//***********************************************************************
 
 		if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise into the I-term
-		RxInPitch = RxInPitch >> Config.RollPitchRate;			// Reduce RxInPitch rate per flying mode
+		RxInPitch = RxInPitch >> RollPitchRate;					// Reduce RxInPitch rate per flying mode
 		Pitch = RxInPitch + gyroADC[PITCH];
 
 		IntegralgPitch += Pitch;								// I-term (32-bit)
@@ -950,6 +1009,12 @@ if (0)
 		MotorOut2 += Pitch;
 		MotorOut4 -= Pitch;
 		MotorOut5 -= Pitch;
+		#elif defined(Y4)
+		Pitch	= (Pitch >> 1);	
+		MotorOut1 += Pitch;
+		MotorOut2 += Pitch;
+		MotorOut3 -= Pitch;
+		MotorOut4 -= Pitch;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -960,7 +1025,7 @@ if (0)
 		//***********************************************************************
 
 		if ((RxInYaw < DEAD_BAND) && (RxInYaw > -DEAD_BAND)) RxInYaw = 0; // Reduce RxIn noise into the I-term
-		RxInYaw = RxInYaw >> Config.Yawrate;				// Reduce RxInYaw rate per flying mode
+		RxInYaw = RxInYaw >> Yawrate;						// Reduce RxInYaw rate per flying mode
 		Yaw = RxInYaw + gyroADC[YAW];	
 
 		IntegralYaw += Yaw;									// I-term (32-bit)
@@ -1002,6 +1067,9 @@ if (0)
 		MotorOut4 += Yaw;
 		MotorOut5 -= Yaw;
 		MotorOut6 += Yaw;
+		#elif defined(Y4)
+		MotorOut3 += Yaw;
+		MotorOut4 -= Yaw;
 		#else
 		#error No Copter configuration defined !!!!
 		#endif
@@ -1084,9 +1152,19 @@ if (0)
 			MotorOut5 = 0;
 			MotorOut6 = 0;
 		}
+		
+		// Calculate loop period (LoopCurrentTCNT1 - LoopStartTCNT1)
+		// Also, handle the odd case where the TCNT1 rolls over and TCNT1 < LoopStartTCNT1
+		LoopCurrentTCNT1 = TCNT1;
+		if (LoopCurrentTCNT1 > LoopStartTCNT1) LoopElapsedTCNT1 = LoopCurrentTCNT1 - LoopStartTCNT1;
+		else LoopElapsedTCNT1 = (0xffff - LoopStartTCNT1) + LoopCurrentTCNT1;
 
-		if (Armed) output_motor_ppm();		// Output ESC signal
+		cycletime = LoopElapsedTCNT1;	// Update cycle time for GUI
+		LoopStartTCNT1 = TCNT1;			// Measure period of loop from here
+
+		if (Armed) output_motor_ppm();	// Output ESC signal
 		uber_loop_count++;
+
 	} // main loop
 } // main()
 
