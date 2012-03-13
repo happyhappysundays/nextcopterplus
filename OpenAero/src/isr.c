@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <avr/interrupt.h>
 #include "..\inc\io_cfg.h"
-//#include "..\inc\main.h"
 
 //************************************************************
 // Interrupt vectors
@@ -22,16 +21,14 @@ volatile uint16_t RxChannel1; // These variables are local but defining them
 volatile uint16_t RxChannel2; // here means that there is less pushing/popping from
 volatile uint16_t RxChannel3; // the stack
 volatile uint16_t RxChannel4;
-uint16_t RxChannel1Start;	
-uint16_t RxChannel2Start;	
-uint16_t RxChannel3Start;	
-uint16_t RxChannel4Start;
-
-#ifdef CPPM_MODE
 volatile uint16_t RxChannel5;
 volatile uint16_t RxChannel6;
 volatile uint16_t RxChannel7;
 volatile uint16_t RxChannel8;
+uint16_t RxChannel1Start;	
+uint16_t RxChannel2Start;	
+uint16_t RxChannel3Start;	
+uint16_t RxChannel4Start;
 uint16_t RxChannel5Start;
 uint16_t RxChannel6Start;
 uint16_t RxChannel7Start;
@@ -40,8 +37,6 @@ uint16_t RxChannel8Start;
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Channel number
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
-
-#endif //CPPM_MODE
 
 //************************************************************
 // Standard mode
@@ -163,6 +158,7 @@ ISR(INT0_vect)
 			RxChannel7Start = TCNT1;
 			RxChannel6 = TCNT1 - RxChannel6Start;	// Ch6 - Flap 
 			ch_num++;
+			//Interrupted = true;						// Signal that interrupt block has finished (ElectoPete 6 channel version)
 			break;
 		case 7:
 			RxChannel8Start = TCNT1;

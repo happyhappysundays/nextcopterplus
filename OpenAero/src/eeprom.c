@@ -76,6 +76,9 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxChannel2ZeroOffset	= 1520;
 	Config.RxChannel3ZeroOffset	= 1120;
 	Config.RxChannel4ZeroOffset	= 1520;
+#if defined(STD_FLAPERON)
+	Config.RxChannel6ZeroOffset = 1520;
+#endif
 	//
 	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
 	Config.AccPitchZeroTrim	= 127;

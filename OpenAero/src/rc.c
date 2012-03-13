@@ -14,6 +14,7 @@
 #include "..\inc\isr.h"
 #include "..\inc\init.h"
 #include <avr/pgmspace.h> 
+#include "..\inc\io_cfg.h"
 
 //************************************************************
 // Prototypes
@@ -30,6 +31,9 @@ int16_t		RxInPitch;
 uint16_t	RxInAux;
 int16_t		RxInYaw;
 int32_t		RxSum, OldRxSum;			// Sum of all major channels
+#if defined(STD_FLAPERON)
+int16_t		RxInAux1;
+#endif
 bool		RxActivity;
 
 #define		NOISE_THRESH	50			// Max RX noise threshold. Increase if lost alarm keeps being reset.
@@ -68,6 +72,16 @@ void RxGetChannels(void)
 		RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
 	} 
 	while (RxChannelsUpdatedFlag);
+
+#if defined(STD_FLAPERON)
+	do
+	{
+		RxChannelsUpdatedFlag = false;
+		RxInAux1 = RxChannel6 - Config.RxChannel6ZeroOffset;
+	} 
+	while (RxChannelsUpdatedFlag);
+#endif
+
 
 	RxSum = RxInRoll + RxInPitch + RxInAux + RxInYaw;
 	RxSumDiff = RxSum - OldRxSum;
