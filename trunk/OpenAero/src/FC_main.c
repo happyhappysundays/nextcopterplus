@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.10a
+// Version 1.11a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -93,6 +93,8 @@
 // V1.10a	Added lost model alarm and changed GUI lockout system
 //			Added configurable stability and autolevel switch modes.
 //			Fixed cycle timer. Corrected Yaw pot gain imbalance.
+// V1.11	Added flaperon configuration for split ailerons on M3/M4
+//			Fixed stick centering via Yaw pot.
 //
 //***********************************************************
 //* To do
@@ -107,15 +109,26 @@
 /*
 Standard mode
 
-			 X <-- THR (Throttle - CPPM mode)
+			 X <--  THR (Throttle - CPPM mode)
              |
   M3/M4 -----+----- Aileron
              |
              |
-    M5/M6 ---+---   Elevator
+     M5/M6 --+--    Elevator
              |
            M1/M2    Rudder
 
+
+Standard Flaperon mode (CPPM only)
+
+			 X <--  THR (Throttle - CPPM mode)
+             |
+     M3 -----+----- M4 Flaperons
+             |
+             |
+     M5/M6 --+--    Elevator
+             |
+           M1/M2    Rudder
 
 Flying Wing - Assumes mixing done in the transmitter
 
@@ -485,7 +498,7 @@ if (0)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2("V1.10a  (c) 2012");
+					LCDprint_line2(" V1.11 (c) 2012 ");
 					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
@@ -526,7 +539,7 @@ if (0)
 
 				// Get stored value of current item
 				if (freshmenuvalue) MenuValue = get_menu_item(MenuItem);// Get current value only when not being changed
-
+		
 				// Refresh changed data prior to delay to make LCD more responsive
 				LCD_Display_Menu(MenuItem);						// Display menu top line
 				if (MenuItem == 14) 							// Special case for LVA mode
@@ -638,14 +651,26 @@ if (0)
 			ServoOut1 = RxChannel4;
 			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
 		}
-		if(Config.RollServo) {
-			ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
-			ServoOut4 = RxChannel1;
-		}
-		else {
-			ServoOut3 = RxChannel1;
-			ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
-		}
+		#if defined(STD_FLAPERON) // Ailerons controlled separately
+			if(Config.RollServo) {
+				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut4 = Config.RxChannel1ZeroOffset - RxInAux1;
+			}
+			else {
+				ServoOut3 = RxChannel6;
+				ServoOut4 = RxChannel1;
+			}
+		#else
+			if(Config.RollServo) {
+				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut4 = RxChannel1;
+			}
+			else {
+				ServoOut3 = RxChannel1;
+				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
+			}
+		#endif
+
 		if(Config.PitchServo) {
 			ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
 			ServoOut6 = RxChannel2;
@@ -775,6 +800,9 @@ if (0)
 			ServoOut4 -= Roll;
 			ServoOut5 += Roll;
 			ServoOut6 -= Roll;
+			#elif defined(STD_FLAPERON)
+			ServoOut3 -= Roll;
+			ServoOut4 += Roll;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -833,7 +861,7 @@ if (0)
 			}
 
 			//--- (Add)Adjust pitch gyro output to Servos
-			#ifdef STANDARD
+			#if (defined (STANDARD) || defined(STD_FLAPERON))
 			ServoOut5 -= Pitch;
 			ServoOut6 += Pitch;
 			#elif defined(FWING)
@@ -874,7 +902,7 @@ if (0)
 			Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
 
 			//--- (Add)Adjust yaw gyro output to servos
-			#if (defined(STANDARD) || defined(FWING))
+			#if (defined(STANDARD) || defined(FWING) || defined(STD_FLAPERON))
 			ServoOut1 -= Yaw;
 			ServoOut2 += Yaw;
 			#else

@@ -145,7 +145,9 @@ void init(void)
 	RxChannel2 = Config.RxChannel2ZeroOffset;	// 1520;
 	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1120;
 	RxChannel4 = Config.RxChannel4ZeroOffset;	// 1520;
-
+#if defined(STD_FLAPERON)
+	RxChannel6 = Config.RxChannel6ZeroOffset;
+#endif
 	CalibrateGyros();
 
 	// Flash LED
@@ -164,14 +166,14 @@ void init(void)
 	// Config Modes (at startup)
 
 	// Stick Centering
-	if (GainInADC[YAW] > 970)	// More than 95%
+	if (GainInADC[YAW] > 240)	// More than 95%
 	{
 		CenterSticks();
 		while(1); 				// Loop forever
 	}
 
 	// Autotune
-	else if (GainInADC[YAW] < 70)	// Less than 5%
+	else if (GainInADC[YAW] < 15)	// Less than 5%
 	{
 		autotune();
 		init_uart();
@@ -278,7 +280,7 @@ void init(void)
 			_delay_ms(50);
 			LED = 0;
 		}
-	} //if (GainInADC[ROLL] < 70)
+	} //if (GainInADC[ROLL] < 15)
 #endif
 
 } // init()
@@ -301,7 +303,9 @@ void CenterSticks(void)
 	uint16_t RxChannel1ZeroOffset = 0;
 	uint16_t RxChannel2ZeroOffset = 0;
 	uint16_t RxChannel4ZeroOffset = 0;
-	
+#if defined(STD_FLAPERON)
+	uint16_t RxChannel6ZeroOffset = 0;
+#endif	
 	for (i=0;i<8;i++)
 	{
 		do
@@ -310,6 +314,9 @@ void CenterSticks(void)
 		RxChannel1ZeroOffset += RxChannel1;
 		RxChannel2ZeroOffset += RxChannel2;
 		RxChannel4ZeroOffset += RxChannel4;
+#if defined(STD_FLAPERON)
+		RxChannel6ZeroOffset += RxChannel6;
+#endif
 		}
 		while (RxChannelsUpdatedFlag);
 
@@ -320,6 +327,9 @@ void CenterSticks(void)
 	Config.RxChannel2ZeroOffset = RxChannel2ZeroOffset >> 3;
 	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH4 - we just need a guaranteed switch here
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
+#if defined(STD_FLAPERON)
+	Config.RxChannel6ZeroOffset = RxChannel6ZeroOffset >> 3;
+#endif
 
 	Save_Config_to_EEPROM();
 
