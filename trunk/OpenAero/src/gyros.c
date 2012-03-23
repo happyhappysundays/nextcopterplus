@@ -25,8 +25,8 @@ void CalibrateGyros(void);
 // Code
 //************************************************************
 //
-// Vertical mode:	Pitch gyro used for Roll
-//					Roll gyro used for Yaw; 
+// Vertical mode:	Pitch gyro used for Yaw
+//					Roll gyro used for Roll
 //				 	Yaw gyro used for Pitch 
 //
 //************************************************************
@@ -42,7 +42,7 @@ int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 		int16_t gyro;
 
 		// Roll
-		read_adc(PITCH_GYRO);				// Read pitch gyro ADC2 for roll
+		read_adc(ROLL_GYRO);				// Read roll gyro ADC2 for roll
 		gyro = ADCW;
 		gyro -= gyroZero[ROLL]; 			// Remove offset from gyro output
 		if(Config.RollGyro) {				// Reverse gyro
@@ -63,7 +63,7 @@ int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 		// Pitch
 		read_adc(YAW_GYRO);					// Read yaw gyro ADC1 for pitch
 		gyro = ADCW;
-		gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
+		gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
 		if(Config.PitchGyro) {				// Reverse gyro
 	#ifndef MEMS_MODULE
 		gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
@@ -80,9 +80,9 @@ int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 		}
 
 		// Yaw
-		read_adc(ROLL_GYRO);				// Read roll gyro ADC0 for yaw
+		read_adc(PITCH_GYRO);				// Read pitch gyro ADC0 for yaw
 		gyro = ADCW;
-		gyro -= gyroZero[YAW]; 				// Remove offset from gyro output
+		gyro -= gyroZero[PITCH]; 			// Remove offset from gyro output
 		if(Config.YawGyro) {
 			gyroADC[YAW] = -gyro;			// Reverse gyro
 		}

@@ -48,7 +48,7 @@ void variable_delay(uint8_t count);
 
 #define VERSION 10			// OpenAero version number
 
-#ifdef STANDARD				// Pass model type to MultiWii GUI
+#if (defined(STANDARD) || defined(STD_FLAPERON))	// Pass model type to MultiWii GUI
 	#define MULTITYPE 12	// Aeroplane mode
 #else
 	#define MULTITYPE 8		// Flying wing

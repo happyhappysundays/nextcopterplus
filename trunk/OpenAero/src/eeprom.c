@@ -113,7 +113,7 @@ void Set_EEPROM_Default_Config(void)
 	#else
 	Config.Modes = 16; 					// LVA mode (1) = buzzer (bit 4), 
 										// Stability mode (0) (bit 3),
-										// Pot mode (0) = active (bit 2)
+										// Pot mode (0) = active (bit 2) pot mode
 										// (bit 1) (0) unused
 										// Autolevel (0) = inactive (bit 0);
 	#endif

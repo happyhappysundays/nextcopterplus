@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.11a
+// Version 1.12a
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -95,6 +95,8 @@
 //			Fixed cycle timer. Corrected Yaw pot gain imbalance.
 // V1.11	Added flaperon configuration for split ailerons on M3/M4
 //			Fixed stick centering via Yaw pot.
+// V1.12	Fixed flaperon and vertical mode bugs
+//			Current code has double the gain for all axis (NDw)
 //
 //***********************************************************
 //* To do
@@ -498,7 +500,7 @@ if (0)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2(" V1.11 (c) 2012 ");
+					LCDprint_line2(" V1.12 (c) 2012 ");
 					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
@@ -767,7 +769,8 @@ if (0)
 	
 				// Sum Gyro P and I terms + Acc P and I terms
 				Roll = P_term_gRoll + I_term_gRoll - P_term_aRoll - I_term_aRoll;
-				Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
+				//Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
+				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 
 			}
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
@@ -788,7 +791,8 @@ if (0)
 
 				// Sum	
 				Roll = P_term_gRoll + I_term_gRoll; 				// P + I
-				Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
+				//Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
+				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 			}
 
 			//--- (Add)Adjust roll gyro output to Servos
@@ -837,7 +841,8 @@ if (0)
 
 				// Sum Gyro P and I terms + Acc P and I terms
 				Pitch = P_term_gPitch + I_term_gPitch - P_term_aPitch - I_term_aPitch;
-				Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
+				//Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
+				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
 			{
@@ -857,7 +862,8 @@ if (0)
 
 				// Sum
 				Pitch = P_term_gPitch + I_term_gPitch;				// P + I
-				Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
+				//Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
+				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
 
 			//--- (Add)Adjust pitch gyro output to Servos
@@ -899,7 +905,8 @@ if (0)
 			I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
 			Yaw = Yaw - I_term_Yaw;								// P + I
-			Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
+			//Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
+			Yaw = Yaw >> 6;										// Divide by 64 to rescale values back to normal
 
 			//--- (Add)Adjust yaw gyro output to servos
 			#if (defined(STANDARD) || defined(FWING) || defined(STD_FLAPERON))

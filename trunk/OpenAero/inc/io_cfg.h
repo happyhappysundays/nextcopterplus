@@ -18,7 +18,7 @@
 // Type of model (Choose one)
 #define STANDARD			// Standard aeroplane config
 //#define FWING				// Flying Wing config
-//#define STD_FLAPERON		// Standard aeroplane config with separate aileron control
+//#define STD_FLAPERON		// Standard aeroplane config with separate aileron control - needs CPPM
 
 // Board orientation options
 //#define VERTICAL			// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
