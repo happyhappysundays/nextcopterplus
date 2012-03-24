@@ -73,9 +73,9 @@ int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 		}
 		else {								// Normal gyro
 	#ifndef MEMS_MODULE
-		gyroADC[PITCH] = -gyro;				// Reverse gyro on KK boards
+		gyroADC[PITCH] = gyro;				// Reverse gyro on KK boards
 	#else
-		gyroADC[PITCH] = gyro;				// Normal gyro on MEMS module
+		gyroADC[PITCH] = -gyro;				// Normal gyro on MEMS module
 	#endif
 		}
 

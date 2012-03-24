@@ -805,8 +805,8 @@ if (0)
 			ServoOut5 += Roll;
 			ServoOut6 -= Roll;
 			#elif defined(STD_FLAPERON)
-			ServoOut3 -= Roll;
-			ServoOut4 += Roll;
+			ServoOut3 += Roll;
+			ServoOut4 += Roll; // Works for my setup...
 			#else
 			#error No configuration defined !!!!
 			#endif
