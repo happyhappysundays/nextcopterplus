@@ -77,7 +77,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxChannel3ZeroOffset	= 1120;
 	Config.RxChannel4ZeroOffset	= 1520;
 #if defined(STD_FLAPERON)
-	Config.RxChannel6ZeroOffset = 1520;
+	Config.RxChannel5ZeroOffset = 1520;
 #endif
 	//
 	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
@@ -102,9 +102,10 @@ void Set_EEPROM_Default_Config(void)
 	//
 	Config.StabMode = 0;				// Stability mode for non-CPPM RX. 0 = stability disables with THR input **, 1 = stability always on
 	Config.ALMode = 1;					// Autolevel mode for non-CPPM RX. 0 = Autolevel enables with THR input, 1 = Autolevel always off **
-	Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
+	//Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
+	Config.PowerTrigger = 0; 
 
-	#ifdef ACCELEROMETER
+	#if (defined (ACCELEROMETER) || defined(MEMS_MODULE))
 	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 
 										// Stability mode (0) (bit 3),
 										// Pot mode (1) = inactive (bit 2) eeprom mode
@@ -113,7 +114,7 @@ void Set_EEPROM_Default_Config(void)
 	#else
 	Config.Modes = 16; 					// LVA mode (1) = buzzer (bit 4), 
 										// Stability mode (0) (bit 3),
-										// Pot mode (0) = active (bit 2) pot mode
+										// Pot mode (0) = active (bit 2)
 										// (bit 1) (0) unused
 										// Autolevel (0) = inactive (bit 0);
 	#endif

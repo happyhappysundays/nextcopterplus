@@ -151,10 +151,10 @@ void send_multwii_data(void) // 66 bytes
 	send_word(gyroADC[i]); 		// Gyro 13
 	send_word(ServoOut1); 		// Motors 25
 	send_word(ServoOut2);
-	send_word(ServoOut3);
 	send_word(ServoOut4);
 	send_word(ServoOut5);
 	send_word(ServoOut6);
+	send_word(Throttle);
 	send_word(RxChannel1);
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 

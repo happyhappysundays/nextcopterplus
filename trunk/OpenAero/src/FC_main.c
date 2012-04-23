@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.12a
+// Version 1.12
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -92,17 +92,18 @@
 //			Fixed LVA mode bug in GUI
 // V1.10a	Added lost model alarm and changed GUI lockout system
 //			Added configurable stability and autolevel switch modes.
-//			Fixed cycle timer. Corrected Yaw pot gain imbalance.
+//			Fixed cycle timer :)
 // V1.11	Added flaperon configuration for split ailerons on M3/M4
-//			Fixed stick centering via Yaw pot.
-// V1.12	Fixed flaperon and vertical mode bugs
-//			Current code has double the gain for all axis (NDw)
+// V1.12	New output pulse generation code. Removed odd channels.
+//			Added ICP input option for CPPM mode. Three and six-channel modes.
+//			Virtually no jitter now.
+//			Fixed flaperon and vertical mode bugs.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// - Camera stabilisation version
+// 
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -113,24 +114,24 @@ Standard mode
 
 			 X <--  THR (Throttle - CPPM mode)
              |
-  M3/M4 -----+----- Aileron
+     M2 -----+----- Aileron
              |
              |
-     M5/M6 --+--    Elevator
+        M4 --+--    Elevator
              |
-           M1/M2    Rudder
+             M1    Rudder
 
 
 Standard Flaperon mode (CPPM only)
 
 			 X <--  THR (Throttle - CPPM mode)
              |
-     M3 -----+----- M4 Flaperons
+     M2 -----+----- M5 Flaperons
              |
              |
-     M5/M6 --+--    Elevator
+        M4 --+--    Elevator
              |
-           M1/M2    Rudder
+             M1    Rudder
 
 Flying Wing - Assumes mixing done in the transmitter
 
@@ -141,10 +142,10 @@ Flying Wing - Assumes mixing done in the transmitter
      |______|______|
      |_____/|\_____|
 
-      M3/M4   M5/M6 (Elevons/Flaperons)
+        M2     M4 (Elevons/Flaperons)
        Left   Right
 
-          M1/M2
+            M1
           Rudder
 */
 
@@ -176,14 +177,14 @@ Flying Wing - Assumes mixing done in the transmitter
 //***********************************************************
 // Sets the rate of the main loop (Normally 500Hz)
 #define LOOP_RATE 500				// in Hz
-#define LOOP_INTERVAL (1000000 / LOOP_RATE ) // 3,333
+#define LOOP_INTERVAL (1000000 / LOOP_RATE ) // 2000
 
-// Defines output rate to the servo (Normally 50Hz)
-#define SERVO_RATE 50				// in Hz
+// Defines output rate to the servo (Normally 55+Hz)
+#define SERVO_RATE 60				// in Hz
 
 // Servo travel limits
-#define MAX_TRAVEL 2200				// Maximum travel allowed
-#define MIN_TRAVEL 900				// Minimum travel allowed
+#define MAX_TRAVEL 2000				// Maximum travel allowed
+#define MIN_TRAVEL 1000				// Minimum travel allowed
 
 // Misc
 #define DEAD_BAND 10				// Centre region of RC input where no activity is processed
@@ -254,12 +255,10 @@ bool 	LMA_Alarm;					// Lost model alarm active
 bool 	LVA_Alarm;					// Low voltage alarm active
 bool 	firsttimeflag;
 char 	pBuffer[16];				// Print buffer
-
 uint16_t Change_LCD;				// Long timers for LCD entry and LMA
 uint32_t Change_LostModel;
 uint8_t LCD_TCNT2;
 uint8_t Lost_TCNT2;
-//
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
@@ -284,20 +283,22 @@ int main(void)
 if (0) 
 {
 	// Test new servo code
-	while(0)
+	while(1)
 	{
 		RxGetChannels();
-		ServoOut1 = RxChannel3;
-		ServoOut2 = 1000;
-		ServoOut3 = 1200;
-		ServoOut4 = 1500;
-		ServoOut5 = 1500;
-		ServoOut6 = RxInAux + 1200;
+		ServoOut1 = 500;
+		ServoOut2 = 600;
+		ServoOut4 = 700;
+		ServoOut5 = 1000;
+		ServoOut6 = 1500;
 		Throttle = RxChannel3;
 		while (Interrupted == false){};
 		Interrupted = false;
-		//_delay_ms(30);
-		output_servo_ppm();	
+		ServoOut1 = ServoOut1 >> 1;
+		ServoOut2 = ServoOut2 >> 1;
+		ServoOut4 = ServoOut4 >> 1;
+		ServoOut5 = ServoOut5 >> 1;
+//		output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);	
 	}
 }
 
@@ -329,11 +330,13 @@ if (0)
 		// Autolevel is only available if you have an Accelerometer
 		#if defined(ACCELEROMETER)
 
-			// For CPPM mode, use separate switch for Autolevel (CH5)
+			// For CPPM mode, use same switch for Autolevel as for stability (RxChannel8)
+			// RxChannel8 enables Autolevel if Config.ALMode = 0
+			// Autolevel always OFF if Config.ALMode = 1 (default)
 			#if defined(CPPM_MODE)
 
-				if (RxChannel5 > 1600)
-				{									// When CH5 is activated
+				if (RxChannel8 > 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
+				{									// When channel is activated
 					AutoLevel = true;				// Activate autolevel mode
 					flight_mode |= 1;				// Notify GUI that mode has changed
 				}
@@ -349,7 +352,7 @@ if (0)
 			// Autolevel always OFF if Config.ALMode = 1 (default)
 			#else
 
-				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and THR is activated
+				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and AL is available
 				{
 					AutoLevel = true;				// Activate autolevel mode
 					flight_mode |= 1;				// Notify GUI that mode has changed
@@ -472,14 +475,14 @@ if (0)
 		//* LCD
 		//************************************************************
 
-		// LCD menu system - enter with pitch up, roll left and yaw right in stable mode
+		// LCD menu system - enter with pitch up, roll right and yaw left in stable mode
 		// Check for stick hold
 		Change_LCD += (uint8_t) (TCNT2 - LCD_TCNT2);
 		LCD_TCNT2 = TCNT2;
 
 		if ((RxInPitch > -STICKARM_POINT) || 	// Reset count if not up enough
-			(RxInYaw < STICKARM_POINT) ||		// Reset count if not right yaw enough
-			(RxInRoll > -STICKARM_POINT))		// Reset count if not left roll enough
+			(RxInYaw < STICKARM_POINT) ||		// Reset count if not left yaw enough
+			(RxInRoll > -STICKARM_POINT))		// Reset count if not right roll enough
 		{														
 			Change_LCD = 0;			
 		}
@@ -500,7 +503,7 @@ if (0)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2(" V1.12 (c) 2012 ");
+					LCDprint_line2(" V1.12  (c)2012 ");
 					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
@@ -645,51 +648,49 @@ if (0)
 		//************************************************************
 
 		// Reverse servo outputs as required
-		if(Config.YawServo) {
+		if(Config.YawServo) {		// Rudder
 			ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 
-			ServoOut2 = RxChannel4;
 		}
 		else {
 			ServoOut1 = RxChannel4;
-			ServoOut2 = Config.RxChannel4ZeroOffset - RxInYaw;
 		}
-		#if defined(STD_FLAPERON) // Ailerons controlled separately
+
+		#if defined(STD_FLAPERON) 	// Ailerons controlled by separate channels
 			if(Config.RollServo) {
-				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
-				ServoOut4 = Config.RxChannel1ZeroOffset - RxInAux1;
+				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut5 = Config.RxChannel1ZeroOffset - RxInAux1;
 			}
 			else {
-				ServoOut3 = RxChannel6;
-				ServoOut4 = RxChannel1;
+				ServoOut2 = RxChannel5;
+				ServoOut5 = RxChannel1;
 			}
-		#else
+		#else						// Only one aileron channel
 			if(Config.RollServo) {
-				ServoOut3 = Config.RxChannel1ZeroOffset - RxInRoll;
-				ServoOut4 = RxChannel1;
+				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
 			}
 			else {
-				ServoOut3 = RxChannel1;
-				ServoOut4 = Config.RxChannel1ZeroOffset - RxInRoll;
+				ServoOut2 = RxChannel1;
 			}
 		#endif
 
-		if(Config.PitchServo) {
-			ServoOut5 = Config.RxChannel2ZeroOffset - RxInPitch;
-			ServoOut6 = RxChannel2;
+		if(Config.PitchServo) {		// Elevator
+			ServoOut4 = Config.RxChannel2ZeroOffset - RxInPitch;
 		}
 		else {
-			ServoOut5 = RxChannel2;
-			ServoOut6 = Config.RxChannel2ZeroOffset - RxInPitch;
+			ServoOut4 = RxChannel2;
 		}
 		Throttle = RxChannel3;
 
-		// For CPPM mode, use separate switch for Stability (CH7)
-		// Stability mode OFF (RxInAux > 0)
+		//************************************************************
+		//* Stability mode selection
+		//************************************************************
+
+		// For CPPM mode, use Ch.8 for Stability
 		#ifdef CPPM_MODE
-		if (RxChannel7 > 1600)							// AUX 1 over-rides stability
+		if ((RxChannel8 > 1600) && (Config.StabMode == 0))	// RxChannel8 enables stability if Config.StabMode = 0 (default)
 		#else
-		if ((RxInAux < 200) && (Config.StabMode == 0))	// RxInAux (formerly throttle) enables stability if Config.StabMode = 0 (default)
-		#endif											// Stability always ON if Config.StabMode = 1
+		if ((RxInAux < 200) && (Config.StabMode == 0))		// RxInAux (formerly throttle) enables stability if Config.StabMode = 0 (default)
+		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
 			flight_mode &= 0xf7;
@@ -769,7 +770,6 @@ if (0)
 	
 				// Sum Gyro P and I terms + Acc P and I terms
 				Roll = P_term_gRoll + I_term_gRoll - P_term_aRoll - I_term_aRoll;
-				//Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
 				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 
 			}
@@ -791,22 +791,18 @@ if (0)
 
 				// Sum	
 				Roll = P_term_gRoll + I_term_gRoll; 				// P + I
-				//Roll = Roll >> 7;									// Divide by 128 to rescale values back to normal
 				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 			}
 
 			//--- (Add)Adjust roll gyro output to Servos
 			#ifdef STANDARD
-			ServoOut3 -= Roll;
-			ServoOut4 += Roll;
+			ServoOut2 -= Roll;
 			#elif defined(FWING)
-			ServoOut3 += Roll;
-			ServoOut4 -= Roll;
-			ServoOut5 += Roll;
-			ServoOut6 -= Roll;
+			ServoOut2 += Roll;
+			ServoOut4 += Roll;
 			#elif defined(STD_FLAPERON)
-			ServoOut3 += Roll;
-			ServoOut4 += Roll; // Works for my setup...
+			ServoOut2 -= Roll;
+			ServoOut5 += Roll;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -841,7 +837,6 @@ if (0)
 
 				// Sum Gyro P and I terms + Acc P and I terms
 				Pitch = P_term_gPitch + I_term_gPitch - P_term_aPitch - I_term_aPitch;
-				//Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
 				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
@@ -862,19 +857,15 @@ if (0)
 
 				// Sum
 				Pitch = P_term_gPitch + I_term_gPitch;				// P + I
-				//Pitch = Pitch >> 7;									// Divide by 128 to rescale values back to normal
 				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
 
 			//--- (Add)Adjust pitch gyro output to Servos
 			#if (defined (STANDARD) || defined(STD_FLAPERON))
-			ServoOut5 -= Pitch;
-			ServoOut6 += Pitch;
+			ServoOut4 -= Pitch;
 			#elif defined(FWING)
-			ServoOut3 -= Pitch;
+			ServoOut2 -= Pitch;
 			ServoOut4 += Pitch;
-			ServoOut5 += Pitch;
-			ServoOut6 -= Pitch;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -905,13 +896,11 @@ if (0)
 			I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
 
 			Yaw = Yaw - I_term_Yaw;								// P + I
-			//Yaw = Yaw >> 7;										// Divide by 128 to rescale values back to normal
 			Yaw = Yaw >> 6;										// Divide by 64 to rescale values back to normal
 
 			//--- (Add)Adjust yaw gyro output to servos
 			#if (defined(STANDARD) || defined(FWING) || defined(STD_FLAPERON))
 			ServoOut1 -= Yaw;
-			ServoOut2 += Yaw;
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -921,18 +910,18 @@ if (0)
 		//--- Servo travel limits ---
 		if ( ServoOut1 < MIN_TRAVEL )	ServoOut1 = MIN_TRAVEL;	
 		if ( ServoOut2 < MIN_TRAVEL )	ServoOut2 = MIN_TRAVEL;	
-		if ( ServoOut3 < MIN_TRAVEL )	ServoOut3 = MIN_TRAVEL;
 		if ( ServoOut4 < MIN_TRAVEL )	ServoOut4 = MIN_TRAVEL;
 		if ( ServoOut5 < MIN_TRAVEL )	ServoOut5 = MIN_TRAVEL;	
-		if ( ServoOut6 < MIN_TRAVEL )	ServoOut6 = MIN_TRAVEL;	
-
+		if ( ServoOut6 < MIN_TRAVEL )	ServoOut6 = MIN_TRAVEL;
+		if ( Throttle  < MIN_TRAVEL )	Throttle  = MIN_TRAVEL;	
+	
 		if ( ServoOut1 > MAX_TRAVEL )	ServoOut1 = MAX_TRAVEL;	
 		if ( ServoOut2 > MAX_TRAVEL )	ServoOut2 = MAX_TRAVEL;	
-		if ( ServoOut3 > MAX_TRAVEL )	ServoOut3 = MAX_TRAVEL;
+		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
 		if ( ServoOut4 > MAX_TRAVEL )	ServoOut4 = MAX_TRAVEL;
 		if ( ServoOut5 > MAX_TRAVEL )	ServoOut5 = MAX_TRAVEL;	
-		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;	
-
+		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
+		if ( Throttle  > MAX_TRAVEL )	Throttle  = MAX_TRAVEL;	
 
 		// Loop governor is here so that output_servo_ppm() is only called every 20ms
 		// and the loop is regulated to LOOP_RATE Hz. This is important for the averaging filters.
@@ -950,11 +939,12 @@ if (0)
 			TCNT0 = 0;					// Reset counter
 			for (int i=0;i<loop_padding;i++)
 			{
-				while (TCNT0 < 64);		// 8MHz * 64 = 8us
-				TCNT0 -= 64;
+				while (TCNT0 < 8);		// 1MHz / 8 = 8us
+				TCNT0 -= 8;
 			}
 		}
 
+		// Ensure that output_servo_ppm() is only called at SERVO_RATE.
 		// If SERVO_RATE due, update servos, otherwise keep looping
 		// Inhibit servos while GUI connected
 		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
@@ -963,7 +953,7 @@ if (0)
 			servo_skip = 0;
 			while (Interrupted == false){};	// Wait here for any interrupts to complete
 			Interrupted = false;
-			output_servo_ppm();			// Output servo signal
+			output_servo_ppm();				// Output servo signal
 		}
 
 		// Update cycle time for GUI

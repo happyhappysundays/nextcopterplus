@@ -8,9 +8,11 @@
 
 extern void RxGetChannels(void);
 
-extern int16_t	RxInRoll;		// RC axis values
-extern int16_t	RxInPitch;
-extern uint16_t	RxInAux;
-extern int16_t	RxInYaw;
-extern int16_t	RxInAux1;
-extern bool		RxActivity;
+// RC input values
+extern int16_t	RxInRoll;		// Roll/Left.Aileron input
+extern int16_t	RxInPitch;		// Pitch input
+extern uint16_t	RxInAux;		// Stability switch input
+extern int16_t	RxInYaw;		// Yaw input
+extern int16_t	RxInAux1;		// Flap/Right.Aileron input
+
+extern bool		RxActivity;		// RX activity flag

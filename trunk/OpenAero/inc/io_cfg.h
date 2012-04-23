@@ -10,24 +10,7 @@
 //***********************************************************
 
 #include "typedefs.h"
-
-//***********************************************************
-//* Compilation options
-//***********************************************************
-//
-// Type of model (Choose one)
-#define STANDARD			// Standard aeroplane config
-//#define FWING				// Flying Wing config
-//#define STD_FLAPERON		// Standard aeroplane config with separate aileron control - needs CPPM
-
-// Board orientation options
-//#define VERTICAL			// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
-
-// Optional extensions (Choose where fitted)
-//#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
-//#define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
-//#define MEMS_MODULE 		// Uncomment this when using the MEMS module (MEMS gyros are reversed)
-//#define CAMERA			// Uncomment this for using M4 to M6 for camera control (TBD)
+#include "compiledefs.h"
 
 //***********************************************************
 //* Pin definitions
@@ -81,6 +64,10 @@
 
 #define LVA				REGISTER_BIT(PORTD,4)	// LVA analog input
 #define LVA_DIR			REGISTER_BIT(DDRD,4)
+
+#define ICP				REGISTER_BIT(PORTB,0)	// ICP CPPM input (formerly M3)
+#define ICP_DIR 		REGISTER_BIT(DDRB,0)
+
 
 //***********************************************************
 
