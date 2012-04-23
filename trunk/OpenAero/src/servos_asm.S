@@ -1,0 +1,171 @@
+/*
+ * servos_asm.S
+ *
+ * Created: 16/04/2012 09:45:00
+ * Author: David Thompson - based on code example from Cesco
+ *
+ */
+
+#include <avr/io.h>
+#include "..\inc\compiledefs.h"
+
+// Servo output pin assignments
+#define M123_OUT	_SFR_IO_ADDR(PORTB)
+#define M456_OUT	_SFR_IO_ADDR(PORTD)
+
+#define M1 M123_OUT,2
+#define M2 M123_OUT,1
+#define M4 M456_OUT,7
+#define M5 M456_OUT,6
+#define M6 M456_OUT,5
+#define THR M456_OUT,3	// THR output
+
+#ifndef __tmp_reg__
+#define __tmp_reg__ 0
+#endif
+
+	.section .text
+
+#ifdef THREE_CHANNEL
+
+;*************************************************************************	
+; void output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
+; regs = r24,25 (ServoOut1), r22,23 (ServoOut2), r20,21 (ServoOut4)
+;
+; Total loop cycles = 13 + (17(avg) * 1042) + 7 = 2.216ms
+;
+;*************************************************************************
+
+	.global output_servo_ppm_asm
+	.func   output_servo_ppm_asm
+output_servo_ppm_asm:
+	push	16			// 2 <---------	Left column is skip execution path
+	push	17			// 2 	<----	Right column is pulse end execution path
+
+	ldi 	16,0x12		// 1			Set loop count to 412h or 1042
+	ldi		17,0x04		// 1
+	clr		0			// 1
+
+	sbi 	M1			// 2			Set all outputs
+	sbi 	M2			// 2
+	sbi 	M4			// 2
+
+f0:
+	subi	r24,1		// 1 			ServoOut1
+	sbc 	r25,0		// 1
+	brne	f1			// 2	1
+	cbi 	M1			// 		2		Clear output M1 if done
+f1:
+	subi	r22,1		// 1			ServoOut2
+	sbc 	r23,0		// 1
+	brne	f2			// 2	1
+	cbi 	M2			// 		2		Clear output M2 if done
+f2:
+	subi	r20,1		// 1			ServoOut4
+	sbc 	r21,0		// 1
+	brne	f3			// 2	1
+	cbi 	M4			// 		2		Clear output M4 if done
+f3:
+	subi 	16,1		// 1
+	sbc 	17,0		// 1
+	brne	f0			// 2	1		Loop until zero
+
+	pop		17			// 		2		Restore regs
+	pop		16			//		2
+	ret					//		4
+	.endfunc	
+
+#elif defined(SIX_CHANNEL)
+
+;*************************************************************************	
+; void output_servo_ppm_asm(Servo1, Servo2, Servo4, Servo5, Servo6, Servo_thr);
+; regs = r24 (Servo1), r22 (Servo2), r20 (Servo4), r18(Servo5), r16 (Servo6), r14(Servo_thr)
+;
+; Total loop cycles = (19 + (18(avg) * 983) + 8) / 8 = 2.216ms
+;
+;*************************************************************************
+
+	.global output_servo_ppm_asm
+	.func   output_servo_ppm_asm
+output_servo_ppm_asm:
+	push	19			// 2 <---------	Left column is skip execution path
+	push	17			// 2 	<----	Right column is pulse end execution path
+	push	23			// 2			
+
+	// Copy r14 to r23 so that subi can be used
+	mov		r23,r14
+
+	sbi 	M1			// 2			Set all outputs
+	sbi 	M2			// 2
+	sbi 	M4			// 2
+	sbi 	M5			// 2
+	sbi 	M6			// 2
+	sbi		THR			// 2
+
+// Min input of 1000us
+minpulse:
+	ldi 	19,0x76		// 1			Set loop count to 476h or 1142d
+	ldi		17,0x04		// 1
+	clr		0			// 1
+looppulse:
+	nop					// 1
+	nop					// 1
+	nop					// 1
+	subi 	19,1		// 1
+	sbc 	17,0		// 1
+	brne	looppulse	// 2	1		Loop until zero
+
+varpulse:				//				Start variable part of pulse
+	ldi 	19,0xD7		// 1			Set loop count to 3D7h or 983
+	ldi		17,0x03		// 1
+	clr		0			// 1
+
+f0:
+	nop
+	nop
+	subi	r24,1		// 1 			Servo1
+	brne	f1			// 2	1
+	cbi 	M1			// 		2		Clear output M1 if done
+f1:
+	nop
+	nop
+	subi	r22,1		// 1			Servo2
+	brne	f2			// 2	1
+	cbi 	M2			// 		2		Clear output M2 if done
+f2:
+	nop
+	nop
+	subi	r20,1		// 1			Servo4
+	brne	f3			// 2	1
+	cbi 	M4			// 		2		Clear output M4 if done
+f3:
+	nop
+	nop
+	subi	r18,1		// 1 			Servo5
+	brne	f4			// 2	1
+	cbi 	M5			// 		2		Clear output M5 if done
+f4:
+//	nop
+	nop
+	subi	r16,1		// 1			Servo6
+	brne	f5			// 2	1
+	cbi 	M6			// 		2		Clear output M6 if done
+f5:
+//	nop
+	nop
+	subi	r23,1		// 1			Throttle
+	brne	f6			// 2	1
+	cbi 	THR			// 		2		Clear output THR if done
+f6:
+//	nop
+	subi 	19,1		// 1
+	sbc 	17,0		// 1
+	brne	f0			// 2	1		Loop until zero
+
+	pop		23			//		2
+	pop		17			// 		2		Restore regs
+	pop		19			//		2
+	ret					//		4
+	.endfunc
+
+#endif
