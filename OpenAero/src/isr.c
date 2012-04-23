@@ -34,12 +34,15 @@ uint16_t RxChannel6Start;
 uint16_t RxChannel7Start;
 uint16_t RxChannel8Start;
 
+volatile uint16_t icp_value;	
+volatile uint16_t RxChannelStart;
+
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Channel number
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
 
 //************************************************************
-// Standard mode
+// Standard PWM mode
 //************************************************************
 
 #ifndef CPPM_MODE  	// Normal RX mode
@@ -51,9 +54,7 @@ ISR(PCINT2_vect)
 	} 
 	else 
 	{				// Falling
-		if (TCNT1 > RxChannel1Start) RxChannel1 = TCNT1 - RxChannel1Start;
-		else RxChannel1 = (0xffff - RxChannel1Start) + TCNT1;
-		//RxChannel1 = TCNT1 - RxChannel1Start;
+		RxChannel1 = TCNT1 - RxChannel1Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -66,9 +67,7 @@ ISR(INT0_vect)
 	} 
 	else 
 	{				// Falling
-		if (TCNT1 > RxChannel2Start) RxChannel2 = TCNT1 - RxChannel2Start;
-		else RxChannel2 = (0xffff - RxChannel2Start) + TCNT1;
-		//RxChannel2 = TCNT1 - RxChannel2Start;
+		RxChannel2 = TCNT1 - RxChannel2Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -81,9 +80,7 @@ ISR(INT1_vect)
 	} 
 	else 
 	{				// Falling
-		if (TCNT1 > RxChannel3Start) RxChannel3 = TCNT1 - RxChannel3Start;
-		else RxChannel3 = (0xffff - RxChannel3Start) + TCNT1;
-		//RxChannel3 = TCNT1 - RxChannel3Start;
+		RxChannel3 = TCNT1 - RxChannel3Start;
 	}
 	RxChannelsUpdatedFlag = true;
 }
@@ -96,23 +93,93 @@ ISR(PCINT0_vect)
 	} 
 	else 
 	{				// Falling
-		if (TCNT1 > RxChannel4Start) RxChannel4 = TCNT1 - RxChannel4Start;
-		else RxChannel4 = (0xffff - RxChannel4Start) + TCNT1;
-		//RxChannel4 = TCNT1 - RxChannel4Start;
+		RxChannel4 = TCNT1 - RxChannel4Start;
 		Interrupted = true;						// Signal that interrupt block has finished
 	}
 	RxChannelsUpdatedFlag = true;
 }
 
+#elif defined(ICP_CPPM_MODE) // ICP CPPM mode
+
 //************************************************************
-// PPM RX mode 	- input on PD2 (INT0/elevator)
+// CPPM RX mode 	- input on PB0 (ICP/M3)
 // NB: JR/Spectrum channel order (Th,Ai,El,Ru,5,6,7,8)
 // 	   Other brands of TX will lead to the wrong channels
 //	   being decoded into the RxChannel variables
 //	   unless they are changed here.
 //************************************************************
 
-#else
+ISR(TIMER1_CAPT_vect)
+{	// Check to see if previous period was a sync pulse
+	// If so, reset channel number
+
+	icp_value = ICR1;
+	if ((icp_value - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
+	PPMSyncStart = icp_value;
+
+	switch(ch_num)
+	{
+		case 0:
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 1:
+			RxChannel3 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 2:
+			RxChannel1 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 3:
+			RxChannel2 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 4:
+			RxChannel4 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 5:
+			RxChannel5 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 6:
+			RxChannel6 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 7:
+			RxChannel7 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 8:
+			RxChannel8 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			ch_num++;
+			Interrupted = true;						// Signal that interrupt block has finished
+			RxChannelsUpdatedFlag = true;			// Flag that data changed
+			break;
+		default:
+			break;
+	} // Switch
+}
+
+#else // INT0 CPPM mode
+
+//************************************************************
+// CPPM RX mode 	- input on PD2 (INT0/elevator)
+// NB: JR/Spectrum channel order (Th,Ai,El,Ru,5,6,7,8)
+// 	   Other brands of TX will lead to the wrong channels
+//	   being decoded into the RxChannel variables
+//	   unless they are changed here.
+//************************************************************
+
 ISR(INT0_vect)
 {	// Check to see if previous period was a sync pulse
 	// If so, reset channel number
@@ -151,18 +218,17 @@ ISR(INT0_vect)
 			break;
 		case 5:
 			RxChannel6Start = TCNT1;
-			RxChannel5 = TCNT1 - RxChannel5Start;	// Ch5 - Gear
+			RxChannel5 = TCNT1 - RxChannel5Start;	// Ch5 - Gear/Aileron 2
 			ch_num++;
 			break;
 		case 6:
 			RxChannel7Start = TCNT1;
-			RxChannel6 = TCNT1 - RxChannel6Start;	// Ch6 - Flap 
+			RxChannel6 = TCNT1 - RxChannel6Start;	// Ch6 - Flap 1
 			ch_num++;
-			//Interrupted = true;						// Signal that interrupt block has finished (ElectoPete 6 channel version)
 			break;
 		case 7:
 			RxChannel8Start = TCNT1;
-			RxChannel7 = TCNT1 - RxChannel7Start;	// Ch7 - AUX2
+			RxChannel7 = TCNT1 - RxChannel7Start;	// Ch7 - Flap 2
 			ch_num++;
 			break;
 		case 8:

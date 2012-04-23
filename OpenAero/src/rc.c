@@ -77,7 +77,7 @@ void RxGetChannels(void)
 	do
 	{
 		RxChannelsUpdatedFlag = false;
-		RxInAux1 = RxChannel6 - Config.RxChannel6ZeroOffset;
+		RxInAux1 = RxChannel5 - Config.RxChannel5ZeroOffset;
 	} 
 	while (RxChannelsUpdatedFlag);
 #endif

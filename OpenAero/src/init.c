@@ -44,17 +44,17 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
-//	uint8_t i;
-
 	MCUCR |= (1<<PUD);			// Pull-up Disable
 
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
+
 #ifdef CPPM_MODE
 	THR_DIR			= OUTPUT;	// In CPPM mode the THR pin is an output
 #else
-	RX_COLL_DIR		= INPUT;	// In non-CPPM mode the THR pin is an input
+	RX_COLL_DIR		= INPUT;	// Otherwise the THR pin is an input
 #endif
+
 	RX_YAW_DIR		= INPUT;
 
 	GYRO_YAW_DIR	= INPUT;
@@ -66,7 +66,6 @@ void init(void)
 
 	M1_DIR			= OUTPUT;
 	M2_DIR			= OUTPUT;
-	M3_DIR			= OUTPUT;
 	M4_DIR			= OUTPUT;
 	M5_DIR			= OUTPUT;
 	M6_DIR			= OUTPUT;
@@ -74,8 +73,9 @@ void init(void)
 	LED_DIR			= OUTPUT;
 	LCD_TX_DIR		= OUTPUT;
 	LVA_DIR			= OUTPUT;
+	ICP_DIR			= INPUT;	// Always an input for safety, even in PWM mode
 
-	LVA 		= 0; // LVA alarm OFF
+	LVA 		= 0; 			// LVA alarm OFF
 
 	LED 		= 0;
 	RX_ROLL 	= 0;
@@ -85,45 +85,53 @@ void init(void)
 #endif
 	RX_YAW		= 0;
 
-// Conditional builds for interrupt and pin function setup
-#ifdef CPPM_MODE 
-	// External interrupts INT0 (CPPM input)
-	EICRA = (1 << ISC01);				// Falling edge of INT0
-	EIMSK = (1 << INT0);				// Enable INT0
-	EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
-
-#else // Non-CPPM mode
-	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
-	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
-	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
-	PCMSK0 |= (1 << PCINT7);			// PB7 (Rudder/Yaw pin change mask)
-	PCMSK2 |= (1 << PCINT17);			// PD1 (Aileron/Roll pin change mask)
-
-	// External interrupts INT0 and INT1 (Pitch, Collective)
-	EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
-	EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
-	EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
-#endif
-
-
-	// Timer0 (8bit) - run @ 8MHz
-	// Used to control ESC/servo pulse length
+	// Timer0 (8bit) - run @ 125kHz (8us)
+	// Used to pad out loop cycle time in blocks of 8us
 	TCCR0A = 0;							// Normal operation
-	TCCR0B = (1 << CS00);				// Clk/0
+	TCCR0B = (1 << CS00);				// Clk/8 = 1MHz = 1us
 	TIMSK0 = 0; 						// No interrupts
 
 	// Timer1 (16bit) - run @ 1Mhz
 	// Used to measure Rx Signals & control ESC/servo output rate
 	TCCR1A = 0;
-	TCCR1B = (1 << CS11);
+	TCCR1B = (1 << CS11);				// Clk/8 = 1MHz
 
-	// Timer2 8bit - run @ 8MHz / 1024 = 7812.5KHz
+	// Timer2 8bit - run @ 8MHz / 1024 = 7812.5kHz
 	// Used to time arm/disarm intervals
 	TCCR2A = 0;	
-	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);	// /1024
+	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);	// Clk/1024 = 7812.5kHz
 	TIMSK2 = 0;
 	TIFR2 = 0;
 	TCNT2 = 0;							// Reset counter
+
+// Conditional builds for interrupt and pin function setup
+#ifdef ICP_CPPM_MODE 
+	// Input capture interrupt
+	TIMSK1  = (1 << ICIE1);					// Input capture interrupt enable
+	TIFR1   = 0;							// Reset input capture interrupt flag
+	TCCR1B |= (1 << ICNC1);					// Set input capture noise canceller
+	//TCCR1B |= (1 << ICES1);				// Set input capture edge selection to rising (otherwise falling)
+#else
+	#ifdef CPPM_MODE 
+		// External interrupts INT0 (CPPM input)
+		EICRA = (1 << ISC01);				// Falling edge of INT0
+		EIMSK = (1 << INT0);				// Enable INT0
+		EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
+
+	#else // Non-CPPM mode
+		// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
+		PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
+		PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
+		PCMSK0 |= (1 << PCINT7);			// PB7 (Rudder/Yaw pin change mask)
+		PCMSK2 |= (1 << PCINT17);			// PD1 (Aileron/Roll pin change mask)
+
+		// External interrupts INT0 and INT1 (Pitch, Collective)
+		EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
+		EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
+		EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
+
+	#endif
+#endif
 
 	Initial_EEPROM_Config_Load();		// Loads config at start-up 
 
@@ -146,7 +154,7 @@ void init(void)
 	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1120;
 	RxChannel4 = Config.RxChannel4ZeroOffset;	// 1520;
 #if defined(STD_FLAPERON)
-	RxChannel6 = Config.RxChannel6ZeroOffset;
+	RxChannel5 = Config.RxChannel5ZeroOffset;
 #endif
 	CalibrateGyros();
 
@@ -304,7 +312,7 @@ void CenterSticks(void)
 	uint16_t RxChannel2ZeroOffset = 0;
 	uint16_t RxChannel4ZeroOffset = 0;
 #if defined(STD_FLAPERON)
-	uint16_t RxChannel6ZeroOffset = 0;
+	uint16_t RxChannel5ZeroOffset = 0;
 #endif	
 	for (i=0;i<8;i++)
 	{
@@ -315,7 +323,7 @@ void CenterSticks(void)
 		RxChannel2ZeroOffset += RxChannel2;
 		RxChannel4ZeroOffset += RxChannel4;
 #if defined(STD_FLAPERON)
-		RxChannel6ZeroOffset += RxChannel6;
+		RxChannel5ZeroOffset += RxChannel5;
 #endif
 		}
 		while (RxChannelsUpdatedFlag);
@@ -328,7 +336,7 @@ void CenterSticks(void)
 	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH4 - we just need a guaranteed switch here
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
 #if defined(STD_FLAPERON)
-	Config.RxChannel6ZeroOffset = RxChannel6ZeroOffset >> 3;
+	Config.RxChannel5ZeroOffset = RxChannel5ZeroOffset >> 3;
 #endif
 
 	Save_Config_to_EEPROM();

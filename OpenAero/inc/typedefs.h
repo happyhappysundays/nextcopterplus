@@ -22,7 +22,7 @@ typedef struct
 	uint16_t	RxChannel2ZeroOffset;
 	uint16_t	RxChannel3ZeroOffset;	// Currently throttle is fixed
 	uint16_t	RxChannel4ZeroOffset;
-	uint16_t	RxChannel6ZeroOffset;
+	uint16_t	RxChannel5ZeroOffset;
 	uint8_t		AccRollZeroTrim;		// User-set ACC trim (0~255 -> +/-127 @ GUI)
 	uint8_t		AccPitchZeroTrim;
 	uint16_t	AccRollZero;			// Acc calibration results
