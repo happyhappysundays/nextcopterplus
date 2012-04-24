@@ -48,13 +48,11 @@ void init(void)
 
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
-
 #ifdef CPPM_MODE
 	THR_DIR			= OUTPUT;	// In CPPM mode the THR pin is an output
 #else
 	RX_COLL_DIR		= INPUT;	// Otherwise the THR pin is an input
 #endif
-
 	RX_YAW_DIR		= INPUT;
 
 	GYRO_YAW_DIR	= INPUT;
@@ -85,8 +83,8 @@ void init(void)
 #endif
 	RX_YAW		= 0;
 
-	// Timer0 (8bit) - run @ 125kHz (8us)
-	// Used to pad out loop cycle time in blocks of 8us
+	// Timer0 (8bit) - run @ 1MHz (1us)
+	// Used to pad out loop cycle time in blocks of 1us
 	TCCR0A = 0;							// Normal operation
 	TCCR0B = (1 << CS00);				// Clk/8 = 1MHz = 1us
 	TIMSK0 = 0; 						// No interrupts
@@ -231,7 +229,7 @@ void init(void)
 		}
 
 		if (Config.ALMode == 1) Config.ALMode = 0;		// Autolevel switchable
-		else Config.ALMode = 1; 						// Autolevel always ON
+		else Config.ALMode = 1; 						// Autolevel always OFF
 
 		Save_Config_to_EEPROM();
 
@@ -333,7 +331,7 @@ void CenterSticks(void)
 
 	Config.RxChannel1ZeroOffset = RxChannel1ZeroOffset >> 3; // Divide by 8
 	Config.RxChannel2ZeroOffset = RxChannel2ZeroOffset >> 3;
-	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH4 - we just need a guaranteed switch here
+	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH3 - we just need a guaranteed switch here
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
 #if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = RxChannel5ZeroOffset >> 3;

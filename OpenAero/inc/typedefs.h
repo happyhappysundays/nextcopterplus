@@ -17,7 +17,6 @@ typedef enum _BOOL { FALSE = 0, TRUE } BOOL;
 typedef struct
 {
 	uint8_t	setup;						// Byte to identify if already setup
-
 	uint16_t	RxChannel1ZeroOffset;	// Zero offsets (stick centering)
 	uint16_t	RxChannel2ZeroOffset;
 	uint16_t	RxChannel3ZeroOffset;	// Currently throttle is fixed

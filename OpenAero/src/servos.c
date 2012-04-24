@@ -33,7 +33,6 @@ void output_servo_ppm_asm(uint8_t mot1, uint8_t mot2, uint8_t mot3, uint8_t mot4
 //************************************************************
 // Code
 //************************************************************
-
 uint16_t ServoOut1;
 uint16_t ServoOut2;
 uint16_t ServoOut4;
@@ -59,6 +58,7 @@ void output_servo_ppm(void)
 	cli();
 	output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
 	sei();
+
 #else
 	Servo1 = ((ServoOut1 - 1000) >> 2); // Scale servo from 1000~2000 to 0~250
 	Servo2 = ((ServoOut2 - 1000) >> 2);
@@ -67,7 +67,7 @@ void output_servo_ppm(void)
 	Servo6 = ((ServoOut6 - 1000) >> 2);
 	Servo_thr = ((Throttle  - 1000) >> 2);
 	//
-	// Debug: Force values to positive (should not be needed as done by FC_main.c)
+	// Debug: Force values to positive (should not be needed as already limited by FC_main.c)
 	//
 	if (Servo1 <= 0) Servo1 = 1;
 	if (Servo2 <= 0) Servo2 = 1;
@@ -80,6 +80,7 @@ void output_servo_ppm(void)
 	cli();
 	output_servo_ppm_asm(Servo1, Servo2, Servo4, Servo5, Servo6, Servo_thr);
 	sei();
+
 #endif
 
 
