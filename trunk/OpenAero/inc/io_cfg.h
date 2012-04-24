@@ -13,6 +13,12 @@
 #include "compiledefs.h"
 
 //***********************************************************
+//* Random externals
+//***********************************************************
+
+extern CONFIG_STRUCT Config;
+
+//***********************************************************
 //* Pin definitions
 //***********************************************************
 
@@ -68,6 +74,7 @@
 #define ICP				REGISTER_BIT(PORTB,0)	// ICP CPPM input (formerly M3)
 #define ICP_DIR 		REGISTER_BIT(DDRB,0)
 
+#define MENUITEMS 27	// Number of lCD menu items
 
 //***********************************************************
 

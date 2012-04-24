@@ -4,8 +4,9 @@
 // Version 1.12
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
+// OpenAero code by David Thompson
 //
-// Includes PID and Auto-level functions inspired by the open-sourced MultiWiiproject
+// Includes PID and Auto-level functions inspired by the open-sourced MultiWii project
 // Compatible with KK boards fitted with X and Y accelerometers 
 // on Roll/Pitch pot inputs. LCD board or GUI required for setup of PID constants.
 //
@@ -63,7 +64,25 @@
 // Move stick Up/Left for Normal, Down/Right for reverse
 // eg: to set Roll Gyro Normal, move Tx Roll stick left, or to reverse it move stick right
 //
-// Menu modes
+// Stability mode selection
+// ------------------------
+// Hold Yaw stick on TX left or right
+// Power on
+// LED flashes 3 times
+// Mode will toggle between the following:
+// 		Stability switchable
+// 		Stability always ON
+//
+// Autolevel mode selection
+// ------------------------
+// Hold Roll stick on TX left or right
+// Power on
+// LED flashes 3 times
+// Mode will toggle between the following:
+// 		Autolevel switchable
+//		Autolevel always OFF
+//
+// Menu modes (direction may depend on TX manufacturer)
 // ----------
 // YAW RIGHT + PITCH FWD + ROLL LEFT	= Enter LCD menu
 // YAW RIGHT + PITCH BACK				= Leave LCD menu
@@ -322,57 +341,6 @@ if (0)
 		AccPitchTrim = Config.AccPitchZeroTrim - 127;
 
 		RxGetChannels();
-
-		//************************************************************
-		//* Autolevel mode selection
-		//************************************************************
-
-		// Autolevel is only available if you have an Accelerometer
-		#if defined(ACCELEROMETER)
-
-			// For CPPM mode, use same switch for Autolevel as for stability (RxChannel8)
-			// RxChannel8 enables Autolevel if Config.ALMode = 0
-			// Autolevel always OFF if Config.ALMode = 1 (default)
-			#if defined(CPPM_MODE)
-
-				if (RxChannel8 > 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
-				{									// When channel is activated
-					AutoLevel = true;				// Activate autolevel mode
-					flight_mode |= 1;				// Notify GUI that mode has changed
-				}
-				else
-				{
-					AutoLevel = false;				// De-activate autolevel mode
-					flight_mode &= 0xfe;			// Notify GUI that mode has changed
-					firsttimeflag = true;			// Reset flag
-				}
-
-			// For non-CPPM mode, use same switch for Autolevel as for stability (THR)
-			// RxInAux (formerly throttle) enables Autolevel if Config.ALMode = 0
-			// Autolevel always OFF if Config.ALMode = 1 (default)
-			#else
-
-				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and AL is available
-				{
-					AutoLevel = true;				// Activate autolevel mode
-					flight_mode |= 1;				// Notify GUI that mode has changed
-				}
-				else
-				{
-					AutoLevel = false;				// De-activate autolevel mode
-					flight_mode &= 0xfe;			// Notify GUI that mode has changed
-					firsttimeflag = true;			// Reset flag
-				}
-
-			#endif // Non-CPPM mode
-
-		#else // No accelerometer fitted
-
-			AutoLevel = false;				// De-activate autolevel mode
-			flight_mode &= 0xfe;			// Notify GUI that mode has changed
-			firsttimeflag = true;			// Reset flag
-
-		#endif // #if defined(ACCELEROMETER)
 
 		//************************************************************
 		//* Alarms
@@ -641,10 +609,10 @@ if (0)
 			} // While LCD mode
 			LCDclear();			// Clear and reset LCD entry mode
 			Change_LCD = 0;
-		} // LCD activated (if (Change_LCD > 8000))
+		} // LCD activated (if (Change_LCD > 15624))
 
 		//************************************************************
-		//* Flight code
+		//* Servo reversing
 		//************************************************************
 
 		// Reverse servo outputs as required
@@ -680,6 +648,44 @@ if (0)
 			ServoOut4 = RxChannel2;
 		}
 		Throttle = RxChannel3;
+
+		//************************************************************
+		//* Autolevel mode selection
+		//************************************************************
+
+		// Autolevel is only available if you have an Accelerometer
+		#if defined(ACCELEROMETER)
+
+			// Use same switch for Autolevel as for stability based on preset 
+			// Autolevel enabled if Config.ALMode = 0
+			// Autolevel always OFF if Config.ALMode = 1 (default)
+
+			// For CPPM mode, use RxChannel8 input (maybe make this selectable in future versions)
+			#if defined(CPPM_MODE)
+				if ((RxChannel8 > 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
+
+			// For non-CPPM mode, use the(THR) input
+			#else
+				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and AL is available
+			#endif
+				{									// When channel is activated
+					AutoLevel = true;				// Activate autolevel mode
+					flight_mode |= 1;				// Notify GUI that mode has changed
+				}
+				else
+				{
+					AutoLevel = false;				// De-activate autolevel mode
+					flight_mode &= 0xfe;			// Notify GUI that mode has changed
+					firsttimeflag = true;			// Reset flag
+				}
+
+		#else // No accelerometer fitted
+
+			AutoLevel = false;				// De-activate autolevel mode
+			flight_mode &= 0xfe;			// Notify GUI that mode has changed
+			firsttimeflag = true;			// Reset flag
+
+		#endif // #if defined(ACCELEROMETER)
 
 		//************************************************************
 		//* Stability mode selection
@@ -801,8 +807,8 @@ if (0)
 			ServoOut2 += Roll;
 			ServoOut4 += Roll;
 			#elif defined(STD_FLAPERON)
-			ServoOut2 -= Roll;
-			ServoOut5 += Roll;
+			ServoOut2 -= Roll; // Left
+			ServoOut5 -= Roll; // Right
 			#else
 			#error No configuration defined !!!!
 			#endif
@@ -884,12 +890,12 @@ if (0)
 
 			if ((Config.Modes &4) > 0)							// eeprom mode
 			{
-				Yaw *= Config.P_mult_yaw;						// Multiply P-term (Max gain of 768)
+				Yaw *= Config.P_mult_yaw;						// Multiply P-term (Max gain of 256)
 				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
 			}
 			else
 			{
-				Yaw *= GainInADC[YAW];							// Multiply P-term (Max gain of 768)
+				Yaw *= GainInADC[YAW];							// Multiply P-term (Max gain of 256)
 				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
 			}
 			Yaw = Yaw * 3;	
@@ -923,15 +929,14 @@ if (0)
 		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
 		if ( Throttle  > MAX_TRAVEL )	Throttle  = MAX_TRAVEL;	
 
-		// Loop governor is here so that output_servo_ppm() is only called every 20ms
-		// and the loop is regulated to LOOP_RATE Hz. This is important for the averaging filters.
-		// Also, handle the odd case where the TCNT1 rolls over and TCNT1 < LoopStartTCNT1
+		// Loop governor is here so that the loop is regulated to LOOP_RATE Hz. 
+		// This is important for the averaging filters.
 		LoopCurrentTCNT1 = TCNT1;
 		if (LoopCurrentTCNT1 > LoopStartTCNT1) LoopElapsedTCNT1 = LoopCurrentTCNT1 - LoopStartTCNT1;
 		else LoopElapsedTCNT1 = (0xffff - LoopStartTCNT1) + LoopCurrentTCNT1;
 
-		// If loop period less than LOOP_INTERVAL, pad it out. (NB: blocking code)
-		loop_padding = (LOOP_INTERVAL - LoopElapsedTCNT1) / 8;
+		// If loop period less than LOOP_INTERVAL, pad it out in 8us chunks. (NB: deliberately blocking code)
+		loop_padding = (LOOP_INTERVAL - LoopElapsedTCNT1) / 8; // Measure remaining interval
 
 		if ((loop_padding > 0) && (GUIconnected == false))
 		{
@@ -939,13 +944,13 @@ if (0)
 			TCNT0 = 0;					// Reset counter
 			for (int i=0;i<loop_padding;i++)
 			{
-				while (TCNT0 < 8);		// 1MHz / 8 = 8us
+				while (TCNT0 < 8);		// 1MHz = 1us * 8 = 8us/loop
 				TCNT0 -= 8;
 			}
 		}
 
 		// Ensure that output_servo_ppm() is only called at SERVO_RATE.
-		// If SERVO_RATE due, update servos, otherwise keep looping
+		// If SERVO_RATE due, update servos, otherwise bypass
 		// Inhibit servos while GUI connected
 		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
 		{
