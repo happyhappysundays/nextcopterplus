@@ -149,7 +149,7 @@ void init(void)
 
 	RxChannel1 = Config.RxChannel1ZeroOffset;	// Prime the channels 1520;
 	RxChannel2 = Config.RxChannel2ZeroOffset;	// 1520;
-	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1120;
+	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1520;
 	RxChannel4 = Config.RxChannel4ZeroOffset;	// 1520;
 #if defined(STD_FLAPERON)
 	RxChannel5 = Config.RxChannel5ZeroOffset;
@@ -196,8 +196,8 @@ void init(void)
 	// Manual stability mode selection
 	if ((RxInYaw > 200) || (RxInYaw < -200))
 	{
-		// flash LED 3 times
-		for (int i=0;i<3;i++)
+		// flash LED 4 times
+		for (int i=0;i<4;i++)
 		{
 			LED = 1;
 			_delay_ms(150);
@@ -219,8 +219,8 @@ void init(void)
 	// Manual autolevel mode selection
 	if ((RxInRoll > 200) || (RxInRoll < -200))
 	{
-		// flash LED 3 times
-		for (int i=0;i<3;i++)
+		// flash LED 5 times
+		for (int i=0;i<5;i++)
 		{
 			LED = 1;
 			_delay_ms(150);
@@ -244,8 +244,8 @@ void init(void)
 	// Gyro direction reversing
 	if (GainInADC[ROLL] < 15)	// less than 5% 
 	{
-		// flash LED 3 times
-		for (int i=0;i<5;i++)
+		// flash LED 6 times
+		for (int i=0;i<6;i++)
 		{
 			LED = 1;
 			_delay_ms(150);
@@ -314,24 +314,18 @@ void CenterSticks(void)
 #endif	
 	for (i=0;i<8;i++)
 	{
-		do
-		{
-		RxChannelsUpdatedFlag = false;
 		RxChannel1ZeroOffset += RxChannel1;
 		RxChannel2ZeroOffset += RxChannel2;
 		RxChannel4ZeroOffset += RxChannel4;
 #if defined(STD_FLAPERON)
 		RxChannel5ZeroOffset += RxChannel5;
 #endif
-		}
-		while (RxChannelsUpdatedFlag);
-
 		_delay_ms(100);
 	}
 
 	Config.RxChannel1ZeroOffset = RxChannel1ZeroOffset >> 3; // Divide by 8
 	Config.RxChannel2ZeroOffset = RxChannel2ZeroOffset >> 3;
-	Config.RxChannel3ZeroOffset = 1500;						 // Cheat for CH3 - we just need a guaranteed switch here
+	Config.RxChannel3ZeroOffset = 1500;// Cheat for CH3 - we just need a guaranteed switch here						 
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
 #if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = RxChannel5ZeroOffset >> 3;

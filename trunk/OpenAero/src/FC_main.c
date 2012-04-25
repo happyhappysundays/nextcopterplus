@@ -60,7 +60,7 @@
 // ------------------------
 // Set Roll Gain pot to zero
 // Power on
-// LED flashes 3 times
+// LED flashes 6 times
 // Move stick Up/Left for Normal, Down/Right for reverse
 // eg: to set Roll Gyro Normal, move Tx Roll stick left, or to reverse it move stick right
 //
@@ -68,7 +68,7 @@
 // ------------------------
 // Hold Yaw stick on TX left or right
 // Power on
-// LED flashes 3 times
+// LED flashes 4 times
 // Mode will toggle between the following:
 // 		Stability switchable
 // 		Stability always ON
@@ -77,7 +77,7 @@
 // ------------------------
 // Hold Roll stick on TX left or right
 // Power on
-// LED flashes 3 times
+// LED flashes 5 times
 // Mode will toggle between the following:
 // 		Autolevel switchable
 //		Autolevel always OFF
@@ -301,12 +301,42 @@ int main(void)
 //************************************************************
 if (0) 
 {
+	while(1)
+	{
+		// Display results
+		LCDgoTo(0);								
+		LCDprintstr("    ");
+		LCDgoTo(0);
+		LCDprintstr(itoa(RxChannel1,pBuffer,10));
+		//
+		LCDgoTo(7);								
+		LCDprintstr("    ");
+		LCDgoTo(7);
+		LCDprintstr(itoa(RxChannel2,pBuffer,10));
+		//
+		LCDgoTo(16);					
+		LCDprintstr("    ");
+		LCDgoTo(16);
+		LCDprintstr(itoa(RxChannel3,pBuffer,10));
+		//
+		LCDgoTo(23);
+		LCDprintstr("    ");
+		LCDgoTo(23);
+		LCDprintstr(itoa(RxChannel4,pBuffer,10));
+		//
+		while (Interrupted == false){};
+		Interrupted = false;
+		ServoOut1 = RxChannel1 >> 1;
+		ServoOut2 = RxChannel2 >> 1;
+		ServoOut4 = RxChannel3 >> 1;
+		//output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
+	}
 	// Test new servo code
 	while(1)
 	{
 		RxGetChannels();
-		ServoOut1 = 500;
-		ServoOut2 = 600;
+		ServoOut1 = RxChannel2;
+		ServoOut2 = RxChannel3;
 		ServoOut4 = 700;
 		ServoOut5 = 1000;
 		ServoOut6 = 1500;
@@ -317,7 +347,7 @@ if (0)
 		ServoOut2 = ServoOut2 >> 1;
 		ServoOut4 = ServoOut4 >> 1;
 		ServoOut5 = ServoOut5 >> 1;
-//		output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);	
+		//output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);	
 	}
 }
 
@@ -662,11 +692,11 @@ if (0)
 
 			// For CPPM mode, use RxChannel8 input (maybe make this selectable in future versions)
 			#if defined(CPPM_MODE)
-				if ((RxChannel8 > 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
+				if ((RxChannel8 < 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
 
 			// For non-CPPM mode, use the(THR) input
 			#else
-				if ((RxInAux > 100) && (Config.ALMode == 0))	// RxInAux ON and AL is available
+				if ((RxChannel3 < 1600) && (Config.ALMode == 0))	// RxInAux ON and AL is available
 			#endif
 				{									// When channel is activated
 					AutoLevel = true;				// Activate autolevel mode
@@ -695,7 +725,7 @@ if (0)
 		#ifdef CPPM_MODE
 		if ((RxChannel8 > 1600) && (Config.StabMode == 0))	// RxChannel8 enables stability if Config.StabMode = 0 (default)
 		#else
-		if ((RxInAux < 200) && (Config.StabMode == 0))		// RxInAux (formerly throttle) enables stability if Config.StabMode = 0 (default)
+		if ((RxChannel3 > 1600) && (Config.StabMode == 0))	// RxChannel3 (formerly throttle) enables stability if Config.StabMode = 0 (default)
 		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
@@ -709,7 +739,7 @@ if (0)
 			IntegralYaw = 0;
 		}
 
-		// Stability mode ON (RxInAux >= 200)
+		// Stability mode ON (RxChannel3 > 1600)
 		else
 		{
 			// Notify GUI that mode has changed to stability mode

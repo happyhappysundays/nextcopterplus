@@ -39,6 +39,7 @@ volatile uint16_t RxChannelStart;
 
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Channel number
+
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
 
 //************************************************************
@@ -162,8 +163,8 @@ ISR(TIMER1_CAPT_vect)
 			RxChannel8 = icp_value - RxChannelStart;
 			RxChannelStart = icp_value;
 			ch_num++;
+			RxChannelsUpdatedFlag = true;
 			Interrupted = true;						// Signal that interrupt block has finished
-			RxChannelsUpdatedFlag = true;			// Flag that data changed
 			break;
 		default:
 			break;
@@ -195,25 +196,25 @@ ISR(INT0_vect)
 		case 1:
 			RxChannel2Start = TCNT1;
 			RxChannel3 = TCNT1 - RxChannel1Start;	// Ch3 - Throttle
-			RxChannelsUpdatedFlag = true;			// Flag that data changed
+			RxChannelsUpdatedFlag = true;
 			ch_num++;
 			break;
 		case 2:
 			RxChannel3Start = TCNT1;
 			RxChannel1 = TCNT1 - RxChannel2Start;	// Ch1 - Aileron
-			RxChannelsUpdatedFlag = true;			// Flag that data changed
+			RxChannelsUpdatedFlag = true;	
 			ch_num++;
 			break;
 		case 3:
 			RxChannel4Start = TCNT1;
 			RxChannel2 = TCNT1 - RxChannel3Start;	// Ch2 - Elevator
-			RxChannelsUpdatedFlag = true;			// Flag that data changed
+			RxChannelsUpdatedFlag = true;
 			ch_num++;
 			break;
 		case 4:
 			RxChannel5Start = TCNT1;
 			RxChannel4 = TCNT1 - RxChannel4Start;	// Ch4 - Rudder
-			RxChannelsUpdatedFlag = true;			// Flag that data changed
+			RxChannelsUpdatedFlag = true;
 			ch_num++;
 			break;
 		case 5:
