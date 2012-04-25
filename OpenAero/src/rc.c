@@ -36,9 +36,9 @@ int16_t		RxInAux1;
 #endif
 bool		RxActivity;
 
-#define		NOISE_THRESH	50			// Max RX noise threshold. Increase if lost alarm keeps being reset.
+#define		NOISE_THRESH	20			// Max RX noise threshold. Increase if lost alarm keeps being reset.
 
-//--- Get and scale RX channel inputs ---
+// Get raw flight channel data and remove zero offset
 void RxGetChannels(void)
 {
 	int16_t  RxChannel;
@@ -90,3 +90,4 @@ void RxGetChannels(void)
 	else RxActivity = false;
 	OldRxSum = RxSum;
 }
+

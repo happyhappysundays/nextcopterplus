@@ -74,7 +74,7 @@ void Set_EEPROM_Default_Config(void)
 {
 	Config.RxChannel1ZeroOffset	= 1520;	// RC input stick centers
 	Config.RxChannel2ZeroOffset	= 1520;
-	Config.RxChannel3ZeroOffset	= 1120;
+	Config.RxChannel3ZeroOffset	= 1520;
 	Config.RxChannel4ZeroOffset	= 1520;
 #if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = 1520;
@@ -86,18 +86,18 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccRollZero	= 578;			// Acc calibration defaults
 	Config.AccPitchZero	= 585;
 	//
-	Config.P_mult_roll = 150;			// PID defaults
+	Config.P_mult_roll = 100;			// PID defaults
 	Config.I_mult_roll = 0;
 	Config.D_mult_roll = 0;
-	Config.P_mult_pitch = 150;
+	Config.P_mult_pitch = 100;
 	Config.I_mult_pitch = 0;
 	Config.D_mult_pitch = 0;
-	Config.P_mult_yaw = 150;
+	Config.P_mult_yaw = 100;
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
 	Config.P_mult_glevel = 100;
 	Config.I_mult_glevel = 30;
-	Config.P_mult_alevel = 50;
+	Config.P_mult_alevel = 100;
 	Config.I_mult_alevel = 00;
 	//
 	Config.StabMode = 0;				// Stability mode for non-CPPM RX. 0 = stability disables with THR input **, 1 = stability always on

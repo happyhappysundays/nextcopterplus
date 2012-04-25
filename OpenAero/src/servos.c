@@ -83,5 +83,4 @@ void output_servo_ppm(void)
 
 #endif
 
-
 }
