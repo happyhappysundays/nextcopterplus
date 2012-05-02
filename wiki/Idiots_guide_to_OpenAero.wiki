@@ -1,10 +1,42 @@
-*bold*Introduction
+=The Idiot's Guide to OpenAero=
+==What is OpenAero?==
+OpenAero is an aeroplane stabilising software for KK-type multicopter boards. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
+==What versions of OpenAero are there?==
+===Standard===
+The standard PWM version of OpenAero has three stabilised outputs - Aileron, Elevator and Rudder.
+For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor. The three-channel version of OpenAero provides finer control of servos.
 
-OpenAero is an open source aeroplane stabilising software for KK-type boards. It has all the features commonly requested, an LCD menu and even the MultiWii GUI interface. It's now released as V1.11 but new versions are coming soon with V1.12 in Beta test phase. For those interested in the code, you can see it at the following repo.
+The standard CPPM version of OpenAero has three stabilised outputs - Aileron, Elevator and Rudder, and outputs a copy of the throttle signal from the receiver out the THR pin of the KK board.
 
-[URL="https://nextcopterplus.googlecode.com/svn/trunk/OpenAero"]https://nextcopterplus.googlecode.com/svn/trunk/OpenAero[/URL]
+Read more about the differences between PWM and CPPM receivers elsewhere in this Wiki.
+===Flying Wing===
+Flying wings normally have delta/flaperon mixing done by the transmitter. This allows you to set the aileron/elevator mixing as best suits you and your aircraft.
+When these signals pass through the OpenAero software the gyro stabilising has to accommodate the flying wing channel mixing. 
+For instance, in response to pitch input, the standard version of Openaero would simply adjust the elevator servo. However the flying wing version adjusts both flaperons to have the desired effect.
 
-[B]GUI[/B]
+The flying wing PWM version of OpenAero has three stabilised outputs - Left Flaperon, Right Flaperon and Rudder.
+
+For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor. The three-channel version of OpenAero provides finer control of servos.
+
+The flying wing CPPM version of OpenAero has three stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and outputs a copy of the throttle signal from the receiver out the THR pin of the KK board.
+===Flaperon===
+The flaperon version of OpenAero is designed for conventional aeroplanes that have individually controlled ailerons.
+The aileron channels normally have flap signals mixed with them so that both ailerons can be lowered to act as flaps, or raised to act as spoilers. Having separate aileron control also allows the use of aileron differential, where the upward movement of the ailerons is larger than the downward.
+
+These models have the flaperon mixing done by the transmitter. This allows you to set flap positions and differential as best suits you and your aircraft.
+When these signals pass through the OpenAero software the gyro stabilising has to accommodate the flaperon mixing. To accommodate this, the flaperon version of OpenAero has four stabilised outputs - Left Flaperon, Right Flaperon, Elevator and Rudder. A copy of the throttle signal from the receiver is also output from the THR pin of the KK board.
+
+The flaperon version requires a single-wire CPPM receiver as there are not enough conventional PWM inputs to control the desired outputs.
+
+
+===OpenAero Nano===
+There is also a version called OpenAero Nano, which is a cut-down version of OpenAero designed to fit into the smallest KK boards with only 4K of program memory. 
+You can read more about OpenAero Nano at the following link.
+
+http://www.rcgroups.com/forums/showpost.php?p=20331503&postcount=2
+
+
+*GUI*
 Have made a new GUI version similar to that of the NeXtcopter project but with proper aeroplane mode and all the copter stuff removed.
 In non-stabilised mode the board just passes the RC values through to the servos and in stability mode the board uses the gyros to dampen any unwanted rotation. Autolevel mode will direct the model back to whatever level position you set up when the accelerometer is calibrated, and trimmed on the field via the LCD or GUI.
 For conventional PWM receivers (via four cables) I have updated the code so that you are able to select Autolevel mode and/or Stability mode via the former throttle input. The default is for that channel to just switch stability on and off with Autolevel disabled, but you can configure the switch via either power-on stick positions or LCD to also switch in Autolevel as well and/or leave stability on permanently if desired.
