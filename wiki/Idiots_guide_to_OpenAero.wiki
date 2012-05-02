@@ -1,0 +1,255 @@
+*bold*Introduction
+OpenAero is an open source aeroplane stabilising software for KK-type boards. It has all the features commonly requested, an LCD menu and even the MultiWii GUI interface. It's now released as V1.11 but new versions are coming soon with V1.12 in Beta test phase. For those interested in the code, you can see it at the following repo.
+
+[URL="https://nextcopterplus.googlecode.com/svn/trunk/OpenAero"]https://nextcopterplus.googlecode.com/svn/trunk/OpenAero[/URL]
+
+[B]GUI[/B]
+Have made a new GUI version similar to that of the NeXtcopter project but with proper aeroplane mode and all the copter stuff removed.
+In non-stabilised mode the board just passes the RC values through to the servos and in stability mode the board uses the gyros to dampen any unwanted rotation. Autolevel mode will direct the model back to whatever level position you set up when the accelerometer is calibrated, and trimmed on the field via the LCD or GUI.
+For conventional PWM receivers (via four cables) I have updated the code so that you are able to select Autolevel mode and/or Stability mode via the former throttle input. The default is for that channel to just switch stability on and off with Autolevel disabled, but you can configure the switch via either power-on stick positions or LCD to also switch in Autolevel as well and/or leave stability on permanently if desired.
+
+Here's a shot of the new V0.2 GUI for the OpenAero. This example shows a model in Flaperon mode (two stabilised servos per wing). 
+[IMG]http://i.imgur.com/hSHbl.jpg[/IMG]
+
+[SIZE="3"][B]Features[/B][/SIZE]
+Depending on what type of KK board, and which add-ons you have fitted to them, these are the available features.
+
+- Support for Standard, Flying Wing and Flaperon-equipped models
+- Auto arming
+- Switchable stability mode
+- LCD support for setting flight parameters
+- GUI for setting parameters and visualising sensors and stability 
+- LCD Menu selectable features
+[INDENT]P + I gain
+LVA voltage *
+LVA alarm mode *
+Battery voltage readout
+Stick centering
+Gyro reversing
+Servo reversing
+Stability switch function
+Autolevel switch function[/INDENT]
+- Lost model alarm*
+- In CPPM mode the throttle signal is decoded and passed back out via the THR pin to be connected to an ESC + motor
+- Vertical board orientation compile option 
+- Flying Wing mode
+- Stick centering on power-up via Yaw pot
+- Adjustable gain via pots or LCD based on a preset - defaults to pots
+[INDENT]Roll pot will adjust Roll and Pitch gain (P-term)
+Pitch pot will adjust Roll and Pitch I-term
+Yaw pot will adjust Yaw gain (P-term) I-term adjustable via LCD or GUI[/INDENT]
+ - Gyro direction can be reversed by setting the Roll pot to zero and using the TX sticks
+- Support for CPPM receivers
+- Switchable auto-level mode 
+- Additional Menu selectable features
+[INDENT]Accelerometer pitch and roll trim 
+Autolevel Gyro and Acc P + I gain
+Accelerometer calibration[/INDENT]
+
+* Needs KK+ board
+
+[B]What do I need to get the GUI running?[/B]
+You need a MKUSB-type serial interface for the GUI to communicate to the board.
+Because of the limitations of the KK board, a non-standard cable is required.
+
+The connections you need are as follows:
+[B]For an 8-pin header[/B]
+From: KK+         To: MKUSB X3 port (Note X3 port [B]NOT[/B] X2 port)
+Pin 8 receive      Pin 8 transmit
+Pin 9 transmit     Pin 3 receive
+Pin 10 ground     Pin 10 ground
+Pin 2   +5V        Pin 2   +5V
+
+[B]..but I don't have an 8-pin header on my KK board[/B]
+The 6-pin connector is missing the serial RXD signal that the KK+ has. It goes to pin 30 of the CPU. Looking at my Blackboard, that pin is not connected at all. Unless you are super-keen to solder a fine wire to pin 30 and make up a hybrid cable, you're out of luck with a Blackboard. However, if sufficiently motivated, here's the connections you'd need.
+Note that on the HobbyKing boards, there is a test pad connected to this pin, making it much easier to access.
+
+[B]For an 6-pin header[/B]
+From: 6-pin KK To: MKUSB X3 port
+Pin X RXD Pin 8 transmit
+Pin 1 MISO to Pin 3 receive
+Pin 6 Ground to Pin 10 ground
+Pin 2 +5V to Pin 2 +5V
+
+* Pin X goes to pin 30 of the Atmel CPU.
+
+Here is a shot of my very simple serial cable for 8-pin KK+ boards.
+[IMG]http://i.imgur.com/MFTP5.jpg[/IMG]
+
+
+[B]Servo connections - V1.11[/B]
+Standard/Flying Wing
+M1: Rudder
+M2: Reversed rudder
+M3: Aileron/Left flaperon
+M4: Reversed aileron
+M5: Elevator/Right flaperon
+M6: Reversed elevator/Reversed right flaperon
+
+[B][COLOR="Red"]Servo connections - V1.12[/COLOR][/B]
+Standard/Flying Wing/Flaperon
+M1: Rudder
+M2: Aileron/Left flaperon
+M3: CPPM input only - not a servo output
+M4: Elevator/Right flaperon (FW)/Elevator
+M5: Right flaperon(non-FW)
+M6: Spare
+
+[B]Connection diagram - CPPM Aeroplane V1.10/V1.11[/B]
+[IMG]http://i.imgur.com/nLa3V.jpg[/IMG]
+
+[B]Connection diagram - STD Aeroplane V1.10/V1.11[/B]
+[IMG]http://i.imgur.com/zn6Lt.jpg[/IMG]
+
+[B]Connection diagram - [COLOR="Red"]CPPM Aeroplane V1.12[/COLOR][/B]
+[IMG]http://i.imgur.com/k2VAV.jpg[/IMG]
+
+[B]Connection diagram - [COLOR="Red"]STD Aeroplane V1.12[/COLOR][/B]
+[IMG]http://i.imgur.com/7jkPu.jpg[/IMG]
+
+[B]Pot-based power-up settings guide[/B]
+Stick Centering
+ 1. Set Yaw Gain pot to max 
+ 2. Set Tx trims to centre
+ 3. Power on
+ 4. LED flashes 3 times
+ 5. Restore gain pot
+ 6. Restart
+
+AutoTune
+ 1. Set Yaw Gain pot to min
+ 2. Start KK autotune on GUI
+ 3. Power on
+ 4. LED flashes 12-13 times
+ 5. Restore gain pot
+ 6. Restart
+
+Gyro reversing (Note: Only for versions without an accelerometer)
+ 1. Set Roll Gain pot to zero
+ 2. Power on
+ 3. LED flashes 6 times
+ 4. Move relevant stick Up/Left for Normal, Down/Right for reverse
+ 5. Restore pot
+ 6. Restart
+
+[B]Transmitter-based power-up settings guide[/B]
+Manual stability mode selection. This switches between Stability switchable (default) and Stability always on.
+
+ 1. Hold Yaw stick on TX left or right
+ 2. Power on FC
+ 3. LED flashes 4 times
+ 4. Return stick to neutral
+
+Manual Autolevel mode selection. This switches between Autolevel switchable and Stability always off (default).
+
+ 1. Hold Roll stick on TX left or right
+ 2. Power on FC
+ 3. LED flashes 5 times
+ 4. Return stick to neutral
+
+[B]Videos[/B]
+This is mrfliboy's test flight of the V1.10 beta firmware
+[URL="http://www.youtube.com/watch?v=mDF0NxXTDO4"]http://www.youtube.com/watch?v=mDF0NxXTDO4[/URL]
+
+Here's a video I found on YouTube on a guy using V1.11 on a Bixler.
+[URL="http://youtu.be/hLFenZskyyc"]http://youtu.be/hLFenZskyyc[/URL]
+
+A really cool video from Brazil showing a model battling strong wind
+[URL="http://www.youtube.com/watch?v=m24TntjX-G4"]http://www.youtube.com/watch?v=m24TntjX-G4[/URL]
+
+Here's a video that NDw made of his first flight of the code:
+[URL="http://vimeo.com/34564560"]http://vimeo.com/34564560[/URL]
+
+Here's a great video of eyeinsky1 flying his FPV model in aeroplane mode
+[URL="http://www.youtube.com/watch?v=lj9eEkSe80M"]http://www.youtube.com/watch?v=lj9eEkSe80M[/URL]
+
+Here's a quick look at the LCD menu and GUI
+[URL="http://www.youtube.com/watch?v=nPP8HNMnuxo"]http://www.youtube.com/watch?v=nPP8HNMnuxo[/URL]
+
+[B]Code change log[/B]
+[B]V1.10a (beta)[/B]
+Updates:
+ - Added lost model alarm. Alarm (if fitted) will sound one minute after the last RC activity.
+ - Changed GUI lockout system. You must connect to the GUI within 10 seconds of power-on. The GUI is locked out after this time until repowered.
+ - LCD menu entry is now with Pitch UP, Yaw RIGHT *and* Roll LEFT for added security.
+ - Added configurable stability and autolevel switch modes. Now users with normal PWM receivers can switch both Stability and Autolevel (if fitted).
+ - Fixed cycle timer in GUI to display actual loop cycle time :)
+
+[B]V1.11 (beta)[/B]
+Updates:
+ - Added flaperon configuration for split ailerons on M3/M4
+ - Fixed stick centering via Yaw pot.
+
+[B]V1.12[/B]
+Updates:
+ - New output pulse generation code. Three and six-channel modes. 
+ - Removed reversed channels.
+ - Added ICP input option for CPPM mode. 
+ - Fixed flaperon and vertical mode bugs.
+
+[B]Common issues[/B]
+1. Any functions that need the transmitter sticks to navigate (LCD Menu and Gyro reversing) will not work if your transmitter has flaperon mixing or similar. You need to have individual control of each channel. You can then switch the mixing back on to fly.
+2. Make sure the transmitter travel throws are set to at least 100%, otherwise the stick-based settings won't work. Examples include LCD menu navigation and gyro reversing. 
+
+The .hex files were tested on a standard KK 5.5 Blackboard, a HK V2 and a KK+.
+
+[B]Which .hex file do I need?[/B]
+
+1. Unmodified HobbyKing V2, Blackboard or KK+ (Atmega168-based)
+[COLOR="Blue"]OpenAero_1_11_A_PWM_STD.hex[/COLOR] for standard PWM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_PWM_STD.hex[/COLOR] for standard PWM receivers (Flying Wing)
+[COLOR="Blue"]OpenAero_1_11_A_CPPM_STD.hex[/COLOR] for CPPM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_CPPM_STD.hex[/COLOR] for CPPM  receivers (Flying Wing)
+These versions use the on-board pots to adjust P and I-terms for Roll and Pitch, and Yaw P-term.
+
+2. HobbyKing V2, Blackboard or KK+ (Atmega168-based) with an accelerometer board
+[COLOR="Blue"]OpenAero_1_11_A_PWM_ACC.hex[/COLOR] for standard PWM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_PWM_ACC.hex[/COLOR] for standard PWM receivers (Flying Wing)
+[COLOR="Blue"]OpenAero_1_11_A_CPPM_ACC.hex[/COLOR] for CPPM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_CPPM_ACC.hex[/COLOR] for CPPM  receivers (Flying Wing)
+These versions cannot use pot-based gain control so required either LCD or GUI for setup and adjustment.
+
+3. KK+ with a MEMS module (better gyros and accelerometer)
+[COLOR="Blue"]OpenAero_1_11_A_PWM_MEMS.hex[/COLOR] for standard PWM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_PWM_MEMS.hex[/COLOR] for standard PWM receivers (Flying Wing)
+[COLOR="Blue"]OpenAero_1_11_A_CPPM_MEMS.hex[/COLOR] for CPPM receivers (Aeroplane)
+[COLOR="Blue"]OpenAero_1_11_FW_CPPM_MEMS.hex[/COLOR] for CPPM  receivers (Flying Wing)
+These versions cannot use pot-based gain control so required either LCD or GUI for setup and adjustment.
+
+4. New experimental version for flaperon/split ailerons on M3 and M4
+[COLOR="Blue"]OpenAero_1_11_FPN_CPPM_MEMS.hex[/COLOR] for CPPM receivers and a KK+ with MEMS module
+[COLOR="Blue"]OpenAero_1_11_FPN_CPPM_STD.hex[/COLOR] for CPPM  receivers and a standard KK board
+
+Note that CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
+The OpenAero CPPM channel order is the same as the JR/Spektrum system: [B]Throttle, Aileron, Elevator, Rudder, 5, 6, 7, 8[/B]
+The flaperon versions expect the second aileron channel to be found on Ch6.
+
+[COLOR="Blue"]OpenAeroGUI_V0_1a4.zip[/COLOR] = Windows 32-bit GUI files
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Add your content here.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
