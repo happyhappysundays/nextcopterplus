@@ -35,6 +35,60 @@ You can read more about OpenAero Nano at the following link.
 
 http://www.rcgroups.com/forums/showpost.php?p=20331503&postcount=2
 
+==How do I connect up my model?==
+===PWM receiver connections===
+For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the stability/autolevel switch input.
+
+ * AIL: Aileron signal input (required)
+ * ELE: Elevator signal input (optional)
+ * THR: Stability switch input (required)
+ * RUD: Rudder signal input (optional)
+
+Please make careful note that for OpenAero to output servo signals, at least two inputs, including the stability switch input *MUST* be connected to the KK board.
+
+===CPPM receiver connections===
+For a single-wire CPPM receiver you need to connect to the M3 output pin of the KK board. All the required signals including the stability/autolevel switch inputs are conveyed over this wire.
+
+ * AIL: Unused
+ * ELE: Unused
+ * THR: Throttle output
+ * RUD: Unused
+ * M3:  CPPM signal input from receiver
+
+
+Note that CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
+The OpenAero CPPM channel order is the same as the JR/Spektrum system: Throttle, Aileron, Elevator, Rudder, 5, 6, 7, 8
+The flaperon versions expect the second aileron channel to be found on Ch6.
+
+===Servo connections===
+For the standard version the connections are as follows:
+ * M1: Rudder
+ * M2: Aileron
+ * M3: CPPM input (if used)
+ * M4: Elevator
+ * M5: Unused
+ * M6: Unused
+ * THR: Throttle (CPPM versions only)
+
+For the flying wing version the connections are as follows:
+ * M1: Rudder
+ * M2: Left flaperon
+ * M3: CPPM input (if used)
+ * M4: Right flaperon
+ * M5: Unused
+ * M6: Unused
+ * THR: Throttle (CPPM versions only)
+
+For the flaperon wing version the connections are as follows:
+ * M1: Rudder
+ * M2: Left flaperon
+ * M3: CPPM input (if used)
+ * M4: Elevator
+ * M5: Right flaperon
+ * M6: Unused
+ * THR: Throttle (CPPM versions only)
+
+
 
 *GUI*
 Have made a new GUI version similar to that of the NeXtcopter project but with proper aeroplane mode and all the copter stuff removed.
