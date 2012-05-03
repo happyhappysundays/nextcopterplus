@@ -45,8 +45,7 @@ void variable_delay(uint8_t count);
 #define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)  // Default RX rate
 #define RX_QUALITY 8 		// Requires <= 80% success rate
 #define TX_BIT_DELAY 51 	// Default TX rate
-
-#define VERSION 10			// OpenAero version number
+#define VERSION 12			// OpenAero version number
 
 // Pass model type to MultiWii GUI
 #if defined(STD_FLAPERON)
@@ -107,9 +106,9 @@ uint16_t rx_word(void)
 {
 	uint8_t bytel, byteh;
 	uint16_t word;
+
 	bytel = rx_byte();
 	byteh = rx_byte();
-
 	word = ((byteh << 8) | bytel);
 
 	return(word);
