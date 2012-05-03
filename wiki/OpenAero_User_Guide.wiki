@@ -174,7 +174,7 @@ With the model held in front of you, rotate it along the roll axis and watch the
 
 With the model held in front of you, rotate it up and down along the pitch axis and watch the elevator move. It should move to oppose the movement. For example the elevator should move DOWN when you pitch the model's nose UP and DOWN when you pitch the model's nose UP. If this is not the case, the Pitch gyro needs to be reversed.
 
-With the model held in front of you, rotate it left and right along the yaw axis and watch the rudder move. It should move to oppose the movement. For example the rudder should move LEFT when you yaw the model's nose RIGHT and RIGHT when you yaw the model's nose RIGHT. If this is not the case, the Yaw gyro needs to be reversed.
+With the model held in front of you, rotate it left and right along the yaw axis and watch the rudder move. It should move to oppose the movement. For example the rudder should move LEFT when you yaw the model's nose RIGHT and RIGHT when you yaw the model's nose LEFT. If this is not the case, the Yaw gyro needs to be reversed.
 
 *Adjusting the gyro direction*
 
