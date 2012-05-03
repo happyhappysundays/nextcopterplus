@@ -325,14 +325,14 @@ Here is a picture of my very simple serial cable for 8-pin KK+ boards.
 http://i.imgur.com/MFTP5.jpg
 
 == Entering GUI mode ==
-1. Make sure your MKUSB and cable are connected to your PC and the KK+. 
-2. Run the MultiWiiConf_Next.exe file. Make sure your COM port is listed in the GUI.
-3. Click on the COM port and make sure it turns green.
-4. Power up the KK+ board.
-5. Within 10 seconds, click on the START button and data should start to be transferred to the GUI. The graph will start to move to the right and the gyro data should be displayed. Try moving the KK+ board and see the gyro outputs displayed on the graph.
-6. Click on READ under "Flight parameters". Now, all the PID etc data from the KK+ is transferred to the screen.
-7. You can modify the data by clicking on each box and moving the mouse left or right. To save any data, first STOP the graph, then click on WRITE.
-8. If you move the transmitter sticks you can see the values change in the GUI. The servo outputs are disabled when in GUI mode.
+ *  1. Make sure your MKUSB and cable are connected to your PC and the KK+. 
+ *  2. Run the MultiWiiConf_Next.exe file. Make sure your COM port is listed in the GUI.
+ *  3. Click on the COM port and make sure it turns green.
+ *  4. Power up the KK+ board.
+ *  5. Within 10 seconds, click on the START button and data should start to be transferred to the GUI. The graph will start to move to the right and the gyro data should be displayed. Try moving the KK+ board and see the gyro outputs displayed on the graph.
+ *  6. Click on READ under "Flight parameters". Now, all the PID etc data from the KK+ is transferred to the screen.
+ *  7. You can modify the data by clicking on each box and moving the mouse left or right. To save any data, first STOP the graph, then click on WRITE.
+ *  8. If you move the transmitter sticks you can see the values change in the GUI. The servo outputs are disabled when in GUI mode.
 
 == Leaving GUI mode ==
 To exit GUI mode simply switch off the model and power to the KK board.
@@ -340,15 +340,15 @@ To exit GUI mode simply switch off the model and power to the KK board.
 == Autotuning your KK board ==
 If you are seeing errors in the data being sent to the GI or are having difficulty communicating with the GUI you might need to autotune the KK board.
 
- 1. Set the Yaw gain pot to the minimum value.
- 2. Make sure your MKUSB and cable is connected to your PC and the KK+. 
- 3. Run the MultiWiiConf_Next.exe file.
- 4. When it opens, select the COM port from the list on the left top. The port number should turn green. 
- 5. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned orange. Please check that the TX LED of the MKUSB is flashing very fast.
- 6. Power up the KK+ board. The LED should flash 12-13 times. 
- 7. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned back to green. Please check that the TX LED of the MKUSB has STOPPED flashing.
- 8. Restore the Yaw gain pot to the original setting.
- 9. Power off and restart
+ *  1. Set the Yaw gain pot to the minimum value.
+ *  2. Make sure your MKUSB and cable is connected to your PC and the KK+. 
+ *  3. Run the MultiWiiConf_Next.exe file.
+ *  4. When it opens, select the COM port from the list on the left top. The port number should turn green. 
+ *  5. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned orange. Please check that the TX LED of the MKUSB is flashing very fast.
+ *  6. Power up the KK+ board. The LED should flash 12-13 times. 
+ *  7. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned back to green. Please check that the TX LED of the MKUSB has STOPPED flashing.
+ *  8. Restore the Yaw gain pot to the original setting.
+ *  9. Power off and restart
 
 The KK board should now communicate with the GUI error-free.
 
@@ -361,15 +361,14 @@ The KK board should now communicate with the GUI error-free.
 ===Using the LVA===
 The default mode for LVA is BUZZER mode and the trigger is 0 Volts.
 While you can change the LVA mode and trigger at any time, the graph must be running to see the VBAT updating.
-
- 1. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
- 2. Click on WRITE. The alarm should start beeping quickly.
- 3. Reduce the LVA value to less than the VBAT.
- 4. Click on WRITE. The alarm should stop beeping
- 5. Click on the MODE button to change the text to LED.
- 6. Click on WRITE. The alarm will sound continually, or the LEDs will be ON.
- 7. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
- 8. Click on WRITE. The alarm should start beeping at 1Hz, or the LEDs will be flashing.
+ *  1. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
+ *  2. Click on WRITE. The alarm should start beeping quickly.
+ *  3. Reduce the LVA value to less than the VBAT.
+ *  4. Click on WRITE. The alarm should stop beeping.
+ *  5. Click on the MODE button to change the text to LED.
+ *  6. Click on WRITE. The alarm will sound continually, or the LEDs will be ON.
+ *  7. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
+ *  8. Click on WRITE. The alarm should start beeping at 1Hz, or the LEDs will be flashing.
 
 
 
