@@ -387,4 +387,7 @@ While you can change the LVA mode and trigger at any time, the graph must be run
 OpenAero is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
 If you feel motivated to donate to the project please feel free. I'm always happy to make special versions for people.
 
+http://i.imgur.com/uaRIu.png
+
+Yeah Google Code sucks and the button won't work. You can find a working button on the OpenAero Project page at the following link.
 https://sites.google.com/site/openaerowiki/home
