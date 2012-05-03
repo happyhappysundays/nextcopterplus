@@ -66,6 +66,8 @@ void CalibrateAcc(void)
 	
 		accZero[ROLL]  += accADC[ROLL];						
 		accZero[PITCH] += accADC[PITCH];	
+
+		_delay_ms(10);			// Get a better acc average over time
 	}
 
 	accZero[ROLL] = (accZero[ROLL]>> 5);						

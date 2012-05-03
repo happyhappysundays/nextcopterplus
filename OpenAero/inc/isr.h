@@ -6,7 +6,6 @@
 //* Externals
 //***********************************************************
 
-extern volatile bool RxChannelsUpdatedFlag;
 extern volatile bool Interrupted;
 
 extern volatile uint16_t RxChannel1;
@@ -18,3 +17,7 @@ extern volatile uint16_t RxChannel6;
 extern volatile uint16_t RxChannel7;
 extern volatile uint16_t RxChannel8;
 
+extern uint16_t gap;					// Size of inter-PWM pulse gap
+volatile extern uint8_t max_chan;		// Number of channel that is before the acceptible gap
+extern bool	gapfound;					// Flag to indentify that gap has been calculated
+extern bool	gapready;					// Used to skip over the first incidence of an input

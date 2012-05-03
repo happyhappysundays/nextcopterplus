@@ -19,7 +19,7 @@ typedef struct
 	uint8_t	setup;						// Byte to identify if already setup
 	uint16_t	RxChannel1ZeroOffset;	// Zero offsets (stick centering)
 	uint16_t	RxChannel2ZeroOffset;
-	uint16_t	RxChannel3ZeroOffset;	// Currently throttle is fixed
+	uint16_t	RxChannel3ZeroOffset;	// Currently offset is fixed at 1520
 	uint16_t	RxChannel4ZeroOffset;
 	uint16_t	RxChannel5ZeroOffset;
 	uint8_t		AccRollZeroTrim;		// User-set ACC trim (0~255 -> +/-127 @ GUI)

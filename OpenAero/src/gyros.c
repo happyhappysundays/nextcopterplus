@@ -36,6 +36,9 @@ int16_t gyroADC[3];							// Holds Gyro ADCs
 int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 
 
+//************************************************************
+// Vertical mode
+//************************************************************
 #ifdef VERTICAL
 	void ReadGyros(void)					// Vertical orientation
 	{
@@ -91,6 +94,9 @@ int16_t gyroZero[3];						// Used for calibrating Gyros on ground
 		}
 	}
 
+//************************************************************
+// Horizontal mode
+//************************************************************
 #else
 	void ReadGyros(void)					// Conventional orientation
 	{

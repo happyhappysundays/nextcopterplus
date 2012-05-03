@@ -8,16 +8,16 @@
 /*********************************************************************
  * Channel configuration (Choose one)
  ********************************************************************/
-//#define THREE_CHANNEL		// Three PWM outputs (M1, M2 and M4), 500 step resolution
-#define SIX_CHANNEL			// Six PWM outputs (M1, M2, M4, M5, M6 and THR), 250 step resolution
+#define THREE_CHANNEL		// Three PWM outputs (M1, M2 and M4), 500 step resolution
+//#define SIX_CHANNEL			// Six PWM outputs (M1, M2, M4, M5, M6 and THR), 250 step resolution
 
 
 /*********************************************************************
  * Type of model (Choose one)
  ********************************************************************/
-//#define STANDARD			// Standard aeroplane config (3 or 6 Ch.)
+#define STANDARD			// Standard aeroplane config (3 or 6 Ch.)
 //#define FWING				// Flying Wing config (3 or 6 Ch.)
-#define STD_FLAPERON		// Standard aeroplane config with separate aileron control (6 Ch. only)
+//#define STD_FLAPERON		// Standard aeroplane config with separate aileron control (6 Ch. only)
 
 
 /*********************************************************************
@@ -33,9 +33,10 @@
  *	If using MEMS, uncomment both ACCELEROMETER and MEMS_MODULE
  *  If using ICP CPPM, uncomment both CPPM_MODE and ICP_CPPM_MODE
  ********************************************************************/
-#define CPPM_MODE 			// Uncomment this for CPPM support rather than traditional PWM inputs
-#define ICP_CPPM_MODE 		// Also uncomment this for superior ICP CPPM support on M3, otherwise CPPM support on CH2 (elevator)
-#define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
-#define MEMS_MODULE 		// Also uncomment this when using the MEMS module (MEMS gyros are reversed)
+//#define CPPM_MODE 			// Uncomment this for CPPM support rather than traditional PWM inputs
+//#define ICP_CPPM_MODE 		// Also uncomment this for superior ICP CPPM support on M3, otherwise CPPM support on CH2 (elevator)
+//#define ACCELEROMETER		// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
+//#define MEMS_MODULE 		// Also uncomment this when using the MEMS module (MEMS gyros are reversed)
+#define	LEGACY_PWM_MODE		// Older but stable PWM code
 
 #endif //COMPILE_DEFS_H_

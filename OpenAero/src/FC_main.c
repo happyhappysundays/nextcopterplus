@@ -115,8 +115,9 @@
 // V1.11	Added flaperon configuration for split ailerons on M3/M4
 // V1.12	New output pulse generation code. Removed odd channels.
 //			Added ICP input option for CPPM mode. Three and six-channel modes.
-//			Virtually no jitter now.
-//			Fixed flaperon and vertical mode bugs.
+//			Virtually no jitter now. Fixed flaperon and vertical mode bugs.
+//			Added auto-configuring PWM and CPPM input code.
+//			Corrected loop timing bug. Servo outputs now match incoming data rate.
 //
 //***********************************************************
 //* To do
@@ -141,7 +142,7 @@ Standard mode
              M1    Rudder
 
 
-Standard Flaperon mode (CPPM only)
+Standard Flaperon mode (CPPM only - second aileron channel on Ch.5)
 
 			 X <--  THR (Throttle - CPPM mode)
              |
@@ -199,7 +200,11 @@ Flying Wing - Assumes mixing done in the transmitter
 #define LOOP_INTERVAL (1000000 / LOOP_RATE ) // 2000
 
 // Defines output rate to the servo (Normally 55+Hz)
-#define SERVO_RATE 60				// in Hz
+#if (defined(LEGACY_PWM_MODE) || defined(CPPM_MODE))
+#define SERVO_RATE 80				// in Hz
+#else
+#define SERVO_RATE 50				// in Hz // New PWM mode bugs out if made to run faster...
+#endif
 
 // Servo travel limits
 #define MAX_TRAVEL 2000				// Maximum travel allowed
@@ -274,10 +279,12 @@ bool 	LMA_Alarm;					// Lost model alarm active
 bool 	LVA_Alarm;					// Low voltage alarm active
 bool 	firsttimeflag;
 char 	pBuffer[16];				// Print buffer
+
 uint16_t Change_LCD;				// Long timers for LCD entry and LMA
 uint32_t Change_LostModel;
 uint8_t LCD_TCNT2;
 uint8_t Lost_TCNT2;
+
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
@@ -301,68 +308,21 @@ int main(void)
 //************************************************************
 if (0) 
 {
-	while(1)
-	{
-		// Display results
-		LCDgoTo(0);								
-		LCDprintstr("    ");
-		LCDgoTo(0);
-		LCDprintstr(itoa(RxChannel1,pBuffer,10));
-		//
-		LCDgoTo(7);								
-		LCDprintstr("    ");
-		LCDgoTo(7);
-		LCDprintstr(itoa(RxChannel2,pBuffer,10));
-		//
-		LCDgoTo(16);					
-		LCDprintstr("    ");
-		LCDgoTo(16);
-		LCDprintstr(itoa(RxChannel3,pBuffer,10));
-		//
-		LCDgoTo(23);
-		LCDprintstr("    ");
-		LCDgoTo(23);
-		LCDprintstr(itoa(RxChannel4,pBuffer,10));
-		//
-		while (Interrupted == false){};
-		Interrupted = false;
-		ServoOut1 = RxChannel1 >> 1;
-		ServoOut2 = RxChannel2 >> 1;
-		ServoOut4 = RxChannel3 >> 1;
-		//output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
-	}
-	// Test new servo code
-	while(1)
-	{
-		RxGetChannels();
-		ServoOut1 = RxChannel2;
-		ServoOut2 = RxChannel3;
-		ServoOut4 = 700;
-		ServoOut5 = 1000;
-		ServoOut6 = 1500;
-		Throttle = RxChannel3;
-		while (Interrupted == false){};
-		Interrupted = false;
-		ServoOut1 = ServoOut1 >> 1;
-		ServoOut2 = ServoOut2 >> 1;
-		ServoOut4 = ServoOut4 >> 1;
-		ServoOut5 = ServoOut5 >> 1;
-		//output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);	
-	}
+
 }
 
 //************************************************************
 // Test code - end
 //************************************************************
 
-	for (int i = 0; i < AVGLENGTH; i++)		// Shouldn't need to do this but... we do
+	for (int i = 0; i < AVGLENGTH; i++)
 	{
 		AvgAccRoll[i] = 0;					// Initialise all elements of the averaging arrays
 		AvgAccPitch[i] = 0;
 	}
 	rxin = UDR0;							// Flush RX buffer so that we don't go into GUI mode
 
-	LED = 1;								// Switch on LED whenever on
+	LED = 1;								// Switch on LED whenever running
 
 	// Main loop
 	while (1)
@@ -371,6 +331,11 @@ if (0)
 		AccPitchTrim = Config.AccPitchZeroTrim - 127;
 
 		RxGetChannels();
+
+		//************************************************************
+		//* Loop debug text
+		//************************************************************
+
 
 		//************************************************************
 		//* Alarms
@@ -642,15 +607,15 @@ if (0)
 		} // LCD activated (if (Change_LCD > 15624))
 
 		//************************************************************
-		//* Servo reversing
+		//* RC input to servos and servo reversing
 		//************************************************************
 
 		// Reverse servo outputs as required
 		if(Config.YawServo) {		// Rudder
-			ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 
+			ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 	// Reverse
 		}
 		else {
-			ServoOut1 = RxChannel4;
+			ServoOut1 = RxChannel4;								// Normal
 		}
 
 		#if defined(STD_FLAPERON) 	// Ailerons controlled by separate channels
@@ -662,7 +627,7 @@ if (0)
 				ServoOut2 = RxChannel5;
 				ServoOut5 = RxChannel1;
 			}
-		#else						// Only one aileron channel
+		#else						// Otherwise only one aileron channel
 			if(Config.RollServo) {
 				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
 			}
@@ -725,7 +690,8 @@ if (0)
 		#ifdef CPPM_MODE
 		if ((RxChannel8 > 1600) && (Config.StabMode == 0))	// RxChannel8 enables stability if Config.StabMode = 0 (default)
 		#else
-		if ((RxChannel3 > 1600) && (Config.StabMode == 0))	// RxChannel3 (formerly throttle) enables stability if Config.StabMode = 0 (default)
+		if ((RxInAux < 200) && (Config.StabMode == 0))
+		//if ((RxChannel3 > 1600) && (Config.StabMode == 0))	// RxChannel3 (formerly throttle) enables stability if Config.StabMode = 0 (default)
 		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
@@ -943,6 +909,7 @@ if (0)
 
 		} // AUX 1 over-rides stability
 
+
 		//--- Servo travel limits ---
 		if ( ServoOut1 < MIN_TRAVEL )	ServoOut1 = MIN_TRAVEL;	
 		if ( ServoOut2 < MIN_TRAVEL )	ServoOut2 = MIN_TRAVEL;	
@@ -959,23 +926,26 @@ if (0)
 		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
 		if ( Throttle  > MAX_TRAVEL )	Throttle  = MAX_TRAVEL;	
 
+
 		// Loop governor is here so that the loop is regulated to LOOP_RATE Hz. 
 		// This is important for the averaging filters.
 		LoopCurrentTCNT1 = TCNT1;
 		if (LoopCurrentTCNT1 > LoopStartTCNT1) LoopElapsedTCNT1 = LoopCurrentTCNT1 - LoopStartTCNT1;
 		else LoopElapsedTCNT1 = (0xffff - LoopStartTCNT1) + LoopCurrentTCNT1;
 
-		// If loop period less than LOOP_INTERVAL, pad it out in 8us chunks. (NB: deliberately blocking code)
-		loop_padding = (LOOP_INTERVAL - LoopElapsedTCNT1) / 8; // Measure remaining interval
+		// If loop period less than LOOP_INTERVAL, pad it out in 8us chunks.
+		// T1 runs at 1MHz (1us). 
+		loop_padding = (LOOP_INTERVAL - LoopElapsedTCNT1) / 8; 
 
+		// User T0 to time the 8us chunks. T0 runs at 8MHz (125ns).
 		if ((loop_padding > 0) && (GUIconnected == false))
 		{
 			TIFR0 &= ~(1 << TOV0);		// Clear overflow
 			TCNT0 = 0;					// Reset counter
 			for (int i=0;i<loop_padding;i++)
 			{
-				while (TCNT0 < 8);		// 1MHz = 1us * 8 = 8us/loop
-				TCNT0 -= 8;
+				while (TCNT0 < 64);		// 125ns * 64 = 8us
+				TCNT0 -= 64;
 			}
 		}
 
@@ -984,11 +954,11 @@ if (0)
 		// Inhibit servos while GUI connected
 		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
 		{
-			Interrupted = false;
 			servo_skip = 0;
+			Interrupted = false;
 			while (Interrupted == false){};	// Wait here for any interrupts to complete
 			Interrupted = false;
-			output_servo_ppm();				// Output servo signal
+			output_servo_ppm();			// Output servo signal
 		}
 
 		// Update cycle time for GUI

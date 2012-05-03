@@ -83,10 +83,10 @@ void init(void)
 #endif
 	RX_YAW		= 0;
 
-	// Timer0 (8bit) - run @ 1MHz (1us)
+	// Timer0 (8bit) - run @ 8MHz (125ns)
 	// Used to pad out loop cycle time in blocks of 1us
 	TCCR0A = 0;							// Normal operation
-	TCCR0B = (1 << CS00);				// Clk/8 = 1MHz = 1us
+	TCCR0B = (1 << CS00);				// Clk/0 = 8MHz = 125ns
 	TIMSK0 = 0; 						// No interrupts
 
 	// Timer1 (16bit) - run @ 1Mhz
@@ -145,8 +145,6 @@ void init(void)
 	IntegralYaw = 0;
 	AutoLevel = false;
 
-	RxChannelsUpdatedFlag = 0;
-
 	RxChannel1 = Config.RxChannel1ZeroOffset;	// Prime the channels 1520;
 	RxChannel2 = Config.RxChannel2ZeroOffset;	// 1520;
 	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1520;
@@ -154,7 +152,6 @@ void init(void)
 #if defined(STD_FLAPERON)
 	RxChannel5 = Config.RxChannel5ZeroOffset;
 #endif
-	CalibrateGyros();
 
 	// Flash LED
 	LED = 1;
@@ -163,13 +160,16 @@ void init(void)
 
 	sei();						// Enable global Interrupts 
 
-	// 2 second delay
-	_delay_ms(1500);
+	// Pause
+	_delay_ms(1500);			// Pause for gyro stability
+	CalibrateGyros();			// Calibrate gyros, hopefully after motion minimised
 
 	ReadGainValues();
-	ReadGainValues();			// Just because KK's code does?
 
-	// Config Modes (at startup)
+
+//************************************************************
+// Config Modes (at startup)
+//************************************************************
 
 	// Stick Centering
 	if (GainInADC[YAW] > 240)	// More than 95%
@@ -213,7 +213,6 @@ void init(void)
 		LED = !LED;
 		_delay_ms(500);
 		LED = !LED;
-
 	}
 
 	// Manual autolevel mode selection
@@ -236,7 +235,6 @@ void init(void)
 		LED = !LED;
 		_delay_ms(500);
 		LED = !LED;
-
 	}
 #endif
 
@@ -291,13 +289,17 @@ void init(void)
 
 } // init()
 
-// Center sticks on request from GUI
-// Probably a better place for this subroutine than init.c but...
+
+//************************************************************
+// Misc init subroutines
+//************************************************************
+
+// Center sticks on request from GUI or by pot selection
 void CenterSticks(void)		
 {
 	uint8_t i;
 
-	// Flash LED 3 times
+	// Flash LED 3 times to warn of impending stick measurement
 	for (i=0;i<3;i++)
 	{
 		LED = !LED;
@@ -312,15 +314,16 @@ void CenterSticks(void)
 #if defined(STD_FLAPERON)
 	uint16_t RxChannel5ZeroOffset = 0;
 #endif	
+
 	for (i=0;i<8;i++)
 	{
+		_delay_ms(100);
 		RxChannel1ZeroOffset += RxChannel1;
 		RxChannel2ZeroOffset += RxChannel2;
 		RxChannel4ZeroOffset += RxChannel4;
 #if defined(STD_FLAPERON)
 		RxChannel5ZeroOffset += RxChannel5;
 #endif
-		_delay_ms(100);
 	}
 
 	Config.RxChannel1ZeroOffset = RxChannel1ZeroOffset >> 3; // Divide by 8
