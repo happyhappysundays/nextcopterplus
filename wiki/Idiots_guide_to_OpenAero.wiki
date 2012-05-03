@@ -1,6 +1,10 @@
 =The Idiot's Guide to OpenAero=
 ==What is OpenAero?==
 OpenAero is an aeroplane stabilising software for KK-type multicopter boards. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
+==What does this guide cover?==
+This guide covers only the basic versions of OpenAero. 
+It does not cover versions with accelerometer or MEMS board add-ons for autoleveling.
+
 ==What versions of OpenAero are there?==
 ===Standard===
 The standard PWM version of OpenAero has three stabilised outputs - Aileron, Elevator and Rudder.
@@ -46,6 +50,11 @@ For a standard multi-wire PWM receiver you need to use the normal PWM inputs of 
 
 Please make careful note that for OpenAero to output servo signals, at least two inputs, including the stability switch input *MUST* be connected to the KK board.
 
+Connect a switched input of your transmitter - normally the gear switch on channel 5 - to the Stability switch input.
+
+Here is a diagram showing how to connect up a PWM receiver.
+http://i.imgur.com/7jkPu.jpg
+
 ===CPPM receiver connections===
 For a single-wire CPPM receiver you need to connect to the M3 output pin of the KK board. All the required signals including the stability/autolevel switch inputs are conveyed over this wire.
 
@@ -55,10 +64,20 @@ For a single-wire CPPM receiver you need to connect to the M3 output pin of the 
  * RUD: Unused
  * M3:  CPPM signal input from receiver
 
+Here is a diagram showing how to connect up a PWM receiver.
+http://i.imgur.com/k2VAV.jpg
 
-Note that CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
-The OpenAero CPPM channel order is the same as the JR/Spektrum system: Throttle, Aileron, Elevator, Rudder, 5, 6, 7, 8
-The flaperon versions expect the second aileron channel to be found on Ch6.
+The CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
+The OpenAero CPPM channel order is the same as the JR/Spektrum system:
+ * CH1: Throttle
+ * CH2: Aileron #1
+ * CH3: Elevator
+ * CH4: Rudder
+ * CH5: Gear switch
+ * CH6: Aileron #2
+ * CH7: Aux 1
+ * CH8: Aux 2
+Note that the flaperon versions expect the second aileron channel to be found on Ch6.
 
 ===Servo connections===
 For the standard version the connections are as follows:
@@ -87,6 +106,42 @@ For the flaperon wing version the connections are as follows:
  * M5: Right flaperon
  * M6: Unused
  * THR: Throttle (CPPM versions only)
+
+===Extra connections===
+*Low battery alarm*
+
+If you have a KK Plus board, OpenAero supports the detection of battery voltage via the attached power distribution pads.
+
+*Buzzer/LED outputs*
+
+If you have a KK Plus board, OpenAero supports the use of a piezo buzzer via the buzzer connections and LEDs via the LED driver pads.
+The buzzer can be used as the audible signal for the lost model alarm or to signal that the battery voltage has dropped below the preset point.
+
+==How do I set up OpenAero?==
+===Pot positions and their use===
+
+
+===Initial setup and calibration===
+The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. While everything is adjustable via the LCD interface, for the moment we will just go over the most common ones that everyone can use.
+
+*Trimming your model*
+
+For OpenAero to understand the normal trimmed radio settings, you have to ask it to learn the trimmed position.
+Firstly though, your model has to be completely trimmed when OpenAero stability is OFF.
+To be sure OpenAero stability is off, with the model powered up, move the model about and see if the control surfaces move. If so, stability is ON and you have to correct that before proceeding. Change the input that controls stability to the opposite state to switch off stability.
+Now adjust all flying surfaces to the neutral position with all trims centered. Please adjust the mechanical servo connections and finally the computer-controlled trims in the transmitter until the model is trimmed.
+
+*Stick centering*
+
+To get OpenAero to learn the neutral stick position, all you have to do is power up the model (with transmitter on) while the Yaw pot is set to the correct position. 
+Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the yaw pot.
+What we need to do is set the Yaw pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
+Power up the model and watch the LED on the KK board carefully.
+If the Yaw pot is set to the correct position, the LED should blink rapidly five times then one long flash. If so the stick position has been successfully saved.
+If the Yaw pot is set to the wrong position, the LED will blink about 12-13 times. Power off the model, reverse the Yaw pot and try again.
+Once the stick position has been successfully saved, switch off ans please remember to return the Yaw pot to the center of its travel.
+
+===Every time you power up OpenAero===
 
 
 
