@@ -43,49 +43,30 @@ void RxGetChannels(void)
 {
 	int16_t  RxChannel;
 	int32_t	 RxSumDiff;
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag); 	// Re-get if updated
 
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInPitch = RxChannel2 - Config.RxChannel2ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag);
+	RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
+	RxInPitch = RxChannel2 - Config.RxChannel2ZeroOffset;
 
-	do
-	{
-		RxChannelsUpdatedFlag = false;
+
 		RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1500
 		if (RxChannel < 0) RxInAux = 0;
 		else RxInAux = RxChannel;
-	} 
-	while (RxChannelsUpdatedFlag);
-	
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag);
+
+//	RxInAux = RxChannel3 - Config.RxChannel3ZeroOffset;
+
+
+
+	RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
 
 #if defined(STD_FLAPERON)
-	do
-	{
-		RxChannelsUpdatedFlag = false;
-		RxInAux1 = RxChannel5 - Config.RxChannel5ZeroOffset;
-	} 
-	while (RxChannelsUpdatedFlag);
+	RxInAux1 = RxChannel5 - Config.RxChannel5ZeroOffset;
 #endif
 
-
+	// Calculate RX activity
 	RxSum = RxInRoll + RxInPitch + RxInAux + RxInYaw;
 	RxSumDiff = RxSum - OldRxSum;
 
+	// Set RX activity flag
 	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) RxActivity = true;
 	else RxActivity = false;
 	OldRxSum = RxSum;

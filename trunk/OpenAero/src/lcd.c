@@ -334,9 +334,7 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 //************************************************************
 
 // LCD timing value from calculated from the UART autotune value.
-// Config.AutoTuneTX  -> 51 is the default, x 2 = 102
-
-//#define LCD_BIT_DELAY 102 	// Allow for interrupts
+// Config.AutoTuneTX  -> 51 is the default, *2 = 102
 
 void LCDprint(uint8_t i)
 {
@@ -345,18 +343,15 @@ void LCDprint(uint8_t i)
 
 	LCD_TX = 0;
 	variable_lcd_delay(delay);
-	//_delay_us(LCD_BIT_DELAY);
 
 	for (mask = 0x01; mask; mask <<= 1) 
 	{
 		if (i & mask) LCD_TX = 1; 
 		else LCD_TX = 0;
 		variable_lcd_delay(delay);
-		//_delay_us(LCD_BIT_DELAY);
 	}
 	LCD_TX = 1;
 	variable_lcd_delay(delay);
-	//_delay_us(LCD_BIT_DELAY);
 }
 
 // Position = line 1: 0-15, line 2: 16-31

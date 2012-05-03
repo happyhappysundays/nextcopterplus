@@ -74,7 +74,7 @@ void Set_EEPROM_Default_Config(void)
 {
 	Config.RxChannel1ZeroOffset	= 1520;	// RC input stick centers
 	Config.RxChannel2ZeroOffset	= 1520;
-	Config.RxChannel3ZeroOffset	= 1520;
+	Config.RxChannel3ZeroOffset	= 1120; //Debug
 	Config.RxChannel4ZeroOffset	= 1520;
 #if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = 1520;
@@ -92,18 +92,17 @@ void Set_EEPROM_Default_Config(void)
 	Config.P_mult_pitch = 100;
 	Config.I_mult_pitch = 0;
 	Config.D_mult_pitch = 0;
-	Config.P_mult_yaw = 100;
+	Config.P_mult_yaw = 150;
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
 	Config.P_mult_glevel = 100;
-	Config.I_mult_glevel = 30;
+	Config.I_mult_glevel = 0;
 	Config.P_mult_alevel = 100;
-	Config.I_mult_alevel = 00;
+	Config.I_mult_alevel = 0;
 	//
 	Config.StabMode = 0;				// Stability mode for non-CPPM RX. 0 = stability disables with THR input **, 1 = stability always on
 	Config.ALMode = 1;					// Autolevel mode for non-CPPM RX. 0 = Autolevel enables with THR input, 1 = Autolevel always off **
-	//Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
-	Config.PowerTrigger = 0; 
+	Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
 
 	#if (defined (ACCELEROMETER) || defined(MEMS_MODULE))
 	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 
