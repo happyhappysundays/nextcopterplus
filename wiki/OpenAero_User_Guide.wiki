@@ -383,17 +383,8 @@ While you can change the LVA mode and trigger at any time, the graph must be run
  *  7. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
  *  8. Click on WRITE. The alarm should start beeping at 1Hz, or the LEDs will be flashing.
 
+=Donations=
+OpenAero is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
+If you feel motivated to donate to the project please feel free. I'm always happy to make special versions for people.
 
-
-
-
-
-
-
-
-
-
-
-Here's a quick video of the LCD menu and GUI
-
-<wiki:video url="http://www.youtube.com/watch?v=nPP8HNMnuxo"/>
+https://sites.google.com/site/openaerowiki/home
