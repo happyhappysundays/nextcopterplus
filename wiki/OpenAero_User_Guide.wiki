@@ -288,7 +288,8 @@ Alternatively you can just reboot.
 An OpenAero GUI exists that allows you to both set up and observe the software and sensor's functionality graphically on a PC/Mac/Linux system.
 
 Here's a screenshot of the new V0.2 GUI for the OpenAero. This example shows a model in Flaperon mode (two stabilised servos per wing). 
-[IMG]http://i.imgur.com/hSHbl.jpg[/IMG]
+
+http://i.imgur.com/hSHbl.jpg
 
 ===What do I need to get the GUI running?===
 You need a MKUSB-type serial interface for the GUI to communicate to the board.
@@ -298,10 +299,10 @@ The connections you need are as follows:
 *For KK boards with an 8-pin header*
 
 From: KK+         To: MKUSB X3 port (Note X3 port *NOT* X2 port)
-Pin 8 receive      Pin 8 transmit
-Pin 9 transmit     Pin 3 receive
-Pin 10 ground     Pin 10 ground
-Pin 2   +5V        Pin 2   +5V
+ * Pin 8 receive      Pin 8 transmit
+ * Pin 9 transmit     Pin 3 receive
+ * Pin 10 ground     Pin 10 ground
+ * Pin 2   +5V        Pin 2   +5V
 
 *If you don't have an 8-pin header*
 
@@ -311,16 +312,21 @@ Note that on the HobbyKing boards, there is a test pad connected to this pin, ma
 *For KK boards with an 6-pin header*
 
 From: 6-pin KK To: MKUSB X3 port
-Pin X RXD Pin 8 transmit
-Pin 1 MISO to Pin 3 receive
-Pin 6 Ground to Pin 10 ground
-Pin 2 +5V to Pin 2 +5V
+ * Pin X RXD Pin 8 transmit
+ * Pin 1 MISO to Pin 3 receive
+ * Pin 6 Ground to Pin 10 ground
+ * Pin 2 +5V to Pin 2 +5V
 
 * Pin X goes to pin 30 of the Atmel CPU.
 
 Here is a picture of my very simple serial cable for 8-pin KK+ boards.
-[IMG]http://i.imgur.com/MFTP5.jpg[/IMG]
+http://i.imgur.com/MFTP5.jpg
 
+== Entering GUI mode ==
+
+== Leaving GUI mode ==
+
+== Autotuning your KK board ==
 
 AutoTune
  1. Set Yaw Gain pot to min
@@ -332,4 +338,5 @@ AutoTune
 
 
 Here's a quick video of the LCD menu and GUI
+
 <wiki:video url="http://www.youtube.com/watch?v=nPP8HNMnuxo"/>
