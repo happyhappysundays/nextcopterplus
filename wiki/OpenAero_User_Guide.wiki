@@ -123,7 +123,7 @@ The buzzer can be used as the audible signal for the lost model alarm or to sign
 When used with a PWM receiver, the input connected to the THR pin controls stability.
 When used with a CPPM receiver the switch input is taken from Ch.8. In order to share these inputs with autolevel mode, you can set it up to toggle stability switchable/alwayson and autolevel switchable/alwaysoff. So that gives you three options with a single channel switch:
 
- * 1. Autolevel always OFF, stability switchable ON/OFF *default
+ * 1. Autolevel always OFF, stability switchable ON/OFF (default)
  * 2. Stability always ON, Autolevel switchable ON/OFF
  * 3. Both stability and autolevel switchable ON/OFF
 
