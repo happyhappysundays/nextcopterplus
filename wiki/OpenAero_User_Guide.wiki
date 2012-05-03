@@ -76,8 +76,9 @@ The OpenAero CPPM channel order is the same as the JR/Spektrum system:
  * CH5: Gear switch
  * CH6: Aileron #2
  * CH7: Aux 1
- * CH8: Aux 2
-Note that the flaperon versions expect the second aileron channel to be found on Ch6.
+ * CH8: Aux 2 <-- Stability/Autolevel switch input
+Note 1: The flaperon versions expect the second aileron channel to be found on Ch6.
+Note 2: The Stability/Autolevel switch input is on Ch8.
 
 ===Servo connections===
 For the standard version the connections are as follows:
@@ -118,6 +119,16 @@ If you have a KK Plus board, OpenAero supports the use of a piezo buzzer via the
 The buzzer can be used as the audible signal for the lost model alarm or to signal that the battery voltage has dropped below the preset point.
 
 ==How do I set up OpenAero?==
+===Switching between stability modes===
+When used with a PWM receiver, the input connected to the THR pin controls stability.
+When used with a CPPM receiver the switch input is taken from Ch.8. In order to share these inputs with autolevel mode, you can set it up to toggle stability switchable/alwayson and autolevel switchable/alwaysoff. So that gives you three options with a single channel switch:
+1. Autolevel always OFF, stability switchable ON/OFF *default
+2. Stability always ON, Autolevel switchable ON/OFF
+3. Both stability and autolevel switchable ON/OFF
+You set up the modes by using the yaw and roll TX sticks on power up and it's saved in eeprom.
+
+Discussion about this will follow in the advanced user guide which includes autolevel.
+
 ===Pot positions and their use===
 *Roll Pot*
 
