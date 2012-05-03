@@ -1,4 +1,4 @@
-=The Idiot's Guide to OpenAero=
+=The OpenAero User Guide=
 ==What is OpenAero?==
 OpenAero is an aeroplane stabilising software for KK-type multicopter boards. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 ==What does this guide cover?==
@@ -119,7 +119,30 @@ The buzzer can be used as the audible signal for the lost model alarm or to sign
 
 ==How do I set up OpenAero?==
 ===Pot positions and their use===
+*Roll Pot*
 
+The roll pot is primarily used to adjust the roll and pitch gyro gain.
+Increasing the gain will increase the amount that the control surfaces move in response to external movement.
+Please note that adjusting the gain too far can lead to instability and oscillation.
+
+The roll pot is also used to adjust the gyro polarity when turned to the minimum setting while being powered up. More on that later.
+
+
+*Pitch Pot*
+
+The pitch pot is used to adjust the roll and pitch PID I-term.
+Increasing this value will increase the control surface's tendency to stay deflected until the model returns to its original position.
+Please note that it is inadvisable to increase this above zero until much experimentation is done.
+
+*Please leave this control at the minimum setting. If you find that the control surfaces slowly move to an unusual position when you first switch stability ON, then the Pitch pot is actually set at the maximum position and must be changed to the opposite position.*
+
+*Yaw Pot*
+
+The yaw pot is primarily used to adjust the yaw gyro gain.
+Increasing the gain will increase the amount that the control surfaces move in response to external movement.
+Please note that adjusting the gain too far can lead to instability and oscillation.
+
+The yaw pot is also used to go into stick centering mode when turned to the minimum setting, and autotune mode when turned to the maximum setting while being powered up. More on that later.
 
 ===Initial setup and calibration===
 The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. While everything is adjustable via the LCD interface, for the moment we will just go over the most common ones that everyone can use.
@@ -137,12 +160,129 @@ To get OpenAero to learn the neutral stick position, all you have to do is power
 Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the yaw pot.
 What we need to do is set the Yaw pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
 Power up the model and watch the LED on the KK board carefully.
-If the Yaw pot is set to the correct position, the LED should blink rapidly five times then one long flash. If so the stick position has been successfully saved.
+If the Yaw pot is set to the correct position, the LED should blink rapidly three times then one long flash. If so the stick position has been successfully saved.
 If the Yaw pot is set to the wrong position, the LED will blink about 12-13 times. Power off the model, reverse the Yaw pot and try again.
-Once the stick position has been successfully saved, switch off ans please remember to return the Yaw pot to the center of its travel.
+Once the stick position has been successfully saved, switch off and please remember to return the Yaw pot to the center of its travel.
+
+*Checking the gyro direction*
+
+An extremely important step is to confirm that the gyros are acting on your model as appropriate. If the gyro directions are reversed any motion of the model will be amplified in the same direction leading to an almost immediate crash.
+Once you have the model trimmed correctly, switch on stabilisation and watch carefully how the control surfces move in response to moving the model.
+
+Gyros respond to rotation, so the easiest way to check the gyro direction is to rotate the model on each axis one by one.
+With the model held in front of you, rotate it along the roll axis and watch the ailerons move. They should move to oppose the movement. For example the falling wing's aileron should move DOWN and the rising wing's aileron should move UP. If this is not the case, the Roll gyro needs to be reversed.
+
+With the model held in front of you, rotate it up and down along the pitch axis and watch the elevator move. It should move to oppose the movement. For example the elevator should move DOWN when you pitch the model's nose UP and DOWN when you pitch the model's nose UP. If this is not the case, the Pitch gyro needs to be reversed.
+
+With the model held in front of you, rotate it left and right along the yaw axis and watch the rudder move. It should move to oppose the movement. For example the rudder should move LEFT when you yaw the model's nose RIGHT and RIGHT when you yaw the model's nose RIGHT. If this is not the case, the Yaw gyro needs to be reversed.
+
+*Adjusting the gyro direction*
+
+To get OpenAero to gyro direction, all you have to do is power up the model while the Roll pot is set to the correct position. 
+Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the Roll pot.
+What we need to do is set the Roll pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
+Power up the model and watch the LED on the KK board carefully.
+If the Roll pot is set to the correct position, the LED should blink rapidly *six* times. If so, we are in gyro reversing mode.
+
+ * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
+ * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
+ * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
+
+Once the gyro direction has been successfully saved, switch off and please remember to return the Roll pot back to your preferred setting.
+
+If you find that the gyro direction has not changed, try moving the transmitter stick in the *opposite* direction next time.
+
+*Initial pot positions*
+
+Try initially setting the Roll and Yaw pots to the center of its throw to set moderate gyro gain. Set the Pitch pot to minimum.
 
 ===Every time you power up OpenAero===
+There are some important things to note when starting OpenAero.
 
+*Stick positions*
+
+The stick positions that the transmitter is in as the model powers up are important to OpenAero. Unless you plan to alter the stability switch modes, make sure the transmitter sticks are centered while powering up your model.
+
+*Gyro calibration*
+
+The gyros are calibrated automatically when the model is powered up.
+It is important that the model is held very still while the gyro calibration is taking place.
+
+To make this easier, the gyro calibration is done after a short pause and just as the LED lights on the KK board. This allows two seconds or so to connect the battery and allow any movement to settle.
+
+
+*Safety*
+
+Always make sure your throttle is set to minimum before attempting to power up your model. *Warning:* Even with the transmitter throttle set to zero, there may be a momentary output from the KK board to the throttle channel which may cause the motor to turn very briefly. As such stay well away from the motor and propellor and sure your model when powering it up.
+
+==Flying with OpenAero==
+Once you have confirmed that the gyro direction is correct you are ready to fly with OpenAero. Do initial test flights with stability switched OFF until you are sure that your model is aerodynamically trimmed and the control throws are set appropriately.
+You can then, at a safe height, switch on stability and carefully observe the model.
+You may find that the controls appear more sluggish than normal as the software dampens movement of the model.
+
+==Using the LCD==
+OpenAero supports serial LCD modules for easy access to all settings in OpenAero. Having an LCD module allows you to make quick changes in the field and is invaluable during setup.
+
+===Connecting an LCD===
+The KK Plus board has a dedicated LCD port that allows direct connection of an LCD module. For those that do not own a KK Plus board you will need to arrange connection to the following three signals.
+
+ * MISO (PB4, pin 16 of the MPU) to LCD data
+ * +5v
+ * Ground
+
+
+===Entering LCD mode===
+Once an LCD module is connected, and OpenAero powered up, you need to set the transmitter sticks to some extreme positions and hold them for at least two seconds.
+If the correct stick positions have been held, the LCD module will display the OpenAero menu.
+Due to channel reversing differences between tranmitter models, there is no hard and fast specification of the stick position but the official LCD entry position is:
+
+ * Pitch up, Roll right and Yaw left
+
+If you find that this does not cause OpenAero to go into LCD mode, then you will have to try all the variations of these position.
+
+*LCD menu*
+
+The LCD menu is navigated by moving the pitch stick up and down. The values can be changed by moving the roll stick and saved with the yaw stick.
+The complete list of menu items is as follows:
+
+ * Acc Trim (Roll): Used to fine tune the autolevel roll setting
+ * Acc Trim (Pitch): Used to fine tune the autolevel pitch setting
+ * PID Roll P-term: In EEPROM mode, used to adjust the Roll gain
+ * PID Roll I-term: In EEPROM mode, used to adjust the Roll I-term
+ * PID Pitch P-term: In EEPROM mode, used to adjust the Pitch gain
+ * PID Pitch I-term: In EEPROM mode, used to adjust the Pitch I-term
+ * PID Yaw P-term: In EEPROM mode, used to adjust the Yaw gain  
+ * PID Yaw I-term: In EEPROM mode, used to adjust the Yaw I-term
+ * Gyr level P-term: Used to set the gyro gain in autolevel mode
+ * Gyr level I-term: Used to set the gyro I-term in autolevel mode
+ * Acc level P-term: Used to set the accelerometer gain in autolevel mode
+ * Acc level I-term: Used to set the accelerometer I-term in autolevel mode
+ * LVA voltage: Set the voltage at which the low voltage alarm (LVA) trips
+ * LVA mode: Buzzer or LED 
+ * Battery voltage: Current battery voltage reading
+ * Pot mode: EEPROM mode - use these settings, Pot mode - use pots
+ * Roll gyro: Reverse roll gyro direction        
+ * Pitch gyro: Reverse pitch gyro direction           
+ * Yaw gyro: Reverse yaw gyro direction             
+ * Roll servo: Reverse roll servo direction      
+ * Pitch servo: Reverse pitch servo direction        
+ * Yaw servo: Reverse yaw servo direction          
+ * Calibrate Accel.: Start accelerometer calibration
+ * Center sticks: Start stick centering   
+ * Stability mode: Switch between switchable and always ON  
+ * Autolevel mode: Switch between switchable and always OFF
+
+Note that many of the above setting only apply to this with add-on accelerometers or MEMS boards.    
+
+
+===Exiting LCD mode===
+To exitLCD mode you need to set the transmitter sticks to some extreme positions and hold them for at least one second.
+If the correct stick positions have been held, the LCD module will go blank and control return to the main program.
+Due to channel reversing differences between tranmitter models, there is no hard and fast specification of the stick position but the official LCD exit position is:
+
+ * Pitch up, Yaw right
+
+Alternatively you can just reboot.
 
 
 *GUI*
@@ -153,42 +293,7 @@ For conventional PWM receivers (via four cables) I have updated the code so that
 Here's a shot of the new V0.2 GUI for the OpenAero. This example shows a model in Flaperon mode (two stabilised servos per wing). 
 [IMG]http://i.imgur.com/hSHbl.jpg[/IMG]
 
-[SIZE="3"][B]Features[/B][/SIZE]
-Depending on what type of KK board, and which add-ons you have fitted to them, these are the available features.
 
-- Support for Standard, Flying Wing and Flaperon-equipped models
-- Auto arming
-- Switchable stability mode
-- LCD support for setting flight parameters
-- GUI for setting parameters and visualising sensors and stability 
-- LCD Menu selectable features
-[INDENT]P + I gain
-LVA voltage *
-LVA alarm mode *
-Battery voltage readout
-Stick centering
-Gyro reversing
-Servo reversing
-Stability switch function
-Autolevel switch function[/INDENT]
-- Lost model alarm*
-- In CPPM mode the throttle signal is decoded and passed back out via the THR pin to be connected to an ESC + motor
-- Vertical board orientation compile option 
-- Flying Wing mode
-- Stick centering on power-up via Yaw pot
-- Adjustable gain via pots or LCD based on a preset - defaults to pots
-[INDENT]Roll pot will adjust Roll and Pitch gain (P-term)
-Pitch pot will adjust Roll and Pitch I-term
-Yaw pot will adjust Yaw gain (P-term) I-term adjustable via LCD or GUI[/INDENT]
- - Gyro direction can be reversed by setting the Roll pot to zero and using the TX sticks
-- Support for CPPM receivers
-- Switchable auto-level mode 
-- Additional Menu selectable features
-[INDENT]Accelerometer pitch and roll trim 
-Autolevel Gyro and Acc P + I gain
-Accelerometer calibration[/INDENT]
-
-* Needs KK+ board
 
 [B]What do I need to get the GUI running?[/B]
 You need a MKUSB-type serial interface for the GUI to communicate to the board.
@@ -219,45 +324,6 @@ Here is a shot of my very simple serial cable for 8-pin KK+ boards.
 [IMG]http://i.imgur.com/MFTP5.jpg[/IMG]
 
 
-[B]Servo connections - V1.11[/B]
-Standard/Flying Wing
-M1: Rudder
-M2: Reversed rudder
-M3: Aileron/Left flaperon
-M4: Reversed aileron
-M5: Elevator/Right flaperon
-M6: Reversed elevator/Reversed right flaperon
-
-[B][COLOR="Red"]Servo connections - V1.12[/COLOR][/B]
-Standard/Flying Wing/Flaperon
-M1: Rudder
-M2: Aileron/Left flaperon
-M3: CPPM input only - not a servo output
-M4: Elevator/Right flaperon (FW)/Elevator
-M5: Right flaperon(non-FW)
-M6: Spare
-
-[B]Connection diagram - CPPM Aeroplane V1.10/V1.11[/B]
-[IMG]http://i.imgur.com/nLa3V.jpg[/IMG]
-
-[B]Connection diagram - STD Aeroplane V1.10/V1.11[/B]
-[IMG]http://i.imgur.com/zn6Lt.jpg[/IMG]
-
-[B]Connection diagram - [COLOR="Red"]CPPM Aeroplane V1.12[/COLOR][/B]
-[IMG]http://i.imgur.com/k2VAV.jpg[/IMG]
-
-[B]Connection diagram - [COLOR="Red"]STD Aeroplane V1.12[/COLOR][/B]
-[IMG]http://i.imgur.com/7jkPu.jpg[/IMG]
-
-[B]Pot-based power-up settings guide[/B]
-Stick Centering
- 1. Set Yaw Gain pot to max 
- 2. Set Tx trims to centre
- 3. Power on
- 4. LED flashes 3 times
- 5. Restore gain pot
- 6. Restart
-
 AutoTune
  1. Set Yaw Gain pot to min
  2. Start KK autotune on GUI
@@ -266,132 +332,6 @@ AutoTune
  5. Restore gain pot
  6. Restart
 
-Gyro reversing (Note: Only for versions without an accelerometer)
- 1. Set Roll Gain pot to zero
- 2. Power on
- 3. LED flashes 6 times
- 4. Move relevant stick Up/Left for Normal, Down/Right for reverse
- 5. Restore pot
- 6. Restart
-
-[B]Transmitter-based power-up settings guide[/B]
-Manual stability mode selection. This switches between Stability switchable (default) and Stability always on.
-
- 1. Hold Yaw stick on TX left or right
- 2. Power on FC
- 3. LED flashes 4 times
- 4. Return stick to neutral
-
-Manual Autolevel mode selection. This switches between Autolevel switchable and Stability always off (default).
-
- 1. Hold Roll stick on TX left or right
- 2. Power on FC
- 3. LED flashes 5 times
- 4. Return stick to neutral
-
-[B]Videos[/B]
-This is mrfliboy's test flight of the V1.10 beta firmware
-[URL="http://www.youtube.com/watch?v=mDF0NxXTDO4"]http://www.youtube.com/watch?v=mDF0NxXTDO4[/URL]
-
-Here's a video I found on YouTube on a guy using V1.11 on a Bixler.
-[URL="http://youtu.be/hLFenZskyyc"]http://youtu.be/hLFenZskyyc[/URL]
-
-A really cool video from Brazil showing a model battling strong wind
-[URL="http://www.youtube.com/watch?v=m24TntjX-G4"]http://www.youtube.com/watch?v=m24TntjX-G4[/URL]
-
-Here's a video that NDw made of his first flight of the code:
-[URL="http://vimeo.com/34564560"]http://vimeo.com/34564560[/URL]
-
-Here's a great video of eyeinsky1 flying his FPV model in aeroplane mode
-[URL="http://www.youtube.com/watch?v=lj9eEkSe80M"]http://www.youtube.com/watch?v=lj9eEkSe80M[/URL]
 
 Here's a quick look at the LCD menu and GUI
 [URL="http://www.youtube.com/watch?v=nPP8HNMnuxo"]http://www.youtube.com/watch?v=nPP8HNMnuxo[/URL]
-
-[B]Code change log[/B]
-[B]V1.10a (beta)[/B]
-Updates:
- - Added lost model alarm. Alarm (if fitted) will sound one minute after the last RC activity.
- - Changed GUI lockout system. You must connect to the GUI within 10 seconds of power-on. The GUI is locked out after this time until repowered.
- - LCD menu entry is now with Pitch UP, Yaw RIGHT *and* Roll LEFT for added security.
- - Added configurable stability and autolevel switch modes. Now users with normal PWM receivers can switch both Stability and Autolevel (if fitted).
- - Fixed cycle timer in GUI to display actual loop cycle time :)
-
-[B]V1.11 (beta)[/B]
-Updates:
- - Added flaperon configuration for split ailerons on M3/M4
- - Fixed stick centering via Yaw pot.
-
-[B]V1.12[/B]
-Updates:
- - New output pulse generation code. Three and six-channel modes. 
- - Removed reversed channels.
- - Added ICP input option for CPPM mode. 
- - Fixed flaperon and vertical mode bugs.
-
-[B]Common issues[/B]
-1. Any functions that need the transmitter sticks to navigate (LCD Menu and Gyro reversing) will not work if your transmitter has flaperon mixing or similar. You need to have individual control of each channel. You can then switch the mixing back on to fly.
-2. Make sure the transmitter travel throws are set to at least 100%, otherwise the stick-based settings won't work. Examples include LCD menu navigation and gyro reversing. 
-
-The .hex files were tested on a standard KK 5.5 Blackboard, a HK V2 and a KK+.
-
-[B]Which .hex file do I need?[/B]
-
-1. Unmodified HobbyKing V2, Blackboard or KK+ (Atmega168-based)
-[COLOR="Blue"]OpenAero_1_11_A_PWM_STD.hex[/COLOR] for standard PWM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_PWM_STD.hex[/COLOR] for standard PWM receivers (Flying Wing)
-[COLOR="Blue"]OpenAero_1_11_A_CPPM_STD.hex[/COLOR] for CPPM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_CPPM_STD.hex[/COLOR] for CPPM  receivers (Flying Wing)
-These versions use the on-board pots to adjust P and I-terms for Roll and Pitch, and Yaw P-term.
-
-2. HobbyKing V2, Blackboard or KK+ (Atmega168-based) with an accelerometer board
-[COLOR="Blue"]OpenAero_1_11_A_PWM_ACC.hex[/COLOR] for standard PWM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_PWM_ACC.hex[/COLOR] for standard PWM receivers (Flying Wing)
-[COLOR="Blue"]OpenAero_1_11_A_CPPM_ACC.hex[/COLOR] for CPPM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_CPPM_ACC.hex[/COLOR] for CPPM  receivers (Flying Wing)
-These versions cannot use pot-based gain control so required either LCD or GUI for setup and adjustment.
-
-3. KK+ with a MEMS module (better gyros and accelerometer)
-[COLOR="Blue"]OpenAero_1_11_A_PWM_MEMS.hex[/COLOR] for standard PWM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_PWM_MEMS.hex[/COLOR] for standard PWM receivers (Flying Wing)
-[COLOR="Blue"]OpenAero_1_11_A_CPPM_MEMS.hex[/COLOR] for CPPM receivers (Aeroplane)
-[COLOR="Blue"]OpenAero_1_11_FW_CPPM_MEMS.hex[/COLOR] for CPPM  receivers (Flying Wing)
-These versions cannot use pot-based gain control so required either LCD or GUI for setup and adjustment.
-
-4. New experimental version for flaperon/split ailerons on M3 and M4
-[COLOR="Blue"]OpenAero_1_11_FPN_CPPM_MEMS.hex[/COLOR] for CPPM receivers and a KK+ with MEMS module
-[COLOR="Blue"]OpenAero_1_11_FPN_CPPM_STD.hex[/COLOR] for CPPM  receivers and a standard KK board
-
-Note that CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
-The OpenAero CPPM channel order is the same as the JR/Spektrum system: [B]Throttle, Aileron, Elevator, Rudder, 5, 6, 7, 8[/B]
-The flaperon versions expect the second aileron channel to be found on Ch6.
-
-[COLOR="Blue"]OpenAeroGUI_V0_1a4.zip[/COLOR] = Windows 32-bit GUI files
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#summary One-sentence summary of this page.
-
-= Introduction =
-
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
