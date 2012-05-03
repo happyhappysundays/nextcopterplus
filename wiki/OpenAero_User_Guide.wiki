@@ -285,7 +285,9 @@ Due to channel reversing differences between tranmitter models, there is no hard
 Alternatively you can just reboot.
 
 ==Using the GUI==
-An OpenAero GUI exists that allows you to both set up and observe the software and sensor's functionality graphically on a PC/Mac/Linux system.
+The OpenAero GUI is a great tool for visualising the sensors on your copter and to not just set, but experiment with PID settings and simulate them on-screen. The limitations of the KK design mean that I have to use a software UART to transmit data back to the GUI. Various KK boards will run at different speeds so it is likely that your board will have to be tuned. Fortunately, with the GUI this is relatively easy. You only have to do the Autotune once, unless you re-flash the board, or click on the "Defaults" button, which resets the eeProm values. The procedure to auto-tune is detailed later in this document.
+
+Please note that the MultiWii GUI is Java-based and quite CPU intensive. Using the GUI while running too many applications might cuse it to slow.
 
 Here's a screenshot of the new V0.2 GUI for the OpenAero. This example shows a model in Flaperon mode (two stabilised servos per wing). 
 
@@ -324,6 +326,62 @@ http://i.imgur.com/MFTP5.jpg
 
 == Entering GUI mode ==
 
+1. Make sure your MKUSB and cable are connected to your PC and the KK+. 
+2. Power up the KK+ board.
+3. Run the MultiWiiConf_Next.exe file. Make sure your COM port is listed in the GUI.
+4. Click on the COM port and make sure it turns green.
+5. Click on the START button and data should start to be transferred to the GUI. 
+   The graph will start to move to the right and the "Cycle Time" will increase.
+   Try moving the KK+ board and see the gyro and acc outputs displayed on the graph.
+   Note that unless you have previsously calibrated the accelerometers, these will not be displayed correctly.
+6. Click on READ under "Flight parameters". Now, all the PID etc data from the KK+ is transferred to the screen.
+7. You can modify the data by clicking on each box and moving the mouse left or right. 
+   To save any data, first STOP the graph, then click on WRITE.
+8. You can now ARM the KK+ with your transmitter.
+9. Increase the throttle. Now you can see the motor outputs start up as if the KK+ is flying.
+   The motor outputs are disabled when in GUI mode, but please take care when arming your copter at *any time*.
+   If you are not actually in GUI mode, then your copter will then be armed and dangerous, so to speak.
+
+How to auto-tune:
+1. Make sure your MKUSB and cable is connected to your PC and the KK+. 
+2. Power up the KK+ board.
+3. Run the MultiWiiConf_Next.exe file.
+4. When it opens, select the COM port from the list on the left top. The port number should turn green. 
+   Do NOT click on anything else yet.
+5. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned orange.
+   Please check that the TX LED of the MKUSB is flashing very fast.
+6. On the transmitter, go into AUTOTUNE mode by holding both ROLL and YAW left for a few seconds.
+   If you have some channels reversed, this may be different.
+   You can tell that you are in AUTOTUNE mode because the LED will flash about 12-13 times.
+   When the autotune has finished, the LED will flash one long flash.
+   The software will save the successful numbers into eeProm. The autotune process takes less than 10 seconds.
+7. Click on the button labelled "KK". If you move the mouse away from the button, you will notice that it has turned back to green.
+   Please check that the TX LED of the MKUSB has STOPPED flashing.
+
+Additional features of the GUI:
+Stick centering: You can calibrate the stick center position with a single click on the "Calibrate Sticks" button.
+Gyro calibration: You can calibrate the gyros with a single click on the "Calibrate Gyros" button.
+Acc calibration: You can calibrate the accelerometers with a single click on the "Calibrate Acc" button.
+LVA: You can see the current battery voltage, and set the low-voltage warning trigger level. You can also set it up to alert you via the buzzer output of via LEDs. In buzzer mode the buzzer is quiet normally and beeps rapidly when the battery voltage falls below the trigger level. In LED mode the output is ON normally and flashes slowly when the battery voltage falls below the trigger level.
+
+Using the LVA:
+The default mode for LVA is BUZZER mode and the trigger is 0 Volts.
+While you can change the LVA mode and trigger at any time, the graph must be running to see the VBAT updating.
+1. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
+2. Click on WRITE. The alarm should start beeping quickly.
+3. Reduce the LVA value to less than the VBAT.
+4. Click on WRITE. The alarm should stop beeping
+5. Click on the MODE button to change the text to LED.
+6. Click on WRITE. The alarm will sound continually, or the LEDs will be ON.
+7. Click and drag the LVA numbers until the trigger is higher than your VBAT value.
+8. Click on WRITE. The alarm should start beeping at 1Hz, or the LEDs will be flashing.
+
+
+
+
+
+
+
 == Leaving GUI mode ==
 
 == Autotuning your KK board ==
@@ -335,6 +393,10 @@ AutoTune
  4. LED flashes 12-13 times
  5. Restore gain pot
  6. Restart
+
+
+
+
 
 
 Here's a quick video of the LCD menu and GUI
