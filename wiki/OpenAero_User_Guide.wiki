@@ -191,15 +191,15 @@ With the model held in front of you, rotate it left and right along the yaw axis
 
 *Adjusting the gyro direction*
 
-To get OpenAero to gyro direction, all you have to do is power up the model while the Roll pot is set to the correct position. 
+To get OpenAero to change gyro direction, all you have to do is power up the model while the Roll pot is set to the correct position. 
 Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the Roll pot.
 What we need to do is set the Roll pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
 Power up the model and watch the LED on the KK board carefully.
-If the Roll pot is set to the correct position, the LED should blink rapidly *six* times. If so, we are in gyro reversing mode.
+If the Roll pot is set to the correct position, the LED should blink rapidly *six* times, then stay ON. If so, we are in gyro reversing mode.
 
- * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
- * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
- * Move the transmitter roll stick to the left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the settting has changed.
+ * Move the transmitter roll stick left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
+ * Move the transmitter yaw stick left or right to set the yaw gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
+ * Move the transmitter pitch stick up or down to set the pitch gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
 
 Once the gyro direction has been successfully saved, switch off and please remember to return the Roll pot back to your preferred setting.
 
