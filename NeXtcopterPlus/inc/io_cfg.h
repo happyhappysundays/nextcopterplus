@@ -82,10 +82,12 @@
 //#define HEXA_X_COPTER		// Choose this for Hexacopter X
 //#define Y4				// Choose this for Y4 mode (V-tail)
 
-#define CPPM_MODE 			// Uncomment this for PPM support on CH2 (elevator)
-#define MEMS_MODULE 		// Uncomment this when using the MEMS module
-//#define PROX_MODULE			// Uncomment this when using a Proximity module 
+#define CPPM_MODE 		// Uncomment this for PPM support on CH2 (elevator)
+//#define MEMS_MODULE 		// Uncomment this when using the MEMS module
+//#define PROX_MODULE		// Uncomment this when using a Proximity module 
 							// (NB: *MUST* select CPPM mode as well)
+//#define NO_ACC				// Uncomment this is your KK board has no acceleromaters
+
 //
 //***********************************************************
 
