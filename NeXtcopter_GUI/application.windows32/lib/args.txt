@@ -1,3 +1,0 @@
-
-MultiWiiConf_Next
-MultiWiiConf_Next.jar,core.jar,RXTXcomm.jar,serial.jar,controlP5.jar,gluegen-rt.jar,jogl.jar,opengl.jar
