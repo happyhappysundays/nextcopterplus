@@ -1,7 +1,7 @@
 // **************************************************************************
 // NeXtcopter Plus software
 // ========================
-// Version 1.1g
+// Version 1.1h
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 //
@@ -98,6 +98,8 @@
 //			Added experimental Y4 mode. Added CH5 input on M6 option in quad, Y4 modes.
 //			As autolevel now switchable with both CPPM and 5-channel PWM, removed
 //			Autolevel arming mode.
+// V1.1h	Added NO_ACC compile option to permanently disable autolevel for boards
+//			without acceleromaters.
 //
 //***********************************************************
 //* To do
@@ -421,6 +423,11 @@ if (0)
 			}
 		#endif // M6 is free
 
+		#ifdef NO_ACC
+			AutoLevel = false;						// No autolevel in NO_ACC mode
+			flight_mode &= 0xfe;				// Notify GUI that mode has changed
+		#endif
+
 		//************************************************************
 		//* Proximity module
 		//************************************************************
@@ -575,7 +582,7 @@ if (0)
 					if (firsttimeflag) 
 					{
 						LCD_Display_Menu(MenuItem);
-						LCDprint_line2(" V1.1g (c) 2012 ");
+						LCDprint_line2(" V1.1h (c) 2012 ");
 						_delay_ms(1000);
 						firsttimeflag = false;
 						MenuItem = 1;
