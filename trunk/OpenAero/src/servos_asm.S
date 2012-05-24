@@ -106,8 +106,14 @@ output_servo_ppm_asm:
 	sbi 	M2			// 2
 	sbi 	M4			// 2
 	sbi 	M5			// 2
-	sbi 	M6			// 2
+//	sbi 	M6			// 2
+
+#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
 	sbi		THR			// 2
+#else
+	nop
+	nop
+#endif
 
 	// Create minimum pulse of 1000us
 minpulse:
@@ -124,7 +130,7 @@ looppulse:
 
 	// Start variable part of pulse
 varpulse:				
-	ldi 	19,0xD7		// 1			Set loop count to 3D7h or 983 <--Wrong - should be max 256
+	ldi 	19,0xD7		// 1			Set loop count to 3D7h or 983
 	ldi		17,0x03		// 1
 	clr		0			// 1
 
@@ -157,13 +163,22 @@ f4:
 	nop					// 1
 	subi	r16,1		// 1			Servo6
 	brne	f5			// 2	1
-	cbi 	M6			// 		2		Clear output M6 if done
+//	cbi 	M6			// 		2		Clear output M6 if done
+	nop
+	nop
+//
 f5:
 //	nop
 	nop					// 1
 	subi	r23,1		// 1			Throttle
 	brne	f6			// 2	1
+#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
 	cbi 	THR			// 		2		Clear output THR if done
+#else
+	nop
+	nop
+#endif
+
 f6:
 //	nop	
 	subi 	19,1		// 1

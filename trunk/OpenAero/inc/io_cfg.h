@@ -19,6 +19,13 @@
 extern CONFIG_STRUCT Config;
 
 //***********************************************************
+//* Project defines
+//***********************************************************
+
+#define VERSION 13		// OpenAero version number
+#define MENUITEMS 28	// Number of LCD menu items
+
+//***********************************************************
 //* Pin definitions
 //***********************************************************
 
@@ -74,7 +81,8 @@ extern CONFIG_STRUCT Config;
 #define ICP				REGISTER_BIT(PORTB,0)	// ICP CPPM input (formerly M3)
 #define ICP_DIR 		REGISTER_BIT(DDRB,0)
 
-#define MENUITEMS 27	// Number of lCD menu items
+#define FS				REGISTER_BIT(PIND,5)	// Failsafe set input (formerly M6)
+#define FS_DIR 			REGISTER_BIT(DDRD,5)
 
 //***********************************************************
 

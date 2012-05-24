@@ -161,7 +161,7 @@ void send_multwii_data(void) // 66 bytes
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 
 	send_word(RxChannel4); 		// 33
-#ifdef CPPM_MODE
+#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
 	send_word(RxChannel5);
 	send_word(RxChannel6); 
 	send_word(RxChannel7); 

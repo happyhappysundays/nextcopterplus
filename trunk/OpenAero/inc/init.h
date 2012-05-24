@@ -8,3 +8,4 @@
 
 extern void init(void);
 extern void CenterSticks(void);
+extern void SetFailsafe(void);

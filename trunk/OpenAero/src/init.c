@@ -29,6 +29,7 @@
 
 void init(void);
 void CenterSticks(void);
+void SetFailsafe(void);
 
 //************************************************************
 // Defines
@@ -44,16 +45,16 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
-	MCUCR |= (1<<PUD);			// Pull-up Disable
-
+	// Setup I/O pins
 	RX_ROLL_DIR		= INPUT;
 	RX_PITCH_DIR	= INPUT;
-#ifdef CPPM_MODE
+#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
 	THR_DIR			= OUTPUT;	// In CPPM mode the THR pin is an output
 #else
 	RX_COLL_DIR		= INPUT;	// Otherwise the THR pin is an input
 #endif
 	RX_YAW_DIR		= INPUT;
+	FS_DIR			= INPUT;	// Failsafe set trigger
 
 	GYRO_YAW_DIR	= INPUT;
 	GYRO_PITCH_DIR	= INPUT;
@@ -66,22 +67,28 @@ void init(void)
 	M2_DIR			= OUTPUT;
 	M4_DIR			= OUTPUT;
 	M5_DIR			= OUTPUT;
-	M6_DIR			= OUTPUT;
 
 	LED_DIR			= OUTPUT;
 	LCD_TX_DIR		= OUTPUT;
 	LVA_DIR			= OUTPUT;
 	ICP_DIR			= INPUT;	// Always an input for safety, even in PWM mode
 
-	LVA 		= 0; 			// LVA alarm OFF
+	M1			= 0;			// Hold all pwm outputs low to stop glitches
+	M2			= 0;
+	M4			= 0;
+	M5			= 0;
 
-	LED 		= 0;
-	RX_ROLL 	= 0;
-	RX_PITCH 	= 0;
-#ifndef CPPM_MODE 
-	RX_COLL 	= 0;
+	LVA 		= 0; 			// LVA alarm OFF
+	LED 		= 0;			// LED off
+
+	// Set/clear pull-ups (1 = set, 0 = clear)
+	RX_ROLL 	= 1;
+	RX_PITCH 	= 1;
+#if (defined (LEGACY_PWM_MODE) || defined (AUTOMAGIC_PWM_MODE) || defined (DOSD_PWM_MODE)) // Only enable pull-up when THR is an input
+	RX_COLL 	= 1;
 #endif
-	RX_YAW		= 0;
+	RX_YAW		= 1;
+	FS			= 1;
 
 	// Timer0 (8bit) - run @ 8MHz (125ns)
 	// Used to pad out loop cycle time in blocks of 1us
@@ -94,7 +101,7 @@ void init(void)
 	TCCR1A = 0;
 	TCCR1B = (1 << CS11);				// Clk/8 = 1MHz
 
-	// Timer2 8bit - run @ 8MHz / 1024 = 7812.5kHz
+	// Timer2 8bit - run @ 8MHz / 1024 = 7812.5kHz / 128us
 	// Used to time arm/disarm intervals
 	TCCR2A = 0;	
 	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);	// Clk/1024 = 7812.5kHz
@@ -116,42 +123,46 @@ void init(void)
 		EIMSK = (1 << INT0);				// Enable INT0
 		EIFR |= (1 << INTF0);				// Clear INT0 interrupt flags
 
-	#else // Non-CPPM mode
+	#else // PWM modes
 		// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
 		PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
 		PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)
 		PCMSK0 |= (1 << PCINT7);			// PB7 (Rudder/Yaw pin change mask)
 		PCMSK2 |= (1 << PCINT17);			// PD1 (Aileron/Roll pin change mask)
-
 		// External interrupts INT0 and INT1 (Pitch, Collective)
-		EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
 		EIMSK = (1 << INT0) | (1 << INT1);	// External Interrupt Mask Register - enable INT0 and INT1
 		EIFR |= (1 << INTF0) | (1 << INTF1);// Clear both INT0 and INT1 interrupt flags
+
+		#ifdef DOSD_PWM_MODE 
+			EICRA = (1 << ISC01) | (1 << ISC11);// Falling edges of INT0, INT1 
+		#else
+			EICRA = (1 << ISC00) | (1 << ISC10);// Any change INT0, INT1 
+		#endif
 
 	#endif
 #endif
 
-	Initial_EEPROM_Config_Load();		// Loads config at start-up 
-
-	Init_ADC();
-	init_uart();						// Enable UART with stored values
-
-	GyroCalibrated = true;
+	RC_Lock = false;					// Preset important flags
+	Failsafe = false;
+	GyroCalibrated = false;
 	AccCalibrated = false;
-	IntegralgPitch = 0;	 
+	AutoLevel = false;
+
+	Initial_EEPROM_Config_Load();		// Loads config at start-up 
+	Init_ADC();
+	init_uart();						// Initialise UART
+
+	IntegralgPitch = 0;	 				// Reset I-terms
 	IntegralgRoll = 0;
 	IntegralaPitch = 0;	 
 	IntegralaRoll = 0;
 	IntegralYaw = 0;
-	AutoLevel = false;
 
-	RxChannel1 = Config.RxChannel1ZeroOffset;	// Prime the channels 1520;
-	RxChannel2 = Config.RxChannel2ZeroOffset;	// 1520;
-	RxChannel3 = Config.RxChannel3ZeroOffset;	// 1520;
-	RxChannel4 = Config.RxChannel4ZeroOffset;	// 1520;
-#if defined(STD_FLAPERON)
+	RxChannel1 = Config.RxChannel1ZeroOffset; // Preset servo outputs
+	RxChannel2 = Config.RxChannel2ZeroOffset;
+	RxChannel3 = Config.RxChannel3ZeroOffset;
+	RxChannel4 = Config.RxChannel4ZeroOffset;
 	RxChannel5 = Config.RxChannel5ZeroOffset;
-#endif
 
 	// Flash LED
 	LED = 1;
@@ -163,9 +174,7 @@ void init(void)
 	// Pause
 	_delay_ms(1500);			// Pause for gyro stability
 	CalibrateGyros();			// Calibrate gyros, hopefully after motion minimised
-
-	ReadGainValues();
-
+	ReadGainValues();			// Check pots
 
 //************************************************************
 // Config Modes (at startup)
@@ -194,7 +203,7 @@ void init(void)
 #ifdef ACCELEROMETER
 	RxGetChannels();
 	// Manual stability mode selection
-	if ((RxInYaw > 200) || (RxInYaw < -200))
+	if (RxInYaw > 200)
 	{
 		// flash LED 4 times
 		for (int i=0;i<4;i++)
@@ -216,7 +225,7 @@ void init(void)
 	}
 
 	// Manual autolevel mode selection
-	if ((RxInRoll > 200) || (RxInRoll < -200))
+	if (RxInYaw < -200)
 	{
 		// flash LED 5 times
 		for (int i=0;i<5;i++)
@@ -289,7 +298,6 @@ void init(void)
 
 } // init()
 
-
 //************************************************************
 // Misc init subroutines
 //************************************************************
@@ -311,28 +319,22 @@ void CenterSticks(void)
 	uint16_t RxChannel1ZeroOffset = 0;
 	uint16_t RxChannel2ZeroOffset = 0;
 	uint16_t RxChannel4ZeroOffset = 0;
-#if defined(STD_FLAPERON)
 	uint16_t RxChannel5ZeroOffset = 0;
-#endif	
 
 	for (i=0;i<8;i++)
 	{
-		_delay_ms(100);
 		RxChannel1ZeroOffset += RxChannel1;
 		RxChannel2ZeroOffset += RxChannel2;
 		RxChannel4ZeroOffset += RxChannel4;
-#if defined(STD_FLAPERON)
 		RxChannel5ZeroOffset += RxChannel5;
-#endif
+		_delay_ms(100);
 	}
 
 	Config.RxChannel1ZeroOffset = RxChannel1ZeroOffset >> 3; // Divide by 8
 	Config.RxChannel2ZeroOffset = RxChannel2ZeroOffset >> 3;
 	Config.RxChannel3ZeroOffset = 1500;// Cheat for CH3 - we just need a guaranteed switch here						 
 	Config.RxChannel4ZeroOffset = RxChannel4ZeroOffset >> 3;
-#if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = RxChannel5ZeroOffset >> 3;
-#endif
 
 	Save_Config_to_EEPROM();
 
@@ -340,3 +342,50 @@ void CenterSticks(void)
 	_delay_ms(500);
 	LED = !LED;
 }
+
+// Set failsafe position
+void SetFailsafe(void)		
+{
+	uint8_t i;
+	uint16_t Failsafe_1 = 0;
+	uint16_t Failsafe_2 = 0;
+	uint16_t Failsafe_3 = 0;
+	uint16_t Failsafe_4 = 0;
+	uint16_t Failsafe_5 = 0;
+	uint16_t Failsafe_6 = 0;
+
+	// Flash LED 6 times to warn of impending stick measurement
+	for (i=0;i<6;i++)
+	{
+		LED = !LED;
+		_delay_ms(150);
+		LED = !LED;
+		_delay_ms(150);
+	}
+
+	for (i=0;i<8;i++)
+	{
+		SetServoPositions();
+		Failsafe_1 += ServoOut1; // Aileron & Left flaperon
+		Failsafe_2 += ServoOut2; // Elevator
+		Failsafe_3 += Throttle;  // Throttle
+		Failsafe_4 += ServoOut4; // Rudder
+		Failsafe_5 += ServoOut5; // Right flaperon
+		Failsafe_6 += ServoOut6; // Spare
+		_delay_ms(100);
+	}
+
+	Config.Failsafe_1 = Failsafe_1 >> 3; // Divide by 8
+	Config.Failsafe_2 = Failsafe_2 >> 3;
+	Config.Failsafe_3 = Failsafe_3 >> 3;
+	Config.Failsafe_4 = Failsafe_4 >> 3;
+	Config.Failsafe_5 = Failsafe_5 >> 3;
+	Config.Failsafe_6 = Failsafe_6 >> 3;
+
+	Save_Config_to_EEPROM();
+
+	LED = !LED;
+	_delay_ms(500);
+	LED = !LED;
+}
+

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.12
+// Version 1.13 Beta 3
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson
@@ -66,7 +66,7 @@
 //
 // Stability mode selection
 // ------------------------
-// Hold Yaw stick on TX left or right
+// Hold Yaw stick on TX left (direction may depend on TX)
 // Power on
 // LED flashes 4 times
 // Mode will toggle between the following:
@@ -75,7 +75,7 @@
 //
 // Autolevel mode selection
 // ------------------------
-// Hold Roll stick on TX left or right
+// Hold Yaw stick on TX right (direction may depend on TX)
 // Power on
 // LED flashes 5 times
 // Mode will toggle between the following:
@@ -118,6 +118,12 @@
 //			Virtually no jitter now. Fixed flaperon and vertical mode bugs.
 //			Added auto-configuring PWM and CPPM input code.
 //			Corrected loop timing bug. Servo outputs now match incoming data rate.
+// V1.13	Add stability channel selection via LCD in CPPM modes.
+//			Removed loop rate control, changed all the long timers to suit.
+//			Added servo overdue timeout to guarantee servo output regardless of input. 
+//			Hopefully fixed PWM input bugs. Added failsafe setting via holding M6 LOW.
+//			Failsafe holds outputs at predetermined position if RC sync lost.
+//			Automated compiledefs.h
 //
 //***********************************************************
 //* To do
@@ -195,16 +201,6 @@ Flying Wing - Assumes mixing done in the transmitter
 //***********************************************************
 //* Defines
 //***********************************************************
-// Sets the rate of the main loop (Normally 500Hz)
-#define LOOP_RATE 500				// in Hz
-#define LOOP_INTERVAL (1000000 / LOOP_RATE ) // 2000
-
-// Defines output rate to the servo (Normally 55+Hz)
-#if (defined(LEGACY_PWM_MODE) || defined(CPPM_MODE))
-#define SERVO_RATE 80				// in Hz
-#else
-#define SERVO_RATE 50				// in Hz // New PWM mode bugs out if made to run faster...
-#endif
 
 // Servo travel limits
 #define MAX_TRAVEL 2000				// Maximum travel allowed
@@ -224,7 +220,15 @@ Flying Wing - Assumes mixing done in the transmitter
 // Stick Arming
 // If you cannot either arm or disarm, lower this value
 #define STICKARM_POINT 200			// Defines how far stick must be moved (for 16-bit accurate RC)
-#define GUI_TIMEOUT 3000			// Time after which GUI entry is impossible (3000 ~ 10 sec)
+
+// Timeouts
+#define GUI_TIMEOUT 78120			// Time after which GUI entry is impossible (78,120 = 10s)
+#define	SERVO_OVERDUE 156			// Number of T2 cycles before servo will be overdue = 156 * 1/7812 = 20ms (50Hz)
+#define LCD_TIMEOUT 15624			// Number or T2 cycles before LCD engages (2 seconds)
+#define LMA_TIMEOUT 468720			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
+#define FS_TIMEOUT 7812				// Number or T2 cycles before Failsafe engages (1 seconds)
+#define	PWM_DELAY 250				// Number of T0 cycles to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
+
 
 //***********************************************************
 //* Code and Data variables
@@ -274,23 +278,32 @@ uint16_t cycletime;					// Loop time in microseconds
 bool 	AutoLevel;					// AutoLevel = 1
 bool 	LCD_active;					// Mode flags
 bool 	freshmenuvalue;
-bool 	Model_lost;					// Model lost flag
-bool 	LMA_Alarm;					// Lost model alarm active
-bool 	LVA_Alarm;					// Low voltage alarm active
 bool 	firsttimeflag;
+bool	Overdue;
+bool	Failsafe;
 char 	pBuffer[16];				// Print buffer
-
-uint16_t Change_LCD;				// Long timers for LCD entry and LMA
-uint32_t Change_LostModel;
-uint8_t LCD_TCNT2;
-uint8_t Lost_TCNT2;
-
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
-uint16_t uber_loop_count;			// Used to count main loops for everything else :)
-uint16_t LoopStartTCNT1, LoopElapsedTCNT1, LoopCurrentTCNT1;
-uint16_t loop_padding, servo_skip;
+
+// Timing
+uint16_t Change_LCD;				// Long timers increment at 7812kHz or 128us
+uint32_t Change_LostModel;
+uint32_t Ticker_Count;
+uint16_t Servo_Timeout;
+uint16_t Failsafe_count;
+uint8_t LCD_TCNT2;
+uint8_t Lost_TCNT2;
+uint8_t Ticker_TCNT2;
+uint8_t Servo_TCNT2;
+uint8_t Failsafe_TCNT2;
+uint16_t LoopStartTCNT1;
+
+bool 	BUZZER_ON;
+bool 	LED_ON;
+bool 	Model_lost;					// Model lost flag
+bool 	LMA_Alarm;					// Lost model alarm active
+bool 	LVA_Alarm;					// Low voltage alarm active
 
 //************************************************************
 // Main loop
@@ -298,19 +311,49 @@ uint16_t loop_padding, servo_skip;
 
 int main(void)
 {
+	uint16_t i;
 	OldIndex = 1;
 	GUI_lockout = false;
 	firsttimeflag = true;
-	init();								// Do all init tasks
+	init();									// Do all init tasks
 
 //************************************************************
 // Test code - start
 //************************************************************
-if (0) 
-{
-
-}
-
+/*
+	if (0)
+	{
+		while (max_chan == 0)							// No pulses yet
+		{
+			_delay_ms(50);
+			LED = !LED;							// Flash LED rapidly
+		}
+		LED = 0;								// LED OFF
+		_delay_ms(500);							// Allow RC time to settle
+		LED = 1;								// LED back ON
+	
+		gapfound = true;
+	}
+	while (0) 
+	{
+		// Display results
+		LCDgoTo(0);								
+		LCDprintstr("1      ");
+		LCDgoTo(2);
+		LCDprintstr(itoa(gap1,pBuffer,10));
+		//
+		LCDgoTo(8);								
+		LCDprintstr("2      ");
+		LCDgoTo(10);
+		LCDprintstr(itoa(gap2,pBuffer,10));
+		//
+		LCDgoTo(16);					
+		LCDprintstr("Max:  ");
+		LCDgoTo(20);
+		LCDprintstr(itoa(max_chan,pBuffer,10));
+		_delay_ms(500);
+	}
+	*/
 //************************************************************
 // Test code - end
 //************************************************************
@@ -321,21 +364,57 @@ if (0)
 		AvgAccPitch[i] = 0;
 	}
 	rxin = UDR0;							// Flush RX buffer so that we don't go into GUI mode
-
 	LED = 1;								// Switch on LED whenever running
+	
 
-	// Main loop
+	//************************************************************
+	//* Wait for RC synchronisation in APWM mode
+	//************************************************************
+	#ifdef AUTOMAGIC_PWM_MODE
+	while (max_chan == 0)					// No pulses yet
+	{
+		_delay_ms(50);
+		LED = !LED;							// Flash LED rapidly
+	}
+
+	LED = 0;								// LED OFF
+	_delay_ms(500);							// Allow RC time to settle
+	LED = 1;								// LED back ON
+
+	gapfound = true;						// Stop channel search
+	#endif
+
+	//************************************************************
+	//* Main loop
+	//************************************************************
 	while (1)
 	{
-		AccRollTrim = Config.AccRollZeroTrim - 127; // GUI I/F bug won't pass signed numbers...
+		// GUI I/F bug won't pass signed numbers...
+		AccRollTrim = Config.AccRollZeroTrim - 127; 
 		AccPitchTrim = Config.AccPitchZeroTrim - 127;
 
+		// Update RC channel data
 		RxGetChannels();
 
 		//************************************************************
-		//* Loop debug text
+		//* System ticker
+		//* 
+		//* (Ticker_Count &128) 	 	= 60Hz
+		//* ((Ticker_Count >> 8) &2) 	= 15Hz
+		//* ((Ticker_Count >> 8) &4) 	= 3.75Hz (LMA and LVA alarms)
+		//* ((Ticker_Count >> 8) &32)	= 0.47Hz (LED mode alarms)
+		//* 
 		//************************************************************
 
+		// Ticker_Count increments at 7812 kHz, in loop cycle chunks
+		Ticker_Count += (uint8_t) (TCNT2 - Ticker_TCNT2);
+		Ticker_TCNT2 = TCNT2;
+
+		if ((Ticker_Count >> 8) &4) BUZZER_ON = true; 	// 3.75Hz beep
+		else BUZZER_ON = false;
+
+		if ((Ticker_Count >> 8) &32) LED_ON = true;		// 0.47Hz flash
+		else LED_ON = false;
 
 		//************************************************************
 		//* Alarms
@@ -351,49 +430,39 @@ if (0)
 			Change_LostModel = 0;
 			Model_lost = false;			
 		}
-		// Wait for 60s then trigger lost model alarm (468720 * 1/7812Hz = 60s)
-		if (Change_LostModel > 468720)	Model_lost = true;
-		if (((uber_loop_count &128) > 0) && (Model_lost))
-		{
-			LMA_Alarm = true;				// Turn on buzzer
-		} 	
+		// Wait for 60s then trigger lost model alarm (LMA_TIMEOUT * 1/7812Hz = 60s)
+		if (Change_LostModel > LMA_TIMEOUT)	Model_lost = true;
+
+		if (BUZZER_ON && Model_lost) LMA_Alarm = true;	// Turn on buzzer
 		else LMA_Alarm = false;				// Otherwise turn off buzzer
 
 
 		// Low-voltage alarm (LVA)
-		if ((uber_loop_count &128) > 0)		// Check every 500ms or so
-		{ 
-			GetVbat();						// Get battery voltage
-		}
+		GetVbat();							// Check battery
 
 		if ((Config.Modes &16) > 0)			// Buzzer mode
 		{
 			// Beep buzzer if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && ((uber_loop_count &128) > 0)) LVA_Alarm = true;
+			if ((vBat < Config.PowerTrigger) && BUZZER_ON) LVA_Alarm = true;
 			else LVA_Alarm = false;				// Otherwise turn off buzzer
 		}
-		else if ((Config.Modes &16) == 0)	// LED mode
+		else 								// LED mode
 		{	// Flash LEDs if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && (((uber_loop_count >> 8) &2) > 0)) LVA_Alarm = false;	
+			if ((vBat < Config.PowerTrigger) && LED_ON) LVA_Alarm = false;	
 			else LVA_Alarm = true;				// Otherwise leave LEDs on
 		}
 
+
 		// Turn on buzzer if in alarm state
-		if ((LVA_Alarm) || (LMA_Alarm))
-		{
-			LVA = 1;
-		}
-		else
-		{
-			LVA = 0;
-		}
+		if ((LVA_Alarm) || (LMA_Alarm)) LVA = 1;
+		else LVA = 0;
 
 		//************************************************************
 		//* GUI
 		//************************************************************
 
 		// Lock GUI out after 10 seconds or so if not already in GUI mode
-		if ((uber_loop_count > GUI_TIMEOUT) && (!GUIconnected)) 
+		if ((Ticker_Count > GUI_TIMEOUT) && (!GUIconnected)) 
 		{
 			GUI_lockout = true;
 		}
@@ -453,9 +522,8 @@ if (0)
 		freshmenuvalue = true;
 		firsttimeflag = true;
 
-		// 1 sec, about 8000. (8000 * 1/7812Hz = 1.024s)
-		// 2 sec, about 15624. (15624 * 1/7812Hz = 1.0s)
-		if (Change_LCD > 15624)
+		// 2 sec, about 15624. (LCD_TIMEOUT * 1/7812Hz = 2.0s)
+		if (Change_LCD > LCD_TIMEOUT)
 		{	
 			MenuItem = 0;
 			LCD_active = true;
@@ -466,7 +534,7 @@ if (0)
 				{
 					LCD_fixBL();
 					LCD_Display_Menu(MenuItem);
-					LCDprint_line2(" V1.12  (c)2012 ");
+					LCDprint_line2(" V1.13  (c)2012 ");
 					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
@@ -552,7 +620,7 @@ if (0)
 					if (MenuValue == 0) LCDprintstr("Normal");
 					else LCDprintstr("Reversed");	
 				}
-				else if ((MenuItem > 0) && (MenuItem < 17)) 	// Print value to change
+				else if (((MenuItem > 0) && (MenuItem < 17)) || (MenuItem == 27)) 	// Print value to change
 				{
 					LCDclearLine(2);
 					LCDgoTo(26);
@@ -573,7 +641,7 @@ if (0)
 					if (MenuValue == 0) LCDprintstr("Switchable");
 					else LCDprintstr("Always ON ");
 				}
-				else if (MenuItem >= 26) 						// Special case for ALMode
+				else if (MenuItem == 26) 						// Special case for ALMode
 				{
 					LCDclearLine(2);
 					LCDgoTo(26);
@@ -604,45 +672,27 @@ if (0)
 			} // While LCD mode
 			LCDclear();			// Clear and reset LCD entry mode
 			Change_LCD = 0;
-		} // LCD activated (if (Change_LCD > 15624))
+		} // LCD activated (if (Change_LCD > LCD_TIMEOUT))
 
 		//************************************************************
 		//* RC input to servos and servo reversing
 		//************************************************************
 
-		// Reverse servo outputs as required
-		if(Config.YawServo) {		// Rudder
-			ServoOut1 = Config.RxChannel4ZeroOffset - RxInYaw; 	// Reverse
-		}
-		else {
-			ServoOut1 = RxChannel4;								// Normal
-		}
+		SetServoPositions();
 
-		#if defined(STD_FLAPERON) 	// Ailerons controlled by separate channels
-			if(Config.RollServo) {
-				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
-				ServoOut5 = Config.RxChannel1ZeroOffset - RxInAux1;
-			}
-			else {
-				ServoOut2 = RxChannel5;
-				ServoOut5 = RxChannel1;
-			}
-		#else						// Otherwise only one aileron channel
-			if(Config.RollServo) {
-				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
-			}
-			else {
-				ServoOut2 = RxChannel1;
-			}
-		#endif
+		//************************************************************
+		//* Check for Failsafe mode request if M6 is held LOW for 1 second
+		//************************************************************
 
-		if(Config.PitchServo) {		// Elevator
-			ServoOut4 = Config.RxChannel2ZeroOffset - RxInPitch;
+		Failsafe_count += (uint8_t) (TCNT2 - Failsafe_TCNT2);
+		Failsafe_TCNT2 = TCNT2;
+		
+		// Reset count if FS is HIGH (normal)
+		if (FS) Failsafe_count = 0;
+		if (Failsafe_count > FS_TIMEOUT) // Trigger failsafe setting after 1 second
+		{
+			SetFailsafe();
 		}
-		else {
-			ServoOut4 = RxChannel2;
-		}
-		Throttle = RxChannel3;
 
 		//************************************************************
 		//* Autolevel mode selection
@@ -655,13 +705,13 @@ if (0)
 			// Autolevel enabled if Config.ALMode = 0
 			// Autolevel always OFF if Config.ALMode = 1 (default)
 
-			// For CPPM mode, use RxChannel8 input (maybe make this selectable in future versions)
-			#if defined(CPPM_MODE)
-				if ((RxChannel8 < 1600) && (Config.ALMode == 0))	// RxChannel8 ON and AL is available
+			// For CPPM mode, use StabChan input
+			#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+				if ((StabChan < 1600) && (Config.ALMode == 0))	// StabChan ON and AL is available
 
 			// For non-CPPM mode, use the(THR) input
 			#else
-				if ((RxChannel3 < 1600) && (Config.ALMode == 0))	// RxInAux ON and AL is available
+				if ((RxInAux < 200) && (Config.ALMode == 0))	// RxInAux ON and AL is available
 			#endif
 				{									// When channel is activated
 					AutoLevel = true;				// Activate autolevel mode
@@ -686,12 +736,11 @@ if (0)
 		//* Stability mode selection
 		//************************************************************
 
-		// For CPPM mode, use Ch.8 for Stability
-		#ifdef CPPM_MODE
-		if ((RxChannel8 > 1600) && (Config.StabMode == 0))	// RxChannel8 enables stability if Config.StabMode = 0 (default)
+		// For CPPM mode, use StabChan for Stability
+		#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+		if ((StabChan > 1600) && (Config.StabMode == 0))	// StabChan enables stability if Config.StabMode = 0 (default)
 		#else
 		if ((RxInAux < 200) && (Config.StabMode == 0))
-		//if ((RxChannel3 > 1600) && (Config.StabMode == 0))	// RxChannel3 (formerly throttle) enables stability if Config.StabMode = 0 (default)
 		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
@@ -806,7 +855,7 @@ if (0)
 			ServoOut2 -= Roll; // Left
 			ServoOut5 -= Roll; // Right
 			#else
-			#error No configuration defined !!!!
+			#error No mixer configuration defined
 			#endif
 
 			//***********************************************************************
@@ -869,7 +918,7 @@ if (0)
 			ServoOut2 -= Pitch;
 			ServoOut4 += Pitch;
 			#else
-			#error No configuration defined !!!!
+			#error No mixer configuration defined
 			#endif
 
 			//***********************************************************************
@@ -904,11 +953,10 @@ if (0)
 			#if (defined(STANDARD) || defined(FWING) || defined(STD_FLAPERON))
 			ServoOut1 -= Yaw;
 			#else
-			#error No configuration defined !!!!
+			#error No mixer configuration defined
 			#endif
 
-		} // AUX 1 over-rides stability
-
+		} // Stability mode
 
 		//--- Servo travel limits ---
 		if ( ServoOut1 < MIN_TRAVEL )	ServoOut1 = MIN_TRAVEL;	
@@ -920,54 +968,79 @@ if (0)
 	
 		if ( ServoOut1 > MAX_TRAVEL )	ServoOut1 = MAX_TRAVEL;	
 		if ( ServoOut2 > MAX_TRAVEL )	ServoOut2 = MAX_TRAVEL;	
-		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
 		if ( ServoOut4 > MAX_TRAVEL )	ServoOut4 = MAX_TRAVEL;
 		if ( ServoOut5 > MAX_TRAVEL )	ServoOut5 = MAX_TRAVEL;	
 		if ( ServoOut6 > MAX_TRAVEL )	ServoOut6 = MAX_TRAVEL;
 		if ( Throttle  > MAX_TRAVEL )	Throttle  = MAX_TRAVEL;	
 
-
-		// Loop governor is here so that the loop is regulated to LOOP_RATE Hz. 
-		// This is important for the averaging filters.
-		LoopCurrentTCNT1 = TCNT1;
-		if (LoopCurrentTCNT1 > LoopStartTCNT1) LoopElapsedTCNT1 = LoopCurrentTCNT1 - LoopStartTCNT1;
-		else LoopElapsedTCNT1 = (0xffff - LoopStartTCNT1) + LoopCurrentTCNT1;
-
-		// If loop period less than LOOP_INTERVAL, pad it out in 8us chunks.
-		// T1 runs at 1MHz (1us). 
-		loop_padding = (LOOP_INTERVAL - LoopElapsedTCNT1) / 8; 
-
-		// User T0 to time the 8us chunks. T0 runs at 8MHz (125ns).
-		if ((loop_padding > 0) && (GUIconnected == false))
+		// Servo_Timeout increments at 7812 kHz, in loop cycle chunks
+		// After SERVO_OVERDUE of T2 cycles, 156 * 1/7812 = 20ms (50Hz)
+		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
+		Servo_TCNT2 = TCNT2;
+		if (Servo_Timeout > SERVO_OVERDUE)
 		{
-			TIFR0 &= ~(1 << TOV0);		// Clear overflow
-			TCNT0 = 0;					// Reset counter
-			for (int i=0;i<loop_padding;i++)
+			Overdue = true;
+		}
+
+		// Check for failsafe condition (Had RC lock but now overdue)
+		if (Overdue && RC_Lock)
+		{
+			Failsafe = true;
+			RC_Lock = false;
+		}
+
+		// Set failsafe positions when RC lock lost
+		if (Failsafe)
+		{
+			ServoOut1 = Config.Failsafe_1;
+			ServoOut2 = Config.Failsafe_2;
+			Throttle  = Config.Failsafe_3;
+			ServoOut4 = Config.Failsafe_4;
+			ServoOut5 = Config.Failsafe_5;
+			ServoOut6 = Config.Failsafe_6;
+		}
+
+		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
+		// Inhibit servos while GUI connected
+		if (Interrupted && !GUIconnected)
+		{
+			Interrupted = false;			// Reset interrupted flag
+			Failsafe = false;				// Cancel failsafe
+			Servo_Timeout = 0;				// Cancel servo timeout
+			Overdue = false;				// And no longer overdue...
+
+			// Short delay to ensure no residual interrupt activity from ISR
+			TIFR0 &= ~(1 << TOV0);			// Clear overflow
+			TCNT0 = 0;						// Reset counter
+			for (i=0;i<PWM_DELAY;i++)		// PWM_DELAY * 8us = 1ms
 			{
-				while (TCNT0 < 64);		// 125ns * 64 = 8us
+				while (TCNT0 < 64);			// 1/8MHz * 64 = 8us
 				TCNT0 -= 64;
 			}
-		}
 
-		// Ensure that output_servo_ppm() is only called at SERVO_RATE.
-		// If SERVO_RATE due, update servos, otherwise bypass
-		// Inhibit servos while GUI connected
-		if ((servo_skip >= (LOOP_RATE/SERVO_RATE)) && (GUIconnected == false))
+			output_servo_ppm();				// Output servo signal
+		}
+		// If in failsafe, just output unsynchronised. Inhibit servos while GUI connected
+		else if (Failsafe && Overdue && !GUIconnected)
 		{
-			servo_skip = 0;
-			Interrupted = false;
-			while (Interrupted == false){};	// Wait here for any interrupts to complete
-			Interrupted = false;
-			output_servo_ppm();			// Output servo signal
+			Servo_Timeout = 0;				// Cancel servo timeout
+			Overdue = false;				// No longer overdue
+
+			// Short delay to ensure no residual interrupt activity from ISR
+			TIFR0 &= ~(1 << TOV0);			// Clear overflow
+			TCNT0 = 0;						// Reset counter
+			for (i=0;i<PWM_DELAY;i++)		// PWM_DELAY * 8us = 1ms
+			{
+				while (TCNT0 < 64);			// 1/8MHz * 64 = 8us
+				TCNT0 -= 64;
+			}
+
+			output_servo_ppm();				// Output servo signal
 		}
 
-		// Update cycle time for GUI
-		cycletime = LoopElapsedTCNT1;
-
-		// Measure period of loop from here
-		LoopStartTCNT1 = TCNT1;
-		uber_loop_count++;
-		servo_skip++;
+		// Measure the current loop rate
+		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time for GUI
+		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
 
 	} // main loop
 } // main()

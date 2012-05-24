@@ -45,17 +45,23 @@ uint16_t gapend;					// End of gap measurement from current channel
 uint16_t gap;						// Size of gap
 bool	gapfound;					// Flag to indentify that gap has been calculated
 bool	gapready;					// Used to skip over the first incidence of an input
+bool	RC_Lock;					// RC sync found/lost flag
 
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
-#define GAPPULSEWIDTH 5000			// Servo update gap must be more than 5ms long
+#define GAPPULSEWIDTH 3000			// Servo update gap must be more than 5ms long
+#define GAPPULSELIMIT 20000			// Maximum gap accepted (increase until gap miscalculated)
 
 //************************************************************
-// Standard PWM mode - original version
+//* RC input modes
 //************************************************************
-
-#ifndef CPPM_MODE  	// Normal RX mode
 
 #ifdef LEGACY_PWM_MODE
+//************************************************************
+//* Standard PWM mode
+//* Sequential PWM inputs from a normal RC receiver
+//* Assumes that the THR input is the last input received
+//************************************************************
+
 ISR(PCINT2_vect)
 {
 	if (RX_ROLL)	// Rising
@@ -88,8 +94,9 @@ ISR(INT1_vect)
 	} 
 	else 
 	{				// Falling
-		RxChannel3 = TCNT1 - RxChannel3Start;	// Normally the last channel to arrive
+		RxChannel3 = TCNT1 - RxChannel3Start;
 		Interrupted = true;						// Signal that interrupt block has finished
+		RC_Lock = true;							// RC sync established
 	}
 }
 
@@ -105,11 +112,12 @@ ISR(PCINT0_vect)
 	}
 }
 
+#elif defined(AUTOMAGIC_PWM_MODE)
 //************************************************************
-// Standard PWM mode - predictive version. Still buggy.
+//* Automagic PWM mode
+//* Sequential PWM inputs from a normal RC receiver
+//* Attempts to calculate the gap between pulse groups
 //************************************************************
-
-#else
 
 ISR(PCINT2_vect)
 {
@@ -126,13 +134,14 @@ ISR(PCINT2_vect)
 			if (gapready)
 			{
 				gapend = TCNT1;
-				gap = gapend - gapstart;
+				if (gapend > gapstart) gap = gapend - gapstart;
+				else gap = (0xffff - gapstart) + gapend;
 
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					gapfound = true;	// Flag that a gap is found
-					max_chan = ch_num;
+					//gapfound = true;	// Flag that a gap is found
+					max_chan = ch_num;	// Use previous channel number
 				}
 			}
 			// All cases
@@ -144,6 +153,7 @@ ISR(PCINT2_vect)
 		else if (max_chan == 1)			// If this is the selected channel number the gap starts from here
 		{
 			Interrupted = true;			// Signal that interrupt block has finished
+			RC_Lock = true;				// RC sync established
 		}
 	}
 }
@@ -163,12 +173,13 @@ ISR(INT0_vect)
 			if (gapready)
 			{
 				gapend = TCNT1;
-				gap = gapend - gapstart;
+				if (gapend > gapstart) gap = gapend - gapstart;
+				else gap = (0xffff - gapstart) + gapend;
 
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					gapfound = true;	// Flag that a gap is found
+					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;
 				}
 			}
@@ -181,6 +192,7 @@ ISR(INT0_vect)
 		else if (max_chan == 2)			// If this is the selected channel number the gap starts from here
 		{
 			Interrupted = true;			// Signal that interrupt block has finished
+			RC_Lock = true;				// RC sync established
 		}
 	}
 }
@@ -200,12 +212,13 @@ ISR(INT1_vect)
 			if (gapready)
 			{
 				gapend = TCNT1;
-				gap = gapend - gapstart;
+				if (gapend > gapstart) gap = gapend - gapstart;
+				else gap = (0xffff - gapstart) + gapend;
 
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					gapfound = true;	// Flag that a gap is found
+					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;
 				}
 			}
@@ -218,6 +231,7 @@ ISR(INT1_vect)
 		else if (max_chan == 3)			// If this is the selected channel number the gap starts from here
 		{
 			Interrupted = true;			// Signal that interrupt block has finished
+			RC_Lock = true;				// RC sync established
 		}
 	}
 }
@@ -237,12 +251,13 @@ ISR(PCINT0_vect)
 			if (gapready)
 			{
 				gapend = TCNT1;
-				gap = gapend - gapstart;
+				if (gapend > gapstart) gap = gapend - gapstart;
+				else gap = (0xffff - gapstart) + gapend;
 
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
-				{
-					gapfound = true;	// Flag that a gap is found
+					{
+					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;
 				}
 			}
@@ -255,13 +270,76 @@ ISR(PCINT0_vect)
 		else if (max_chan == 4)			// If this is the selected channel number the gap starts from here
 		{
 			Interrupted = true;			// Signal that interrupt block has finished
+			RC_Lock = true;				// RC sync established
 		}
 	}
 }
-#endif
+
+#elif defined(DOSD_PWM_MODE)
+//************************************************************
+//* DOSD PWM mode
+//* Simultaneous PWM inputs from a DOSD or unusual RC receiver
+//************************************************************
+
+ISR(PCINT2_vect) // Both edges
+{
+	if (RX_ROLL)	// Rising - start all timers
+	{
+		RxChannel1Start = TCNT1;
+		RxChannel2Start = TCNT1;
+		RxChannel3Start = TCNT1;
+		RxChannel4Start = TCNT1;
+	} 
+	else 
+	{				// Falling
+		RxChannel1 = TCNT1 - RxChannel1Start;
+		// Signal that interrupt block has finished if all complete
+		if (!RX_YAW && !RX_COLL && !RX_PITCH && !RX_ROLL) 
+		{
+			Interrupted = true;
+			RC_Lock = true;				// RC sync established
+		}
+	}
+}
+
+ISR(INT0_vect) // Falling edge only
+{
+	RxChannel2 = TCNT1 - RxChannel2Start;
+	// Signal that interrupt block has finished if all complete
+	if (!RX_YAW && !RX_COLL && !RX_PITCH && !RX_ROLL) 
+	{
+		Interrupted = true;
+		RC_Lock = true;					// RC sync established
+	}
+}
+
+ISR(INT1_vect) // Falling edge only
+{
+	RxChannel3 = TCNT1 - RxChannel3Start;
+	// Signal that interrupt block has finished if all complete
+	if (!RX_YAW && !RX_COLL && !RX_PITCH && !RX_ROLL) 
+	{
+		Interrupted = true;
+		RC_Lock = true;					// RC sync established
+	}
+
+}
+
+ISR(PCINT0_vect) // Both edges
+{
+	if (!RX_YAW) // Falling
+	{
+		RxChannel4 = TCNT1 - RxChannel4Start;
+		// Signal that interrupt block has finished if all complete
+		if (!RX_YAW && !RX_COLL && !RX_PITCH && !RX_ROLL) 
+		{
+			Interrupted = true;
+			RC_Lock = true;				// RC sync established
+		}
+	}
+}
 
 #elif defined(ICP_CPPM_MODE) // ICP CPPM mode
-
 //************************************************************
 // CPPM RX mode 	- input on PB0 (ICP/M3)
 // NB: JR/Spectrum channel order (Th,Ai,El,Ru,5,6,7,8)
@@ -324,7 +402,9 @@ ISR(TIMER1_CAPT_vect)
 			RxChannelStart = icp_value;
 			ch_num++;
 			break;
-		default:
+		default:							// If something goes wrong, keep outputs going
+			Interrupted = true;				// Signal that interrupt block has finished
+			RC_Lock = true;					// RC sync established
 			break;
 	} // Switch
 
@@ -337,11 +417,11 @@ ISR(TIMER1_CAPT_vect)
 	else if (ch_num == max_chan)
 	{
 		Interrupted = true;					// Signal that interrupt block has finished
+		RC_Lock = true;						// RC sync established
 	}
 }
 
-#else // INT0 CPPM mode
-
+#elif defined(CPPM_MODE)
 //************************************************************
 // CPPM RX mode 	- input on PD2 (INT0/elevator)
 // NB: JR/Spectrum channel order (Th,Ai,El,Ru,5,6,7,8)
@@ -401,7 +481,9 @@ ISR(INT0_vect)
 			RxChannel8 = TCNT1 - RxChannel8Start;	// Ch8 - AUX3
 			ch_num++;
 			break;
-		default:
+		default:							// If something goes wrong, keep outputs going
+			Interrupted = true;				// Signal that interrupt block has finished
+			RC_Lock = true;					// RC sync established
 			break;
 	} // Switch
 
@@ -413,7 +495,11 @@ ISR(INT0_vect)
 	else if (ch_num == max_chan)
 	{
 		Interrupted = true;					// Signal that interrupt block has finished
+		RC_Lock = true;						// RC sync established
 	}
 } // ISR(INT0_vect)
 
+#else
+	#error No RC input configuration defined
 #endif
+

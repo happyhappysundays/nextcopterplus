@@ -15,3 +15,4 @@ extern int32_t	IntegralYaw;
 extern uint16_t	cycletime;
 extern uint8_t	flight_mode;
 extern char pBuffer[16];
+extern bool	Failsafe;
