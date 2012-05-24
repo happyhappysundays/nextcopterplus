@@ -52,6 +52,14 @@ typedef struct
 	uint8_t		RollServo;
 	uint8_t		PitchServo;
 	uint8_t		YawServo;
+	uint8_t		StabChan;				// CPPM channel number to select stability mode
+	//
+	uint16_t	Failsafe_1;				// Failsafe positions
+	uint16_t	Failsafe_2;
+	uint16_t	Failsafe_3;
+	uint16_t	Failsafe_4;
+	uint16_t	Failsafe_5;
+	uint16_t	Failsafe_6;
 
 } CONFIG_STRUCT;
 

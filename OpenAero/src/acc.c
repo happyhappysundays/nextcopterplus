@@ -82,5 +82,4 @@ void CalibrateAcc(void)
 	LED = !LED;
 	_delay_ms(500);
 	LED = !LED;
-
 }

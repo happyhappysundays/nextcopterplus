@@ -12,7 +12,7 @@
 #include "..\inc\io_cfg.h"
 #include "..\inc\init.h"
 #include "..\inc\main.h"
-#include "..\inc\lcd.h"
+#include "..\inc\isr.h"
 
 //************************************************************
 // Prototypes
@@ -54,11 +54,17 @@ void output_servo_ppm(void)
 	ServoOut1 = ServoOut1 >> 1; // Scale servo from 1000~2000 to 500~1000
 	ServoOut2 = ServoOut2 >> 1;
 	ServoOut4 = ServoOut4 >> 1;
-	// Create the output pulses
-	cli();
-	output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
-	sei();
-
+	//
+	// Create the output pulses if in sync with RC inputs
+	if (RC_Lock) {
+		output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
+	}
+	else if (Failsafe) // Unsynchronised so need to disable interrupts
+	{
+		cli();
+		output_servo_ppm_asm(ServoOut1, ServoOut2, ServoOut4);
+		sei();
+	}
 #else
 	Servo1 = ((ServoOut1 - 1000) >> 2); // Scale servo from 1000~2000 to 0~250
 	Servo2 = ((ServoOut2 - 1000) >> 2);
@@ -66,6 +72,7 @@ void output_servo_ppm(void)
 	Servo5 = ((ServoOut5 - 1000) >> 2);
 	Servo6 = ((ServoOut6 - 1000) >> 2);
 	Servo_thr = ((Throttle  - 1000) >> 2);
+
 	//
 	// Debug: Force values to positive (should not be needed as already limited by FC_main.c)
 	//
@@ -76,11 +83,16 @@ void output_servo_ppm(void)
 	if (Servo6 <= 0) Servo6 = 1;
 	if (Servo_thr <= 0) Servo_thr = 1;
 	//
-	// Create the output pulses
-	cli();
-	output_servo_ppm_asm(Servo1, Servo2, Servo4, Servo5, Servo6, Servo_thr);
-	sei();
-
+	// Create the output pulses if in sync with RC inputs
+	if (RC_Lock) {
+		output_servo_ppm_asm(Servo1, Servo2, Servo4, Servo5, Servo6, Servo_thr);
+	}
+	else if (Failsafe) // Unsynchronised so need to disable interrupts
+	{
+		cli();
+		output_servo_ppm_asm(Servo1, Servo2, Servo4, Servo5, Servo6, Servo_thr);
+		sei();
+	}
 #endif
 
 }

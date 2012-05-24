@@ -68,12 +68,13 @@ const char MenuItem24[] PROGMEM = "Calibrate Accel.";
 const char MenuItem25[] PROGMEM = "Center sticks   ";
 const char MenuItem26[] PROGMEM = "Stability mode  ";
 const char MenuItem27[] PROGMEM = "Autolevel mode  ";
+const char MenuItem28[] PROGMEM = "Stability ch.   ";
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
 	 MenuItem9, MenuItem10, MenuItem11, MenuItem12, MenuItem13, MenuItem14, MenuItem15, MenuItem16,
 	 MenuItem17, MenuItem18, MenuItem19, MenuItem20, MenuItem21, MenuItem22, MenuItem23, MenuItem24, 
-	 MenuItem25, MenuItem26, MenuItem27}; 
+	 MenuItem25, MenuItem26, MenuItem27, MenuItem28}; 
 
 const menu_range_t menu_ranges[MENUITEMS] PROGMEM = 
 {
@@ -107,7 +108,8 @@ const menu_range_t menu_ranges[MENUITEMS] PROGMEM =
 	{0,0},
 	{0,0},
 	{0,1},
-	{0,1}
+	{0,1},
+	{1,8}		// Stability channel number
 };
 
 // Get LCD data from Program memory
@@ -212,6 +214,9 @@ int16_t get_menu_item(uint8_t menuitem)
 		case 26:
 			value = (int16_t) Config.ALMode;
 			break;
+		case 27:
+			value = (int16_t) Config.StabChan;
+			break;
 		default:
 			break;
 	} // Switch
@@ -314,6 +319,10 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 		case 26:
 			// 0 = Autolevel switchable, 1 = Always off
 			Config.ALMode = (uint8_t) value;
+			break;
+		case 27:
+			// Stability switch channel number
+			Config.StabChan = (uint8_t) value;
 			break;
 		default:
 			break;

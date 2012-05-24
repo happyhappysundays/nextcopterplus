@@ -76,9 +76,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxChannel2ZeroOffset	= 1520;
 	Config.RxChannel3ZeroOffset	= 1120; //Debug
 	Config.RxChannel4ZeroOffset	= 1520;
-#if defined(STD_FLAPERON)
 	Config.RxChannel5ZeroOffset = 1520;
-#endif
 	//
 	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
 	Config.AccPitchZeroTrim	= 127;
@@ -86,23 +84,25 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccRollZero	= 578;			// Acc calibration defaults
 	Config.AccPitchZero	= 585;
 	//
-	Config.P_mult_roll = 100;			// PID defaults
+	Config.P_mult_roll = 60;			// PID defaults
 	Config.I_mult_roll = 0;
 	Config.D_mult_roll = 0;
-	Config.P_mult_pitch = 100;
+	Config.P_mult_pitch = 60;
 	Config.I_mult_pitch = 0;
 	Config.D_mult_pitch = 0;
-	Config.P_mult_yaw = 150;
+	Config.P_mult_yaw = 60;
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
-	Config.P_mult_glevel = 100;
+	Config.P_mult_glevel = 60;
 	Config.I_mult_glevel = 0;
 	Config.P_mult_alevel = 100;
 	Config.I_mult_alevel = 0;
 	//
 	Config.StabMode = 0;				// Stability mode for non-CPPM RX. 0 = stability disables with THR input **, 1 = stability always on
 	Config.ALMode = 1;					// Autolevel mode for non-CPPM RX. 0 = Autolevel enables with THR input, 1 = Autolevel always off **
-	Config.PowerTrigger = 1080; 			// 7.33V for 2S, 10.8V for 3S are good values here
+	Config.PowerTrigger = 1080; 		// 7.33V for 2S, 10.8V for 3S are good values here
+
+//Config.PowerTrigger = 0; 
 
 	#if (defined (ACCELEROMETER) || defined(MEMS_MODULE))
 	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 
@@ -126,6 +126,15 @@ void Set_EEPROM_Default_Config(void)
 	Config.RollServo = 0;
 	Config.PitchServo = 0;				// Default to normal (not reversed)
 	Config.YawServo = 0;
+	Config.StabChan = 8;				// Channel 8 switches stability by default
+
+	// Failsafe positions
+	Config.Failsafe_1 = 1520;			// Aileron & Left flaperon
+	Config.Failsafe_2 = 1520;			// Elevator
+	Config.Failsafe_3 = 900;			// Throttle
+	Config.Failsafe_4 = 1520;			// Rudder
+	Config.Failsafe_5 = 1520;			// Right flaperon
+	Config.Failsafe_6 = 1520;			// Spare
 }
 
 void Save_Config_to_EEPROM(void)
