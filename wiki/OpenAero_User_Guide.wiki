@@ -56,6 +56,17 @@ Here is a diagram showing how to connect up a PWM receiver.
 http://i.imgur.com/7jkPu.jpg
 
 ===CPPM receiver connections===
+*V1.11 and older*
+
+For a single-wire CPPM receiver you need to connect to the ELE input pin of the KK board. All the required signals including the stability/autolevel switch inputs are conveyed over this wire.
+
+ * AIL: Unused
+ * ELE: CPPM signal input from receiver
+ * THR: Throttle output
+ * RUD: Unused
+
+*V1.12 and newer*
+
 For a single-wire CPPM receiver you need to connect to the M3 output pin of the KK board. All the required signals including the stability/autolevel switch inputs are conveyed over this wire.
 
  * AIL: Unused
@@ -127,7 +138,8 @@ When used with a CPPM receiver the switch input is taken from Ch.8. In order to 
  * 2. Stability always ON, Autolevel switchable ON/OFF
  * 3. Both stability and autolevel switchable ON/OFF
 
-You set up the modes by using the yaw and roll TX sticks on power up and it's saved in eeprom.
+You set up the modes by using the yaw and roll TX sticks on power up and it's saved in eeprom. *Note:* For verions V1.13 and above, only the Yaw input is used for setting stability and autolevel modes.
+
 
 Discussion about this will follow in the advanced user guide which includes autolevel.
 
@@ -159,6 +171,11 @@ The yaw pot is also used to go into stick centering mode when turned to the mini
 
 ===Initial setup and calibration===
 The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. While everything is adjustable via the LCD interface, for the moment we will just go over the most common ones that everyone can use.
+
+*Setting failsafe mode (V1.13 and above)*
+
+To setup failsafe mode, set the control positions that you require, then simply short the M6 signal pin to ground. An RX bind plug linking the two opposite end pins is perfect for this job. M6 needs to be shorted for one second to trigger failsafe learning mode. 
+In failsafe learning mode the LED will start to flash. You can then remove the shorting jumper to stop the learning mode from restarting. When the LED has stopped flashing the failsafe has been set.
 
 *Trimming your model*
 
