@@ -49,8 +49,8 @@
 // Receiver encoding
 #ifdef PWM
 	//#define AUTOMAGIC_PWM_MODE
-	//#define LEGACY_PWM_MODE1
-	#define LEGACY_PWM_MODE2
+	#define LEGACY_PWM_MODE1
+	//#define LEGACY_PWM_MODE2
 	//#define DOSD_PWM_MODE
 #elif defined(CPPM)
 	#define ICP_CPPM_MODE

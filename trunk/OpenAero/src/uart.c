@@ -198,10 +198,10 @@ void send_multwii_data(void) // 66 bytes
 		case 0:					// Aeroplane mixing
 			send_byte(12);
 			break;
-		case 1:					// Flying wing mixing
+		case 2:					// Flying wing mixing
 			send_byte(8);
 			break;
-		case 2:					// Flaperon mixing
+		case 1:					// Flaperon mixing
 			send_byte(13);
 			break;
 		default:				// Default to aeroplane mixing
