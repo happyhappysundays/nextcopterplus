@@ -148,7 +148,7 @@ void init(void)
 #ifdef N6_MODE	
 	i2c_init();  						// Setup i2c bus
 	init_i2c_gyros();					// Configure gyros
-	MixerMode = ((PIND >> 6) && 0x03);	// Process mixer switch (S3~4) setting
+	MixerMode = ((PIND >> 6) & 0x03);	// Process mixer switch (S3~4) setting
 #endif
 	// Reset I-terms
 	IntegralaPitch = 0;	 

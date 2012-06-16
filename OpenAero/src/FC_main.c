@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.13 Beta 5
+// Version 1.13 Beta 6
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per references
@@ -132,6 +132,7 @@
 //				Yaw pot 	= Yaw P-term
 //			Power-on modes now no longer lock up and confuse those that won't read manuals.
 //			Added X-MODE thanks to Cesco. Added LEGACY_PWM_MODE1 and LEGACY_PWM_MODE2 compile options.
+//			Beta 6: Fixed flaperon mode on N6. Fixed Pitch/Roll gyros swapped on N6. Oops...
 //
 //***********************************************************
 //* To do
@@ -345,17 +346,19 @@ while(0)
 	ServoOut1 = RxChannel4;
 	ServoOut2 = RxChannel1;
 	ServoOut4 = RxChannel2;
+	ServoOut5 = RxChannel5;
 	output_servo_ppm();				// Output servo signal
 	_delay_ms(20);
 }
 
 while(0)
 {
+	MixerMode = ((PIND >> 6) & 0x03);	// Process mixer switch (S3~4) setting
 	LCDclear();
 	LCDgoTo(0);
-	LCDprintstr("PIND:      ");
+	LCDprintstr("Mode:      ");
 	LCDgoTo(6);
-	LCDprintstr(itoa(PIND,pBuffer,16)); // Print data in hex
+	LCDprintstr(itoa(MixerMode,pBuffer,16)); // Print data in hex
 	_delay_ms(100);
 }
 
@@ -992,14 +995,14 @@ while (0)
 					ServoOut2 -= Roll;
 					ServoOut4 -= Pitch;
 					break;
-				case 1:						// Flying wing mixing
+				case 2:						// Flying wing mixing
 					ServoOut1 -= Yaw;
 					ServoOut2 += Roll;
 					ServoOut2 -= Pitch;
 					ServoOut4 += Roll;
 					ServoOut4 += Pitch;
 					break;
-				case 2:						// Flaperon mixing
+				case 1:						// Flaperon mixing
 					ServoOut1 -= Yaw;
 					ServoOut2 -= Roll;
 					ServoOut5 -= Roll;

@@ -135,7 +135,7 @@ void SetServoPositions(void)
 #else
 	switch(MixerMode)
 	{
-		case 2:						// Flaperon mixing
+		case 1:						// Flaperon mixing
 			if(Config.RollServo) {
 				ServoOut2 = Config.RxChannel5ZeroOffset - RxInRoll;
 				ServoOut5 = Config.RxChannel1ZeroOffset - RxInAux1;
