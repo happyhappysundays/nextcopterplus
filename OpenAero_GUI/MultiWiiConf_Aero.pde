@@ -24,7 +24,8 @@ int frame_size = 69; // Beta 3 frame size
 cGraph g_graph;
 int windowsX    = 780; int windowsY    = 470;
 int xGraph      = 10;  int yGraph      = 255;
-int xObj        = 670; int yObj        = 410;
+//int xObj        = 670; int yObj        = 410;
+int xObj        = 720; int yObj        = 500;
 int xParam      = 120; int yParam      = 10;
 int xRC         = 630; int yRC         = 15;
 int xMot        = 480; int yMot        = 30;
@@ -210,20 +211,20 @@ void setup() {
   gzSlider   =         controlP5.addSlider("gzSlider",-500,+500,0,x+20,y2+50,50,20);gzSlider.setDecimalPrecision(0);gzSlider.setLabel("");
 
   confP[ROLL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confP_ROLL",0,xParam+40,yParam+20,30,14));confP[ROLL].setDecimalPrecision(0);confP[ROLL].setMultiplier(0.1);confP[ROLL].setMax(255);
-  confI[ROLL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_ROLL",0,xParam+75,yParam+20,45,14));confI[ROLL].setDecimalPrecision(3);confI[ROLL].setMultiplier(0.001);confI[ROLL].setMax(0.255);
-  confD[ROLL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_ROLL",0,xParam+125,yParam+20,30,14));confD[ROLL].setDecimalPrecision(0);confD[ROLL].setMultiplier(0.1);confD[ROLL].setMax(255);confD[ROLL].hide();
+  confI[ROLL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_ROLL",0,xParam+75,yParam+20,45,14));confI[ROLL].setDecimalPrecision(3);confI[ROLL].setMultiplier(0);confI[ROLL].setMax(0.255);
+  confD[ROLL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_ROLL",0,xParam+125,yParam+20,30,14));confD[ROLL].setDecimalPrecision(0);confD[ROLL].setMultiplier(0.1);confD[ROLL].setMax(255);
 
   confP[PITCH] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confP_PITCH",0,xParam+40,yParam+40,30,14));confP[PITCH].setDecimalPrecision(0);confP[PITCH].setMultiplier(0.1);confP[PITCH].setMax(255);
-  confI[PITCH] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_PITCH",0,xParam+75,yParam+40,45,14));confI[PITCH].setDecimalPrecision(3);confI[PITCH].setMultiplier(0.001);confI[PITCH].setMax(0.255);
-  confD[PITCH] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_PITCH",0,xParam+125,yParam+40,30,14));confD[PITCH].setDecimalPrecision(0);confD[PITCH].setMultiplier(0.1);confD[PITCH].setMax(255);confD[PITCH].hide();
+  confI[PITCH] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_PITCH",0,xParam+75,yParam+40,45,14));confI[PITCH].setDecimalPrecision(3);confI[PITCH].setMultiplier(0);confI[PITCH].setMax(0.255);
+  confD[PITCH] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_PITCH",0,xParam+125,yParam+40,30,14));confD[PITCH].setDecimalPrecision(0);confD[PITCH].setMultiplier(0.1);confD[PITCH].setMax(255);
 
   confP[YAW] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confP_YAW",0,xParam+40,yParam+60,30,14));confP[YAW].setDecimalPrecision(0);confP[YAW].setMultiplier(0.1);confP[YAW].setMax(255);
-  confI[YAW] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_YAW",0,xParam+75,yParam+60,45,14));confI[YAW].setDecimalPrecision(3);confI[YAW].setMultiplier(0.001);confI[YAW].setMax(0.255);
-  confD[YAW] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_YAW",0,xParam+125,yParam+60,30,14));confD[YAW].setDecimalPrecision(0);confD[YAW].setMultiplier(0.1);confD[YAW].setMax(255);confD[YAW].hide();
+  confI[YAW] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_YAW",0,xParam+75,yParam+60,45,14));confI[YAW].setDecimalPrecision(3);confI[YAW].setMultiplier(0);confI[YAW].setMax(0.255);
+  confD[YAW] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_YAW",0,xParam+125,yParam+60,30,14));confD[YAW].setDecimalPrecision(0);confD[YAW].setMultiplier(0.1);confD[YAW].setMax(255);
 
   confP[ALT] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confP_ALT",0,xParam+40,yParam+97,30,14));confP[ALT].setDecimalPrecision(0);confP[ALT].setMultiplier(0.1);confP[ALT].setMax(255);
-  confI[ALT] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_ALT",0,xParam+75,yParam+97,45,14));confI[ALT].setDecimalPrecision(3);confI[ALT].setMultiplier(0.001);confI[ALT].setMax(0.255);
-  confD[ALT] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_ALT",0,xParam+125,yParam+97,30,14));confD[ALT].setDecimalPrecision(0);confD[ALT].setMultiplier(0.1);confD[ALT].setMax(255);confD[ALT].hide();
+  confI[ALT] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_ALT",0,xParam+75,yParam+97,45,14));confI[ALT].setDecimalPrecision(3);confI[ALT].setMultiplier(0);confI[ALT].setMax(0.255);
+  confD[ALT] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confD_ALT",0,xParam+125,yParam+97,30,14));confD[ALT].setDecimalPrecision(0);confD[ALT].setMultiplier(0.1);confD[ALT].setMax(255);
 
   confP[VEL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confP_VEL",0,xParam+40,yParam+115,30,14));confP[VEL].setDecimalPrecision(0);confP[VEL].setMultiplier(0.1);confP[VEL].setMax(255);
   confI[VEL] = (controlP5.Numberbox) hideLabel(controlP5.addNumberbox("confI_VEL",0,xParam+75,yParam+115,45,14));confI[VEL].setDecimalPrecision(3);confI[VEL].setMultiplier(0.001);confI[VEL].setMax(0.255);
@@ -236,7 +237,7 @@ void setup() {
 
   for(int i=0;i<5;i++) {confP[i].setColorBackground(grey_);confP[i].setMin(0);confP[i].setDirection(Controller.HORIZONTAL);}
   for(int i=0;i<5;i++) {confI[i].setColorBackground(grey_);confI[i].setMin(0);confI[i].setDirection(Controller.HORIZONTAL);}
-  for(int i=0;i<3;i++) {confD[i].setColorBackground(grey_);confD[i].setMin(0);confD[i].setDirection(Controller.HORIZONTAL);}
+  for(int i=0;i<5;i++) {confD[i].setColorBackground(grey_);confD[i].setMin(0);confD[i].setDirection(Controller.HORIZONTAL);}
   //for(int i=3;i<4;i++) {confP[i].setColorBackground(grey_);confP[i].setMin(0);confP[i].setDirection(Controller.HORIZONTAL);}
   //for(int i=3;i<4;i++) {confI[i].setColorBackground(grey_);confI[i].setMin(0);confI[i].setDirection(Controller.HORIZONTAL);}
   //for(int i=3;i<4;i++) {confD[i].setColorBackground(grey_);confD[i].setMin(0);confD[i].setDirection(Controller.HORIZONTAL);}
@@ -308,7 +309,7 @@ void draw() {
 
   textFont(font12);
   text("Based on MultiWii",3,450);text("by Alexander Dubus",3,465);
-  text("Ver. 0.2",720,465);
+  text("GUI V0.21 for OpenAero V1.13",605,465);
    
   textFont(font12);
   //text("Power:",xGraph-5,yGraph-30); text(pMeterSum,xGraph+50,yGraph-30);
@@ -362,7 +363,7 @@ void draw() {
   // Fudge AngX, AngY for now until the KK+ can do so itself
   angx = ax/7;
   angy = -ay/7;
-  h = radians(5); // To offset weird tilt to left...
+  h = radians(5); // To offset weird tilt to left... 5
   // Debug
   
   a=radians(angx);
@@ -377,13 +378,14 @@ void draw() {
   float size = 30.0;
 
   pushMatrix();
-  camera(xObj,yObj,300/tan(PI*60.0/360.0),xObj/2+30,yObj/2-40,0,0,1,0);
-  translate(xObj+35,yObj);
-//  translate(xObj+20,yObj-60);
+  //camera(xObj,yObj,300/tan(PI*60.0/360.0),xObj/2+35,yObj/2-40,0,0,1,0);
+  camera(xObj,yObj,300/tan(PI*60.0/360.0),xObj/2,yObj/2,0,0,1,0);
+  translate(xObj,yObj);
+  //translate(xObj+35,yObj+35);
   directionalLight(200,200,200, 0, 0, -1);
   rotateZ(h);
   rotateX(b);
-  rotateY(a);
+  rotateY(a); // - 0.1
   stroke(150,255,150);
   strokeWeight(0);sphere(size/3);strokeWeight(3);
   line(0,0, 10,0,-size-5,10);line(0,-size-5,10,+size/4,-size/2,10); line(0,-size-5,10,-size/4,-size/2,10);
@@ -645,21 +647,24 @@ void draw() {
   }
   
   pushMatrix();
-  translate(xObj+50,yObj-165);
+  translate(xObj,yObj-250);
+  //translate(xObj+50,yObj-165);
   textFont(font15);text("ROLL", -90, 5);
   rotate(a);
   line(-30,0,+30,0);line(0,0,0,-10);
   popMatrix();
   
   pushMatrix();
-  translate(xObj+50,yObj-100);
+  //translate(xObj+50,yObj-100);
+  translate(xObj,yObj-190);
   textFont(font15);text("PITCH", -90, 5);
   rotate(b);
   line(-30,0,30,0);line(+30,0,30-size/2 ,size/3);  line(+30,0,30-size/2 ,-size/3);  
   popMatrix();
  
   pushMatrix();
-  translate(xObj-20,yObj-133);
+  translate(xObj-70,yObj-220);
+  //translate(xObj-20,yObj-133);
   size=15;
   strokeWeight(1.5);
   fill(0);stroke(0);
@@ -746,7 +751,7 @@ void draw() {
   fill(255);
   textFont(font15);    
   text("P",xParam+48,yParam+15);text("I",xParam+93,yParam+15);
-  //text("D",xParam+132,yParam+15);
+  text("D",xParam+132,yParam+15);
   textFont(font12);
   //text("RATE",xParam+191,yParam+122);
   //text("EXPO",xParam+270,yParam+122);
@@ -827,8 +832,8 @@ public void READ() {
   buttonLVAMODE.setColorBackground(green_);
 
   for(int i=0;i<5;i++) {confP[i].setColorBackground(green_);}
-  for(int i=0;i<5;i++) {confI[i].setColorBackground(green_);}
-  for(int i=0;i<3;i++) {confD[i].setColorBackground(green_);}
+  for(int i=4;i<5;i++) {confI[i].setColorBackground(green_);}
+  for(int i=0;i<4;i++) {confD[i].setColorBackground(green_);}
   
   confRC_RATE.setColorBackground(green_);
   confRC_EXPO.setColorBackground(green_);
