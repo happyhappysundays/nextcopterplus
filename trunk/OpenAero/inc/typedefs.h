@@ -36,7 +36,7 @@ typedef struct
 	uint8_t		I_mult_yaw;
 	uint8_t		D_mult_yaw;
 	uint8_t		P_mult_glevel;			// Autolevel gyro P-term
-	uint8_t		I_mult_glevel;			// Autolevel gyro I-term
+	uint8_t		D_mult_glevel;			// Autolevel gyro D-term
 	uint8_t		P_mult_alevel;			// Autolevel acc P-term
 	uint8_t		I_mult_alevel;			// Autolevel acc I-term
 	//

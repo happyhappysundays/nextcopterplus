@@ -74,7 +74,7 @@ void Set_EEPROM_Default_Config(void)
 {
 	Config.RxChannel1ZeroOffset	= 1520;	// RC input stick centers
 	Config.RxChannel2ZeroOffset	= 1520;
-	Config.RxChannel3ZeroOffset	= 1120; //Debug
+	Config.RxChannel3ZeroOffset	= 1520;
 	Config.RxChannel4ZeroOffset	= 1520;
 	Config.RxChannel5ZeroOffset = 1520;
 	//
@@ -94,7 +94,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.I_mult_yaw = 0;
 	Config.D_mult_yaw = 0;
 	Config.P_mult_glevel = 60;
-	Config.I_mult_glevel = 0;
+	Config.D_mult_glevel = 0;
 	Config.P_mult_alevel = 100;
 	Config.I_mult_alevel = 0;
 	//

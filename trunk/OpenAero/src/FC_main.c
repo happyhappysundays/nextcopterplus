@@ -1,16 +1,16 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.13 Beta 3
+// Version 1.13 Beta 5
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
-// OpenAero code by David Thompson
+// OpenAero code by David Thompson, included open-source code as per references
 //
 // Includes PID and Auto-level functions inspired by the open-sourced MultiWii project
 // Compatible with KK boards fitted with X and Y accelerometers 
 // on Roll/Pitch pot inputs. LCD board or GUI required for setup of PID constants.
 //
-// Tested only on Atmega168P boards (KK+)
+// Tested only on Atmega168P/PA boards (KK+, Blackboards, HobbyKing V1 & 2)
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -121,15 +121,23 @@
 // V1.13	Add stability channel selection via LCD in CPPM modes.
 //			Removed loop rate control, changed all the long timers to suit.
 //			Added servo overdue timeout to guarantee servo output regardless of input. 
-//			Hopefully fixed PWM input bugs. Added failsafe setting via holding M6 LOW.
+//			Fixed "Automagic PWM" input mode. Added failsafe setting via holding M6 LOW.
 //			Failsafe holds outputs at predetermined position if RC sync lost.
-//			Automated compiledefs.h
+//			Automated compiledefs.h. Tweaked failsafe timing. Adjusted overdue define for slower RXs.
+//			Optimised code - thanks to wargh from RCG. 
+//			Added support for Eagle N6 / HobbyKing i86 hardware. S1 selects failsafe, S3 & S4 select mixer modes.
+//			Removed gyro I-term as it was dangerous/confusing, Gyro PID now a P+D loop.
+//				Roll pot 	= Roll/Pitch P-term
+//				Pitch pot 	= Roll/Pitch D-term
+//				Yaw pot 	= Yaw P-term
+//			Power-on modes now no longer lock up and confuse those that won't read manuals.
+//			Added X-MODE thanks to Cesco. Added LEGACY_PWM_MODE1 and LEGACY_PWM_MODE2 compile options.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// 
+//  Fix remaining incompatibilities with some RXs, or some users...
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -145,7 +153,7 @@ Standard mode
              |
         M4 --+--    Elevator
              |
-             M1    Rudder
+             M1     Rudder (M3 on i86/N6)
 
 
 Standard Flaperon mode (CPPM only - second aileron channel on Ch.5)
@@ -157,7 +165,7 @@ Standard Flaperon mode (CPPM only - second aileron channel on Ch.5)
              |
         M4 --+--    Elevator
              |
-             M1    Rudder
+             M1     Rudder (M3 on i86/N6)
 
 Flying Wing - Assumes mixing done in the transmitter
 
@@ -172,7 +180,20 @@ Flying Wing - Assumes mixing done in the transmitter
        Left   Right
 
             M1
-          Rudder
+          Rudder (M3 on i86/N6)
+
+  i86/N6 Switch bank modes
+  ------------------------
+  S1 = Failsafe mode if held on for > 1 second. Leave OFF.
+  S2 = Spare
+  +-----------------------------------+
+  |S3 |S4 | Mode                      |  
+  +-----------------------------------+
+  |0FF|OFF| Aeroplane mode            |
+  |OFF|ON | Flying Wing mode          |
+  |ON |OFF| Flaperon mode             |
+  |ON |ON | Defaults to Aeroplane mode|
+  +-----------------------------------+
 */
 
 //***********************************************************
@@ -197,6 +218,8 @@ Flying Wing - Assumes mixing done in the transmitter
 #include "..\inc\lcd.h"
 #include "..\inc\uart.h"
 #include "..\inc\isr.h"
+#include "..\inc\i2cmaster.h"
+#include "..\inc\i2c.h"
 
 //***********************************************************
 //* Defines
@@ -223,12 +246,11 @@ Flying Wing - Assumes mixing done in the transmitter
 
 // Timeouts
 #define GUI_TIMEOUT 78120			// Time after which GUI entry is impossible (78,120 = 10s)
-#define	SERVO_OVERDUE 156			// Number of T2 cycles before servo will be overdue = 156 * 1/7812 = 20ms (50Hz)
+#define	SERVO_OVERDUE 195			// Number of T2 cycles before servo will be overdue = 195 * 1/7812 = 25ms (40Hz)
 #define LCD_TIMEOUT 15624			// Number or T2 cycles before LCD engages (2 seconds)
 #define LMA_TIMEOUT 468720			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
 #define FS_TIMEOUT 7812				// Number or T2 cycles before Failsafe engages (1 seconds)
 #define	PWM_DELAY 250				// Number of T0 cycles to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
-
 
 //***********************************************************
 //* Code and Data variables
@@ -250,20 +272,14 @@ int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer r
 int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
 
 // PID variables
-int32_t	IntegralgPitch;				// PID I-terms (gyro) for each axis
-int32_t	IntegralgRoll;
 int32_t	IntegralaPitch;				// PID I-terms (acc.) for each axis
 int32_t	IntegralaRoll;
-int32_t	IntegralYaw;
 int32_t P_term_gRoll;				// Calculated P-terms (gyro) for each axis
 int32_t P_term_gPitch;
 int32_t P_term_aRoll;				// Calculated P-terms (acc.) for each axis
 int32_t P_term_aPitch;
-int32_t I_term_gRoll;				// Calculated I-terms (gyro) for each axis
-int32_t I_term_gPitch;
 int32_t I_term_aRoll;				// Calculated I-terms (acc.) for each axis
 int32_t I_term_aPitch;
-int32_t I_term_Yaw;
 int16_t currentError[4];			// Used with lastError to keep track of D-Terms in PID calculations
 int16_t lastError[4];
 int16_t DifferentialGyro;			// Holds difference between last two errors (angular acceleration)
@@ -285,6 +301,7 @@ char 	pBuffer[16];				// Print buffer
 uint8_t rxin;
 uint8_t MenuItem;
 int16_t MenuValue;
+uint8_t	MixerMode;					// Mixer mode from switch bank
 
 // Timing
 uint16_t Change_LCD;				// Long timers increment at 7812kHz or 128us
@@ -311,7 +328,9 @@ bool 	LVA_Alarm;					// Low voltage alarm active
 
 int main(void)
 {
+#ifndef ICP_CPPM_MODE
 	uint16_t i;
+#endif
 	OldIndex = 1;
 	GUI_lockout = false;
 	firsttimeflag = true;
@@ -320,40 +339,61 @@ int main(void)
 //************************************************************
 // Test code - start
 //************************************************************
-/*
-	if (0)
+
+while(0)
+{
+	ServoOut1 = RxChannel4;
+	ServoOut2 = RxChannel1;
+	ServoOut4 = RxChannel2;
+	output_servo_ppm();				// Output servo signal
+	_delay_ms(20);
+}
+
+while(0)
+{
+	LCDclear();
+	LCDgoTo(0);
+	LCDprintstr("PIND:      ");
+	LCDgoTo(6);
+	LCDprintstr(itoa(PIND,pBuffer,16)); // Print data in hex
+	_delay_ms(100);
+}
+
+#ifdef N6_MODE
+while (0) 
+{
+	_delay_ms(2000);
+	CalibrateGyros();
+	writeI2Cbyte(L3G4200D_ADDRESS, 0x20, 0x8F); // 400Hz ODR, 20Hz cut-off
+	writeI2Cbyte(L3G4200D_ADDRESS, 0x23, 0x20); // 500dps
+	writeI2Cbyte(L3G4200D_ADDRESS, 0x24, 0x02);
+
+	LCDclear();
+	LCDgoTo(0);
+	LCDprintstr("Ad:0x   ");
+	LCDgoTo(5);
+	LCDprintstr(itoa(L3G4200D_ADDRESS,pBuffer,16)); // Print address in hex
+
+	while(1)
 	{
-		while (max_chan == 0)							// No pulses yet
-		{
-			_delay_ms(50);
-			LED = !LED;							// Flash LED rapidly
-		}
-		LED = 0;								// LED OFF
-		_delay_ms(500);							// Allow RC time to settle
-		LED = 1;								// LED back ON
-	
-		gapfound = true;
-	}
-	while (0) 
-	{
-		// Display results
-		LCDgoTo(0);								
-		LCDprintstr("1      ");
-		LCDgoTo(2);
-		LCDprintstr(itoa(gap1,pBuffer,10));
-		//
-		LCDgoTo(8);								
-		LCDprintstr("2      ");
+		ReadGyros();
+		LCDgoTo(8);
+		LCDprintstr("X:      ");
 		LCDgoTo(10);
-		LCDprintstr(itoa(gap2,pBuffer,10));
-		//
-		LCDgoTo(16);					
-		LCDprintstr("Max:  ");
-		LCDgoTo(20);
-		LCDprintstr(itoa(max_chan,pBuffer,10));
-		_delay_ms(500);
+		LCDprintstr(itoa(gyroADC[ROLL],pBuffer,10));
+		LCDgoTo(16);
+		LCDprintstr("Y:      ");
+		LCDgoTo(18);
+		LCDprintstr(itoa(gyroADC[PITCH],pBuffer,10));
+		LCDgoTo(24);
+		LCDprintstr("Z:      ");
+		LCDgoTo(26);
+		LCDprintstr(itoa(gyroADC[YAW],pBuffer,10));
+		_delay_ms(100);
 	}
-	*/
+}
+#endif
+
 //************************************************************
 // Test code - end
 //************************************************************
@@ -364,7 +404,7 @@ int main(void)
 		AvgAccPitch[i] = 0;
 	}
 	rxin = UDR0;							// Flush RX buffer so that we don't go into GUI mode
-	LED = 1;								// Switch on LED whenever running
+	LED2 = 1;								// Switch on Red LED whenever running
 	
 
 	//************************************************************
@@ -374,12 +414,12 @@ int main(void)
 	while (max_chan == 0)					// No pulses yet
 	{
 		_delay_ms(50);
-		LED = !LED;							// Flash LED rapidly
+		LED2 = !LED2;						// Flash Red LED rapidly
 	}
 
-	LED = 0;								// LED OFF
+	LED2 = 0;								// LED OFF
 	_delay_ms(500);							// Allow RC time to settle
-	LED = 1;								// LED back ON
+	LED2 = 1;								// LED back ON
 
 	gapfound = true;						// Stop channel search
 	#endif
@@ -416,6 +456,7 @@ int main(void)
 		if ((Ticker_Count >> 8) &32) LED_ON = true;		// 0.47Hz flash
 		else LED_ON = false;
 
+
 		//************************************************************
 		//* Alarms
 		//************************************************************
@@ -436,7 +477,7 @@ int main(void)
 		if (BUZZER_ON && Model_lost) LMA_Alarm = true;	// Turn on buzzer
 		else LMA_Alarm = false;				// Otherwise turn off buzzer
 
-
+		#ifndef N6_MODE // No LVA for i86/N6
 		// Low-voltage alarm (LVA)
 		GetVbat();							// Check battery
 
@@ -451,7 +492,7 @@ int main(void)
 			if ((vBat < Config.PowerTrigger) && LED_ON) LVA_Alarm = false;	
 			else LVA_Alarm = true;				// Otherwise leave LEDs on
 		}
-
+		#endif
 
 		// Turn on buzzer if in alarm state
 		if ((LVA_Alarm) || (LMA_Alarm)) LVA = 1;
@@ -488,9 +529,9 @@ int main(void)
 				case 'W':					// Receive data from GUI and save to eeProm
 					get_multwii_data();
 					Save_Config_to_EEPROM();
-					LED = !LED;
+					LED1 = !LED1;
 					_delay_ms(500);
-					LED = !LED;
+					LED1 = !LED1;
 					break;
 				case 'D':					// Load eeProm defaults
 					Set_EEPROM_Default_Config();
@@ -688,7 +729,11 @@ int main(void)
 		Failsafe_TCNT2 = TCNT2;
 		
 		// Reset count if FS is HIGH (normal)
+		#ifndef N6_MODE
 		if (FS) Failsafe_count = 0;
+		#else
+		if (!FS) Failsafe_count = 0;	 // Switch inverted on N6
+		#endif
 		if (Failsafe_count > FS_TIMEOUT) // Trigger failsafe setting after 1 second
 		{
 			SetFailsafe();
@@ -706,7 +751,7 @@ int main(void)
 			// Autolevel always OFF if Config.ALMode = 1 (default)
 
 			// For CPPM mode, use StabChan input
-			#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+			#ifdef ICP_CPPM_MODE
 				if ((StabChan < 1600) && (Config.ALMode == 0))	// StabChan ON and AL is available
 
 			// For non-CPPM mode, use the(THR) input
@@ -737,7 +782,7 @@ int main(void)
 		//************************************************************
 
 		// For CPPM mode, use StabChan for Stability
-		#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+		#ifdef ICP_CPPM_MODE
 		if ((StabChan > 1600) && (Config.StabMode == 0))	// StabChan enables stability if Config.StabMode = 0 (default)
 		#else
 		if ((RxInAux < 200) && (Config.StabMode == 0))
@@ -747,11 +792,8 @@ int main(void)
 			flight_mode &= 0xf7;
 
 			// Reset I-terms when stabilise is off
-			IntegralgPitch = 0;	 
-			IntegralgRoll = 0;
 			IntegralaPitch = 0;	 
 			IntegralaRoll = 0;
-			IntegralYaw = 0;
 		}
 
 		// Stability mode ON (RxChannel3 > 1600)
@@ -767,11 +809,11 @@ int main(void)
 
 			//--- Read sensors ---
 			ReadGyros();
-			// Only read Accs if in AutoLevel mode
-			if (AutoLevel) ReadAcc();
 
 			// Accelerometer low-pass filter
 			if (AutoLevel) {
+
+				ReadAcc();	// Only read Accs if in AutoLevel mode
 
 				// Average accelerometer readings properly to create a genuine low-pass filter
 				// Note that this has exactly the same effect as a complementary filter but with vastly less overhead.
@@ -795,21 +837,19 @@ int main(void)
 			//                --- Calculate roll gyro output ---
 			//***********************************************************************
 
-			if ((RxInRoll < DEAD_BAND) && (RxInRoll > -DEAD_BAND)) RxInRoll = 0; // Reduce RxIn noise into the I-term
-			//Roll = RxInRoll + gyroADC[ROLL];
+			if ((RxInRoll < DEAD_BAND) && (RxInRoll > -DEAD_BAND)) RxInRoll = 0; // Reduce RxIn noise
 			Roll = gyroADC[ROLL];
 
-			IntegralgRoll += Roll;									// Gyro I-term
-			if (IntegralgRoll > ITERM_LIMIT_RP) IntegralgRoll = ITERM_LIMIT_RP; // Anti wind-up limit
-			else if (IntegralgRoll < -ITERM_LIMIT_RP) IntegralgRoll = -ITERM_LIMIT_RP;
+			currentError[ROLL] = Roll;								// D-term
+			DifferentialGyro = currentError[ROLL] - lastError[ROLL];
+			lastError[ROLL] = currentError[ROLL];
 
 			if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 			{
-				// Gyro PI terms
+				// Gyro PD terms
 				P_term_gRoll = Roll * Config.P_mult_glevel;			// Multiply P-term (Max gain of 256)
 				P_term_gRoll = P_term_gRoll * 3;					// Multiply by 3, so max effective gain is 768
-				I_term_gRoll = IntegralgRoll * Config.I_mult_glevel;// Multiply I-term (Max gain of 256)
-				I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
+				DifferentialGyro *= Config.D_mult_glevel;			// Multiply D-term by up to 256
 
 				// Acc PI terms
 				P_term_aRoll = AvgRoll * Config.P_mult_alevel;		// P-term of accelerometer (Max gain of 256)
@@ -819,64 +859,48 @@ int main(void)
 				I_term_aRoll = IntegralaRoll * Config.I_mult_alevel;// Multiply I-term (Max gain of 256)
 				I_term_aRoll = I_term_aRoll >> 3;					// Divide by 8, so max effective gain is 16
 	
-				// Sum Gyro P and I terms + Acc P and I terms
-				Roll = P_term_gRoll + I_term_gRoll - P_term_aRoll - I_term_aRoll;
+				// Sum Gyro P and D terms + Acc P and I terms
+				Roll = P_term_gRoll + DifferentialGyro - P_term_aRoll - I_term_aRoll;
 				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 
 			}
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
 			{
-				// Gyro PID terms
+				// Gyro PD terms
 				if ((Config.Modes &4) > 0)							// eeprom mode
 				{
 					P_term_gRoll = Roll * Config.P_mult_roll;		// Multiply P-term (Max gain of 256)
-					I_term_gRoll = IntegralgRoll * Config.I_mult_roll;	// Multiply I-term (Max gain of 256)
+					DifferentialGyro *= Config.D_mult_roll;			// Multiply D-term by up to 256
 				}
 				else 
 				{
 					P_term_gRoll = Roll * GainInADC[ROLL];			// Multiply P-term (Max gain of 256)
-					I_term_gRoll = IntegralgRoll * GainInADC[PITCH];// Multiply I-term (Max gain of 256)
+					DifferentialGyro *= GainInADC[PITCH];			// Multiply D-term by up to 256
 				}
 				P_term_gRoll = P_term_gRoll * 3;					// Multiply by 3, so max effective gain is 768
-				I_term_gRoll = I_term_gRoll >> 3;					// Divide by 8, so max effective gain is 16
 
 				// Sum	
-				Roll = P_term_gRoll + I_term_gRoll; 				// P + I
+				Roll = P_term_gRoll + DifferentialGyro; 			// P + D; 
 				Roll = Roll >> 6;									// Divide by 64 to rescale values back to normal
 			}
-
-			//--- (Add)Adjust roll gyro output to Servos
-			#ifdef STANDARD
-			ServoOut2 -= Roll;
-			#elif defined(FWING)
-			ServoOut2 += Roll;
-			ServoOut4 += Roll;
-			#elif defined(STD_FLAPERON)
-			ServoOut2 -= Roll; // Left
-			ServoOut5 -= Roll; // Right
-			#else
-			#error No mixer configuration defined
-			#endif
 
 			//***********************************************************************
 			//                --- Calculate pitch gyro output ---
 			//***********************************************************************
 
-			if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise into the I-term
-			//Pitch = RxInPitch + gyroADC[PITCH];
+			if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise
 			Pitch = gyroADC[PITCH];
 
-			IntegralgPitch += Pitch;								// I-term (32-bit)
-			if (IntegralgPitch > ITERM_LIMIT_RP) IntegralgPitch = ITERM_LIMIT_RP; // Anti wind-up limit
-			else if (IntegralgPitch < -ITERM_LIMIT_RP) IntegralgPitch = -ITERM_LIMIT_RP;
+			currentError[PITCH] = Pitch;							// D-term
+			DifferentialGyro = currentError[PITCH] - lastError[PITCH];
+			lastError[PITCH] = currentError[PITCH];
 
 			if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 			{
-				// Gyro PI terms
+				// Gyro PD terms
 				P_term_gPitch = Pitch * Config.P_mult_glevel;		// Multiply P-term (Max gain of 256)
 				P_term_gPitch = P_term_gPitch * 3;					// Multiply by 3, so max effective gain is 768
-				I_term_gPitch = IntegralgPitch * Config.I_mult_glevel;// Multiply I-term (Max gain of 256)
-				I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
+				DifferentialGyro *= Config.D_mult_glevel;			// Multiply D-term by up to 256
 	
 				// Acc PI terms
 				P_term_aPitch = AvgPitch * Config.P_mult_alevel;	// P-term of accelerometer (Max gain of 256)
@@ -887,75 +911,107 @@ int main(void)
 				I_term_aPitch = I_term_aPitch >> 3;					// Divide by 8, so max effective gain is 16
 
 				// Sum Gyro P and I terms + Acc P and I terms
-				Pitch = P_term_gPitch + I_term_gPitch - P_term_aPitch - I_term_aPitch;
+				Pitch = P_term_gPitch + DifferentialGyro - P_term_aPitch - I_term_aPitch;
 				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
 			else // Normal mode (Just use raw gyro errors to guess at attitude)
 			{
-				// Gyro PID terms
+				// Gyro PD terms
 				if ((Config.Modes &4) > 0)							// eeprom mode
 				{
 					P_term_gPitch = Pitch * Config.P_mult_pitch;	// Multiply P-term (Max gain of 256)
-					I_term_gPitch = IntegralgPitch * Config.I_mult_pitch;// Multiply I-term (Max gain of 256)
+					DifferentialGyro *= Config.D_mult_roll;			// Multiply D-term by up to 256
 				}
 				else
 				{
 					P_term_gPitch = Pitch * GainInADC[ROLL];		// Multiply P-term (Max gain of 256)
-					I_term_gPitch = IntegralgPitch * GainInADC[PITCH];// Multiply I-term (Max gain of 256)
+					DifferentialGyro *= GainInADC[PITCH];			// Multiply D-term by up to 256
 				}
 				P_term_gPitch = P_term_gPitch * 3;					// Multiply by 3, so max effective gain is 768
-				I_term_gPitch = I_term_gPitch >> 3;					// Divide by 8, so max effective gain is 16
 
 				// Sum
-				Pitch = P_term_gPitch + I_term_gPitch;				// P + I
+				Pitch = P_term_gPitch + DifferentialGyro; 			// P + D; 
 				Pitch = Pitch >> 6;									// Divide by 64 to rescale values back to normal
 			}
-
-			//--- (Add)Adjust pitch gyro output to Servos
-			#if (defined (STANDARD) || defined(STD_FLAPERON))
-			ServoOut4 -= Pitch;
-			#elif defined(FWING)
-			ServoOut2 -= Pitch;
-			ServoOut4 += Pitch;
-			#else
-			#error No mixer configuration defined
-			#endif
 
 			//***********************************************************************
 			//                 --- Calculate yaw gyro output ---
 			//***********************************************************************
 
-			if ((RxInYaw < DEAD_BAND) && (RxInYaw > -DEAD_BAND)) RxInYaw = 0; // Reduce RxIn noise into the I-term
-			//Yaw = RxInYaw + gyroADC[YAW];	
+			if ((RxInYaw < DEAD_BAND) && (RxInYaw > -DEAD_BAND)) RxInYaw = 0; // Reduce RxIn noise
 			Yaw = gyroADC[YAW];
 
-			IntegralYaw += Yaw;									// I-term (32-bit)
-			if (IntegralYaw > ITERM_LIMIT_YAW) IntegralYaw = ITERM_LIMIT_YAW;
-			else if (IntegralYaw < -ITERM_LIMIT_YAW) IntegralYaw = -ITERM_LIMIT_YAW;// Anti wind-up (Experiment with value)
+			currentError[YAW] = Yaw;							// D-term
+			DifferentialGyro = currentError[YAW] - lastError[YAW];
+			lastError[YAW] = currentError[YAW];
 
 			if ((Config.Modes &4) > 0)							// eeprom mode
 			{
 				Yaw *= Config.P_mult_yaw;						// Multiply P-term (Max gain of 256)
-				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
+				DifferentialGyro *= Config.D_mult_roll;			// Multiply D-term by up to 256
 			}
 			else
 			{
 				Yaw *= GainInADC[YAW];							// Multiply P-term (Max gain of 256)
-				I_term_Yaw = IntegralYaw * Config.I_mult_yaw;	// Multiply IntegralYaw by up to 256
+				DifferentialGyro *= GainInADC[PITCH];			// Multiply D-term by up to 256
 			}
-			Yaw = Yaw * 3;	
-			I_term_Yaw = I_term_Yaw >> 3;						// Divide by 8, so max effective gain is 16
+			Yaw = Yaw * 3;
 
-			Yaw = Yaw - I_term_Yaw;								// P + I
+			// Sum
+			Yaw = Yaw + DifferentialGyro; 						// P + D; 
 			Yaw = Yaw >> 6;										// Divide by 64 to rescale values back to normal
 
-			//--- (Add)Adjust yaw gyro output to servos
-			#if (defined(STANDARD) || defined(FWING) || defined(STD_FLAPERON))
+			//***********************************************************************
+			//                 --- Output mixer ---
+			//***********************************************************************
+			#ifndef N6_MODE 					// Standard KK board mixer configuration
+			#ifdef STANDARD
 			ServoOut1 -= Yaw;
+			ServoOut2 -= Roll;
+			ServoOut4 -= Pitch;
+			#elif defined(FWING)
+			ServoOut1 -= Yaw;
+			ServoOut2 += Roll;
+			ServoOut2 -= Pitch;
+			ServoOut4 += Roll;
+			ServoOut4 += Pitch;
+			#elif defined(STD_FLAPERON)
+			ServoOut1 -= Yaw;
+			ServoOut2 -= Roll; 		// Left
+			ServoOut5 -= Roll; 		// Right
+			ServoOut4 -= Pitch;
 			#else
 			#error No mixer configuration defined
 			#endif
-
+			#else
+			// Note that in N6 mode, ServoOut1 redirects to M3 in servos_asm.S
+			switch(MixerMode)
+			{
+				case 0:						// Aeroplane mixing
+					ServoOut1 -= Yaw;
+					ServoOut2 -= Roll;
+					ServoOut4 -= Pitch;
+					break;
+				case 1:						// Flying wing mixing
+					ServoOut1 -= Yaw;
+					ServoOut2 += Roll;
+					ServoOut2 -= Pitch;
+					ServoOut4 += Roll;
+					ServoOut4 += Pitch;
+					break;
+				case 2:						// Flaperon mixing
+					ServoOut1 -= Yaw;
+					ServoOut2 -= Roll;
+					ServoOut5 -= Roll;
+					ServoOut4 -= Pitch;
+					break;
+				default:					// Default to aeroplane mixing
+					ServoOut1 -= Yaw;
+					ServoOut2 -= Roll;
+					ServoOut4 -= Pitch;
+					break;
+			}
+			#endif
 		} // Stability mode
 
 		//--- Servo travel limits ---
@@ -989,8 +1045,8 @@ int main(void)
 			RC_Lock = false;
 		}
 
-		// Set failsafe positions when RC lock lost
-		if (Failsafe)
+		// Set failsafe positions when RC lock lost - disable for GUI mode
+		if (Failsafe && !GUIconnected)
 		{
 			ServoOut1 = Config.Failsafe_1;
 			ServoOut2 = Config.Failsafe_2;
@@ -1009,6 +1065,7 @@ int main(void)
 			Servo_Timeout = 0;				// Cancel servo timeout
 			Overdue = false;				// And no longer overdue...
 
+			#ifndef ICP_CPPM_MODE
 			// Short delay to ensure no residual interrupt activity from ISR
 			TIFR0 &= ~(1 << TOV0);			// Clear overflow
 			TCNT0 = 0;						// Reset counter
@@ -1017,7 +1074,7 @@ int main(void)
 				while (TCNT0 < 64);			// 1/8MHz * 64 = 8us
 				TCNT0 -= 64;
 			}
-
+			#endif
 			output_servo_ppm();				// Output servo signal
 		}
 		// If in failsafe, just output unsynchronised. Inhibit servos while GUI connected
@@ -1026,6 +1083,7 @@ int main(void)
 			Servo_Timeout = 0;				// Cancel servo timeout
 			Overdue = false;				// No longer overdue
 
+			#ifndef ICP_CPPM_MODE
 			// Short delay to ensure no residual interrupt activity from ISR
 			TIFR0 &= ~(1 << TOV0);			// Clear overflow
 			TCNT0 = 0;						// Reset counter
@@ -1034,7 +1092,7 @@ int main(void)
 				while (TCNT0 < 64);			// 1/8MHz * 64 = 8us
 				TCNT0 -= 64;
 			}
-
+			#endif
 			output_servo_ppm();				// Output servo signal
 		}
 
