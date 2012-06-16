@@ -11,9 +11,9 @@
  * Easy configuration (Choose one from each part, and ignore all the settings below)
  *********************************************************************/
 //(Part 1 - Mixer type)
-#define AEROPLANE_1			// Standard Aileron/Elevator/Rudder aeroplane (M1, M2 and M4)
-//#define AEROPLANE_2			// Advanced Flaperons/Elevator/Rudder aeroplane (M1, M2, M4 and M5)
-//#define FLYING_WING			// Standard flaperon-controlled flying wing with optional rudder (M1, M2 and M4)
+#define AEROPLANE_1			// Standard Aileron/Elevator/Rudder aeroplane (M2, M4 and M1 or M3)
+//#define AEROPLANE_2			// Advanced Flaperons/Elevator/Rudder aeroplane (M2 and M5, M4 and M1 or M3)
+//#define FLYING_WING			// Standard flaperon-controlled flying wing with optional rudder (M2 and M4, and M1 or M3)
 
 //(Part 2 - receiver type)
 #define PWM					// My radio is a normal radio with multiple outputs
@@ -23,6 +23,7 @@
 #define STD_KK				// My board is an unmodified KK board
 //#define ACC_KK				// My KK board has a DIY ACC sensor added
 //#define MEMS_KK				// I have a KK Plus board with the MEMS board fitted 
+//#define N6_MODE				// My board is an Eagle N6/HobbyKing i86 board
 
 /*********************************************************************
  * Configuration macros for Basic mode - do not edit
@@ -47,7 +48,10 @@
 
 // Receiver encoding
 #ifdef PWM
-	#define AUTOMAGIC_PWM_MODE
+	//#define AUTOMAGIC_PWM_MODE
+	//#define LEGACY_PWM_MODE1
+	#define LEGACY_PWM_MODE2
+	//#define DOSD_PWM_MODE
 #elif defined(CPPM)
 	#define ICP_CPPM_MODE
 #else
@@ -55,7 +59,7 @@
 #endif
 
 // Board types
-#ifdef STD_KK
+#if (defined(STD_KK) || defined(N6_MODE))
 	// No special switches needed
 #elif defined(ACC_KK)
 	#define ACCELEROMETER
@@ -70,8 +74,8 @@
 /*********************************************************************
  * Advanced (manual) configuration (Do not use unless you know what you are doing)
  *********************************************************************/
-//#define THREE_CHANNEL			// Three PWM outputs (M1, M2 and M4), 500 step resolution
-//#define SIX_CHANNEL			// Six PWM outputs (M1, M2, M4, M5, M6 and THR), 250 step resolution
+//#define THREE_CHANNEL			// Three PWM outputs (M1/M3, M2 and M4), 500 step resolution
+//#define SIX_CHANNEL			// Six PWM outputs (M1/M3, M2, M4, M5, M6 and THR), 250 step resolution
 
 //#define STANDARD				// Standard aeroplane config (3 or 6 Ch.)
 //#define FWING					// Flying Wing config (3 or 6 Ch.)
@@ -80,17 +84,20 @@
 //#define VERTICAL				// Mount PCB vertically with arrow facing upwards and pitch gyro aft.
 								// This setting swaps the gyros around to maintain normal attitude.
 								// NB: OK for MEMS gyros but NOT MEMS accelerometers
+//#define XMODE					// Mount PCB square-on to the model, not with the arrow facing forwards to save space.
 
 //#define ACCELEROMETER			// Uncomment this when using an accelerometer module (enables autolevel if CPPM, removes pots)
 //#define MEMS_MODULE 			// Also uncomment this when using the MEMS module (MEMS gyros are reversed)
+//#define N6_MODE				// My board is an Eagle N6/HobbyKing i86 board
 
-//#define CPPM_MODE 			// Uncomment this for CPPM support on CH2 (elevator)
-//#define ICP_CPPM_MODE 		// Uncomment this for superior ICP CPPM support on M3
-//#define LEGACY_PWM_MODE		// Uncomment this for PWM input. Older but "stable" PWM code
+//#define ICP_CPPM_MODE 		// Uncomment this for superior ICP CPPM support on M3 (KK) or M1 (i86/N6)
+//#define LEGACY_PWM_MODE1		// Uncomment this for V1.11-style PWM input. Older but "stable" PWM code
+//#define LEGACY_PWM_MODE2		// Uncomment this for V1.12-style PWM input. Works better for some people
 //#define AUTOMAGIC_PWM_MODE	// Uncomment this for PWM input. New auto-configuring PWM code
 //#define DOSD_PWM_MODE			// Uncomment this for simultaneous PWM inputs such as used by DOSD etc
 
 #endif // Advanced mode
+
 /*********************************************************************
  * Illegal configuration detection
  *********************************************************************/
@@ -98,7 +105,7 @@
 	#error AEROPLANE_2 mode must be used with CPPM mode selected and a CPPM receiver
 #elif (defined(STD_FLAPERON) && defined(THREE_CHANNEL))
 	#error AEROPLANE_2 requires SIX_CHANNEL mode
-#elif (defined(THREE_CHANNEL) && (defined(CPPM_MODE) || defined(ICP_CPPM_MODE)))
+#elif (defined(THREE_CHANNEL) && (defined(ICP_CPPM_MODE)))
 	#error CPPM mode requires SIX_CHANNEL mode
 #elif (defined(MEMS_MODULE) && !defined(ACCELEROMETER))
 	#error MEMS mode requires ACCELEROMETER mode
@@ -106,7 +113,7 @@
 	#error Forgot to select the number of channels
 #elif (!defined(STANDARD) && !defined(STD_FLAPERON) && !defined(FWING))
 	#error Forgot to select the aeroplane type
-#elif (!defined(CPPM_MODE) && !defined(ICP_CPPM_MODE) && !defined(LEGACY_PWM_MODE) && !defined(AUTOMAGIC_PWM_MODE) && !defined(DOSD_PWM_MODE))
+#elif (!defined(ICP_CPPM_MODE) && !defined(LEGACY_PWM_MODE1) && !defined(LEGACY_PWM_MODE2) && !defined(AUTOMAGIC_PWM_MODE) && !defined(DOSD_PWM_MODE))
 	#error Forgot to select a receiver mode
 #endif // Illegal configurations
 #endif //COMPILE_DEFS_H_

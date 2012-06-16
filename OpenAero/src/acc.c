@@ -79,7 +79,7 @@ void CalibrateAcc(void)
 
 	Save_Config_to_EEPROM();
 
-	LED = !LED;
+	LED1 = !LED1;
 	_delay_ms(500);
-	LED = !LED;
+	LED1 = !LED1;
 }

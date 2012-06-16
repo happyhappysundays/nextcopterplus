@@ -13,12 +13,21 @@
 #define M123_OUT	_SFR_IO_ADDR(PORTB)
 #define M456_OUT	_SFR_IO_ADDR(PORTD)
 
+#ifndef N6_MODE
 #define M1 M123_OUT,2	// PORTB,2
 #define M2 M123_OUT,1	// PORTB,1
 #define M4 M456_OUT,7	// PORTD,7
 #define M5 M456_OUT,6	// PORTD,6
 #define M6 M456_OUT,5	// PORTD,5
 #define THR M456_OUT,3	// PORTD,3 (former THR input)
+#else // N6 mode
+#define M2 M123_OUT,1	// PORTB,1
+#define M3 M123_OUT,2	// PORTB,2
+#define M4 M123_OUT,3	// PORTB,3
+#define M5 M123_OUT,4	// PORTB,4
+#define M6 M123_OUT,5	// PORTB,5
+#define THR M456_OUT,3	// PORTD,3 (former THR input)
+#endif
 
 #ifndef __tmp_reg__
 #define __tmp_reg__ 0
@@ -49,7 +58,11 @@ output_servo_ppm_asm:
 	ldi		17,0x04		// 1
 	clr		0			// 1
 
+#ifndef N6_MODE
 	sbi 	M1			// 2			Set all outputs
+#else
+	sbi 	M3			// 2
+#endif
 	sbi 	M2			// 2
 	sbi 	M4			// 2
 
@@ -57,7 +70,11 @@ f0:
 	subi	r24,1		// 1 			ServoOut1
 	sbc 	r25,0		// 1
 	brne	f1			// 2	1
+#ifndef N6_MODE
 	cbi 	M1			// 		2		Clear output M1 if done
+#else
+	cbi 	M3			// 		2		Clear output M3 if done
+#endif
 f1:
 	subi	r22,1		// 1			ServoOut2
 	sbc 	r23,0		// 1
@@ -102,13 +119,16 @@ output_servo_ppm_asm:
 	// Copy r14 to r23 so that subi can be used
 	mov		r23,r14
 
+#ifndef N6_MODE
 	sbi 	M1			// 2			Set all outputs
+#else
+	sbi 	M3			// 2
+#endif
 	sbi 	M2			// 2
 	sbi 	M4			// 2
 	sbi 	M5			// 2
 //	sbi 	M6			// 2
-
-#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+#ifdef ICP_CPPM_MODE
 	sbi		THR			// 2
 #else
 	nop
@@ -139,7 +159,11 @@ f0:
 	nop					// 1
 	subi	r24,1		// 1 			Servo1
 	brne	f1			// 2	1
+#ifndef N6_MODE
 	cbi 	M1			// 		2		Clear output M1 if done
+#else
+	cbi 	M3			// 		2		Clear output M3 if done
+#endif
 f1:
 	nop					// 1
 	nop					// 1
@@ -159,7 +183,6 @@ f3:
 	brne	f4			// 2	1
 	cbi 	M5			// 		2		Clear output M5 if done
 f4:
-//	nop
 	nop					// 1
 	subi	r16,1		// 1			Servo6
 	brne	f5			// 2	1
@@ -168,11 +191,10 @@ f4:
 	nop
 //
 f5:
-//	nop
 	nop					// 1
 	subi	r23,1		// 1			Throttle
 	brne	f6			// 2	1
-#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+#ifdef ICP_CPPM_MODE
 	cbi 	THR			// 		2		Clear output THR if done
 #else
 	nop
@@ -180,7 +202,6 @@ f5:
 #endif
 
 f6:
-//	nop	
 	subi 	19,1		// 1
 	sbc 	17,0		// 1
 	brne	f0			// 2	1		Loop until zero

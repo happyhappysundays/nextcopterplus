@@ -45,7 +45,6 @@ void variable_delay(uint8_t count);
 #define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)  // Default RX rate
 #define RX_QUALITY 8 		// Requires <= 80% success rate
 #define TX_BIT_DELAY 51 	// Default TX rate
-#define VERSION 12			// OpenAero version number
 
 // Pass model type to MultiWii GUI
 #if defined(STD_FLAPERON)
@@ -69,16 +68,16 @@ void send_byte(uint8_t ByteToSend)
 {
 	uint8_t mask;
 
-	LCD_TX = 0;
+	TX = 0;
 	variable_delay(Config.AutoTuneTX);
 
 	for (mask = 0x01; mask; mask <<= 1) 
 	{
-		if (ByteToSend & mask) LCD_TX = 1; 
-		else LCD_TX = 0;
+		if (ByteToSend & mask) TX = 1; 
+		else TX = 0;
 		variable_delay(Config.AutoTuneTX);
 	}
-	LCD_TX = 1;
+	TX = 1;
 	variable_delay(Config.AutoTuneTX);
 }
 
@@ -126,7 +125,7 @@ void get_multwii_data(void) // 22 bytes
 	Config.I_mult_yaw = rx_byte();
 	Config.D_mult_yaw = rx_byte();
 	Config.P_mult_glevel = rx_byte();
-	Config.I_mult_glevel = rx_byte();
+	Config.D_mult_glevel = rx_byte();
 	Config.P_mult_alevel = rx_byte();
 	Config.I_mult_alevel = rx_byte();	//
 	rx_byte();							// Was RC_Rate
@@ -161,7 +160,7 @@ void send_multwii_data(void) // 66 bytes
 	send_word(RxChannel2); 
 	send_word(RxChannel3); 
 	send_word(RxChannel4); 		// 33
-#if (defined(CPPM_MODE) || defined(ICP_CPPM_MODE))
+#ifdef ICP_CPPM_MODE
 	send_word(RxChannel5);
 	send_word(RxChannel6); 
 	send_word(RxChannel7); 
@@ -190,7 +189,27 @@ void send_multwii_data(void) // 66 bytes
 	}
 	send_byte(flight_mode);
 	send_word(cycletime);		// cycleTime 44
+
+#ifndef N6_MODE
 	send_byte(MULTITYPE);		// Multitype 45
+#else
+	switch(MixerMode)
+	{
+		case 0:					// Aeroplane mixing
+			send_byte(12);
+			break;
+		case 1:					// Flying wing mixing
+			send_byte(8);
+			break;
+		case 2:					// Flaperon mixing
+			send_byte(13);
+			break;
+		default:				// Default to aeroplane mixing
+			send_byte(12);
+			break;
+	}
+#endif
+
 	send_byte(Config.P_mult_roll);
 	send_byte(Config.I_mult_roll);
 	send_byte(Config.D_mult_roll);
@@ -201,7 +220,7 @@ void send_multwii_data(void) // 66 bytes
 	send_byte(Config.I_mult_yaw);
 	send_byte(Config.D_mult_yaw);
 	send_byte(Config.P_mult_glevel);
-	send_byte(Config.I_mult_glevel);
+	send_byte(Config.D_mult_glevel);
 	send_byte(Config.P_mult_alevel);
 	send_byte(Config.I_mult_alevel);	// 
     send_byte(0);						// Was RC rate
@@ -255,10 +274,10 @@ void autotune(void)
 			}
 			_delay_ms(20);				// Wait until a character sure to be there
 		}
-		LED = !LED;						// Flash LED during test loops
+		LED1 = !LED1;						// Flash LED during test loops
 	}
 
-	LED = 0;
+	LED1 = 0;
 	
 	if (hit > 0)						// Only update if new value found
 	{

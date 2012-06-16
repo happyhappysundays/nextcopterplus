@@ -41,7 +41,6 @@ void ReadGainValues(void)
 void GetVbat(void)			// Get battery voltage (VBAT on ADC6)
 {	
 	read_adc(VBAT);			// Multiplication factor = (Display volts / 1024) / (Vbat / 11 / Vref)
-
 #ifndef MEMS_MODULE
 	vBat = ADCW * 7 / 4;	// For Vref = 1.64V, factor = 1.76 (7/4 = 1.75)
 #else

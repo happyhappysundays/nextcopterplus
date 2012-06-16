@@ -44,15 +44,15 @@ void LCD_fixBL(void);
 const char MenuItem1[]  PROGMEM = "  OpenAero Menu ";
 const char MenuItem2[]  PROGMEM = "Acc Trim (Roll) "; 
 const char MenuItem3[]  PROGMEM = "Acc Trim (Pitch)";
-const char MenuItem4[]  PROGMEM = "PID Roll P-term ";
-const char MenuItem5[]  PROGMEM = "PID Roll I-term ";
-const char MenuItem6[]  PROGMEM = "PID Pitch P-term";
-const char MenuItem7[]  PROGMEM = "PID Pitch I-term";
-const char MenuItem8[]  PROGMEM = "PID Yaw P-term  ";
-const char MenuItem9[]  PROGMEM = "PID Yaw I-term  ";
-const char MenuItem10[] PROGMEM = "Gyr level P-term";
-const char MenuItem11[] PROGMEM = "Gyr level I-term";
-const char MenuItem12[] PROGMEM = "Acc level P-term";
+const char MenuItem4[]  PROGMEM = "PID Roll Gain   ";
+const char MenuItem5[]  PROGMEM = "PID Roll D-term ";
+const char MenuItem6[]  PROGMEM = "PID Pitch Gain  ";
+const char MenuItem7[]  PROGMEM = "PID Pitch D-term";
+const char MenuItem8[]  PROGMEM = "PID Yaw Gain    ";
+const char MenuItem9[]  PROGMEM = "PID Yaw D-term  ";
+const char MenuItem10[] PROGMEM = "Gyr level Gain  ";
+const char MenuItem11[] PROGMEM = "Gyr level D-term";
+const char MenuItem12[] PROGMEM = "Acc level Gain  ";
 const char MenuItem13[] PROGMEM = "Acc level I-term";
 const char MenuItem14[] PROGMEM = "LVA voltage     ";
 const char MenuItem15[] PROGMEM = "LVA mode        ";
@@ -163,7 +163,7 @@ int16_t get_menu_item(uint8_t menuitem)
 			value = (int16_t) Config.P_mult_glevel;
 			break;
 		case 10:
-			value = (int16_t) Config.I_mult_glevel;
+			value = (int16_t) Config.D_mult_glevel;
 			break;
 		case 11:
 			value = (int16_t) Config.P_mult_alevel;
@@ -257,7 +257,7 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 			Config.P_mult_glevel = (uint8_t) value;
 			break;
 		case 10:
-			Config.I_mult_glevel = (uint8_t) value;
+			Config.D_mult_glevel = (uint8_t) value;
 			break;
 		case 11:
 			Config.P_mult_alevel = (uint8_t) value;
@@ -330,9 +330,9 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 
 	// Save to eeProm	
 	Save_Config_to_EEPROM(); 
-	LED = !LED;
+	LED1 = !LED1;
 	_delay_ms(500);
-	LED = !LED;
+	LED1 = !LED1;
 }
 
 
@@ -350,16 +350,16 @@ void LCDprint(uint8_t i)
 	uint8_t mask, delay;
 	delay = Config.AutoTuneTX << 1;
 
-	LCD_TX = 0;
+	TX = 0;
 	variable_lcd_delay(delay);
 
 	for (mask = 0x01; mask; mask <<= 1) 
 	{
-		if (i & mask) LCD_TX = 1; 
-		else LCD_TX = 0;
+		if (i & mask) TX = 1; 
+		else TX = 0;
 		variable_lcd_delay(delay);
 	}
-	LCD_TX = 1;
+	TX = 1;
 	variable_lcd_delay(delay);
 }
 

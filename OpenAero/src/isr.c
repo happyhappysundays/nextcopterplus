@@ -48,18 +48,19 @@ bool	gapready;					// Used to skip over the first incidence of an input
 bool	RC_Lock;					// RC sync found/lost flag
 
 #define SYNCPULSEWIDTH 3000			// Sync pulse must be more than 3ms long
-#define GAPPULSEWIDTH 3000			// Servo update gap must be more than 5ms long
+#define GAPPULSEWIDTH 3000			// Servo update gap must be more than 3ms long
 #define GAPPULSELIMIT 20000			// Maximum gap accepted (increase until gap miscalculated)
 
 //************************************************************
 //* RC input modes
 //************************************************************
 
-#ifdef LEGACY_PWM_MODE
+#if ((defined LEGACY_PWM_MODE1) || (defined LEGACY_PWM_MODE2))
 //************************************************************
 //* Standard PWM mode
 //* Sequential PWM inputs from a normal RC receiver
-//* Assumes that the THR input is the last input received
+//* LEGACY_PWM_MODE1 assumes that the YAW input is the last input received
+//* LEGACY_PWM_MODE2 assumes that the THR input is the last input received
 //************************************************************
 
 ISR(PCINT2_vect)
@@ -95,8 +96,10 @@ ISR(INT1_vect)
 	else 
 	{				// Falling
 		RxChannel3 = TCNT1 - RxChannel3Start;
+#ifdef LEGACY_PWM_MODE2
 		Interrupted = true;						// Signal that interrupt block has finished
 		RC_Lock = true;							// RC sync established
+#endif
 	}
 }
 
@@ -109,6 +112,10 @@ ISR(PCINT0_vect)
 	else 
 	{				// Falling
 		RxChannel4 = TCNT1 - RxChannel4Start;
+#ifdef LEGACY_PWM_MODE1
+		Interrupted = true;						// Signal that interrupt block has finished
+		RC_Lock = true;							// RC sync established
+#endif
 	}
 }
 
@@ -140,7 +147,6 @@ ISR(PCINT2_vect)
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;	// Use previous channel number
 				}
 			}
@@ -179,7 +185,6 @@ ISR(INT0_vect)
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;
 				}
 			}
@@ -218,7 +223,6 @@ ISR(INT1_vect)
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
 				{
-					//gapfound = true;	// Flag that a gap is found
 					max_chan = ch_num;
 				}
 			}
@@ -256,8 +260,7 @@ ISR(PCINT0_vect)
 
 				// If gap bigger than GAPPULSEWIDTH, mark as found
 				if (gap > GAPPULSEWIDTH)
-					{
-					//gapfound = true;	// Flag that a gap is found
+				{
 					max_chan = ch_num;
 				}
 			}
@@ -420,85 +423,6 @@ ISR(TIMER1_CAPT_vect)
 		RC_Lock = true;						// RC sync established
 	}
 }
-
-#elif defined(CPPM_MODE)
-//************************************************************
-// CPPM RX mode 	- input on PD2 (INT0/elevator)
-// NB: JR/Spectrum channel order (Th,Ai,El,Ru,5,6,7,8)
-// 	   Other brands of TX will lead to the wrong channels
-//	   being decoded into the RxChannel variables
-//	   unless they are changed here.
-//************************************************************
-
-ISR(INT0_vect)
-{	// Check to see if previous period was a sync pulse
-	// If so, reset channel number
-
-	if ((TCNT1 - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
-	PPMSyncStart = TCNT1;
-	switch(ch_num)
-	{
-		case 0:
-			RxChannel1Start = TCNT1;
-			ch_num++;
-			break;
-		case 1:
-			RxChannel2Start = TCNT1;
-			RxChannel3 = TCNT1 - RxChannel1Start;	// Ch3 - Throttle
-			ch_num++;
-			break;
-		case 2:
-			RxChannel3Start = TCNT1;
-			RxChannel1 = TCNT1 - RxChannel2Start;	// Ch1 - Aileron
-			ch_num++;
-			break;
-		case 3:
-			RxChannel4Start = TCNT1;
-			RxChannel2 = TCNT1 - RxChannel3Start;	// Ch2 - Elevator
-			ch_num++;
-			break;
-		case 4:
-			RxChannel5Start = TCNT1;
-			RxChannel4 = TCNT1 - RxChannel4Start;	// Ch4 - Rudder
-			ch_num++;
-			break;
-		case 5:
-			RxChannel6Start = TCNT1;
-			RxChannel5 = TCNT1 - RxChannel5Start;	// Ch5 - Gear/Aileron 2
-			ch_num++;
-			break;
-		case 6:
-			RxChannel7Start = TCNT1;
-			RxChannel6 = TCNT1 - RxChannel6Start;	// Ch6 - Flap 1
-			ch_num++;
-			break;
-		case 7:
-			RxChannel8Start = TCNT1;
-			RxChannel7 = TCNT1 - RxChannel7Start;	// Ch7 - Flap 2
-			ch_num++;
-			break;
-		case 8:
-			RxChannel8 = TCNT1 - RxChannel8Start;	// Ch8 - AUX3
-			ch_num++;
-			break;
-		default:							// If something goes wrong, keep outputs going
-			Interrupted = true;				// Signal that interrupt block has finished
-			RC_Lock = true;					// RC sync established
-			break;
-	} // Switch
-
-	// Work out the highest channel number automagically
-	if (ch_num > max_chan)	
-	{
-		max_chan = ch_num;					// Reset max channel number
-	}
-	else if (ch_num == max_chan)
-	{
-		Interrupted = true;					// Signal that interrupt block has finished
-		RC_Lock = true;						// RC sync established
-	}
-} // ISR(INT0_vect)
-
 #else
 	#error No RC input configuration defined
 #endif

@@ -16,6 +16,7 @@
 #include <avr/pgmspace.h> 
 #include "..\inc\io_cfg.h"
 #include "..\inc\servos.h"
+#include "..\inc\main.h"
 
 //************************************************************
 // Prototypes
@@ -53,7 +54,7 @@ void RxGetChannels(void)
 	RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
 	RxInPitch = RxChannel2 - Config.RxChannel2ZeroOffset;
 
-	RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1500
+	RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1520
 	if (RxChannel < 0) RxInAux = 0;
 	else RxInAux = RxChannel;
 
@@ -103,6 +104,7 @@ void RxGetChannels(void)
 }
 
 // Set servo position
+// Note that in N6 mode, ServoOut1 redirects to M3 in servos_asm.S
 void SetServoPositions(void)	
 {
 	if(Config.YawServo) {
@@ -112,6 +114,7 @@ void SetServoPositions(void)
 		ServoOut1 = RxChannel4;
 	}
 
+#ifndef N6_MODE
 	#if defined(STD_FLAPERON)
 		if(Config.RollServo) {
 			ServoOut2 = Config.RxChannel5ZeroOffset - RxInRoll;
@@ -129,6 +132,29 @@ void SetServoPositions(void)
 			ServoOut2 = RxChannel1;
 		}
 	#endif
+#else
+	switch(MixerMode)
+	{
+		case 2:						// Flaperon mixing
+			if(Config.RollServo) {
+				ServoOut2 = Config.RxChannel5ZeroOffset - RxInRoll;
+				ServoOut5 = Config.RxChannel1ZeroOffset - RxInAux1;
+			}
+			else {
+				ServoOut2 = RxChannel5;
+				ServoOut5 = RxChannel1;
+			}
+			break;
+		default:					// Everything else
+			if(Config.RollServo) {
+				ServoOut2 = Config.RxChannel1ZeroOffset - RxInRoll;
+			}
+			else {
+				ServoOut2 = RxChannel1;
+			}
+			break;
+	}
+#endif
 
 	if(Config.PitchServo) {
 		ServoOut4 = Config.RxChannel2ZeroOffset - RxInPitch;
