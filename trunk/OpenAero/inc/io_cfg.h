@@ -161,7 +161,14 @@ extern CONFIG_STRUCT Config;
 #endif //N6_MODE 
 
 //***********************************************************
-enum GyroArrayIndex { ROLL = 0, PITCH, YAW, ALT };
+// Gyro enumeration
+//***********************************************************
+#ifndef N6_MODE
+enum GyroArrayIndex { ROLL = 0, PITCH, YAW};
+#else // Swap Roll and pitch gyros for N6
+enum GyroArrayIndex { PITCH = 0, ROLL, YAW};
+#endif
+
 enum GyroDirection {GYRO_NORMAL = 0, GYRO_REVERSED};
 
 //***********************************************************

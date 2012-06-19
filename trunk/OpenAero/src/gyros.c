@@ -90,15 +90,13 @@ void get_raw_gyros(void)
 	read_adc(YAW_GYRO);				// Read yaw gyro ADC0
 	gyroADC[YAW] = ADCW;
 
-// For i86/N6 boards, get the i2c data
+// For i86/N6 boards, use the i2c data from the L3G4200D
 #else
-	int16_t	temp;
 	readI2CbyteArray(L3G4200D_ADDRESS,0xA8,(uint8_t *)gyroADC,2*3);
 	// L3G4200D gyro will return values over 200x larger than the Murata gyros + analog ADC code
-	// Swap pitch/roll gyros 
-	temp = gyroADC[PITCH];
-	gyroADC[PITCH] = gyroADC[ROLL] >> 6;	// Seems like a waste of sensitivity, 
-	gyroADC[ROLL] = temp >> 6;				// but at least there should be no noise left...
+	// Also note that the gyro array axis order (enumeration) is changed for N6 in io_cfg.h
+	gyroADC[PITCH] = gyroADC[PITCH] >> 6;	// Seems like a waste of sensitivity, 
+	gyroADC[ROLL] = gyroADC[ROLL] >> 6;		// but at least there should be no noise left...
 	gyroADC[YAW] = gyroADC[YAW] >> 6;
 #endif
 }

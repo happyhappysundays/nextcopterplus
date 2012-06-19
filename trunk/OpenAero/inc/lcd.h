@@ -18,3 +18,5 @@ extern int16_t get_menu_item(uint8_t menuitem);
 extern void LCD_Display_Menu (uint8_t menuitem);
 extern menu_range_t get_menu_range (uint8_t menuitem);
 extern void LCD_fixBL(void);
+extern uint8_t LCD_increment(uint8_t MenuItem);
+extern uint8_t LCD_decrement(uint8_t MenuItem);
