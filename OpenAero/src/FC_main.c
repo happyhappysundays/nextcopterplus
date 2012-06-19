@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.13 Beta 6
+// Version 1.13 Beta 7
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per references
@@ -133,6 +133,8 @@
 //			Power-on modes now no longer lock up and confuse those that won't read manuals.
 //			Added X-MODE thanks to Cesco. Added LEGACY_PWM_MODE1 and LEGACY_PWM_MODE2 compile options.
 //			Beta 6: Fixed flaperon mode on N6. Fixed Pitch/Roll gyros swapped on N6. Oops...
+//			Beta 7: Removed usused LCD menu items where appropriate.
+//			Changed failsafe timeout to 500ms and added servo rate timer to set servo failsafe rate to 50Hz.
 //
 //***********************************************************
 //* To do
@@ -247,10 +249,11 @@ Flying Wing - Assumes mixing done in the transmitter
 
 // Timeouts
 #define GUI_TIMEOUT 78120			// Time after which GUI entry is impossible (78,120 = 10s)
-#define	SERVO_OVERDUE 195			// Number of T2 cycles before servo will be overdue = 195 * 1/7812 = 25ms (40Hz)
+#define	SERVO_OVERDUE 3906			// Number of T2 cycles before servo will be overdue = 3906 * 1/7812 = 500ms
+#define	SERVO_RATE 156				// Requested servo rate when in failsafe mode. 7812 / 50(Hz) = 156
 #define LCD_TIMEOUT 15624			// Number or T2 cycles before LCD engages (2 seconds)
 #define LMA_TIMEOUT 468720			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
-#define FS_TIMEOUT 7812				// Number or T2 cycles before Failsafe engages (1 seconds)
+#define FS_TIMEOUT 7812				// Number or T2 cycles before Failsafe setting engages (1 seconds)
 #define	PWM_DELAY 250				// Number of T0 cycles to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 
 //***********************************************************
@@ -297,6 +300,7 @@ bool 	LCD_active;					// Mode flags
 bool 	freshmenuvalue;
 bool 	firsttimeflag;
 bool	Overdue;
+bool	ServoTick;
 bool	Failsafe;
 char 	pBuffer[16];				// Print buffer
 uint8_t rxin;
@@ -309,11 +313,14 @@ uint16_t Change_LCD;				// Long timers increment at 7812kHz or 128us
 uint32_t Change_LostModel;
 uint32_t Ticker_Count;
 uint16_t Servo_Timeout;
+uint16_t Servo_Rate;
 uint16_t Failsafe_count;
+
 uint8_t LCD_TCNT2;
 uint8_t Lost_TCNT2;
 uint8_t Ticker_TCNT2;
 uint8_t Servo_TCNT2;
+uint8_t ServoRate_TCNT2;
 uint8_t Failsafe_TCNT2;
 uint16_t LoopStartTCNT1;
 
@@ -582,21 +589,19 @@ while (0)
 					_delay_ms(1500);
 					firsttimeflag = false;
 					GUIconnected = false;
-					MenuItem = 1;
+					MenuItem = LCD_increment(MenuItem);
 				}
 				//
 				RxGetChannels();								// Check sticks
 				//
 				if (RxInPitch >= STICKARM_POINT) 
 				{	// Move up through menu list
-					if (MenuItem == (MENUITEMS-1)) MenuItem = 1;// Wrap back to start	
-					else MenuItem += 1;
+					MenuItem = LCD_increment(MenuItem);
 					freshmenuvalue = true;
 				}
 				if (RxInPitch <= -STICKARM_POINT) 
 				{	// Pitch down to move down menu
-					if  (MenuItem <= 1) MenuItem = (MENUITEMS-1);// Wrap back to end
-					else MenuItem -= 1;
+					MenuItem = LCD_decrement(MenuItem);
 					freshmenuvalue = true;
 				}
 				if (RxInRoll > STICKARM_POINT-100) 
@@ -1033,12 +1038,21 @@ while (0)
 		if ( Throttle  > MAX_TRAVEL )	Throttle  = MAX_TRAVEL;	
 
 		// Servo_Timeout increments at 7812 kHz, in loop cycle chunks
-		// After SERVO_OVERDUE of T2 cycles, 156 * 1/7812 = 20ms (50Hz)
+		// After SERVO_OVERDUE of T2 cycles, 3906 * 1/7812 = 500ms
 		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
 		if (Servo_Timeout > SERVO_OVERDUE)
 		{
 			Overdue = true;
+		}
+
+		// Servo_Rate increments at 7812 kHz, in loop cycle chunks
+		// After SERVO_RATE of T2 cycles, 156 * 1/7812 = 20ms
+		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
+		ServoRate_TCNT2 = TCNT2;
+		if (Servo_Rate > SERVO_RATE)
+		{
+			ServoTick = true;
 		}
 
 		// Check for failsafe condition (Had RC lock but now overdue)
@@ -1049,6 +1063,7 @@ while (0)
 		}
 
 		// Set failsafe positions when RC lock lost - disable for GUI mode
+		// as GUI tends to trigger failsafe as the loop rate is slower.
 		if (Failsafe && !GUIconnected)
 		{
 			ServoOut1 = Config.Failsafe_1;
@@ -1064,8 +1079,9 @@ while (0)
 		if (Interrupted && !GUIconnected)
 		{
 			Interrupted = false;			// Reset interrupted flag
+
 			Failsafe = false;				// Cancel failsafe
-			Servo_Timeout = 0;				// Cancel servo timeout
+			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
 			#ifndef ICP_CPPM_MODE
@@ -1081,21 +1097,11 @@ while (0)
 			output_servo_ppm();				// Output servo signal
 		}
 		// If in failsafe, just output unsynchronised. Inhibit servos while GUI connected
-		else if (Failsafe && Overdue && !GUIconnected)
+		else if (Failsafe && Overdue && ServoTick && !GUIconnected)
 		{
-			Servo_Timeout = 0;				// Cancel servo timeout
-			Overdue = false;				// No longer overdue
+			ServoTick = false;				// Reset servo update ticker
+			Servo_Rate = 0;					// Reset servo rate timer
 
-			#ifndef ICP_CPPM_MODE
-			// Short delay to ensure no residual interrupt activity from ISR
-			TIFR0 &= ~(1 << TOV0);			// Clear overflow
-			TCNT0 = 0;						// Reset counter
-			for (i=0;i<PWM_DELAY;i++)		// PWM_DELAY * 8us = 1ms
-			{
-				while (TCNT0 < 64);			// 1/8MHz * 64 = 8us
-				TCNT0 -= 64;
-			}
-			#endif
 			output_servo_ppm();				// Output servo signal
 		}
 

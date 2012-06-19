@@ -20,10 +20,11 @@
 //#define CPPM				// My radio is a special radio with one, combined output
 
 //(Part 3 - KK board type)
-#define STD_KK				// My board is an unmodified KK board
+//#define STD_KK				// My board is an unmodified KK board
+//#define KK_PLUS				// I have a KK Plus board with support for LVA and buzzer
 //#define ACC_KK				// My KK board has a DIY ACC sensor added
 //#define MEMS_KK				// I have a KK Plus board with the MEMS board fitted 
-//#define N6_MODE				// My board is an Eagle N6/HobbyKing i86 board
+#define N6_MODE				// My board is an Eagle N6/HobbyKing i86 board
 
 /*********************************************************************
  * Configuration macros for Basic mode - do not edit
@@ -59,7 +60,7 @@
 #endif
 
 // Board types
-#if (defined(STD_KK) || defined(N6_MODE))
+#if (defined(STD_KK) || defined(N6_MODE) || defined(KK_PLUS))
 	// No special switches needed
 #elif defined(ACC_KK)
 	#define ACCELEROMETER

@@ -36,27 +36,29 @@ menu_range_t get_menu_range (uint8_t menuitem);
 void LCDprint_Menu_P(const char *s);
 void variable_lcd_delay(uint8_t count);
 void LCD_fixBL(void);
+uint8_t LCD_increment(uint8_t MenuItem);
+uint8_t LCD_decrement(uint8_t MenuItem);
 
 //************************************************************
 // LCD menu system
 //************************************************************
 
 const char MenuItem1[]  PROGMEM = "  OpenAero Menu ";
-const char MenuItem2[]  PROGMEM = "Acc Trim (Roll) "; 
-const char MenuItem3[]  PROGMEM = "Acc Trim (Pitch)";
+const char MenuItem2[]  PROGMEM = "Acc Trim (Roll) "; // Only for ACC
+const char MenuItem3[]  PROGMEM = "Acc Trim (Pitch)"; // Only for ACC
 const char MenuItem4[]  PROGMEM = "PID Roll Gain   ";
 const char MenuItem5[]  PROGMEM = "PID Roll D-term ";
 const char MenuItem6[]  PROGMEM = "PID Pitch Gain  ";
 const char MenuItem7[]  PROGMEM = "PID Pitch D-term";
 const char MenuItem8[]  PROGMEM = "PID Yaw Gain    ";
 const char MenuItem9[]  PROGMEM = "PID Yaw D-term  ";
-const char MenuItem10[] PROGMEM = "Gyr level Gain  ";
-const char MenuItem11[] PROGMEM = "Gyr level D-term";
-const char MenuItem12[] PROGMEM = "Acc level Gain  ";
-const char MenuItem13[] PROGMEM = "Acc level I-term";
-const char MenuItem14[] PROGMEM = "LVA voltage     ";
-const char MenuItem15[] PROGMEM = "LVA mode        ";
-const char MenuItem16[] PROGMEM = "Battery voltage ";
+const char MenuItem10[] PROGMEM = "Gyr level Gain  "; // Only for ACC
+const char MenuItem11[] PROGMEM = "Gyr level D-term"; // Only for ACC
+const char MenuItem12[] PROGMEM = "Acc level Gain  "; // Only for ACC
+const char MenuItem13[] PROGMEM = "Acc level I-term"; // Only for ACC
+const char MenuItem14[] PROGMEM = "LVA voltage     "; // Only for KK Plus
+const char MenuItem15[] PROGMEM = "LVA mode        "; // Only for KK Plus
+const char MenuItem16[] PROGMEM = "Battery voltage "; // Only for KK Plus
 const char MenuItem17[] PROGMEM = "Pot mode        ";
 const char MenuItem18[] PROGMEM = "Roll gyro       ";
 const char MenuItem19[] PROGMEM = "Pitch gyro      ";
@@ -64,10 +66,10 @@ const char MenuItem20[] PROGMEM = "Yaw gyro        ";
 const char MenuItem21[] PROGMEM = "Roll servo      ";
 const char MenuItem22[] PROGMEM = "Pitch servo     ";
 const char MenuItem23[] PROGMEM = "Yaw servo       ";
-const char MenuItem24[] PROGMEM = "Calibrate Accel.";
+const char MenuItem24[] PROGMEM = "Calibrate Accel."; // Only for ACC
 const char MenuItem25[] PROGMEM = "Center sticks   ";
 const char MenuItem26[] PROGMEM = "Stability mode  ";
-const char MenuItem27[] PROGMEM = "Autolevel mode  ";
+const char MenuItem27[] PROGMEM = "Autolevel mode  "; // Only for ACC
 const char MenuItem28[] PROGMEM = "Stability ch.   ";
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
@@ -333,6 +335,104 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 	LED1 = !LED1;
 	_delay_ms(500);
 	LED1 = !LED1;
+}
+
+uint8_t LCD_increment(uint8_t MenuItem)
+{
+	if (MenuItem >= (MENUITEMS-1)) MenuItem = 0;// Wrap back to start	
+
+	MenuItem += 1;
+
+	// Skip menu items that are not supported by the hardware
+	#ifndef ACCELEROMETER // Skip Acc-related menu items
+	switch (MenuItem)
+	{
+		case 1:	
+		case 2:
+			MenuItem = 3;
+			break;
+		case 9:
+		case 10:
+		case 11:
+		case 12:
+			MenuItem = 13;
+			break;
+		case 23:
+			MenuItem = 24;
+			break;
+		case 26:
+			MenuItem = 27;
+			break;
+		case 28:
+			MenuItem = 3;
+			break;
+		default:
+			break;
+	}
+	#endif
+
+	#ifndef KK_PLUS // Battery LVA items only work on KK Plus boards
+	switch (MenuItem)
+	{
+		case 13:
+		case 14:
+		case 15:	
+			MenuItem = 16;
+			break;
+		default:
+			break;
+	}
+	#endif
+
+	return MenuItem;
+}
+
+uint8_t LCD_decrement(uint8_t MenuItem)
+{
+	if  (MenuItem <= 1) MenuItem = (MENUITEMS);// Wrap back to end
+
+	MenuItem -= 1;
+
+	#ifndef KK_PLUS // Battery LVA items only work on KK Plus boards
+	switch (MenuItem)
+	{
+		case 13:
+		case 14:
+		case 15:	
+			MenuItem = 12;
+			break;
+		default:
+			break;
+	}
+	#endif
+
+	// Skip menu items that are not supported by the hardware
+	#ifndef ACCELEROMETER // Skip Acc-related menu items
+
+	switch (MenuItem)
+	{
+		case 1:	
+		case 2:
+			MenuItem = 27;
+			break;
+		case 9:
+		case 10:
+		case 11:
+		case 12:
+			MenuItem = 8;
+			break;
+		case 23:
+			MenuItem = 22;
+			break;
+		case 26:
+			MenuItem = 25;
+			break;
+		default:
+			break;
+	}
+	#endif
+
+	return MenuItem;
 }
 
 

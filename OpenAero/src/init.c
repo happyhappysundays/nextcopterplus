@@ -99,7 +99,7 @@ void init(void)
 	TCCR0B = (1 << CS00);				// Clk/0 = 8MHz = 125ns
 	TIMSK0 = 0; 						// No interrupts
 
-	// Timer1 (16bit) - run @ MHz
+	// Timer1 (16bit) - run @ 1MHz
 	// Used to measure Rx Signals & control ESC/servo output rate
 	TCCR1A = 0;
 	TCCR1B = (1 << CS11);				// Clk/8 = 1MHz
@@ -215,9 +215,9 @@ void init(void)
 
 		Save_Config_to_EEPROM();
 
-		LED = !LED;
+		LED1 = !LED1;
 		_delay_ms(500);
-		LED = !LED;
+		LED1 = !LED1;
 	}
 
 	// Manual autolevel mode selection
@@ -226,9 +226,9 @@ void init(void)
 		// flash LED 5 times
 		for (int i=0;i<5;i++)
 		{
-			LED = 1;
+			LED1 = 1;
 			_delay_ms(150);
-			LED = 0;
+			LED1 = 0;
 			_delay_ms(150);
 		}
 
@@ -237,9 +237,9 @@ void init(void)
 
 		Save_Config_to_EEPROM();
 
-		LED = !LED;
+		LED1 = !LED1;
 		_delay_ms(500);
-		LED = !LED;
+		LED1 = !LED1;
 	}
 #endif
 
