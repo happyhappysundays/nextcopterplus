@@ -41,15 +41,14 @@ void menu_rc_setup(void);
 	 
 const uint8_t RCMenuOffsets[RCITEMS] PROGMEM = {92, 92, 92, 92, 92};
 const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149};
-const menu_range_t rc_menu_ranges[] = 
+const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
-	{JRSEQ,FUTABASEQ,1,1}, 	// Min, Max, Increment
-	{CPPM_MODE,PWM3,1,1},
-	{THROTTLE,NOCHAN,1,1},
-	{THROTTLE,NOCHAN,1,1},
-	{THROTTLE,NOCHAN,1,1}
+	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
+	{CPPM_MODE,PWM3,1,1,PWM1},
+	{THROTTLE,NOCHAN,1,1,GEAR},
+	{THROTTLE,NOCHAN,1,1,AUX1},
+	{THROTTLE,NOCHAN,1,1,FLAP}
 };
-
 //************************************************************
 // Main menu-specific setup
 //************************************************************
@@ -78,7 +77,7 @@ void menu_rc_setup(void)
 		values[4] = Config.ThreePos;
 
 		// Print menu
-		print_menu_items(top, RCSTART, &values[0], &rc_menu_ranges[0], (prog_uchar*)RCMenuOffsets, (prog_uchar*)RCMenuText, cursor);
+		print_menu_items(top, RCSTART, &values[0], (prog_uchar*)rc_menu_ranges, (prog_uchar*)RCMenuOffsets, (prog_uchar*)RCMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -90,7 +89,8 @@ void menu_rc_setup(void)
 		// Handle menu changes
 		update_menu(RCITEMS, RCSTART, button, &cursor, &top, &temp);
 
-		range = rc_menu_ranges[temp - RCSTART];
+		range = get_menu_range ((prog_uchar*)rc_menu_ranges, temp - RCSTART);
+		//range = rc_menu_ranges[temp - RCSTART];
 
 		if (button == ENTER)
 		{
@@ -112,11 +112,11 @@ void menu_rc_setup(void)
 			{
 				if (Config.TxSeq == JRSEQ) 
 				{
-					Config.ChannelOrder[i] = JR[i];
+					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 				}
 				else if (Config.TxSeq == FUTABASEQ)
 				{
-					Config.ChannelOrder[i] = FUTABA[i];
+					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
 				}
 			}
 			Save_Config_to_EEPROM(); // Save value and return

@@ -40,6 +40,7 @@
 #define GLCD_BAUDRATE 8000
 #define GLCD_DELAY (1000000 / GLCD_BAUDRATE)  // Default RX rate (125ns)
 
+void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 
@@ -47,8 +48,8 @@ void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 //* Low-level code
 //***********************************************************
 
-int pagemap[] = { 7, 6, 5, 4, 3, 2, 1, 0 }; 	// This makes more sense
-int pagemap_logo[] = { 0, 1, 2, 3, 4, 5, 6, 7 };// This works for the logo...
+int pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 	// This makes more sense
+int pagemap_logo[] PROGMEM	= { 0, 1, 2, 3, 4, 5, 6, 7 };	// This works for the logo...
 
 // Software SPI write
 inline void spiwrite(uint8_t c) 
@@ -60,13 +61,13 @@ inline void spiwrite(uint8_t c)
 		if (c & (1 << (i)))		// Bit set?
 		{
 			LCD_SI = 1;
-			_delay_us(1);
+			glcd_delay();
 			LCD_SCL = 1;
 		}
 		else					// Bit clear?
 		{
 			LCD_SI = 0;
-			_delay_us(1);
+			glcd_delay();
 			LCD_SCL = 1;
 		}
 		_delay_us(1);
@@ -152,7 +153,7 @@ void write_buffer(uint8_t *buffer)
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 
 	{
-		st7565_command(CMD_SET_PAGE | pagemap[p]);					// Page 0 to 7
+		st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));					// Page 0 to 7
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
 		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
 		st7565_command(CMD_RMW);									// Sets auto-increment
@@ -170,7 +171,7 @@ void write_logo_buffer(uint8_t *buffer)
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 
 	{
-		st7565_command(CMD_SET_PAGE | pagemap_logo[p]);					// Page 0 to 7
+		st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));					// Page 0 to 7
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
 		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
 		st7565_command(CMD_RMW);									// Sets auto-increment

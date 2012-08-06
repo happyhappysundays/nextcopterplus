@@ -44,13 +44,13 @@ const uint8_t BattMenuOffsets[BATTITEMS] PROGMEM =
 	82, 38, 85, 95, 90
 };
 const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
-const menu_range_t batt_menu_ranges[] = 
+const menu_range_t batt_menu_ranges[] PROGMEM = 
 {
-	{0,1,1,1}, 	// Min, Max, Increment, style, offset
-	{1,5,1,0},
-	{0,2000,10,0},
-	{120,430,10,0},
-	{80,400,10,0}
+	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
+	{1,5,1,0,3},
+	{0,2000,10,0,1080},
+	{120,430,10,0,420},
+	{80,400,10,0,360}
 };
 
 //************************************************************
@@ -83,7 +83,7 @@ void menu_battery(void)
 		temp_minvoltage = Config.MinVoltage;
 
 		// Print menu
-		print_menu_items(top, BATTSTART, &values[0], &batt_menu_ranges[0], (prog_uchar*)BattMenuOffsets, (prog_uchar*)BattMenuText, cursor);
+		print_menu_items(top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, (prog_uchar*)BattMenuOffsets, (prog_uchar*)BattMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -94,7 +94,9 @@ void menu_battery(void)
 
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, button, &cursor, &top, &temp);
-		range = batt_menu_ranges[temp - BATTSTART];
+
+		range = get_menu_range ((prog_uchar*)batt_menu_ranges, temp - BATTSTART);
+		//range = batt_menu_ranges[temp - BATTSTART];
 
 		if (button == ENTER)
 		{

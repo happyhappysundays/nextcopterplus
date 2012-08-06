@@ -144,3 +144,13 @@ f8:
 	ret					//		4
 	.endfunc	
 
+;*************************************************************************	
+; void glcd_delay(void) 250ns delay for glcd clock
+;*************************************************************************
+
+	.global glcd_delay
+	.func   glcd_delay
+glcd_delay:
+	nop					// 1 		5 * 50ns = 250ns = 4MHz
+	ret					// 4
+	.endfunc

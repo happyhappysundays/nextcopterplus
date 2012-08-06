@@ -41,14 +41,13 @@ void menu_expo(void);
 
 const uint8_t ExpoMenuOffsets[EXPOITEMS] PROGMEM = {90, 90, 90, 90};
 const uint8_t ExpoMenuText[EXPOITEMS] PROGMEM = {EXPOTEXT, 0, 0, 0};
-const menu_range_t expo_menu_ranges[] = 
+const menu_range_t expo_menu_ranges[] PROGMEM = 
 {
-	{0,100,10,0}, 	// Min, Max, Increment
-	{0,100,10,0},
-	{0,100,10,0},
-	{0,100,10,0},
+	{0,100,10,0,0}, 	// Min, Max, Increment, Style, Default
+	{0,100,10,0,0},
+	{0,100,10,0,0},
+	{0,100,10,0,0},
 };
-
 //************************************************************
 // Main menu-specific setup
 //************************************************************
@@ -75,7 +74,7 @@ void menu_expo(void)
 		values[3] = Config.Differential;
 
 		// Print menu
-		print_menu_items(top, EXPOSTART, &values[0], &expo_menu_ranges[0], (prog_uchar*)ExpoMenuOffsets, (prog_uchar*)ExpoMenuText, cursor);
+		print_menu_items(top, EXPOSTART, &values[0], (prog_uchar*)expo_menu_ranges, (prog_uchar*)ExpoMenuOffsets, (prog_uchar*)ExpoMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -87,7 +86,8 @@ void menu_expo(void)
 		// Handle menu changes
 		update_menu(EXPOITEMS, EXPOSTART, button, &cursor, &top, &temp);
 
-		range = expo_menu_ranges[temp - EXPOSTART];
+		range = get_menu_range ((prog_uchar*)expo_menu_ranges, temp - EXPOSTART);
+		//range = expo_menu_ranges[temp - EXPOSTART];
 
 		if (button == ENTER)
 		{

@@ -36,50 +36,50 @@ void get_preset_mix (channel_t*);
 // Aeroplane mixer defaults
 channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM = 
 {
-	// Rudder -= Yaw;
-	// Aileron -= Roll;
-	// Elevator -= Pitch;
+	// Rudder -= Yaw; (normal)
+	// Aileron -= Roll; (normal)
+	// Elevator -= Pitch; (normal)
 
-	//Value,source,src_pol,src_vol,roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,acc,pol,min,max,fs
+	//Value,source,src_pol,src_vol,roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol,min,max,fs
 
-	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut1 (Throttle)
-	{0,NOCHAN,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut2
-	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut3
-	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500},  		// ServoOut4
-	{0,ELEVATOR,NORMAL,1,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,Y,NORMAL,2250,5250,3500}, 			// ServoOut5 (Elevator)
-	{0,AILERON,NORMAL,1,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,X,NORMAL,2250,5250,3500},	 		// ServoOut6 (Left aileron)
-	{0,FLAP,NORMAL,1,ON,G_REVERSED,OFF,NORMAL,OFF,NORMAL,X,NORMAL,2250,5250,3500}, 			// ServoOut7 (Right aileron)
-	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut8 (Rudder)
+	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut1 (Throttle)
+	{0,NOCHAN,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut2
+	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut3
+	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500},  		// ServoOut4
+	{0,ELEVATOR,NORMAL,1,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,2250,5250,3500}, 		// ServoOut5 (Elevator)
+	{0,AILERON,NORMAL,1,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,2250,5250,3500},	 	// ServoOut6 (Left aileron)
+	{0,FLAP,NORMAL,1,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut7 (Right aileron)
+	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,ON,REVERSED,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut8 (Rudder)
 }; 
 
 channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
 {
-	// Rudder -= Yaw;
-	// Aileron += Roll;
-	// Elevator -= Pitch;
-	// Aileron += Roll;
-	// Elevator += Pitch;
+	// Rudder -= Yaw; (normal)
+	// LAileron += Roll; (reversed)
+	// LElevator -= Pitch; (normal)
+	// RAileron += Roll;(reversed)
+	// RElevator += Pitch;(reversed)
 	
-	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut1
-	{0,NOCHAN,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut2
-	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut3
-	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500},  		// ServoOut4
-	{0,AILERON,NORMAL,1,ON,G_REVERSED,ON,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut5
-	{0,ELEVATOR,NORMAL,1,ON,G_REVERSED,ON,G_REVERSED,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500},	// ServoOut6
-	{0,FLAP,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut7
-	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut8
+	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut1
+	{0,NOCHAN,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut2
+	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut3
+	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500},  		// ServoOut4
+	{0,AILERON,NORMAL,1,ON,REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut5
+	{0,ELEVATOR,NORMAL,1,ON,REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,2250,5250,3500},// ServoOut6 (left elevon)
+	{0,FLAP,NORMAL,1,ON,REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,2250,5250,3500},// ServoOut7 (right elevon)
+	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut8
 }; 
 
 channel_t MANUAL_MIX[MAX_OUTPUTS] PROGMEM = 
 {
-	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut1
-	{0,GEAR,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut2
-	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut3
-	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500},  		// ServoOut4
-	{0,ELEVATOR,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut5
-	{0,AILERON,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 	// ServoOut6
-	{0,FLAP,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut7
-	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,NO_ACC,NORMAL,2250,5250,3500}, 		// ServoOut8
+	{0,THROTTLE,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut1
+	{0,GEAR,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut2
+	{0,AUX1,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut3
+	{0,AUX2,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500},  		// ServoOut4
+	{0,ELEVATOR,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut5
+	{0,AILERON,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 	// ServoOut6
+	{0,FLAP,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut7
+	{0,RUDDER,NORMAL,1,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,2250,5250,3500}, 		// ServoOut8
 }; 
 
 //************************************************************
@@ -90,17 +90,19 @@ void get_preset_mix(channel_t* preset)
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		Config.Channel[i].value = pgm_read_word(&preset[i].value);
-		Config.Channel[i].source = pgm_read_word(&preset[i].source);
-		Config.Channel[i].source_polarity = pgm_read_word(&preset[i].source_polarity);
-		Config.Channel[i].source_volume = pgm_read_word(&preset[i].source_volume);
-		Config.Channel[i].roll_gyro = pgm_read_word(&preset[i].roll_gyro);
-		Config.Channel[i].roll_gyro_polarity = pgm_read_word(&preset[i].roll_gyro_polarity);
-		Config.Channel[i].pitch_gyro = pgm_read_word(&preset[i].pitch_gyro);
-		Config.Channel[i].pitch_gyro_polarity = pgm_read_word(&preset[i].pitch_gyro_polarity);
-		Config.Channel[i].yaw_gyro = pgm_read_word(&preset[i].yaw_gyro);
-		Config.Channel[i].yaw_gyro_polarity = pgm_read_word(&preset[i].yaw_gyro_polarity);
-		Config.Channel[i].acc = pgm_read_word(&preset[i].acc);
-		Config.Channel[i].acc_polarity = pgm_read_word(&preset[i].acc_polarity);
+		Config.Channel[i].source = pgm_read_byte(&preset[i].source);
+		Config.Channel[i].source_polarity = pgm_read_byte(&preset[i].source_polarity);
+		Config.Channel[i].source_volume = pgm_read_byte(&preset[i].source_volume);
+		Config.Channel[i].roll_gyro = pgm_read_byte(&preset[i].roll_gyro);
+		Config.Channel[i].roll_gyro_polarity = pgm_read_byte(&preset[i].roll_gyro_polarity);
+		Config.Channel[i].pitch_gyro = pgm_read_byte(&preset[i].pitch_gyro);
+		Config.Channel[i].pitch_gyro_polarity = pgm_read_byte(&preset[i].pitch_gyro_polarity);
+		Config.Channel[i].yaw_gyro = pgm_read_byte(&preset[i].yaw_gyro);
+		Config.Channel[i].yaw_gyro_polarity = pgm_read_byte(&preset[i].yaw_gyro_polarity);
+		Config.Channel[i].roll_acc = pgm_read_byte(&preset[i].roll_acc);
+		Config.Channel[i].roll_acc_polarity = pgm_read_byte(&preset[i].roll_acc_polarity);
+		Config.Channel[i].pitch_acc = pgm_read_byte(&preset[i].pitch_acc);
+		Config.Channel[i].pitch_acc_polarity = pgm_read_byte(&preset[i].pitch_acc_polarity);
 		Config.Channel[i].min_travel = pgm_read_word(&preset[i].min_travel);
 		Config.Channel[i].max_travel = pgm_read_word(&preset[i].max_travel);
 		Config.Channel[i].Failsafe = pgm_read_word(&preset[i].Failsafe);
@@ -204,17 +206,26 @@ void ProcessMixer(void)
 		// Post-PID acc input
 		if (AutoLevel)
 		{
-			if (Config.Channel[i].acc != NO_ACC)
+			if (Config.Channel[i].roll_acc == G_ON)
 			{
-				if (Config.Channel[i].acc_polarity == REVERSED)
+				if (Config.Channel[i].roll_acc_polarity == REVERSED)
 				{
-					//temp -=	PID_ACCs[ROLL];
-					temp -=	PID_ACCs[Config.Channel[i].acc];
+					temp -=	PID_ACCs[ROLL];
 				}
 				else
 				{
-					//temp +=	PID_ACCs[ROLL];*/
-					temp +=	PID_ACCs[Config.Channel[i].acc];
+					temp +=	PID_ACCs[ROLL];
+				}
+			}
+			if (Config.Channel[i].pitch_acc == G_ON)
+			{
+				if (Config.Channel[i].pitch_acc_polarity == REVERSED)
+				{
+					temp -=	PID_ACCs[PITCH];
+				}
+				else
+				{
+					temp +=	PID_ACCs[PITCH];
 				}
 			}
 		}

@@ -30,7 +30,7 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 18 // Number of menu items
+#define MAINITEMS 19 // Number of menu items
 #define MAINSTART 106 // Start of Menu text items
 
 //************************************************************
@@ -135,7 +135,7 @@ void do_main_menu_item(uint8_t menuitem)
 			Display_rcinput();
 			break;
 		case MAINSTART+18:
-			//Display_balance();
+			Display_balance();
 			break;
 		default:
 			break;

@@ -127,14 +127,14 @@ void CenterSticks(void)
 	// Take an average of eight readings
 	for (i=0;i<8;i++)
 	{
-		for (j=0;j<8;j++)
+		for (j=0;j<MAX_RC_CHANNELS;j++)
 		{
 			RxChannelZeroOffset[j] += RxChannel[j];
 		}
 		_delay_ms(100);
 	}
 
-	for (i=0;i<8;i++)
+	for (i=0;i<MAX_RC_CHANNELS;i++)
 	{
 		Config.RxChannelZeroOffset[i] = RxChannelZeroOffset[i] >> 3; // Divide by 8
 	}

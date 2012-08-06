@@ -39,20 +39,20 @@ void menu_mixer(uint8_t i);
 //************************************************************
 	 
 const uint8_t MixerMenuOffsets[MIXERITEMS] PROGMEM = {80,80,80,80,80,80,80,80,80,80,80};
-const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,143,143,159,141,0,0,0};
-const menu_range_t mixer_menu_ranges[] = 
+const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,143,143,143,143,0,0,0};
+const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
-	{CH1,CH8,1,1}, 				// Source
-	{NORMAL,REVERSED,1,1}, 	// source_polarity
-	{0,1,1,0},					// source_volume
-	{G_OFF, G_REVERSED,1,1},	// roll_gyro
-	{G_OFF, G_REVERSED,1,1},	// pitch_gyro
-	{G_OFF, G_REVERSED,1,1},	// yaw_gyro
-	{X,NO_ACC,1,1},			// acc source
-	{NORMAL,REVERSED,1,1}, 	// acc polarity
-	{2250,5250,10,0}, 			// Min travel
-	{2250,5250,10,0}, 			// Max travel
-	{2250,5250,10,0}, 			// failsafe
+	{CH1,CH8,1,1,CH1}, 				// Source
+	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
+	{0,1,1,0,1},					// source_volume
+	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_gyro
+	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_gyro
+	{G_OFF, G_REVERSED,1,1,G_OFF},	// yaw_gyro
+	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_acc
+	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_acc
+	{2250,5250,10,0,2250}, 			// Min travel
+	{2250,5250,10,0,5250}, 			// Max travel
+	{2250,5250,10,0,3500}, 			// failsafe
 };
 
 //************************************************************
@@ -85,17 +85,21 @@ void menu_mixer(uint8_t i)
 		if (Config.Channel[i].pitch_gyro_polarity == REVERSED) values[4] = G_REVERSED;
 		else values[4] = (uint8_t)Config.Channel[i].pitch_gyro;
 
-		if (Config.Channel[i].yaw_gyro_polarity == REVERSED)	values[5] = G_REVERSED;
+		if (Config.Channel[i].yaw_gyro_polarity == REVERSED) values[5] = G_REVERSED;
 		else values[5] = (uint8_t)Config.Channel[i].yaw_gyro;
 
-		values[6] = (uint8_t)Config.Channel[i].acc;
-		values[7] = Config.Channel[i].acc_polarity;
+		if (Config.Channel[i].roll_acc_polarity == REVERSED) values[6] = G_REVERSED;
+		else values[6] = (uint8_t)Config.Channel[i].roll_acc;
+
+		if (Config.Channel[i].pitch_acc_polarity == REVERSED) values[7] = G_REVERSED;
+		else values[7] = (uint8_t)Config.Channel[i].pitch_acc;
+
 		values[8] = Config.Channel[i].min_travel;
 		values[9] = Config.Channel[i].max_travel;
 		values[10] = Config.Channel[i].Failsafe;
 
 		// Print menu
-		print_menu_items(top, MIXERSTART, &values[0], &mixer_menu_ranges[0], (prog_uchar*)MixerMenuOffsets, (prog_uchar*)MixerMenuText, cursor);
+		print_menu_items(top, MIXERSTART, &values[0], (prog_uchar*)mixer_menu_ranges, (prog_uchar*)MixerMenuOffsets, (prog_uchar*)MixerMenuText, cursor);
 		
 
 		// Poll buttons when idle
@@ -107,7 +111,9 @@ void menu_mixer(uint8_t i)
 
 		// Handle menu changes
 		update_menu(MIXERITEMS, MIXERSTART, button, &cursor, &top, &temp);
-		range = mixer_menu_ranges[temp - MIXERSTART];
+
+		range = get_menu_range ((prog_uchar*)mixer_menu_ranges, temp - MIXERSTART);
+		//range = mixer_menu_ranges[temp - MIXERSTART];
 
 		if (button == ENTER)
 		{
@@ -168,9 +174,39 @@ void menu_mixer(uint8_t i)
 			default:				
 				break;	
 		}
+		switch (values[6])
+		{
+			case G_OFF:
+				Config.Channel[i].roll_acc = OFF;
+				break;
+			case G_ON:
+				Config.Channel[i].roll_acc = ON;
+				Config.Channel[i].roll_acc_polarity = NORMAL;
+				break;
+			case G_REVERSED:
+				Config.Channel[i].roll_acc = ON;
+				Config.Channel[i].roll_acc_polarity = REVERSED;
+				break;
+			default:				
+				break;	
+		}
+		switch (values[7])
+		{
+			case G_OFF:
+				Config.Channel[i].pitch_acc = OFF;
+				break;
+			case G_ON:
+				Config.Channel[i].pitch_acc = ON;
+				Config.Channel[i].pitch_acc_polarity = NORMAL;
+				break;
+			case G_REVERSED:
+				Config.Channel[i].pitch_acc = ON;
+				Config.Channel[i].pitch_acc_polarity = REVERSED;
+				break;
+			default:				
+				break;	
+		}
 
-		Config.Channel[i].acc = values[6];
-		Config.Channel[i].acc_polarity = values[7];
 		Config.Channel[i].min_travel = values[8];
 		Config.Channel[i].max_travel = values[9];
 		Config.Channel[i].Failsafe = values[10];

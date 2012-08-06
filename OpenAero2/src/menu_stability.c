@@ -41,20 +41,19 @@ void menu_stab_control(void);
 
 const uint8_t StabMenuOffsets[STABITEMS] PROGMEM = {75, 75, 75, 75, 75, 75, 75, 75, 75, 75};
 const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const menu_range_t stab_menu_ranges[] = 
+const menu_range_t stab_menu_ranges[] PROGMEM = 
 {
-	{DISABLED,ALWAYSON,1,1}, 	// Min, Max, Increment
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0}, 
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0}
+	{DISABLED,ALWAYSON,1,1,STABCHAN}, 	// Min, Max, Increment, Style, Default
+	{0,250,1,0,60},
+	{0,250,1,0,0},
+	{0,250,1,0,0},
+	{0,250,1,0,60},
+	{0,250,1,0,0}, 
+	{0,250,1,0,0},
+	{0,250,1,0,60},
+	{0,250,1,0,0},
+	{0,250,1,0,0}
 };
-
 //************************************************************
 // Main menu-specific setup
 //************************************************************
@@ -87,7 +86,7 @@ void menu_stab_control(void)
 		values[9] = Config.Yaw.D_mult;
 
 		// Print menu
-		print_menu_items(top, STABSTART, &values[0], &stab_menu_ranges[0], (prog_uchar*)StabMenuOffsets, (prog_uchar*)StabMenuText, cursor);
+		print_menu_items(top, STABSTART, &values[0], (prog_uchar*)stab_menu_ranges, (prog_uchar*)StabMenuOffsets, (prog_uchar*)StabMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -99,7 +98,8 @@ void menu_stab_control(void)
 		// Handle menu changes
 		update_menu(STABITEMS, STABSTART, button, &cursor, &top, &temp);
 
-		range = stab_menu_ranges[temp - STABSTART];
+		range = get_menu_range ((prog_uchar*)stab_menu_ranges, temp - STABSTART);
+		//range = stab_menu_ranges[temp - STABSTART];
 
 		if (button == ENTER)
 		{
