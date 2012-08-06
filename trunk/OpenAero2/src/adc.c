@@ -7,6 +7,7 @@
 //***********************************************************
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include "..\inc\io_cfg.h"
 
 //************************************************************
@@ -23,7 +24,7 @@ void read_adc(uint8_t channel);
 //					X_ACC used for Z_ACC	
 //***********************************************************
 
-int8_t ADCseqVert[8]  = {VCC, ROLL_GYRO, PITCH_GYRO, VBAT, YAW_GYRO, Y_ACC, Z_ACC, X_ACC}; // Vertical
+int8_t ADCseqVert[8] PROGMEM = {VCC, ROLL_GYRO, PITCH_GYRO, VBAT, YAW_GYRO, Y_ACC, Z_ACC, X_ACC}; // Vertical
 
 void Init_ADC(void)
 {
@@ -33,18 +34,15 @@ void Init_ADC(void)
 
 void read_adc(uint8_t channel)
 {
-
-ADMUX = channel; //debug (horiz only)
-
-/*	if (Config.Orientation == VERTICAL)
+	if (Config.Orientation == VERTICAL)
 	{
-		ADMUX = ADCseqVert[channel];		// Set channel swapped as per ADCseqVert[]
+		ADMUX = pgm_read_byte(&ADCseqVert[channel]);	// Set channel swapped as per ADCseqVert[]
 	}
 	else
 	{
 		ADMUX = channel;					// Set channel - use Aref as reference
 	}
-*/
+
 	ADCSRA 	= 0b11000110;					// ADEN, ADSC, ADPS1,2
 	while (ADCSRA & (1 << ADSC));			// Wait to complete
 }

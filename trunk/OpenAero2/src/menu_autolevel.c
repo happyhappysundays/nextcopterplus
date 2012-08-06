@@ -41,17 +41,17 @@ void menu_al_control(void);
 
 const uint8_t AutoMenuOffsets[AUTOITEMS] PROGMEM = {75, 75, 75, 75, 75, 75, 75, 75, 75};
 const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 0, 0, 0};
-const menu_range_t auto_menu_ranges[]  = 
+const menu_range_t auto_menu_ranges[] PROGMEM = 
 {
-	{DISABLED,ALWAYSON,1,1}, 	// Min, Max, Increment
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0},
-	{0,250,1,0}, 
-	{0,250,1,0},
-	{-127,127,1,0}, 
-	{-127,127,1,0}
+	{DISABLED,ALWAYSON,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
+	{0,250,1,0,60},
+	{0,250,1,0,0},
+	{0,250,1,0,0},
+	{0,250,1,0,100},
+	{0,250,1,0,0}, 
+	{0,250,1,0,0},
+	{-127,127,1,0,0}, 
+	{-127,127,1,0,0}
 };
 
 //************************************************************
@@ -85,7 +85,7 @@ void menu_al_control(void)
 		values[8] = Config.AccPitchZeroTrim - 127;
 
 		// Print menu
-		print_menu_items(top, AUTOSTART, &values[0], &auto_menu_ranges[0], (prog_uchar*)AutoMenuOffsets, (prog_uchar*)AutoMenuText, cursor);
+		print_menu_items(top, AUTOSTART, &values[0], (prog_uchar*)auto_menu_ranges, (prog_uchar*)AutoMenuOffsets, (prog_uchar*)AutoMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -97,7 +97,8 @@ void menu_al_control(void)
 		// Handle menu changes
 		update_menu(AUTOITEMS, AUTOSTART, button, &cursor, &top, &temp);
 
-		range = auto_menu_ranges[temp - AUTOSTART];
+		range = get_menu_range ((prog_uchar*)auto_menu_ranges, temp - AUTOSTART);
+		//range = auto_menu_ranges[temp - AUTOSTART];
 
 		if (button == ENTER)
 		{

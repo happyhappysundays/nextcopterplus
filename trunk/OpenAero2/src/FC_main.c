@@ -36,18 +36,31 @@
 // Alpha 2  Fixed channel number bug, added second aileron to default mixer
 // Alpha 3	Enabled autolevel and acc settings in mixer menus, gyro reversing works.
 //			Contrast updates visually during modification. Status menu updated.
-// Alpha 4	Battery auto-calculates LVA setting. Restore to default instead of clear (not working)
+// Alpha 4	Battery auto-calculates LVA setting. Restore to default instead of clear.
+//			*Everything* that can be in PROGMEM is in PROGMEM. JR/Spk notation.
+//			Version added to Status menu. Added separate accs to mixer.
+//			Increased GLCD write speed to maximum.
+//			Working Status menu auto refresh!
+//
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Add two acc channels to each so that FW can also do autolevel
-// Expo
+// ASAP
+/
+// For beta
+// Audible/visual error messages for LVA, CPPM + Throttle, RX error, Sensor error with setup enable.
 // RC mixing menu
+// Expo
+// Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
+// General settings (LMA timeout)
+//
+//
+// Later
 // Camera stabilisation (tilt/pan and gimbal)
-// Advanced PWM/CPPM settings (RC settings menu)
 // Differential
+//
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -142,7 +155,6 @@ Camera Gimbal (if enabled)
 //***********************************************************
 
 // Flight variables
-uint8_t flight_mode;				// Global flight mode flag
 uint16_t cycletime;					// Loop time in microseconds
 
 // Misc
@@ -150,6 +162,7 @@ bool AutoLevel;						// AutoLevel = 1
 bool Stability;						// Stability = 1
 bool Failsafe;
 bool RefreshStatus;
+bool Refresh_safe;
 char pBuffer[16];					// Print buffer
 
 //************************************************************
@@ -169,13 +182,13 @@ int main(void)
 	bool	menu_mode = false;
 
 	// Timers
-//	uint32_t Change_UpdateStatus = 0;
+	uint32_t Change_UpdateStatus = 0;
 	uint32_t Change_LostModel = 0;
 	uint32_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
 
-//	uint8_t Refresh_TCNT2 = 0;
+	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
@@ -193,65 +206,6 @@ int main(void)
 
 while (0) 
 {
-	while(BUTTON1 != 0)
-	{
-		if (BUTTON4 == 0)
-		{
-			_delay_ms(500);
-			CalibrateAcc();
-			CalibrateGyros();
-		}
-
-		ReadGyros();
-		//ReadAcc();
-
-		Calculate_PID();
-		//get_raw_gyros();
-
-		mugui_lcd_puts("Roll:",(prog_uchar*)Verdana8,30,0);
-		mugui_lcd_puts("Pitch:",(prog_uchar*)Verdana8,30,10);
-		mugui_lcd_puts("Yaw:",(prog_uchar*)Verdana8,30,20);
-		mugui_lcd_puts("rADC:",(prog_uchar*)Verdana8,30,30);
-		mugui_lcd_puts("pADC:",(prog_uchar*)Verdana8,30,40);
-		mugui_lcd_puts("yADC:",(prog_uchar*)Verdana8,30,50);
-
-
-		mugui_lcd_puts(itoa(PID_Gyros[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,0); 
-		mugui_lcd_puts(itoa(PID_Gyros[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,10);
-		mugui_lcd_puts(itoa(PID_Gyros[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,20);
-		/*mugui_lcd_puts(itoa(Config.Roll.P_mult,pBuffer,10),(prog_uchar*)Verdana8,80,30);
-		mugui_lcd_puts(itoa(Config.Pitch.P_mult,pBuffer,10),(prog_uchar*)Verdana8,80,40);
-		mugui_lcd_puts(itoa(Config.Yaw.P_mult,pBuffer,10),(prog_uchar*)Verdana8,80,50);*/
-		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,30);
-		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,40);
-		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,50);
-
-		// Update buffer
-		write_buffer(buffer);
-		clear_buffer(buffer);
-		_delay_ms(100);
-	}
-}
-
-//************************************************************
-// RX input to Servos test code - OK
-//************************************************************
-
-while(0)
-{
-	ServoOut[0] = 2250;
-	ServoOut[1] = 2500;
-	ServoOut[2] = 3000;
-	ServoOut[3] = 3750;
-	ServoOut[4] = 4000;
-	ServoOut[5] = 4375;
-	ServoOut[6] = 5000;
-	ServoOut[7] = 5500;
-
-	RC_Lock = true;					// Fudge lock
-	Failsafe = true;
-	output_servo_ppm();				// Output servo signal
-	_delay_ms(20);
 }
 
 //************************************************************
@@ -266,7 +220,7 @@ while(0)
 	while (1)
 	{
 		// Display menu on request
-		if((BUTTON2 == 0) || (BUTTON3 == 0))
+		if(BUTTON3 == 0)
 		{
 			menu_mode = true;
 			menu_main();
@@ -283,8 +237,8 @@ while(0)
 		{
 			Display_status();
 		}
-/*
-		// Update status provided no RX activity for X seconds
+
+		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (2s)
 		Change_UpdateStatus += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
 
@@ -294,17 +248,21 @@ while(0)
 			Change_UpdateStatus = 0;
 			RefreshStatus = false;			
 		}
-		// Wait for Xs then allow status refresh
-		if (Change_UpdateStatus > REFRESH_TIMEOUT)	
+		// Wait for REFRESH_TIMEOUT seconds (2s) then allow status refresh, but only in synch with RC
+		if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Refresh_safe || Overdue))
+		//if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Interrupted || Failsafe))
 		{
+			Refresh_safe = false;
 			RefreshStatus = true;
+			Change_UpdateStatus = 0;
 		}
 
-		if (BUZZER_ON && RefreshStatus) 
+		if (LED_ON && RefreshStatus) // 0.5Hz
 		{
 			Display_status();
+			RefreshStatus = false;
 		}
-*/
+
 		//************************************************************
 		//* Reconfigure interrupts if menu changed
 		//************************************************************
@@ -474,15 +432,6 @@ while(0)
 				break;
 		}
 
-		if (AutoLevel)
-		{
-			flight_mode |= 1;
-		}
-		else
-		{
-			flight_mode &= 0xfe;
-		}
-
 		//************************************************************
 		//* Stability mode selection
 		//************************************************************
@@ -521,13 +470,8 @@ while(0)
 				break;
 		}
 
-		if (Stability)
+		if (!Stability)
 		{
-			flight_mode |= 8;
-		}
-		else
-		{
-			flight_mode &= 0xf7;
 			// Reset I-terms when stabilise is off
 			IntegralaPitch = 0;	 
 			IntegralaRoll = 0;
@@ -567,6 +511,7 @@ while(0)
 		//* Process servos, failsafe mode
 		//************************************************************
 
+		// Sognal servo overdue after SERVO_OVERDUE time (500ms)
 		// Servo_Timeout increments at 19.531 kHz, in loop cycle chunks
 		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
@@ -575,6 +520,7 @@ while(0)
 			Overdue = true;
 		}
 
+		// Assures even without synchronous RX, something will come out at SERVO_RATE (50Hz)
 		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
 		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
 		ServoRate_TCNT2 = TCNT2;
@@ -602,10 +548,9 @@ while(0)
 
 		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
 		if (Interrupted)
-		//if (Interrupted && !RefreshStatus)
 		{
 			Interrupted = false;			// Reset interrupted flag
-
+			Refresh_safe = true;			// Safe to try and refresh status screen
 			Failsafe = false;				// Cancel failsafe
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
@@ -626,7 +571,6 @@ while(0)
 		}
 		// If in failsafe, just output unsynchronised
 		else if (Failsafe && Overdue && ServoTick)
-		//else if ((Failsafe && Overdue && ServoTick) || (Overdue && ServoTick && RefreshStatus))
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer

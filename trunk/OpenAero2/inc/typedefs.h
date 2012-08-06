@@ -34,8 +34,10 @@ typedef struct
 	uint8_t		pitch_gyro_polarity;	// Pitch gyro normal/reverse
 	uint8_t		yaw_gyro;				// Use yaw gyro
 	uint8_t		yaw_gyro_polarity;		// Yaw gyro normal/reverse
-	uint8_t		acc;					// Source acc for calculation
-	uint8_t		acc_polarity;			// Normal/reverse acc
+	uint8_t		roll_acc;				// Use roll acc
+	uint8_t		roll_acc_polarity;		// Roll acc normal/reverse
+	uint8_t		pitch_acc;				// Use pitch acc
+	uint8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
 	uint16_t	min_travel;				// Minimum output value
 	uint16_t	max_travel;				// Maximum output value
 	uint16_t	Failsafe;				// Failsafe position
@@ -109,9 +111,10 @@ typedef struct
 
 	// Misc
 	uint8_t		Modes;					// Misc flight mode flag
+	uint8_t		AutoUpdateEnable;			// Status screen auto-update enable flag
 
 	// RC inputs
-	uint16_t 	RxChannelZeroOffset[9];	// RC channel offsets
+	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets
 
 	// Acc zeros
 	uint16_t	AccRollZero;			// Acc calibration results
@@ -128,6 +131,7 @@ typedef struct
 	int16_t upper;						// Upper limit for menu item
 	uint8_t increment;					// Increment for menu item
 	uint8_t style;						// 0 = numeral, 1 = text
+	uint16_t default_value;				// Default value for this item
 } menu_range_t; 
 
 

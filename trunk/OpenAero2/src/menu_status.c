@@ -38,7 +38,7 @@ void Display_status(void)
 
 	// Display text
 	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
-	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Battery
+	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
 	LCD_Display_Text(59,(prog_uchar*)Verdana8,0,33); 	// Stability
 	LCD_Display_Text(60,(prog_uchar*)Verdana8,0,44); 	// Autolevel
@@ -48,25 +48,24 @@ void Display_status(void)
 	LCD_Display_Text(105,(prog_uchar*)Verdana8,10,55);	// Refresh
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,54,55);	// Menu
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59);// Down
-	
-	//LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-	//LCD_Display_Text(11, (prog_uchar*)Wingdings, 86, 57); 	// Right
 
-	// Display mode
-	print_menu_text(0, 1, (29 + Config.RxMode), 36, 22);
+	// Display values
+	print_menu_text(0, 1, (29 + Config.RxMode), 50, 22);
+	LCD_Display_Text(163,(prog_uchar*)Verdana8,50,11); 
 	print_menu_text(0, 1, (33 + Config.MixMode), 36, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
 
 	// Draw battery
-	drawrect(buffer, 100,4, 28, 60, 1);					// Battery body
+	drawrect(buffer, 100,4, 28, 50, 1);					// Battery body
 	drawrect(buffer, 110,0, 8, 4, 1);					// Battery terminal
+
 	GetVbat();
 
 	min = Config.MinVoltage * Config.BatteryCells;		// Calculate battery voltage limits
 	max = Config.MaxVoltage * Config.BatteryCells;
 	range = max - min;
-	scale = range / 60;
+	scale = range / 50;
 
 	if (vBat >= min) 
 	{
@@ -77,14 +76,14 @@ void Display_status(void)
 		temp = 0;
 	}
 	if (temp <= 0) temp = 0;
-	if (temp > 60) temp = 60;
+	if (temp > 50) temp = 50;
 
-	fillrect(buffer, 100,64-temp, 28, temp, 1);				// Battery filler (max is 60)
+	fillrect(buffer, 100,54-temp, 28, temp, 1);				// Battery filler (max is 60)
 
 
 	// Display voltage
-	uint8_t x_loc = 50;		// X location of voltage display
-	uint8_t y_loc = 11;		// Y location of voltage display
+	uint8_t x_loc = 102;	// X location of voltage display
+	uint8_t y_loc = 55;		// Y location of voltage display
 
 	temp = vBat/100;		// Display whole decimal part first
 	mugui_text_sizestring(itoa(temp,pBuffer,10), (prog_uchar*)Verdana8, &size);

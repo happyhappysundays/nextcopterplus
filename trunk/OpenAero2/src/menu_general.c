@@ -31,22 +31,23 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 5 	// Number of menu items
-#define GENERALSTART 96 	// Start of Menu text items
+#define GENERALITEMS 6 		// Number of menu items
+#define GENERALSTART 164 	// Start of Menu text items
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {40, 73, 50, 80, 60};
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101, 101};
-const menu_range_t general_menu_ranges[] = 
+const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {40, 73, 50, 80, 60, 80};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101, 101, 101};
+const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-	{AEROPLANE,MANUAL,1,1}, 	// Min, Max, Increment
-	{HORIZONTAL,VERTICAL,1,1},
-	{OFF,ON,1,1},
-	{OFF,ON,1,1},
-	{28,45,1,0}, // Numeric
+	{AEROPLANE,MANUAL,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
+	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
+	{OFF,ON,1,1,OFF},
+	{OFF,ON,1,1,OFF},
+	{28,45,1,0,38}, 	// Contrast
+	{OFF,ON,1,1,OFF},	// Auto-update status menu
 };
 
 //************************************************************
@@ -74,10 +75,10 @@ void menu_general(void)
 		values[2] = Config.RCMix;
 		values[3] = Config.CamStab;
 		values[4] = Config.Contrast;
+		values[5] = Config.AutoUpdateEnable;
 
 		// Print menu
-		//print_menu_items(top, GENERALSTART, &values[0], &general_menu_ranges[0], &GeneralMenuOffsets[0], &GeneralMenuText[0], cursor);
-		print_menu_items(top, GENERALSTART, &values[0], &general_menu_ranges[0], (prog_uchar*)GeneralMenuOffsets, (prog_uchar*)GeneralMenuText, cursor);
+		print_menu_items(top, GENERALSTART, &values[0], (prog_uchar*)general_menu_ranges, (prog_uchar*)GeneralMenuOffsets, (prog_uchar*)GeneralMenuText, cursor);
 
 		// Poll buttons when idle
 		button = poll_buttons();
@@ -88,7 +89,9 @@ void menu_general(void)
 
 		// Handle menu changes
 		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &top, &temp);
-		range = general_menu_ranges[temp - GENERALSTART];
+
+		range = get_menu_range ((prog_uchar*)general_menu_ranges, temp - GENERALSTART);
+		//range = general_menu_ranges[temp - GENERALSTART];
 
 		if (button == ENTER)
 		{
@@ -102,6 +105,7 @@ void menu_general(void)
 		Config.RCMix = values[2];
 		Config.CamStab = values[3];
 		Config.Contrast = values[4];
+		Config.AutoUpdateEnable = values[5];
 
 		// Update contrast
 		//st7565_set_brightness(Config.Contrast);

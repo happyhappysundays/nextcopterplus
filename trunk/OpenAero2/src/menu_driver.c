@@ -31,14 +31,15 @@ void print_menu_frame(uint8_t style);
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
 uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
-//void print_menu_items(uint8_t top, uint8_t start, int16_t values[], const menu_range_t menu_ranges[], const uint8_t MenuOffsets[], const uint8_t text_link[], uint8_t cursor);
-void print_menu_items(uint8_t top, uint8_t start, int16_t values[], const menu_range_t menu_ranges[], prog_uchar* MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+void print_menu_items(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, prog_uchar* MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc
 void menu_beep(void);
 uint8_t poll_buttons(void);
 void print_cursor(uint8_t line);
 void draw_expo(int16_t value);
+
+menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
 
 // Special print routine - prints either numeric or text
 void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
@@ -71,38 +72,46 @@ void print_menu_frame(uint8_t style)
 
 //************************************************************
 // Print menu items
-// 
 //************************************************************
-void print_menu_items(uint8_t top, uint8_t start, int16_t values[], const menu_range_t menu_ranges[], prog_uchar* MenuOffsets, prog_uchar* text_link, uint8_t cursor)
-//void print_menu_items(uint8_t top, uint8_t start, int16_t values[], const menu_range_t menu_ranges[], const uint8_t MenuOffsets[], const uint8_t text_link[], uint8_t cursor)
+void print_menu_items(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, prog_uchar* MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
+	menu_range_t	range1;
+	menu_range_t	range2;
+	menu_range_t	range3;
+	menu_range_t	range4;
+	
 	// Clear buffer before each update
 	clear_buffer(buffer);
 
-	// Print menu
+	// Print menu items
 	print_menu_frame(0);											// Frame
 	LCD_Display_Text(top,(prog_uchar*)Verdana8,ITEMOFFSET,LINE0);	// First line
 	LCD_Display_Text(top+1,(prog_uchar*)Verdana8,ITEMOFFSET,LINE1);	// Second line
 	LCD_Display_Text(top+2,(prog_uchar*)Verdana8,ITEMOFFSET,LINE2);	// Third line
 	LCD_Display_Text(top+3,(prog_uchar*)Verdana8,ITEMOFFSET,LINE3);	// Fourth line
 
+	// Do range data up front for sanity - complex but necessary
+	memcpy_P(&range1, &menu_ranges[(top - start)* sizeof(range1)], sizeof(range1));
+	memcpy_P(&range2, &menu_ranges[(top+1 - start)* sizeof(range2)], sizeof(range2));
+	memcpy_P(&range3, &menu_ranges[(top+2 - start)* sizeof(range3)], sizeof(range3));
+	memcpy_P(&range4, &menu_ranges[(top+3 - start)* sizeof(range4)], sizeof(range4));
 
-	
+	// Print menu values
+	print_menu_text(values[top - start], range1.style, (pgm_read_byte(&text_link[top - start]) + values[top - start]), pgm_read_byte(&MenuOffsets[top - start]), LINE0);
+	print_menu_text(values[top+1 - start], range2.style, (pgm_read_byte(&text_link[top+1 - start]) + values[top+1 - start]), pgm_read_byte(&MenuOffsets[top - start+1]), LINE1);
+	print_menu_text(values[top+2 - start], range3.style, (pgm_read_byte(&text_link[top+2 - start]) + values[top+2 - start]), pgm_read_byte(&MenuOffsets[top - start+2]), LINE2);
+	print_menu_text(values[top+3 - start], range4.style, (pgm_read_byte(&text_link[top+3 - start]) + values[top+3 - start]), pgm_read_byte(&MenuOffsets[top - start+3]), LINE3);
 
-	// Print values
-
-	print_menu_text(values[top - start], menu_ranges[top - start].style, (pgm_read_byte(&text_link[top - start]) + values[top - start]), pgm_read_byte(&MenuOffsets[top - start]), LINE0);
-	print_menu_text(values[top+1 - start], menu_ranges[top+1 - start].style, (pgm_read_byte(&text_link[top+1 - start]) + values[top+1 - start]), pgm_read_byte(&MenuOffsets[top - start+1]), LINE1);
-	print_menu_text(values[top+2 - start], menu_ranges[top+2 - start].style, (pgm_read_byte(&text_link[top+2 - start]) + values[top+2 - start]), pgm_read_byte(&MenuOffsets[top - start+2]), LINE2);
-	print_menu_text(values[top+3 - start], menu_ranges[top+3 - start].style, (pgm_read_byte(&text_link[top+3 - start]) + values[top+3 - start]), pgm_read_byte(&MenuOffsets[top - start+3]), LINE3);
-
-/*	print_menu_text(values[top - start], menu_ranges[top - start].style, (text_link[top - start] + values[top - start]), MenuOffsets[top - start], LINE0);
-	print_menu_text(values[top+1 - start], menu_ranges[top+1 - start].style, (text_link[top+1 - start] + values[top+1 - start]), MenuOffsets[top - start+1], LINE1);
-	print_menu_text(values[top+2 - start], menu_ranges[top+2 - start].style, (text_link[top+2 - start] + values[top+2 - start]), MenuOffsets[top - start+2], LINE2);
-	print_menu_text(values[top+3 - start], menu_ranges[top+3 - start].style, (text_link[top+3 - start] + values[top+3 - start]), MenuOffsets[top - start+3], LINE3);
-*/
-	print_cursor(cursor);												// Cursor
+	print_cursor(cursor);	// Cursor
 	write_buffer(buffer);
+}
+
+// Get range from Program memory
+menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem)
+{
+	menu_range_t	range;
+	memcpy_P(&range, &menu_ranges[menuitem * sizeof(range)], sizeof(range));
+	return (range);
 }
 
 //************************************************************
@@ -175,7 +184,7 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 		if (button == BACK)	// Clear value
 		{
-			value = range.lower;
+			value = range.default_value;
 		}
 
 		// Limit values to set ranges
