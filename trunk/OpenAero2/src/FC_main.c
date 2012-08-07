@@ -41,25 +41,28 @@
 //			Version added to Status menu. Added separate accs to mixer.
 //			Increased GLCD write speed to maximum.
 //			Working Status menu auto refresh!
-//
+// Alpha 5	Added audible and visual error messages for LVA, no RX, Gyro error, throttle high
+//			Failsafe setting now possible from the RCinputs screen. Expo now works nicely.
+//			FlapChan now updates mixer so that M7 has the same source as FlapChan.
+//			Enabled source volume - now adjustable from between 0% and 125%
+//			Fixed niggling hiccup from servos due to status screen refreshing.
+//			Also fixed servo jitter in CPPM mode.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // ASAP
-/
-// For beta
-// Audible/visual error messages for LVA, CPPM + Throttle, RX error, Sensor error with setup enable.
-// RC mixing menu
-// Expo
-// Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
-// General settings (LMA timeout)
+//  Add lost model alarm message
 //
+// For Beta
+//  Camera stabilisation (tilt/pan and gimbal)?
 //
 // Later
-// Camera stabilisation (tilt/pan and gimbal)
-// Differential
+//  RC mixing menu
+//  Differential
+//  Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
+//  General settings (LMA timeout)
 //
 //
 //***********************************************************
@@ -128,6 +131,7 @@ Camera Gimbal (if enabled)
 #include "..\inc\mugui.h"
 #include "..\inc\glcd_menu.h"
 #include "..\inc\menu_ext.h"
+#include "..\inc\main.h"
 
 //***********************************************************
 //* Fonts
@@ -174,12 +178,12 @@ int main(void)
 	bool Overdue = false;
 	bool ServoTick = false;
 	// Alarms
-	bool 	BUZZER_ON = false;
-	bool 	LED_ON = false;
-	bool 	Model_lost = false;			// Model lost flag
-	bool 	LMA_Alarm = false;			// Lost model alarm active
-	bool 	LVA_Alarm = false;			// Low voltage alarm active
-	bool	menu_mode = false;
+	bool BUZZER_ON = false;
+	bool LED_ON = false;
+	bool Model_lost = false;			// Model lost flag
+	bool LMA_Alarm = false;			// Lost model alarm active
+	bool LVA_Alarm = false;			// Low voltage alarm active
+	bool menu_mode = false;
 
 	// Timers
 	uint32_t Change_UpdateStatus = 0;
@@ -198,7 +202,6 @@ int main(void)
 
 	init();									// Do all init tasks
 	AccInit();								// Clear avg buffer, set indexes
-	LED1 = 1;								// Switch on Red LED whenever running
 
 //************************************************************
 // Test code - start
@@ -249,8 +252,7 @@ while (0)
 			RefreshStatus = false;			
 		}
 		// Wait for REFRESH_TIMEOUT seconds (2s) then allow status refresh, but only in synch with RC
-		if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Refresh_safe || Overdue))
-		//if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Interrupted || Failsafe))
+		if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Refresh_safe || Failsafe))
 		{
 			Refresh_safe = false;
 			RefreshStatus = true;
@@ -261,6 +263,7 @@ while (0)
 		{
 			Display_status();
 			RefreshStatus = false;
+			Interrupted = false;	// Force resync on next RC packet
 		}
 
 		//************************************************************
@@ -348,28 +351,20 @@ while (0)
 		// Low-voltage alarm (LVA)
 		GetVbat();							// Check battery
 
-		if ((Config.Modes &16) > 0)			// Buzzer mode
+
+		// Beep buzzer if Vbat lower than trigger
+		if ((vBat < Config.PowerTrigger) && BUZZER_ON) 
 		{
-			// Beep buzzer if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && BUZZER_ON) 
-			{
-				LVA_Alarm = true;
-			}
-			else 
-			{
-				LVA_Alarm = false;			// Otherwise turn off buzzer
-			}
+			LVA_Alarm = true;
+			General_error |= (1 << LOW_BATT); // Set low battery bit
 		}
-		else 								// LED mode
-		{	// Flash LEDs if Vbat lower than trigger
-			if ((vBat < Config.PowerTrigger) && LED_ON) 
-			{
-				LVA_Alarm = false;	
-			}
-			else 
-			{
-				LVA_Alarm = true;			// Otherwise leave LEDs on
-			}
+		else 
+		{
+			LVA_Alarm = false;			// Otherwise turn off buzzer
+		}
+		if (vBat >= Config.PowerTrigger)
+		{
+			General_error &= ~(1 << LOW_BATT); // Clear low battery bit
 		}
 
 		// Turn on buzzer if in alarm state
@@ -397,6 +392,12 @@ while (0)
 
 		// Update zeroed RC channel data
 		RxGetChannels();
+
+		// Clear Throttle High error once throtle reset
+		if (RCinputs[THROTTLE] < 100)
+		{
+			General_error &= ~(1 << THROTTLE_HIGH);	
+		}
 
 		switch(Config.AutoMode)
 		{
@@ -486,13 +487,8 @@ while (0)
 		// Autolevel mode ON
 		if (AutoLevel) 
 		{
-			LED1 = 1; //debug
 			ReadAcc();			// Only read Accs if in AutoLevel mode
 			AvgAcc();			// Average acc readings
-		}
-		else
-		{
-			LED1 = 0; //debug
 		}
 
 		// Calculate PID
@@ -529,6 +525,16 @@ while (0)
 			ServoTick = true;
 		}
 
+		// If simply overdue, signal RX error message
+		if (Overdue)
+		{
+			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
+		}
+		else
+		{
+			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
+		}
+
 		// Check for failsafe condition (Had RC lock but now overdue)
 		if (Overdue && RC_Lock)
 		{
@@ -555,7 +561,7 @@ while (0)
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
-			if(Config.RxMode == CPPM_MODE)
+		/*	if(Config.RxMode == CPPM_MODE)
 			{
 				uint8_t i;
 				// Short delay to ensure no residual interrupt activity from ISR
@@ -566,12 +572,13 @@ while (0)
 					while (TCNT0 < 160);		// 1/20MHz * 64 = 8us
 					TCNT0 -= 160;
 				}
-			}
+			}*/
 			output_servo_ppm();				// Output servo signal
 		}
 		// If in failsafe, just output unsynchronised
 		else if (Failsafe && Overdue && ServoTick)
 		{
+			Refresh_safe = true;			// Safe to try and refresh status screen
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
 

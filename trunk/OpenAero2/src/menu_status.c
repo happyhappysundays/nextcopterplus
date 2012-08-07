@@ -28,6 +28,8 @@ void Display_status(void);
 // Code
 //************************************************************
 
+int8_t	General_error;	// Global error flag
+
 void Display_status(void)
 {
 	int16_t temp, min, max, range, scale;
@@ -80,7 +82,6 @@ void Display_status(void)
 
 	fillrect(buffer, 100,54-temp, 28, temp, 1);				// Battery filler (max is 60)
 
-
 	// Display voltage
 	uint8_t x_loc = 102;	// X location of voltage display
 	uint8_t y_loc = 55;		// Y location of voltage display
@@ -108,5 +109,39 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(vBat,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
 
+	// Draw error messages, if any
+	if (General_error != 0)
+	{
+		// Create message box
+		fillrect(buffer, 14,8, 96, 48, 0);	// White box
+		drawrect(buffer, 14,8, 96, 48, 1); 	// Outline
+
+		// Prioritise error from top to bottom
+		if((General_error & (1 << SENSOR_ERROR)) != 0)
+		{
+			LCD_Display_Text(96,(prog_uchar*)Verdana14,35,14); 	// Sensor
+			LCD_Display_Text(170,(prog_uchar*)Verdana14,43,34); // Error
+			//menu_beep(7);
+		}
+		else if((General_error & (1 << LOW_BATT)) != 0)
+		{
+			LCD_Display_Text(111,(prog_uchar*)Verdana14,33,14); // Battery
+			LCD_Display_Text(97,(prog_uchar*)Verdana14,46,34); 	// Low
+		}
+		else if((General_error & (1 << NO_SIGNAL)) != 0)
+		{
+			LCD_Display_Text(99,(prog_uchar*)Verdana14,51,13); 	// No
+			LCD_Display_Text(100,(prog_uchar*)Verdana14,39,33); // Signal
+			//menu_beep(3);
+		}
+		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
+		{
+			LCD_Display_Text(149,(prog_uchar*)Verdana14,28,14); // Throttle
+			LCD_Display_Text(98,(prog_uchar*)Verdana14,46,34); 	// High
+			//menu_beep(5);
+		}
+	}
+
+	// Write buffer to complete
 	write_buffer(buffer);
 }

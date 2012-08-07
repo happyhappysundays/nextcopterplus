@@ -134,5 +134,6 @@ enum Availability	{OFF = 0, ON};
 enum BatteryType	{LIPO = 0, NIMH};
 enum Orientation	{HORIZONTAL = 0, VERTICAL};
 enum ADCInputs 		{VCC = 0, ROLL_GYRO, YAW_GYRO, VBAT, PITCH_GYRO, X_ACC, Y_ACC, Z_ACC};
+enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR};
 
 #endif //IO_CFG_H

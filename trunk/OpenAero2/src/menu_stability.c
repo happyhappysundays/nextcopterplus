@@ -125,6 +125,6 @@ void menu_stab_control(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }

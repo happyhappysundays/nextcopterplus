@@ -22,6 +22,7 @@ extern void menu_rc_setup(void);
 extern void menu_expo(void);
 extern void menu_mixer(uint8_t i);
 extern void menu_general(void);
+extern void	menu_camstab(void);
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
@@ -30,7 +31,7 @@ extern void print_menu_items(uint8_t top, uint8_t start, int16_t values[], prog_
 
 // Misc subroutines
 extern uint8_t poll_buttons(void);
-extern void menu_beep(void);
+extern void menu_beep(uint8_t beeps);
 extern void print_cursor(uint8_t line);
 
 // Menu management

@@ -37,16 +37,20 @@ void output_servo_ppm(void)
 		ServoOut[i] = temp;
 	}
 
-	// Create the output pulses if in sync with RC inputs
-	if (RC_Lock) {
-		output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
-		output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
-	}
-	else if (Failsafe) // Unsynchronised so need to disable interrupts
+	// Suppress outputs during throttle high error
+	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{
-		cli();
-		output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
-		output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
-		sei();
+		// Create the output pulses if in sync with RC inputs
+		if (RC_Lock) {
+			output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
+			output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
+		}
+		else if (Failsafe) // Unsynchronised so need to disable interrupts
+		{
+			cli();
+			output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
+			output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
+			sei();
+		}
 	}
 }

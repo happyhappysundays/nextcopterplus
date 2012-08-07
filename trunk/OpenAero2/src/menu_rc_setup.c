@@ -31,7 +31,7 @@ void menu_rc_setup(void);
 // Defines
 //************************************************************
 
-#define RCITEMS 5 	// Number of menu items
+#define RCITEMS 6 	// Number of menu items
 #define RCSTART 74 	// Start of Menu text items
 #define RCTEXT 80 	// Start of value text items
 
@@ -39,14 +39,15 @@ void menu_rc_setup(void);
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuOffsets[RCITEMS] PROGMEM = {92, 92, 92, 92, 92};
-const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149};
+const uint8_t RCMenuOffsets[RCITEMS] PROGMEM = {92, 92, 92, 92, 92, 92};
+const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 149};
 const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
 	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
 	{CPPM_MODE,PWM3,1,1,PWM1},
 	{THROTTLE,NOCHAN,1,1,GEAR},
 	{THROTTLE,NOCHAN,1,1,AUX1},
+	{THROTTLE,NOCHAN,1,1,NOCHAN},
 	{THROTTLE,NOCHAN,1,1,FLAP}
 };
 //************************************************************
@@ -75,6 +76,7 @@ void menu_rc_setup(void)
 		values[2] = Config.StabChan;
 		values[3] = Config.AutoChan;
 		values[4] = Config.ThreePos;
+		values[5] = Config.FlapChan;
 
 		// Print menu
 		print_menu_items(top, RCSTART, &values[0], (prog_uchar*)rc_menu_ranges, (prog_uchar*)RCMenuOffsets, (prog_uchar*)RCMenuText, cursor);
@@ -104,6 +106,10 @@ void menu_rc_setup(void)
 		Config.StabChan = values[2];
 		Config.AutoChan = values[3];
 		Config.ThreePos = values[4];
+		Config.FlapChan = values[5];
+
+		// Update Ch7. mixer with source from Config.FlapChan
+		Config.Channel[CH7].source = Config.FlapChan;
 
 		if (button == ENTER)
 		{
@@ -122,7 +128,7 @@ void menu_rc_setup(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }
 

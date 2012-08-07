@@ -83,7 +83,6 @@ void RxGetChannels(void)
 	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) RxActivity = true;
 	else RxActivity = false;
 	OldRxSum = RxSum;
-
 }
 
 
@@ -94,8 +93,9 @@ int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
 	int32_t RCcalc, RCsum, mult;						// Max values are around+/-75000
 
 	if (Expolevel == 0) return (RCvalue);				// No need to calculate if expo is zero
+	if (Expolevel > 99) Expolevel = 99;					// Limit expo to 99%
 
-	range 	= abs(RCvalue) >> 6;						// Work out which band the RCinput is in (16 values)
+	range 	= (abs(RCvalue) >> 6);						// Work out which band the RCinput is in (16 values)
 	if (range > 15) range = 15;
 	if (range <  0) range = 0;
 	expo_level = Expolevel/10;							// Work out which expo level to use (0~100 -> 0~10)	
@@ -104,7 +104,7 @@ int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
 
 	RCsum 	= RCvalue;									// Promote RCvalue to 32 bits as GCC is broken :(
 	RCcalc 	= RCsum * mult;								// Do the 32-bit x 32-bit multiply
-	RCcalc	= RCcalc >> 6;
+	RCcalc	= RCcalc >> 7;
 	RCvalue = (int16_t) RCcalc;							// Divide by 64 to get the expo'd value
 
 	return (RCvalue);

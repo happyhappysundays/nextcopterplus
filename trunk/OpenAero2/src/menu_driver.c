@@ -34,7 +34,7 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 void print_menu_items(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, prog_uchar* MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc
-void menu_beep(void);
+void menu_beep(uint8_t beeps);
 uint8_t poll_buttons(void);
 void print_cursor(uint8_t line);
 void draw_expo(int16_t value);
@@ -231,7 +231,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 			default:
 				break;
 		}
-		menu_beep();
+		menu_beep(1);
 		_delay_ms(200);
 	}
 
@@ -256,7 +256,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 				*cursor = NEXTLINE;
 				break;
 		}
-		menu_beep();
+		menu_beep(1);
 		_delay_ms(200);
 	}
 
@@ -280,7 +280,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 				*cursor = PREVLINE;
 				break;
 		}
-		menu_beep();
+		menu_beep(1);
 		_delay_ms(200);
 	}
 
@@ -333,11 +333,17 @@ uint8_t poll_buttons(void)
 	return buttons;
 }
 
-void menu_beep(void)
+void menu_beep(uint8_t beeps)
 {
-	LVA = 1;
-	_delay_ms(25);
-	LVA = 0;
+	uint8_t i;
+
+	for (i=0; i < beeps; i++)
+	{ 
+		LVA = 1;
+		_delay_ms(25);
+		LVA = 0;
+		_delay_ms(25);
+	}
 }
 
 void print_cursor(uint8_t line)
@@ -365,7 +371,7 @@ void draw_expo(int16_t value)
 		expo = get_expo_value (i, (uint8_t)value-1);	// Get expo value from table
 
 		b.x = 70 + (i/16);								// Calculate next point location
-		b.y = 52 - (expo/40);
+		b.y = 52 - (expo/20);
 
 		if (b.x > 127) b.x = 127;						// Limit graph points
 		if (b.x <= 0) b.x = 0;

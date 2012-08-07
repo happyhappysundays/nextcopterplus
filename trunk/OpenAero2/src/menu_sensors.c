@@ -67,6 +67,6 @@ void Display_sensors(void)
 		clear_buffer(buffer);
 		_delay_ms(100);
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }

@@ -28,6 +28,13 @@
 #include <avr/pgmspace.h>
 #include "..\inc\glcd_menu.h"
 #include "..\inc\pid.h"
+#include "..\inc\menu_ext.h"
+
+//************************************************************
+// Defines
+//************************************************************
+
+#define GYROS_STABLE 30
 
 //************************************************************
 // Prototypes
@@ -162,6 +169,13 @@ void init(void)
 	Init_ADC();
 	//init_uart();						// Initialise UART
 
+	// Flash LED
+	LED1 = 1;
+	_delay_ms(150);
+	LED1 = 0;
+
+	// Beep
+	menu_beep(1);
 
 	// Initialise the GLCD
 	st7565_init();
@@ -185,10 +199,9 @@ void init(void)
 	IntegralaPitch = 0;	 
 	IntegralaRoll = 0;
 
-	// Flash LED
-	LED1 = 1;
-	_delay_ms(150);
-	LED1 = 0;
+	// Calibrate gyros, hopefully after motion minimised
+	CalibrateGyros();			
+
 
 	//***********************************************************
 	//* Reload eeprom settings if all buttons are pressed 
@@ -201,7 +214,7 @@ void init(void)
 		LCD_Display_Text(2,(prog_uchar*)Verdana14,31,30);
 
 		write_buffer(buffer);
-		clear_buffer(buffer);					// Clear
+		clear_buffer(buffer);				// Clear
 		_delay_ms(1000);
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
@@ -210,8 +223,27 @@ void init(void)
 
 	//***********************************************************
 
-	sei();						// Enable global Interrupts 
+	sei();									// Enable global Interrupts 
 
-	CalibrateGyros();			// Calibrate gyros, hopefully after motion minimised
+	// Check to see that gyros are stable
+	ReadGyros();
+
+	if ((gyroADC[ROLL] > GYROS_STABLE) || (gyroADC[ROLL] < -GYROS_STABLE) ||
+	 	(gyroADC[PITCH] > GYROS_STABLE) || (gyroADC[PITCH] < -GYROS_STABLE) ||
+		(gyroADC[YAW] > GYROS_STABLE) || (gyroADC[YAW] < -GYROS_STABLE))
+	{
+		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
+	}
+
+	// Check to see that throttle is low if in CPPM mode
+	_delay_ms(100);
+	if ((Config.RxMode == CPPM_MODE) && RC_Lock)
+	{
+		RxGetChannels();
+		if (RCinputs[THROTTLE] > 100)
+		{
+			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
+		}
+	}
 
 } // init()

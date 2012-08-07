@@ -75,7 +75,7 @@ const char MainMenuItem3[]  PROGMEM = "Autolevel control";
 const char MainMenuItem4[]  PROGMEM = "Expo/Differential";
 const char MainMenuItem5[]  PROGMEM = "Battery";
 const char MainMenuItem6[]  PROGMEM = "Camera stab.";
-const char MainMenuItem7[]  PROGMEM = "Manual mixer";
+const char MainMenuItem7[]  PROGMEM = "RC mixer";
 const char MainMenuItem8[]  PROGMEM = "Sensors";
 const char MainMenuItem9[]  PROGMEM = "RC inputs";
 const char MainMenuItem11[] PROGMEM = "M1 mixing";
@@ -200,7 +200,14 @@ const char OrientRef0[] PROGMEM = "Pitch";
 const char OrientRef1[] PROGMEM = "Roll"; 
 const char OrientRef2[] PROGMEM = "Yaw";
 //
-const char VersionRef0[] PROGMEM = "Alpha 4";
+const char VersionRef0[] PROGMEM = "Alpha 5"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+//
+const char ErrorText0[] PROGMEM = "Sensor"; //96
+const char ErrorText1[] PROGMEM = "Low";
+const char ErrorText2[] PROGMEM = "High";
+const char ErrorText3[] PROGMEM = "No";
+const char ErrorText4[] PROGMEM = "Signal";
+const char ErrorText5[] PROGMEM = "Error";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -243,7 +250,7 @@ const char *text_menu[] PROGMEM =
 		//
 		PText21, PText22, PText24, ExpoMenuItem3,											// 92 to 95
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0,	Dummy0,												// 96 to 100
+		ErrorText0, ErrorText1, ErrorText2, ErrorText3,	ErrorText4,							// 96 to 100
 		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
 		MixerMenuItem2, MixerMenuItem3,														// 103 to 104 H/V
 		//
@@ -276,6 +283,8 @@ const char *text_menu[] PROGMEM =
 		//
 		StatusText1, MixerMenuItem0, MixerMenuItem1, MainMenuItem6,	GeneralText0,			// 164 to 169 general
 		GeneralText1,
+		//
+		ErrorText5,																			// 170 Error
 	}; 
 
 //************************************************************
