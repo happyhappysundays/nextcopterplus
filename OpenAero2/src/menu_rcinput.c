@@ -37,8 +37,14 @@ void Display_rcinput(void)
 	{
 		if (BUTTON4 == 0)
 		{
-			_delay_ms(500);
+			_delay_ms(100);
 			CenterSticks();
+		}
+
+		if (BUTTON3 == 0)
+		{
+			_delay_ms(100);
+			SetFailsafe();
 		}
 
 		RxGetChannels();
@@ -64,13 +70,17 @@ void Display_rcinput(void)
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(73, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
+		LCD_Display_Text(140, (prog_uchar*)Verdana8, 40, 55); 	// Failsafe
+		fillrect(buffer, 77,56, 2, 8, 0);						// Chop off (:) to save memory :)
+		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
+		LCD_Display_Text(73, (prog_uchar*)Verdana8, 100, 55); 	// Cal.
+		LCD_Display_Text(9, (prog_uchar*)Wingdings, 119, 59); 	// Down
 
 		// Update buffer
 		write_buffer(buffer);
 		clear_buffer(buffer);
 		_delay_ms(100);
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }

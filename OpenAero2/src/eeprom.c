@@ -97,8 +97,8 @@ void Set_EEPROM_Default_Config(void)
 										// Autolevel (0) = inactive (bit 0);
 	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
 	Config.AutoChan = AUX1;				// Channel AUX2 switches autolevel by default
-	Config.FlapChan = FLAP;				// Channel FLAP is the flap input by default
-	Config.ThreePos = UNUSED;			// Three-position switch input disabled by default
+	Config.FlapChan = NOCHAN;				// Channel FLAP (6) is the second aileron input by default
+	Config.ThreePos = NOCHAN;			// Three-position switch input disabled by default
 
 	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
 	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel

@@ -66,6 +66,6 @@ void Display_balance(void)
 		clear_buffer(buffer);
 		_delay_ms(20);
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }

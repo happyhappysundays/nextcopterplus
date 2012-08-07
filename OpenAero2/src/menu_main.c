@@ -72,7 +72,7 @@ void menu_main(void)
 			do_main_menu_item(temp);
 		}
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }
 

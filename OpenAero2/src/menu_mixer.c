@@ -44,7 +44,7 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 {
 	{CH1,CH8,1,1,CH1}, 				// Source
 	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
-	{0,1,1,0,1},					// source_volume
+	{0,125,10,0,100},				// source_volume (%)
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_gyro
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_gyro
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// yaw_gyro
@@ -216,7 +216,7 @@ void menu_mixer(uint8_t i)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep();
+	menu_beep(1);
 	_delay_ms(200);
 }
 
