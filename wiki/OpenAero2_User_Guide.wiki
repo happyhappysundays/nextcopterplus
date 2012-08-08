@@ -93,31 +93,28 @@ For flying wing models the connections are as follows:
  * M7: Right elevon
  * M8: Rudder
 
-==How do I set up OpenAero2?==
-===Stability and Autolevel switching===
-Due to countless requests you now have absolute freedom in how to enable these modes.
-In the Stability and Autolevel Settings menus you can select which method of control you wish to use.
+==The LCD Menu System==
 
- * OFF: Always off
- * Autochan: On when the channel set as "Autochan" in RC settings is more than 50%
- * Stabchan: On when the channel set as "Stabchan" in RC settings is more than 50%
- * 3-pos: Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
- * ON: Always on
+===The Status Screen===
+The status screen gives you a continually updated display of the battery status, flight modes and any error messages.
 
-*3-pos switch*
-The three-position switch mode allows you to have both Stability and Autolevel on one switch, but have them selectable.
-The way it works is this:
-For the switch position between minimum and about 33% = Stability off, Autolevel off.
-For the switch position between 33% and about 66% = Stability on, Autolevel off.
-For the switch position above 66% = Stability on, Autolevel on.
+http://i.imgur.com/kaaAF.jpg
 
-*RC Setting defaults*
-Stabchan = GEAR (normally ch.5)
-Autochan = AUX1 (normally ch.7)
-Flapchan = FLAP (normally ch.6)
-3-pos chan = disabled
+ * *Mode:* The current mixer mode
+ * *Version:* The version number of the loaded firmware
+ * *Input:* The RC input mode (CPPM/PWM1, PWM2 or PWM3)
+ * *Autolevel:* The current autolevel status (ON/OFF)
+ * *Stability:* The current stability status (ON/OFF)
+ * *Battery icon:* The battery icon shows the remaining battery capacity. The limits of the capacity meter are calculated from the battery settings menu. For example, if a 3S LiPo is used and the minimum cell voltage is set to 3.7V (370) the graphic will show empty at a total battery voltage of 11.1V. If the maximum cell voltage is set to 4.2V (420) the graphic will show full at a total cell voltage of 12.6V.
+ * *Battery voltage:* The battery voltage is displayed under the battery icon
 
-===The LCD Menu System===
+The menu defaults to auto-update, which means the menu self-refreshes every two second when no RC activity is detected. The screen will not update if there is RC activity.
+
+If the auto-update is switched off, the screen can be manually updated with the "Refresh" button (button 1).
+
+Pressing button 3 goes to the main menu.
+
+===Main Menu===
 *Main menu*
 The main menu stops the loop. The main menu controls should be self-explanatory.
 LEFT exits to the status menu
@@ -134,29 +131,36 @@ LEFT resets the item to its minimum value
 RIGHT saves the item
 UD/DOWN increments and decrements the item
 
-*Contrast*
-You can change the screen contrast inside the General menu.
-==The Status Screen==
-The status screen gives you a continually updated display of the battery status, flight modes and any error messages.
+===General Menu===
+http://i.imgur.com/g2fgp.jpg
+ * *Mode:* Allows you to select from the input preset mixers. Currently there are presets for dual-aileron aeroplane and flying wing.
+ * *Orientation:* Remaps the sensors so that you can mount the board vertically (buttons down) in space-restricted areas.
+ * *Contrast:* Allows you to change the contrast of the LCD. See below.
+ * *Auto-Refresh:* With this set to ON, the status screen auto-updates every two seconds while no RC input is detected. With this setting OFF, you have to manually update the status screen with the refresh button. You may wish to switch this setting to OFF if you find the auto-update interferes with the flight controller.
+http://i.imgur.com/RcSHI.jpg
+ * *RC mix:* This feature is not yet implemented.
+ * *Camera stab.:* This feature is not yet implemented.
 
-http://i.imgur.com/kaaAF.jpg
+===Adjusting LCD Contrast===
+http://i.imgur.com/WzAeW.jpg
+http://i.imgur.com/QvA6c.jpg
+http://i.imgur.com/tjW92.jpg
+ * Reducing the number reduces contrast.
+ * Pressing button 1 "Def." returns the value to the default of 38.
+ * Increasing the number increases contrast.
 
-*Mode:* The current mixer mode
+===RC Setup Menu===
+http://i.imgur.com/rhm5G.jpg
+ * *CPPM Ch. Order:* When using CPPM input, this setting allows you to select either JR/Spektrum (TAER) or Futaba (AETR) channel order. 
+ * *RX mode:* Many users have previously experienced trouble with their receivers and OpenAero. For many it was because they did not use a rudder input. The rudder input was used by the software to signify that all channel data had been received. Synching on the rudder was called PWM1. Next I tried the option of synching on the stabilisation channel as it is normally a higher channel number, That is called PWM2. PWM1 and PWM2 are the same as in OpenAero, but PWM3 is new. PWM3 is for synching with whatever is on that fifth channel the KK2 has. If you have no servo jitter, then PWM1 is working for you, but if you use PWM, please try PWM2 and PWM3 to see what difference they make.
+ * *Stability input:* Set this to the channel number that you plan to use for stability control.
+ * *Autolevel input:* Set this to the channel number that you plan to use for autolevel control. It can be the same as for stability if you like.
+http://i.imgur.com/L4iET.jpg
+ * *3-pos switch:* Set this to the channel number that you have a three-position switch on. This allows you to have both Stability and Autolevel on one switch, but have them selectable.
+ * *2nd aileron:* Set this to the channel number that your radio uses for the second aileron channel.
+ * *Preset 1 to Preset 4:* When using a camera mount which is stabilised but not necessarily controlled, you need a fixed offset to feed that channel. These can be set up here.
 
-*Version:* The version number of the loaded firmware
-
-*Input:* The RC input mode (CPPM/PWM1, PWM2 or PWM3)
-
-*Autolevel:* The current autolevel status (ON/OFF)
-
-
-*Stability:* The current stability status (ON/OFF)
-
-The menu defaults to auto-update, which means the menu self-refreshes every two second when no RC activity is detected. The screen will not update if there is RC activity.
-
-If the auto-update is switched off, the screen can be manually updated with the "Refresh" button (button 1).
-
-Pressing button 3 goes to the main menu.
+===Stability Control Menu===
 
 ==Error messages==
 If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
@@ -183,6 +187,30 @@ Approximately one minute after the last detected RC input, the Lost Model buzzer
 *Throttle High:*
 PWM does not require a throttle input in OpenAero2. In CPPM mode however, the throttle signal is passed through the board and appears as a PWM signal on M1.
 As a safety measure, if the board is powered up with the throttle set to more than about 5%, the oupts will be disabled, anaalarm will sound and this message will be displayed.
+
+==How do I set up OpenAero2?==
+===Stability and Autolevel switching===
+Due to countless requests you now have absolute freedom in how to enable these modes.
+In the Stability and Autolevel Settings menus you can select which method of control you wish to use.
+
+ * OFF: Always off
+ * Autochan: On when the channel set as "Autochan" in RC settings is more than 50%
+ * Stabchan: On when the channel set as "Stabchan" in RC settings is more than 50%
+ * 3-pos: Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ * ON: Always on
+
+*3-pos switch*
+The three-position switch mode allows you to have both Stability and Autolevel on one switch, but have them selectable.
+The way it works is this:
+For the switch position between minimum and about 33% = Stability off, Autolevel off.
+For the switch position between 33% and about 66% = Stability on, Autolevel off.
+For the switch position above 66% = Stability on, Autolevel on.
+
+*RC Setting defaults*
+Stabchan = GEAR (normally ch.5)
+Autochan = AUX1 (normally ch.7)
+Flapchan = FLAP (normally ch.6)
+3-pos chan = disabled
 
 ==Initial setup and calibration==
 The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
