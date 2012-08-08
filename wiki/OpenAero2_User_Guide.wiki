@@ -1,6 +1,6 @@
 =The OpenAero2 User Guide= (Work in progress)
 ==What is OpenAero2?==
-OpenAero is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
+OpenAero2 is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
 ==What models can OpenAero2 be used with?==
 OpenAero2 have a completely flexible mixer which allows it to control just about anything, but comes with two preset mix tables.
@@ -90,7 +90,7 @@ For flying wing models the connections are as follows:
  * M7: Right elevon
  * M8: Rudder
 
-==How do I set up OpenAero?==
+==How do I set up OpenAero2?==
 ===Stability and Autolevel switching===
 Due to countless requests you now have absolute freedom in how to enable these modes.
 In the Stability and Autolevel Settings menus you can select which method of control you wish to use.
@@ -135,7 +135,7 @@ UD/DOWN increments and decrements the item
 You can change the screen contrast inside the General menu.
 
 ===Initial setup and calibration===
-The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. 
+The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
 
 *Step 1: Model type*
 Go into the General menu and change the Mode to that which suits your model. The default is Aeroplane.
@@ -155,17 +155,21 @@ Go into the General menu and change the Mode to that which suits your model. The
  * Go to the RC Inputs screen and switch on your transmitter and receiver. You should immediately see values appearing in both columns next to each connected channel.
  * Make sure all the tranmitter channels are centered and the throttle to minimum, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
  * The right-hand column should now all be zero and change +/-1000 or so at the extremes of throw.
+
 *Step 6: Servo direction*
+
 One return to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
+
  * Move all surfaces and check that the move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
+
 *Step 7: Gyro direction*
  * Now, switch on stability control whil leaving autolevel OFF.
  * Pitch the nose of the model up and down while watching the elevator. The elevator should move to counteract the pitching. Pitching the nose UP should make the elevator move DOWN.
  * If this is not the case, you can reverse the pitch gyro in the M5 mixer menu.
  * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. Use the M6 and M7 mixer menus to reverse the roll gyro as required.
  * Finally, yaw the model left and right while observing the rudder. Adjust the M8 mixer menu to reverse the yaw gyro as required.
-refully how the control surfces move in response to moving the model.
-*Step 7: Auto-level setup*
+
+*Step 8: Auto-level setup*
  * Firstly, go into the balance meter screen of the menu and observe the balance meter. The black dot indicates where OpenAero2 thinks "down" is.
  * Place the model on a flat surface and chock up the tail or nose until it is level and in its normal flying attitude.
  * Keeping the model perfectly still, carefully press button 4 under the screen marker "Cal." After a short pause the black dot will move to the center of the display.
@@ -175,8 +179,8 @@ refully how the control surfces move in response to moving the model.
  * If they move in the reverse sense, reverse the pitch and roll acc settings in the mixer menus for M5, M6 and M6 as appropriate.
 
 
-===Every time you power up OpenAero===
-There are some important things to note when starting OpenAero.
+===Every time you power up OpenAero2===
+There are some important things to note when starting OpenAero2.
 
 *Gyro calibration*
 
@@ -190,10 +194,10 @@ If you move the model during calibration the "Sensor Error" message will appear 
 Always make sure your throttle is set to minimum before attempting to power up your model. *Warning:* Even with the transmitter throttle set to zero, there may be a momentary output from the KK board to the throttle channel which may cause the motor to turn very briefly. As such stay well away from the motor and propellor and sure your model when powering it up.
 
 =Donations=
-OpenAero is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
+OpenAero2 is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
 If you feel motivated to donate to the project please feel free. I'm always happy to make special versions for people.
 
 http://i.imgur.com/uaRIu.png
 
-Yeah Google Code sucks and the button won't work. You can find a working button on the OpenAero Project page at the following link.
+Yeah Google Code sucks and the button won't work. You can find a working button on the OpenAero2 Project page at the following link.
 https://sites.google.com/site/openaerowiki/home
