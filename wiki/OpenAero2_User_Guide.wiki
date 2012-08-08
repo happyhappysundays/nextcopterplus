@@ -1,4 +1,4 @@
-=The OpenAero2 User Guide=
+=The OpenAero2 User Guide= (Work in progress)
 ==What is OpenAero2?==
 OpenAero is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
@@ -152,84 +152,42 @@ Go into the General menu and change the Mode to that which suits your model. The
 *Step 4: Autolevel settings*
  * For now, just alter the Mode as described above in "Stability and Autolevel switching".
 *Step 5: RC check*
- * Go to the RC Inputs screen and switch on your transmitter and receiver. You should 
-
-
-*Setting failsafe mode (V1.13 and above)*
-
-To setup failsafe mode, set the control positions that you require, then simply short the M6 signal pin to ground. An RX bind plug linking the two opposite end pins is perfect for this job. M6 needs to be shorted for one second to trigger failsafe learning mode. 
-In failsafe learning mode the LED will start to flash. You can then remove the shorting jumper to stop the learning mode from restarting. When the LED has stopped flashing the failsafe has been set.
-
-*Trimming your model*
-
-For OpenAero to understand the normal trimmed radio settings, you have to ask it to learn the trimmed position.
-Firstly though, your model has to be completely trimmed when OpenAero stability is OFF.
-To be sure OpenAero stability is off, with the model powered up, move the model about and see if the control surfaces move. If so, stability is ON and you have to correct that before proceeding. Change the input that controls stability to the opposite state to switch off stability.
-Now adjust all flying surfaces to the neutral position with all trims centered. Please adjust the mechanical servo connections and finally the computer-controlled trims in the transmitter until the model is trimmed.
-
-*Stick centering*
-
-To get OpenAero to learn the neutral stick position, all you have to do is power up the model (with transmitter on) while the Yaw pot is set to the correct position. 
-Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the yaw pot.
-What we need to do is set the Yaw pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
-Power up the model and watch the LED on the KK board carefully.
-If the Yaw pot is set to the correct position, the LED should blink rapidly three times then one long flash. If so the stick position has been successfully saved.
-If the Yaw pot is set to the wrong position, the LED will blink about 12-13 times. Power off the model, reverse the Yaw pot and try again.
-Once the stick position has been successfully saved, switch off and please remember to return the Yaw pot to the center of its travel.
-
-*Checking the gyro direction*
-
-An extremely important step is to confirm that the gyros are acting on your model as appropriate. If the gyro directions are reversed any motion of the model will be amplified in the same direction leading to an almost immediate crash.
-Once you have the model trimmed correctly, switch on stabilisation and watch carefully how the control surfces move in response to moving the model.
-
-Gyros respond to rotation, so the easiest way to check the gyro direction is to rotate the model on each axis one by one.
-With the model held in front of you, rotate it along the roll axis and watch the ailerons move. They should move to oppose the movement. For example the falling wing's aileron should move DOWN and the rising wing's aileron should move UP. If this is not the case, the Roll gyro needs to be reversed.
-
-With the model held in front of you, rotate it up and down along the pitch axis and watch the elevator move. It should move to oppose the movement. For example the elevator should move DOWN when you pitch the model's nose UP and DOWN when you pitch the model's nose UP. If this is not the case, the Pitch gyro needs to be reversed.
-
-With the model held in front of you, rotate it left and right along the yaw axis and watch the rudder move. It should move to oppose the movement. For example the rudder should move LEFT when you yaw the model's nose RIGHT and RIGHT when you yaw the model's nose LEFT. If this is not the case, the Yaw gyro needs to be reversed.
-
-*Adjusting the gyro direction*
-
-To get OpenAero to change gyro direction, all you have to do is power up the model while the Roll pot is set to the correct position. 
-Different boards have the pot polarity reversed so there is no hard rule to determine which direction (clockwise or couter-clockwise) to turn the Roll pot.
-What we need to do is set the Roll pot to the minimum value. Turn the pot with a small screwdriver until it hits the stop in the minimum direction.
-Power up the model and watch the LED on the KK board carefully.
-If the Roll pot is set to the correct position, the LED should blink rapidly *six* times, then stay ON. If so, we are in gyro reversing mode.
-
- * Move the transmitter roll stick left or right to set the roll gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
- * Move the transmitter yaw stick left or right to set the yaw gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
- * Move the transmitter pitch stick up or down to set the pitch gyro to the normal or reversed state. The LED on the KK board will flash briefly to indicate that the setting has changed.
-
-Once the gyro direction has been successfully saved, switch off and please remember to return the Roll pot back to your preferred setting.
-
-If you find that the gyro direction has not changed, try moving the transmitter stick in the *opposite* direction next time.
+ * Go to the RC Inputs screen and switch on your transmitter and receiver. You should immediately see values appearing in both columns next to each connected channel.
+ * Make sure all the tranmitter channels are centered and the throttle to minimum, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
+ * The right-hand column should now all be zero and change +/-1000 or so at the extremes of throw.
+*Step 6: Servo direction*
+One return to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
+ * Move all surfaces and check that the move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
+*Step 7: Gyro direction*
+ * Now, switch on stability control whil leaving autolevel OFF.
+ * Pitch the nose of the model up and down while watching the elevator. The elevator should move to counteract the pitching. Pitching the nose UP should make the elevator move DOWN.
+ * If this is not the case, you can reverse the pitch gyro in the M5 mixer menu.
+ * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. Use the M6 and M7 mixer menus to reverse the roll gyro as required.
+ * Finally, yaw the model left and right while observing the rudder. Adjust the M8 mixer menu to reverse the yaw gyro as required.
+refully how the control surfces move in response to moving the model.
+*Step 7: Auto-level setup*
+ * Firstly, go into the balance meter screen of the menu and observe the balance meter. The black dot indicates where OpenAero2 thinks "down" is.
+ * Place the model on a flat surface and chock up the tail or nose until it is level and in its normal flying attitude.
+ * Keeping the model perfectly still, carefully press button 4 under the screen marker "Cal." After a short pause the black dot will move to the center of the display.
+ * Go back to the status menu.
+ * Switch off stability control and switch ON autolevel.
+ * Tilt the model in pitch and roll while watching the respective surfaces. They should move slightly to compensate and remain in that position.
+ * If they move in the reverse sense, reverse the pitch and roll acc settings in the mixer menus for M5, M6 and M6 as appropriate.
 
 
 ===Every time you power up OpenAero===
 There are some important things to note when starting OpenAero.
 
-*Stick positions*
-
-The stick positions that the transmitter is in as the model powers up are important to OpenAero. Unless you plan to alter the stability switch modes, make sure the transmitter sticks are centered while powering up your model.
-
 *Gyro calibration*
 
 The gyros are calibrated automatically when the model is powered up.
 It is important that the model is held very still while the gyro calibration is taking place.
-
-To make this easier, the gyro calibration is done after a short pause and just as the LED lights on the KK board. This allows two seconds or so to connect the battery and allow any movement to settle.
+If you move the model during calibration the "Sensor Error" message will appear with a warning beep. The only option is to repower the board.
 
 
 *Safety*
 
 Always make sure your throttle is set to minimum before attempting to power up your model. *Warning:* Even with the transmitter throttle set to zero, there may be a momentary output from the KK board to the throttle channel which may cause the motor to turn very briefly. As such stay well away from the motor and propellor and sure your model when powering it up.
-
-==Flying with OpenAero==
-Once you have confirmed that the gyro direction is correct you are ready to fly with OpenAero. Do initial test flights with stability switched OFF until you are sure that your model is aerodynamically trimmed and the control throws are set appropriately.
-You can then, at a safe height, switch on stability and carefully observe the model.
-You may find that the controls appear more sluggish than normal as the software dampens movement of the model.
-
 
 =Donations=
 OpenAero is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
