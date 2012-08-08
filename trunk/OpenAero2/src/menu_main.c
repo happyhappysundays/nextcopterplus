@@ -30,7 +30,7 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 19 // Number of menu items
+#define MAINITEMS 17 // Number of menu items
 #define MAINSTART 106 // Start of Menu text items
 
 //************************************************************
@@ -99,44 +99,45 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_battery();
 			break;
 		case MAINSTART+6:
+			Display_rcinput();
+			break;
+		case MAINSTART+7:
+			Display_sensors();
+			break;
+		case MAINSTART+8:
+			Display_balance();
+			break;
+/*		case MAINSTART+6:
 			//menu_camstab();
 			break;
 		case MAINSTART+7:
 			//menu_manual_mixer();
-			break;
-		case MAINSTART+8:
+			break;*/
+		case MAINSTART+9:
 			menu_mixer(0);
 			break;
-		case MAINSTART+9:
+		case MAINSTART+10:
 			menu_mixer(1);
 			break;
-		case MAINSTART+10:
+		case MAINSTART+11:
 			menu_mixer(2);
 			break;
-		case MAINSTART+11:
+		case MAINSTART+12:
 			menu_mixer(3);
 			break;
-		case MAINSTART+12:
+		case MAINSTART+13:
 			menu_mixer(4);
 			break;
-		case MAINSTART+13:
+		case MAINSTART+14:
 			menu_mixer(5);
 			break;
-		case MAINSTART+14:
+		case MAINSTART+15:
 			menu_mixer(6);
 			break;
-		case MAINSTART+15:
+		case MAINSTART+16:
 			menu_mixer(7);
 			break;
-		case MAINSTART+16:
-			Display_sensors();
-			break;
-		case MAINSTART+17:
-			Display_rcinput();
-			break;
-		case MAINSTART+18:
-			Display_balance();
-			break;
+
 		default:
 			break;
 	} // Switch

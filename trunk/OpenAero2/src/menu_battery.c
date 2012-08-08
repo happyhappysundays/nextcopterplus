@@ -41,7 +41,7 @@ void menu_battery(void);
 
 const uint8_t BattMenuOffsets[BATTITEMS] PROGMEM = 
 {
-	82, 38, 85, 95, 90
+	92, 38, 92, 92, 92
 };
 const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
 const menu_range_t batt_menu_ranges[] PROGMEM = 

@@ -38,16 +38,16 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 	 
-const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {40, 73, 50, 80, 60, 80};
+const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {50, 80, 80, 80, 80, 80};
 const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101, 101, 101};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
 	{AEROPLANE,MANUAL,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
-	{OFF,ON,1,1,OFF},
-	{OFF,ON,1,1,OFF},
 	{28,45,1,0,38}, 	// Contrast
 	{OFF,ON,1,1,OFF},	// Auto-update status menu
+	{OFF,ON,1,1,OFF},
+	{OFF,ON,1,1,OFF},
 };
 
 //************************************************************
@@ -72,10 +72,11 @@ void menu_general(void)
 		// Load values from eeprom
 		values[0] = Config.MixMode;
 		values[1] = Config.Orientation;
-		values[2] = Config.RCMix;
-		values[3] = Config.CamStab;
-		values[4] = Config.Contrast;
-		values[5] = Config.AutoUpdateEnable;
+		values[2] = Config.Contrast;
+		values[3] = Config.AutoUpdateEnable;
+		values[4] = Config.RCMix;
+		values[5] = Config.CamStab;
+
 
 		// Print menu
 		print_menu_items(top, GENERALSTART, &values[0], (prog_uchar*)general_menu_ranges, (prog_uchar*)GeneralMenuOffsets, (prog_uchar*)GeneralMenuText, cursor);
@@ -102,10 +103,10 @@ void menu_general(void)
 		// Update value in config structure
 		Config.MixMode = values[0];
 		Config.Orientation = values[1];
-		Config.RCMix = values[2];
-		Config.CamStab = values[3];
-		Config.Contrast = values[4];
-		Config.AutoUpdateEnable = values[5];
+		Config.Contrast = values[2];
+		Config.AutoUpdateEnable = values[3];
+		Config.RCMix = values[4];
+		Config.CamStab = values[5];
 
 		// Update contrast
 		//st7565_set_brightness(Config.Contrast);

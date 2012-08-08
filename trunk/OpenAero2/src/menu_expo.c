@@ -39,7 +39,7 @@ void menu_expo(void);
 // Battery menu items
 //************************************************************
 
-const uint8_t ExpoMenuOffsets[EXPOITEMS] PROGMEM = {90, 90, 90, 90};
+const uint8_t ExpoMenuOffsets[EXPOITEMS] PROGMEM = {95, 95, 95, 95};
 const uint8_t ExpoMenuText[EXPOITEMS] PROGMEM = {EXPOTEXT, 0, 0, 0};
 const menu_range_t expo_menu_ranges[] PROGMEM = 
 {

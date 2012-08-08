@@ -42,7 +42,7 @@ const uint8_t MixerMenuOffsets[MIXERITEMS] PROGMEM = {80,80,80,80,80,80,80,80,80
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,143,143,143,143,0,0,0};
 const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
-	{CH1,CH8,1,1,CH1}, 				// Source
+	{THROTTLE,PRESET4,1,1,CH1}, 	// Source
 	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
 	{0,125,10,0,100},				// source_volume (%)
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_gyro
@@ -50,9 +50,9 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// yaw_gyro
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_acc
 	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_acc
-	{2250,5250,10,0,2250}, 			// Min travel
-	{2250,5250,10,0,5250}, 			// Max travel
-	{2250,5250,10,0,3500}, 			// failsafe
+	{900,2100,10,0,900}, 			// Min travel
+	{900,2100,10,0,2100}, 			// Max travel
+	{900,2100,10,0,1500}, 			// failsafe
 };
 
 //************************************************************
@@ -68,6 +68,7 @@ void menu_mixer(uint8_t i)
 	menu_range_t range;
 	uint8_t temp = 0;
 	uint8_t text_link = 0;
+	int16_t temp16 = 0;
 
 	while(button != BACK)
 	{
@@ -94,9 +95,13 @@ void menu_mixer(uint8_t i)
 		if (Config.Channel[i].pitch_acc_polarity == REVERSED) values[7] = G_REVERSED;
 		else values[7] = (uint8_t)Config.Channel[i].pitch_acc;
 
-		values[8] = Config.Channel[i].min_travel;
-		values[9] = Config.Channel[i].max_travel;
-		values[10] = Config.Channel[i].Failsafe;
+		// Re-span travel limits and failsafe to 40%
+		temp16 = ((Config.Channel[i].min_travel << 2) / 10); 
+		values[8] = temp16;
+		temp16 = ((Config.Channel[i].max_travel << 2) / 10); 
+		values[9] = temp16;
+		temp16 = ((Config.Channel[i].Failsafe << 2) / 10); 
+		values[10] = temp16;
 
 		// Print menu
 		print_menu_items(top, MIXERSTART, &values[0], (prog_uchar*)mixer_menu_ranges, (prog_uchar*)MixerMenuOffsets, (prog_uchar*)MixerMenuText, cursor);
@@ -207,9 +212,13 @@ void menu_mixer(uint8_t i)
 				break;	
 		}
 
-		Config.Channel[i].min_travel = values[8];
-		Config.Channel[i].max_travel = values[9];
-		Config.Channel[i].Failsafe = values[10];
+		// Re-span travel limits and failsafe to 40%
+		temp16 = ((values[8] * 5) >> 1); 
+		Config.Channel[i].min_travel = temp16;
+		temp16 = ((values[9] * 5) >> 1);
+		Config.Channel[i].max_travel = temp16;
+		temp16 = ((values[10] * 5) >> 1);
+		Config.Channel[i].Failsafe = temp16;
 
 		if (button == ENTER)
 		{

@@ -59,7 +59,7 @@ const char Expo[10][16] PROGMEM =
 // Code
 //************************************************************
 
-uint16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
+uint16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs + four presets
 bool		RxActivity;
 
 // Get raw flight channel data and remove zero offset
@@ -74,6 +74,11 @@ void RxGetChannels(void)
 	{
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
+
+	RxChannel[9] = Config.Preset1;
+	RxChannel[10] = Config.Preset2;
+	RxChannel[11] = Config.Preset3;
+	RxChannel[12] = Config.Preset4;
 
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
@@ -122,7 +127,7 @@ void RC_Deadband(void)
 void CenterSticks(void)		
 {
 	uint8_t i, j;
-	uint16_t RxChannelZeroOffset[MAX_RC_CHANNELS] = {0,0,0,0,0,0,0,0,0};
+	uint16_t RxChannelZeroOffset[MAX_RC_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 	// Take an average of eight readings
 	for (i=0;i<8;i++)

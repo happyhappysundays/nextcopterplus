@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 2.00 Alpha 4
+// Version 2.00 Alpha 5
 // Inspired by KKmulticopter
 // Contains trace elements of assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -42,18 +42,18 @@
 //			Increased GLCD write speed to maximum.
 //			Working Status menu auto refresh!
 // Alpha 5	Added audible and visual error messages for LVA, no RX, Gyro error, throttle high
-//			Failsafe setting now possible from the RCinputs screen. Expo now works nicely.
+//			and Lost Model.	Failsafe setting now possible from the RCinputs screen. 
+//			Expo now works nicely. Changed min/max values to (us). Rearranged menu.
 //			FlapChan now updates mixer so that M7 has the same source as FlapChan.
 //			Enabled source volume - now adjustable from between 0% and 125%
 //			Fixed niggling hiccup from servos due to status screen refreshing.
-//			Also fixed servo jitter in CPPM mode.
+//			Fixed servo jitter in CPPM mode. Add four presets for use as source channels.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // ASAP
-//  Add lost model alarm message
 //
 // For Beta
 //  Camera stabilisation (tilt/pan and gimbal)?
@@ -62,7 +62,7 @@
 //  RC mixing menu
 //  Differential
 //  Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
-//  General settings (LMA timeout)
+//  General settings (LMA enable, timeout)
 //
 //
 //***********************************************************
@@ -251,6 +251,7 @@ while (0)
 			Change_UpdateStatus = 0;
 			RefreshStatus = false;			
 		}
+
 		// Wait for REFRESH_TIMEOUT seconds (2s) then allow status refresh, but only in synch with RC
 		if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Refresh_safe || Failsafe))
 		{
@@ -331,12 +332,14 @@ while (0)
 		if (RxActivity)	
 		{														
 			Change_LostModel = 0;
-			Model_lost = false;			
+			Model_lost = false;	
+			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
 		}
 		// Wait for 60s then trigger lost model alarm
 		if (Change_LostModel > LMA_TIMEOUT)	
 		{
 			Model_lost = true;
+			General_error |= (1 << LOST_MODEL); // Set lost model bit
 		}
 
 		if (BUZZER_ON && Model_lost) 
@@ -361,9 +364,6 @@ while (0)
 		else 
 		{
 			LVA_Alarm = false;			// Otherwise turn off buzzer
-		}
-		if (vBat >= Config.PowerTrigger)
-		{
 			General_error &= ~(1 << LOW_BATT); // Clear low battery bit
 		}
 
@@ -561,7 +561,8 @@ while (0)
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
-		/*	if(Config.RxMode == CPPM_MODE)
+/*
+			if(Config.RxMode == CPPM_MODE)
 			{
 				uint8_t i;
 				// Short delay to ensure no residual interrupt activity from ISR
@@ -572,17 +573,24 @@ while (0)
 					while (TCNT0 < 160);		// 1/20MHz * 64 = 8us
 					TCNT0 -= 160;
 				}
-			}*/
+			}
+*/
 			output_servo_ppm();				// Output servo signal
 		}
+
 		// If in failsafe, just output unsynchronised
 		else if (Failsafe && Overdue && ServoTick)
 		{
-			Refresh_safe = true;			// Safe to try and refresh status screen
+			//Refresh_safe = true;			// Safe to try and refresh status screen
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
 
 			output_servo_ppm();				// Output servo signal
+		}
+
+		if (Overdue && ServoTick)
+		{
+			Refresh_safe = true;			// Safe to try and refresh status screen
 		}
 
 		// Measure the current loop rate
