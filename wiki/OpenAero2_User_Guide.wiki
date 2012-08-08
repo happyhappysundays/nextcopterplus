@@ -25,6 +25,9 @@ For those needing a throttle control, you can just take the throttle output of y
 In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
 
 ==How do I connect up my model?==
+*A note about servo connections*
+There is no +5V power supplied to M2 to M8, so you must supply your own 5V to any of M2 to M8 via a BESC or battery pack.
+
 ===Receiver connections===
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input.
 
@@ -46,6 +49,7 @@ http://i.imgur.com/S2xRY.jpg
 ===CPPM channel order===
 CPPM mode requires that the receiver and a transmitter can reallocate channels if not matching the JR/Spektrum or Futaba channel order.
 OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
+
 *JR/Spektrum*
  * CH1: Throttle
  * CH2: Aileron #1
@@ -87,23 +91,69 @@ For flying wing models the connections are as follows:
  * M8: Rudder
 
 ==How do I set up OpenAero?==
-===Switching between stability modes===
-When used with a PWM receiver, the input connected to the THR pin controls stability.
-When used with a CPPM receiver the switch input is taken from Ch.8. In order to share these inputs with autolevel mode, you can set it up to toggle stability switchable/alwayson and autolevel switchable/alwaysoff. So that gives you three options with a single channel switch:
+===Stability and Autolevel switching===
+Due to countless requests you now have absolute freedom in how to enable these modes.
+In the Stability and Autolevel Settings menus you can select which method of control you wish to use.
 
- * 1. Autolevel always OFF, stability switchable ON/OFF (default)
- * 2. Stability always ON, Autolevel switchable ON/OFF
- * 3. Both stability and autolevel switchable ON/OFF
+ * OFF: Always off
+ * Autochan: On when the channel set as "Autochan" in RC settings is more than 50%
+ * Stabchan: On when the channel set as "Stabchan" in RC settings is more than 50%
+ * 3-pos: Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ * ON: Always on
 
-You set up the modes by using the yaw and roll TX sticks on power up and it's saved in eeprom. *Note:* For verions V1.13 and above, only the Yaw input is used for setting stability and autolevel modes.
+*3-pos switch*
+The three-position switch mode allows you to have both Stability and Autolevel on one switch, but have them selectable.
+The way it works is this:
+For the switch position between minimum and about 33% = Stability off, Autolevel off.
+For the switch position between 33% and about 66% = Stability on, Autolevel off.
+For the switch position above 66% = Stability on, Autolevel on.
 
+*RC Setting defaults*
+Stabchan = GEAR (normally ch.5)
+Autochan = AUX1 (normally ch.7)
+Flapchan = FLAP (normally ch.6)
+3-pos chan = disabled
 
-Discussion about this will follow in the advanced user guide which includes autolevel.
+===The LCD Menu System===
+*Main menu*
+The main menu stops the loop. The main menu controls should be self-explanatory.
+LEFT exits to the status menu
+RIGHT goes down into a submenu
+UD/DOWN moves through the menu list
 
-=
+*Sub menus*
+LEFT exits to the main menu
+RIGHT open up an item to edit
+UD/DOWN moves through the sub menu list
+
+*Menu item*
+LEFT resets the item to its minimum value
+RIGHT saves the item
+UD/DOWN increments and decrements the item
+
+*Contrast*
+You can change the screen contrast inside the General menu.
 
 ===Initial setup and calibration===
-The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. While everything is adjustable via the LCD interface, for the moment we will just go over the most common ones that everyone can use.
+The first time you set up OpenAero you will have to adjust a few things to suit your radio gear and particular usage. 
+
+*Step 1: Model type*
+Go into the General menu and change the Mode to that which suits your model. The default is Aeroplane.
+
+*Step 2: RC settings*
+ * Set the Rx mode to suit your radio. Unless you are using CPPM, start with PWM1. CPPM users select CPPM.
+ * If you are using CPPM, also select the channel order between either JR/Spektrum or Futaba.
+ * Select which input channel you plan to use for stability. PWM users will normally select the fifth channel (GEAR) as that corresponds to the fifth (AUX) input on the KK2. CPPM users can pick any unused channel.
+ * Select which input channel you plan to use for autolevel. PWM users may select the unused throttle input (THROTTLE) or double-up the two functions on the fifth channel (GEAR). CPPM users can pick any unused channel.
+ * If you have a three-position switch and plan to use it, set the channel it is on here.
+ * If your radio carries the second aileron channel on a channel different to the default of FLAP (channel 6) set that here too.
+*Step 3: Stability settings*
+ * For now, just alter the Mode as described above in "Stability and Autolevel switching".
+*Step 4: Autolevel settings*
+ * For now, just alter the Mode as described above in "Stability and Autolevel switching".
+*Step 5: RC check*
+ * Go to the RC Inputs screen and switch on your transmitter and receiver. You should 
+
 
 *Setting failsafe mode (V1.13 and above)*
 
