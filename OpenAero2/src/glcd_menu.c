@@ -139,12 +139,12 @@ const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
 const char SensorMenuItem6[]  PROGMEM = "Cal.";				 // Sensors text
 //
-const char RCMenuItem0[]  PROGMEM = "CPPM Ch.order:"; 		 // RC setup text
+const char RCMenuItem0[]  PROGMEM = "CPPM Ch. order:"; 		 // RC setup text
 const char RCMenuItem1[]  PROGMEM = "RX mode:"; 
-const char RCMenuItem2[]  PROGMEM = "Stability chan.:";
-const char RCMenuItem3[]  PROGMEM = "Autolevel chan.:";
-const char RCMenuItem4[]  PROGMEM = "Flap chan.:";
-const char RCMenuItem5[]  PROGMEM = "3-pos chan.:";
+const char RCMenuItem2[]  PROGMEM = "Stability input:";
+const char RCMenuItem3[]  PROGMEM = "Autolevel input:";
+const char RCMenuItem4[]  PROGMEM = "2nd Aileron:";
+const char RCMenuItem5[]  PROGMEM = "3-pos switch:";
 const char RCMenuItem6[]  PROGMEM = "JR/Spk"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
 //
@@ -159,7 +159,7 @@ const char StabMenuItem7[]  PROGMEM = "Yaw P Gain:";
 const char StabMenuItem8[]  PROGMEM = "Yaw I Gain:";
 const char StabMenuItem9[]  PROGMEM = "Yaw D Gain:";
 //
-const char ExpoMenuItem3[]  PROGMEM = "Differential:";		// Expo text
+const char ExpoMenuItem3[]  PROGMEM = "Differential (%):";		// Expo text
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// Mixer text
 const char MixerMenuItem1[]  PROGMEM = "RC mix:";
@@ -173,15 +173,15 @@ const char GeneralText1[]  PROGMEM = "Auto-refresh:";
 //
 const char MixerItem0[] PROGMEM = "Source:";				// Mixer menu items
 const char MixerItem1[] PROGMEM = "Polarity:";
-const char MixerItem2[] PROGMEM = "Volume:";
+const char MixerItem2[] PROGMEM = "Volume(%):";
 const char MixerItem4[] PROGMEM = "Roll gyro:";
 const char MixerItem5[] PROGMEM = "Pitch gyro:";
 const char MixerItem6[] PROGMEM = "Yaw gyro:";
 const char MixerItem7[] PROGMEM = "Roll acc:";
 const char MixerItem3[] PROGMEM = "Pitch acc:";
-const char MixerItem8[] PROGMEM = "Min:";
-const char MixerItem9[] PROGMEM = "Max:";
-const char MixerItem10[] PROGMEM = "Failsafe:";
+const char MixerItem8[] PROGMEM = "Min(us):";
+const char MixerItem9[] PROGMEM = "Max(us):";
+const char MixerItem10[] PROGMEM = "Failsafe(us):";
 //
 const char MixerItem11[] PROGMEM = "Normal";
 const char MixerItem12[] PROGMEM = "Reversed";
@@ -195,6 +195,10 @@ const char ChannelRef5[] PROGMEM = "Flap";
 const char ChannelRef6[] PROGMEM = "Aux1"; 
 const char ChannelRef7[] PROGMEM = "Aux2"; 
 const char ChannelRef8[] PROGMEM = "None";
+const char ChannelRef9[] PROGMEM = "Preset 1";
+const char ChannelRef10[] PROGMEM = "Preset 2";
+const char ChannelRef11[] PROGMEM = "Preset 3";
+const char ChannelRef12[] PROGMEM = "Preset 4";
 //
 const char OrientRef0[] PROGMEM = "Pitch"; 
 const char OrientRef1[] PROGMEM = "Roll"; 
@@ -208,6 +212,8 @@ const char ErrorText2[] PROGMEM = "High";
 const char ErrorText3[] PROGMEM = "No";
 const char ErrorText4[] PROGMEM = "Signal";
 const char ErrorText5[] PROGMEM = "Error";
+const char ErrorText6[] PROGMEM = "Lost";
+const char ErrorText7[] PROGMEM = "Model";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -242,8 +248,8 @@ const char *text_menu[] PROGMEM =
 		//
 		SensorMenuItem6,																	// 73
 		//
-		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, RCMenuItem5, 					// 74 to 81
-		RCMenuItem4, RCMenuItem6, RCMenuItem7,
+		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 											// 74 to 81
+		Dummy0, Dummy0, Dummy0,
 		//
 		StabMenuItem0, StabMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem4, 			// 82 to 91
 		StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, StabMenuItem9, 
@@ -257,11 +263,13 @@ const char *text_menu[] PROGMEM =
 		StatusText6, 																		// 105
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem2, MainMenuItem3, MainMenuItem4, 			// 106 to 124 
-		MainMenuItem5, MainMenuItem6, MainMenuItem7, MainMenuItem11,MainMenuItem12,
+		MainMenuItem5, MainMenuItem9, MainMenuItem8,MainMenuItem10,MainMenuItem11,
+		MainMenuItem12,
 		MainMenuItem13,MainMenuItem14,MainMenuItem15,MainMenuItem16,MainMenuItem17,
-		MainMenuItem18,MainMenuItem8, MainMenuItem9,MainMenuItem10,
+		MainMenuItem18,
+		MainMenuItem6, MainMenuItem7,
 		//
-		StatusText4, StatusText4, StatusText4, StatusText4, StatusText4, 					// Dummy 125 to 129
+		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 										// Dummy 125 to 129
 		// 
 		MixerItem0, MixerItem1, MixerItem2, MixerItem4, 									// 130 to 140
 		MixerItem5, MixerItem6, MixerItem7,MixerItem3,
@@ -272,19 +280,25 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 149 to 157 Ch. nums
-		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,								
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 149 to 161 Ch. nums
+		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
+		ChannelRef9, ChannelRef10, ChannelRef11, ChannelRef12,							
 		//
-		ChannelRef8,																		// Dummy 158
+		Dummy0,																				// Dummy 162
 		//
-		OrientRef1, OrientRef0, PText18, AutoMenuItem11,									// 159 Accs Roll, Pitch, Z, OFF
+		//OrientRef1, OrientRef0, PText18, AutoMenuItem11,									// 159 Accs Roll, Pitch, Z, OFF
 		//
 		VersionRef0,																		// 163 version
 		//
-		StatusText1, MixerMenuItem0, MixerMenuItem1, MainMenuItem6,	GeneralText0,			// 164 to 169 general
-		GeneralText1,
+		StatusText1, MixerMenuItem0, GeneralText0,											// 164 to 169 general
+		GeneralText1,MixerMenuItem1, MainMenuItem6,	
 		//
-		ErrorText5,																			// 170 Error
+		ErrorText5,	ErrorText6, ErrorText7,													// 170 to 172 Error
+		//
+		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, RCMenuItem5, 					// 173 to 182 general menu
+		RCMenuItem4, ChannelRef9, ChannelRef10, ChannelRef11, ChannelRef12,
+		//
+		RCMenuItem6, RCMenuItem7, Dummy0,													// 183 to 185 JR/Futaba
 	}; 
 
 //************************************************************

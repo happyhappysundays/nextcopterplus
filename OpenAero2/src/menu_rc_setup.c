@@ -31,16 +31,16 @@ void menu_rc_setup(void);
 // Defines
 //************************************************************
 
-#define RCITEMS 6 	// Number of menu items
-#define RCSTART 74 	// Start of Menu text items
-#define RCTEXT 80 	// Start of value text items
+#define RCITEMS 10 	// Number of menu items
+#define RCSTART 173 // Start of Menu text items
+#define RCTEXT 183 	// Start of value text items
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuOffsets[RCITEMS] PROGMEM = {92, 92, 92, 92, 92, 92};
-const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 149};
+const uint8_t RCMenuOffsets[RCITEMS] PROGMEM = {92, 92, 92, 92, 92, 92, 92, 92, 92, 92};
+const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 149, 0,0,0,0};
 const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
 	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
@@ -48,7 +48,11 @@ const menu_range_t rc_menu_ranges[] PROGMEM =
 	{THROTTLE,NOCHAN,1,1,GEAR},
 	{THROTTLE,NOCHAN,1,1,AUX1},
 	{THROTTLE,NOCHAN,1,1,NOCHAN},
-	{THROTTLE,NOCHAN,1,1,FLAP}
+	{THROTTLE,NOCHAN,1,1,FLAP},
+	{900,2100,10,0,1500},
+	{900,2100,10,0,1500},
+	{900,2100,10,0,1500},
+	{900,2100,10,0,1500},
 };
 //************************************************************
 // Main menu-specific setup
@@ -64,6 +68,7 @@ void menu_rc_setup(void)
 	menu_range_t range;
 	uint8_t i = 0;
 	uint8_t text_link;
+	int16_t temp16 = 0;
 	
 	while(button != BACK)
 	{
@@ -77,6 +82,16 @@ void menu_rc_setup(void)
 		values[3] = Config.AutoChan;
 		values[4] = Config.ThreePos;
 		values[5] = Config.FlapChan;
+
+		// Re-span presets to 40%
+		temp16 = ((Config.Preset1 << 2) / 10); 
+		values[6] = temp16;
+		temp16 = ((Config.Preset2 << 2) / 10); 
+		values[7] = temp16;
+		temp16 = ((Config.Preset3 << 2) / 10); 
+		values[8] = temp16;
+		temp16 = ((Config.Preset4 << 2) / 10); 
+		values[9] = temp16;
 
 		// Print menu
 		print_menu_items(top, RCSTART, &values[0], (prog_uchar*)rc_menu_ranges, (prog_uchar*)RCMenuOffsets, (prog_uchar*)RCMenuText, cursor);
@@ -107,6 +122,16 @@ void menu_rc_setup(void)
 		Config.AutoChan = values[3];
 		Config.ThreePos = values[4];
 		Config.FlapChan = values[5];
+
+		// Re-span travel limits and failsafe to 40%
+		temp16 = ((values[6] * 5) >> 1); 
+		Config.Preset1 = temp16;
+		temp16 = ((values[7] * 5) >> 1); 
+		Config.Preset2 = temp16;
+		temp16 = ((values[8] * 5) >> 1); 
+		Config.Preset3 = temp16;
+		temp16 = ((values[9] * 5) >> 1); 
+		Config.Preset4 = temp16;
 
 		// Update Ch7. mixer with source from Config.FlapChan
 		Config.Channel[CH7].source = Config.FlapChan;

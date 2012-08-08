@@ -11,7 +11,7 @@
 
 #define INPUT 	0
 #define OUTPUT 	1
-#define MAX_RC_CHANNELS 9				// Maximum input channels
+#define MAX_RC_CHANNELS 13				// Maximum input channels
 #define MAX_OUTPUTS 8					// Maximum output channels
 
 typedef struct
@@ -120,6 +120,13 @@ typedef struct
 	uint16_t	AccRollZero;			// Acc calibration results
 	uint16_t	AccPitchZero;
 	uint16_t	AccZedZero;
+	
+	// Preset channels
+	uint16_t	Preset1;				// RC presets for camstab
+	uint16_t	Preset2;
+	uint16_t	Preset3;
+	uint16_t	Preset4;
+
 	// 
 	uint16_t	Dummy;
 

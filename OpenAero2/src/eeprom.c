@@ -39,8 +39,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 // Code
 //************************************************************
 
-uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7,0}; // JR/Spektrum channel sequence
-uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7,0}; // Futaba channel sequence
+uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7,0,0,0,0,0}; // JR/Spektrum channel sequence
+uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7,0,0,0,0,0}; // Futaba channel sequence
 
 void Set_EEPROM_Default_Config(void)
 {
@@ -110,6 +110,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.Orientation = 0;				// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.AutoUpdateEnable = OFF;
+
+	Config.Preset1 = 3750;
+	Config.Preset2 = 3750;
+	Config.Preset3 = 3750;
+	Config.Preset4 = 3750;
 }
 
 void Save_Config_to_EEPROM(void)

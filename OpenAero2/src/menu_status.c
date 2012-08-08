@@ -109,6 +109,10 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(vBat,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
 
+	//Debug
+	//General_error = 0;
+	//General_error = (1 << LOST_MODEL);
+
 	// Draw error messages, if any
 	if (General_error != 0)
 	{
@@ -121,7 +125,7 @@ void Display_status(void)
 		{
 			LCD_Display_Text(96,(prog_uchar*)Verdana14,35,14); 	// Sensor
 			LCD_Display_Text(170,(prog_uchar*)Verdana14,43,34); // Error
-			//menu_beep(7);
+			menu_beep(9);
 		}
 		else if((General_error & (1 << LOW_BATT)) != 0)
 		{
@@ -132,13 +136,18 @@ void Display_status(void)
 		{
 			LCD_Display_Text(99,(prog_uchar*)Verdana14,51,13); 	// No
 			LCD_Display_Text(100,(prog_uchar*)Verdana14,39,33); // Signal
-			//menu_beep(3);
+			menu_beep(3);
+		}
+		else if((General_error & (1 << LOST_MODEL)) != 0)
+		{
+			LCD_Display_Text(171,(prog_uchar*)Verdana14,45,14); // Lost
+			LCD_Display_Text(172,(prog_uchar*)Verdana14,40,34); // Model
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{
 			LCD_Display_Text(149,(prog_uchar*)Verdana14,28,14); // Throttle
 			LCD_Display_Text(98,(prog_uchar*)Verdana14,46,34); 	// High
-			//menu_beep(5);
+			menu_beep(6);
 		}
 	}
 

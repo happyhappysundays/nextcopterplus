@@ -142,7 +142,7 @@ void ProcessMixer(void)
 	int16_t temp = 0;
 	int32_t temp32 = 0;
 	int32_t mult32 = 0;
-	uint8_t expos[] = {0,0,0,0,Config.ElevatorExpo,Config.AileronExpo,Config.AileronExpo,Config.RudderExpo};
+	uint8_t expos[] = {0,0,0,0,Config.ElevatorExpo,Config.AileronExpo,Config.AileronExpo,Config.RudderExpo,0};
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
