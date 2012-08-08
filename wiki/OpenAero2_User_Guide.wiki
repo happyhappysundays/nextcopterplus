@@ -115,6 +115,7 @@ If the auto-update is switched off, the screen can be manually updated with the 
 Pressing button 3 goes to the main menu.
 
 ===Main Menu===
+http://i.imgur.com/9Iopl.jpg
 *Main menu*
 The main menu stops the loop. The main menu controls should be self-explanatory.
 LEFT exits to the status menu
@@ -161,6 +162,106 @@ http://i.imgur.com/L4iET.jpg
  * *Preset 1 to Preset 4:* When using a camera mount which is stabilised but not necessarily controlled, you need a fixed offset to feed that channel. These can be set up here.
 
 ===Stability Control Menu===
+http://i.imgur.com/OqlvE.jpg
+ * *Mode:* This setting determines how the stability is to be controlled. There five options.
+ # *OFF:* Always off
+ # *Autochan:* On when the channel set as "Autochan" in RC settings is more than 50%
+ # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%
+ # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ # *ON:* Always on
+ * *Roll P Gain:* PID Proportional gain for the roll gyro
+ * *Roll I Gain:* PID I-term gain for the roll gyro
+ * *Roll D Gain:* PID Differential gain for the roll gyro
+ * *Pitch P Gain:* PID Proportional gain for the pitch gyro
+ * *Pitch I Gain:* PID I-term gain for the roll gyro
+ * *Pitch D Gain:* PID Differential gain for the pitch gyro
+ * *Yaw P Gain:* PID Proportional gain for the yaw gyro
+ * *Yaw I Gain:* PID I-term gain for the roll gyro
+ * *Yaw D Gain:* PID Differential gain for the yaw gyro
+
+*Note:* The function of PID gain controls is outside the scope of this basic User's Guide.
+===Autolevel Control Menu===
+http://i.imgur.com/talS1.jpg
+ * *Mode:* This setting determines how the stability is to be controlled. There five options.
+ # *OFF:* Always off
+ # *Autochan:* On when the channel set as "Autochan" in RC settings is more than 50%
+ # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%
+ # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ # *ON:* Always on
+ * *Gyro P Gain:* PID Proportional gain for the roll and pitch gyros
+ * *Gyro I Gain:* PID I-term gain for the roll and pitch gyros
+ * *Gyro D Gain:* PID Differential gain for the roll and pitch gyros
+ * *Acc P:* PID Proportional gain for the accelerometers
+ * *Acc I:* PID I-term gain for the accelerometers
+ * *Acc D:* PID Differential gain for the accelerometers
+ * *Roll trim:* For fine roll tuning of the autolevel.
+ * *Pitch trim:* For fine pitch tuning of the autolevel.
+
+===Expo/Differential Menu===
+http://i.imgur.com/UJCkf.jpg
+ * *Aileron:* Aileron expo in %.
+ * *Elevator:* Elevator expo in %.
+ * *Rudder:* Rudder expo in %.
+ * *Differential(%):* This feature is not implemented in this release.
+http://i.imgur.com/m797m.jpg
+ * The on-screen graph is drawn using the actual expo table and so gives you an accurate view of the response curve.
+
+===Battery Menu===
+http://i.imgur.com/yUARU.jpg
+ * *Battery type:* Used internally to preset the min and max cell volatges.
+ * *Cells:* Number of cells in your battery pack. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
+ * *Alarm voltage:* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
+ * *Max cell voltage:* Set this to the maximum cell voltage that you like to use. defaults to 420 (4.2V) for LiPo.
+http://i.imgur.com/HmskH.jpg
+ * *Min cell voltage:* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
+
+
+===RC inputs Screen===
+http://i.imgur.com/WlVhb.jpg
+
+The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. Only the first five channels are shown.
+
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on thr right-hand column drop to zero. Make sure all controls are centered before calibration
+
+Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
+Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
+It is recommended that receivers with built-in failsafe be set up and used.
+
+===Sensor Inputs Screen===
+http://i.imgur.com/qUqmL.jpg
+
+The sensor inputs screen shows you the current values of all sensors. 
+Pressing button 4 "Cal." calibrates the accelerometers. The gyros are calibrated at start-up.
+
+===Balance Meter Screen===
+http://i.imgur.com/L4Qte.jpg
+
+The balance meter screen shows you a graphical representation of where the board considers "down" to be. Pressing button 4 "Cal." calibrates the accelerometers. 
+A detailed description of the correct use of this screen is given in the section "Initial setup and calibration".
+
+===Mixer Menu 1 to 8===
+Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
+
+http://i.imgur.com/VkVQb.jpg
+
+ * *Source:* Source RC input channel for this output.
+ * *Polarity:* Input channel polarity (Normal/Reverse).
+ * *Volume(%):* The percentage of the input channel you wish to use (0% to 125%).
+ * *Roll gyro:* Roll gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to roll, enable this. If the response is backwards to what you need, set this to Reversed.
+
+
+http://i.imgur.com/i9hGL.jpg
+
+ * *Pitch gyro:* Pitch gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to pitch, enable this. If the response is backwards to what you need, set this to Reversed.
+ * *Yaw gyro:* Yaw gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to yaw, enable this. If the response is backwards to what you need, set this to Reversed.
+ * *Roll acc:* Roll accelerometer signal enable/disable (Off/On/Reversed). If you wish this output to respond to roll attitude, enable this. If the response is backwards to what you need, set this to Reversed.
+ * *Pitch acc:* Pitch accelerometer signal enable/disable (Off/On/Reversed). If you wish this output to respond to pitch attitude, enable this. If the response is backwards to what you need, set this to Reversed.
+
+http://i.imgur.com/p1qYz.jpg
+
+ * *Min (us):* The lower end-point of the servo travel.
+ * *Max (us):* The upper end-point of the servo travel.
+ * *Failsafe (us):* The failsafe position of the servo. Over-ridden by pressing the failsafe button on the RC Inputs screen.
 
 ==Error messages==
 If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
