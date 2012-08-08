@@ -2,6 +2,9 @@
 ==What is OpenAero2?==
 OpenAero2 is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
+OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. In addition, four preset channel sources can be used as inputs.
+Each of the eight output channels can have any or all sensors mixed together.
+
 ==What models can OpenAero2 be used with?==
 OpenAero2 have a completely flexible mixer which allows it to control just about anything, but comes with two preset mix tables.
 
@@ -133,8 +136,55 @@ UD/DOWN increments and decrements the item
 
 *Contrast*
 You can change the screen contrast inside the General menu.
+==The Status Screen==
+The status screen gives you a continually updated display of the battery status, flight modes and any error messages.
 
-===Initial setup and calibration===
+http://i.imgur.com/kaaAF.jpg
+
+*Mode:* The current mixer mode
+
+*Version:* The version number of the loaded firmware
+
+*Input:* The RC input mode (CPPM/PWM1, PWM2 or PWM3)
+
+*Autolevel:* The current autolevel status (ON/OFF)
+
+
+*Stability:* The current stability status (ON/OFF)
+
+The menu defaults to auto-update, which means the menu self-refreshes every two second when no RC activity is detected. The screen will not update if there is RC activity.
+
+If the auto-update is switched off, the screen can be manually updated with the "Refresh" button (button 1).
+
+Pressing button 3 goes to the main menu.
+
+==Error messages==
+If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
+http://i.imgur.com/bnM8R.jpg
+http://i.imgur.com/MEX6v.jpg
+http://i.imgur.com/zz3pz.jpg
+
+*Sensor Error:* 
+When the board is powered up it must remain still so that the gyros can be accurately calibrated. It the boards detects movement during calibration, this error will be displayed. To clear this error, repower the board while keeping the board still.
+
+*Battery Low:*
+If you are using the board to monitor the battery voltage, when the current battery voltage falls below the set alarm point, this message is shown. 
+If you are not planning to monitor the battery voltage, please set the LVA to zero.
+
+*No Signal:*
+This message will be displayed when the board detects a loss of RC signal.
+
+http://i.imgur.com/Oynh2.jpg
+http://i.imgur.com/v397I.jpg
+
+*Lost Model:*
+Approximately one minute after the last detected RC input, the Lost Model buzzer will sound and this message will be displayed. The alarm can be cancelled with any stick input.
+
+*Throttle High:*
+PWM does not require a throttle input in OpenAero2. In CPPM mode however, the throttle signal is passed through the board and appears as a PWM signal on M1.
+As a safety measure, if the board is powered up with the throttle set to more than about 5%, the oupts will be disabled, anaalarm will sound and this message will be displayed.
+
+==Initial setup and calibration==
 The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
 
 *Step 1: Model type*
