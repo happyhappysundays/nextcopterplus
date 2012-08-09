@@ -85,9 +85,7 @@ void menu_expo(void)
 
 		// Handle menu changes
 		update_menu(EXPOITEMS, EXPOSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)expo_menu_ranges, temp - EXPOSTART);
-		//range = expo_menu_ranges[temp - EXPOSTART];
 
 		if (button == ENTER)
 		{

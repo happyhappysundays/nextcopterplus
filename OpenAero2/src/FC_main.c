@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 2.00 Alpha 5
+// Version 2.00 Beta 1 - August 2012
 // Inspired by KKmulticopter
 // Contains trace elements of assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -48,17 +48,17 @@
 //			Enabled source volume - now adjustable from between 0% and 125%
 //			Fixed niggling hiccup from servos due to status screen refreshing.
 //			Fixed servo jitter in CPPM mode. Add four presets for use as source channels.
+// Beta 1	First public release. Fixed failsafe bug. Removed unused menu items.
+//			Small, ugly hack to modify battery defaults if NiMh selected.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// ASAP
-//
 // For Beta
-//  Camera stabilisation (tilt/pan and gimbal)?
 //
 // Later
+//  Camera stabilisation (tilt/pan and gimbal)
 //  RC mixing menu
 //  Differential
 //  Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
@@ -203,19 +203,7 @@ int main(void)
 	init();									// Do all init tasks
 	AccInit();								// Clear avg buffer, set indexes
 
-//************************************************************
-// Test code - start
-//************************************************************
-
-while (0) 
-{
-}
-
-//************************************************************
-// Test code - end
-//************************************************************
-
-	Display_status();
+	Display_status(); // Initial display of status menu prior to main loop
 
 	//************************************************************
 	//* Main loop
@@ -561,8 +549,7 @@ while (0)
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
-/*
-			if(Config.RxMode == CPPM_MODE)
+/*			if(Config.RxMode == CPPM_MODE)
 			{
 				uint8_t i;
 				// Short delay to ensure no residual interrupt activity from ISR

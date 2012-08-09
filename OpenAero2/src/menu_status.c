@@ -109,10 +109,6 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(vBat,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
 
-	//Debug
-	//General_error = 0;
-	//General_error = (1 << LOST_MODEL);
-
 	// Draw error messages, if any
 	if (General_error != 0)
 	{

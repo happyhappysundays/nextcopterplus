@@ -204,7 +204,7 @@ const char OrientRef0[] PROGMEM = "Pitch";
 const char OrientRef1[] PROGMEM = "Roll"; 
 const char OrientRef2[] PROGMEM = "Yaw";
 //
-const char VersionRef0[] PROGMEM = "Alpha 5"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 1"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char ErrorText0[] PROGMEM = "Sensor"; //96
 const char ErrorText1[] PROGMEM = "Low";

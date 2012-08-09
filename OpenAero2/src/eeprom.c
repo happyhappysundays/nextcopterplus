@@ -56,7 +56,6 @@ void Set_EEPROM_Default_Config(void)
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
-	//Config.RxMode = CPPM_MODE;
 	Config.TxSeq = JRSEQ;
 	//
 	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
@@ -83,8 +82,7 @@ void Set_EEPROM_Default_Config(void)
 	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
-	Config.PowerTrigger = 1080; 		// 7.33V for 2S, 10.8V for 3S are good values here
-	//Config.PowerTrigger = 0;
+	Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
 	Config.BatteryCells = 3;			// Default to 3S
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 360;
@@ -97,8 +95,8 @@ void Set_EEPROM_Default_Config(void)
 										// Autolevel (0) = inactive (bit 0);
 	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
 	Config.AutoChan = AUX1;				// Channel AUX2 switches autolevel by default
-	Config.FlapChan = NOCHAN;				// Channel FLAP (6) is the second aileron input by default
-	Config.ThreePos = NOCHAN;			// Three-position switch input disabled by default
+	Config.FlapChan = THROTTLE;			// Most people will use the throttle input I imagine
+	Config.ThreePos = GEAR;				// Three-position switch should be connected to AUX on the PCB (Ch.5 - GEAR)
 
 	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
 	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
@@ -109,7 +107,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.RCMix = 0;
 	Config.Orientation = 0;				// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
-	Config.AutoUpdateEnable = OFF;
+	Config.AutoUpdateEnable = ON;
 
 	Config.Preset1 = 3750;
 	Config.Preset2 = 3750;

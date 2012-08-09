@@ -35,6 +35,9 @@ void menu_battery(void);
 #define BATTSTART 66 	// Start of Menu text items
 #define BATTTEXT 71 	// Start of value text items
 
+#define	NIMH_MAX 125	// Alternate default for max cell voltage for NiMh
+#define	NIMH_MIN 110	// Alternate default for max cell voltage for NiMh
+
 //************************************************************
 // Battery menu items
 //************************************************************
@@ -47,7 +50,7 @@ const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
 const menu_range_t batt_menu_ranges[] PROGMEM = 
 {
 	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
-	{1,5,1,0,3},
+	{1,12,1,0,3},
 	{0,2000,10,0,1080},
 	{120,430,10,0,420},
 	{80,400,10,0,360}
@@ -94,9 +97,21 @@ void menu_battery(void)
 
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)batt_menu_ranges, temp - BATTSTART);
-		//range = batt_menu_ranges[temp - BATTSTART];
+
+		// Modify defaults for NiMh if NiMh selected (really ugly)
+		if (Config.BatteryType == NIMH)
+		{
+			if ((temp - BATTSTART) == 3) // MaxVoltage
+			{
+				range.default_value = NIMH_MAX;
+			}
+
+			if ((temp - BATTSTART) == 4) // MinVoltage
+			{
+				range.default_value = NIMH_MIN;
+			}
+		}
 
 		if (button == ENTER)
 		{

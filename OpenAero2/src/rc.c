@@ -75,6 +75,7 @@ void RxGetChannels(void)
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
 
+	// Update presets manually as they don't come from the RC
 	RxChannel[9] = Config.Preset1;
 	RxChannel[10] = Config.Preset2;
 	RxChannel[11] = Config.Preset3;
@@ -151,22 +152,17 @@ void CenterSticks(void)
 void SetFailsafe(void)		
 {
 	uint8_t i;
-	uint16_t Failsafe[MAX_OUTPUTS] = {0,0,0,0,0,0,0,0};
 
-	// Take an average of eight readings
-	for (i=0;i<8;i++)
-	{
-		UpdateServos();
-		for (i=0;i<MAX_OUTPUTS;i++)
-		{
-			Failsafe[i] += ServoOut[i]; 
-		}
-		_delay_ms(100);
-	}
+	// Update latest values of each channel
+	ProcessMixer();
 
+	// Transfer latest values of each channel to ServoOut[] and range limit
+	UpdateServos();
+
+	// Transfer values to failsafe
 	for (i=0;i<MAX_OUTPUTS;i++)
 	{
-		Config.Channel[i].Failsafe = Failsafe[i] >> 3; 
+		Config.Channel[i].Failsafe = ServoOut[i]; 
 	}
 
 	Save_Config_to_EEPROM();
