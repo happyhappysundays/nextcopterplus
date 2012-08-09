@@ -31,13 +31,14 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 6 		// Number of menu items
+#define GENERALITEMS 4 		// Number of menu items
 #define GENERALSTART 164 	// Start of Menu text items
 
 //************************************************************
 // RC menu items
 //************************************************************
-	 
+
+/*	 
 const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {50, 80, 80, 80, 80, 80};
 const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101, 101, 101};
 const menu_range_t general_menu_ranges[] PROGMEM = 
@@ -48,6 +49,16 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 	{OFF,ON,1,1,OFF},	// Auto-update status menu
 	{OFF,ON,1,1,OFF},
 	{OFF,ON,1,1,OFF},
+};
+*/
+const uint8_t GeneralMenuOffsets[GENERALITEMS] PROGMEM = {50, 80, 80, 80};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101};
+const menu_range_t general_menu_ranges[] PROGMEM = 
+{
+	{AEROPLANE,MANUAL,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
+	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
+	{28,45,1,0,38}, 	// Contrast
+	{OFF,ON,1,1,OFF},	// Auto-update status menu
 };
 
 //************************************************************
@@ -74,8 +85,8 @@ void menu_general(void)
 		values[1] = Config.Orientation;
 		values[2] = Config.Contrast;
 		values[3] = Config.AutoUpdateEnable;
-		values[4] = Config.RCMix;
-		values[5] = Config.CamStab;
+	//	values[4] = Config.RCMix;
+	//	values[5] = Config.CamStab;
 
 
 		// Print menu
@@ -90,9 +101,7 @@ void menu_general(void)
 
 		// Handle menu changes
 		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)general_menu_ranges, temp - GENERALSTART);
-		//range = general_menu_ranges[temp - GENERALSTART];
 
 		if (button == ENTER)
 		{
@@ -105,8 +114,8 @@ void menu_general(void)
 		Config.Orientation = values[1];
 		Config.Contrast = values[2];
 		Config.AutoUpdateEnable = values[3];
-		Config.RCMix = values[4];
-		Config.CamStab = values[5];
+	//	Config.RCMix = values[4];
+	//	Config.CamStab = values[5];
 
 		// Update contrast
 		//st7565_set_brightness(Config.Contrast);

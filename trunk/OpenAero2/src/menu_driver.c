@@ -19,7 +19,7 @@
 #include "..\inc\menu_ext.h"
 #include "..\inc\rc.h"
 
-#define CONTRAST 166
+#define CONTRAST 166 // Contrast item number
 
 //************************************************************
 // Prototypes

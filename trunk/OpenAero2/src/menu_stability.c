@@ -54,6 +54,7 @@ const menu_range_t stab_menu_ranges[] PROGMEM =
 	{0,250,1,0,0},
 	{0,250,1,0,0}
 };
+
 //************************************************************
 // Main menu-specific setup
 //************************************************************
@@ -97,9 +98,7 @@ void menu_stab_control(void)
 
 		// Handle menu changes
 		update_menu(STABITEMS, STABSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)stab_menu_ranges, temp - STABSTART);
-		//range = stab_menu_ranges[temp - STABSTART];
 
 		if (button == ENTER)
 		{
@@ -108,7 +107,6 @@ void menu_stab_control(void)
 		}
 
 		// Update value in config structure
-
 		Config.StabMode = values[0];	
 		Config.Roll.P_mult = values[1];	
 		Config.Roll.I_mult = values[2]; 

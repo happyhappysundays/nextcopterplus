@@ -96,9 +96,7 @@ void menu_al_control(void)
 
 		// Handle menu changes
 		update_menu(AUTOITEMS, AUTOSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)auto_menu_ranges, temp - AUTOSTART);
-		//range = auto_menu_ranges[temp - AUTOSTART];
 
 		if (button == ENTER)
 		{

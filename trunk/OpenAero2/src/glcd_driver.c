@@ -37,9 +37,6 @@
 #include "..\inc\io_cfg.h"
 #include "..\inc\main.h"
 
-#define GLCD_BAUDRATE 8000
-#define GLCD_DELAY (1000000 / GLCD_BAUDRATE)  // Default RX rate (125ns)
-
 void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);

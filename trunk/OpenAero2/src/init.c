@@ -131,13 +131,11 @@ void init(void)
 	//***********************************************************
 	// Interrupts and pin function setup
 	//***********************************************************
-	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
 
+	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
 	PCICR  |= (1 << PCIE1);				// PCINT8  to PCINT15 (PCINT1 group - AUX)
-	//PCICR  |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group - M8/CPPM)	
 	PCICR  |= (1 << PCIE3);				// PCINT24 to PCINT31 (PCINT3 group - THR)
 	PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
-	//PCMSK2 |= (1 << PCINT23);			// PC7 (M8 CPPM input)
 	PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
 	PCIFR  |= (1 << PCIF0);				// Clear PCIF0 interrupt flag 
 	PCIFR  |= (1 << PCIF1);				// Clear PCIF1 interrupt flag 
@@ -145,7 +143,6 @@ void init(void)
 	PCIFR  |= (1 << PCIF3);				// Clear PCIF3 interrupt flag 
 
 	// External interrupts INT0 (Elevator) and INT1 (Aileron) and INT2 (Rudder)
-
 	EIMSK |= (1 << INT0);				// Enable INT0 (Elevator input)
 	EIMSK |= (1 << INT1);				// Enable INT1 (Aileron input)
 	EIMSK |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
@@ -167,7 +164,6 @@ void init(void)
 
 	Initial_EEPROM_Config_Load();		// Loads config at start-up 
 	Init_ADC();
-	//init_uart();						// Initialise UART
 
 	// Flash LED
 	LED1 = 1;

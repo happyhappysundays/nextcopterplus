@@ -60,8 +60,8 @@ void Calculate_PID(void)
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Gyro PD terms
-		PID_gyro_temp = PID_gyro_temp * Config.G_level.P_mult;				// Multiply P-term (Max gain of 256)
-		PID_gyro_temp = PID_gyro_temp * 3;									// Multiply by 3, so max effective gain is 768
+		PID_gyro_temp = PID_gyro_temp * Config.G_level.P_mult;		// Multiply P-term (Max gain of 256)
+		PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3, so max effective gain is 768
 		DifferentialGyro *= Config.G_level.D_mult;					// Multiply D-term by up to 256
 
 		// Acc PI terms
@@ -75,37 +75,37 @@ void Calculate_PID(void)
 		{
 			IntegralaRoll = -ITERM_LIMIT_LEVEL;
 		}
-		PID_I_temp = IntegralaRoll * Config.A_level.I_mult;		// Multiply I-term (Max gain of 256)
-		PID_I_temp = PID_I_temp >> 3;							// Divide by 8, so max effective gain is 16
+		PID_I_temp = IntegralaRoll * Config.A_level.I_mult;			// Multiply I-term (Max gain of 256)
+		PID_I_temp = PID_I_temp >> 3;								// Divide by 8, so max effective gain is 16
 
 		// Sum Gyro P and D terms + Acc P and I terms
-		PID_Gyros[ROLL] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
-		PID_ACCs[ROLL] 	= (PID_acc_temp + PID_I_temp) >> 6;		// Sum  Acc P and I terms and rescale
+		PID_Gyros[ROLL] = (PID_gyro_temp + DifferentialGyro) >> 6;	// Sum Gyro P and D terms and rescale
+		PID_ACCs[ROLL] 	= (PID_acc_temp + PID_I_temp) >> 6;			// Sum  Acc P and I terms and rescale
 
 	}
 	else // Normal mode (Just use raw gyro errors to guess at attitude)
 	{
 		// Gyro PD terms
-		PID_gyro_temp = PID_gyro_temp * Config.Roll.P_mult;					// Multiply P-term (Max gain of 256)
+		PID_gyro_temp = PID_gyro_temp * Config.Roll.P_mult;			// Multiply P-term (Max gain of 256)
 		DifferentialGyro *= Config.Roll.D_mult;						// Multiply D-term by up to 256
-		PID_gyro_temp = PID_gyro_temp * 3;									// Multiply by 3, so max effective gain is 768
+		PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3, so max effective gain is 768
 
 		// Sum	
-		PID_Gyros[ROLL] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
+		PID_Gyros[ROLL] = (PID_gyro_temp + DifferentialGyro) >> 6;	// Sum Gyro P and D terms and rescale
 	}
 
 	// Calculate pitch PID
 	PID_gyro_temp = gyroADC[PITCH];
 
-	currentError[PITCH] = PID_gyro_temp;									// D-term
+	currentError[PITCH] = PID_gyro_temp;							// D-term
 	DifferentialGyro = currentError[PITCH] - lastError[PITCH];
 	lastError[PITCH] = currentError[PITCH];
 
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Gyro PD terms
-		PID_gyro_temp = PID_gyro_temp * Config.G_level.P_mult;				// Multiply P-term (Max gain of 256)
-		PID_gyro_temp = PID_gyro_temp * 3;									// Multiply by 3, so max effective gain is 768
+		PID_gyro_temp = PID_gyro_temp * Config.G_level.P_mult;		// Multiply P-term (Max gain of 256)
+		PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3, so max effective gain is 768
 		DifferentialGyro *= Config.G_level.D_mult;					// Multiply D-term by up to 256
 
 		// Acc PI terms
@@ -120,36 +120,36 @@ void Calculate_PID(void)
 			IntegralaPitch = -ITERM_LIMIT_LEVEL;
 		}
 		PID_I_temp = IntegralaPitch * Config.A_level.I_mult;		// Multiply I-term (Max gain of 256)
-		PID_I_temp = PID_I_temp >> 3;							// Divide by 8, so max effective gain is 16
+		PID_I_temp = PID_I_temp >> 3;								// Divide by 8, so max effective gain is 16
 
 		// Sum Gyro P and I terms + Acc P and I terms
-		PID_Gyros[PITCH] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
-		PID_ACCs[PITCH] = (PID_acc_temp + PID_I_temp) >> 6;		// Sum  Acc P and I terms and rescale
+		PID_Gyros[PITCH] = (PID_gyro_temp + DifferentialGyro) >> 6;	// Sum Gyro P and D terms and rescale
+		PID_ACCs[PITCH] = (PID_acc_temp + PID_I_temp) >> 6;			// Sum  Acc P and I terms and rescale
 
 	}
 	else // Normal mode (Just use raw gyro errors to guess at attitude)
 	{
 		// Gyro PD terms
-		PID_gyro_temp = PID_gyro_temp * Config.Pitch.P_mult;					// Multiply P-term (Max gain of 256)
+		PID_gyro_temp = PID_gyro_temp * Config.Pitch.P_mult;		// Multiply P-term (Max gain of 256)
 		DifferentialGyro *= Config.Pitch.D_mult;					// Multiply D-term by up to 256
-		PID_gyro_temp = PID_gyro_temp * 3;									// Multiply by 3, so max effective gain is 768
+		PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3, so max effective gain is 768
 
 		// Sum
-		PID_Gyros[PITCH] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
+		PID_Gyros[PITCH] = (PID_gyro_temp + DifferentialGyro) >> 6;	// Sum Gyro P and D terms and rescale
 	}
 
 	// Calculate yaw PID
 	PID_gyro_temp = gyroADC[YAW];
 	
-	currentError[YAW] = PID_gyro_temp;									// D-term
+	currentError[YAW] = PID_gyro_temp;								// D-term
 	DifferentialGyro = currentError[YAW] - lastError[YAW];
 	lastError[YAW] = currentError[YAW];
 
-	PID_gyro_temp *= Config.Yaw.P_mult;									// Multiply P-term (Max gain of 256)
+	PID_gyro_temp *= Config.Yaw.P_mult;								// Multiply P-term (Max gain of 256)
 	DifferentialGyro *= Config.Yaw.D_mult;							// Multiply D-term by up to 256
 	PID_gyro_temp = PID_gyro_temp * 3;
 
 	// Sum
-	PID_Gyros[YAW] = (PID_gyro_temp + DifferentialGyro) >> 6;			// Sum Gyro P and D terms and rescale
+	PID_Gyros[YAW] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
 
 }
