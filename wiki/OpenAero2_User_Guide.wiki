@@ -116,6 +116,7 @@ Pressing button 3 goes to the main menu.
 
 ===Main Menu===
 http://i.imgur.com/9Iopl.jpg
+
 *Main menu*
 The main menu stops the loop. The main menu controls should be self-explanatory.
 LEFT exits to the status menu
@@ -338,7 +339,7 @@ Go into the General menu and change the Mode to that which suits your model. The
 
 *Step 6: Servo direction*
 
-One return to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
+ * Once return to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
 
  * Move all surfaces and check that the move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
 
