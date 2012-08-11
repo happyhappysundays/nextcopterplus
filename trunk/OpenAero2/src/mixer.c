@@ -173,7 +173,7 @@ void ProcessMixer(void)
 		// Post-PID gyro input
 		if (Stability || AutoLevel)
 		{
-			if (Config.Channel[i].roll_gyro == G_ON)
+			if (Config.Channel[i].roll_gyro == ON)
 			{
 				if (Config.Channel[i].roll_gyro_polarity == REVERSED)
 				{
@@ -185,7 +185,7 @@ void ProcessMixer(void)
 				}
 			}
 
-			if (Config.Channel[i].pitch_gyro == G_ON)
+			if (Config.Channel[i].pitch_gyro == ON)
 			{
 				if (Config.Channel[i].pitch_gyro_polarity == REVERSED)
 				{
@@ -197,7 +197,7 @@ void ProcessMixer(void)
 				}
 			}
 
-			if (Config.Channel[i].yaw_gyro == G_ON)
+			if (Config.Channel[i].yaw_gyro == ON)
 			{
 				if (Config.Channel[i].yaw_gyro_polarity == REVERSED)
 				{
@@ -214,7 +214,7 @@ void ProcessMixer(void)
 		// Post-PID acc input
 		if (AutoLevel)
 		{
-			if (Config.Channel[i].roll_acc == G_ON)
+			if (Config.Channel[i].roll_acc == ON)
 			{
 				if (Config.Channel[i].roll_acc_polarity == REVERSED)
 				{
@@ -225,7 +225,7 @@ void ProcessMixer(void)
 					temp +=	PID_ACCs[ROLL];
 				}
 			}
-			if (Config.Channel[i].pitch_acc == G_ON)
+			if (Config.Channel[i].pitch_acc == ON)
 			{
 				if (Config.Channel[i].pitch_acc_polarity == REVERSED)
 				{

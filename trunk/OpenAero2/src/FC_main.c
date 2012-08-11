@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 2.00 Beta 1 - August 2012
+// Version 2.00 Beta 2 - August 2012
 // Inspired by KKmulticopter
 // Contains trace elements of assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -50,12 +50,14 @@
 //			Fixed servo jitter in CPPM mode. Add four presets for use as source channels.
 // Beta 1	First public release. Fixed failsafe bug. Removed unused menu items.
 //			Small, ugly hack to modify battery defaults if NiMh selected.
+// Beta 2	Change gyro setup in mixer. Change limits to percentages.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For Beta
+// For Beta2
+//  Compress menu value data to reclaim space
 //
 // Later
 //  Camera stabilisation (tilt/pan and gimbal)

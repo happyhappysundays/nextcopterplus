@@ -179,9 +179,9 @@ const char MixerItem5[] PROGMEM = "Pitch gyro:";
 const char MixerItem6[] PROGMEM = "Yaw gyro:";
 const char MixerItem7[] PROGMEM = "Roll acc:";
 const char MixerItem3[] PROGMEM = "Pitch acc:";
-const char MixerItem8[] PROGMEM = "Min(us):";
-const char MixerItem9[] PROGMEM = "Max(us):";
-const char MixerItem10[] PROGMEM = "Failsafe(us):";
+const char MixerItem8[] PROGMEM = "Min(%):";
+const char MixerItem9[] PROGMEM = "Max(%):";
+const char MixerItem10[] PROGMEM = "Failsafe(%):";
 //
 const char MixerItem11[] PROGMEM = "Normal";
 const char MixerItem12[] PROGMEM = "Reversed";
@@ -204,7 +204,7 @@ const char OrientRef0[] PROGMEM = "Pitch";
 const char OrientRef1[] PROGMEM = "Roll"; 
 const char OrientRef2[] PROGMEM = "Yaw";
 //
-const char VersionRef0[] PROGMEM = "Beta 1"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 2"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char ErrorText0[] PROGMEM = "Sensor"; //96
 const char ErrorText1[] PROGMEM = "Low";
@@ -268,11 +268,11 @@ const char *text_menu[] PROGMEM =
 		MainMenuItem13,MainMenuItem14,MainMenuItem15,MainMenuItem16,MainMenuItem17,
 		MainMenuItem18,
 		MainMenuItem6, MainMenuItem7,
-		//
-		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 										// Dummy 125 to 129
+
 		// 
-		MixerItem0, MixerItem1, MixerItem2, MixerItem4, 									// 130 to 140
-		MixerItem5, MixerItem6, MixerItem7,MixerItem3,
+		MixerItem0, MixerItem1, MixerItem2, MixerItem4,MixerItem1, 							// 125 to 140
+		MixerItem5, MixerItem1, MixerItem6, MixerItem1, MixerItem7,
+		MixerItem1, MixerItem3, MixerItem1,
 		MixerItem8, MixerItem9,	MixerItem10,
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev

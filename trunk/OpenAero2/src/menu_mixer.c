@@ -31,28 +31,33 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 11 	// Number of menu items
-#define MIXERSTART 130 	// Start of Menu text items
+#define MIXERITEMS 16 	// Number of menu items
+#define MIXERSTART 125 	// Start of Menu text items
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t MixerMenuOffsets[MIXERITEMS] PROGMEM = {80,80,80,80,80,80,80,80,80,80,80};
-const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,143,143,143,143,0,0,0};
+const uint8_t MixerMenuOffsets[MIXERITEMS] PROGMEM = {80,80,80,80,80,80,80,80,80,80,80,80,80,80,80,80};
+const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,141,143,141,143,141,143,141,143,141,0,0,0};
 const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
 	{THROTTLE,PRESET4,1,1,CH1}, 	// Source
 	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
 	{0,125,10,0,100},				// source_volume (%)
-	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_gyro
-	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_gyro
-	{G_OFF, G_REVERSED,1,1,G_OFF},	// yaw_gyro
-	{G_OFF, G_REVERSED,1,1,G_OFF},	// roll_acc
-	{G_OFF, G_REVERSED,1,1,G_OFF},	// pitch_acc
-	{900,2100,10,0,900}, 			// Min travel
-	{900,2100,10,0,2100}, 			// Max travel
-	{900,2100,10,0,1500}, 			// failsafe
+	{OFF, ON,1,1,OFF},				// roll_gyro
+	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{OFF, ON,1,1,OFF},				// pitch_gyro
+	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{OFF, ON,1,1,OFF},				// yaw_gyro
+	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{OFF, REVERSED,1,1,OFF},		// roll_acc
+	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{OFF, REVERSED,1,1,OFF},		// pitch_acc
+	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{-125,125,5,0,-100}, 			// Min travel
+	{-125,125,5,0,100}, 			// Max travel
+	{-125,125,5,0,0}, 				// failsafe
 };
 
 //************************************************************
@@ -68,7 +73,6 @@ void menu_mixer(uint8_t i)
 	menu_range_t range;
 	uint8_t temp = 0;
 	uint8_t text_link = 0;
-	int16_t temp16 = 0;
 
 	while(button != BACK)
 	{
@@ -79,29 +83,21 @@ void menu_mixer(uint8_t i)
 		values[0] = (uint8_t)Config.Channel[i].source;
 		values[1] = (uint8_t)Config.Channel[i].source_polarity;
 		values[2] = (uint8_t)Config.Channel[i].source_volume;
+		values[3] = (uint8_t)Config.Channel[i].roll_gyro;
+		values[4] = (uint8_t)Config.Channel[i].roll_gyro_polarity;
+		values[5] = (uint8_t)Config.Channel[i].pitch_gyro;
+		values[6] = (uint8_t)Config.Channel[i].pitch_gyro_polarity;
+		values[7] = (uint8_t)Config.Channel[i].yaw_gyro;
+		values[8] = (uint8_t)Config.Channel[i].yaw_gyro_polarity;
+		values[9] = (uint8_t)Config.Channel[i].roll_acc;
+		values[10] = (uint8_t)Config.Channel[i].roll_acc_polarity;
+		values[11] = (uint8_t)Config.Channel[i].pitch_acc;
+		values[12] = (uint8_t)Config.Channel[i].pitch_acc_polarity;
 
-		if (Config.Channel[i].roll_gyro_polarity == REVERSED) values[3] = G_REVERSED;
-		else values[3] = (uint8_t)Config.Channel[i].roll_gyro;
-
-		if (Config.Channel[i].pitch_gyro_polarity == REVERSED) values[4] = G_REVERSED;
-		else values[4] = (uint8_t)Config.Channel[i].pitch_gyro;
-
-		if (Config.Channel[i].yaw_gyro_polarity == REVERSED) values[5] = G_REVERSED;
-		else values[5] = (uint8_t)Config.Channel[i].yaw_gyro;
-
-		if (Config.Channel[i].roll_acc_polarity == REVERSED) values[6] = G_REVERSED;
-		else values[6] = (uint8_t)Config.Channel[i].roll_acc;
-
-		if (Config.Channel[i].pitch_acc_polarity == REVERSED) values[7] = G_REVERSED;
-		else values[7] = (uint8_t)Config.Channel[i].pitch_acc;
-
-		// Re-span travel limits and failsafe to 40%
-		temp16 = ((Config.Channel[i].min_travel << 2) / 10); 
-		values[8] = temp16;
-		temp16 = ((Config.Channel[i].max_travel << 2) / 10); 
-		values[9] = temp16;
-		temp16 = ((Config.Channel[i].Failsafe << 2) / 10); 
-		values[10] = temp16;
+		// Re-span travel limits and failsafe to +/- 125%
+		values[13] = ((Config.Channel[i].min_travel - 3750) / 12); 
+		values[14] = ((Config.Channel[i].max_travel - 3750) / 12); 
+		values[15] = ((Config.Channel[i].Failsafe - 3750) / 12); 
 
 		// Print menu
 		print_menu_items(top, MIXERSTART, &values[0], (prog_uchar*)mixer_menu_ranges, (prog_uchar*)MixerMenuOffsets, (prog_uchar*)MixerMenuText, cursor);
@@ -130,95 +126,21 @@ void menu_mixer(uint8_t i)
 		Config.Channel[i].source = values[0];
 		Config.Channel[i].source_polarity = values[1];
 		Config.Channel[i].source_volume = values[2];
-	
-		switch (values[3])
-		{
-			case G_OFF:
-				Config.Channel[i].roll_gyro = OFF;
-				break;
-			case G_ON:
-				Config.Channel[i].roll_gyro = ON;
-				Config.Channel[i].roll_gyro_polarity = NORMAL;
-				break;
-			case G_REVERSED:
-				Config.Channel[i].roll_gyro = ON;
-				Config.Channel[i].roll_gyro_polarity = REVERSED;
-				break;
-			default:			
-				break;	
-		}
-		switch (values[4])
-		{
-			case G_OFF:
-				Config.Channel[i].pitch_gyro = OFF;
-				break;
-			case G_ON:
-				Config.Channel[i].pitch_gyro = ON;
-				Config.Channel[i].pitch_gyro_polarity = NORMAL;
-				break;
-			case G_REVERSED:
-				Config.Channel[i].pitch_gyro = ON;
-				Config.Channel[i].pitch_gyro_polarity = REVERSED;
-				break;
-			default:					
-				break;	
-		}
-		switch (values[5])
-		{
-			case G_OFF:
-				Config.Channel[i].yaw_gyro = OFF;
-				break;
-			case G_ON:
-				Config.Channel[i].yaw_gyro = ON;
-				Config.Channel[i].yaw_gyro_polarity = NORMAL;
-				break;
-			case G_REVERSED:
-				Config.Channel[i].yaw_gyro = ON;
-				Config.Channel[i].yaw_gyro_polarity = REVERSED;
-				break;
-			default:				
-				break;	
-		}
-		switch (values[6])
-		{
-			case G_OFF:
-				Config.Channel[i].roll_acc = OFF;
-				break;
-			case G_ON:
-				Config.Channel[i].roll_acc = ON;
-				Config.Channel[i].roll_acc_polarity = NORMAL;
-				break;
-			case G_REVERSED:
-				Config.Channel[i].roll_acc = ON;
-				Config.Channel[i].roll_acc_polarity = REVERSED;
-				break;
-			default:				
-				break;	
-		}
-		switch (values[7])
-		{
-			case G_OFF:
-				Config.Channel[i].pitch_acc = OFF;
-				break;
-			case G_ON:
-				Config.Channel[i].pitch_acc = ON;
-				Config.Channel[i].pitch_acc_polarity = NORMAL;
-				break;
-			case G_REVERSED:
-				Config.Channel[i].pitch_acc = ON;
-				Config.Channel[i].pitch_acc_polarity = REVERSED;
-				break;
-			default:				
-				break;	
-		}
+		Config.Channel[i].roll_gyro = values[3];
+		Config.Channel[i].roll_gyro_polarity = values[4];
+		Config.Channel[i].pitch_gyro = values[5];
+		Config.Channel[i].pitch_gyro_polarity = values[6];
+		Config.Channel[i].yaw_gyro = values[7];
+		Config.Channel[i].yaw_gyro_polarity = values[8];
+		Config.Channel[i].roll_acc = values[9];
+		Config.Channel[i].roll_acc_polarity = values[10];
+		Config.Channel[i].pitch_acc = values[11];
+		Config.Channel[i].pitch_acc_polarity = values[12];
 
-		// Re-span travel limits and failsafe to 40%
-		temp16 = ((values[8] * 5) >> 1); 
-		Config.Channel[i].min_travel = temp16;
-		temp16 = ((values[9] * 5) >> 1);
-		Config.Channel[i].max_travel = temp16;
-		temp16 = ((values[10] * 5) >> 1);
-		Config.Channel[i].Failsafe = temp16;
+		// Re-span travel limits and failsafe to system units (2500 to 5000)
+		Config.Channel[i].min_travel = ((values[13] * 12) + 3750);
+		Config.Channel[i].max_travel = ((values[14] * 12) + 3750);
+		Config.Channel[i].Failsafe = ((values[15] * 12) + 3750);
 
 		if (button == ENTER)
 		{

@@ -31,7 +31,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 // Defines
 //************************************************************
 
-#define EEPROM_DATA_START_POS 10// Servo travel limits
+#define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
+// Servo travel limits
 #define MAX_TRAVEL 5000			// Maximum travel allowed
 #define MIN_TRAVEL 2500			// Minimum travel allowed
 
