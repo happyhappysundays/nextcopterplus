@@ -38,9 +38,9 @@ typedef struct
 	uint8_t		roll_acc_polarity;		// Roll acc normal/reverse
 	uint8_t		pitch_acc;				// Use pitch acc
 	uint8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
-	uint16_t	min_travel;				// Minimum output value
-	uint16_t	max_travel;				// Maximum output value
-	uint16_t	Failsafe;				// Failsafe position
+	int16_t		min_travel;				// Minimum output value (2250 to 5250)
+	int16_t		max_travel;				// Maximum output value
+	int16_t		Failsafe;				// Failsafe position
 } channel_t;
 
 // PID type
@@ -138,7 +138,7 @@ typedef struct
 	int16_t upper;						// Upper limit for menu item
 	uint8_t increment;					// Increment for menu item
 	uint8_t style;						// 0 = numeral, 1 = text
-	uint16_t default_value;				// Default value for this item
+	int16_t default_value;				// Default value for this item
 } menu_range_t; 
 
 

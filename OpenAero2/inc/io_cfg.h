@@ -121,7 +121,6 @@ extern CONFIG_STRUCT Config;
 // Enumeration
 //***********************************************************
 enum GyroArrayIndex {ROLL = 0, PITCH, YAW, NO_GYRO};
-enum GyroActivation {G_OFF = 0, G_ON, G_REVERSED};
 enum AccArrayIndex  {X = 0, Y, Z, NO_ACC};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
