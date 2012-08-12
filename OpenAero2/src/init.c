@@ -55,56 +55,24 @@ void init(void)
 	// I/O setup
 	//***********************************************************
 
-	MOTOR_DIR		= 0xFF;		// Port C - Quickly set M1 to M8 motors to output
-	MOTORS			= 0;		// Hold all PWM outputs low to stop glitches
+	// Set port directions
+	DDRA		= 0x00;		// Port A
+	DDRB		= 0x0A;		// Port B
+	DDRC		= 0xFF;		// Port C
+	DDRD		= 0xF2;		// Port D
 
-	CPPM_DIR		= INPUT;	// Port B, 2
-
-	GYRO_YAW_DIR	= INPUT;	// Port A
-	GYRO_PITCH_DIR	= INPUT;
-	GYRO_ROLL_DIR	= INPUT;
-	ACC_X_DIR		= INPUT;
-	ACC_Y_DIR		= INPUT;
-	ACC_Z_DIR		= INPUT;
-	VCC_DIR			= INPUT;
-	VBAT_DIR		= INPUT;
-
-	RX_AUX_DIR		= INPUT;
-	LVA_DIR			= OUTPUT;	// Port B
-	RX_YAW_DIR		= INPUT;
-	LED1_DIR		= OUTPUT;
-	BUTTON4_DIR		= INPUT;
-	BUTTON3_DIR		= INPUT;
-	BUTTON2_DIR		= INPUT;
-	BUTTON1_DIR		= INPUT;
-
-	RX_COLL_DIR		= INPUT;	// Port D
-	LCD_SI_DIR		= OUTPUT;
-	RX_PITCH_DIR	= INPUT;
-	RX_ROLL_DIR		= INPUT;
-	LCD_SCL_DIR		= OUTPUT;
-	LCD_CSI_DIR		= OUTPUT;
-	LCD_RES_DIR		= OUTPUT;
-	LCD_A0_DIR		= OUTPUT;
+	MOTORS		= 0;		// Hold all PWM outputs low to stop glitches
 
 	// Preset I/O pins
-	LED1 			= 0;		// LED1 off
-	LVA 			= 0; 		// LVA alarm OFF
-	LCD_CSI			= 1;
-	LCD_SCL			= 1;
-	LCD_RES			= 1;
+	LED1 		= 0;		// LED1 off
+	LVA 		= 0; 		// LVA alarm OFF
+	LCD_CSI		= 1;
+	LCD_SCL		= 1;
+	LCD_RES		= 1;
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
-	RX_ROLL 	= 1;
-	RX_PITCH 	= 1;
-	RX_YAW		= 1;
-	RX_COLL 	= 1;
-	RX_AUX		= 1;
-	BUTTON1		= 1;
-	BUTTON2		= 1;
-	BUTTON3		= 1;
-	BUTTON4		= 1;
-	CPPM		= 1;
+	PINB		= 0xF5;		// Set PB pull-ups
+	PIND		= 0x0D;		// Set PD pull-ups
 
 	//***********************************************************
 	// Timers
@@ -184,11 +152,6 @@ void init(void)
 	clear_buffer(buffer);					// Clear
 	write_buffer(buffer);
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text
-
-	// Display OpenAero text
-/*	LCD_Display_Text(0,(prog_uchar*)Verdana14,14,24);
-	write_buffer(buffer);
-	_delay_ms(1000);*/
 	clear_buffer(buffer);					// Clear
 
 	// Reset I-terms

@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\init.h"
@@ -34,22 +35,22 @@ void menu_al_control(void);
 #define AUTOITEMS 9 	// Number of menu items
 #define AUTOSTART 50 	// Start of Menu text items
 #define AUTOTEXT 61 	// Start of value text items
+#define AUTOOFFSET 75	// Value offsets
 
 //************************************************************
 // AUTO menu items
 //************************************************************
 
-const uint8_t AutoMenuOffsets[AUTOITEMS] PROGMEM = {75, 75, 75, 75, 75, 75, 75, 75, 75};
 const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 0, 0, 0};
 const menu_range_t auto_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
-	{0,250,1,0,60},
-	{0,250,1,0,0},
-	{0,250,1,0,0},
-	{0,250,1,0,100},
-	{0,250,1,0,0}, 
-	{0,250,1,0,0},
+	{0,127,1,0,60},
+	{0,127,1,0,0},
+	{0,127,1,0,0},
+	{0,127,1,0,100},
+	{0,127,1,0,0}, 
+	{0,127,1,0,0},
 	{-127,127,1,0,0}, 
 	{-127,127,1,0,0}
 };
@@ -61,38 +62,19 @@ const menu_range_t auto_menu_ranges[] PROGMEM =
 void menu_al_control(void)
 {
 	uint8_t cursor = LINE0;
-	uint8_t button = 0;
 	uint8_t top = AUTOSTART;
 	uint8_t temp = 0;
-	int16_t values[AUTOITEMS];
+	int8_t values[AUTOITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
 	
 	while(button != BACK)
 	{
-		// Clear buffer before each update
-		clear_buffer(buffer);	
-
 		// Load values from eeprom
-		values[0] = Config.AutoMode;		// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
-		values[1] = Config.G_level.P_mult;
-		values[2] = Config.G_level.I_mult;
-		values[3] = Config.G_level.D_mult;
-		values[4] = Config.A_level.P_mult;
-		values[5] = Config.A_level.I_mult;
-		values[6] = Config.A_level.D_mult;
-		values[7] = Config.AccRollZeroTrim - 127;
-		values[8] = Config.AccPitchZeroTrim - 127;
+		memcpy(&values[0],&Config.AutoMode,sizeof(int8_t) * AUTOITEMS);
 
 		// Print menu
-		print_menu_items(top, AUTOSTART, &values[0], (prog_uchar*)auto_menu_ranges, (prog_uchar*)AutoMenuOffsets, (prog_uchar*)AutoMenuText, cursor);
-
-		// Poll buttons when idle
-		button = poll_buttons();
-		while (button == NONE)					
-		{
-			button = poll_buttons();
-		}
+		print_menu_items(top, AUTOSTART, &values[0], (prog_uchar*)auto_menu_ranges, AUTOOFFSET, (prog_uchar*)AutoMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(AUTOITEMS, AUTOSTART, button, &cursor, &top, &temp);
@@ -105,15 +87,7 @@ void menu_al_control(void)
 		}
 
 		// Update value in config structure
-		Config.AutoMode = values[0];
-		Config.G_level.P_mult = values[1];
-		Config.G_level.I_mult = values[2];
-		Config.G_level.D_mult = values[3];
-		Config.A_level.P_mult = values[4];
-		Config.A_level.I_mult = values[5];
-		Config.A_level.D_mult = values[6];
-		Config.AccRollZeroTrim = values[7] + 127;
-		Config.AccPitchZeroTrim = values[8] + 127;
+		memcpy(&Config.AutoMode,&values[0],sizeof(int8_t) * AUTOITEMS);
 
 		if (button == ENTER)
 		{

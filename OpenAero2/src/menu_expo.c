@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\init.h"
@@ -34,12 +35,12 @@ void menu_expo(void);
 #define EXPOITEMS 4 	// Number of menu items
 #define EXPOSTART 92 	// Start of Menu text items
 #define EXPOTEXT 0	 	// Start of value text items
+#define EXPOOFFSET 95	// Value offsets
 
 //************************************************************
 // Battery menu items
 //************************************************************
 
-const uint8_t ExpoMenuOffsets[EXPOITEMS] PROGMEM = {95, 95, 95, 95};
 const uint8_t ExpoMenuText[EXPOITEMS] PROGMEM = {EXPOTEXT, 0, 0, 0};
 const menu_range_t expo_menu_ranges[] PROGMEM = 
 {
@@ -55,33 +56,19 @@ const menu_range_t expo_menu_ranges[] PROGMEM =
 void menu_expo(void)
 {
 	uint8_t cursor = LINE0;
-	uint8_t button = 0;
 	uint8_t top = EXPOSTART;
 	uint8_t temp = 0;
-	int16_t values[EXPOITEMS];
+	int8_t values[EXPOITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
 	
 	while(button != BACK)
 	{
-		// Clear buffer before each update
-		clear_buffer(buffer);	
-
 		// Load values from eeprom
-		values[0] = Config.AileronExpo;
-		values[1] = Config.ElevatorExpo;
-		values[2] = Config.RudderExpo;
-		values[3] = Config.Differential;
+		memcpy(&values[0],&Config.AileronExpo,sizeof(int8_t) * EXPOITEMS);
 
 		// Print menu
-		print_menu_items(top, EXPOSTART, &values[0], (prog_uchar*)expo_menu_ranges, (prog_uchar*)ExpoMenuOffsets, (prog_uchar*)ExpoMenuText, cursor);
-
-		// Poll buttons when idle
-		button = poll_buttons();
-		while (button == NONE)					
-		{
-			button = poll_buttons();
-		}
+		print_menu_items(top, EXPOSTART, &values[0], (prog_uchar*)expo_menu_ranges, EXPOOFFSET, (prog_uchar*)ExpoMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(EXPOITEMS, EXPOSTART, button, &cursor, &top, &temp);
@@ -94,10 +81,7 @@ void menu_expo(void)
 		}
 
 		// Update value in config structure
-		Config.AileronExpo = values[0];
-		Config.ElevatorExpo = values[1];
-		Config.RudderExpo = values[2];
-		Config.Differential = values[3];
+		memcpy(&Config.AileronExpo,&values[0],sizeof(int8_t) * EXPOITEMS);
 
 		if (button == ENTER)
 		{

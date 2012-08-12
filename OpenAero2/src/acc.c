@@ -41,8 +41,7 @@ int16_t AvgPitch;
 int8_t  OldIndex;
 int16_t accADC[3];					// Holds Acc ADC values
 int16_t accZero[3];					// Used for calibrating Accs on ground
-int8_t  AccRollTrim;				// Normalised acc trim 
-int8_t  AccPitchTrim;
+
 int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer roll readings
 int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
 
@@ -85,9 +84,6 @@ void AvgAcc(void)
 	static int32_t AvgRollSum;	
 	static int32_t AvgPitchSum;
 
-	AccRollTrim = Config.AccRollZeroTrim - 127;
-	AccPitchTrim = Config.AccPitchZeroTrim - 127;
-
 	// Average accelerometer readings properly to create a genuine low-pass filter
 	// Note that this has exactly the same effect as a complementary filter but with vastly less overhead.
 	AvgAccRoll[AvgIndex] = accADC[Y];
@@ -97,8 +93,8 @@ void AvgAcc(void)
 	AvgRollSum = AvgRollSum + accADC[Y] - AvgAccRoll[OldIndex]; // Add new value to sum, subtract oldest
 	AvgPitchSum = AvgPitchSum + accADC[X] - AvgAccPitch[OldIndex];
 
-	AvgRoll = ((AvgRollSum >> 2) - AccRollTrim); // Divide by 8 to get rolling average then adjust for acc trim
-	AvgPitch = ((AvgPitchSum >> 2) - AccPitchTrim);
+	AvgRoll = ((AvgRollSum >> 2) - Config.AccRollZeroTrim); // Divide by 8 to get rolling average then adjust for acc trim
+	AvgPitch = ((AvgPitchSum >> 2) - Config.AccPitchZeroTrim);
 
 	AvgIndex ++;
 	if (AvgIndex >= AVGLENGTH) AvgIndex = 0; // Wrap both indexes properly to create circular buffer

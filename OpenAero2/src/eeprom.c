@@ -32,9 +32,6 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-// Servo travel limits
-#define MAX_TRAVEL 5000			// Maximum travel allowed
-#define MIN_TRAVEL 2500			// Minimum travel allowed
 
 //************************************************************
 // Code
@@ -59,8 +56,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
 	//
-	Config.AccRollZeroTrim	= 127;		// User-set ACC trim (127-127 = 0)
-	Config.AccPitchZeroTrim	= 127;
+	Config.AccRollZeroTrim	= 0;		// User-set ACC trim
+	Config.AccPitchZeroTrim	= 0;
 	Config.AccRollZero	= 621;			// Acc calibration defaults
 	Config.AccPitchZero	= 623;
 	Config.AccZedZero	= 767;
@@ -110,10 +107,10 @@ void Set_EEPROM_Default_Config(void)
 	Config.Contrast = 38;				// Contrast
 	Config.AutoUpdateEnable = ON;
 
-	Config.Preset1 = 3750;
-	Config.Preset2 = 3750;
-	Config.Preset3 = 3750;
-	Config.Preset4 = 3750;
+	Config.Preset1 = 0;
+	Config.Preset2 = 0;
+	Config.Preset3 = 0;
+	Config.Preset4 = 0;
 }
 
 void Save_Config_to_EEPROM(void)
