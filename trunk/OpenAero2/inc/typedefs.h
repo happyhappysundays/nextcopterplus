@@ -25,22 +25,22 @@ typedef struct
 typedef struct
 {
 	uint16_t	value;					// Current value
-	uint8_t		source;					// Source RC input for calculation
-	uint8_t		source_polarity;		// Normal/reverse RC input
-	uint8_t		source_volume;			// Percentage of source to pass on
-	uint8_t		roll_gyro;				// Use roll gyro
-	uint8_t		roll_gyro_polarity;		// Roll gyro normal/reverse
-	uint8_t		pitch_gyro;				// Use pitch gyro
-	uint8_t		pitch_gyro_polarity;	// Pitch gyro normal/reverse
-	uint8_t		yaw_gyro;				// Use yaw gyro
-	uint8_t		yaw_gyro_polarity;		// Yaw gyro normal/reverse
-	uint8_t		roll_acc;				// Use roll acc
-	uint8_t		roll_acc_polarity;		// Roll acc normal/reverse
-	uint8_t		pitch_acc;				// Use pitch acc
-	uint8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
-	int16_t		min_travel;				// Minimum output value (2250 to 5250)
-	int16_t		max_travel;				// Maximum output value
-	int16_t		Failsafe;				// Failsafe position
+	int8_t		source;					// Source RC input for calculation
+	int8_t		source_polarity;		// Normal/reverse RC input
+	int8_t		source_volume;			// Percentage of source to pass on
+	int8_t		roll_gyro;				// Use roll gyro
+	int8_t		roll_gyro_polarity;		// Roll gyro normal/reverse
+	int8_t		pitch_gyro;				// Use pitch gyro
+	int8_t		pitch_gyro_polarity;	// Pitch gyro normal/reverse
+	int8_t		yaw_gyro;				// Use yaw gyro
+	int8_t		yaw_gyro_polarity;		// Yaw gyro normal/reverse
+	int8_t		roll_acc;				// Use roll acc
+	int8_t		roll_acc_polarity;		// Roll acc normal/reverse
+	int8_t		pitch_acc;				// Use pitch acc
+	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
+	int8_t		min_travel;				// Minimum output value (2250 to 5250)
+	int8_t		max_travel;				// Maximum output value
+	int8_t		Failsafe;				// Failsafe position
 } channel_t;
 
 // PID type
@@ -67,23 +67,31 @@ typedef struct
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
 										// AUX1 to AUX4 are fixed
-	uint8_t		RxMode;					// PWM or CPPM mode
-	uint8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
-	uint8_t		StabChan;				// Channel number to select stability mode
-	uint8_t		AutoChan;				// Channel number for Autolevel switch input
-	uint8_t		FlapChan;				// Channel number for second aileron input
-	uint8_t		ThreePos;				// Channel number for ThreePos switch
+
+	// RC items
+	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
+	int8_t		RxMode;					// PWM or CPPM mode
+	int8_t		StabChan;				// Channel number to select stability mode
+	int8_t		AutoChan;				// Channel number for Autolevel switch input
+	int8_t		ThreePos;				// Channel number for ThreePos switch
+	int8_t		FlapChan;				// Channel number for second aileron input
+	int8_t		Preset1;				// RC presets for camstab
+	int8_t		Preset2;
+	int8_t		Preset3;
+	int8_t		Preset4;
+
+	// Expo items
 	uint8_t		AileronExpo;			// Amount of expo on Aileron channel
 	uint8_t		ElevatorExpo;			// Amount of expo on Elevator channel
 	uint8_t		RudderExpo;				// Amount of expo on Rudder channel
 	uint8_t		Differential;			// Amount of differential on Aileron channels
 	
 	// Autolevel settings
-	uint8_t		AutoMode;
-	uint8_t		AccRollZeroTrim;		// User-set ACC trim (0~255 -> +/-127)
-	uint8_t		AccPitchZeroTrim;
+	int8_t		AutoMode;
 	PID_mult_t	G_level;				// Gyro level
 	PID_mult_t	A_level;				// Acc level
+	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
+	int8_t		AccPitchZeroTrim;
 
 	// Stability PID settings
 	uint8_t		StabMode;				// Stability switch mode
@@ -92,18 +100,23 @@ typedef struct
 	PID_mult_t	Yaw;
 
 	// Battery settings
-	uint16_t	PowerTrigger;			// Trip voltage
-	uint8_t		BatteryCells;			// Number of cells (2~5)	
-	uint8_t		BatteryType;			// LiPo, NiMh
-	uint16_t	MinVoltage;				// Minimum cell voltage in discharge state
-	uint16_t	MaxVoltage;				// Maximum cell voltage in charged state
+	int16_t		BatteryType;			// LiPo, NiMh
+	int16_t		BatteryCells;			// Number of cells (2~5)	
+	int16_t		PowerTrigger;			// Trip voltage
+	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
+	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
+
 	
-	// Mixer modes
+	// General items
 	uint8_t		MixMode;				// Aeroplane/Flying Wing/Manual
-	uint8_t		CamStab;
-	uint8_t		RCMix;
 	uint8_t		Orientation;			// Horizontal / vertical
 	uint8_t		Contrast;
+	uint8_t		AutoUpdateEnable;		// Status screen auto-update enable flag
+
+	// Misc
+	uint8_t		CamStab;
+	uint8_t		RCMix;
+
 		
 	// Non-menu items 
 	// Channel configuration
@@ -111,7 +124,7 @@ typedef struct
 
 	// Misc
 	uint8_t		Modes;					// Misc flight mode flag
-	uint8_t		AutoUpdateEnable;			// Status screen auto-update enable flag
+
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets
@@ -120,12 +133,6 @@ typedef struct
 	uint16_t	AccRollZero;			// Acc calibration results
 	uint16_t	AccPitchZero;
 	uint16_t	AccZedZero;
-	
-	// Preset channels
-	uint16_t	Preset1;				// RC presets for camstab
-	uint16_t	Preset2;
-	uint16_t	Preset3;
-	uint16_t	Preset4;
 
 	// 
 	uint16_t	Dummy;

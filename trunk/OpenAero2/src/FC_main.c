@@ -51,6 +51,7 @@
 // Beta 1	First public release. Fixed failsafe bug. Removed unused menu items.
 //			Small, ugly hack to modify battery defaults if NiMh selected.
 // Beta 2	Change gyro setup in mixer. Change limits to percentages.
+//			Final menu size reduction. Trash KK2 eeprom locations.
 //
 //***********************************************************
 //* To do
@@ -215,6 +216,7 @@ int main(void)
 		// Display menu on request
 		if(BUTTON3 == 0)
 		{
+			button = NONE;		// Temporary fudge while redoing the menu system
 			menu_mode = true;
 			menu_main();
 			Display_status();
@@ -551,19 +553,6 @@ int main(void)
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
-/*			if(Config.RxMode == CPPM_MODE)
-			{
-				uint8_t i;
-				// Short delay to ensure no residual interrupt activity from ISR
-				TIFR0 &= ~(1 << TOV0);			// Clear overflow
-				TCNT0 = 0;						// Reset counter
-				for (i=0;i<PWM_DELAY;i++)		// PWM_DELAY * 8us = 1ms
-				{
-					while (TCNT0 < 160);		// 1/20MHz * 64 = 8us
-					TCNT0 -= 160;
-				}
-			}
-*/
 			output_servo_ppm();				// Output servo signal
 		}
 

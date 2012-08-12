@@ -40,7 +40,6 @@ void do_main_menu_item(uint8_t menuitem);
 void menu_main(void)
 {
 	uint8_t cursor = LINE0;
-	uint8_t button = 0;
 	uint8_t top = MAINSTART;
 	uint8_t temp = 0;
 	
@@ -59,17 +58,14 @@ void menu_main(void)
 		write_buffer(buffer);
 
 		// Poll buttons when idle
-		button = poll_buttons();
-		while (button == NONE)					
-		{
-			button = poll_buttons();
-		}
+		poll_buttons();
 
 		// Handle menu changes
 		update_menu(MAINITEMS, MAINSTART, button, &cursor, &top, &temp);
 		if (button == ENTER)
 		{
 			do_main_menu_item(temp);
+			button = NONE;
 		}
 	}
 	menu_beep(1);

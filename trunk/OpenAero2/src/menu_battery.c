@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\init.h"
@@ -34,6 +35,7 @@ void menu_battery(void);
 #define BATTITEMS 5 	// Number of menu items
 #define BATTSTART 66 	// Start of Menu text items
 #define BATTTEXT 71 	// Start of value text items
+#define BATTOFFSET 92	// Value offsets
 
 #define	NIMH_MAX 125	// Alternate default for max cell voltage for NiMh
 #define	NIMH_MIN 110	// Alternate default for max cell voltage for NiMh
@@ -42,18 +44,14 @@ void menu_battery(void);
 // Battery menu items
 //************************************************************
 
-const uint8_t BattMenuOffsets[BATTITEMS] PROGMEM = 
-{
-	92, 38, 92, 92, 92
-};
 const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
 const menu_range_t batt_menu_ranges[] PROGMEM = 
 {
 	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
 	{1,12,1,0,3},
-	{0,2000,10,0,1080},
-	{120,430,10,0,420},
-	{80,400,10,0,360}
+	{0,2000,1,0,108},
+	{120,430,1,0,42},
+	{80,400,1,0,36}
 };
 
 //************************************************************
@@ -63,7 +61,6 @@ const menu_range_t batt_menu_ranges[] PROGMEM =
 void menu_battery(void)
 {
 	uint8_t cursor = LINE0;
-	uint8_t button = 0;
 	uint8_t top = BATTSTART;
 	uint8_t temp = 0;
 	int16_t values[BATTITEMS];
@@ -75,25 +72,14 @@ void menu_battery(void)
 	while(button != BACK)
 	{
 		// Load values from eeprom
-		values[0] = Config.BatteryType;
-		values[1] = Config.BatteryCells;
-		values[2] = Config.PowerTrigger;
-		values[3] = Config.MaxVoltage;
-		values[4] = Config.MinVoltage;
+		memcpy(&values[0],&Config.BatteryType,sizeof(int16_t) * BATTITEMS);
 
 		// Save pre-edited values
 		temp_cells = Config.BatteryCells;
 		temp_minvoltage = Config.MinVoltage;
 
 		// Print menu
-		print_menu_items(top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, (prog_uchar*)BattMenuOffsets, (prog_uchar*)BattMenuText, cursor);
-
-		// Poll buttons when idle
-		button = poll_buttons();
-		while (button == NONE)					
-		{
-			button = poll_buttons();
-		}
+		print_menu_items_16(top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, button, &cursor, &top, &temp);
@@ -127,11 +113,7 @@ void menu_battery(void)
 		}
 
 		// Update value in config structure
-		Config.BatteryType = values[0];
-		Config.BatteryCells = values[1];
-		Config.PowerTrigger = values[2];
-		Config.MaxVoltage = values[3];
-		Config.MinVoltage = values[4];
+		memcpy(&Config.BatteryType,&values[0],sizeof(int16_t) * BATTITEMS);
 
 		if (button == ENTER)
 		{

@@ -76,10 +76,10 @@ void RxGetChannels(void)
 	}
 
 	// Update presets manually as they don't come from the RC
-	RxChannel[9] = Config.Preset1;
-	RxChannel[10] = Config.Preset2;
-	RxChannel[11] = Config.Preset3;
-	RxChannel[12] = Config.Preset4;
+	RxChannel[9]  = ((Config.Preset1 * 12) + 3750);
+	RxChannel[10] = ((Config.Preset2 * 12) + 3750);
+	RxChannel[11] = ((Config.Preset3 * 12) + 3750);
+	RxChannel[12] = ((Config.Preset4 * 12) + 3750);
 
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];

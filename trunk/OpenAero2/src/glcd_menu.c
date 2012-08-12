@@ -47,7 +47,7 @@ void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y);
 // Text to print (non-menu)
 //************************************************************
 
-const char PText0[]  PROGMEM = "OpenAero2";					// Init
+const char PText0[]  PROGMEM = "";					// Init
 const char PText1[]  PROGMEM = "Resetting to";
 const char PText2[]  PROGMEM = "defaults";
 //
@@ -72,7 +72,7 @@ const char MainMenuItem0[]  PROGMEM = "General";
 const char MainMenuItem1[]  PROGMEM = "RC setup"; 
 const char MainMenuItem2[]  PROGMEM = "Stability control";
 const char MainMenuItem3[]  PROGMEM = "Autolevel control";
-const char MainMenuItem4[]  PROGMEM = "Expo/Differential";
+const char MainMenuItem4[]  PROGMEM = "Expo";
 const char MainMenuItem5[]  PROGMEM = "Battery";
 const char MainMenuItem6[]  PROGMEM = "Camera stab.";
 const char MainMenuItem7[]  PROGMEM = "RC mixer";
@@ -92,11 +92,11 @@ const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "PWM1"; 		
 const char RXMode2[]  PROGMEM = "PWM2"; 
 const char RXMode3[]  PROGMEM = "PWM3"; 		
-const char RXMode4[]  PROGMEM = "Aeroplane"; 
-const char RXMode5[]  PROGMEM = "Flying Wing";
+const char RXMode4[]  PROGMEM = "Aero"; 
+const char RXMode5[]  PROGMEM = "F.Wing";
 const char RXMode6[]  PROGMEM = "Manual";
 //
-const char PText8[]  PROGMEM = "Capacity:";
+const char PText8[]  PROGMEM = "";// Capacity
 const char PText15[] PROGMEM = "Gyro";
 const char PText16[] PROGMEM = "X";
 const char PText17[] PROGMEM = "Y";
@@ -131,9 +131,9 @@ const char AutoMenuItem15[] PROGMEM = "ON";
 //
 const char BattMenuItem0[]  PROGMEM = "Battery type:"; 		// Battery text
 const char BattMenuItem1[]  PROGMEM = "Cells:"; 
-const char BattMenuItem2[]  PROGMEM = "Alarm voltage:";
-const char BattMenuItem3[]  PROGMEM = "Max cell voltage:";
-const char BattMenuItem4[]  PROGMEM = "Min cell voltage:";
+const char BattMenuItem2[]  PROGMEM = "Alarm (mV):";
+const char BattMenuItem3[]  PROGMEM = "Max (mV):";
+const char BattMenuItem4[]  PROGMEM = "Min (mV):";
 const char BattMenuItem5[]  PROGMEM = "LiPo";
 const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
@@ -195,7 +195,7 @@ const char ChannelRef5[] PROGMEM = "Flap";
 const char ChannelRef6[] PROGMEM = "Aux1"; 
 const char ChannelRef7[] PROGMEM = "Aux2"; 
 const char ChannelRef8[] PROGMEM = "None";
-const char ChannelRef9[] PROGMEM = "Preset 1";
+const char ChannelRef9[] PROGMEM = "Preset 1 (%)";
 const char ChannelRef10[] PROGMEM = "Preset 2";
 const char ChannelRef11[] PROGMEM = "Preset 3";
 const char ChannelRef12[] PROGMEM = "Preset 4";
@@ -204,7 +204,7 @@ const char OrientRef0[] PROGMEM = "Pitch";
 const char OrientRef1[] PROGMEM = "Roll"; 
 const char OrientRef2[] PROGMEM = "Yaw";
 //
-const char VersionRef0[] PROGMEM = "Beta 2"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 2+"; // <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char ErrorText0[] PROGMEM = "Sensor"; //96
 const char ErrorText1[] PROGMEM = "Low";

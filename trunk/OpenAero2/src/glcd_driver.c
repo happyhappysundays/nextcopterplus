@@ -45,8 +45,9 @@ void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 //* Low-level code
 //***********************************************************
 
-int pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 	// This makes more sense
-int pagemap_logo[] PROGMEM	= { 0, 1, 2, 3, 4, 5, 6, 7 };	// This works for the logo...
+uint8_t pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 	// This makes more sense
+uint8_t pagemap_logo[] PROGMEM	= { 0, 1, 2, 3, 4, 5, 6, 7 };	// This works for the logo...
+uint8_t lcd_commmands[] PROGMEM	= { 0xA2,0xA0,0x40,0xA6,0xEE,0xC8,0x2C,0x2E,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string
 
 // Software SPI write
 inline void spiwrite(uint8_t c) 
@@ -89,51 +90,26 @@ void st7565_data(uint8_t c)
 // Initialise LCD
 void st7565_init(void) 
 {
-	// Set pin directions
-	LCD_SI_DIR 	= OUTPUT;
-	LCD_SCL_DIR = OUTPUT;
-	LCD_A0_DIR	= OUTPUT;
-	LCD_RES_DIR = OUTPUT;
-	LCD_CSI_DIR	= OUTPUT;
-
 	// Toggle RST low to reset and CS low so it'll listen to us
 	LCD_CSI = 0;
 	LCD_RES = 0;
 	_delay_ms(500);
 	LCD_RES = 1;
 
-	// LCD bias select
-	st7565_command(CMD_SET_BIAS_9); 			// Check (A2)
-	// ADC select
-	st7565_command(CMD_SET_ADC_NORMAL); 		// Check (A0)
-	// Initial display line
-	st7565_command(CMD_SET_DISP_START_LINE); 	// Check (40)
-	// Normal display mode
-	st7565_command(CMD_SET_DISP_NORMAL); 		// Check (A6)
-	// Clear RMW mode
-	st7565_command(CMD_RMW_CLEAR); 				// Check (EE)
-	// Set reverse scan mode
-	st7565_command(CMD_SET_COM_REVERSE); 		// Check (C8)
-	// Turn on voltage converter (VC=1, VR=0, VF=0)
-	st7565_command(CMD_SET_POWER_CONTROL | 0x4); 
-	// Wait for 50% rising
+	for (int i = 0; i < 7; i++)
+	{
+		st7565_command(pgm_read_byte(&lcd_commmands[i]));
+	}
 	_delay_ms(50);
-	// Turn on voltage regulator (VC=1, VR=1, VF=0)
-	st7565_command(CMD_SET_POWER_CONTROL | 0x6);
-	// Wait >=50ms
+	st7565_command(0x2E);
 	_delay_ms(50);
-	// Turn on voltage follower (VC=1, VR=1, VF=1)
-	st7565_command(CMD_SET_POWER_CONTROL | 0x7); // Check (2F)
-	// Wait
+	st7565_command(0x2F);
 	_delay_ms(10);
-	// Set LCD operating voltage (regulator resistor, ref voltage resistor)
-	st7565_command(CMD_SET_RESISTOR_RATIO); 	// Check (24)
-	// Set up static register (OFF)
-	st7565_command(CMD_SET_STATIC_OFF); 		// Check (AC)
-	st7565_command(CMD_SET_STATIC_REG); 		// Check (00)
-	// Set up booster
-	st7565_command(CMD_SET_BOOSTER_FIRST); 		// Check (F8)
-	st7565_command(CMD_SET_BOOSTER_234); 		// Check (00)
+
+	for (int i = 9; i < 14; i++)
+	{
+		st7565_command(pgm_read_byte(&lcd_commmands[i]));
+	}
 }
 
 
@@ -240,12 +216,6 @@ void drawbitmap(uint8_t *buff, uint8_t x, uint8_t y, const uint8_t bitmap, uint8
 	}
 }
 
-// Clear a single pixel
-void clearpixel(uint8_t *buff, uint8_t x, uint8_t y) 
-{
-	// x is which column
-	buff[x+ (y/8)*128] &= ~(1 << (7-(y%8)));
-}
 
 // Bresenham's algorithm - From wikpedia
 void drawline(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color) 
