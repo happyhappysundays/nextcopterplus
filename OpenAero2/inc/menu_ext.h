@@ -23,6 +23,7 @@ extern void menu_expo(void);
 extern void menu_mixer(uint8_t i);
 extern void menu_general(void);
 extern void	menu_camstab(void);
+extern void menu_rcmixer(uint8_t i);
 
 extern  uint8_t button;
 
@@ -30,6 +31,7 @@ extern  uint8_t button;
 extern void print_menu_frame(uint8_t style);
 extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 extern void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+extern void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc subroutines
 extern uint8_t poll_buttons(void);

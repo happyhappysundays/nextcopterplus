@@ -33,7 +33,7 @@ void menu_mixer(uint8_t i);
 //************************************************************
 
 #define MIXERITEMS 16 	// Number of menu items
-#define MIXERSTART 125 	// Start of Menu text items
+#define MIXERSTART 186 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************
@@ -43,7 +43,7 @@ void menu_mixer(uint8_t i);
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,141,143,141,143,141,143,141,143,141,0,0,0};
 const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
-	{THROTTLE,PRESET4,1,1,CH1}, 	// Source
+	{THROTTLE,MIX2,1,1,CH1}, 		// Source
 	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
 	{0,125,10,0,100},				// source_volume (%)
 	{OFF, ON,1,1,OFF},				// roll_gyro
@@ -84,9 +84,7 @@ void menu_mixer(uint8_t i)
 
 		// Handle menu changes
 		update_menu(MIXERITEMS, MIXERSTART, button, &cursor, &top, &temp);
-
 		range = get_menu_range ((prog_uchar*)mixer_menu_ranges, temp - MIXERSTART);
-		//range = mixer_menu_ranges[temp - MIXERSTART];
 
 		if (button == ENTER)
 		{
@@ -99,6 +97,7 @@ void menu_mixer(uint8_t i)
 
 		if (button == ENTER)
 		{
+			UpdateLimits();			 // Update travel limits based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}

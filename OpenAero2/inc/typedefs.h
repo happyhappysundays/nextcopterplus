@@ -11,14 +11,22 @@
 
 #define INPUT 	0
 #define OUTPUT 	1
-#define MAX_RC_CHANNELS 13				// Maximum input channels
+#define MAX_RC_CHANNELS 15				// Maximum input channels
 #define MAX_OUTPUTS 8					// Maximum output channels
+#define NUM_MIXERS 2
 
 typedef struct
 {
 	uint16_t	x;
 	uint16_t	y;
 } mugui_size16_t;
+
+typedef struct
+{
+	uint16_t	minimum;
+	uint16_t	maximum;
+	uint16_t	failsafe;
+} servo_limits_t;
 
 // Channel mixer definition
 // Size = 20 bytes
@@ -47,26 +55,36 @@ typedef struct
 // Size = 3 bytes
 typedef struct
 {
-	uint8_t	P_mult;
-	uint8_t	I_mult;
-	uint8_t	D_mult;
+	int8_t	P_mult;
+	int8_t	I_mult;
+	int8_t	D_mult;
 } PID_mult_t;
 
+typedef struct
+{
+	int8_t		source_a;				// Source RC input for calculation	
+	int8_t		source_a_volume;		// Percentage of source to pass on	
+	int8_t		source_b;				// Source RC input for calculation	
+	int8_t		source_b_volume;		// Percentage of source to pass on
+} mixer_t; 
+
 // Settings structure
-// Size = 228 bytes
+// Size =  bytes
 typedef struct
 {
 	uint8_t	setup;						// Byte to identify if already setup
 
 	// Menu adjustable items
 	// RC settings
-	uint8_t		ChannelOrder[9];		// Assign channel numbers to hard-coded channel order
+	uint8_t		ChannelOrder[MAX_RC_CHANNELS];// Assign channel numbers to hard-coded channel order
 										// OpenAeroEvo uses Thr, Ail, Ele, Rud, Gear, Flap, Aux1, Aux2
 										// THROTTLE will always return the correct data for the assigned throttle channel
 										// AILERON will always return the correct data for the assigned aileron channel
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
 										// AUX1 to AUX4 are fixed
+	// Servo travel limts
+	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limts to save recalculation each loop
 
 	// RC items
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
@@ -94,7 +112,7 @@ typedef struct
 	int8_t		AccPitchZeroTrim;
 
 	// Stability PID settings
-	uint8_t		StabMode;				// Stability switch mode
+	int8_t		StabMode;				// Stability switch mode
 	PID_mult_t	Roll;					// Gyro PID settings
 	PID_mult_t	Pitch;
 	PID_mult_t	Yaw;
@@ -106,24 +124,27 @@ typedef struct
 	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	
+	// RC mixer settings
+	mixer_t		mixer_data[2];
+	uint16_t	Mix_value[2];			// Mixer values
+
 	// General items
-	uint8_t		MixMode;				// Aeroplane/Flying Wing/Manual
-	uint8_t		Orientation;			// Horizontal / vertical
-	uint8_t		Contrast;
-	uint8_t		AutoUpdateEnable;		// Status screen auto-update enable flag
+	int8_t		MixMode;				// Aeroplane/Flying Wing/Manual
+	int8_t		Orientation;			// Horizontal / vertical
+	int8_t		Contrast;				// Contrast setting
+	int8_t		AutoUpdateEnable;		// Status screen auto-update enable flag
+	int8_t		RCMix;					// RC mixer enable
+	int8_t		LMA_enable;				// LMA setting
 
 	// Misc
-	uint8_t		CamStab;
-	uint8_t		RCMix;
-
+	int8_t		CamStab;
 		
 	// Non-menu items 
 	// Channel configuration
-	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
+	channel_t	Channel[MAX_RC_CHANNELS];// Channel mixing data	
 
 	// Misc
-	uint8_t		Modes;					// Misc flight mode flag
+	int8_t		Modes;					// Misc flight mode flag
 
 
 	// RC inputs
@@ -147,7 +168,6 @@ typedef struct
 	uint8_t style;						// 0 = numeral, 1 = text
 	int16_t default_value;				// Default value for this item
 } menu_range_t; 
-
 
 // The following code courtesy of: stu_san on AVR Freaks
 

@@ -6,10 +6,9 @@
 //* Externals
 //***********************************************************
 
-extern void SetMixer(void);
 extern void ProcessMixer(void);
 extern void UpdateServos(void);
-extern void SetServoPositions(void);
+extern void UpdateLimits(void);
 extern void get_preset_mix(channel_t*);
 
 extern channel_t MANUAL_MIX[];

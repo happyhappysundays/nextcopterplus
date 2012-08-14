@@ -40,6 +40,7 @@
 void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
+void write_buffer(uint8_t *buffer, uint8_t type);
 
 //***********************************************************
 //* Low-level code
@@ -120,31 +121,20 @@ void st7565_set_brightness(uint8_t val)
 	st7565_command(CMD_SET_VOLUME_SECOND | (val & 0x3f));
 }
 
-// Write LCD buffer
-void write_buffer(uint8_t *buffer) 
+// Write LCD buffer if type = 1 normal, 0 = logo
+void write_buffer(uint8_t *buffer, uint8_t type) 
 {
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 
 	{
-		st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));					// Page 0 to 7
-		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
-		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
-		st7565_command(CMD_RMW);									// Sets auto-increment
-
-		for(c = 0; c < 128; c++) 
+		if (type)
 		{
-			st7565_data(buffer[(128*p)+c]);
+			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));		// Page 7 to 0
 		}
-	}
-}
-
-// Write LCD buffer for logo
-void write_logo_buffer(uint8_t *buffer) 
-{
-	uint8_t c, p;
-	for(p = 0; p < 8; p++) 
-	{
-		st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));					// Page 0 to 7
+		else
+		{
+			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
+		}
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
 		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
 		st7565_command(CMD_RMW);									// Sets auto-increment
@@ -216,7 +206,6 @@ void drawbitmap(uint8_t *buff, uint8_t x, uint8_t y, const uint8_t bitmap, uint8
 	}
 }
 
-
 // Bresenham's algorithm - From wikpedia
 void drawline(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color) 
 {
@@ -281,7 +270,6 @@ void fillrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t
 	}
 }
 
-
 // Draw a rectangle
 void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color) 
 {
@@ -297,7 +285,6 @@ void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t
 		setpixel(buff, x+w-1, i, color);
 	} 
 }
-
 
 // Draw a circle
 void drawcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color) 
@@ -338,7 +325,6 @@ void drawcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color)
 	}
 }
 
-
 // Draw a filled circle
 void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color) 
 {
@@ -378,7 +364,6 @@ void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color)
 		}    
 	}
 }
-
 
 // Clear screen (does not clear buffer)
 void clear_screen(void) 

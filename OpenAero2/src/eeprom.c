@@ -11,9 +11,6 @@
 #include <avr/pgmspace.h>
 #include <stdbool.h>
 #include "..\inc\io_cfg.h"
-#include "..\inc\init.h"
-#include "..\inc\main.h"
-#include "..\inc\rc.h"
 #include <util/delay.h>
 #include "..\inc\mixer.h"
 
@@ -32,23 +29,24 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
+#define MAGIC_NUMBER 0x42		// eePROM signature
 
 //************************************************************
 // Code
 //************************************************************
 
-uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7,0,0,0,0,0}; // JR/Spektrum channel sequence
-uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7,0,0,0,0,0}; // Futaba channel sequence
+uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7,0,0,0,0,0,0,0}; // JR/Spektrum channel sequence
+uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7,0,0,0,0,0,0,0}; // Futaba channel sequence
 
 void Set_EEPROM_Default_Config(void)
 {
 	uint8_t i;
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-		Config.Channel[i].value = 3500;
-		Config.RxChannelZeroOffset[i] = 3500;
+		Config.Channel[i].value = 3750;
+		Config.RxChannelZeroOffset[i] = 3750;
 	}
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
@@ -101,16 +99,28 @@ void Set_EEPROM_Default_Config(void)
 	Config.RudderExpo = 0;				// Amount of expo on Rudder channel
 	Config.Differential = 0;			// Amount of differential on Aileron channels
 	Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
+
 	Config.CamStab = 0;
-	Config.RCMix = 0;
+	Config.RCMix = OFF;					// RC mixer defaults to OFF for speed
+
 	Config.Orientation = 0;				// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.AutoUpdateEnable = ON;
+	Config.LMA_enable = 1;				// Default to 1 minute
 
 	Config.Preset1 = 0;
 	Config.Preset2 = 0;
 	Config.Preset3 = 0;
 	Config.Preset4 = 0;
+
+	for (i = 0; i < NUM_MIXERS; i++)
+	{
+		Config.mixer_data[i].source_a = AILERON;
+		Config.mixer_data[i].source_a_volume = 0;
+		Config.mixer_data[i].source_b = ELEVATOR;
+		Config.mixer_data[i].source_b_volume = 0;
+		Config.Mix_value[i] = 0;
+	}
 }
 
 void Save_Config_to_EEPROM(void)
@@ -147,9 +157,9 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 void Initial_EEPROM_Config_Load(void)
 {
 	// Load last settings from EEPROM
-	if(eeprom_read_byte((uint8_t*) EEPROM_DATA_START_POS )!=0x47)
+	if(eeprom_read_byte((uint8_t*) EEPROM_DATA_START_POS )!= MAGIC_NUMBER)
 	{
-		Config.setup = 0x47;
+		Config.setup = MAGIC_NUMBER;
 		Set_EEPROM_Default_Config();
 		// Write to eeProm
 		Save_Config_to_EEPROM();

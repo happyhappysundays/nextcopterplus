@@ -51,21 +51,24 @@
 // Beta 1	First public release. Fixed failsafe bug. Removed unused menu items.
 //			Small, ugly hack to modify battery defaults if NiMh selected.
 // Beta 2	Change gyro setup in mixer. Change limits to percentages.
-//			Final menu size reduction. Trash KK2 eeprom locations.
+//			Large menu size reduction. Trash KK2 eeprom locations.
+//			Added two, two-channel RC mixers - mixes to new channels "MIX1" and "MIX2".
+//			Added adjustable Lost Model Alarm timeout. 0 = disabled, otherwise 1 to 10 minutes
+//			without RC input. Fixed min/max travel bug. Startup beep now after last gyro check.
+//			Fixed issue where changing anything in the general menu over-wrote the mixers.
+//			Removed other font options from mugui_text.c 
+//
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For Beta2
-//  Compress menu value data to reclaim space
+// For Beta2 and first release
 //
 // Later
-//  Camera stabilisation (tilt/pan and gimbal)
-//  RC mixing menu
+//  Camera stabilisation settings (tilt/pan and gimbal)
 //  Differential
-//  Advanced RC settings (CPPM gap, servo rate, servo overdue, post interrupt delay etc.)
-//  General settings (LMA enable, timeout)
+//  Advanced RC settings (CPPM gap, servo rate, servo overdue, etc.)
 //
 //
 //***********************************************************
@@ -183,7 +186,7 @@ int main(void)
 	// Alarms
 	bool BUZZER_ON = false;
 	bool LED_ON = false;
-	bool Model_lost = false;			// Model lost flag
+	bool Model_lost = false;		// Model lost flag
 	bool LMA_Alarm = false;			// Lost model alarm active
 	bool LVA_Alarm = false;			// Low voltage alarm active
 	bool menu_mode = false;
@@ -202,6 +205,7 @@ int main(void)
 	uint8_t ServoRate_TCNT2 = 0;
 
 	uint16_t LoopStartTCNT1 = 0;
+	uint8_t	LMA_minutes = 0;
 
 	init();									// Do all init tasks
 	AccInit();								// Clear avg buffer, set indexes
@@ -321,14 +325,22 @@ int main(void)
 		Lost_TCNT2 = TCNT2;
 
 		// Reset count if any RX activity
-		if (RxActivity)	
+		if (RxActivity || (Config.LMA_enable == 0))
 		{														
 			Change_LostModel = 0;
 			Model_lost = false;	
+			LMA_minutes = 0;
 			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
 		}
-		// Wait for 60s then trigger lost model alarm
-		if (Change_LostModel > LMA_TIMEOUT)	
+		
+		if (Change_LostModel > LMA_TIMEOUT)
+		{
+			LMA_minutes++;
+			Change_LostModel = 0;
+		}
+
+		// Trigger lost model alarm if enabled and due
+		if ((LMA_minutes >= Config.LMA_enable) && (Config.LMA_enable != 0))	
 		{
 			Model_lost = true;
 			General_error |= (1 << LOST_MODEL); // Set lost model bit
@@ -397,7 +409,6 @@ int main(void)
 				AutoLevel = false;				// De-activate autolevel mode
 				break;
 			case AUTOCHAN:
-				//if (RxChannel[AUX1] > 3000)
 				if (RxChannel[Config.AutoChan] > MIDDLE)
 				{
 					AutoLevel = true;			// Activate autolevel mode
@@ -418,7 +429,7 @@ int main(void)
 				}	
 				break;
 			case ALWAYSON:
-				AutoLevel = true;			// Activate autolevel mode
+				AutoLevel = true;				// Activate autolevel mode
 				break;
 			default:							// Disable by default
 				AutoLevel = false;				// De-activate autolevel mode
@@ -445,7 +456,6 @@ int main(void)
 				break;
 			case STABCHAN:
 			case THREEPOS:
-				//if (RxChannel[GEAR] > 3000)
 				if (RxChannel[Config.StabChan] > MIDDLE)
 				{
 					Stability = true;			// Activate autolevel mode
@@ -540,7 +550,7 @@ int main(void)
 			uint8_t i;
 			for (i = 0; i < MAX_OUTPUTS; i++)
 			{
-				ServoOut[i] = Config.Channel[i].Failsafe;
+				ServoOut[i] = Config.Limits[i].failsafe;
 			}
 		}
 
@@ -559,7 +569,6 @@ int main(void)
 		// If in failsafe, just output unsynchronised
 		else if (Failsafe && Overdue && ServoTick)
 		{
-			//Refresh_safe = true;			// Safe to try and refresh status screen
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
 

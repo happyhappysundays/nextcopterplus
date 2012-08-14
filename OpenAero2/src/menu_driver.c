@@ -19,7 +19,7 @@
 #include "..\inc\menu_ext.h"
 #include "..\inc\rc.h"
 
-#define CONTRAST 166 // Contrast item number
+#define CONTRAST 204 // Contrast item number
 
 //************************************************************
 // Prototypes
@@ -33,6 +33,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -72,59 +73,74 @@ void print_menu_frame(uint8_t style)
 	}
 
 	// Write from buffer
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 }
 
-//************************************************************
-// Print menu items (int8_t)
-//************************************************************
+//**********************************************************************
+// Print menu items primary subroutine
+// Why are there two? 8-bit menu structures take up much less space
+// but are obviously limited to +/-127.
+// We need a 16-bit version for things like the battery menu.
+// GCC doesn't allow over-driving functions like C++ so...
+// print_menu_items() and print_menu_items_16() are wrappers for
+// print_menu_items_core().
+//
+// Usage:
+// top = position in submenu list
+// start = start of submenu text list. (top - start) gives the offset into the list.
+// values = pointer to array of values to change
+// menu_ranges = pointer to array of min/max/inc/style/defaults
+// MenuOffsets = originally an array, now just a fixed horizontal offset for the value text
+// text_link = pointer to the text list for the values if not numeric
+// cursor = cursor position
+//**********************************************************************
+void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
+{
+	menu_range_t	range1;
+	
+	// Clear buffer before each update
+	clear_buffer(buffer);
+	print_menu_frame(0);
+	
+	// Print each line
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		LCD_Display_Text(top+i,(prog_uchar*)Verdana8,ITEMOFFSET,lines[i]);
+		memcpy_P(&range1, &menu_ranges[(top+i - start)* sizeof(range1)], sizeof(range1));
+		print_menu_text(values[top+i - start], range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, lines[i]);
+	}
+
+	print_cursor(cursor);	// Cursor
+	write_buffer(buffer,1);
+	poll_buttons();
+}
+
+//*******************************************************************
+// Print menu items (int8_t) for handling signed 8-bit +/-127 values
+//*******************************************************************
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
-	menu_range_t	range1;
-	
-	// Clear buffer before each update
-	clear_buffer(buffer);
-	print_menu_frame(0);
-	
-	// Print each line
-	for (uint8_t i = 0; i < 4; i++)
+	int16_t big_values[16];		// Hope 10 is always enough lol... (hides)
+	int8_t	i = 0;
+
+	for (i = 0; i < 16; i++)	// Promote 8-bit structure to 16 
 	{
-		LCD_Display_Text(top+i,(prog_uchar*)Verdana8,ITEMOFFSET,lines[i]);
-		memcpy_P(&range1, &menu_ranges[(top+i - start)* sizeof(range1)], sizeof(range1));
-		print_menu_text(values[top+i - start], range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, lines[i]);
+		big_values[i] = values[i];
 	}
 
-	print_cursor(cursor);	// Cursor
-	write_buffer(buffer);
-	poll_buttons();
+	print_menu_items_core(top, start, &big_values[0], (prog_uchar*)menu_ranges, MenuOffsets, (prog_uchar*)text_link, cursor);
 }
 
-//************************************************************
-// Print menu items (int16_t)
-//************************************************************
+//**********************************************************************
+// Print menu items (int16_t) for handling signed 16-bit +/-32768 values
+//**********************************************************************
 void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
-	menu_range_t	range1;
-	
-	// Clear buffer before each update
-	clear_buffer(buffer);
-	print_menu_frame(0);
-	
-	// Print each line
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		LCD_Display_Text(top+i,(prog_uchar*)Verdana8,ITEMOFFSET,lines[i]);
-		memcpy_P(&range1, &menu_ranges[(top+i - start)* sizeof(range1)], sizeof(range1));
-		print_menu_text(values[top+i - start], range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, lines[i]);
-	}
-
-	print_cursor(cursor);	// Cursor
-	write_buffer(buffer);
-	poll_buttons();
+	print_menu_items_core(top, start, &values[0], (prog_uchar*)menu_ranges, MenuOffsets, (prog_uchar*)text_link, cursor);
 }
 
 //************************************************************
-// Print menu items
+// get_menu_range - Get raneg info from PROGMEM for a specific item
 //************************************************************
 
 // Get range from Program memory
@@ -137,9 +153,11 @@ menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem)
 
 //************************************************************
 // Edit curent value according to limits and increment
-// button	= Total number of menu items in list
-// value*	= Value of current item
-// range 	= Limits of current item
+// menuitem = Item reference
+// value	= Value of item
+// range 	= Limits of item
+// offset	= Horizontal offset on screen
+// text_link = Start of text list for the values if not numeric
 //************************************************************
 
 uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link)
@@ -181,7 +199,7 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		print_menu_frame(1);
 
 		// Write from buffer
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 
 
 		// Poll buttons when idle
@@ -191,13 +209,13 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		if (button == DOWN)	
 		{
 			value = value - range.increment;
-			_delay_ms(10);
+			_delay_ms(50);
 		}
 
 		if (button == UP)	
 		{
 			value = value + range.increment;
-			_delay_ms(10);
+			_delay_ms(50);
 		}
 
 		if (button == BACK)	// Clear value
@@ -223,6 +241,7 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 // Update menu list, cursor, calculate selected item
 // items	= Total number of menu items in list
 // start	= Text list start position
+// button	= Current button state/value
 // cursor* 	= Location of cursor
 // top*		= Item number currently on top line
 // temp*	= Currently selected item number
@@ -318,6 +337,11 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 
 //************************************************************
 // Special subroutine to print either numeric or text
+// values = current value of item
+// style = flag to indicate if value is numeric or a text link
+// text_link = index of text to display
+// x = horizontal location on screen
+// y = vertical location on screen
 //************************************************************
 
 void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y)
@@ -333,7 +357,8 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 }
 
 //************************************************************
-// Misc subroutines
+// Poll buttons, wait until something pressed, debounce and 
+// return button info.
 //************************************************************
 
 uint8_t poll_buttons(void)
@@ -359,6 +384,10 @@ uint8_t poll_buttons(void)
 	return buttons;
 }
 
+//************************************************************
+// Beep required number of times
+//************************************************************
+
 void menu_beep(uint8_t beeps)
 {
 	uint8_t i;
@@ -372,10 +401,22 @@ void menu_beep(uint8_t beeps)
 	}
 }
 
+//************************************************************
+// Print cursor on specified line
+//************************************************************
+
 void print_cursor(uint8_t line)
 {
 	LCD_Display_Text(13, (prog_uchar*)Wingdings, CURSOROFFSET, line);
 }
+
+//************************************************************
+// Draw expo chart on pop-up window.
+// uses actual expo table to draw graph.
+// Really painful to maintain as it includes many hard-coded 
+// values that are highly sensitive to changes in the source data.
+// Just as well it's cute...
+//************************************************************
 
 void draw_expo(int16_t value)
 {

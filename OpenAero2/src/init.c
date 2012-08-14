@@ -21,7 +21,6 @@
 #include "..\inc\servos.h"
 #include "..\inc\gyros.h"
 #include "..\inc\acc.h"
-#include "..\inc\uart.h"
 #include "..\inc\mixer.h"
 #include "..\inc\glcd_driver.h"
 #include "..\inc\mugui.h"
@@ -50,7 +49,6 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
-
 	//***********************************************************
 	// I/O setup
 	//***********************************************************
@@ -123,14 +121,15 @@ void init(void)
 
 	//***********************************************************
 
-	RC_Lock = false;					// Preset important flags
+	RC_Lock = false;						// Preset important flags
 	Failsafe = false;
 	GyroCalibrated = false;
 	AccCalibrated = false;
 	AutoLevel = false;
 	Stability = false;
 
-	Initial_EEPROM_Config_Load();		// Loads config at start-up 
+	Initial_EEPROM_Config_Load();			// Loads config at start-up 
+	UpdateLimits();							// Update travel limts	
 	Init_ADC();
 
 	// Flash LED
@@ -138,19 +137,16 @@ void init(void)
 	_delay_ms(150);
 	LED1 = 0;
 
-	// Beep
-	menu_beep(1);
-
 	// Initialise the GLCD
 	st7565_init();
 	st7565_command(CMD_DISPLAY_ON); 		// Check (AF)
 	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
 	st7565_set_brightness(0x26);
 	clear_screen();
-	write_logo_buffer(buffer);				// Display logo
+	write_buffer(buffer,0);				// Display logo
 	_delay_ms(1000);
 	clear_buffer(buffer);					// Clear
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text
 	clear_buffer(buffer);					// Clear
 
@@ -172,12 +168,12 @@ void init(void)
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,15,10);
 		LCD_Display_Text(2,(prog_uchar*)Verdana14,31,30);
 
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);				// Clear
 		_delay_ms(1000);
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 	}
 
 	//***********************************************************
@@ -204,5 +200,9 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
+
+
+	// Beep that all sensors have been handled
+	menu_beep(1);
 
 } // init()

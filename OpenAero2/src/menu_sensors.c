@@ -63,7 +63,7 @@ void Display_sensors(void)
 		LCD_Display_Text(73, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 
 		// Update buffer
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(100);
 	}

@@ -11,8 +11,6 @@
 //***********************************************************
 
 #include "typedefs.h"
-#include "compiledefs.h"
-
 
 //***********************************************************
 //* Random externals
@@ -127,7 +125,7 @@ enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
 enum MIX_Modes		{AEROPLANE = 0, FLYINGWING, MANUAL};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, UNUSED};
-enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX2, NOCHAN, PRESET1, PRESET2, PRESET3, PRESET4};
+enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX2, NOCHAN, PRESET1, PRESET2, PRESET3, PRESET4, MIX1, MIX2};
 enum SwitchModes	{DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON};
 enum Availability	{OFF = 0, ON};
 enum BatteryType	{LIPO = 0, NIMH};

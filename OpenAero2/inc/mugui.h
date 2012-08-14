@@ -15,8 +15,6 @@ extern void pgm_mugui_lcd_puts(prog_uchar* s, prog_uchar* font,uint16_t x, uint1
 extern void pgm_mugui_scopy(const char *s);
 
 extern const unsigned char Verdana8[] PROGMEM;
-extern const unsigned char Verdana10[] PROGMEM;
 extern const unsigned char Verdana14[] PROGMEM;
-extern const unsigned char Verdana16[] PROGMEM;
 extern const unsigned char Verdana22[] PROGMEM;
 extern const unsigned char Wingdings[] PROGMEM;
