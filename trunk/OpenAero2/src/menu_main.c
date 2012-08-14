@@ -30,8 +30,8 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 17 // Number of menu items
-#define MAINSTART 106 // Start of Menu text items
+#define MAINITEMS 19	// Number of menu items
+#define MAINSTART 106	// Start of Menu text items
 
 //************************************************************
 // Main menu-specific setup
@@ -55,7 +55,7 @@ void menu_main(void)
 		LCD_Display_Text(top+2,(prog_uchar*)Verdana8,ITEMOFFSET,LINE2); // Third line
 		LCD_Display_Text(top+3,(prog_uchar*)Verdana8,ITEMOFFSET,LINE3);	// Fourth line
 		print_cursor(cursor);											// Cursor
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 
 		// Poll buttons when idle
 		poll_buttons();
@@ -103,37 +103,36 @@ void do_main_menu_item(uint8_t menuitem)
 		case MAINSTART+8:
 			Display_balance();
 			break;
-/*		case MAINSTART+6:
-			//menu_camstab();
-			break;
-		case MAINSTART+7:
-			//menu_manual_mixer();
-			break;*/
 		case MAINSTART+9:
-			menu_mixer(0);
+			menu_rcmixer(0);
 			break;
 		case MAINSTART+10:
-			menu_mixer(1);
+			menu_rcmixer(1);
 			break;
 		case MAINSTART+11:
-			menu_mixer(2);
+			menu_mixer(0);
 			break;
 		case MAINSTART+12:
-			menu_mixer(3);
+			menu_mixer(1);
 			break;
 		case MAINSTART+13:
-			menu_mixer(4);
+			menu_mixer(2);
 			break;
 		case MAINSTART+14:
-			menu_mixer(5);
+			menu_mixer(3);
 			break;
 		case MAINSTART+15:
-			menu_mixer(6);
+			menu_mixer(4);
 			break;
 		case MAINSTART+16:
+			menu_mixer(5);
+			break;
+		case MAINSTART+17:
+			menu_mixer(6);
+			break;
+		case MAINSTART+18:
 			menu_mixer(7);
 			break;
-
 		default:
 			break;
 	} // Switch

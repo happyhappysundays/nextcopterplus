@@ -196,6 +196,7 @@ void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_ui
 	\param  y position (upper left corner)
 	\return character width
 	\date 	13.11.2009
+	\Modified by D. Thompson 14/08/2012 - Now hard-coded for proportional, type 2 (verticalCeiling)
 */
 /************************************************************************/
 mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y)
@@ -219,7 +220,7 @@ mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x,
 	mugui_uint8_t  tc= 0;	 				//temorary count
 	mugui_uint8_t  bytes= 0;  				//bytes per line or row
 
-	/* read header of the font          */
+	/* Read header of the font          */
 	/* pgm_read_byte is ATMega specific */
 	proportional = pgm_read_byte(&font[0]);
 	alignment = pgm_read_byte(&font[1]);
@@ -227,153 +228,44 @@ mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x,
 	numberofbitmaps = pgm_read_byte(&font[3]);
 	height = pgm_read_byte(&font[4]);
 
-	/* proportional font */
-	if(proportional) 
-	{
-		/* read the rest of the header */
-		index = c - startcharacter;
-		indexhighbyte = pgm_read_byte(&font[index*2 + 5]);
-		indexlowbyte = pgm_read_byte(&font[index*2 + 6]);
-		indexaddress = (mugui_int64_t)indexhighbyte;
-		indexaddress = indexaddress << 8;
-		indexaddress += indexlowbyte;
-		width = pgm_read_byte(&font[indexaddress]);
-		/* select the byte orientation */
-		switch(alignment)
-		{
-			/* byte orientation horizontal left */
-			case 0:
-				/* determin the number of bytes for given width */ 
-				bytes = ((width-1)>>3)+1;
-				/* for every line */
-				for(ty=0; ty < height; ty++)
-				{				
-					tx = 0;
-					/* for every byte */
-					for(tb = 0; tb < bytes; tb ++)
-					{
-						/* read bytes from program memory - ATMega specific */
-						data = pgm_read_byte(&font[indexaddress + 1 + bytes*ty + tb]);
-						/* for every bit within the width */
-						for(tc = 0; ( (tc < 8) && (tx < width) ); tc ++)
-						{
-							/* determin the bit mask */
-							mask = 1<<(tc);
-							bit = data & mask;
-							if(bit)
-							{
-								mugui_ctrl_setPixel(tx+x,ty+y,1);
-							}
-							else
-							{
-								mugui_ctrl_setPixel(tx+x,ty+y,0);
-							}
-							tx++;
-						}
-					}
-				}
-			break;
-			/* byte orientation horizontal right */
-			case 1:
-				/* determin the number of bytes for given width */ 
-				bytes = ((width-1)>>3)+1;
-				/* for every line */
-				for(ty=0; ty < height; ty++) //for every line
-				{				
-					tx = 0;
-					/* for every byte */
-					for(tb = 0; tb < bytes; tb ++)
-					{
-						/* read bytes from program memory - ATMega specific */
-						data = pgm_read_byte(&font[indexaddress + 1 + bytes*ty + tb]);
-						/* for every bit within the width */
-						for(tc = 0; ( (tc < 8) && (tx < width) ) ; tc ++)
-						{
-							/* determin the bit mask */	
-							mask = 1<<(tc);
-							bit = data & mask;
-							if(bit)
-							{
-								mugui_ctrl_setPixel(width-1-tx+x,ty+y,1);
-							}
-							else
-							{
-								mugui_ctrl_setPixel(width-1-tx+x,ty+y,0);
-							}
-							tx++;
-						}
-					}
-				}
-			break;
-			/* byte orientation vertical ceiling */
-			case 2:
-				/* determin the number of bytes for given width */ 
-				bytes = ((height-1)>>3)+1;
-				/* for every column */
-				for(tx= 0; tx < width; tx++) //for every row
-				{
-					ty = 0;
-					/* for every byte */
-					for(tb = 0; tb < bytes; tb ++)
-					{
-						/* read bytes from program memory - ATMega specific */
-						data = pgm_read_byte(&font[indexaddress + 1 + bytes*tx + tb]);
-						/* for every bit within the height */
-						for(tc = 0;  ( (tc < 8) && (ty < height) ); tc ++)
-						{
-								/* determin the bit mask */
-								mask = 1<<(tc);
-								bit = data & mask;
-								if(bit)
-								{
-									mugui_ctrl_setPixel(tx+x,ty+y,1);
-								}
-								else
-								{
-									mugui_ctrl_setPixel(tx+x,ty+y,0);
-								}
-								ty++;
-						}
-					}
-				}
-			break;
-			/* byte orientation vertical bottom */
-			case 3:
-				/* determin the number of bytes for given height */
-				bytes = ((height-1)>>3)+1; 
-				/* for every column */
-				for(tx= 0; tx < width; tx++)
-				{
-					ty = 0;
-					/* for every byte */
-					for(tb = 0; tb < bytes; tb ++)
-					{
-						/* read bytes from program memory - ATMega specific */
-						data = pgm_read_byte(&font[indexaddress + 1 + bytes*tx + tb]);
-						/* for every bit within the height */
-						for(tc = 0; ( (tc < 8) && (ty < height) ); tc ++)
-						{
-							/* determin the bit mask */
-							mask = 1<<(tc);
-							bit = data & mask;
-							if(bit)
-							{
-								mugui_ctrl_setPixel(tx+x,height-1-ty+y,1);
-							}
-							else
-							{
-								mugui_ctrl_setPixel(tx+x,height-1-ty+y,0);
-							}
-							ty++;
+	/* Read the rest of the header */
+	index = c - startcharacter;
+	indexhighbyte = pgm_read_byte(&font[index*2 + 5]);
+	indexlowbyte = pgm_read_byte(&font[index*2 + 6]);
+	indexaddress = (mugui_int64_t)indexhighbyte;
+	indexaddress = indexaddress << 8;
+	indexaddress += indexlowbyte;
+	width = pgm_read_byte(&font[indexaddress]);
 
-						}
+	/* Determine the number of bytes for given width */ 
+	bytes = ((height-1)>>3)+1;
+	/* For every column */
+	for(tx= 0; tx < width; tx++) //for every row
+	{
+		ty = 0;
+		/* For every byte */
+		for(tb = 0; tb < bytes; tb ++)
+		{
+			/* Read bytes from program memory - ATMega specific */
+			data = pgm_read_byte(&font[indexaddress + 1 + bytes*tx + tb]);
+			/* For every bit within the height */
+			for(tc = 0;  ( (tc < 8) && (ty < height) ); tc ++)
+			{
+					/* Determine the bit mask */
+					mask = 1<<(tc);
+					bit = data & mask;
+					if(bit)
+					{
+						mugui_ctrl_setPixel(tx+x,ty+y,1);
 					}
-				}
-			break;
-			
-			default:
-			break;
+					else
+					{
+						mugui_ctrl_setPixel(tx+x,ty+y,0);
+					}
+					ty++;
+			}
 		}
 	}
+
 	return width;
 }

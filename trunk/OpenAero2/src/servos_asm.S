@@ -7,7 +7,6 @@
  */
 
 #include <avr/io.h>
-#include "..\inc\compiledefs.h"
 
 // Servo output pin assignments
 #define SERVO_OUT	_SFR_IO_ADDR(PORTC)

@@ -178,7 +178,7 @@ ISR(INT2_vect)
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished
-			RC_Lock = true;							// RC sync established
+			RC_Lock = true;						// RC sync established
 		}
 	}
 } // ISR(INT2_vect)

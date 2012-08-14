@@ -76,10 +76,14 @@ void RxGetChannels(void)
 	}
 
 	// Update presets manually as they don't come from the RC
-	RxChannel[9]  = ((Config.Preset1 * 12) + 3750);
-	RxChannel[10] = ((Config.Preset2 * 12) + 3750);
-	RxChannel[11] = ((Config.Preset3 * 12) + 3750);
-	RxChannel[12] = ((Config.Preset4 * 12) + 3750);
+	RxChannel[PRESET1] = ((Config.Preset1 * 12) + 3750);
+	RxChannel[PRESET2] = ((Config.Preset2 * 12) + 3750);
+	RxChannel[PRESET3] = ((Config.Preset3 * 12) + 3750);
+	RxChannel[PRESET4] = ((Config.Preset4 * 12) + 3750);
+
+	// Update mixer channels
+	RxChannel[MIX1] = Config.Mix_value[0];
+	RxChannel[MIX2] = Config.Mix_value[1];
 
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
@@ -90,7 +94,6 @@ void RxGetChannels(void)
 	else RxActivity = false;
 	OldRxSum = RxSum;
 }
-
 
 // Get expo'd RC value
 int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
@@ -152,6 +155,7 @@ void CenterSticks(void)
 void SetFailsafe(void)		
 {
 	uint8_t i;
+	int16_t failsafe;
 
 	// Update latest values of each channel
 	ProcessMixer();
@@ -159,10 +163,15 @@ void SetFailsafe(void)
 	// Transfer latest values of each channel to ServoOut[] and range limit
 	UpdateServos();
 
-	// Transfer values to failsafe
-	for (i=0;i<MAX_OUTPUTS;i++)
+	// Update Config settings based on servo position
+	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].Failsafe = ServoOut[i]; 
+		// Set primary failsafe point
+		Config.Limits[i].failsafe = ServoOut[i];
+
+		// Rescale and set noob-friendly mixer failsafe percentages
+		failsafe = (ServoOut[i] - 3750) / 12;
+		Config.Channel[i].Failsafe = failsafe;
 	}
 
 	Save_Config_to_EEPROM();

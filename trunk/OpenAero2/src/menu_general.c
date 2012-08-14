@@ -32,21 +32,24 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 4 		// Number of menu items
-#define GENERALSTART 164 	// Start of Menu text items
+#define GENERALITEMS 6 		// Number of menu items
+#define GENERALSTART 202 	// Start of Menu text items
+#define GENERALTEXT	 33 	// Start of value text items
 #define GENOFFSET	 80		// Value offsets
 
 //************************************************************
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {33, 103, 101, 101};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 101, 101, 0};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
 	{AEROPLANE,MANUAL,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
 	{28,45,1,0,38}, 	// Contrast
-	{OFF,ON,1,1,OFF},	// Auto-update status menu
+	{OFF,ON,1,1,ON},	// Auto-update status menu
+	{OFF,ON,1,1,OFF},	// RC mixer enable
+	{0,10,1,0,1},		// LMA enable
 };
 
 //************************************************************
@@ -57,15 +60,19 @@ void menu_general(void)
 {
 	uint8_t cursor = LINE0;
 	uint8_t top = GENERALSTART;
+	uint8_t temp = 0;
 	int8_t values[GENERALITEMS];
 	menu_range_t range;
-	uint8_t temp = 0;
 	uint8_t text_link = 0;
+	uint8_t temp_type = 0;
 
 	while(button != BACK)
 	{
 		// Load values from eeprom
 		memcpy(&values[0],&Config.MixMode,sizeof(int8_t) * GENERALITEMS);
+
+		// Save pre-edited values
+		temp_type = Config.MixMode;
 
 		// Print menu
 		print_menu_items(top, GENERALSTART, &values[0], (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
@@ -85,19 +92,23 @@ void menu_general(void)
 
 		if (button == ENTER)
 		{
-			switch(Config.MixMode)  // Load selected mix
+			// If model type has changed, reload preset
+			if (temp_type != values[0]) 
 			{
-				case AEROPLANE:
-					get_preset_mix(AEROPLANE_MIX);
-					break;	
-				case FLYINGWING:
-					get_preset_mix(FLYING_WING_MIX);
-					break;
-				case MANUAL:
-					get_preset_mix(MANUAL_MIX);
-					break;
-				default:
-					break;
+				switch(Config.MixMode)  // Load selected mix
+				{
+					case AEROPLANE:
+						get_preset_mix(AEROPLANE_MIX);
+						break;	
+					case FLYINGWING:
+						get_preset_mix(FLYING_WING_MIX);
+						break;
+					case MANUAL:
+						get_preset_mix(MANUAL_MIX);
+						break;
+					default:
+						break;
+				}
 			}
 			Save_Config_to_EEPROM(); // Save value and return
 		}

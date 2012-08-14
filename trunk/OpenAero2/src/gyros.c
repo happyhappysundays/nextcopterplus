@@ -10,9 +10,7 @@
 #include <stdbool.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
-#include "..\inc\vbat.h"
 #include "..\inc\adc.h"
-#include "..\inc\init.h"
 
 //************************************************************
 // Prototypes

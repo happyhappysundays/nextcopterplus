@@ -151,5 +151,4 @@ void Calculate_PID(void)
 
 	// Sum
 	PID_Gyros[YAW] = (PID_gyro_temp + DifferentialGyro) >> 6;		// Sum Gyro P and D terms and rescale
-
 }

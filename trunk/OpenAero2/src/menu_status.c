@@ -53,7 +53,7 @@ void Display_status(void)
 
 	// Display values
 	print_menu_text(0, 1, (29 + Config.RxMode), 50, 22);
-	LCD_Display_Text(163,(prog_uchar*)Verdana8,50,11); 
+	LCD_Display_Text(140,(prog_uchar*)Verdana8,50,11); 
 	print_menu_text(0, 1, (33 + Config.MixMode), 36, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
@@ -148,5 +148,6 @@ void Display_status(void)
 	}
 
 	// Write buffer to complete
-	write_buffer(buffer);
+	write_buffer(buffer,1);
+	clear_buffer(buffer);
 }
