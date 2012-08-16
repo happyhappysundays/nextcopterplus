@@ -29,14 +29,15 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x42		// eePROM signature
+#define MAGIC_NUMBER 0x01		// eePROM signature - change for each eePROM structure change
+								// to force factory reset
 
 //************************************************************
 // Code
 //************************************************************
 
-uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7,0,0,0,0,0,0,0}; // JR/Spektrum channel sequence
-uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7,0,0,0,0,0,0,0}; // Futaba channel sequence
+uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence
+uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7}; 	// Futaba channel sequence
 
 void Set_EEPROM_Default_Config(void)
 {
@@ -100,12 +101,12 @@ void Set_EEPROM_Default_Config(void)
 	Config.Differential = 0;			// Amount of differential on Aileron channels
 	Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
 
-	Config.CamStab = 0;
+	Config.CamStab = OFF;
 	Config.RCMix = OFF;					// RC mixer defaults to OFF for speed
 
 	Config.Orientation = 0;				// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
-	Config.AutoUpdateEnable = ON;
+	Config.Status_timer = 5;			// Refresh timeout
 	Config.LMA_enable = 1;				// Default to 1 minute
 
 	Config.Preset1 = 0;

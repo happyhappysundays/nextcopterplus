@@ -47,14 +47,12 @@ void Display_status(void)
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
-	LCD_Display_Text(105,(prog_uchar*)Verdana8,10,55);	// Refresh
-	LCD_Display_Text(14,(prog_uchar*)Verdana8,54,55);	// Menu
-	LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59);// Down
+	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
 	print_menu_text(0, 1, (29 + Config.RxMode), 50, 22);
 	LCD_Display_Text(140,(prog_uchar*)Verdana8,50,11); 
-	print_menu_text(0, 1, (33 + Config.MixMode), 36, 0);
+	print_menu_text(0, 1, (33 + Config.MixMode), 33, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
 

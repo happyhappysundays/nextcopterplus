@@ -32,7 +32,7 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 6 		// Number of menu items
+#define GENERALITEMS 7 		// Number of menu items
 #define GENERALSTART 202 	// Start of Menu text items
 #define GENERALTEXT	 33 	// Start of value text items
 #define GENOFFSET	 80		// Value offsets
@@ -41,15 +41,16 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 101, 101, 0};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 101, 0, 101};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-	{AEROPLANE,MANUAL,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
+	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
 	{28,45,1,0,38}, 	// Contrast
-	{OFF,ON,1,1,ON},	// Auto-update status menu
+	{1,30,1,0,10},		// Status menu timeout
 	{OFF,ON,1,1,OFF},	// RC mixer enable
-	{0,10,1,0,1},		// LMA enable
+	{0,30,1,0,1},		// LMA enable
+	{OFF,ON,1,1,OFF},	// Camstab enable
 };
 
 //************************************************************
@@ -105,6 +106,9 @@ void menu_general(void)
 						break;
 					case MANUAL:
 						get_preset_mix(MANUAL_MIX);
+						break;
+					case CAMSTAB:
+						get_preset_mix(CAM_STAB);
 						break;
 					default:
 						break;

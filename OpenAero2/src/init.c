@@ -153,6 +153,9 @@ void init(void)
 	// Reset I-terms
 	IntegralaPitch = 0;	 
 	IntegralaRoll = 0;
+	IntegralgPitch = 0;	
+	IntegralgRoll = 0;
+	IntegralYaw = 0;
 
 	// Calibrate gyros, hopefully after motion minimised
 	CalibrateGyros();			
@@ -192,7 +195,7 @@ void init(void)
 
 	// Check to see that throttle is low if in CPPM mode
 	_delay_ms(100);
-	if ((Config.RxMode == CPPM_MODE) && RC_Lock)
+	if ((Config.RxMode == CPPM_MODE) && RC_Lock && (Config.CamStab == OFF))
 	{
 		RxGetChannels();
 		if (RCinputs[THROTTLE] > 100)

@@ -29,7 +29,7 @@ void AccInit(void);
 // Defines
 //************************************************************
 
-#define AVGLENGTH 5					// Accelerometer filter buffer length + 1 (4 new + 1 old)
+#define AVGLENGTH 17					// Accelerometer filter buffer length + 1 (4 new + 1 old)
 
 //************************************************************
 // Code
@@ -91,8 +91,8 @@ void AvgAcc(void)
 	AvgRollSum = AvgRollSum + accADC[Y] - AvgAccRoll[OldIndex]; // Add new value to sum, subtract oldest
 	AvgPitchSum = AvgPitchSum + accADC[X] - AvgAccPitch[OldIndex];
 
-	AvgRoll = ((AvgRollSum >> 2) - Config.AccRollZeroTrim); // Divide by 4 to get rolling average then adjust for acc trim
-	AvgPitch = ((AvgPitchSum >> 2) - Config.AccPitchZeroTrim);
+	AvgRoll = ((AvgRollSum >> 4) - Config.AccRollZeroTrim); // Divide by 32 to get rolling average then adjust for acc trim
+	AvgPitch = ((AvgPitchSum >> 4) - Config.AccPitchZeroTrim);
 
 	AvgIndex ++;
 	if (AvgIndex >= AVGLENGTH) AvgIndex = 0; // Wrap both indexes properly to create circular buffer

@@ -15,7 +15,7 @@
 //************************************************************
 
 volatile bool Interrupted;
-volatile uint16_t RxChannel[MAX_RC_CHANNELS]; 
+volatile uint16_t RxChannel[MAX_RC_SOURCES]; // There are more sources than RC channels
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Current channel number

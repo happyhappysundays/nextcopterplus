@@ -11,7 +11,8 @@
 
 #define INPUT 	0
 #define OUTPUT 	1
-#define MAX_RC_CHANNELS 15				// Maximum input channels
+#define MAX_RC_SOURCES 15				// Maximum input channels including non-RX channels
+#define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define MAX_OUTPUTS 8					// Maximum output channels
 #define NUM_MIXERS 2
 
@@ -76,7 +77,7 @@ typedef struct
 
 	// Menu adjustable items
 	// RC settings
-	uint8_t		ChannelOrder[MAX_RC_CHANNELS];// Assign channel numbers to hard-coded channel order
+	uint8_t		ChannelOrder[MAX_RC_CHANNELS];	// Assign channel numbers to hard-coded channel order
 										// OpenAeroEvo uses Thr, Ail, Ele, Rud, Gear, Flap, Aux1, Aux2
 										// THROTTLE will always return the correct data for the assigned throttle channel
 										// AILERON will always return the correct data for the assigned aileron channel
@@ -125,30 +126,28 @@ typedef struct
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
 
 	// RC mixer settings
-	mixer_t		mixer_data[2];
-	uint16_t	Mix_value[2];			// Mixer values
+	mixer_t		mixer_data[NUM_MIXERS];
+	uint16_t	Mix_value[NUM_MIXERS];	// Mixer values
 
 	// General items
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Manual
 	int8_t		Orientation;			// Horizontal / vertical
 	int8_t		Contrast;				// Contrast setting
-	int8_t		AutoUpdateEnable;		// Status screen auto-update enable flag
+	int8_t		Status_timer;			// Status screen timer
 	int8_t		RCMix;					// RC mixer enable
 	int8_t		LMA_enable;				// LMA setting
-
-	// Misc
-	int8_t		CamStab;
+	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
 		
 	// Non-menu items 
 	// Channel configuration
-	channel_t	Channel[MAX_RC_CHANNELS];// Channel mixing data	
+	channel_t	Channel[MAX_OUTPUTS];// Channel mixing data	
 
 	// Misc
 	int8_t		Modes;					// Misc flight mode flag
 
 
 	// RC inputs
-	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets
+	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
 	// Acc zeros
 	uint16_t	AccRollZero;			// Acc calibration results

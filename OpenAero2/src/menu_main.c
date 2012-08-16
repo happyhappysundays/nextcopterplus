@@ -43,6 +43,14 @@ void menu_main(void)
 	uint8_t top = MAINSTART;
 	uint8_t temp = 0;
 	
+	button = NONE; // debug
+
+	// Wait until user's finger is off button 1
+	while(BUTTON1 == 0)
+	{
+		_delay_ms(50);
+	}
+
 	while(button != BACK)
 	{
 		// Clear buffer before each update

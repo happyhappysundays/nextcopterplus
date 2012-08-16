@@ -19,6 +19,8 @@
 #include "..\inc\acc.h"
 #include "..\inc\rc.h"
 #include "..\inc\mugui.h"
+#include "..\inc\glcd_driver.h"
+#include "..\inc\main.h"
 
 //************************************************************
 // Prototypes
@@ -29,6 +31,9 @@ void LCD_Display_Text (uint8_t menuitem, prog_uchar* font,uint16_t x, uint16_t y
 
 // Print a string from at a particular location
 void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y);
+
+// Misc
+void idle_screen(void);
 
 //************************************************************
 // Text to print (non-menu)
@@ -160,7 +165,7 @@ const char MixerMenuItem3[]  PROGMEM = "Vert.";
 const char StatusText6[]  PROGMEM = "Refresh";				// Status menu
 //
 const char GeneralText0[]  PROGMEM = "Contrast:";
-const char GeneralText1[]  PROGMEM = "Auto-refresh:";
+const char GeneralText1[]  PROGMEM = "Status time:";
 const char GeneralText2[]  PROGMEM = "LMA timeout:";
 //
 const char MixerItem0[] PROGMEM = "Source:";				// Mixer menu items
@@ -210,6 +215,10 @@ const char RCMixText1[] PROGMEM = "Source B:";
 const char RCMixText2[] PROGMEM = "Mix 1";
 const char RCMixText3[] PROGMEM = "Mix 2";
 //
+const char Status0[] PROGMEM = "Press any";			// Idle text
+const char Status1[] PROGMEM = "button";			// Idle text
+const char Status2[] PROGMEM = "for status";
+//
 const char Dummy0[] PROGMEM = "";
 //
 
@@ -226,10 +235,10 @@ const char *text_menu[] PROGMEM =
 		StatusText4, StatusText4, StatusText4, StatusText4,StatusText4,
 		StatusText4,
 		//
-		RXMode0, RXMode1, RXMode2, RXMode3, RXMode4, RXMode5, RXMode6,						// 29 to 35
+		RXMode0, RXMode1, RXMode2, RXMode3, RXMode4, RXMode5, RXMode6,						// 29 to 36
+		MainMenuItem6,
 		//
-		PText8,																				// 36 to 49
-		PText15, PText16,
+		PText15, PText16,																	// 37 to 49
 		PText17, PText18, PText19, PText20, PText21, PText22, PText23, PText24, 
 		PText25, PText26, PText27,
 		//
@@ -299,7 +308,8 @@ const char *text_menu[] PROGMEM =
 		StatusText1, MixerMenuItem0, GeneralText0,											// 202 to 209 general
 		GeneralText1,MixerMenuItem1,
 		GeneralText2,MainMenuItem6,	 MainMenuItem6,	
-
+		//
+		Status0, Status1, Status2															// 210 to 212
 	}; 
 
 //************************************************************
@@ -318,3 +328,12 @@ void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y)
 	pgm_mugui_lcd_puts((prog_uchar*)s, font, x, y);
 }
 
+// Pop up the Idle screen
+void idle_screen(void)
+{
+	clear_buffer(buffer);
+	LCD_Display_Text(210,(prog_uchar*)Verdana14,26,8); 	// "Press any"
+	LCD_Display_Text(211,(prog_uchar*)Verdana14,38,25); // "button"
+	LCD_Display_Text(212,(prog_uchar*)Verdana14,24,42); // "for status"
+	write_buffer(buffer,1);
+};

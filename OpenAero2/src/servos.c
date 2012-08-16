@@ -45,7 +45,7 @@ void output_servo_ppm(void)
 			output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
 			output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
 		}
-		else if (Failsafe) // Unsynchronised so need to disable interrupts
+		else if (Failsafe || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
 		{
 			cli();
 			output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
