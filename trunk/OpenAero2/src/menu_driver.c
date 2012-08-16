@@ -120,10 +120,10 @@ void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uc
 //*******************************************************************
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
-	int16_t big_values[16];		// Hope 10 is always enough lol... (hides)
+	int16_t big_values[16];		// Hope 16 is always enough lol... (hides)
 	int8_t	i = 0;
 
-	for (i = 0; i < 16; i++)	// Promote 8-bit structure to 16 
+	for (i = 0; i < 16; i++)	// Promote 8-bit structure to 16-bit ones
 	{
 		big_values[i] = values[i];
 	}

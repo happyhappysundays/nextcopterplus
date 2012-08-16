@@ -96,7 +96,7 @@ void menu_rc_setup(void)
 		if (button == ENTER)
 		{
 			// Update channel sequence
-			for (i = 0; i < MAX_OUTPUTS; i++)
+			for (i = 0; i < MAX_RC_CHANNELS; i++)
 			{
 				if (Config.TxSeq == JRSEQ) 
 				{

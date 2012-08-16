@@ -2,8 +2,8 @@
 // OpenAero software for KK2.0
 // ===========================
 // Version 2.00 Beta 2 - August 2012
-// Inspired by KKmulticopter
-// Contains trace elements of assembly code by Rolf R Bakke, and C code by Mike Barton
+//
+// Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
 // Includes PID and Auto-level functions inspired by the open-sourced MultiWii project
 //
@@ -30,7 +30,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V2.00a	Based on OpenAero V1.13 Beta 8 code
+// V1.00a	Based on OpenAero V1.13 Beta 8 code
 //			Initial code base.
 // Alpha 1	First release to alpha testers
 // Alpha 2  Fixed channel number bug, added second aileron to default mixer
@@ -56,14 +56,20 @@
 //			Added adjustable Lost Model Alarm timeout. 0 = disabled, otherwise 1 to 10 minutes
 //			without RC input. Fixed min/max travel bug. Startup beep now after last gyro check.
 //			Fixed issue where changing anything in the general menu over-wrote the mixers.
-//			Removed other font options from mugui_text.c 
-//
+//			Removed other font options from mugui_text.c. Adjusted F.Wing default sources.
+//			Force factory reset for new eeprom structure changes.
+//			Added back CamStab enable so that camera stability can be done without RC.
+//			Added CamStab mixer preset. Restored full PID functionality.
+//			Completely new idle screen. Status screen now has user settable timeout.
+//			Greatly increased acc gain.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // For Beta2 and first release
+//  Replace the auto-update with a timed self-clearing status screen 
+//  that drops back to a static screen showing "Press any key for status"
 //
 // Later
 //  Camera stabilisation settings (tilt/pan and gimbal)
@@ -159,6 +165,7 @@ Camera Gimbal (if enabled)
 #define	MIDDLE	3500				// Mid third of travel
 #define	UPPER	4000				// Upper third of travel
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
+#define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
 
 //***********************************************************
 //* Code and Data variables
@@ -171,7 +178,6 @@ uint16_t cycletime;					// Loop time in microseconds
 bool AutoLevel;						// AutoLevel = 1
 bool Stability;						// Stability = 1
 bool Failsafe;
-bool RefreshStatus;
 bool Refresh_safe;
 char pBuffer[16];					// Print buffer
 
@@ -189,15 +195,16 @@ int main(void)
 	bool Model_lost = false;		// Model lost flag
 	bool LMA_Alarm = false;			// Lost model alarm active
 	bool LVA_Alarm = false;			// Low voltage alarm active
-	bool menu_mode = false;
 
 	// Timers
+	uint32_t Status_timeout = 0;
 	uint32_t Change_UpdateStatus = 0;
 	uint32_t Change_LostModel = 0;
 	uint32_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
 
+	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
@@ -206,62 +213,127 @@ int main(void)
 
 	uint16_t LoopStartTCNT1 = 0;
 	uint8_t	LMA_minutes = 0;
+	uint8_t Status_seconds = 0;
+
+	uint8_t Menu_mode = STATUS_TIMEOUT;
 
 	init();									// Do all init tasks
 	AccInit();								// Clear avg buffer, set indexes
 
-	Display_status(); // Initial display of status menu prior to main loop
+	// Initial display of idle screen prior to main loop
+	//idle_screen();
 
-	//************************************************************
-	//* Main loop
-	//************************************************************
+	// Main loop
 	while (1)
 	{
-		// Display menu on request
-		if(BUTTON3 == 0)
+		//************************************************************
+		//* State machine for switching between screens safely
+		//************************************************************
+
+		switch(Menu_mode) 
 		{
-			button = NONE;		// Temporary fudge while redoing the menu system
-			menu_mode = true;
-			menu_main();
-			Display_status();
-			menu_mode = false;
+			// In IDLE mode, the text "Press any button for status" is displayed ONCE.
+			// If a button is pressed the mode changes to STATUS.
+			case IDLE:
+				if((PINB & 0xf0) != 0xf0)
+				{
+					Menu_mode = REQ_STATUS;
+					// Reset the status screen timeout
+					Status_seconds = 0;
+				}
+				break;
+
+			// Request the status be updated when safe
+			case REQ_STATUS:
+				// Reset safe to refresh flag
+				Refresh_safe = false;
+				Menu_mode = WAITING_STATUS;
+				break;
+
+			// Waiting for status screen to be updated
+			case WAITING_STATUS:
+				// Next time Refresh_safe is set, switch to status screen
+				if (Refresh_safe)
+				{
+					Menu_mode = STATUS;
+				}
+				break;
+
+			// Status screen first display
+			case STATUS:
+				// Reset the 1 second status screen period
+				Change_UpdateStatus = 0;
+				// Update status screen
+				Display_status();
+				// Force resync on next RC packet
+				Interrupted = false;	
+				// Wait for timeout
+				Menu_mode = WAITING_TIMEOUT;
+				break;
+			
+			// Status screen up, waiting for timeout or action
+			case WAITING_TIMEOUT:
+				// In status screen, change back to idle after timing out
+				if (Status_seconds >= Config.Status_timer)
+				{
+					Menu_mode = STATUS_TIMEOUT;
+				}
+
+				// Update status screen while waiting to time out
+				else if (Change_UpdateStatus > STATUS_TIMER)
+				{
+					Menu_mode = REQ_STATUS;
+				}
+
+				// Jump to menu if button pressed
+				else if(BUTTON1 == 0)
+				{
+					Menu_mode = MENU;
+				}
+
+				break;
+
+			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
+			case STATUS_TIMEOUT:
+				// Pop up the Idle screen
+				idle_screen();
+				// Switch to IDLE mode
+				Menu_mode = IDLE;
+				break;
+
+			// In MENU mode, 
+			case MENU:
+				//button = NONE;//debug
+				menu_main();
+				Menu_mode = STATUS;
+				//button = NONE;//debug
+				// Reset timeout once back in status screen
+				Status_seconds = 0;
+				break;
+
+			default:
+				break;
 		}
+
 
 		//************************************************************
 		//* Status menu refreshing
 		//************************************************************
 
-		// Refresh status window on manual request
-		if(BUTTON1 == 0)
+		// Update status timeout
+		Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
+		Status_TCNT2 = TCNT2;
+
+		// Count elapsed seconds
+		if (Status_timeout > STATUS_TIMER)
 		{
-			Display_status();
+			Status_seconds++;
+			Status_timeout = 0;
 		}
 
-		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (2s)
+		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (1s)
 		Change_UpdateStatus += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
-
-		// Reset count if any RX activity
-		if (RxActivity)	
-		{														
-			Change_UpdateStatus = 0;
-			RefreshStatus = false;			
-		}
-
-		// Wait for REFRESH_TIMEOUT seconds (2s) then allow status refresh, but only in synch with RC
-		if ((Change_UpdateStatus > REFRESH_TIMEOUT)	&& (Config.AutoUpdateEnable == ON) && (Refresh_safe || Failsafe))
-		{
-			Refresh_safe = false;
-			RefreshStatus = true;
-			Change_UpdateStatus = 0;
-		}
-
-		if (LED_ON && RefreshStatus) // 0.5Hz
-		{
-			Display_status();
-			RefreshStatus = false;
-			Interrupted = false;	// Force resync on next RC packet
-		}
 
 		//************************************************************
 		//* Reconfigure interrupts if menu changed
@@ -325,7 +397,7 @@ int main(void)
 		Lost_TCNT2 = TCNT2;
 
 		// Reset count if any RX activity
-		if (RxActivity || (Config.LMA_enable == 0))
+		if (RxActivity || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
 			Change_LostModel = 0;
 			Model_lost = false;	
@@ -478,6 +550,9 @@ int main(void)
 			// Reset I-terms when stabilise is off
 			IntegralaPitch = 0;	 
 			IntegralaRoll = 0;
+			IntegralgPitch = 0;	
+			IntegralgRoll = 0;
+			IntegralYaw = 0;
 		}
 
 		// Read gyros when required
@@ -493,11 +568,12 @@ int main(void)
 			AvgAcc();			// Average acc readings
 		}
 
-		// Calculate PID
-		Calculate_PID();
 
 		// Remove RC noise when sticks centered
 		RC_Deadband();
+
+		// Calculate PID
+		Calculate_PID();
 
 		// Calculate mix
 		ProcessMixer();
@@ -528,7 +604,8 @@ int main(void)
 		}
 
 		// If simply overdue, signal RX error message
-		if (Overdue)
+		// If in independant camstab mode, don't bother
+		if (Overdue && (Config.CamStab == OFF))
 		{
 			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
 		}
@@ -566,8 +643,9 @@ int main(void)
 			output_servo_ppm();				// Output servo signal
 		}
 
-		// If in failsafe, just output unsynchronised
-		else if (Failsafe && Overdue && ServoTick)
+		// If in failsafe, or when doing independant camstab, just output unsynchronised
+		else if ((Overdue && ServoTick) && (Failsafe || (Config.CamStab == ON)))
+		//else if (Failsafe && Overdue && ServoTick)
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
