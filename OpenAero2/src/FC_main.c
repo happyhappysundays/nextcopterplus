@@ -655,6 +655,11 @@ int main(void)
 			output_servo_ppm();				// Output servo signal
 		}
 
+		if (Overdue && ServoTick)
+		{
+			Refresh_safe = true;			// Safe to try and refresh status screen
+		}
+
 		// Measure the current loop rate
 		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
