@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 2.00 Beta 2 - August 2012
+// Version 2.00 Beta 3 - August 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -62,18 +62,17 @@
 //			Added CamStab mixer preset. Restored full PID functionality.
 //			Completely new idle screen. Status screen now has user settable timeout.
 //			Greatly increased acc gain.
+// Beta 3	Added anti-gyro noise into PID calculations.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For Beta2 and first release
-//  Replace the auto-update with a timed self-clearing status screen 
-//  that drops back to a static screen showing "Press any key for status"
+// For V2.0
 //
 // Later
-//  Camera stabilisation settings (tilt/pan and gimbal)
-//  Differential
+//  Camera stabilisation refinements (separate PID settings)
+//  Aileron differential?
 //  Advanced RC settings (CPPM gap, servo rate, servo overdue, etc.)
 //
 //
