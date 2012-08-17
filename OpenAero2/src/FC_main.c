@@ -63,6 +63,7 @@
 //			Completely new idle screen. Status screen now has user settable timeout.
 //			Greatly increased acc gain.
 // Beta 3	Added anti-gyro noise into PID calculations.
+//			Fixed bug where CamStab and failsafe would clash and lock the menu.
 //
 //***********************************************************
 //* To do
@@ -304,6 +305,7 @@ int main(void)
 			case MENU:
 				//button = NONE;//debug
 				menu_main();
+				// Switch back to status screen when leaving menu
 				Menu_mode = STATUS;
 				//button = NONE;//debug
 				// Reset timeout once back in status screen
@@ -395,7 +397,7 @@ int main(void)
 		Change_LostModel += (uint8_t) (TCNT2 - Lost_TCNT2);
 		Lost_TCNT2 = TCNT2;
 
-		// Reset count if any RX activity
+		// Reset LMA count if any RX activity, LMA of, or CamStab (no RC used)
 		if (RxActivity || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
 			Change_LostModel = 0;
@@ -621,7 +623,8 @@ int main(void)
 		}
 
 		// Set failsafe positions when RC lock lost
-		if (Failsafe)
+		// Obviously not desired in CamStab mode (no RC)
+		if (Failsafe && (Config.CamStab == OFF))
 		{
 			uint8_t i;
 			for (i = 0; i < MAX_OUTPUTS; i++)
@@ -648,13 +651,8 @@ int main(void)
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
-
+			Refresh_safe = true;			// Safe to try and refresh status screen DEBUG
 			output_servo_ppm();				// Output servo signal
-		}
-
-		if (Overdue && ServoTick)
-		{
-			Refresh_safe = true;			// Safe to try and refresh status screen
 		}
 
 		// Measure the current loop rate

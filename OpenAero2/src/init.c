@@ -193,7 +193,8 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
-	// Check to see that throttle is low if in CPPM mode
+	// Check to see that throttle is low if in CPPM mode if RC detected
+	// Don't bother if in CamStab mode
 	_delay_ms(100);
 	if ((Config.RxMode == CPPM_MODE) && RC_Lock && (Config.CamStab == OFF))
 	{

@@ -21,7 +21,8 @@
 
 // PID constants
 #define ITERM_LIMIT_RP 1000			// Max I-term sum for Roll/Pitch axis in STABILITY mode
-#define ITERM_LIMIT_YAW 2000		// Max I-term sum for Yaw axis (Heading hold)
+//#define ITERM_LIMIT_YAW 4000		// Max I-term sum for Yaw axis (Heading hold)
+#define ITERM_LIMIT_YAW 170000		// Max I-term sum for Yaw axis (Heading hold)
 #define ITERM_LIMIT_LEVEL 250		// Max I-term sum for Roll/Pitch axis in AUTOLEVEL mode
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
@@ -62,7 +63,7 @@ void Calculate_PID(void)
 	PID_gyro_temp = gyroADC[ROLL];
 
 	// Roll I-term - Reduce Gyro drift noise into the I-term
-	if ((gyroADC[ROLL] > GYRO_DEADBAND) && (gyroADC[ROLL] < -GYRO_DEADBAND)) 
+	if ((gyroADC[ROLL] > GYRO_DEADBAND) || (gyroADC[ROLL] < -GYRO_DEADBAND)) 
 	{
 		IntegralgRoll += gyroADC[ROLL]; 
 	}
@@ -138,7 +139,7 @@ void Calculate_PID(void)
 	PID_gyro_temp = gyroADC[PITCH];
 
 	// Pitch I-term - Reduce Gyro drift noise into the I-term
-	if ((gyroADC[PITCH] > GYRO_DEADBAND) && (gyroADC[PITCH] < -GYRO_DEADBAND)) 
+	if ((gyroADC[PITCH] > GYRO_DEADBAND) || (gyroADC[PITCH] < -GYRO_DEADBAND)) 
 	{
 		IntegralgPitch += gyroADC[PITCH]; 
 	}
@@ -214,7 +215,7 @@ void Calculate_PID(void)
 	PID_gyro_temp = gyroADC[YAW];
 
 	// Pitch I-term - Reduce Gyro drift noise into the I-term
-	if ((gyroADC[YAW] > GYRO_DEADBAND) && (gyroADC[YAW] < -GYRO_DEADBAND)) 
+	if ((PID_gyro_temp > GYRO_DEADBAND) || (PID_gyro_temp < -GYRO_DEADBAND)) 
 	{
 		IntegralYaw += gyroADC[YAW]; 
 	}
@@ -239,7 +240,19 @@ void Calculate_PID(void)
 	PID_gyro_temp = PID_gyro_temp * 3;								// Multiply by 3
 
 	PID_Gyro_I_temp = IntegralYaw * Config.Yaw.I_mult;				// Multiply IntegralYaw by up to 127
-	PID_Gyro_I_temp = PID_Gyro_I_temp >> 3;							// Divide by 8
+	PID_Gyro_I_temp = PID_Gyro_I_temp >> 5;							// Divide by 8
+
+
+	// I-term limits
+	if (IntegralYaw > 320000) 
+	{
+		IntegralYaw = 320000;
+	}
+	else if (IntegralYaw < -320000) 
+	{
+		IntegralYaw = -320000;	
+	}
+
 
 	DifferentialGyro = DifferentialGyro * Config.Yaw.D_mult;		// Multiply D-term by up to 127
 	DifferentialGyro = DifferentialGyro << 4;						// Multiply by 16
