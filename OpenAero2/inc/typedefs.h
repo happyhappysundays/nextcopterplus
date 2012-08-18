@@ -107,7 +107,6 @@ typedef struct
 	
 	// Autolevel settings
 	int8_t		AutoMode;
-	PID_mult_t	G_level;				// Gyro level
 	PID_mult_t	A_level;				// Acc level
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;

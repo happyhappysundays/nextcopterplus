@@ -153,9 +153,9 @@ void init(void)
 	// Reset I-terms
 	IntegralaPitch = 0;	 
 	IntegralaRoll = 0;
-	IntegralgPitch = 0;	
-	IntegralgRoll = 0;
-	IntegralYaw = 0;
+	IntegralGyro[ROLL] = 0;	
+	IntegralGyro[PITCH] = 0;
+	IntegralGyro[YAW] = 0;
 
 	// Calibrate gyros, hopefully after motion minimised
 	CalibrateGyros();			

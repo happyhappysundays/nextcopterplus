@@ -242,8 +242,9 @@ const char *text_menu[] PROGMEM =
 		PText17, PText18, PText19, PText20, PText21, PText22, PText23, PText24, 
 		PText25, PText26, PText27,
 		//
-		AutoMenuItem0, AutoMenuItem1, AutoMenuItem2, AutoMenuItem3, AutoMenuItem4, 			// 50 to 65
-		AutoMenuItem5, AutoMenuItem6, AutoMenuItem7, AutoMenuItem8, AutoMenuItem9, 
+		AutoMenuItem0, AutoMenuItem4,											 			// 50 to 65
+		AutoMenuItem5, AutoMenuItem6, AutoMenuItem7, AutoMenuItem8, 
+		Dummy0, Dummy0, Dummy0, AutoMenuItem9, 
 		AutoMenuItem10, AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 
 		AutoMenuItem15, 
 		//

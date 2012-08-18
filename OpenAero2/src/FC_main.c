@@ -64,6 +64,8 @@
 //			Greatly increased acc gain.
 // Beta 3	Added anti-gyro noise into PID calculations.
 //			Fixed bug where CamStab and failsafe would clash and lock the menu.
+//			Completely reworked PID code to enable heading hold on all axis.
+//			Autolevel menu now only handles accelerometers
 //
 //***********************************************************
 //* To do
@@ -158,6 +160,8 @@ Camera Gimbal (if enabled)
 
 #define	SERVO_OVERDUE 9765			// Number of T2 cycles before servo will be overdue = 9765 * 1/19531 = 500ms
 #define	SERVO_RATE 390				// Requested servo rate when in failsafe mode. 19531 / 50(Hz) = 390
+//#define	SERVO_RATE 195				// Requested servo rate when in failsafe mode 100(Hz) = 195
+
 #define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
 #define FS_TIMEOUT 19531			// Number or T2 cycles before Failsafe setting engages (1 second)
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
@@ -551,9 +555,9 @@ int main(void)
 			// Reset I-terms when stabilise is off
 			IntegralaPitch = 0;	 
 			IntegralaRoll = 0;
-			IntegralgPitch = 0;	
-			IntegralgRoll = 0;
-			IntegralYaw = 0;
+			IntegralGyro[ROLL] = 0;	
+			IntegralGyro[PITCH] = 0;
+			IntegralGyro[YAW] = 0;
 		}
 
 		// Read gyros when required
