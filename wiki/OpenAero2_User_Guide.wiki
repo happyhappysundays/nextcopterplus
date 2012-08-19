@@ -1,8 +1,8 @@
-=The OpenAero2 User Guide=
+=The OpenAero2 User Guide (Beta 3)=
 ==What is OpenAero2?==
 OpenAero2 is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
-OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. In addition, four preset channel sources can be used as inputs.
+OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. In addition, four preset channel sources and two on-board RC mixer can be used as inputs.
 Each of the eight output channels can have any or all sensors mixed together.
 
 ==What models can OpenAero2 be used with?==
@@ -97,8 +97,15 @@ For flying wing models the connections are as follows:
 
 ===The Status Screen===
 The status screen gives you a continually updated display of the battery status, flight modes and any error messages.
+For performance reasons the status screen will switch back to the idle screen after a short interval. The interval defaults to 5 seconds but can be set to up to 30s in the General Menu.
 
-http://i.imgur.com/kaaAF.jpg
+*Status screen*
+
+http://i.imgur.com/4xbBz.jpg
+
+*Idle screen*
+
+http://i.imgur.com/kGAvd.jpg
 
  * *Mode:* The current mixer mode
  * *Version:* The version number of the loaded firmware
@@ -108,11 +115,7 @@ http://i.imgur.com/kaaAF.jpg
  * *Battery icon:* The battery icon shows the remaining battery capacity. The limits of the capacity meter are calculated from the battery settings menu. For example, if a 3S LiPo is used and the minimum cell voltage is set to 3.7V (370) the graphic will show empty at a total battery voltage of 11.1V. If the maximum cell voltage is set to 4.2V (420) the graphic will show full at a total cell voltage of 12.6V.
  * *Battery voltage:* The battery voltage is displayed under the battery icon
 
-The menu defaults to auto-update, which means the menu self-refreshes every two second when no RC activity is detected. The screen will not update if there is RC activity.
-
-If the auto-update is switched off, the screen can be manually updated with the "Refresh" button (button 1).
-
-Pressing button 3 goes to the main menu.
+Pressing button 1 goes to the main menu.
 
 ===Main Menu===
 http://i.imgur.com/9Iopl.jpg
@@ -134,14 +137,14 @@ RIGHT saves the item
 UD/DOWN increments and decrements the item
 
 ===General Menu===
-http://i.imgur.com/g2fgp.jpg
+http://i.imgur.com/0Jdtz.jpg
  * *Mode:* Allows you to select from the input preset mixers. Currently there are presets for dual-aileron aeroplane and flying wing.
  * *Orientation:* Remaps the sensors so that you can mount the board vertically (buttons down) in space-restricted areas.
  * *Contrast:* Allows you to change the contrast of the LCD. See below.
- * *Auto-Refresh:* With this set to ON, the status screen auto-updates every two seconds while no RC input is detected. With this setting OFF, you have to manually update the status screen with the refresh button. You may wish to switch this setting to OFF if you find the auto-update interferes with the flight controller.
-http://i.imgur.com/RcSHI.jpg
- * *RC mix:* This feature is not yet implemented.
- * *Camera stab.:* This feature is not yet implemented.
+ * *Status time:* Allows you to set the amount of time the status screen is displayed until it is replaced by the idle mode screen. Settable from 1 to 30 seconds.
+ * *RC mix:* Enables the two on-board RC mixers.
+ * *LMA timeout:*  Allows you to set the amount of time without RC activity before the Lost Model Alarm goes off. Setting to zero disables the alarm.
+ * *Camera stab.:* Setting this to ON allows the board to function without an external RC source. Use only for stand-alone camera stability.
 
 ===Adjusting LCD Contrast===
 http://i.imgur.com/WzAeW.jpg
@@ -182,23 +185,20 @@ http://i.imgur.com/OqlvE.jpg
 
 *Note:* The function of PID gain controls is outside the scope of this basic User's Guide.
 ===Autolevel Control Menu===
-http://i.imgur.com/talS1.jpg
+http://i.imgur.com/f0CsW.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There five options.
  # *OFF:* Always off
  # *Autochan:* On when the channel set as "Autochan" in RC settings is more than 50%
  # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%
  # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
  # *ON:* Always on
- * *Gyro P Gain:* PID Proportional gain for the roll and pitch gyros
- * *Gyro I Gain:* PID I-term gain for the roll and pitch gyros
- * *Gyro D Gain:* PID Differential gain for the roll and pitch gyros
  * *Acc P:* PID Proportional gain for the accelerometers
- * *Acc I:* PID I-term gain for the accelerometers
- * *Acc D:* PID Differential gain for the accelerometers
+ * *Acc I:* PID I-term gain (Not settable in this version)
+ * *Acc D:* PID Differential gain (Not settable in this version)
  * *Roll trim:* For fine roll tuning of the autolevel.
  * *Pitch trim:* For fine pitch tuning of the autolevel.
 
-===Expo/Differential Menu===
+===Expo Menu===
 http://i.imgur.com/UJCkf.jpg
  * *Aileron:* Aileron expo in %.
  * *Elevator:* Elevator expo in %.
@@ -208,21 +208,21 @@ http://i.imgur.com/m797m.jpg
  * The on-screen graph is drawn using the actual expo table and so gives you an accurate view of the response curve.
 
 ===Battery Menu===
-http://i.imgur.com/yUARU.jpg
+http://i.imgur.com/AMTKt.jpg
  * *Battery type:* Used internally to preset the min and max cell volatges.
  * *Cells:* Number of cells in your battery pack. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
- * *Alarm voltage:* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
- * *Max cell voltage:* Set this to the maximum cell voltage that you like to use. defaults to 420 (4.2V) for LiPo.
-http://i.imgur.com/HmskH.jpg
- * *Min cell voltage:* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
+ * *Alarm (mV):* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
+ * *Max (mV):* Set this to the maximum cell voltage that you like to use. Defaults to 420 (4.2V) for LiPo.
+http://i.imgur.com/FCbur.jpg
+ * *Min (mV):* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
 
 
 ===RC inputs Screen===
 http://i.imgur.com/WlVhb.jpg
 
-The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. Only the first five channels are shown.
+The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
 
-Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on thr right-hand column drop to zero. Make sure all controls are centered before calibration
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered and throttle at minimum before calibration.
 
 Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
 Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
@@ -240,6 +240,16 @@ http://i.imgur.com/L4Qte.jpg
 The balance meter screen shows you a graphical representation of where the board considers "down" to be. Pressing button 4 "Cal." calibrates the accelerometers. 
 A detailed description of the correct use of this screen is given in the section "Initial setup and calibration".
 
+===RC Mixer 1 and 2===
+http://i.imgur.com/tt04Z.jpg
+
+There are two dedicated mixer channels MIX1 and MIX2. These can be used by any of the output channels M1 to M8 as a source.
+You can therefore do delta, taileron, elevon etc mixing with OpeAero2 without needing special transmitter mixing functions.
+ * *Source A:* Set the first channel source to be mixed here. 
+ * *Volume (%):* Set the amount of channel A required.
+ * *Source A:* Set the second channel source to be mixed here. 
+ * *Volume (%):* Set the amount of channel B required.
+
 ===Mixer Menu 1 to 8===
 Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
 
@@ -248,21 +258,19 @@ http://i.imgur.com/VkVQb.jpg
  * *Source:* Source RC input channel for this output.
  * *Polarity:* Input channel polarity (Normal/Reverse).
  * *Volume(%):* The percentage of the input channel you wish to use (0% to 125%).
- * *Roll gyro:* Roll gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to roll, enable this. If the response is backwards to what you need, set this to Reversed.
-
-
-http://i.imgur.com/i9hGL.jpg
-
- * *Pitch gyro:* Pitch gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to pitch, enable this. If the response is backwards to what you need, set this to Reversed.
- * *Yaw gyro:* Yaw gyro signal enable/disable (Off/On/Reversed). If you wish this output to respond to yaw, enable this. If the response is backwards to what you need, set this to Reversed.
- * *Roll acc:* Roll accelerometer signal enable/disable (Off/On/Reversed). If you wish this output to respond to roll attitude, enable this. If the response is backwards to what you need, set this to Reversed.
- * *Pitch acc:* Pitch accelerometer signal enable/disable (Off/On/Reversed). If you wish this output to respond to pitch attitude, enable this. If the response is backwards to what you need, set this to Reversed.
-
-http://i.imgur.com/p1qYz.jpg
-
- * *Min (us):* The lower end-point of the servo travel.
- * *Max (us):* The upper end-point of the servo travel.
- * *Failsafe (us):* The failsafe position of the servo. Over-ridden by pressing the failsafe button on the RC Inputs screen.
+ * *Roll gyro:* Roll gyro signal enable/disable (Off/On). If you wish this output to respond to roll, enable this. 
+ * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Pitch gyro:* Pitch gyro signal enable/disable (Off/On). If you wish this output to respond to pitch, enable this. 
+ * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Yaw gyro:* Yaw gyro signal enable/disable (Off/On). If you wish this output to respond to yaw, enable this. 
+ * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Roll acc:* Roll accelerometer signal enable/disable (Off/On). If you wish this output to respond to the roll accelerometer, enable this. 
+ * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Pitch acc:* Pitch accelerometer signal enable/disable (Off/On). If you wish this output to respond to the pitch accelerometer, enable this. 
+ * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Min(%):* The minimum servo travel limit -125% to 125%.
+ * *Max(%):* The minimum servo travel limit -125% to 125%.
+ * *Failsafe(%):* The failsafe servo position -125% to 125%. Over-ridden by pressing the failsafe button on the RC Inputs screen.
 
 ==Error messages==
 If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
