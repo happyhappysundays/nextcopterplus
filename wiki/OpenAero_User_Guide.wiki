@@ -1,4 +1,4 @@
-#summary The OpenAero user Guide
+#summary The OpenAero User Guide
 
 =The OpenAero User Guide=
 ==What is OpenAero?==
