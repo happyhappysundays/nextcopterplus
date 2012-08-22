@@ -1,3 +1,5 @@
+#summary Connection diagrams for OpenAero V1.11 and older
+
 =Older Wiring diagrams=
 
 ==The following are the wiring diagrams for older code prior to V1.12==
