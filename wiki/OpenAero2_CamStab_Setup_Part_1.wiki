@@ -1,4 +1,4 @@
-#summary This guide assumes that you only plan to use OpenAero2 for camera stability and not for controlling the flight of an aircraft.
+#summary How to use OpenAero2 for camera stability
 
 =OpenAero2 Camera Stabilisation Setup Guide=
 =Part 1 - Stabilisation only=
