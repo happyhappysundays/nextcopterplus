@@ -1,4 +1,4 @@
-#summary This guide assumes that you plan to use OpenAero2 for camera stability and that you want the camera mount to be controlled during stabilisation.
+#summary How to use OpenAero2 for camera stability with RC control
 
 =OpenAero2 Camera Stabilisation Setup Guide=
 =Part 2 - Stabilisation under RC control=
