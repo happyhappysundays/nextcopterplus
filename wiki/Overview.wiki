@@ -1,4 +1,4 @@
-#Summary Overview of the NeXtcopter Plus software for multicopters
+#summary Overview of the NeXtcopter Plus software for multicopters
 
 Introduction
 ------------
