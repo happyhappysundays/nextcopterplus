@@ -20,6 +20,7 @@
 #include "..\inc\glcd_driver.h"
 #include "..\inc\main.h"
 #include "..\inc\eeprom.h"
+#include "..\inc\mixer.h"
 
 //************************************************************
 // Prototypes
@@ -32,8 +33,8 @@ void menu_stab_control(void);
 // Defines
 //************************************************************
 
-#define STABITEMS 10 	// Number of menu items
-#define STABSTART 82 	// Start of Menu text items
+#define STABITEMS 13 	// Number of menu items
+#define STABSTART 213 	// Start of Menu text items
 #define STABTEXT 61 	// Start of value text items
 #define STABOFFSET 75	// Value offsets
 
@@ -41,7 +42,7 @@ void menu_stab_control(void);
 // STAB menu items
 //************************************************************
 
-const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 const menu_range_t stab_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,STABCHAN}, 	// Min, Max, Increment, Style, Default
@@ -53,7 +54,10 @@ const menu_range_t stab_menu_ranges[] PROGMEM =
 	{0,127,1,0,0},
 	{0,127,1,0,60},
 	{0,127,1,0,0},
-	{0,127,1,0,0}
+	{0,127,1,0,0},
+	{0,125,5,0,0},
+	{0,125,5,0,0},
+	{0,125,5,0,0}
 };
 
 //************************************************************
@@ -92,6 +96,7 @@ void menu_stab_control(void)
 
 		if (button == ENTER)
 		{
+			UpdateLimits();			 // Update I-term limits based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}

@@ -14,6 +14,7 @@
 #define MAX_RC_SOURCES 15				// Maximum input channels including non-RX channels
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define MAX_OUTPUTS 8					// Maximum output channels
+#define MIN_OUTPUTS 4					// Minimum output channels
 #define NUM_MIXERS 2
 
 typedef struct
@@ -85,7 +86,7 @@ typedef struct
 										// RUDDER will always return the correct data for the assigned rudder channel
 										// AUX1 to AUX4 are fixed
 	// Servo travel limts
-	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limts to save recalculation each loop
+	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
 	// RC items
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
@@ -107,7 +108,10 @@ typedef struct
 	
 	// Autolevel settings
 	int8_t		AutoMode;
-	PID_mult_t	A_level;				// Acc level
+	//PID_mult_t	A_Roll;					// Acc PID settings
+	//PID_mult_t	A_Pitch;
+	int8_t		A_Roll_P_mult;			// Acc gain settings
+	int8_t		A_Pitch_P_mult;
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;
 
@@ -116,6 +120,10 @@ typedef struct
 	PID_mult_t	Roll;					// Gyro PID settings
 	PID_mult_t	Pitch;
 	PID_mult_t	Yaw;
+	int8_t		I_Limits[3];			// I-term limits for all axis (0 to 125%)
+
+	// Servo travel limts
+	int16_t		Raw_I_Limits[3];		// Actual, unspanned I-term limits to save recalculation each loop
 
 	// Battery settings
 	int16_t		BatteryType;			// LiPo, NiMh
@@ -136,6 +144,8 @@ typedef struct
 	int8_t		RCMix;					// RC mixer enable
 	int8_t		LMA_enable;				// LMA setting
 	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
+	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
+
 		
 	// Non-menu items 
 	// Channel configuration
@@ -166,6 +176,19 @@ typedef struct
 	uint8_t style;						// 0 = numeral, 1 = text
 	int16_t default_value;				// Default value for this item
 } menu_range_t; 
+
+// MWC IMU structures
+
+typedef struct {
+  float X;
+  float Y;
+  float Z;
+} t_fp_vector_def;
+
+typedef union {
+  float   A[3];
+  t_fp_vector_def V;
+} t_fp_vector;
 
 // The following code courtesy of: stu_san on AVR Freaks
 

@@ -7,6 +7,8 @@
 //* Externals
 //***********************************************************
 
+extern uint16_t micros(void);
+
 extern bool	AutoLevel;
 extern bool	Stability;
 extern uint16_t	cycletime;

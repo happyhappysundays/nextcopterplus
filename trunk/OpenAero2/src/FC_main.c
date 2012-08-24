@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 2.00 Beta 3 - August 2012
+// Version 1.00 Beta 3 Release - August 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -62,22 +62,27 @@
 //			Added CamStab mixer preset. Restored full PID functionality.
 //			Completely new idle screen. Status screen now has user settable timeout.
 //			Greatly increased acc gain.
-// Beta 3	Added anti-gyro noise into PID calculations.
+// Beta 3	Added anti-gyro noise gate into PID calculations.
 //			Fixed bug where CamStab and failsafe would clash and lock the menu.
 //			Completely reworked PID code to enable heading hold on all axis.
-//			Autolevel menu now only handles accelerometers
+//			Autolevel menu now only handles accelerometers. Tweaked camstab mixer preset.
+//			Added settable I-term limits in %. Added servo rate adjustment for CamStab mode.
+//			In CamStab mode, switched off M5-M8 mixing and outputs to increase loop speed to about 400Hz.
+//			Added separate P settings for Roll and Pitch accelerometers. Servo HIGH rate set to 300Hz.
+//			Added preliminary IMU code. Removed small, ugly NiMh hack.
+//			Changed autolevel setting to only do autolevel. No implied stability control.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For V2.0
+// For V1.0 release
+//	Trial Beta 3
 //
 // Later
 //  Camera stabilisation refinements (separate PID settings)
-//  Aileron differential?
-//  Advanced RC settings (CPPM gap, servo rate, servo overdue, etc.)
-//
+//  Aileron differential? (limit downward throw. 100% = none)
+//  Advanced RC settings (CPPM gap, servo rate, servo overdue, etc.) as required
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -159,9 +164,8 @@ Camera Gimbal (if enabled)
 //***********************************************************
 
 #define	SERVO_OVERDUE 9765			// Number of T2 cycles before servo will be overdue = 9765 * 1/19531 = 500ms
-#define	SERVO_RATE 390				// Requested servo rate when in failsafe mode. 19531 / 50(Hz) = 390
-//#define	SERVO_RATE 195				// Requested servo rate when in failsafe mode 100(Hz) = 195
-
+#define	SERVO_RATE_LOW 390			// Requested servo rate when in failsafe/Camstab LOW mode. 19531 / 50(Hz) = 390
+#define	SERVO_RATE_HIGH 65			// Requested servo rate when in Camstab HIGH mode 300(Hz) = 65
 #define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
 #define FS_TIMEOUT 19531			// Number or T2 cycles before Failsafe setting engages (1 second)
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
@@ -186,7 +190,13 @@ bool Refresh_safe;
 char pBuffer[16];					// Print buffer
 
 //************************************************************
-// Main loop
+//* Prototypes
+//************************************************************
+
+uint16_t micros(void);
+
+//************************************************************
+//* Main loop
 //************************************************************
 
 int main(void)
@@ -223,9 +233,6 @@ int main(void)
 
 	init();									// Do all init tasks
 	AccInit();								// Clear avg buffer, set indexes
-
-	// Initial display of idle screen prior to main loop
-	//idle_screen();
 
 	// Main loop
 	while (1)
@@ -590,7 +597,7 @@ int main(void)
 		//* Process servos, failsafe mode
 		//************************************************************
 
-		// Sognal servo overdue after SERVO_OVERDUE time (500ms)
+		// Signal servo overdue after SERVO_OVERDUE time (500ms)
 		// Servo_Timeout increments at 19.531 kHz, in loop cycle chunks
 		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
@@ -603,9 +610,19 @@ int main(void)
 		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
 		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
 		ServoRate_TCNT2 = TCNT2;
-		if (Servo_Rate > SERVO_RATE)
+
+
+		// If in CabStab mode (no RC to synch) AND the Servo Rate is set to HIGH run at full speed
+		if ((Config.CamStab == ON) && (Config.Servo_rate == HIGH))
 		{
-			ServoTick = true;
+			if (Servo_Rate > SERVO_RATE_HIGH)
+			{
+				ServoTick = true;
+			}
+		}
+		else if (Servo_Rate > SERVO_RATE_LOW)
+		{
+				ServoTick = true;
 		}
 
 		// If simply overdue, signal RX error message
@@ -651,7 +668,6 @@ int main(void)
 
 		// If in failsafe, or when doing independant camstab, just output unsynchronised
 		else if ((Overdue && ServoTick) && (Failsafe || (Config.CamStab == ON)))
-		//else if (Failsafe && Overdue && ServoTick)
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
@@ -668,6 +684,17 @@ int main(void)
 		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
 
+
 	} // main loop
 } // main()
 
+uint16_t micros(void)
+{
+	uint16_t us;
+	uint32_t cycletime_32;
+
+	cycletime_32 = cycletime;				// Promote cycletime to 32 bits
+	us = ((cycletime_32 << 2) / 10); 		// Scale cycletime to microseconds
+
+	return us;
+}

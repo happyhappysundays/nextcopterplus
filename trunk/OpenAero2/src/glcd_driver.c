@@ -87,7 +87,6 @@ void st7565_data(uint8_t c)
 	spiwrite(c);
 }
 
-
 // Initialise LCD
 void st7565_init(void) 
 {
@@ -97,6 +96,7 @@ void st7565_init(void)
 	_delay_ms(500);
 	LCD_RES = 1;
 
+	// Send command sequence
 	for (int i = 0; i < 7; i++)
 	{
 		st7565_command(pgm_read_byte(&lcd_commmands[i]));

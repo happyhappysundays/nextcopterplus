@@ -24,7 +24,6 @@ void get_raw_gyros(void);
 // Code
 //************************************************************
 
-bool	GyroCalibrated;
 int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
@@ -59,8 +58,6 @@ void CalibrateGyros(void)
 	gyroZero[ROLL] 	= (gyroZero[ROLL] >> 5);	//Divide by 32				
 	gyroZero[PITCH] = (gyroZero[PITCH] >> 5);
 	gyroZero[YAW] 	= (gyroZero[YAW]>> 5);
-
-	GyroCalibrated = true;
 }
 
 void get_raw_gyros(void)

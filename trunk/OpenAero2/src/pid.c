@@ -19,14 +19,21 @@
 // Defines
 //************************************************************
 
-#define MAX_I_SPAN 160000			// Servo range of 2500 * 64 to limit maximum influence of I-term
-
-// PID constants
-#define ITERM_LIMIT_RP 40000		// Max I-term sum for Roll/Pitch axis in STABILITY mode
-#define ITERM_LIMIT_YAW 80000		// Max I-term sum for Yaw axis (Heading hold) (MAX_I_SPAN * 2 * 32 / 127)
-#define ITERM_LIMIT_LEVEL 1200		// Max I-term sum for Roll/Pitch axis in AUTOLEVEL mode (5000 * 4 * 8 / 127)
-
+#define MAX_I_SPAN 80000			// Servo range of 1250 * 64 to limit maximum influence of I-term
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
+
+//************************************************************
+// Notes
+//************************************************************
+//
+// Servo output range is 2500 to 5000, centered on 3750.
+// RC and PID values are added to this then rescaled at the the output stage to 1000 to 2000.
+// As such, the maximum usable value that the PID section can output is +/-1250.
+// So working backwards, prior to rescaling (/64) the max values are +/-80,000.
+// Prior to this, PID_Gyro_I_temp has been divided by 32 so the values are now +/- 2,560,000
+// however the I-term gain can be up to 127 which means the values are now limited to +/-20,157 for full scale authority.
+// For reference, a constant gyro value of 50 would go full scale in about 1 second at max gain of 127 if incremented at 400Hz.
+// This seems about right for heading hold usage.
 
 //************************************************************
 // Prototypes
@@ -54,12 +61,11 @@ void Calculate_PID(void)
 	int32_t PID_acc_temp;
 	int32_t PID_Gyro_I_temp;
 	int8_t	axis;
-	int32_t	I_limts[3] = {ITERM_LIMIT_RP, ITERM_LIMIT_RP, ITERM_LIMIT_YAW};
 
 	//************************************************************
 	// Increment and limit I-terms, pre-calculate D-terms
 	//************************************************************
-	
+
 	for (axis = 0; axis < YAW; axis ++)
 	{
 		// Reduce Gyro drift noise into the I-terms
@@ -69,13 +75,13 @@ void Calculate_PID(void)
 		}
 
 		// Anti wind-up limits
-		if (IntegralGyro[axis] > I_limts[axis])
+		if (IntegralGyro[axis] > Config.Raw_I_Limits[axis])
 		{
-			IntegralGyro[axis] = I_limts[axis];
+			IntegralGyro[axis] = Config.Raw_I_Limits[axis];
 		}
-		else if (IntegralGyro[axis] < -I_limts[axis]) 
+		else if (IntegralGyro[axis] < -Config.Raw_I_Limits[axis]) 
 		{
-			IntegralGyro[axis] = -I_limts[axis];
+			IntegralGyro[axis] = -Config.Raw_I_Limits[axis];
 		}
 
 		// D-terms
@@ -95,7 +101,7 @@ void Calculate_PID(void)
 	PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3
 
 	PID_Gyro_I_temp = IntegralGyro[ROLL] * Config.Roll.I_mult;	// Multiply I-term (Max gain of 127)
-	PID_Gyro_I_temp = PID_Gyro_I_temp >> 5;						// Divide by 8
+	PID_Gyro_I_temp = PID_Gyro_I_temp >> 5;						// Divide by 32
 
 	DifferentialGyro[ROLL] *= Config.Roll.D_mult;				// Multiply D-term by up to 127
 	DifferentialGyro[ROLL] = DifferentialGyro[ROLL] << 4;		// Multiply by 16
@@ -103,7 +109,7 @@ void Calculate_PID(void)
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Acc P terms
-		PID_acc_temp = AvgRoll * Config.A_level.P_mult;			// P-term of accelerometer (Max gain of 127)
+		PID_acc_temp = AvgRoll * Config.A_Roll_P_mult;			// P-term of accelerometer (Max gain of 127)
 		PID_ACCs[ROLL] = PID_acc_temp >> 2;						// Accs need much less scaling
 	}
 
@@ -131,7 +137,7 @@ void Calculate_PID(void)
 	PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3
 
 	PID_Gyro_I_temp = IntegralGyro[PITCH] * Config.Pitch.I_mult;// Multiply I-term (Max gain of 127)
-	PID_Gyro_I_temp = PID_Gyro_I_temp >> 5;						// Divide by 8
+	PID_Gyro_I_temp = PID_Gyro_I_temp >> 5;						// Divide by 32
 
 	DifferentialGyro[PITCH] *= Config.Pitch.D_mult;				// Multiply D-term by up to 127
 	DifferentialGyro[PITCH] = DifferentialGyro[PITCH] << 4;		// Multiply by 16
@@ -139,7 +145,7 @@ void Calculate_PID(void)
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Acc P terms
-		PID_acc_temp = AvgPitch * Config.A_level.P_mult;		// P-term of accelerometer (Max gain of 127)
+		PID_acc_temp = AvgPitch * Config.A_Pitch_P_mult;		// P-term of accelerometer (Max gain of 127)
 		PID_ACCs[PITCH] = PID_acc_temp >> 2;					// Accs need much less scaling
 	}
 

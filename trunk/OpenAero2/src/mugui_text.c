@@ -86,7 +86,6 @@ void mugui_text_sizestring(mugui_char_t *s, prog_uchar* font, mugui_size16_t *si
 	mugui_uint16_t startcharacter = 0; 	    //startcharacter of the font
 	mugui_uint16_t height = 0;				//height of the bitmap
 	mugui_uint16_t width = 0; 				//width of the bitmap
-	mugui_bool     proportional = false;  	//proportional or monospace font
 	mugui_uint8_t  index = 0; 				//Index of the bitmap
 	mugui_uint8_t  indexlowbyte = 0; 		//low byte of the bitmap address in the array
 	mugui_uint8_t  indexhighbyte = 0; 		//high byte of the bitmap address in the array
@@ -95,28 +94,20 @@ void mugui_text_sizestring(mugui_char_t *s, prog_uchar* font, mugui_size16_t *si
 	/* read header of the font          */
 	/* pgm_read_byte is ATMega specific */
 	length = strlen(s);
-	proportional = pgm_read_byte(&font[0]);
 	height = pgm_read_byte(&font[4]);
-	/* proportional font */
-	if(proportional)
+
+	startcharacter = pgm_read_byte(&font[2]);
+	for(i=0;i<length;i++) //every character in prop fonts has its own width
 	{
-		startcharacter = pgm_read_byte(&font[2]);
-		for(i=0;i<length;i++) //every character in prop fonts has its own width
-		{
-			index = s[i] - startcharacter;
-			indexhighbyte = pgm_read_byte(&font[index*2 + 5]);
-			indexlowbyte = pgm_read_byte(&font[index*2 + 6]);
-			indexaddress = (mugui_int64_t)indexhighbyte;
-			indexaddress = indexaddress << 8;
-			indexaddress += indexlowbyte;
-			width += pgm_read_byte(&font[indexaddress]) + distance;
-		}
+		index = s[i] - startcharacter;
+		indexhighbyte = pgm_read_byte(&font[index*2 + 5]);
+		indexlowbyte = pgm_read_byte(&font[index*2 + 6]);
+		indexaddress = (mugui_int64_t)indexhighbyte;
+		indexaddress = indexaddress << 8;
+		indexaddress += indexlowbyte;
+		width += pgm_read_byte(&font[indexaddress]) + distance;
 	}
-	/* monospace font */
-	else
-	{
-		width = length * pgm_read_byte(&font[5]);	
-	}
+
 	/* prepare return value */
 	size->x = width;
 	size->y = height;
