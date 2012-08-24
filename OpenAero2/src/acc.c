@@ -29,7 +29,7 @@ void AccInit(void);
 // Defines
 //************************************************************
 
-#define AVGLENGTH 17					// Accelerometer filter buffer length + 1 (4 new + 1 old)
+#define AVGLENGTH 17					// Accelerometer filter buffer length + 1 (16 new + 1 old)
 
 //************************************************************
 // Code
@@ -42,8 +42,6 @@ int16_t accZero[3];					// Used for calibrating Accs on ground
 
 int16_t AvgAccRoll[AVGLENGTH];		// Circular buffer of historical accelerometer roll readings
 int16_t AvgAccPitch[AVGLENGTH];		// Circular buffer of historical accelerometer pitch readings
-
-bool AccCalibrated;
 
 void AccInit(void)				
 {
@@ -91,7 +89,7 @@ void AvgAcc(void)
 	AvgRollSum = AvgRollSum + accADC[Y] - AvgAccRoll[OldIndex]; // Add new value to sum, subtract oldest
 	AvgPitchSum = AvgPitchSum + accADC[X] - AvgAccPitch[OldIndex];
 
-	AvgRoll = ((AvgRollSum >> 4) - Config.AccRollZeroTrim); // Divide by 32 to get rolling average then adjust for acc trim
+	AvgRoll = ((AvgRollSum >> 4) - Config.AccRollZeroTrim); // Divide by 16 to get rolling average then adjust for acc trim
 	AvgPitch = ((AvgPitchSum >> 4) - Config.AccPitchZeroTrim);
 
 	AvgIndex ++;
@@ -136,7 +134,6 @@ void CalibrateAcc(void)
 	Config.AccZedZero = accZero[Z];
 
 	Save_Config_to_EEPROM();
-	AccCalibrated = true;
 }
 
 

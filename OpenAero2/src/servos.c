@@ -8,6 +8,7 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <stdbool.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\main.h"
 #include "..\inc\isr.h"
@@ -49,7 +50,11 @@ void output_servo_ppm(void)
 		{
 			cli();
 			output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
-			output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
+			// If in high speed mode, only output to M1 to M4
+			if (Config.Servo_rate == LOW)
+			{
+				output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
+			}
 			sei();
 		}
 	}

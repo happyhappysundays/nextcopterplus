@@ -99,7 +99,7 @@ void RxGetChannels(void)
 int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
 {
 	int8_t	range, expo_level;
-	int32_t RCcalc, RCsum, mult;						// Max values are around+/-75000
+	int32_t RCcalc, RCsum, mult;						// Max values are around +/-75000
 
 	if (Expolevel == 0) return (RCvalue);				// No need to calculate if expo is zero
 	if (Expolevel > 99) Expolevel = 99;					// Limit expo to 99%

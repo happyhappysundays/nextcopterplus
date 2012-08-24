@@ -68,18 +68,6 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,RUDDER,NORMAL,100,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut8
 }; 
 
-channel_t MANUAL_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	{0,THROTTLE,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut1
-	{0,GEAR,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 		// ServoOut2
-	{0,AUX1,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 		// ServoOut3
-	{0,AUX2,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0},  	// ServoOut4
-	{0,ELEVATOR,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut5
-	{0,AILERON,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut6
-	{0,FLAP,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 		// ServoOut7
-	{0,RUDDER,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut8
-}; 
-
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For presets, use
@@ -93,13 +81,13 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
 		
 	{0,NOCHAN,NORMAL,100,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut1
-	{0,PRESET1,NORMAL,100,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut2 (Tilt axis)
+	{0,PRESET1,NORMAL,100,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,-100,100,0}, 	// ServoOut2 (Tilt axis)
 	{0,PRESET2,NORMAL,100,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut3 (Pan axis)
-	{0,PRESET3,NORMAL,100,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0},  	// ServoOut4 (Roll axis)
+	{0,PRESET3,NORMAL,100,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,-100,100,0},  	// ServoOut4 (Roll axis)
 	{0,NOCHAN,NORMAL,100,ON,REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut5
-	{0,ELEVATOR,NORMAL,100,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut6 (Tilt axis)
+	{0,ELEVATOR,NORMAL,100,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,-100,100,0}, 	// ServoOut6 (Tilt axis)
 	{0,RUDDER,NORMAL,100,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0}, 	// ServoOut7 (Pan axis)
-	{0,AILERON,NORMAL,100,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,-100,100,0},  	// ServoOut8 (Roll axis)
+	{0,AILERON,NORMAL,100,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,-100,100,0},  	// ServoOut8 (Roll axis)
 }; 
 
 //************************************************************
@@ -124,13 +112,13 @@ void get_preset_mix(channel_t* preset)
 
 void ProcessMixer(void)
 {
-	uint8_t i;
+	uint8_t i, outputs;
 	int16_t temp, temp2 = 0;
 	// Quick fudge to allow easy look-up of which channels require expo
 	uint8_t expos[] = {0,0,0,0,Config.ElevatorExpo,Config.AileronExpo,Config.AileronExpo,Config.RudderExpo,0,0,0,0,0,0,0,0};
 
 	// Process RC mixer if enabled
-	if (Config.RCMix == ON)
+	if ((Config.RCMix == ON) && (Config.CamStab == OFF))
 	{
 
 		//for (i = 0; i < NUM_MIXERS; i++)
@@ -150,8 +138,18 @@ void ProcessMixer(void)
 		}
 	}
 
+	// Limit output mixing as needed to save processing power
+	if (Config.CamStab == ON)
+	{
+		outputs = MIN_OUTPUTS;
+	}
+	else
+	{
+		outputs = MAX_OUTPUTS;
+	}
+
 	// Process output mixers
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < outputs; i++)
 	{
 		// RC source inputs and reversing, and expo
 		if (Config.Channel[i].source_polarity == REVERSED)
@@ -173,7 +171,7 @@ void ProcessMixer(void)
 
 	
 		// Post-PID gyro input
-		if (Stability || AutoLevel)
+		if (Stability)
 		{
 			if (Config.Channel[i].roll_gyro == ON)
 			{
@@ -251,7 +249,16 @@ void UpdateLimits(void)
 {
 	uint8_t i;
 	int16_t min, max, failsafe;
+	int16_t temp;
 
+	// Update I-term limits
+	for (i = 0; i < 3; i++)
+	{
+		temp = Config.I_Limits[i]; 				// 0 to 125%
+		Config.Raw_I_Limits[i] = temp * 160;	// Multiply by 160 (max is 160 x 125 = 20000)
+	}
+
+	// Update travel limits
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		min = Config.Channel[i].min_travel;

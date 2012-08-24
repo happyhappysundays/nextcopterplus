@@ -123,8 +123,6 @@ void init(void)
 
 	RC_Lock = false;						// Preset important flags
 	Failsafe = false;
-	GyroCalibrated = false;
-	AccCalibrated = false;
 	AutoLevel = false;
 	Stability = false;
 
@@ -143,7 +141,7 @@ void init(void)
 	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
 	st7565_set_brightness(0x26);
 	clear_screen();
-	write_buffer(buffer,0);				// Display logo
+	write_buffer(buffer,0);					// Display logo
 	_delay_ms(1000);
 	clear_buffer(buffer);					// Clear
 	write_buffer(buffer,1);
@@ -176,7 +174,7 @@ void init(void)
 		_delay_ms(1000);
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
-		write_buffer(buffer,1);
+		//write_buffer(buffer,1);
 	}
 
 	//***********************************************************
@@ -204,7 +202,6 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
-
 
 	// Beep that all sensors have been handled
 	menu_beep(1);

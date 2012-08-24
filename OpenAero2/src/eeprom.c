@@ -70,9 +70,21 @@ void Set_EEPROM_Default_Config(void)
 	Config.Yaw.P_mult = 60;
 	Config.Yaw.I_mult = 0;
 	Config.Yaw.D_mult = 0;
-	Config.A_level.P_mult = 30;
-	Config.A_level.I_mult = 0;
-	Config.A_level.D_mult = 0;
+	//
+	Config.A_Roll_P_mult = 30;
+	Config.A_Pitch_P_mult = 30;
+	//Config.A_Roll.P_mult = 30;
+	//Config.A_Roll.I_mult = 0;
+	//Config.A_Roll.D_mult = 0;
+	//Config.A_Pitch.P_mult = 30;
+	//Config.A_Pitch.I_mult = 0;
+	//Config.A_Pitch.D_mult = 0;
+	//
+	for (i = 0; i < 3; i++)
+	{
+		Config.I_Limits[i] = 0;
+		Config.Raw_I_Limits[i] = 0;
+	}
 	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
@@ -105,6 +117,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 5;			// Refresh timeout
 	Config.LMA_enable = 1;				// Default to 1 minute
+
+	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 
 	Config.Preset1 = 0;
 	Config.Preset2 = 0;

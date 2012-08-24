@@ -37,9 +37,6 @@ void menu_battery(void);
 #define BATTTEXT 71 	// Start of value text items
 #define BATTOFFSET 92	// Value offsets
 
-#define	NIMH_MAX 125	// Alternate default for max cell voltage for NiMh
-#define	NIMH_MIN 110	// Alternate default for max cell voltage for NiMh
-
 //************************************************************
 // Battery menu items
 //************************************************************
@@ -84,20 +81,6 @@ void menu_battery(void)
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, button, &cursor, &top, &temp);
 		range = get_menu_range ((prog_uchar*)batt_menu_ranges, temp - BATTSTART);
-
-		// Modify defaults for NiMh if NiMh selected (really ugly)
-		if (Config.BatteryType == NIMH)
-		{
-			if ((temp - BATTSTART) == 3) // MaxVoltage
-			{
-				range.default_value = NIMH_MAX;
-			}
-
-			if ((temp - BATTSTART) == 4) // MinVoltage
-			{
-				range.default_value = NIMH_MIN;
-			}
-		}
 
 		if (button == ENTER)
 		{
