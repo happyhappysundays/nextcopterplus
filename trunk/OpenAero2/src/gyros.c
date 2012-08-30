@@ -48,6 +48,7 @@ void CalibrateGyros(void)
 	for (i=0;i<32;i++)					// Calculate average over 32 reads
 	{
 		get_raw_gyros();				// Updates gyroADC[]
+
 		gyroZero[ROLL] 	+= gyroADC[ROLL];						
 		gyroZero[PITCH] += gyroADC[PITCH];	
 		gyroZero[YAW] 	+= gyroADC[YAW];
@@ -55,17 +56,19 @@ void CalibrateGyros(void)
 		_delay_ms(10);					// Get a better gyro average over time
 	}
 
-	gyroZero[ROLL] 	= (gyroZero[ROLL] >> 5);	//Divide by 32				
-	gyroZero[PITCH] = (gyroZero[PITCH] >> 5);
-	gyroZero[YAW] 	= (gyroZero[YAW]>> 5);
+	gyroZero[ROLL] 	= (gyroZero[ROLL] 	>> 5);	//Divide by 32				
+	gyroZero[PITCH] = (gyroZero[PITCH] 	>> 5);
+	gyroZero[YAW] 	= (gyroZero[YAW]	>> 5);
 }
 
 void get_raw_gyros(void)
 {
-	read_adc(ROLL_GYRO);			// Read roll gyro ADC1
+	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
 	gyroADC[ROLL] = ADCW;
-	read_adc(PITCH_GYRO);			// Read pitch gyro ADC4
+
+	read_adc(AIN_X_GYRO);				// Read pitch gyro ADC4 (Pitch)
 	gyroADC[PITCH] = ADCW;
-	read_adc(YAW_GYRO);				// Read yaw gyro ADC2
-	gyroADC[YAW] = ADCW;
+
+	read_adc(AIN_Z_GYRO);				// Read yaw gyro ADC2 (Yaw)
+	gyroADC[YAW] = -ADCW;				// Reverse gyro sense
 }

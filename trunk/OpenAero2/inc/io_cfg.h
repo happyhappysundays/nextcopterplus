@@ -118,8 +118,8 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 // Enumeration
 //***********************************************************
-enum GyroArrayIndex {ROLL = 0, PITCH, YAW, NO_GYRO};
-enum AccArrayIndex  {X = 0, Y, Z, NO_ACC};
+enum RPYArrayIndex {ROLL = 0, PITCH, YAW, NO_GYRO};
+//enum SensorArrayIndex  {X = 0, Y, Z, NO_ACC};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
 enum MIX_Modes		{AEROPLANE = 0, FLYINGWING, CAMSTAB};
@@ -130,7 +130,7 @@ enum SwitchModes	{DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON};
 enum Availability	{OFF = 0, ON};
 enum BatteryType	{LIPO = 0, NIMH};
 enum Orientation	{HORIZONTAL = 0, VERTICAL};
-enum ADCInputs 		{VCC = 0, ROLL_GYRO, YAW_GYRO, VBAT, PITCH_GYRO, X_ACC, Y_ACC, Z_ACC};
+enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, NO_MOTORS};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};

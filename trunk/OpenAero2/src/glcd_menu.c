@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "Beta 3"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 4p1"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char PText0[]  PROGMEM = "";							// Init
 const char PText1[]  PROGMEM = "Resetting to";
@@ -195,10 +195,6 @@ const char ChannelRef10[] PROGMEM = "Preset 2";
 const char ChannelRef11[] PROGMEM = "Preset 3";
 const char ChannelRef12[] PROGMEM = "Preset 4";
 //
-const char OrientRef0[] PROGMEM = "Pitch"; 
-const char OrientRef1[] PROGMEM = "Roll"; 
-const char OrientRef2[] PROGMEM = "Yaw";
-//
 const char ErrorText0[] PROGMEM = "Sensor"; 				// Error text
 const char ErrorText3[] PROGMEM = "No";
 const char ErrorText4[] PROGMEM = "Signal";
@@ -216,6 +212,8 @@ const char Status1[] PROGMEM = "button";			// Idle text
 const char Status2[] PROGMEM = "for status";
 //
 const char Dummy0[] PROGMEM = "";
+//
+const char IMU0[] PROGMEM = "AHRS";
 //
 
 const char *text_menu[] PROGMEM = 
@@ -252,7 +250,7 @@ const char *text_menu[] PROGMEM =
 		//
 		SensorMenuItem6,																	// 73
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0, 													// 74 to 77
+		IMU0, Dummy0, Dummy0, Dummy0, 														// 74 to 77 IMU
 		//
 		RCMixText0, MixerItem2, RCMixText1, MixerItem2,										// 78 to 81
 		//

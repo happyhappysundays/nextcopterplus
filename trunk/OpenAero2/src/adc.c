@@ -24,7 +24,7 @@ void read_adc(uint8_t channel);
 //					X_ACC used for Z_ACC	
 //***********************************************************
 
-int8_t ADCseqVert[8] PROGMEM = {VCC, ROLL_GYRO, PITCH_GYRO, VBAT, YAW_GYRO, Y_ACC, Z_ACC, X_ACC}; // Vertical
+int8_t ADCseqVert[8] PROGMEM = {AIN_VCC, AIN_Y_GYRO, AIN_X_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
 
 void Init_ADC(void)
 {

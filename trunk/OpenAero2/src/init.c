@@ -149,8 +149,6 @@ void init(void)
 	clear_buffer(buffer);					// Clear
 
 	// Reset I-terms
-	IntegralaPitch = 0;	 
-	IntegralaRoll = 0;
 	IntegralGyro[ROLL] = 0;	
 	IntegralGyro[PITCH] = 0;
 	IntegralGyro[YAW] = 0;

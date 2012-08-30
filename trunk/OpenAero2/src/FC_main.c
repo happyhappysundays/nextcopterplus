@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.00 Beta 3 Release - August 2012
+// Version 1.00 Beta 4 Release - August 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -71,13 +71,15 @@
 //			Added separate P settings for Roll and Pitch accelerometers. Servo HIGH rate set to 300Hz.
 //			Added preliminary IMU code. Removed small, ugly NiMh hack.
 //			Changed autolevel setting to only do autolevel. No implied stability control.
+// Beta 4	Completed and integrated basic IMU code.
+//			Fixed noob-level f*ck-up resulting in no I-term for Yaw in Beta3
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // For V1.0 release
-//	Trial Beta 3
+//	Trial Beta 4
 //
 // Later
 //  Camera stabilisation refinements (separate PID settings)
@@ -151,6 +153,8 @@ Camera Gimbal (if enabled)
 #include "..\inc\glcd_menu.h"
 #include "..\inc\menu_ext.h"
 #include "..\inc\main.h"
+#include "..\inc\imu.h"
+#include <math.h>
 
 //***********************************************************
 //* Fonts
@@ -180,7 +184,8 @@ Camera Gimbal (if enabled)
 //***********************************************************
 
 // Flight variables
-uint16_t cycletime;					// Loop time in microseconds
+uint16_t cycletime;					// Loop time
+uint32_t ticker_32;					// Incrementing system ticker
 
 // Misc
 bool AutoLevel;						// AutoLevel = 1
@@ -188,12 +193,6 @@ bool Stability;						// Stability = 1
 bool Failsafe;
 bool Refresh_safe;
 char pBuffer[16];					// Print buffer
-
-//************************************************************
-//* Prototypes
-//************************************************************
-
-uint16_t micros(void);
 
 //************************************************************
 //* Main loop
@@ -232,7 +231,77 @@ int main(void)
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 
 	init();									// Do all init tasks
-	AccInit();								// Clear avg buffer, set indexes
+
+//************************************************************
+//* Test Code - Start
+//************************************************************
+/*
+uint16_t counter = 0;
+
+while(1)
+{
+
+	counter++;
+
+	if (BUTTON4 == 0)
+	{
+		_delay_ms(500);
+		CalibrateAcc();
+	}
+
+	ReadAcc();
+	ReadGyros();
+	getEstimatedAttitude();
+
+
+	if (counter > 100)
+	{
+		counter = 0;
+
+		LCD_Display_Text(37,(prog_uchar*)Verdana8,0,0);		// Gyro
+		LCD_Display_Text(38,(prog_uchar*)Verdana8,0,10);	// X
+		LCD_Display_Text(39,(prog_uchar*)Verdana8,0,20);	// Y
+		LCD_Display_Text(40,(prog_uchar*)Verdana8,0,30);	// Z
+
+		LCD_Display_Text(41,(prog_uchar*)Verdana8,64,0); 	// Acc
+		LCD_Display_Text(38,(prog_uchar*)Verdana8,64,10);	// X
+		LCD_Display_Text(39,(prog_uchar*)Verdana8,64,20);	// Y
+		LCD_Display_Text(40,(prog_uchar*)Verdana8,64,30);	// Z
+
+		LCD_Display_Text(74,(prog_uchar*)Verdana8,0,45); 	// AHRS
+		LCD_Display_Text(41,(prog_uchar*)Verdana8,0,55); 	// Acc
+
+		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
+		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,20);
+		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,10,30);
+
+		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,74,10);
+		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,74,20);
+		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,74,30);
+
+		//Angles
+		mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,45); // Gyro
+		mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,45);
+
+		mugui_lcd_puts(itoa(-accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,55); // Acc
+		mugui_lcd_puts(itoa(-accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,55);
+
+		// Update buffer
+		write_buffer(buffer,1);
+		clear_buffer(buffer);
+	}
+
+	// Measure the current loop rate
+	cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
+	LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
+	ticker_32 += cycletime;
+
+	_delay_ms(2);
+}
+*/
+//************************************************************
+//* Test Code - End
+//************************************************************
 
 	// Main loop
 	while (1)
@@ -244,7 +313,7 @@ int main(void)
 		switch(Menu_mode) 
 		{
 			// In IDLE mode, the text "Press any button for status" is displayed ONCE.
-			// If a button is pressed the mode changes to STATUS.
+			// If a button is pressed the mode changes to REQ_STATUS
 			case IDLE:
 				if((PINB & 0xf0) != 0xf0)
 				{
@@ -314,11 +383,9 @@ int main(void)
 
 			// In MENU mode, 
 			case MENU:
-				//button = NONE;//debug
 				menu_main();
 				// Switch back to status screen when leaving menu
 				Menu_mode = STATUS;
-				//button = NONE;//debug
 				// Reset timeout once back in status screen
 				Status_seconds = 0;
 				break;
@@ -560,8 +627,6 @@ int main(void)
 		if (!Stability)
 		{
 			// Reset I-terms when stabilise is off
-			IntegralaPitch = 0;	 
-			IntegralaRoll = 0;
 			IntegralGyro[ROLL] = 0;	
 			IntegralGyro[PITCH] = 0;
 			IntegralGyro[YAW] = 0;
@@ -576,8 +641,8 @@ int main(void)
 		// Autolevel mode ON
 		if (AutoLevel) 
 		{
-			ReadAcc();			// Only read Accs if in AutoLevel mode
-			AvgAcc();			// Average acc readings
+			ReadAcc();					// Only read Accs if in AutoLevel mode
+			getEstimatedAttitude();		// Get current attitude from the IMU
 		}
 
 
@@ -671,7 +736,7 @@ int main(void)
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
-			Refresh_safe = true;			// Safe to try and refresh status screen DEBUG
+			Refresh_safe = true;			// Safe to try and refresh status screen
 			output_servo_ppm();				// Output servo signal
 		}
 
@@ -683,18 +748,7 @@ int main(void)
 		// Measure the current loop rate
 		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
-
+		ticker_32 += cycletime;
 
 	} // main loop
 } // main()
-
-uint16_t micros(void)
-{
-	uint16_t us;
-	uint32_t cycletime_32;
-
-	cycletime_32 = cycletime;				// Promote cycletime to 32 bits
-	us = ((cycletime_32 << 2) / 10); 		// Scale cycletime to microseconds
-
-	return us;
-}
