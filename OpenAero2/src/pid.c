@@ -14,6 +14,7 @@
 #include "..\inc\main.h"
 #include "..\inc\init.h"
 #include "..\inc\acc.h"
+#include "..\inc\imu.h"
 
 //************************************************************
 // Defines
@@ -66,7 +67,7 @@ void Calculate_PID(void)
 	// Increment and limit I-terms, pre-calculate D-terms
 	//************************************************************
 
-	for (axis = 0; axis < YAW; axis ++)
+	for (axis = 0; axis <= YAW; axis ++)
 	{
 		// Reduce Gyro drift noise into the I-terms
 		if ((gyroADC[axis] > GYRO_DEADBAND) || (gyroADC[axis] < -GYRO_DEADBAND)) 
@@ -109,7 +110,7 @@ void Calculate_PID(void)
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Acc P terms
-		PID_acc_temp = AvgRoll * Config.A_Roll_P_mult;			// P-term of accelerometer (Max gain of 127)
+		PID_acc_temp = angle[ROLL] * Config.A_Roll_P_mult;			// P-term of accelerometer (Max gain of 127)
 		PID_ACCs[ROLL] = PID_acc_temp >> 2;						// Accs need much less scaling
 	}
 
@@ -145,7 +146,7 @@ void Calculate_PID(void)
 	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
 	{
 		// Acc P terms
-		PID_acc_temp = AvgPitch * Config.A_Pitch_P_mult;		// P-term of accelerometer (Max gain of 127)
+		PID_acc_temp = angle[PITCH] * Config.A_Pitch_P_mult;		// P-term of accelerometer (Max gain of 127)
 		PID_ACCs[PITCH] = PID_acc_temp >> 2;					// Accs need much less scaling
 	}
 

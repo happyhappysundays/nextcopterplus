@@ -1,14 +1,7 @@
 //***********************************************************
 //* imu.c
-//***********************************************************
-//* Simplified IMU based on "Complementary Filter"
-//* Inspired by http://starlino.com/imu_guide.html
 //*
-//* The following ideas was used in this project:
-//* 1) Rotation matrix: http://en.wikipedia.org/wiki/Rotation_matrix
-//* 2) Small-angle approximation: http://en.wikipedia.org/wiki/Small-angle_approximation
-//* 3) C. Hastings approximation for atan2()
-//* 4) Optimization tricks: http://www.hackersdelight.org/
+//* Based partly on the IMU from the open-sourced MultiWii project
 //*
 //***********************************************************
 
@@ -30,64 +23,80 @@
 //************************************************************
 
 void getEstimatedAttitude(void);
-int16_t _atan2(float y, float x);
 
 //************************************************************
-// Defines
+// 	Defines
 //************************************************************
 
-//******advanced users settings *******************
-/* Set the Low Pass Filter factor for ACC */
+// Set the Low Pass Filter factor for ACC 
+// Time constant T = 1/ (2*PI*f)
+// factor = T / (T + dt) where dt is the loop period or 1 / Looprate 2.5e-3
+// 1Hz = 64, 5Hz = 13, 100Hz = 1.6,  Infinite = 1
+
 /* Increasing this value would reduce ACC noise, but would increase ACC lag time */
 /* Comment this out if you do not want filter at all.*/
-/* Default WMC value: 8*/
-#define ACC_LPF_FACTOR 8
+
+//#define ACC_LPF_FACTOR 8 		// Hard code the number for now
 
 /* Set the Gyro Weight for Gyro/Acc complementary filter */
 /* Increasing this value would reduce and delay Acc influence on the output of the filter*/
-/* Default WMC value: 300*/
-#define GYR_CMPF_FACTOR 310.0f
 
-//****** end of advanced users settings *************
+#define GYR_CMPF_FACTOR 800.0f	// Hard code the number for now
+#define INV_GYR_CMPF_FACTOR (1.0f / (GYR_CMPF_FACTOR + 1.0f))
 
-// _atan2 define
-#define fp_is_neg(val) ((((uint8_t*)&val)[3] & 0x80) != 0)
+// Gyro scaling factor determination
+// IDG650 has 440 deg/sec on the 4.5x outputs (KK2 default) and 2000 deg/sec on the XOUT outputs
+// The output we use has 2.27mV/deg/s. So for +/-440 deg/s that is 440 * 2.27e-3 = +/-1.0V
+// On the MPU, Vref is 2.45V for full-scale 1024 bits. +/-1.0V translates to 1/2.45 = 0.408 * 1024 = +/-418 digits.
+// So the acc has a span of 2 x 418 = 836 (+/-418). These are the highest values that we have to deal with.
+//
+// OpenAero2's natural tick timer is 2.5MHz or 400ns, so intervals are measured in these units.
+// A max value of 418 represents 440 deg/s. At a tick level that max is 440/2500000 = 1.672e-4 deg/tick.
+// There are 6250 ticks per 400Hz loop cycle - the interval that will be used in practice.
+// So +/-418 will indicate (1.672e-4 * 6250) +/-1.045 deg/interval at the 440 deg/s maximum. (0.0182 rad/interval)
+//
+// So to work out the GYRO_SCALE we need to work out how to turn this gyro data into radians/interval or degrees/interval.
+// deltaGyroAngle = gyroADC[ROLL] * deltaTime;
+// The above code does the conversion. gyroADC[ROLL] has the values +/-418 and deltaTime is the interval.
+// We want deltaGyroAngle to be 1.045 degree (0.0182r) with 418 for gyroADC[ROLL].
+// This makes deltaTime 0.0182r / 418 = 4.354e-5 or 1.045 / 418 = 2.5e-3 for degrees.
+// 
+// Now deltaTime = (CurrentTime - PreviousTime) * GYRO_SCALE, so GYRO_SCALE = 4.354e-5 / 6250, or 2.5e-3 / 6250
+// GYRO_SCALE = 4.354e-5 / 6250 = 6.966e-9 for radians or 2.5e-3 / 6250 = 4.0e-7 for degrees
+// 
+// While the above gives accurate output in degrees or radias, I choose to increase GYRO_SCALE until its
+// arbitary scale matches the raw output of the accelerometers. This gives us the best resolution, but
+// the output is not usable in degrees without rescaling.
+ 
 
-#define INV_GYR_CMPF_FACTOR (1.0f / (GYR_CMPF_FACTOR+ 1.0f))
-#define GYRO_SCALE (1.0f/200e6f)
+//#define GYRO_SCALE	0.000000007f 	// for conversion to radians
+//#define GYRO_SCALE	0.0000004f 		// for conversion to degrees
+#define GYRO_SCALE	0.000001f 			// for conversion to the same scale as the accs
 
-// Small angle approximation
-#define ssin(val) (val)
-#define scos(val) 1.0f
-
-// Scaling factor for acc
-#define acc_1G 125 			// Debug - Z-axis full scale (+/- 1G) is 249 so I guess 1G is half of that
+// Scaling factor for acc to read in Gs
+#define acc_1G 125 						// Z-axis full scale (+/- 1G) is 249 so I guess 1G is half of that
 
 //************************************************************
 // Code
 //************************************************************
 
-int16_t	angle[2]; 			// Attitude
-int16_t	accSmooth[3]; 		// Debug
+int16_t	angle[2]; 	// Attitude
 
 void getEstimatedAttitude(void)
 {
-	static t_fp_vector GEstG;
-	static uint16_t PreviousTime;
+	static float deltaGyroAngle[3] = {0,0,0};
+	static uint32_t 	PreviousTime = 0;
 
-	GEstG.A[0] = 0;				// Debug - only need this once
-	GEstG.A[1] = 0;
-	GEstG.A[2] = 200;
+	uint8_t		axis;
+	int16_t		AccMag = 0;
+	uint32_t 	CurrentTime;
+	float 		deltaTime;
+	float		accSmooth[3];
 
-	t_fp_vector EstG = GEstG;
-	uint8_t axis;
-	int16_t	AccMag = 0;
-	uint16_t CurrentTime;
-	float deltaGyroAngle;
-	float deltaTime;
-
-	CurrentTime= micros();
-	deltaTime = (CurrentTime - PreviousTime) * GYRO_SCALE;
+	// Get global timestamp
+	CurrentTime = ticker_32;
+	deltaTime = (CurrentTime - PreviousTime);
+	deltaTime = deltaTime * GYRO_SCALE;
 	PreviousTime = CurrentTime;
 
 	// Initialization
@@ -95,89 +104,72 @@ void getEstimatedAttitude(void)
 	{
 	#if defined(ACC_LPF_FACTOR)
 		// LPF for ACC values
-		accSmooth[axis] = (accSmooth[axis] * (ACC_LPF_FACTOR - 1) + accADC[axis]) / ACC_LPF_FACTOR;
-		AccMag += (accSmooth[axis] * 10 / acc_1G) * (accSmooth[axis] * 10 / acc_1G);
+		accSmooth[axis] = ((accSmooth[axis] * (ACC_LPF_FACTOR - 1)) + accADC[axis]) / ACC_LPF_FACTOR;
+
+		// Check for any unusual acceleration		
+		AccMag = (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G) * (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G);
+		AccMag += acc_1G; // Offset for 1G at neutral
 
 		// Use accSmooth[axis] as source for acc values
-		#define ACC_VALUE accSmooth[axis]
+		#define ACC_VALUE -accSmooth[axis]
 
 	#else
-		accSmooth[axis] = accADC[axis];
-		AccMag = AccMag + ((accADC[axis] * 10) / acc_1G) * ((accADC[axis] * 10) / acc_1G);
+		// Check for any unusual acceleration	
+		AccMag = ((accADC[axis] * 10) / (int16_t) acc_1G) * ((accADC[axis] * 10) / (int16_t) acc_1G);
+		AccMag += acc_1G; // Offset for 1G at neutral
+		accSmooth[axis] = 0;
 
-		// Use accADC[axis] as source for acc values
-		#define ACC_VALUE accADC[axis]
+		// Use raw accADC[axis] as source for acc values
+		#define ACC_VALUE -accADC[axis]
 
 	#endif
+
+		// Estimate angle via gyros
+		deltaGyroAngle[axis] += (float)gyroADC[axis] * deltaTime;
 	}
-
-	// Rotate Estimated vector(s), ROLL
-	deltaGyroAngle = gyroADC[ROLL] * deltaTime;
-	EstG.V.Z = scos(deltaGyroAngle) * EstG.V.Z - ssin(deltaGyroAngle) * EstG.V.X;
-	EstG.V.X = ssin(deltaGyroAngle) * EstG.V.Z + scos(deltaGyroAngle) * EstG.V.X;
-
-	// Rotate Estimated vector(s), PITCH
-	deltaGyroAngle = gyroADC[PITCH] * deltaTime;
-	EstG.V.Y = scos(deltaGyroAngle) * EstG.V.Y + ssin(deltaGyroAngle) * EstG.V.Z;
-	EstG.V.Z = -ssin(deltaGyroAngle) * EstG.V.Y + scos(deltaGyroAngle) * EstG.V.Z;
-
-	// Rotate Estimated vector(s), YAW
-	deltaGyroAngle = gyroADC[YAW] * deltaTime;
-	EstG.V.X = scos(deltaGyroAngle) * EstG.V.X - ssin(deltaGyroAngle) * EstG.V.Y;
-	EstG.V.Y = ssin(deltaGyroAngle) * EstG.V.X + scos(deltaGyroAngle) * EstG.V.Y;
 
 	// Apply complimentary filter (Gyro drift correction)
 	// If accel magnitude >1.4G or <0.6G => we neutralize the effect of accelerometers in the angle estimation.
-	// To do that, we just skip filter, as EstV already rotated by Gyro
+	// To do that, we just skip the filter temporarily
+	//
+	// Note that this equation is a cheat to save doing a square root on the right-hand side.
+	// (SQR)36 is 6 and (SQR)196 is 14. The accADC numbers on the right have already been multiplied by 10
+	// so the equation is really just mag^2 = x^2 + y^2 + z^2. 196 corresponds to 1.6G etc.
+
 	if (!((36 > AccMag) || (AccMag > 196))) 
 	{
-		// Note that EstG.A[ROLL] is EstG.V.X, EstG.A[PITCH] is EstG.V.Y and EstG.A[YAW] is EstG.V.Z
-		for (axis = 0; axis < 3; axis++)
-		EstG.A[axis] = (EstG.A[axis] * GYR_CMPF_FACTOR + ACC_VALUE) * INV_GYR_CMPF_FACTOR;
+		for (axis = 0; axis < 2; axis++)
+		{
+			deltaGyroAngle[axis] = ((deltaGyroAngle[axis] * GYR_CMPF_FACTOR) + ACC_VALUE) * INV_GYR_CMPF_FACTOR;
+		}
 	}
 
-	// Attitude of the estimated vector
-	angle[ROLL]=_atan2(EstG.V.X, EstG.V.Z);
-	angle[PITCH] =_atan2(EstG.V.Y, EstG.V.Z);
-	GEstG = EstG;
+	// Calculated roll/pitch angles
+	angle[ROLL]= (int16_t)deltaGyroAngle[ROLL];
+	angle[PITCH] = (int16_t)deltaGyroAngle[PITCH];
 }
 
-// Fast ATAN calculation
-int16_t _atan2(float y, float x)
+/*
+//
+// From: http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=99637&start=all&postdays=0&postorder=asc
+//
+//
+// These are the correct equations:
+// Calculate the pitch and roll from the measurements
+// See Farrell, Equations 10.14 - 10.15
+double roll  = atan2(-accel_y, -accel_z);
+double pitch = atan2( accel_x, sqrt( accel_y * accel_y + accel_z * accel_z)); 
+//
+
+void CoarseLevelling(double f_x, double f_y, double f_z, double* roll, double* pitch)
 {
-	float z = y / x;
-	int16_t zi = abs((int16_t)(z * 100)); 
-	int8_t y_neg = fp_is_neg(y);
+    *pitch = atan2(f_x, sqrt(f_y*f_y + f_z*f_z) );
+    *roll  = atan2(-f_y, -f_z);
+} 
 
-	if (zi < 100)
-	{
-		if (zi > 10) 
-		{
- 		z = z / (1.0f + (0.28f * z * z));
-		}
+//
+//
+*/
 
- 		if (fp_is_neg(x)) 
-		{
- 			if (y_neg) 
-			{
-				z = (z - M_PI);
-			}
-		}
-		else
-		{
-			z = z + M_PI;
-		}
-	} 
-	else 
-	{
-		z = (M_PI / 2.0f) - z / ((z * z) + 0.28f);
-		if (y_neg)
-		{
-			z -= M_PI;
-		}
-	}
 
-	z *= ((180.0f / M_PI) * 10); 
 
-	return z;
-}

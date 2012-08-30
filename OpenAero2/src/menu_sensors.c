@@ -51,12 +51,12 @@ void Display_sensors(void)
 		LCD_Display_Text(41,(prog_uchar*)Verdana8,20,40); LCD_Display_Text(39,(prog_uchar*)Verdana8,50,40);
 		LCD_Display_Text(41,(prog_uchar*)Verdana8,20,50); LCD_Display_Text(40,(prog_uchar*)Verdana8,50,50);
 
-		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,0);
-		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,10);
+		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,0);
+		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,10);
 		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,20);
-		mugui_lcd_puts(itoa(accADC[X],pBuffer,10),(prog_uchar*)Verdana8,80,30);
-		mugui_lcd_puts(itoa(accADC[Y],pBuffer,10),(prog_uchar*)Verdana8,80,40);
-		mugui_lcd_puts(itoa(accADC[Z],pBuffer,10),(prog_uchar*)Verdana8,80,50);
+		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,30);
+		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,40);
+		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,50);
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left

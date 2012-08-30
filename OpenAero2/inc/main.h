@@ -7,8 +7,6 @@
 //* Externals
 //***********************************************************
 
-extern uint16_t micros(void);
-
 extern bool	AutoLevel;
 extern bool	Stability;
 extern uint16_t	cycletime;
@@ -17,3 +15,7 @@ extern bool	Failsafe;
 extern uint8_t	buffer[];
 extern bool	RefreshStatus;
 extern int8_t General_error;
+
+
+extern uint32_t ticker_32;	
+extern int16_t deltaGyroRollAngle;
