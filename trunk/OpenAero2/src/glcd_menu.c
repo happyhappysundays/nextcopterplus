@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "Beta 4p1"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 4p2"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char PText0[]  PROGMEM = "";							// Init
 const char PText1[]  PROGMEM = "Resetting to";
@@ -163,8 +163,10 @@ const char GeneralText0[]  PROGMEM = "Contrast:";
 const char GeneralText1[]  PROGMEM = "Status time:";
 const char GeneralText2[]  PROGMEM = "LMA timeout:";
 const char GeneralText3[]  PROGMEM = "Servo rate:";
-const char GeneralText4[] PROGMEM = "Low";
-const char GeneralText5[] PROGMEM = "High";
+const char GeneralText4[] PROGMEM =  "Low";
+const char GeneralText5[] PROGMEM =  "High";
+const char GeneralText6[] PROGMEM =  "Acc. LPF:";
+const char GeneralText7[] PROGMEM =  "CF factor:";
 //
 const char MixerItem0[] PROGMEM = "Source:";				// Mixer menu items
 const char MixerItem1[] PROGMEM = "Polarity:";
@@ -288,7 +290,8 @@ const char *text_menu[] PROGMEM =
 		RCMixText2, RCMixText3,						
 		//
 		GeneralText4, GeneralText5, Dummy0,													// 164 to 169 LOW, HIGH
-		Dummy0,Dummy0, Dummy0,	
+		//
+		Status0, Status1, Status2,															// 167 to 169
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 170 to 172 Error
 		//
@@ -302,11 +305,12 @@ const char *text_menu[] PROGMEM =
 		MixerItem1, MixerItem3, MixerItem1,
 		MixerItem8, MixerItem9,	MixerItem10,
 		//
-		StatusText1, MixerMenuItem0, GeneralText0,											// 202 to 209 general
+		StatusText1, MixerMenuItem0, GeneralText0,											// 202 to 211 general
 		GeneralText1,MixerMenuItem1,
 		GeneralText2,MainMenuItem6, GeneralText3,	
+		GeneralText6,GeneralText7, 
 		//
-		Status0, Status1, Status2,															// 210 to 212
+		Dummy0,	
 		//
 		StabMenuItem0, StabMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem4, 			// 213 to 225
 		StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, StabMenuItem9, 
@@ -334,8 +338,8 @@ void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y)
 void idle_screen(void)
 {
 	clear_buffer(buffer);
-	LCD_Display_Text(210,(prog_uchar*)Verdana14,26,8); 	// "Press any"
-	LCD_Display_Text(211,(prog_uchar*)Verdana14,38,25); // "button"
-	LCD_Display_Text(212,(prog_uchar*)Verdana14,24,42); // "for status"
+	LCD_Display_Text(167,(prog_uchar*)Verdana14,26,8); 	// "Press any"
+	LCD_Display_Text(168,(prog_uchar*)Verdana14,38,25); // "button"
+	LCD_Display_Text(169,(prog_uchar*)Verdana14,24,42); // "for status"
 	write_buffer(buffer,1);
 };

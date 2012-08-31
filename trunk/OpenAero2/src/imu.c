@@ -23,26 +23,22 @@
 //************************************************************
 
 void getEstimatedAttitude(void);
+void UpdateIMUvalues(void);
 
 //************************************************************
 // 	Defines
 //************************************************************
 
-// Set the Low Pass Filter factor for ACC 
+/* Set the Low Pass Filter factor for ACC */
 // Time constant T = 1/ (2*PI*f)
 // factor = T / (T + dt) where dt is the loop period or 1 / Looprate 2.5e-3
 // 1Hz = 64, 5Hz = 13, 100Hz = 1.6,  Infinite = 1
-
-/* Increasing this value would reduce ACC noise, but would increase ACC lag time */
-/* Comment this out if you do not want filter at all.*/
-
-//#define ACC_LPF_FACTOR 8 		// Hard code the number for now
+// Increasing ACC_LPF_FACTOR would reduce ACC noise, but would increase ACC lag time
+// Set to zero if you do not want filter at all, otherwise 8 is a typical number
 
 /* Set the Gyro Weight for Gyro/Acc complementary filter */
-/* Increasing this value would reduce and delay Acc influence on the output of the filter*/
-
-#define GYR_CMPF_FACTOR 800.0f	// Hard code the number for now
-#define INV_GYR_CMPF_FACTOR (1.0f / (GYR_CMPF_FACTOR + 1.0f))
+// Increasing GYR_CMPF_FACTOR would reduce and delay Acc influence on the output of the filter*/
+// 300 is the default for aeroplane mode, and 800 is good for camstab
 
 // Gyro scaling factor determination
 // IDG650 has 440 deg/sec on the 4.5x outputs (KK2 default) and 2000 deg/sec on the XOUT outputs
@@ -67,7 +63,6 @@ void getEstimatedAttitude(void);
 // While the above gives accurate output in degrees or radias, I choose to increase GYRO_SCALE until its
 // arbitary scale matches the raw output of the accelerometers. This gives us the best resolution, but
 // the output is not usable in degrees without rescaling.
- 
 
 //#define GYRO_SCALE	0.000000007f 	// for conversion to radians
 //#define GYRO_SCALE	0.0000004f 		// for conversion to degrees
@@ -80,7 +75,11 @@ void getEstimatedAttitude(void);
 // Code
 //************************************************************
 
-int16_t	angle[2]; 	// Attitude
+int8_t	ACC_LPF_FACTOR;		// User-set Acc low-pass filter
+float	GYR_CMPF_FACTOR;
+float	INV_GYR_CMPF_FACTOR;
+
+int16_t	angle[2]; 			// Attitude
 
 void getEstimatedAttitude(void)
 {
@@ -102,27 +101,25 @@ void getEstimatedAttitude(void)
 	// Initialization
 	for (axis = 0; axis < 3; axis++) 
 	{
-	#if defined(ACC_LPF_FACTOR)
-		// LPF for ACC values
-		accSmooth[axis] = ((accSmooth[axis] * (ACC_LPF_FACTOR - 1)) + accADC[axis]) / ACC_LPF_FACTOR;
+		if (ACC_LPF_FACTOR > 0)
+		{
+			// LPF for ACC values
+			accSmooth[axis] = ((accSmooth[axis] * (ACC_LPF_FACTOR - 1)) + accADC[axis]) / ACC_LPF_FACTOR;
 
-		// Check for any unusual acceleration		
-		AccMag = (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G) * (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G);
-		AccMag += acc_1G; // Offset for 1G at neutral
+			// Check for any unusual acceleration		
+			AccMag = (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G) * (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G);
+			AccMag += acc_1G; // Offset for 1G at neutral
+		}
+		else
+		{
+			// Check for any unusual acceleration	
+			AccMag = ((accADC[axis] * 10) / (int16_t) acc_1G) * ((accADC[axis] * 10) / (int16_t) acc_1G);
+			AccMag += acc_1G; // Offset for 1G at neutral
+			accSmooth[axis] = 0;
 
-		// Use accSmooth[axis] as source for acc values
-		#define ACC_VALUE -accSmooth[axis]
-
-	#else
-		// Check for any unusual acceleration	
-		AccMag = ((accADC[axis] * 10) / (int16_t) acc_1G) * ((accADC[axis] * 10) / (int16_t) acc_1G);
-		AccMag += acc_1G; // Offset for 1G at neutral
-		accSmooth[axis] = 0;
-
-		// Use raw accADC[axis] as source for acc values
-		#define ACC_VALUE -accADC[axis]
-
-	#endif
+			// Use raw accADC[axis] as source for acc values
+			accSmooth[axis] =  accADC[axis];
+		}
 
 		// Estimate angle via gyros
 		deltaGyroAngle[axis] += (float)gyroADC[axis] * deltaTime;
@@ -140,7 +137,7 @@ void getEstimatedAttitude(void)
 	{
 		for (axis = 0; axis < 2; axis++)
 		{
-			deltaGyroAngle[axis] = ((deltaGyroAngle[axis] * GYR_CMPF_FACTOR) + ACC_VALUE) * INV_GYR_CMPF_FACTOR;
+			deltaGyroAngle[axis] = ((deltaGyroAngle[axis] * GYR_CMPF_FACTOR) - accSmooth[axis]) * INV_GYR_CMPF_FACTOR;
 		}
 	}
 
@@ -149,27 +146,12 @@ void getEstimatedAttitude(void)
 	angle[PITCH] = (int16_t)deltaGyroAngle[PITCH];
 }
 
-/*
-//
-// From: http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=99637&start=all&postdays=0&postorder=asc
-//
-//
-// These are the correct equations:
-// Calculate the pitch and roll from the measurements
-// See Farrell, Equations 10.14 - 10.15
-double roll  = atan2(-accel_y, -accel_z);
-double pitch = atan2( accel_x, sqrt( accel_y * accel_y + accel_z * accel_z)); 
-//
-
-void CoarseLevelling(double f_x, double f_y, double f_z, double* roll, double* pitch)
+void UpdateIMUvalues(void)
 {
-    *pitch = atan2(f_x, sqrt(f_y*f_y + f_z*f_z) );
-    *roll  = atan2(-f_y, -f_z);
-} 
-
-//
-//
-*/
+	ACC_LPF_FACTOR = Config.Acc_LPF;
+	GYR_CMPF_FACTOR = Config.CF_factor * 10;
+	INV_GYR_CMPF_FACTOR = (1.0f / (GYR_CMPF_FACTOR + 1.0f));
+}
 
 
 
