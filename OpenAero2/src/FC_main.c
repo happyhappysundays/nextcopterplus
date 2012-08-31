@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.00 Beta 4 Release - August 2012
+// Version 1.00 Beta 4 pre-release 2 - August 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -73,6 +73,7 @@
 //			Changed autolevel setting to only do autolevel. No implied stability control.
 // Beta 4	Completed and integrated basic IMU code.
 //			Fixed noob-level f*ck-up resulting in no I-term for Yaw in Beta3
+//			Added menu settings for acc LPF and IMU filter.
 //
 //***********************************************************
 //* To do
