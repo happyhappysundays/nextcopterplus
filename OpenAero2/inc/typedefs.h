@@ -145,7 +145,8 @@ typedef struct
 	int8_t		LMA_enable;				// LMA setting
 	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
-
+	int8_t		Acc_LPF;				// LPF for accelerometers
+	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 		
 	// Non-menu items 
 	// Channel configuration
