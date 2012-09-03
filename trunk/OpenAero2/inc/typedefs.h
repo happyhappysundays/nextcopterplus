@@ -147,7 +147,8 @@ typedef struct
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-		
+	int8_t		AutoCenter;				// Yaw heading hold auto centering
+			
 	// Non-menu items 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];// Channel mixing data	

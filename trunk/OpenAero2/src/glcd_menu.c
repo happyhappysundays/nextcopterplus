@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "Beta 4p2"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 4p3"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char PText0[]  PROGMEM = "";							// Init
 const char PText1[]  PROGMEM = "Resetting to";
@@ -119,9 +119,9 @@ const char AutoMenuItem15[] PROGMEM = "ON";
 //
 const char BattMenuItem0[]  PROGMEM = "Battery type:"; 		// Battery text
 const char BattMenuItem1[]  PROGMEM = "Cells:"; 
-const char BattMenuItem2[]  PROGMEM = "Alarm (mV):";
-const char BattMenuItem3[]  PROGMEM = "Max (mV):";
-const char BattMenuItem4[]  PROGMEM = "Min (mV):";
+const char BattMenuItem2[]  PROGMEM = "Alarm (x10mV):";
+const char BattMenuItem3[]  PROGMEM = "Max (x10mV):";
+const char BattMenuItem4[]  PROGMEM = "Min (x10mV):";
 const char BattMenuItem5[]  PROGMEM = "LiPo";
 const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
@@ -167,6 +167,7 @@ const char GeneralText4[] PROGMEM =  "Low";
 const char GeneralText5[] PROGMEM =  "High";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
+const char GeneralText8[] PROGMEM =  "Yaw magic:";
 //
 const char MixerItem0[] PROGMEM = "Source:";				// Mixer menu items
 const char MixerItem1[] PROGMEM = "Polarity:";
@@ -305,12 +306,10 @@ const char *text_menu[] PROGMEM =
 		MixerItem1, MixerItem3, MixerItem1,
 		MixerItem8, MixerItem9,	MixerItem10,
 		//
-		StatusText1, MixerMenuItem0, GeneralText0,											// 202 to 211 general
+		StatusText1, MixerMenuItem0, GeneralText0,											// 202 to 212 general
 		GeneralText1,MixerMenuItem1,
 		GeneralText2,MainMenuItem6, GeneralText3,	
-		GeneralText6,GeneralText7, 
-		//
-		Dummy0,	
+		GeneralText6,GeneralText7, 	GeneralText8,	
 		//
 		StabMenuItem0, StabMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem4, 			// 213 to 225
 		StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, StabMenuItem9, 

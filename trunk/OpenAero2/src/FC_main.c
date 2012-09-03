@@ -74,6 +74,10 @@
 // Beta 4	Completed and integrated basic IMU code.
 //			Fixed noob-level f*ck-up resulting in no I-term for Yaw in Beta3
 //			Added menu settings for acc LPF and IMU filter.
+//			Added menu setting for Yaw heading-hold auto-center "Yaw magic".
+//			Corrected voltage scaling text. Fixed LiPo default voltage.
+//			Menu now remembers last position. Added button acceleration.
+//			Updated Aeroplane mixer preset.
 //
 //***********************************************************
 //* To do

@@ -75,6 +75,20 @@ void Calculate_PID(void)
 			IntegralGyro[axis] += gyroADC[axis]; 
 		}
 
+		// Handle auto-centering of Yaw in CamStab mode
+		// If no significant gyro input and IntegralGyro[YAW] is non-zero, pull it back slowly.
+		else if ((Config.CamStab == ON) && (Config.AutoCenter == ON))
+		{
+			if (IntegralGyro[YAW] > 0)
+			{
+				IntegralGyro[YAW] --;
+			}
+			else if (IntegralGyro[YAW] < 0)
+			{	
+				IntegralGyro[YAW] ++;
+			}
+		}
+
 		// Anti wind-up limits
 		if (IntegralGyro[axis] > Config.Raw_I_Limits[axis])
 		{
