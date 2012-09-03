@@ -46,7 +46,7 @@ const menu_range_t batt_menu_ranges[] PROGMEM =
 {
 	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
 	{1,12,1,0,3},
-	{0,2000,1,0,108},
+	{0,2000,1,0,1080},
 	{120,430,1,0,420},
 	{80,400,1,0,360}
 };

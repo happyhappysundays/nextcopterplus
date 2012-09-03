@@ -126,6 +126,9 @@ void init(void)
 	AutoLevel = false;
 	Stability = false;
 
+	// Button acceleration
+	button_multiplier = 1;
+
 	Initial_EEPROM_Config_Load();			// Loads config at start-up 
 	UpdateLimits();							// Update travel limts	
 	Init_ADC();

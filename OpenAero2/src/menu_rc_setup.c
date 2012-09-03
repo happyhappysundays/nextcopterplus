@@ -90,8 +90,11 @@ void menu_rc_setup(void)
 		// Update value in config structure
 		memcpy(&Config.TxSeq,&values[0],sizeof(int8_t) * RCITEMS);
 
-		// Update Ch7. mixer with source from Config.FlapChan
-		Config.Channel[CH7].source = Config.FlapChan;
+		// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode
+		if (Config.MixMode == AEROPLANE)
+		{
+			Config.Channel[CH7].source = Config.FlapChan;
+		}
 
 		if (button == ENTER)
 		{

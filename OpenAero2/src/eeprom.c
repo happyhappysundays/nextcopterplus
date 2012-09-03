@@ -29,7 +29,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x03		// eePROM signature - change for each eePROM structure change
+#define MAGIC_NUMBER 0x04		// eePROM signature - change for each eePROM structure change
 								// to force factory reset
 
 //************************************************************
@@ -75,6 +75,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.A_Pitch_P_mult = 30;
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
+	Config.AutoCenter = OFF;
 
 	for (i = 0; i < 3; i++)
 	{

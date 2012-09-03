@@ -49,6 +49,9 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 // Hard-coded line positions
 uint8_t lines[4] = {LINE0, LINE1, LINE2, LINE3};
 
+// Button acceleration
+uint8_t button_multiplier;
+
 
 //************************************************************
 // Print basic menu frame
@@ -208,13 +211,13 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		// Handle cursor Up/Down limits
 		if (button == DOWN)	
 		{
-			value = value - range.increment;
+			value = value - (range.increment * button_multiplier);
 			_delay_ms(50);
 		}
 
 		if (button == UP)	
 		{
-			value = value + range.increment;
+			value = value + (range.increment * button_multiplier);
 			_delay_ms(50);
 		}
 
@@ -363,9 +366,10 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 
 uint8_t poll_buttons(void)
 {
+	static uint8_t button_count = 0;
 	uint8_t buttons = 0;
 
-	button = (PINB & 0xf0);
+	button = (PINB & 0xf0); // button is global, buttons is local
 
 	while (button == NONE)					
 	{
@@ -374,13 +378,30 @@ uint8_t poll_buttons(void)
 
 		if (buttons != (PINB & 0xf0))
 		{
-			buttons = 0;	// Debounce buttons
+			buttons = 0; // Buttons different
 		}
-		else
+		else // Buttons the same - update global
 		{
 			button = buttons;
 		}
+
+		// Reset button acceleration
+		button_count = 0;
+		button_multiplier = 1;
 	}
+
+	// Check for buttons being held down
+	if (button != NONE)
+	{
+		// Count the number of times incremented
+		button_count++; 
+		if (button_count >= 10)
+		{
+			button_count = 0;
+			button_multiplier ++;
+		}
+	}
+
 	return buttons;
 }
 

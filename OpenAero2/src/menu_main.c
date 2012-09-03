@@ -39,9 +39,9 @@ void do_main_menu_item(uint8_t menuitem);
 
 void menu_main(void)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = MAINSTART;
-	uint8_t temp = 0;
+	static uint8_t cursor = LINE0;	// These are now static so as to remember the menu position
+	static uint8_t top = MAINSTART;
+	static uint8_t temp = 0;
 	
 	button = NONE; // debug
 

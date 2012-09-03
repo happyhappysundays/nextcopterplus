@@ -64,3 +64,9 @@ extern const char *text_menu[];
 #define BACK	0x70 	// S1 pressed
 #define ENTER	0xe0 	// S4 pressed
 #define NONE	0xf0 	// No button pressed
+
+
+// Button acceleration
+uint8_t button_multiplier;
+
+
