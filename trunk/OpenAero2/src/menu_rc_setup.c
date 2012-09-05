@@ -32,7 +32,7 @@ void menu_rc_setup(void);
 // Defines
 //************************************************************
 
-#define RCITEMS 10 	// Number of menu items
+#define RCITEMS 9 	// Number of menu items
 #define RCSTART 173 // Start of Menu text items
 #define RCTEXT 183 	// Start of value text items
 #define RCOFFSET 92	// Value offsets
@@ -41,15 +41,14 @@ void menu_rc_setup(void);
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 149, 0,0,0,0};
+const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 0,0,0,0};
 const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
 	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
 	{CPPM_MODE,PWM3,1,1,PWM1},
-	{THROTTLE,NOCHAN,1,1,GEAR},
-	{THROTTLE,NOCHAN,1,1,AUX1},
-	{THROTTLE,NOCHAN,1,1,NOCHAN},
-	{THROTTLE,NOCHAN,1,1,FLAP},
+	{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
+	{THROTTLE,NOCHAN,1,1,GEAR},		// Autochan
+	{THROTTLE,NOCHAN,1,1,THROTTLE},	// Second aileron
 	{-125,125,5,0,0},
 	{-125,125,5,0,0},
 	{-125,125,5,0,0},

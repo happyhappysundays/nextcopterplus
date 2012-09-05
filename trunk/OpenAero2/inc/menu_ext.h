@@ -59,9 +59,9 @@ extern const char *text_menu[];
 #define LINE2 27		// Middle line of menu
 #define LINE3 39		// Bottom line of menu
 #define NEXTLINE 40		// When cursor has been asked to move down off screen
-#define UP		0xd0 	// S3 pressed
-#define DOWN	0xb0 	// S2 pressed
 #define BACK	0x70 	// S1 pressed
+#define UP		0xb0 	// S2 pressed
+#define DOWN	0xd0 	// S3 pressed
 #define ENTER	0xe0 	// S4 pressed
 #define NONE	0xf0 	// No button pressed
 

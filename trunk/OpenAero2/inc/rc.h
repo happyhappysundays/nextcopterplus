@@ -14,7 +14,7 @@ extern void CenterSticks(void);
 extern void SetFailsafe(void);
 
 // RC input values
-extern	uint16_t RCinputs[MAX_RC_CHANNELS];
+extern int16_t RCinputs[MAX_RC_CHANNELS];
 extern bool	RxActivity;		// RX activity flag
 
 

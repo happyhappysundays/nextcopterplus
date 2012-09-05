@@ -53,7 +53,7 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 	{0,30,1,0,1},		// LMA enable
 	{OFF,ON,1,1,OFF},	// Camstab enable
 	{LOW,HIGH,1,1,LOW},	// Camstab servo rate
-	{1,16,1,0,8},		// Acc. LPF
+	{1,64,1,0,8},		// Acc. LPF
 	{10,100,5,0,30},	// CF factor
 	{OFF,ON,1,1,OFF},	// Yaw HH auto-center
 };

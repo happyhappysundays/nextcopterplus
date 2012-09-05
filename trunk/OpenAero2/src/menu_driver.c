@@ -63,15 +63,15 @@ void print_menu_frame(uint8_t style)
 	if (style == 0)
 	{
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 38, 59); 	// Down
-		LCD_Display_Text(10, (prog_uchar*)Wingdings, 80, 59); 	// Up
+		LCD_Display_Text(10, (prog_uchar*)Wingdings, 38, 59); 	// Up
+		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
 		LCD_Display_Text(11, (prog_uchar*)Wingdings, 120, 57); 	// Right
 	}
 	else
 	{
 		LCD_Display_Text(16, (prog_uchar*)Verdana8, 0, 54); 	// Clear
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 38, 59);	// Down
-		LCD_Display_Text(10, (prog_uchar*)Wingdings, 80, 59);	// Up
+		LCD_Display_Text(10, (prog_uchar*)Wingdings, 38, 59);	// Up
+		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59);	// Down
 		LCD_Display_Text(17, (prog_uchar*)Verdana8, 103, 54);	// Save
 	}
 
