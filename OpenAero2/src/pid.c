@@ -49,8 +49,6 @@ void Calculate_PID(void);
 // PID globals
 int16_t PID_Gyros[3];
 int16_t PID_ACCs[3];
-int32_t	IntegralaPitch;						// PID I-terms (acc.) for each axis
-int32_t	IntegralaRoll;
 int32_t	IntegralGyro[3];					// PID I-terms (gyro) for each axis
 
 void Calculate_PID(void)
@@ -121,7 +119,7 @@ void Calculate_PID(void)
 	DifferentialGyro[ROLL] *= Config.Roll.D_mult;				// Multiply D-term by up to 127
 	DifferentialGyro[ROLL] = DifferentialGyro[ROLL] << 4;		// Multiply by 16
 
-	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
+	if (AutoLevel) // Autolevel mode (Use IMU to calculate attitude)
 	{
 		// Acc P terms
 		PID_acc_temp = angle[ROLL] * Config.A_Roll_P_mult;			// P-term of accelerometer (Max gain of 127)
@@ -157,7 +155,7 @@ void Calculate_PID(void)
 	DifferentialGyro[PITCH] *= Config.Pitch.D_mult;				// Multiply D-term by up to 127
 	DifferentialGyro[PITCH] = DifferentialGyro[PITCH] << 4;		// Multiply by 16
 
-	if (AutoLevel) // Autolevel mode (Use averaged accelerometer to calculate attitude)
+	if (AutoLevel) // Autolevel mode (Use IMU to calculate attitude)
 	{
 		// Acc P terms
 		PID_acc_temp = angle[PITCH] * Config.A_Pitch_P_mult;		// P-term of accelerometer (Max gain of 127)

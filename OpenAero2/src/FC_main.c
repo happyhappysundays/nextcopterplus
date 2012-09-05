@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.00 Beta 4 pre-release 2 - August 2012
+// Version 1.00 Beta 4 Release - September 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -71,13 +71,15 @@
 //			Added separate P settings for Roll and Pitch accelerometers. Servo HIGH rate set to 300Hz.
 //			Added preliminary IMU code. Removed small, ugly NiMh hack.
 //			Changed autolevel setting to only do autolevel. No implied stability control.
-// Beta 4	Completed and integrated basic IMU code.
-//			Fixed noob-level f*ck-up resulting in no I-term for Yaw in Beta3
-//			Added menu settings for acc LPF and IMU filter.
+// Beta 4	Fixed noob-level f*ck-up resulting in no I-term for Yaw in Beta3
 //			Added menu setting for Yaw heading-hold auto-center "Yaw magic".
 //			Corrected voltage scaling text. Fixed LiPo default voltage.
 //			Menu now remembers last position. Added button acceleration.
-//			Updated Aeroplane mixer preset.
+//			Updated Aeroplane mixer preset. Removed 3-pos setting from General menu as not needed.
+//			Added stack monitoring function. Reversed menu and value UP/DOWN sense. 
+//			Hopefully fixed false throttle high alarm.
+//			Completed and integrated basic IMU code (again).
+//			Added General menu settings for Acc LPF and IMU CF factor.
 //
 //***********************************************************
 //* To do
@@ -159,7 +161,6 @@ Camera Gimbal (if enabled)
 #include "..\inc\menu_ext.h"
 #include "..\inc\main.h"
 #include "..\inc\imu.h"
-#include <math.h>
 
 //***********************************************************
 //* Fonts
@@ -307,6 +308,7 @@ while(1)
 //************************************************************
 //* Test Code - End
 //************************************************************
+
 
 	// Main loop
 	while (1)
@@ -554,7 +556,7 @@ while(1)
 		RxGetChannels();
 
 		// Clear Throttle High error once throtle reset
-		if (RCinputs[THROTTLE] < 100)
+		if (RCinputs[THROTTLE] < 250)
 		{
 			General_error &= ~(1 << THROTTLE_HIGH);	
 		}
@@ -646,8 +648,8 @@ while(1)
 		// Autolevel mode ON
 		if (AutoLevel) 
 		{
-			ReadAcc();					// Only read Accs if in AutoLevel mode
-			getEstimatedAttitude();		// Get current attitude from the IMU
+			ReadAcc();			// Only read Accs if in AutoLevel mode
+			getEstimatedAttitude();
 		}
 
 
@@ -755,5 +757,7 @@ while(1)
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
 		ticker_32 += cycletime;
 
+
 	} // main loop
 } // main()
+

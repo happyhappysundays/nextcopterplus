@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "Beta 4p3"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
+const char VersionRef0[] PROGMEM = "Beta 4"; 				// <-- Change version number here !!!!!!!!!!!!!!!!!!!!
 //
 const char PText0[]  PROGMEM = "";							// Init
 const char PText1[]  PROGMEM = "Resetting to";
@@ -132,7 +132,6 @@ const char RCMenuItem1[]  PROGMEM = "RX mode:";
 const char RCMenuItem2[]  PROGMEM = "Stability input:";
 const char RCMenuItem3[]  PROGMEM = "Autolevel input:";
 const char RCMenuItem4[]  PROGMEM = "2nd Aileron:";
-const char RCMenuItem5[]  PROGMEM = "3-pos switch:";
 const char RCMenuItem6[]  PROGMEM = "JR/Spk"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
 //
@@ -296,8 +295,10 @@ const char *text_menu[] PROGMEM =
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 170 to 172 Error
 		//
-		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, RCMenuItem5, 					// 173 to 182 rc menu
+		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, 								// 173 to 181 rc menu
 		RCMenuItem4, ChannelRef9, ChannelRef10, ChannelRef11, ChannelRef12,
+		//
+		Dummy0,
 		//
 		RCMenuItem6, RCMenuItem7, Dummy0,													// 183 to 185 JR/Futaba
 		//

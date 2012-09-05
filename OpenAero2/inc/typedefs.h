@@ -93,7 +93,6 @@ typedef struct
 	int8_t		RxMode;					// PWM or CPPM mode
 	int8_t		StabChan;				// Channel number to select stability mode
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
-	int8_t		ThreePos;				// Channel number for ThreePos switch
 	int8_t		FlapChan;				// Channel number for second aileron input
 	int8_t		Preset1;				// RC presets for camstab
 	int8_t		Preset2;
@@ -108,8 +107,6 @@ typedef struct
 	
 	// Autolevel settings
 	int8_t		AutoMode;
-	//PID_mult_t	A_Roll;					// Acc PID settings
-	//PID_mult_t	A_Pitch;
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		A_Pitch_P_mult;
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
@@ -148,6 +145,7 @@ typedef struct
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		AutoCenter;				// Yaw heading hold auto centering
+	int8_t		Dummy_1;
 			
 	// Non-menu items 
 	// Channel configuration
@@ -166,7 +164,7 @@ typedef struct
 	uint16_t	AccZedZero;
 
 	// 
-	uint16_t	Dummy;
+	uint16_t	Dummy_2;
 
 } CONFIG_STRUCT;
 

@@ -36,9 +36,14 @@ void UpdateIMUvalues(void);
 // Increasing ACC_LPF_FACTOR would reduce ACC noise, but would increase ACC lag time
 // Set to zero if you do not want filter at all, otherwise 8 is a typical number
 
+//#define ACC_LPF_FACTOR 8 		// Hard code the number for now
+
 /* Set the Gyro Weight for Gyro/Acc complementary filter */
 // Increasing GYR_CMPF_FACTOR would reduce and delay Acc influence on the output of the filter*/
 // 300 is the default for aeroplane mode, and 800 is good for camstab
+
+//#define GYR_CMPF_FACTOR 800.0f	// Hard code the number for now
+//#define INV_GYR_CMPF_FACTOR (1.0f / (GYR_CMPF_FACTOR + 1.0f))
 
 // Gyro scaling factor determination
 // IDG650 has 440 deg/sec on the 4.5x outputs (KK2 default) and 2000 deg/sec on the XOUT outputs
@@ -85,12 +90,12 @@ void getEstimatedAttitude(void)
 {
 	static float deltaGyroAngle[3] = {0,0,0};
 	static uint32_t 	PreviousTime = 0;
+	static	float		accSmooth[3];
 
 	uint8_t		axis;
 	int16_t		AccMag = 0;
 	uint32_t 	CurrentTime;
 	float 		deltaTime;
-	float		accSmooth[3];
 
 	// Get global timestamp
 	CurrentTime = ticker_32;
@@ -107,15 +112,14 @@ void getEstimatedAttitude(void)
 			accSmooth[axis] = ((accSmooth[axis] * (ACC_LPF_FACTOR - 1)) + accADC[axis]) / ACC_LPF_FACTOR;
 
 			// Check for any unusual acceleration		
-			AccMag = (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G) * (((int16_t)accSmooth[axis] * 10) / (int16_t) acc_1G);
+			AccMag = (int16_t)(((accSmooth[axis] * 10) / (int16_t)acc_1G) * ((accSmooth[axis] * 10) / (int16_t)acc_1G));
 			AccMag += acc_1G; // Offset for 1G at neutral
 		}
 		else
 		{
 			// Check for any unusual acceleration	
-			AccMag = ((accADC[axis] * 10) / (int16_t) acc_1G) * ((accADC[axis] * 10) / (int16_t) acc_1G);
+			AccMag = ((accADC[axis] * 10) / (int16_t)acc_1G) * ((accADC[axis] * 10) / (int16_t)acc_1G);
 			AccMag += acc_1G; // Offset for 1G at neutral
-			accSmooth[axis] = 0;
 
 			// Use raw accADC[axis] as source for acc values
 			accSmooth[axis] =  accADC[axis];
@@ -130,8 +134,8 @@ void getEstimatedAttitude(void)
 	// To do that, we just skip the filter temporarily
 	//
 	// Note that this equation is a cheat to save doing a square root on the right-hand side.
-	// (SQR)36 is 6 and (SQR)196 is 14. The accADC numbers on the right have already been multiplied by 10
-	// so the equation is really just mag^2 = x^2 + y^2 + z^2. 196 corresponds to 1.6G etc.
+	// (SQR)36 is 6 (0.6G) and (SQR)196 is 14 (1.4G). The accADC numbers on the right have already been multiplied by 10
+	// so the equation is really just mag^2 = x^2 + y^2 + z^2.
 
 	if (!((36 > AccMag) || (AccMag > 196))) 
 	{

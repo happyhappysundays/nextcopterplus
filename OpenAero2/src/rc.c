@@ -59,7 +59,7 @@ const char Expo[10][16] PROGMEM =
 // Code
 //************************************************************
 
-uint16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
+int16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
 bool		RxActivity;
 
 // Get raw flight channel data and remove zero offset

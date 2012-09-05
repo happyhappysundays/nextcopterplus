@@ -28,6 +28,7 @@
 #include "..\inc\glcd_menu.h"
 #include "..\inc\pid.h"
 #include "..\inc\menu_ext.h"
+#include "..\inc\imu.h"
 
 //************************************************************
 // Defines
@@ -131,6 +132,7 @@ void init(void)
 
 	Initial_EEPROM_Config_Load();			// Loads config at start-up 
 	UpdateLimits();							// Update travel limts	
+	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 
 	// Flash LED
@@ -198,7 +200,7 @@ void init(void)
 	if ((Config.RxMode == CPPM_MODE) && RC_Lock && (Config.CamStab == OFF))
 	{
 		RxGetChannels();
-		if (RCinputs[THROTTLE] > 100)
+		if (RCinputs[THROTTLE] > 300)
 		{
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
