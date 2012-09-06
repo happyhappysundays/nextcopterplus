@@ -1,14 +1,16 @@
 #summary The OpenAero2 User guide
 
-=The OpenAero2 User Guide (Beta 3)=
+=The OpenAero2 User Guide (Beta 4)=
 ==What is OpenAero2?==
 OpenAero2 is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
-OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. In addition, four preset channel sources and two on-board RC mixer can be used as inputs.
+OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. In addition, four preset channel sources and two on-board RC mixers can be used as inputs.
 Each of the eight output channels can have any or all sensors mixed together.
 
+http://i.imgur.com/hpdpV.jpg
+
 ==What models can OpenAero2 be used with?==
-OpenAero2 have a completely flexible mixer which allows it to control just about anything, but comes with two preset mix tables.
+OpenAero2 have a completely flexible mixer which allows it to control just about anything, but comes with three preset mix tables.
 
 ===Aeroplane===
 In aeroplane mode there are four stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder.
@@ -28,6 +30,9 @@ In flying wing mode there are three stabilised outputs - Left Flaperon, Right Fl
 For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor. 
 
 In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
+
+===Camera Stability===
+In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 ==How do I connect up my model?==
 *A note about servo connections*
@@ -77,9 +82,9 @@ OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
 ===Servo connections===
 For conventional aeroplanes the connections are as follows:
  * M1: Throttle (CPPM only)
- * M2: Free channel or Pitch/Tilt for camera stabilising (TBA)
- * M3: Free channel or Yaw/Pan for camera stabilising (TBA)
- * M4: Free channel or Roll for camera stabilising (TBA)
+ * M2: Free channel or Pitch/Tilt for camera stabilising
+ * M3: Free channel or Yaw/Pan for camera stabilising
+ * M4: Free channel or Roll for camera stabilising
  * M5: Elevator
  * M6: Left aileron
  * M7: Right aileron
@@ -87,9 +92,9 @@ For conventional aeroplanes the connections are as follows:
 
 For flying wing models the connections are as follows:
  * M1: Throttle (CPPM only)
- * M2: Free channel or Pitch/Tilt for camera stabilising (TBA)
- * M3: Free channel or Yaw/Pan for camera stabilising (TBA)
- * M4: Free channel or Roll for camera stabilising (TBA)
+ * M2: Free channel or Pitch/Tilt for camera stabilising
+ * M3: Free channel or Yaw/Pan for camera stabilising
+ * M4: Free channel or Roll for camera stabilising
  * M5: Elevator
  * M6: Left elevon
  * M7: Right elevon
@@ -147,6 +152,10 @@ http://i.imgur.com/0Jdtz.jpg
  * *RC mix:* Enables the two on-board RC mixers.
  * *LMA timeout:*  Allows you to set the amount of time without RC activity before the Lost Model Alarm goes off. Setting to zero disables the alarm.
  * *Camera stab.:* Setting this to ON allows the board to function without an external RC source. Use only for stand-alone camera stability.
+ * *Camstab servo rate:* If Camera Stab is ON, you can increase the servo refresh rate on M1 to M4 to 300Hz. 
+ * *Acc LPF:* Allows adjustment of the accelerometer Low-Pass Filter from 1 (infinite) to 64 (about 1 Hz)
+ * *CF factor:* Controls the fusion of Accelerometer and Gyros. The higher the number the faster as gyro is favoured, the lower the more accurate but slower.
+ * *Yaw magic:* Automatically centers the Yaw axis when in heading hold mode if the yaw has drifted off-center.
 
 ===Adjusting LCD Contrast===
 http://i.imgur.com/WzAeW.jpg
@@ -163,7 +172,6 @@ http://i.imgur.com/rhm5G.jpg
  * *Stability input:* Set this to the channel number that you plan to use for stability control.
  * *Autolevel input:* Set this to the channel number that you plan to use for autolevel control. It can be the same as for stability if you like.
 http://i.imgur.com/L4iET.jpg
- * *3-pos switch:* Set this to the channel number that you have a three-position switch on. This allows you to have both Stability and Autolevel on one switch, but have them selectable.
  * *2nd aileron:* Set this to the channel number that your radio uses for the second aileron channel.
  * *Preset 1 to Preset 4:* When using a camera mount which is stabilised but not necessarily controlled, you need a fixed offset to feed that channel. These can be set up here.
 
@@ -194,9 +202,8 @@ http://i.imgur.com/f0CsW.jpg
  # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%
  # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
  # *ON:* Always on
- * *Acc P:* PID Proportional gain for the accelerometers
- * *Acc I:* PID I-term gain (Not settable in this version)
- * *Acc D:* PID Differential gain (Not settable in this version)
+ * *Roll P:* PID Proportional gain for the roll accelerometer
+ * *Pitch P:* PID Proportional gain for the pitch accelerometer
  * *Roll trim:* For fine roll tuning of the autolevel.
  * *Pitch trim:* For fine pitch tuning of the autolevel.
 
@@ -299,7 +306,7 @@ Approximately one minute after the last detected RC input, the Lost Model buzzer
 
 *Throttle High:*
 PWM does not require a throttle input in OpenAero2. In CPPM mode however, the throttle signal is passed through the board and appears as a PWM signal on M1.
-As a safety measure, if the board is powered up with the throttle set to more than about 5%, the oupts will be disabled, anaalarm will sound and this message will be displayed.
+As a safety measure, if the board is powered up with the throttle set to more than about 5%, the oupts will be disabled, an alarm will sound and this message will be displayed.
 
 ==How do I set up OpenAero2?==
 ===Stability and Autolevel switching===
@@ -309,7 +316,7 @@ In the Stability and Autolevel Settings menus you can select which method of con
  * OFF: Always off
  * Autochan: On when the channel set as "Autochan" in RC settings is more than 50%
  * Stabchan: On when the channel set as "Stabchan" in RC settings is more than 50%
- * 3-pos: Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ * 3-pos: Stability on when the 3-pos switch is more than 33%. Autolevel also on when the 3-pos switch is more than 66%
  * ON: Always on
 
 *3-pos switch*
@@ -320,10 +327,9 @@ For the switch position between 33% and about 66% = Stability on, Autolevel off.
 For the switch position above 66% = Stability on, Autolevel on.
 
 *RC Setting defaults*
-Stabchan = GEAR (normally ch.5)
-Autochan = AUX1 (normally ch.7)
-Flapchan = FLAP (normally ch.6)
-3-pos chan = disabled
+Stabchan = GEAR (AUX input on KK2 board)
+Autochan = GEAR (AUX input on KK2 board)
+Flapchan = THROTTLE (THROTTLE input on KK2 board)
 
 ==Initial setup and calibration==
 The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
@@ -336,7 +342,6 @@ Go into the General menu and change the Mode to that which suits your model. The
  * If you are using CPPM, also select the channel order between either JR/Spektrum or Futaba.
  * Select which input channel you plan to use for stability. PWM users will normally select the fifth channel (GEAR) as that corresponds to the fifth (AUX) input on the KK2. CPPM users can pick any unused channel.
  * Select which input channel you plan to use for autolevel. PWM users may select the unused throttle input (THROTTLE) or double-up the two functions on the fifth channel (GEAR). CPPM users can pick any unused channel.
- * If you have a three-position switch and plan to use it, set the channel it is on here.
  * If your radio carries the second aileron channel on a channel different to the default of FLAP (channel 6) set that here too.
 *Step 3: Stability settings*
  * For now, just alter the Mode as described above in "Stability and Autolevel switching".
@@ -349,12 +354,12 @@ Go into the General menu and change the Mode to that which suits your model. The
 
 *Step 6: Servo direction*
 
- * Once return to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
+ * Once returned to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
 
- * Move all surfaces and check that the move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
+ * Move all surfaces and check that they move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
 
 *Step 7: Gyro direction*
- * Now, switch on stability control whil leaving autolevel OFF.
+ * Now, switch on stability control while leaving autolevel OFF.
  * Pitch the nose of the model up and down while watching the elevator. The elevator should move to counteract the pitching. Pitching the nose UP should make the elevator move DOWN.
  * If this is not the case, you can reverse the pitch gyro in the M5 mixer menu.
  * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. Use the M6 and M7 mixer menus to reverse the roll gyro as required.
@@ -367,7 +372,7 @@ Go into the General menu and change the Mode to that which suits your model. The
  * Go back to the status menu.
  * Switch off stability control and switch ON autolevel.
  * Tilt the model in pitch and roll while watching the respective surfaces. They should move slightly to compensate and remain in that position.
- * If they move in the reverse sense, reverse the pitch and roll acc settings in the mixer menus for M5, M6 and M6 as appropriate.
+ * If they move in the reverse sense, reverse the pitch and roll acc settings in the mixer menus for M5, M6 and M7 as appropriate.
 
 
 ===Every time you power up OpenAero2===
