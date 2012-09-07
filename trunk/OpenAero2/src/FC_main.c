@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.00 Beta 4 Release - September 2012
+// Version 1.00 Release - September 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -80,6 +80,8 @@
 //			Hopefully fixed false throttle high alarm.
 //			Completed and integrated basic IMU code (again).
 //			Added General menu settings for Acc LPF and IMU CF factor.
+// Beta 4.1 Trial fix for Autolevel switch-on issue
+//	
 //
 //***********************************************************
 //* To do
@@ -88,10 +90,12 @@
 // For V1.0 release
 //	Trial Beta 4
 //
-// Later
+// For V1.1
+//	Aeroplane attitude lock mode (for 3D)
+//	CamStab RC control with servo speed setting
 //  Camera stabilisation refinements (separate PID settings)
-//  Aileron differential? (limit downward throw. 100% = none)
-//  Advanced RC settings (CPPM gap, servo rate, servo overdue, etc.) as required
+//  Aileron differential (limit downward throw. 100% = none)
+//
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -650,6 +654,11 @@ while(1)
 		{
 			ReadAcc();			// Only read Accs if in AutoLevel mode
 			getEstimatedAttitude();
+		}
+		else
+		{
+			// Reset IMU each time autolevel restarted
+			FirstTimeIMU = true;
 		}
 
 
