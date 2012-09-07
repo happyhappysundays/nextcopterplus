@@ -126,6 +126,7 @@ void init(void)
 	Failsafe = false;
 	AutoLevel = false;
 	Stability = false;
+	FirstTimeIMU = true;
 
 	// Button acceleration
 	button_multiplier = 1;
