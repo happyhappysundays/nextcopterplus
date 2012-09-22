@@ -113,13 +113,15 @@ void init(void)
 	TCNT2 = 0;							// Reset counter
 
 // Conditional builds for interrupt and pin function setup
-#ifdef ICP_CPPM_MODE 
+#if (defined(ICP_CPPM_MODE) || defined(HYBRID_PWM_MODE))
 	// Input capture interrupt
 	TIMSK1  = (1 << ICIE1);					// Input capture interrupt enable
 	TIFR1   = 0;							// Reset input capture interrupt flag
 	TCCR1B |= (1 << ICNC1);					// Set input capture noise canceller
 	//TCCR1B |= (1 << ICES1);				// Set input capture edge selection to rising (otherwise falling)
-#else
+#endif
+
+#ifndef ICP_CPPM_MODE 
 	// Pin change interrupt enables PCINT0 and PCINT2 (Yaw, Roll)
 	PCICR |= (1 << PCIE0);				// PCINT0  to PCINT7  (PCINT0 group)		
 	PCICR |= (1 << PCIE2);				// PCINT16 to PCINT23 (PCINT2 group)

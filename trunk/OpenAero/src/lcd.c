@@ -70,7 +70,7 @@ const char MenuItem24[] PROGMEM = "Calibrate Accel."; // Only for ACC
 const char MenuItem25[] PROGMEM = "Center sticks   ";
 const char MenuItem26[] PROGMEM = "Stability mode  ";
 const char MenuItem27[] PROGMEM = "Autolevel mode  "; // Only for ACC
-const char MenuItem28[] PROGMEM = "Stability ch.   ";
+const char MenuItem28[] PROGMEM = "Stability ch.   "; // Only for CPPM
 
 const char *lcd_menu[MENUITEMS] PROGMEM = 
 	{MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuItem7, MenuItem8,
@@ -340,7 +340,6 @@ void set_menu_item(uint8_t menuitem, int16_t value)
 uint8_t LCD_increment(uint8_t MenuItem)
 {
 	if (MenuItem >= (MENUITEMS-1)) MenuItem = 0;// Wrap back to start	
-
 	MenuItem += 1;
 
 	// Skip menu items that are not supported by the hardware
@@ -361,7 +360,11 @@ uint8_t LCD_increment(uint8_t MenuItem)
 			MenuItem = 24;
 			break;
 		case 26:
+		#ifdef ICP_CPPM_MODE
 			MenuItem = 27;
+		#else
+			MenuItem = 3;
+		#endif
 			break;
 		case 28:
 			MenuItem = 3;
@@ -390,7 +393,6 @@ uint8_t LCD_increment(uint8_t MenuItem)
 uint8_t LCD_decrement(uint8_t MenuItem)
 {
 	if  (MenuItem <= 1) MenuItem = (MENUITEMS);// Wrap back to end
-
 	MenuItem -= 1;
 
 	#ifndef KK_PLUS // Battery LVA items only work on KK Plus boards
@@ -408,12 +410,15 @@ uint8_t LCD_decrement(uint8_t MenuItem)
 
 	// Skip menu items that are not supported by the hardware
 	#ifndef ACCELEROMETER // Skip Acc-related menu items
-
 	switch (MenuItem)
 	{
 		case 1:	
 		case 2:
+		#ifdef ICP_CPPM_MODE
 			MenuItem = 27;
+		#else
+			MenuItem = 25;
+		#endif
 			break;
 		case 9:
 		case 10:
