@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.13 Beta 7
+// Version 1.14 Release
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per references
@@ -135,12 +135,14 @@
 //			Beta 6: Fixed flaperon mode on N6. Fixed Pitch/Roll gyros swapped on N6. Oops...
 //			Beta 7: Removed usused LCD menu items where appropriate.
 //			Changed failsafe timeout to 500ms and added servo rate timer to set servo failsafe rate to 50Hz.
+//			Beta 8: Added 3-position switch mode for selection of Stability/Autolevel.
+// 			Beta 9: Added PWM flaperon mode using M3 as the additional input
+// V1.14	V1.14 release
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-//  Fix remaining incompatibilities with some RXs, or some users...
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -754,28 +756,32 @@ while (0)
 		// Autolevel is only available if you have an Accelerometer
 		#if defined(ACCELEROMETER)
 
-			// Use same switch for Autolevel as for stability based on preset 
-			// Autolevel enabled if Config.ALMode = 0
-			// Autolevel always OFF if Config.ALMode = 1 (default)
+		// Use same switch for Autolevel as for stability based on preset 
+		// Autolevel enabled if Config.ALMode = 0
+		// Autolevel always OFF if Config.ALMode = 1 (default)
 
-			// For CPPM mode, use StabChan input
-			#ifdef ICP_CPPM_MODE
-				if ((StabChan < 1600) && (Config.ALMode == 0))	// StabChan ON and AL is available
+		// For CPPM mode, use StabChan input
+		#ifdef ICP_CPPM_MODE
+			if ((StabChan < 1600) && (Config.ALMode == 0))	// StabChan ON and AL is available
 
-			// For non-CPPM mode, use the(THR) input
-			#else
-				if ((RxInAux < 200) && (Config.ALMode == 0))	// RxInAux ON and AL is available
-			#endif
-				{									// When channel is activated
-					AutoLevel = true;				// Activate autolevel mode
-					flight_mode |= 1;				// Notify GUI that mode has changed
-				}
-				else
-				{
-					AutoLevel = false;				// De-activate autolevel mode
-					flight_mode &= 0xfe;			// Notify GUI that mode has changed
-					firsttimeflag = true;			// Reset flag
-				}
+		// For 3-position switch, use the high range of THR input
+		#elif defined (THREE_POS)
+			if (RxInAux > 100)
+
+		// For non-CPPM mode, use the(THR) input
+		#else
+			if ((RxInAux < 200) && (Config.ALMode == 0))	// RxInAux ON and AL is available
+		#endif
+			{									// When channel is activated
+				AutoLevel = true;				// Activate autolevel mode
+				flight_mode |= 1;				// Notify GUI that mode has changed
+			}
+			else
+			{
+				AutoLevel = false;				// De-activate autolevel mode
+				flight_mode &= 0xfe;			// Notify GUI that mode has changed
+				firsttimeflag = true;			// Reset flag
+			}
 
 		#else // No accelerometer fitted
 
@@ -792,8 +798,15 @@ while (0)
 		// For CPPM mode, use StabChan for Stability
 		#ifdef ICP_CPPM_MODE
 		if ((StabChan > 1600) && (Config.StabMode == 0))	// StabChan enables stability if Config.StabMode = 0 (default)
+
+		// For 3-position switch, use medium to high range of THR input
+		// The range of less than -100 has both Stability and Autolevel OFF
+		#elif defined (THREE_POS)
+		if (RxInAux > -100)
+
+		// For non-CPPM mode, use the(THR) input
 		#else
-		if ((RxInAux < 200) && (Config.StabMode == 0))
+		if ((RxInAux > 100) && (Config.StabMode == 0))		// RxInAux enables stability if Config.StabMode = 0 (default)
 		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
@@ -804,7 +817,7 @@ while (0)
 			IntegralaRoll = 0;
 		}
 
-		// Stability mode ON (RxChannel3 > 1600)
+		// Stability mode ON
 		else
 		{
 			// Notify GUI that mode has changed to stability mode

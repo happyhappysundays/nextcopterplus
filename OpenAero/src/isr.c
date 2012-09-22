@@ -55,7 +55,7 @@ bool	RC_Lock;					// RC sync found/lost flag
 //* RC input modes
 //************************************************************
 
-#if ((defined LEGACY_PWM_MODE1) || (defined LEGACY_PWM_MODE2))
+#if ((defined LEGACY_PWM_MODE1) || (defined LEGACY_PWM_MODE2) || (defined HYBRID_PWM_MODE))
 //************************************************************
 //* Standard PWM mode
 //* Sequential PWM inputs from a normal RC receiver
@@ -423,7 +423,40 @@ ISR(TIMER1_CAPT_vect)
 		RC_Lock = true;						// RC sync established
 	}
 }
+
 #else
 	#error No RC input configuration defined
 #endif
 
+#if defined (HYBRID_PWM_MODE)
+//************************************************************
+// Hybrid RX mode to obtain 5th input on PB0 (ICP/M3)
+//************************************************************
+ISR(TIMER1_CAPT_vect)
+{	// Check to see if previous period was a sync pulse
+	// If so, reset channel number
+
+	icp_value = ICR1;
+	if ((icp_value - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
+	PPMSyncStart = icp_value;
+
+	switch(ch_num)
+	{
+		case 0:
+			RxChannelStart = icp_value;
+			ch_num++;
+			break;
+		case 1:
+			RxChannel5 = icp_value - RxChannelStart;
+			RxChannelStart = icp_value;
+			Interrupted = true;				// Signal that interrupt block has finished
+			RC_Lock = true;					// RC sync established
+			break;
+		default:							// If something goes wrong, keep outputs going
+			Interrupted = true;				// Signal that interrupt block has finished
+			RC_Lock = true;					// RC sync established
+			break;
+	}
+}
+
+#endif

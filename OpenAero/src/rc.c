@@ -48,18 +48,13 @@ bool		RxActivity;
 // Get raw flight channel data and remove zero offset
 void RxGetChannels(void)
 {
-	int16_t  RxChannel;
 	int32_t	 RxSumDiff;
 
-	RxInRoll = RxChannel1 - Config.RxChannel1ZeroOffset;
-	RxInPitch = RxChannel2 - Config.RxChannel2ZeroOffset;
-
-	RxChannel = RxChannel3 - Config.RxChannel3ZeroOffset; //1520
-	if (RxChannel < 0) RxInAux = 0;
-	else RxInAux = RxChannel;
-
-	RxInYaw = RxChannel4 - Config.RxChannel4ZeroOffset;
-	RxInAux1 = RxChannel5 - Config.RxChannel5ZeroOffset;
+	RxInRoll 	= RxChannel1 - Config.RxChannel1ZeroOffset;
+	RxInPitch 	= RxChannel2 - Config.RxChannel2ZeroOffset;
+	RxInAux 	= RxChannel3 - Config.RxChannel3ZeroOffset; 	// Set to 1520
+	RxInYaw 	= RxChannel4 - Config.RxChannel4ZeroOffset;
+	RxInAux1 	= RxChannel5 - Config.RxChannel5ZeroOffset;
 
 	// Calculate RX activity
 	RxSum = RxInRoll + RxInPitch + RxInAux + RxInYaw;
