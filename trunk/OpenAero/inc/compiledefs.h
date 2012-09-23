@@ -11,14 +11,14 @@
  * Easy configuration (Choose one from each part, and ignore all the settings below)
  *********************************************************************/
 //(Part 1 - Mixer type)
-//#define AEROPLANE_1			// Standard Aileron/Elevator/Rudder aeroplane (M2, M4 and M1 or M3)
+#define AEROPLANE_1			// Standard Aileron/Elevator/Rudder aeroplane (M2, M4 and M1 or M3)
 //#define AEROPLANE_2			// Advanced Flaperons/Elevator/Rudder aeroplane (M2 and M5, M4 and M1 or M3)
-#define FLYING_WING			// Standard flaperon-controlled flying wing with optional rudder (M2 and M4, and M1 or M3)
+//#define FLYING_WING			// Standard flaperon-controlled flying wing with optional rudder (M2 and M4, and M1 or M3)
 //#define AEROPLANE_3			// Same as AEROPLANE_1 but with extra flaperon channel on M3
 
 //(Part 2 - receiver type)
-#define PWM					// My radio is a normal radio with multiple outputs
-//#define CPPM				// My radio is a special radio with one, combined output
+//#define PWM					// My radio is a normal radio with multiple outputs
+#define CPPM				// My radio is a special radio with one, combined output
 
 //(Part 3 - KK board type)
 #define STD_KK				// My board is an unmodified KK board
@@ -57,8 +57,8 @@
 		#define HYBRID_PWM_MODE
 	#endif
 	//#define AUTOMAGIC_PWM_MODE
-	#define LEGACY_PWM_MODE1
-	//#define LEGACY_PWM_MODE2
+	//#define LEGACY_PWM_MODE1
+	#define LEGACY_PWM_MODE2
 	//#define DOSD_PWM_MODE
 #elif defined(CPPM)
 	#define ICP_CPPM_MODE
@@ -122,7 +122,7 @@
 	#error Forgot to select the number of channels
 #elif (!defined(STANDARD) && !defined(STD_FLAPERON) && !defined(FWING))
 	#error Forgot to select the aeroplane type
-#elif (!defined(ICP_CPPM_MODE) && !defined(LEGACY_PWM_MODE1) && !defined(LEGACY_PWM_MODE2) && !defined(AUTOMAGIC_PWM_MODE) && !defined(DOSD_PWM_MODE))
+#elif (!defined(ICP_CPPM_MODE) && !defined(LEGACY_PWM_MODE1) && !defined(LEGACY_PWM_MODE2) && !defined(AUTOMAGIC_PWM_MODE) && !defined(DOSD_PWM_MODE) && !defined(HYBRID_PWM_MODE))
 	#error Forgot to select a receiver mode
 #endif // Illegal configurations
 #endif //COMPILE_DEFS_H_

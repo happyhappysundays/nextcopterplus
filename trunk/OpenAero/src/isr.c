@@ -433,25 +433,25 @@ ISR(TIMER1_CAPT_vect)
 // Hybrid RX mode to obtain 5th input on PB0 (ICP/M3)
 //************************************************************
 ISR(TIMER1_CAPT_vect)
-{	// Check to see if previous period was a sync pulse
-	// If so, reset channel number
-
+{	
 	icp_value = ICR1;
-	if ((icp_value - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
-	PPMSyncStart = icp_value;
-
-	switch(ch_num)
+	switch(RX_AIL2)
 	{
+		// Just gone low
 		case 0:
-			RxChannelStart = icp_value;
-			ch_num++;
-			break;
-		case 1:
 			RxChannel5 = icp_value - RxChannelStart;
-			RxChannelStart = icp_value;
+			TCCR1B |= (1 << ICES1);			// Switch input capture edge selection back to rising
 			Interrupted = true;				// Signal that interrupt block has finished
 			RC_Lock = true;					// RC sync established
 			break;
+
+		// Just gone high
+		case 1:
+			RxChannelStart = icp_value;
+			TCCR1B &= 0xbf;					// Switch input capture edge selection to falling (ICES1 = 0)
+			break;
+
+		// Twilight zone
 		default:							// If something goes wrong, keep outputs going
 			Interrupted = true;				// Signal that interrupt block has finished
 			RC_Lock = true;					// RC sync established

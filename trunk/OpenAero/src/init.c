@@ -113,12 +113,19 @@ void init(void)
 	TCNT2 = 0;							// Reset counter
 
 // Conditional builds for interrupt and pin function setup
-#if (defined(ICP_CPPM_MODE) || defined(HYBRID_PWM_MODE))
+#if defined(ICP_CPPM_MODE)
 	// Input capture interrupt
 	TIMSK1  = (1 << ICIE1);					// Input capture interrupt enable
 	TIFR1   = 0;							// Reset input capture interrupt flag
 	TCCR1B |= (1 << ICNC1);					// Set input capture noise canceller
 	//TCCR1B |= (1 << ICES1);				// Set input capture edge selection to rising (otherwise falling)
+
+#elif defined(HYBRID_PWM_MODE)
+	// Input capture interrupt
+	TIMSK1  = (1 << ICIE1);					// Input capture interrupt enable
+	TIFR1   = 0;							// Reset input capture interrupt flag
+	TCCR1B |= (1 << ICNC1);					// Set input capture noise canceller
+	TCCR1B |= (1 << ICES1);					// Set input capture edge selection to rising (0 = falling)
 #endif
 
 #ifndef ICP_CPPM_MODE 
