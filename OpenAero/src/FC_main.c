@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software
 // =================
-// Version 1.14 Release
+// Version 1.14.1 Release
 // Inspired by KKmulticopter
 // Based on assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per references
@@ -138,6 +138,7 @@
 //			Beta 8: Added 3-position switch mode for selection of Stability/Autolevel.
 // 			Beta 9: Added PWM flaperon mode using M3 as the additional input
 // V1.14	V1.14 release
+// V1.14.1	Bugfix for stability switch in V1.14. Oops.
 //
 //***********************************************************
 //* To do
@@ -766,7 +767,7 @@ while (0)
 
 		// For 3-position switch, use the high range of THR input
 		#elif defined (THREE_POS)
-			if (RxInAux > 100)
+			if (RxInAux > 200)
 
 		// For non-CPPM mode, use the(THR) input
 		#else
@@ -802,11 +803,11 @@ while (0)
 		// For 3-position switch, use medium to high range of THR input
 		// The range of less than -100 has both Stability and Autolevel OFF
 		#elif defined (THREE_POS)
-		if (RxInAux > -100)
+		if (RxInAux < 200)
 
 		// For non-CPPM mode, use the(THR) input
 		#else
-		if ((RxInAux > 100) && (Config.StabMode == 0))		// RxInAux enables stability if Config.StabMode = 0 (default)
+		if ((RxInAux < 200) && (Config.StabMode == 0))		// RxInAux enables stability if Config.StabMode = 0 (default)
 		#endif												// Stability always ON if Config.StabMode = 1
 		{
 			// Notify GUI that mode has changed
