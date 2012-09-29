@@ -17,8 +17,8 @@
 //#define AEROPLANE_3			// Same as AEROPLANE_1 but with extra flaperon channel on M3
 
 //(Part 2 - receiver type)
-//#define PWM					// My radio is a normal radio with multiple outputs
-#define CPPM				// My radio is a special radio with one, combined output
+#define PWM					// My radio is a normal radio with multiple outputs
+//#define CPPM				// My radio is a special radio with one, combined output
 
 //(Part 3 - KK board type)
 #define STD_KK				// My board is an unmodified KK board
@@ -55,11 +55,12 @@
 #ifdef PWM
 	#if defined(AEROPLANE_3)
 		#define HYBRID_PWM_MODE
-	#endif
+	#else
 	//#define AUTOMAGIC_PWM_MODE
-	//#define LEGACY_PWM_MODE1
-	#define LEGACY_PWM_MODE2
+	#define LEGACY_PWM_MODE1
+	//#define LEGACY_PWM_MODE2
 	//#define DOSD_PWM_MODE
+	#endif
 #elif defined(CPPM)
 	#define ICP_CPPM_MODE
 #else
@@ -74,6 +75,7 @@
 #elif defined(MEMS_KK)
 	#define ACCELEROMETER
 	#define MEMS_MODULE
+	#define KK_PLUS
 #else
 	#error No board type defined
 #endif
