@@ -55,7 +55,21 @@ Please make careful note that for OpenAero to output servo signals, at least two
 Connect a switched input of your transmitter - normally the gear switch on channel 5 - to the Stability switch input.
 
 Here is a diagram showing how to connect up a PWM receiver.
-http://i.imgur.com/7jkPu.jpg
+http://i.imgur.com/PzWqc.jpg
+
+===HYBRID PWM receiver connections===
+In Hybrid PWM mode an additional PWM input is made on M3 for the second aileron channel of a flaperon or split aileron system.
+
+ * AIL: Aileron signal input (required)
+ * ELE: Elevator signal input (optional)
+ * THR: Stability switch input (required)
+ * RUD: Rudder signal input (optional)
+ * M3:  Second aileron signal input (required)
+
+Connect a switched input of your transmitter - normally the gear switch on channel 5 - to the Stability switch input.
+
+Here is a diagram showing how to connect up a PWM receiver for the Hybrid code.
+http://i.imgur.com/EQA86.jpg
 
 ===CPPM receiver connections===
 *V1.11 and older*
@@ -77,8 +91,8 @@ For a single-wire CPPM receiver you need to connect to the M3 output pin of the 
  * RUD: Unused
  * M3:  CPPM signal input from receiver
 
-Here is a diagram showing how to connect up a PWM receiver.
-http://i.imgur.com/k2VAV.jpg
+Here is a diagram showing how to connect up a CPPM receiver.
+http://i.imgur.com/Q3DiQ.jpg
 
 The CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
 The OpenAero CPPM channel order is the same as the JR/Spektrum system:
