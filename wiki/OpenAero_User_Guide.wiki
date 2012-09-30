@@ -32,7 +32,7 @@ The aileron channels normally have flap signals mixed with them so that both ail
 These models have the flaperon mixing done by the transmitter. This allows you to set flap positions and differential as best suits you and your aircraft.
 When these signals pass through the OpenAero software the gyro stabilising has to accommodate the flaperon mixing. To accommodate this, the flaperon version of OpenAero has four stabilised outputs - Left Flaperon, Right Flaperon, Elevator and Rudder. A copy of the throttle signal from the receiver is also output from the THR pin of the KK board.
 
-The flaperon version requires a single-wire CPPM receiver as there are not enough conventional PWM inputs to control the desired outputs.
+The flaperon version requires a single-wire CPPM receiver and the CPPM version of the code OR the HYBRID_PWM version of the code if a normal receiver is used. The HYBRID version allows the addition of a fifth PWM input into the KK board via one of the connectors normally used for an output.
 
 
 ===OpenAero Nano===
@@ -56,6 +56,7 @@ Connect a switched input of your transmitter - normally the gear switch on chann
 
 Here is a diagram showing how to connect up a PWM receiver.
 http://i.imgur.com/PzWqc.jpg
+http://i.imgur.com/sgalF.jpg
 
 ===HYBRID PWM receiver connections===
 In Hybrid PWM mode an additional PWM input is made on M3 for the second aileron channel of a flaperon or split aileron system.
@@ -93,6 +94,7 @@ For a single-wire CPPM receiver you need to connect to the M3 output pin of the 
 
 Here is a diagram showing how to connect up a CPPM receiver.
 http://i.imgur.com/Q3DiQ.jpg
+http://i.imgur.com/wxQjY.jpg
 
 The CPPM versions require a receiver and a transmitter that can reallocate channels if not matching the JR/Spektrum channel order, or a CPPM converter board.
 The OpenAero CPPM channel order is the same as the JR/Spektrum system:
@@ -190,8 +192,13 @@ The first time you set up OpenAero you will have to adjust a few things to suit 
 
 *Setting failsafe mode (V1.13 and above)*
 
+*(KK boards)*
 To setup failsafe mode, set the control positions that you require, then simply short the M6 signal pin to ground. An RX bind plug linking the two opposite end pins is perfect for this job. M6 needs to be shorted for one second to trigger failsafe learning mode. 
 In failsafe learning mode the LED will start to flash. You can then remove the shorting jumper to stop the learning mode from restarting. When the LED has stopped flashing the failsafe has been set.
+
+*(N6 boards)*
+To setup failsafe mode, set the control positions that you require, then simply close switch 1 of the DIP switch. The switch needs to be shorted for one second to trigger failsafe learning mode. 
+In failsafe learning mode the LED will start to flash. You can then return the swithc to the original setting to stop the learning mode from restarting. When the LED has stopped flashing the failsafe has been set.
 
 *Trimming your model*
 
