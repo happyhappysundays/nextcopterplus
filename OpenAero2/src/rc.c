@@ -81,10 +81,6 @@ void RxGetChannels(void)
 	RxChannel[PRESET3] = ((Config.Preset3 * 12) + 3750);
 	RxChannel[PRESET4] = ((Config.Preset4 * 12) + 3750);
 
-	// Update mixer channels
-	RxChannel[MIX1] = Config.Mix_value[0];
-	RxChannel[MIX2] = Config.Mix_value[1];
-
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
 	RxSumDiff = RxSum - OldRxSum;

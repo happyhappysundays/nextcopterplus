@@ -47,13 +47,13 @@ void Display_balance(void)
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
 
-		y_pos = 64 - accADC[ROLL];
+		y_pos = accADC[ROLL] + 64;
 		if (y_pos < 0) y_pos = 0;
 		if (y_pos > 128) y_pos = 128;
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 2, 55); 	// Left
-		LCD_Display_Text(73, (prog_uchar*)Verdana8, 108, 53); 	// Calibrate
+		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 53); 	// Calibrate
 
 		// Draw balance meter
 		drawrect(buffer, 0, 0, 128, 64, 1);
@@ -66,6 +66,4 @@ void Display_balance(void)
 		clear_buffer(buffer);
 		_delay_ms(20);
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }

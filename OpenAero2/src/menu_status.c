@@ -42,17 +42,17 @@ void Display_status(void)
 	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
-	LCD_Display_Text(59,(prog_uchar*)Verdana8,0,33); 	// Stability
-	LCD_Display_Text(60,(prog_uchar*)Verdana8,0,44); 	// Autolevel
+	LCD_Display_Text(46,(prog_uchar*)Verdana8,0,33); 	// Stability
+	LCD_Display_Text(47,(prog_uchar*)Verdana8,0,44); 	// Autolevel
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (29 + Config.RxMode), 50, 22);
-	LCD_Display_Text(140,(prog_uchar*)Verdana8,50,11); 
-	print_menu_text(0, 1, (33 + Config.MixMode), 33, 0);
+	print_menu_text(0, 1, (18 + Config.RxMode), 50, 22);
+	LCD_Display_Text(0,(prog_uchar*)Verdana8,50,11); 
+	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
 
@@ -117,8 +117,8 @@ void Display_status(void)
 		// Prioritise error from top to bottom
 		if((General_error & (1 << SENSOR_ERROR)) != 0)
 		{
-			LCD_Display_Text(96,(prog_uchar*)Verdana14,35,14); 	// Sensor
-			LCD_Display_Text(170,(prog_uchar*)Verdana14,43,34); // Error
+			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); 	// Sensor
+			LCD_Display_Text(98,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
 		else if((General_error & (1 << LOW_BATT)) != 0)
@@ -128,14 +128,14 @@ void Display_status(void)
 		}
 		else if((General_error & (1 << NO_SIGNAL)) != 0)
 		{
-			LCD_Display_Text(99,(prog_uchar*)Verdana14,51,13); 	// No
-			LCD_Display_Text(100,(prog_uchar*)Verdana14,39,33); // Signal
+			LCD_Display_Text(75,(prog_uchar*)Verdana14,51,13); 	// No
+			LCD_Display_Text(76,(prog_uchar*)Verdana14,39,33);  // Signal
 			menu_beep(3);
 		}
 		else if((General_error & (1 << LOST_MODEL)) != 0)
 		{
-			LCD_Display_Text(171,(prog_uchar*)Verdana14,45,14); // Lost
-			LCD_Display_Text(172,(prog_uchar*)Verdana14,40,34); // Model
+			LCD_Display_Text(99,(prog_uchar*)Verdana14,45,14); // Lost
+			LCD_Display_Text(100,(prog_uchar*)Verdana14,40,34); // Model
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{

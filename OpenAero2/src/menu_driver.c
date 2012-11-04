@@ -31,7 +31,7 @@ void print_menu_frame(uint8_t style);
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
 uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
@@ -121,12 +121,12 @@ void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uc
 //*******************************************************************
 // Print menu items (int8_t) for handling signed 8-bit +/-127 values
 //*******************************************************************
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
-	int16_t big_values[16];		// Hope 16 is always enough lol... (hides)
+	int16_t big_values[size];
 	int8_t	i = 0;
 
-	for (i = 0; i < 16; i++)	// Promote 8-bit structure to 16-bit ones
+	for (i = 0; i < size; i++)	// Promote 8-bit structure to 16-bit ones
 	{
 		big_values[i] = values[i];
 	}

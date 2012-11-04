@@ -44,12 +44,12 @@ void Display_sensors(void)
 		ReadGyros();
 		ReadAcc();
 
-		LCD_Display_Text(37,(prog_uchar*)Verdana8,20,0); LCD_Display_Text(38,(prog_uchar*)Verdana8,50,0);
-		LCD_Display_Text(37,(prog_uchar*)Verdana8,20,10); LCD_Display_Text(39,(prog_uchar*)Verdana8,50,10);
-		LCD_Display_Text(37,(prog_uchar*)Verdana8,20,20); LCD_Display_Text(40,(prog_uchar*)Verdana8,50,20);
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,20,30); LCD_Display_Text(38,(prog_uchar*)Verdana8,50,30);
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,20,40); LCD_Display_Text(39,(prog_uchar*)Verdana8,50,40);
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,20,50); LCD_Display_Text(40,(prog_uchar*)Verdana8,50,50);
+		LCD_Display_Text(26,(prog_uchar*)Verdana8,20,0); LCD_Display_Text(27,(prog_uchar*)Verdana8,50,0);
+		LCD_Display_Text(26,(prog_uchar*)Verdana8,20,10); LCD_Display_Text(28,(prog_uchar*)Verdana8,50,10);
+		LCD_Display_Text(26,(prog_uchar*)Verdana8,20,20); LCD_Display_Text(29,(prog_uchar*)Verdana8,50,20);
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,20,30); LCD_Display_Text(27,(prog_uchar*)Verdana8,50,30);
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,20,40); LCD_Display_Text(28,(prog_uchar*)Verdana8,50,40);
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,20,50); LCD_Display_Text(29,(prog_uchar*)Verdana8,50,50);
 
 		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,0);
 		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,10);
@@ -60,13 +60,11 @@ void Display_sensors(void)
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(73, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
+		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(100);
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }

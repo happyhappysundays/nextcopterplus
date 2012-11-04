@@ -1,6 +1,6 @@
 //***********************************************************
 //* stack.c
-//* Copied from public code on AVRfreaks via MichaelMcTernan
+//* Copied from public code on AVRfreaks via Michael McTernan
 //***********************************************************
 
 //***********************************************************

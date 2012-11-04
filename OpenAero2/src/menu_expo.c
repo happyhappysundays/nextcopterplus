@@ -33,7 +33,7 @@ void menu_expo(void);
 //************************************************************
 
 #define EXPOITEMS 4 	// Number of menu items
-#define EXPOSTART 92 	// Start of Menu text items
+#define EXPOSTART 195 	// Start of Menu text items
 #define EXPOTEXT 0	 	// Start of value text items
 #define EXPOOFFSET 95	// Value offsets
 
@@ -68,7 +68,7 @@ void menu_expo(void)
 		memcpy(&values[0],&Config.AileronExpo,sizeof(int8_t) * EXPOITEMS);
 
 		// Print menu
-		print_menu_items(top, EXPOSTART, &values[0], (prog_uchar*)expo_menu_ranges, EXPOOFFSET, (prog_uchar*)ExpoMenuText, cursor);
+		print_menu_items(top, EXPOSTART, &values[0], EXPOITEMS, (prog_uchar*)expo_menu_ranges, EXPOOFFSET, (prog_uchar*)ExpoMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(EXPOITEMS, EXPOSTART, button, &cursor, &top, &temp);
@@ -88,7 +88,5 @@ void menu_expo(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }
 
