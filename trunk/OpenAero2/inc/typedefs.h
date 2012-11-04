@@ -30,14 +30,14 @@ typedef struct
 	uint16_t	failsafe;
 } servo_limits_t;
 
-// Channel mixer definition
-// Size = 20 bytes
+// Input mixer definition
 typedef struct
 {
 	uint16_t	value;					// Current value
-	int8_t		source;					// Source RC input for calculation
-	int8_t		source_polarity;		// Normal/reverse RC input
-	int8_t		source_volume;			// Percentage of source to pass on
+	int8_t		source_a;				// Source A RC input for calculation
+	int8_t		source_a_volume;		// Percentage of source to pass on
+	int8_t		source_b;				// Optional source B RC input for calculation
+	int8_t		source_b_volume;		// Percentage of source to pass on
 	int8_t		roll_gyro;				// Use roll gyro
 	int8_t		roll_gyro_polarity;		// Roll gyro normal/reverse
 	int8_t		pitch_gyro;				// Use pitch gyro
@@ -48,13 +48,20 @@ typedef struct
 	int8_t		roll_acc_polarity;		// Roll acc normal/reverse
 	int8_t		pitch_acc;				// Use pitch acc
 	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
-	int8_t		min_travel;				// Minimum output value (2250 to 5250)
-	int8_t		max_travel;				// Maximum output value
-	int8_t		Failsafe;				// Failsafe position
+	int8_t		output_a;				// Channel A for calculation
+	int8_t		output_a_volume;		// Percentage of output to use
+	int8_t		output_b;				// Channel B for calculation
+	int8_t		output_b_volume;		// Percentage of output to use
+	int8_t		output_c;				// Channel C for calculation
+	int8_t		output_c_volume;		// Percentage of output to use
+	int8_t		output_d;				// Channel D for calculation
+	int8_t		output_d_volume;		// Percentage of output to use
+	int8_t		min_travel;				// Minimum output value (-125 to 125)
+	int8_t		max_travel;				// Maximum output value (-125 to 125)
+	int8_t		Failsafe;				// Failsafe position (-125 to 125)
 } channel_t;
 
 // PID type
-// Size = 3 bytes
 typedef struct
 {
 	int8_t	P_mult;
@@ -62,16 +69,7 @@ typedef struct
 	int8_t	D_mult;
 } PID_mult_t;
 
-typedef struct
-{
-	int8_t		source_a;				// Source RC input for calculation	
-	int8_t		source_a_volume;		// Percentage of source to pass on	
-	int8_t		source_b;				// Source RC input for calculation	
-	int8_t		source_b_volume;		// Percentage of source to pass on
-} mixer_t; 
-
 // Settings structure
-// Size =  bytes
 typedef struct
 {
 	uint8_t	setup;						// Byte to identify if already setup
@@ -107,13 +105,17 @@ typedef struct
 	
 	// Autolevel settings
 	int8_t		AutoMode;
+	int8_t		Autolimit;				// Autolevel switch point (-125% to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		A_Pitch_P_mult;
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;
+	int8_t		LaunchMode;				// Launch mode on/off
+	int8_t		LaunchThrPos;			// Launch mode throttle position
 
 	// Stability PID settings
 	int8_t		StabMode;				// Stability switch mode
+	int8_t		Stablimit;				// Stability switch point (-125% to 125%)
 	PID_mult_t	Roll;					// Gyro PID settings
 	PID_mult_t	Pitch;
 	PID_mult_t	Yaw;
@@ -122,16 +124,17 @@ typedef struct
 	// Servo travel limts
 	int16_t		Raw_I_Limits[3];		// Actual, unspanned I-term limits to save recalculation each loop
 
+	// Triggers
+	int16_t		Stabtrigger;			// Actual, unspanned stability trigger to save recalculation each loop
+	int16_t		Autotrigger;			// Actual, unspanned autolevel trigger to save recalculation each loop
+	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
+
 	// Battery settings
 	int16_t		BatteryType;			// LiPo, NiMh
 	int16_t		BatteryCells;			// Number of cells (2~5)	
 	int16_t		PowerTrigger;			// Trip voltage
 	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
-
-	// RC mixer settings
-	mixer_t		mixer_data[NUM_MIXERS];
-	uint16_t	Mix_value[NUM_MIXERS];	// Mixer values
 
 	// General items
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Manual
@@ -148,12 +151,11 @@ typedef struct
 	int8_t		Dummy_1;
 			
 	// Non-menu items 
-	// Channel configuration
-	channel_t	Channel[MAX_OUTPUTS];// Channel mixing data	
+	// Input channel configuration
+	channel_t	Channel[MAX_OUTPUTS];	// RC channel mixing data	
 
 	// Misc
 	int8_t		Modes;					// Misc flight mode flag
-
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
@@ -177,21 +179,7 @@ typedef struct
 	int16_t default_value;				// Default value for this item
 } menu_range_t; 
 
-// MWC IMU structures
-
-typedef struct {
-  float X;
-  float Y;
-  float Z;
-} t_fp_vector_def;
-
-typedef union {
-  float   A[3];
-  t_fp_vector_def V;
-} t_fp_vector;
-
 // The following code courtesy of: stu_san on AVR Freaks
-
 typedef struct
 {
   unsigned int bit0:1;

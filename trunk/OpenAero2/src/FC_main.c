@@ -30,7 +30,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V1.00a	Based on OpenAero V1.13 Beta 8 code
+// V1.00	Based on OpenAero V1.13 Beta 8 code
 //			Initial code base.
 // Alpha 1	First release to alpha testers
 // Alpha 2  Fixed channel number bug, added second aileron to default mixer
@@ -80,21 +80,26 @@
 //			Hopefully fixed false throttle high alarm.
 //			Completed and integrated basic IMU code (again).
 //			Added General menu settings for Acc LPF and IMU CF factor.
-// Beta 4.1 Trial fix for Autolevel switch-on issue
+// Beta 4.1 Trial fix for Autolevel switch-on issue (Successful).
 //	
+// V1.10
+// Beta 1	Stability and Autolevel switch setpoint adjustment	
+//			RC mixers moved to main mixers. Fixed balance meter movement
+//			Main mixers can now cross-mix up to four channels
+//			Launch delay mode. Tweaked menu navigation and driver.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For V1.0 release
-//	Trial Beta 4
+// For V1.1 Beta 1
+//	Autolevel modes (Normal, autolevel at centered sticks)
+//	Update to attitude measurement for inverted flight
 //
-// For V1.1
+// Future
 //	Aeroplane attitude lock mode (for 3D)
 //	CamStab RC control with servo speed setting
 //  Camera stabilisation refinements (separate PID settings)
-//  Aileron differential (limit downward throw. 100% = none)
 //
 //
 //***********************************************************
@@ -183,11 +188,9 @@ Camera Gimbal (if enabled)
 #define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
 #define FS_TIMEOUT 19531			// Number or T2 cycles before Failsafe setting engages (1 second)
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
-#define	LOWER	3000				// Lower third of travel
-#define	MIDDLE	3500				// Mid third of travel
-#define	UPPER	4000				// Upper third of travel
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
+#define LAUNCH_TIMER 195310			// Hand-launch timer (10 seconds)
 
 //***********************************************************
 //* Code and Data variables
@@ -219,10 +222,15 @@ int main(void)
 	bool LMA_Alarm = false;			// Lost model alarm active
 	bool LVA_Alarm = false;			// Low voltage alarm active
 
+	// Launch mode
+	bool Launch_Mode = false;		// Launch mode ON flag
+	bool Launch_Block = false;		// Launch mode autolevel block flag
+
 	// Timers
 	uint32_t Status_timeout = 0;
-	uint32_t Change_UpdateStatus = 0;
-	uint32_t Change_LostModel = 0;
+	uint32_t UpdateStatus_timer = 0;
+	uint32_t LostModel_timer = 0;
+	uint32_t Launch_timer = 0;
 	uint32_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
@@ -230,6 +238,7 @@ int main(void)
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
+	uint8_t Launch_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
@@ -278,7 +287,7 @@ while(1)
 		LCD_Display_Text(39,(prog_uchar*)Verdana8,64,20);	// Y
 		LCD_Display_Text(40,(prog_uchar*)Verdana8,64,30);	// Z
 
-		LCD_Display_Text(74,(prog_uchar*)Verdana8,0,45); 	// AHRS
+		LCD_Display_Text(61,(prog_uchar*)Verdana8,0,45); 	// AHRS
 		LCD_Display_Text(41,(prog_uchar*)Verdana8,0,55); 	// Acc
 
 		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
@@ -331,6 +340,7 @@ while(1)
 					Menu_mode = REQ_STATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
+					menu_beep(1);
 				}
 				break;
 
@@ -352,16 +362,29 @@ while(1)
 
 			// Status screen first display
 			case STATUS:
-				// Reset the 1 second status screen period
-				Change_UpdateStatus = 0;
+				// Reset the status screen period
+				UpdateStatus_timer = 0;
 				// Update status screen
 				Display_status();
 				// Force resync on next RC packet
 				Interrupted = false;	
 				// Wait for timeout
-				Menu_mode = WAITING_TIMEOUT;
+				Menu_mode = WAITING_TIMEOUT_BD;
 				break;
-			
+
+
+			// Status screen up, but button still down ;)
+			case WAITING_TIMEOUT_BD:
+				if(BUTTON1 == 0)
+				{
+					Menu_mode = WAITING_TIMEOUT_BD;
+				}
+				else
+				{
+					Menu_mode = WAITING_TIMEOUT;
+				}
+				break;
+												
 			// Status screen up, waiting for timeout or action
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
@@ -371,7 +394,7 @@ while(1)
 				}
 
 				// Update status screen while waiting to time out
-				else if (Change_UpdateStatus > STATUS_TIMER)
+				else if (UpdateStatus_timer > STATUS_TIMER)
 				{
 					Menu_mode = REQ_STATUS;
 				}
@@ -380,8 +403,8 @@ while(1)
 				else if(BUTTON1 == 0)
 				{
 					Menu_mode = MENU;
+					menu_beep(1);
 				}
-
 				break;
 
 			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
@@ -422,7 +445,7 @@ while(1)
 		}
 
 		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (1s)
-		Change_UpdateStatus += (uint8_t) (TCNT2 - Refresh_TCNT2);
+		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
 
 		//************************************************************
@@ -483,22 +506,22 @@ while(1)
 		//************************************************************
 
 		// Lost model alarm
-		Change_LostModel += (uint8_t) (TCNT2 - Lost_TCNT2);
+		LostModel_timer += (uint8_t) (TCNT2 - Lost_TCNT2);
 		Lost_TCNT2 = TCNT2;
 
 		// Reset LMA count if any RX activity, LMA of, or CamStab (no RC used)
 		if (RxActivity || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
-			Change_LostModel = 0;
+			LostModel_timer = 0;
 			Model_lost = false;	
 			LMA_minutes = 0;
 			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
 		}
 		
-		if (Change_LostModel > LMA_TIMEOUT)
+		if (LostModel_timer > LMA_TIMEOUT)
 		{
 			LMA_minutes++;
-			Change_LostModel = 0;
+			LostModel_timer = 0;
 		}
 
 		// Trigger lost model alarm if enabled and due
@@ -510,27 +533,27 @@ while(1)
 
 		if (BUZZER_ON && Model_lost) 
 		{
-			LMA_Alarm = true;	// Turn on buzzer
+			LMA_Alarm = true;					// Turn on buzzer
 		}
 		else 
 		{
-			LMA_Alarm = false;				// Otherwise turn off buzzer
+			LMA_Alarm = false;					// Otherwise turn off buzzer
 		}
 
 		// Low-voltage alarm (LVA)
-		GetVbat();							// Check battery
+		GetVbat();								// Check battery
 
 
 		// Beep buzzer if Vbat lower than trigger
 		if ((vBat < Config.PowerTrigger) && BUZZER_ON) 
 		{
 			LVA_Alarm = true;
-			General_error |= (1 << LOW_BATT); // Set low battery bit
+			General_error |= (1 << LOW_BATT); 	// Set low battery bit
 		}
 		else 
 		{
-			LVA_Alarm = false;			// Otherwise turn off buzzer
-			General_error &= ~(1 << LOW_BATT); // Clear low battery bit
+			LVA_Alarm = false;					// Otherwise turn off buzzer
+			General_error &= ~(1 << LOW_BATT); 	// Clear low battery bit
 		}
 
 		// Turn on buzzer if in alarm state
@@ -544,16 +567,53 @@ while(1)
 		}
 
 		//************************************************************
+		//* Hand-launch mode handling
+		//************************************************************
+
+		if (Config.LaunchMode == ON)
+		{
+			// Increment timer only if Launch mode on to save cycles
+			Launch_timer += (uint8_t) (TCNT2 - Launch_TCNT2);
+			Launch_TCNT2 = TCNT2;
+
+			// Reset Launch count if Launch_Mode false
+			if (Launch_Mode == false)
+			{														
+				Launch_timer = 0;
+			}
+		
+			// Re-enable autolevel if timer expires while autolevel blocked
+			if ((Launch_Block) && (Launch_timer > LAUNCH_TIMER))
+			{
+				Launch_Block = false;
+			}
+		}
+
+		// If first time into Launch mode
+		if ((Config.LaunchMode == ON) && (Launch_Mode == false))	
+		{
+			// Launch mode throttle position exceeded
+			if (RxChannel[THROTTLE] > Config.Launchtrigger)	
+			{
+				Launch_Mode = true;				// Start 10 second countdown
+				Launch_Block = true;			// Disable autolevel
+				menu_beep(1);					// Signal launch mode timer start
+			}
+		}
+
+		//************************************************************
 		//* Autolevel mode selection
 		//************************************************************
 		//* Primary override:
 		//*		Autolevel enabled if Config.AutoMode = 0N
 		//*		Autolevel always OFF if Config.AutoMode = OFF (default)
+		//*		Autolevel disabled if Launch_Block = true
 		//*
 		//* Three switchable modes:
 		//*		1. Disabled by Config.AutoMode = OFF
 		//*		2. Enabled by "AutoChan" channel number
-		//*		3. Enabled by upper 33% throw of "ThreePos" channel number
+		//*		3. Enabled by user-set triggers of "ThreePos" channel number
+		//*		4. Always ON
 		//************************************************************
 
 		// Update zeroed RC channel data
@@ -571,17 +631,8 @@ while(1)
 				AutoLevel = false;				// De-activate autolevel mode
 				break;
 			case AUTOCHAN:
-				if (RxChannel[Config.AutoChan] > MIDDLE)
-				{
-					AutoLevel = true;			// Activate autolevel mode
-				}	
-				else
-				{
-					AutoLevel = false;			// De-activate autolevel mode
-				}	
-				break;
 			case THREEPOS:
-				if (RxChannel[Config.AutoChan] > UPPER)
+				if (RxChannel[Config.AutoChan] > Config.Autotrigger)
 				{
 					AutoLevel = true;			// Activate autolevel mode
 				}	
@@ -598,6 +649,12 @@ while(1)
 				break;
 		}
 
+		// Check for Launch blocking
+		if (Launch_Block)
+		{
+			AutoLevel = false;					// De-activate autolevel mode
+		}
+
 		//************************************************************
 		//* Stability mode selection
 		//************************************************************
@@ -605,10 +662,11 @@ while(1)
 		//*		Stability enabled if Config.StabMode = ON
 		//*		Stability always OFF if Config.StabMode = OFF (default)
 		//*
-		//* Three switchable modes:
+		//* Four switchable modes:
 		//*		1. Disabled by Config.StabMode = OFF
 		//*		2. Enabled by "StabChan" channel number
-		//*		3. Enabled by middle or higher throw of "ThreePos" channel number
+		//*		3. Enabled by user-set triggers of "ThreePos" channel number
+		//*		4. Always ON
 		//************************************************************
 
 		switch(Config.StabMode)
@@ -618,7 +676,7 @@ while(1)
 				break;
 			case STABCHAN:
 			case THREEPOS:
-				if (RxChannel[Config.StabChan] > MIDDLE)
+				if (RxChannel[Config.StabChan] > Config.Stabtrigger)
 				{
 					Stability = true;			// Activate autolevel mode
 				}	
@@ -650,15 +708,11 @@ while(1)
 		}
 
 		// Autolevel mode ON
-		if (AutoLevel) 
+		//if (AutoLevel) 
+		if (1) 	// Debug
 		{
 			ReadAcc();			// Only read Accs if in AutoLevel mode
 			getEstimatedAttitude();
-		}
-		else
-		{
-			// Reset IMU each time autolevel restarted
-			FirstTimeIMU = true;
 		}
 
 

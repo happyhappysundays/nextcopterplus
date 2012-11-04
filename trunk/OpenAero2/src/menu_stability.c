@@ -33,19 +33,20 @@ void menu_stab_control(void);
 // Defines
 //************************************************************
 
-#define STABITEMS 13 	// Number of menu items
-#define STABSTART 213 	// Start of Menu text items
-#define STABTEXT 61 	// Start of value text items
+#define STABITEMS 14 	// Number of menu items
+#define STABSTART 124 	// Start of Menu text items
+#define STABTEXT 48 	// Start of value text items
 #define STABOFFSET 75	// Value offsets
 
 //************************************************************
 // STAB menu items
 //************************************************************
 
-const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 const menu_range_t stab_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,STABCHAN}, 	// Min, Max, Increment, Style, Default
+	{-125,125,10,0,0},
 	{0,127,1,0,60},
 	{0,127,1,0,0},
 	{0,127,1,0,0},
@@ -79,7 +80,7 @@ void menu_stab_control(void)
 		memcpy(&values[0],&Config.StabMode,sizeof(int8_t) * STABITEMS);
 
 		// Print menu
-		print_menu_items(top, STABSTART, &values[0], (prog_uchar*)stab_menu_ranges, STABOFFSET, (prog_uchar*)StabMenuText, cursor);
+		print_menu_items(top, STABSTART, &values[0], STABITEMS, (prog_uchar*)stab_menu_ranges, STABOFFSET, (prog_uchar*)StabMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(STABITEMS, STABSTART, button, &cursor, &top, &temp);
@@ -96,10 +97,8 @@ void menu_stab_control(void)
 
 		if (button == ENTER)
 		{
-			UpdateLimits();			 // Update I-term limits based on percentages
+			UpdateLimits();			 // Update I-term limits and triggers based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }

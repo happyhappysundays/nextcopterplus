@@ -13,6 +13,7 @@
 #include "..\inc\io_cfg.h"
 #include <util/delay.h>
 #include "..\inc\mixer.h"
+#include "..\inc\menu_ext.h"
 
 //************************************************************
 // Prototypes
@@ -29,7 +30,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x04		// eePROM signature - change for each eePROM structure change
+#define MAGIC_NUMBER 0x05		// eePROM signature - change for each eePROM structure change 0x05 = V1.1b1
 								// to force factory reset
 
 //************************************************************
@@ -99,6 +100,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
 	Config.AutoChan = GEAR;				// Channel AUX2 switches autolevel by default
 	Config.FlapChan = THROTTLE;			// Most people will use the throttle input I imagine
+	Config.Stabtrigger = 3500;
+	Config.Autotrigger = 3500;
+	Config.LaunchMode = OFF;			// Launch mode on/off
+	Config.LaunchThrPos = 0;			// Launch mode throttle position
+	Config.Launchtrigger = 3500;		// Respanned launch trigger
 
 	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
 	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
@@ -120,15 +126,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.Preset2 = 0;
 	Config.Preset3 = 0;
 	Config.Preset4 = 0;
-
-	for (i = 0; i < NUM_MIXERS; i++)
-	{
-		Config.mixer_data[i].source_a = AILERON;
-		Config.mixer_data[i].source_a_volume = 0;
-		Config.mixer_data[i].source_b = ELEVATOR;
-		Config.mixer_data[i].source_b_volume = 0;
-		Config.Mix_value[i] = 0;
-	}
 }
 
 void Save_Config_to_EEPROM(void)
@@ -137,6 +134,7 @@ void Save_Config_to_EEPROM(void)
 	cli();
 	eeprom_write_block_changes((const void*) &Config, (void*) EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));	
 	sei();
+	menu_beep(1);
 	LED1 = !LED1;
 	_delay_ms(500);
 	LED1 = !LED1;

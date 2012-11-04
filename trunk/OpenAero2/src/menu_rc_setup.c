@@ -33,15 +33,15 @@ void menu_rc_setup(void);
 //************************************************************
 
 #define RCITEMS 9 	// Number of menu items
-#define RCSTART 173 // Start of Menu text items
-#define RCTEXT 183 	// Start of value text items
+#define RCSTART 149 // Start of Menu text items
+#define RCTEXT 138 	// Start of value text items
 #define RCOFFSET 92	// Value offsets
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 29, 149, 149, 149, 0,0,0,0};
+const uint8_t RCMenuText[RCITEMS] PROGMEM = {RCTEXT, 18, 105, 105, 105, 0,0,0,0};
 const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
 	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
@@ -74,7 +74,7 @@ void menu_rc_setup(void)
 		memcpy(&values[0],&Config.TxSeq,sizeof(int8_t) * RCITEMS);
 
 		// Print menu
-		print_menu_items(top, RCSTART, &values[0], (prog_uchar*)rc_menu_ranges, RCOFFSET, (prog_uchar*)RCMenuText, cursor);
+		print_menu_items(top, RCSTART, &values[0], RCITEMS, (prog_uchar*)rc_menu_ranges, RCOFFSET, (prog_uchar*)RCMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(RCITEMS, RCSTART, button, &cursor, &top, &temp);
@@ -92,7 +92,7 @@ void menu_rc_setup(void)
 		// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode
 		if (Config.MixMode == AEROPLANE)
 		{
-			Config.Channel[CH7].source = Config.FlapChan;
+			Config.Channel[CH7].source_a = Config.FlapChan;
 		}
 
 		if (button == ENTER)
@@ -112,7 +112,5 @@ void menu_rc_setup(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }
 

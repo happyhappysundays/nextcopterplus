@@ -34,18 +34,18 @@ void menu_general(void);
 //************************************************************
 
 #define GENERALITEMS 11 		// Number of menu items
-#define GENERALSTART 202 	// Start of Menu text items
-#define GENERALTEXT	 33 	// Start of value text items
-#define GENOFFSET	 80		// Value offsets
+#define GENERALSTART 158 	// Start of Menu text items
+#define GENERALTEXT	 22 	// Start of value text items
+#define GENOFFSET	 78		// Value offsets
 
 //************************************************************
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 101, 0, 101, 164, 0, 0, 101};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 101, 0, 101, 119, 0, 0, 101};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
+	{AEROPLANE,SWASH120,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
 	{28,50,1,0,38}, 	// Contrast
 	{1,30,1,0,5},		// Status menu timeout
@@ -81,7 +81,7 @@ void menu_general(void)
 		temp_type = Config.MixMode;
 
 		// Print menu
-		print_menu_items(top, GENERALSTART, &values[0], (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
+		print_menu_items(top, GENERALSTART, &values[0], GENERALITEMS, (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &top, &temp);
@@ -112,6 +112,9 @@ void menu_general(void)
 					case CAMSTAB:
 						get_preset_mix(CAM_STAB);
 						break;
+					case SWASH120:
+						get_preset_mix(SWASH120_MIX);
+						break;
 					default:
 						break;
 				}
@@ -121,8 +124,6 @@ void menu_general(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }
 
 

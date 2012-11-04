@@ -20,6 +20,7 @@
 #include "..\inc\glcd_driver.h"
 #include "..\inc\main.h"
 #include "..\inc\eeprom.h"
+#include "..\inc\mixer.h"
 
 //************************************************************
 // Prototypes
@@ -32,23 +33,26 @@ void menu_al_control(void);
 // Defines
 //************************************************************
 
-#define AUTOITEMS 5 	// Number of menu items
-#define AUTOSTART 50 	// Start of Menu text items
-#define AUTOTEXT 61 	// Start of value text items
+#define AUTOITEMS 8 	// Number of menu items
+#define AUTOSTART 37 	// Start of Menu text items
+#define AUTOTEXT 48 	// Start of value text items
 #define AUTOOFFSET 75	// Value offsets
 
 //************************************************************
 // AUTO menu items
 //************************************************************
 
-const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0};
+const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 101, 0};
 const menu_range_t auto_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
+	{-125,125,10,0,0},
 	{0,127,1,0,30},
 	{0,127,1,0,30},
 	{-127,127,1,0,0}, 
-	{-127,127,1,0,0}
+	{-127,127,1,0,0},
+	{OFF,ON,1,1,OFF},	// Launch mode
+	{-125,125,10,0,0}	// Launch trigger
 };
 
 //************************************************************
@@ -70,7 +74,7 @@ void menu_al_control(void)
 		memcpy(&values[0],&Config.AutoMode,sizeof(int8_t) * AUTOITEMS);
 
 		// Print menu
-		print_menu_items(top, AUTOSTART, &values[0], (prog_uchar*)auto_menu_ranges, AUTOOFFSET, (prog_uchar*)AutoMenuText, cursor);
+		print_menu_items(top, AUTOSTART, &values[0], AUTOITEMS, (prog_uchar*)auto_menu_ranges, AUTOOFFSET, (prog_uchar*)AutoMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(AUTOITEMS, AUTOSTART, button, &cursor, &top, &temp);
@@ -87,9 +91,8 @@ void menu_al_control(void)
 
 		if (button == ENTER)
 		{
+			UpdateLimits();			 // Update I-term limits and triggers based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }

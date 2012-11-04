@@ -30,8 +30,8 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 19	// Number of menu items
-#define MAINSTART 106	// Start of Menu text items
+#define MAINITEMS 17	// Number of menu items
+#define MAINSTART 77	// Start of Menu text items
 
 //************************************************************
 // Main menu-specific setup
@@ -112,37 +112,33 @@ void do_main_menu_item(uint8_t menuitem)
 			Display_balance();
 			break;
 		case MAINSTART+9:
-			menu_rcmixer(0);
-			break;
-		case MAINSTART+10:
-			menu_rcmixer(1);
-			break;
-		case MAINSTART+11:
 			menu_mixer(0);
 			break;
-		case MAINSTART+12:
+		case MAINSTART+10:
 			menu_mixer(1);
 			break;
-		case MAINSTART+13:
+		case MAINSTART+11:
 			menu_mixer(2);
 			break;
-		case MAINSTART+14:
+		case MAINSTART+12:
 			menu_mixer(3);
 			break;
-		case MAINSTART+15:
+		case MAINSTART+13:
 			menu_mixer(4);
 			break;
-		case MAINSTART+16:
+		case MAINSTART+14:
 			menu_mixer(5);
 			break;
-		case MAINSTART+17:
+		case MAINSTART+15:
 			menu_mixer(6);
 			break;
-		case MAINSTART+18:
+		case MAINSTART+16:
 			menu_mixer(7);
 			break;
 		default:
 			break;
 	} // Switch
+	menu_beep(1);
+	_delay_ms(200);
 }
 

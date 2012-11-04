@@ -33,8 +33,8 @@ void menu_battery(void);
 //************************************************************
 
 #define BATTITEMS 5 	// Number of menu items
-#define BATTSTART 66 	// Start of Menu text items
-#define BATTTEXT 71 	// Start of value text items
+#define BATTSTART 53 	// Start of Menu text items
+#define BATTTEXT 58 	// Start of value text items
 #define BATTOFFSET 92	// Value offsets
 
 //************************************************************
@@ -103,7 +103,5 @@ void menu_battery(void)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
 }
 

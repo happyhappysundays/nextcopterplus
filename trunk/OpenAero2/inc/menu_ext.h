@@ -30,7 +30,7 @@ extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 extern void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 extern void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 

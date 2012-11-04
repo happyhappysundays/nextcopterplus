@@ -83,7 +83,6 @@ void UpdateIMUvalues(void);
 int8_t	ACC_LPF_FACTOR;		// User-set Acc low-pass filter
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
-bool 	FirstTimeIMU;
 
 int16_t	angle[2]; 			// Attitude
 
@@ -92,6 +91,8 @@ void getEstimatedAttitude(void)
 	static float deltaGyroAngle[3] = {0.0f,0.0f,0.0f};
 	static uint32_t PreviousTime = 0;
 	static float accSmooth[3];
+	static bool FirstTimeIMU = true;
+
 	uint8_t		axis;
 	int16_t		AccMag = 0;
 	uint32_t 	CurrentTime;

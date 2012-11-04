@@ -32,20 +32,21 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 16 	// Number of menu items
-#define MIXERSTART 186 	// Start of Menu text items
+#define MIXERITEMS 25 	// Number of menu items
+#define MIXERSTART 169 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {149,141,0,143,141,143,141,143,141,143,141,143,141,0,0,0};
+const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {105,0,105,0,143,141,143,141,143,141,143,141,143,141,62,0,62,0,62,0,62,0,0,0,0};
 const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
-	{THROTTLE,MIX2,1,1,CH1}, 		// Source
-	{NORMAL,REVERSED,1,1,NORMAL}, 	// source_polarity
-	{0,125,10,0,100},				// source_volume (%)
+	{THROTTLE,PRESET4,1,1,CH1}, 	// Source A
+	{-125,125,5,0,100},				// Source A volume (%)
+	{THROTTLE,PRESET4,1,1,CH1}, 	// Source B
+	{-125,125,5,0,0},				// Source B volume (%)
 	{OFF, ON,1,1,OFF},				// roll_gyro
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 	{OFF, ON,1,1,OFF},				// pitch_gyro
@@ -56,6 +57,14 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 	{OFF, REVERSED,1,1,OFF},		// pitch_acc
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
+	{CH1,UNUSED,1,1,CH1},			// Output A
+	{-125,125,5,0,100},				// Output A volume
+	{CH1,UNUSED,1,1,UNUSED},		// Output B
+	{-125,125,5,0,0},				// Output B volume
+	{CH1,UNUSED,1,1,UNUSED},		// Output C
+	{-125,125,5,0,0},				// Output C volume
+	{CH1,UNUSED,1,1,UNUSED},		// Output D
+	{-125,125,5,0,0},				// Output D volume
 	{-125,125,5,0,-100}, 			// Min travel
 	{-125,125,5,0,100}, 			// Max travel
 	{-125,125,5,0,0}, 				// failsafe
@@ -77,10 +86,10 @@ void menu_mixer(uint8_t i)
 	while(button != BACK)
 	{
 		// Load values from eeprom
-		memcpy(&values[0],&Config.Channel[i].source,sizeof(int8_t) * MIXERITEMS);
+		memcpy(&values[0],&Config.Channel[i].source_a,sizeof(int8_t) * MIXERITEMS);
 
 		// Print menu
-		print_menu_items(top, MIXERSTART, &values[0],(prog_uchar*)mixer_menu_ranges, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
+		print_menu_items(top, MIXERSTART, &values[0], MIXERITEMS,(prog_uchar*)mixer_menu_ranges, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(MIXERITEMS, MIXERSTART, button, &cursor, &top, &temp);
@@ -93,7 +102,7 @@ void menu_mixer(uint8_t i)
 		}
 
 		// Update value in config structure
-		memcpy(&Config.Channel[i].source,&values[0],sizeof(int8_t) * MIXERITEMS);
+		memcpy(&Config.Channel[i].source_a,&values[0],sizeof(int8_t) * MIXERITEMS);
 
 		if (button == ENTER)
 		{
