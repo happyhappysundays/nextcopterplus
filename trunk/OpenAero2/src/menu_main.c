@@ -43,7 +43,7 @@ void menu_main(void)
 	static uint8_t top = MAINSTART;
 	static uint8_t temp = 0;
 	
-	button = NONE; // debug
+	button = NONE;
 
 	// Wait until user's finger is off button 1
 	while(BUTTON1 == 0)

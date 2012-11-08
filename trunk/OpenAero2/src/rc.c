@@ -61,6 +61,8 @@ const char Expo[10][16] PROGMEM =
 
 int16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
 bool		RxActivity;
+bool		HandsFree;
+
 
 // Get raw flight channel data and remove zero offset
 // Use channel mapping for configurability
@@ -74,12 +76,6 @@ void RxGetChannels(void)
 	{
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
-
-	// Update presets manually as they don't come from the RC
-	RxChannel[PRESET1] = ((Config.Preset1 * 12) + 3750);
-	RxChannel[PRESET2] = ((Config.Preset2 * 12) + 3750);
-	RxChannel[PRESET3] = ((Config.Preset3 * 12) + 3750);
-	RxChannel[PRESET4] = ((Config.Preset4 * 12) + 3750);
 
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
@@ -115,12 +111,33 @@ int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
 	return (RCvalue);
 }
 
- // Reduce RxIn noise
+ // Reduce RxIn noise and also detect the hands-off situation
 void RC_Deadband(void)
 {
-	if ((RCinputs[AILERON] < DEAD_BAND) && (RCinputs[AILERON] > -DEAD_BAND)) RCinputs[AILERON] = 0;
-	if ((RCinputs[ELEVATOR] < DEAD_BAND) && (RCinputs[ELEVATOR] > -DEAD_BAND)) RCinputs[ELEVATOR] = 0;
-	if ((RCinputs[RUDDER] < DEAD_BAND) && (RCinputs[RUDDER] > -DEAD_BAND)) RCinputs[RUDDER] = 0;
+	// Deadband bulling
+	if ((RCinputs[AILERON] < DEAD_BAND) && (RCinputs[AILERON] > -DEAD_BAND))
+	{
+		RCinputs[AILERON] = 0;
+	}
+	if ((RCinputs[ELEVATOR] < DEAD_BAND) && (RCinputs[ELEVATOR] > -DEAD_BAND)) 
+	{
+		RCinputs[ELEVATOR] = 0;
+	}
+	if ((RCinputs[RUDDER] < DEAD_BAND) && (RCinputs[RUDDER] > -DEAD_BAND))
+	{
+		RCinputs[RUDDER] = 0;
+	}
+
+	// Hands-free detection
+	if (((RCinputs[AILERON] < Config.HandsFreetrigger) && (RCinputs[AILERON] > -Config.HandsFreetrigger))
+	 && ((RCinputs[RUDDER]  < Config.HandsFreetrigger) && (RCinputs[RUDDER]  > -Config.HandsFreetrigger)))
+	{
+		HandsFree = true;
+	}
+	else
+	{
+		HandsFree = false;
+	}
 }
 
 // Center sticks on request from Menu

@@ -8,7 +8,9 @@
 
 extern void getEstimatedAttitude(void);
 extern void UpdateIMUvalues(void);
-
-extern bool 	FirstTimeIMU;
 extern int16_t	angle[2];
+extern bool FirstTimeIMU;
+
+// Debug
+extern int16_t	AccMag;
 

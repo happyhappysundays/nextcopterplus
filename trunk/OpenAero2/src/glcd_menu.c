@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1b1"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1a2"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Resetting to";				// Init
 const char PText2[]  PROGMEM = "defaults";
@@ -109,6 +109,7 @@ const char AutoMenuItem13[] PROGMEM = "StabChan";
 const char AutoMenuItem14[] PROGMEM = "3-pos";
 const char AutoMenuItem15[] PROGMEM = "ON"; 
 const char AutoMenuItem16[] PROGMEM = "THR. pos"; 
+const char AutoMenuItem17[] PROGMEM = "Hands Free"; 
 //
 const char BattMenuItem0[]  PROGMEM = "Battery type:"; 		// Battery text
 const char BattMenuItem1[]  PROGMEM = "Cells:"; 
@@ -171,6 +172,7 @@ const char MixerItem15[] PROGMEM = "Crossmix:";
 const char MixerItem8[] PROGMEM = "Min(%):";
 const char MixerItem9[] PROGMEM = "Max(%):";
 const char MixerItem10[] PROGMEM = "Failsafe(%):";
+const char MixerItem16[] PROGMEM = "Offset(%):";
 //
 const char MixerItem11[] PROGMEM = "Normal";
 const char MixerItem12[] PROGMEM = "Reversed";
@@ -184,10 +186,6 @@ const char ChannelRef5[] PROGMEM = "Flap";
 const char ChannelRef6[] PROGMEM = "Aux1"; 
 const char ChannelRef7[] PROGMEM = "Aux2"; 
 const char ChannelRef8[] PROGMEM = "None";
-const char ChannelRef9[] PROGMEM = "Preset 1";
-const char ChannelRef10[] PROGMEM = "Preset 2";
-const char ChannelRef11[] PROGMEM = "Preset 3";
-const char ChannelRef12[] PROGMEM = "Preset 4";
 //
 const char ErrorText0[] PROGMEM = "Sensor"; 				// Error text
 const char ErrorText3[] PROGMEM = "No";
@@ -224,60 +222,60 @@ const char *text_menu[] PROGMEM =
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17
 		MenuFrame6, MenuFrame7, MenuFrame8, 
 		//
-		RXMode0, RXMode1, RXMode2, RXMode3, 												// 18 to 21  was 29 to 32 RX mode
+		RXMode0, RXMode1, RXMode2, RXMode3, 												// 18 to 21 RX mode
 		//
-		RXMode4, RXMode5, MainMenuItem6, RXMode6,											// 22 to 25  was 33 to 36 Mix presets
+		RXMode4, RXMode5, MainMenuItem6, RXMode6,											// 22 to 25 Mix presets
 		//
-		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 was 37 to 49 Sensors
+		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
 		ChannelRef1, ChannelRef2, ChannelRef0, ChannelRef3, ChannelRef4,					// 32 to 36 RC inputs
 		//
 		//
-		StatusText1, StabMenuItem13, AutoMenuItem1,											// 37 to 45 was 50 to 60 Autolevel
+		StatusText1, StabMenuItem13, AutoMenuItem1,											// 37 to 45 Autolevel
 		AutoMenuItem4, AutoMenuItem7, AutoMenuItem8, AutoMenuItem2,
 		AutoMenuItem16, Dummy0, 
 		//
 		AutoMenuItem9, AutoMenuItem10,														// 46 to 47 Autolevel, stability
 		// 
-		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 48 to 52 was 61 to 65
-		AutoMenuItem15, 
+		Dummy0, Dummy0, Dummy0, Dummy0, 													// 48 to 52 
+		Dummy0, 
 		//
-		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 53 to 59 was 66 to 72
+		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 53 to 59 
 		BattMenuItem5, BattMenuItem6, 														// LiPo, NiMh
 		//
 		SensorMenuItem6,																	// 60 was 73 calibrate
 		//
 		IMU0, 																				// 61 was 74 IMU
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 62 to 71 was 82 to 91 MOUT1-8 + NONE
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 62 to 71 MOUT1-8 + NONE
 		MOUT6, MOUT7, MOUT8, ChannelRef8, Dummy0, 
 		//
-		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 was 96 to 100 Error messages
+		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
-		MainMenuItem0, MainMenuItem1, MainMenuItem2, MainMenuItem3, MainMenuItem4, 			// 77 to 97 was 106 to 122 
+		MainMenuItem0, MainMenuItem1, MainMenuItem2, MainMenuItem3, MainMenuItem4, 			// 77 to 97  
 		MainMenuItem5, MainMenuItem9, MainMenuItem8,MainMenuItem10, MainMenuItem11, 
 		MainMenuItem12,MainMenuItem13,MainMenuItem14,MainMenuItem15,MainMenuItem16,
 		MainMenuItem17, MainMenuItem18,	Dummy0, Dummy0,	Dummy0, Dummy0,	
 		//
-		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 was 170 to 172 Error, lost, model
+		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 Error, lost, model
 		//
 		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
 		MixerMenuItem2, MixerMenuItem3,														// 103 to 104 H/V
 		//
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 118 was 149 to 163 Ch. nums
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 118 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
-		ChannelRef9, ChannelRef10, ChannelRef11, ChannelRef12,	
+		Dummy0, Dummy0, Dummy0, Dummy0,	
 		Dummy0,
 		//
-		GeneralText4, GeneralText5,															// 119, 120 was 164 LOW
+		GeneralText4, GeneralText5,															// 119, 120 LOW, HIGH
 		//
-		Status0, Status1, Status2,															// 121 to 123 was 167 to 169 Press any button
+		Status0, Status1, Status2,															// 121 to 123 Press any button
 		//
-		StatusText1,StabMenuItem13, AutoMenuItem1, StabMenuItem2, StabMenuItem3,  			// 124 to 137 was 213 to 226 Stability menu
+		StatusText1,StabMenuItem13, AutoMenuItem1, StabMenuItem2, StabMenuItem3,  			// 124 to 137 Stability menu
 		AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, 
 		StabMenuItem9, StabMenuItem10,StabMenuItem11,StabMenuItem12,
 		//
-		RCMenuItem6, RCMenuItem7, Dummy0,													// 138 to 140 was 183 to 185 JR/Futaba
+		RCMenuItem6, RCMenuItem7, Dummy0,													// 138 to 140 JR/Futaba
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
@@ -285,24 +283,23 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, 								// 149 to 157 was 173 to 181 rc menu
-		RCMenuItem4, ChannelRef9, ChannelRef10, ChannelRef11, ChannelRef12,
+		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, 								// 149 to 157 rc menu
+		RCMenuItem4, Dummy0, Dummy0, Dummy0, Dummy0,
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,MixerMenuItem1,				// 158 to 168 was 202 to 212 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,MixerMenuItem1,				// 158 to 168 general
 		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 	
 		GeneralText8,	
 		//
-		MixerItem0, MixerItem2, MixerItem13, MixerItem2, MixerItem4, MixerItem1, 			// 169 to 194 was 227 to 251
+		MixerItem0, MixerItem2, MixerItem13, MixerItem2, MixerItem4, MixerItem1, 			// 169 to 194 
 		MixerItem5, MixerItem1, MixerItem6,  MixerItem1, MixerItem7, MixerItem1, 
 		MixerItem3, MixerItem1, MixerItem14, MixerItem2, MixerItem15,MixerItem2,
 		MixerItem15,MixerItem2, MixerItem15, MixerItem2,
-		MixerItem8, MixerItem9,	MixerItem10, Dummy0, 
+		MixerItem8, MixerItem9,	MixerItem10, MixerItem16, 
 		//
-		ChannelRef1, ChannelRef2, ChannelRef0, ExpoMenuItem3,								// 195 to 198 was 92 to 95
-		// orphans
-		StatusText4, 
-		PText26, PText27,																	// 39 to 40 Raw, Offset
-		
+		ChannelRef1, ChannelRef2, ChannelRef0, ExpoMenuItem3,								// 195 to 198 
+		//
+		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 199 to 204 was 48 to 52 Flight modes
+		AutoMenuItem15, AutoMenuItem17, 
 	}; 
 
 //************************************************************

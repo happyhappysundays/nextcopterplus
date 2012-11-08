@@ -117,14 +117,14 @@ void Display_status(void)
 		// Prioritise error from top to bottom
 		if((General_error & (1 << SENSOR_ERROR)) != 0)
 		{
-			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); 	// Sensor
+			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); // Sensor
 			LCD_Display_Text(98,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
 		else if((General_error & (1 << LOW_BATT)) != 0)
 		{
-			LCD_Display_Text(111,(prog_uchar*)Verdana14,33,14); // Battery
-			LCD_Display_Text(97,(prog_uchar*)Verdana14,46,34); 	// Low
+			LCD_Display_Text(82,(prog_uchar*)Verdana14,33,14); 	// Battery
+			LCD_Display_Text(119,(prog_uchar*)Verdana14,46,34); // Low
 		}
 		else if((General_error & (1 << NO_SIGNAL)) != 0)
 		{
@@ -135,12 +135,12 @@ void Display_status(void)
 		else if((General_error & (1 << LOST_MODEL)) != 0)
 		{
 			LCD_Display_Text(99,(prog_uchar*)Verdana14,45,14); // Lost
-			LCD_Display_Text(100,(prog_uchar*)Verdana14,40,34); // Model
+			LCD_Display_Text(100,(prog_uchar*)Verdana14,40,34);// Model
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{
-			LCD_Display_Text(149,(prog_uchar*)Verdana14,28,14); // Throttle
-			LCD_Display_Text(98,(prog_uchar*)Verdana14,46,34); 	// High
+			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
+			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
 			menu_beep(6);
 		}
 	}
