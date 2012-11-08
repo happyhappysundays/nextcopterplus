@@ -28,6 +28,7 @@ typedef struct
 	uint16_t	minimum;
 	uint16_t	maximum;
 	uint16_t	failsafe;
+	uint16_t	trim;
 } servo_limits_t;
 
 // Input mixer definition
@@ -59,6 +60,7 @@ typedef struct
 	int8_t		min_travel;				// Minimum output value (-125 to 125)
 	int8_t		max_travel;				// Maximum output value (-125 to 125)
 	int8_t		Failsafe;				// Failsafe position (-125 to 125)
+	int8_t		Offset;					// Trim/neutral position (-125 to 125)
 } channel_t;
 
 // PID type
@@ -92,10 +94,6 @@ typedef struct
 	int8_t		StabChan;				// Channel number to select stability mode
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
 	int8_t		FlapChan;				// Channel number for second aileron input
-	int8_t		Preset1;				// RC presets for camstab
-	int8_t		Preset2;
-	int8_t		Preset3;
-	int8_t		Preset4;
 
 	// Expo items
 	uint8_t		AileronExpo;			// Amount of expo on Aileron channel
@@ -128,6 +126,7 @@ typedef struct
 	int16_t		Stabtrigger;			// Actual, unspanned stability trigger to save recalculation each loop
 	int16_t		Autotrigger;			// Actual, unspanned autolevel trigger to save recalculation each loop
 	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
+	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
 
 	// Battery settings
 	int16_t		BatteryType;			// LiPo, NiMh
@@ -160,10 +159,12 @@ typedef struct
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
-	// Acc zeros
+	// Acc
 	uint16_t	AccRollZero;			// Acc calibration results
 	uint16_t	AccPitchZero;
 	uint16_t	AccZedZero;
+	int16_t		AccMin[3];				// Full calibration limits
+	int16_t		AccMax[3];
 
 	// 
 	uint16_t	Dummy_2;

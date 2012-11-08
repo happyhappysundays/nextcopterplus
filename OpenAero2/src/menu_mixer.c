@@ -32,7 +32,7 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 25 	// Number of menu items
+#define MIXERITEMS 26 	// Number of menu items
 #define MIXERSTART 169 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
@@ -40,12 +40,12 @@ void menu_mixer(uint8_t i);
 // RC menu items
 //************************************************************
 	 
-const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {105,0,105,0,143,141,143,141,143,141,143,141,143,141,62,0,62,0,62,0,62,0,0,0,0};
+const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = {105,0,105,0,143,141,143,141,143,141,143,141,143,141,62,0,62,0,62,0,62,0,0,0,0,0};
 const menu_range_t mixer_menu_ranges[] PROGMEM = 
 {
-	{THROTTLE,PRESET4,1,1,CH1}, 	// Source A
+	{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
 	{-125,125,5,0,100},				// Source A volume (%)
-	{THROTTLE,PRESET4,1,1,CH1}, 	// Source B
+	{THROTTLE,NOCHAN,1,1,CH1}, 		// Source B
 	{-125,125,5,0,0},				// Source B volume (%)
 	{OFF, ON,1,1,OFF},				// roll_gyro
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
@@ -57,17 +57,18 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 	{OFF, REVERSED,1,1,OFF},		// pitch_acc
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity
-	{CH1,UNUSED,1,1,CH1},			// Output A
-	{-125,125,5,0,100},				// Output A volume
-	{CH1,UNUSED,1,1,UNUSED},		// Output B
+	{CH1,CH8,1,1,CH1},				// Primary
+	{-125,125,5,0,100},				// Primary volume
+	{CH1,CH8,1,1,CH1},				// Output B
 	{-125,125,5,0,0},				// Output B volume
-	{CH1,UNUSED,1,1,UNUSED},		// Output C
+	{CH1,CH8,1,1,CH1},				// Output C
 	{-125,125,5,0,0},				// Output C volume
-	{CH1,UNUSED,1,1,UNUSED},		// Output D
+	{CH1,CH8,1,1,CH1},				// Output D
 	{-125,125,5,0,0},				// Output D volume
 	{-125,125,5,0,-100}, 			// Min travel
 	{-125,125,5,0,100}, 			// Max travel
-	{-125,125,5,0,0}, 				// failsafe
+	{-125,125,5,0,0}, 				// Failsafe
+	{-125,125,1,0,0}, 				// Offset
 };
 
 //************************************************************

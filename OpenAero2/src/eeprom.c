@@ -47,7 +47,6 @@ void Set_EEPROM_Default_Config(void)
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-		Config.Channel[i].value = 3750;
 		Config.RxChannelZeroOffset[i] = 3750;
 	}
 	//
@@ -77,12 +76,17 @@ void Set_EEPROM_Default_Config(void)
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
 	Config.AutoCenter = OFF;
-
+	//
 	for (i = 0; i < 3; i++)
 	{
 		Config.I_Limits[i] = 0;
 		Config.Raw_I_Limits[i] = 0;
+		Config.AccMin[i] = 0;
+		Config.AccMax[i] = 0;
+		//Config.AccMin[i] = -100; // Debug
+		//Config.AccMax[i] = 100;
 	}
+
 	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
@@ -122,10 +126,6 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 
-	Config.Preset1 = 0;
-	Config.Preset2 = 0;
-	Config.Preset3 = 0;
-	Config.Preset4 = 0;
 }
 
 void Save_Config_to_EEPROM(void)

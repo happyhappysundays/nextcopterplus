@@ -82,18 +82,21 @@
 //			Added General menu settings for Acc LPF and IMU CF factor.
 // Beta 4.1 Trial fix for Autolevel switch-on issue (Successful).
 //	
-// V1.10
-// Beta 1	Stability and Autolevel switch setpoint adjustment	
+// V1.10	Based on OpenAero2 Beta 4.1 code
+// Alpha 1	Stability and Autolevel switch setpoint adjustment	
 //			RC mixers moved to main mixers. Fixed balance meter movement
 //			Main mixers can now cross-mix up to four channels
 //			Launch delay mode. Tweaked menu navigation and driver.
+//			Added 120 degree swashplate preset. 
+// Alpha 2	Removed PRESET channels and replaced with per-output trims.
+//			Added HANDSFREE autolevel modes (autolevel at centered sticks)
+//			Added working differential (finally)
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // For V1.1 Beta 1
-//	Autolevel modes (Normal, autolevel at centered sticks)
 //	Update to attitude measurement for inverted flight
 //
 // Future
@@ -170,6 +173,7 @@ Camera Gimbal (if enabled)
 #include "..\inc\menu_ext.h"
 #include "..\inc\main.h"
 #include "..\inc\imu.h"
+#include "..\inc\eeprom.h"
 
 //***********************************************************
 //* Fonts
@@ -255,6 +259,53 @@ int main(void)
 //* Test Code - Start
 //************************************************************
 /*
+	uint8_t axis;
+	while(1)
+	{
+		while(BUTTON1 != 0)
+		{
+	        for (axis = 0; axis < 3; axis++) 
+			{
+				ReadAcc();								// Updates accADC[] with zeroed values
+	            if (accADC[axis] < Config.AccMin[axis])
+				{
+	                Config.AccMin[axis] = accADC[axis];
+	                menu_beep(1);
+				}
+				if (accADC[axis] > Config.AccMax[axis])
+				{
+	                Config.AccMax[axis] = accADC[axis];
+					menu_beep(2);
+				}
+			}
+
+			LCD_Display_Text(27,(prog_uchar*)Verdana8,0,10);	// X
+			LCD_Display_Text(28,(prog_uchar*)Verdana8,0,20);	// Y
+			LCD_Display_Text(29,(prog_uchar*)Verdana8,0,30);	// Z
+
+			LCD_Display_Text(27,(prog_uchar*)Verdana8,64,10);	// X
+			LCD_Display_Text(28,(prog_uchar*)Verdana8,64,20);	// Y
+			LCD_Display_Text(29,(prog_uchar*)Verdana8,64,30);	// Z
+
+			mugui_lcd_puts(itoa(Config.AccMin[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
+			mugui_lcd_puts(itoa(Config.AccMin[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,20);
+			mugui_lcd_puts(itoa(Config.AccMin[YAW],pBuffer,10),(prog_uchar*)Verdana8,10,30);
+
+			mugui_lcd_puts(itoa(Config.AccMax[PITCH],pBuffer,10),(prog_uchar*)Verdana8,74,10);
+			mugui_lcd_puts(itoa(Config.AccMax[ROLL],pBuffer,10),(prog_uchar*)Verdana8,74,20);
+			mugui_lcd_puts(itoa(Config.AccMax[YAW],pBuffer,10),(prog_uchar*)Verdana8,74,30);
+
+			// Update buffer
+			write_buffer(buffer,1);
+			clear_buffer(buffer);
+
+		}
+
+		Save_Config_to_EEPROM();
+		menu_beep(5);
+	}
+*/
+/*
 uint16_t counter = 0;
 
 while(1)
@@ -269,26 +320,28 @@ while(1)
 	}
 
 	ReadAcc();
+	//get_raw_accs();
 	ReadGyros();
 	getEstimatedAttitude();
 
+	accADC[YAW] += 125;
 
 	if (counter > 100)
 	{
 		counter = 0;
 
-		LCD_Display_Text(37,(prog_uchar*)Verdana8,0,0);		// Gyro
-		LCD_Display_Text(38,(prog_uchar*)Verdana8,0,10);	// X
-		LCD_Display_Text(39,(prog_uchar*)Verdana8,0,20);	// Y
-		LCD_Display_Text(40,(prog_uchar*)Verdana8,0,30);	// Z
+		LCD_Display_Text(26,(prog_uchar*)Verdana8,0,0);		// Gyro
+		LCD_Display_Text(27,(prog_uchar*)Verdana8,0,10);	// X
+		LCD_Display_Text(28,(prog_uchar*)Verdana8,0,20);	// Y
+		LCD_Display_Text(29,(prog_uchar*)Verdana8,0,30);	// Z
 
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,64,0); 	// Acc
-		LCD_Display_Text(38,(prog_uchar*)Verdana8,64,10);	// X
-		LCD_Display_Text(39,(prog_uchar*)Verdana8,64,20);	// Y
-		LCD_Display_Text(40,(prog_uchar*)Verdana8,64,30);	// Z
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,64,0); 	// Acc
+		LCD_Display_Text(27,(prog_uchar*)Verdana8,64,10);	// X
+		LCD_Display_Text(28,(prog_uchar*)Verdana8,64,20);	// Y
+		LCD_Display_Text(29,(prog_uchar*)Verdana8,64,30);	// Z
 
 		LCD_Display_Text(61,(prog_uchar*)Verdana8,0,45); 	// AHRS
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,0,55); 	// Acc
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,0,55); 	// Acc
 
 		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
 		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,20);
@@ -298,12 +351,16 @@ while(1)
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,74,20);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,74,30);
 
-		//Angles
-		mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,45); // Gyro
+		// Angles
+		mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,45); // AHRS
 		mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,45);
 
 		mugui_lcd_puts(itoa(-accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,55); // Acc
 		mugui_lcd_puts(itoa(-accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,55);
+
+		// AccMag
+		mugui_lcd_puts(itoa(AccMag,pBuffer,10),(prog_uchar*)Verdana8,100,55);
+
 
 		// Update buffer
 		write_buffer(buffer,1);
@@ -605,15 +662,15 @@ while(1)
 		//* Autolevel mode selection
 		//************************************************************
 		//* Primary override:
-		//*		Autolevel enabled if Config.AutoMode = 0N
 		//*		Autolevel always OFF if Config.AutoMode = OFF (default)
 		//*		Autolevel disabled if Launch_Block = true
 		//*
-		//* Three switchable modes:
+		//* Five switchable modes:
 		//*		1. Disabled by Config.AutoMode = OFF
 		//*		2. Enabled by "AutoChan" channel number
 		//*		3. Enabled by user-set triggers of "ThreePos" channel number
-		//*		4. Always ON
+		//*		4. Enabled if HandsFree and Config.AutoMode = HANDSFREE
+		//*		5. Enabled by Config.AutoMode = ON
 		//************************************************************
 
 		// Update zeroed RC channel data
@@ -633,6 +690,16 @@ while(1)
 			case AUTOCHAN:
 			case THREEPOS:
 				if (RxChannel[Config.AutoChan] > Config.Autotrigger)
+				{
+					AutoLevel = true;			// Activate autolevel mode
+				}	
+				else
+				{
+					AutoLevel = false;			// De-activate autolevel mode
+				}	
+				break;
+			case HANDSFREE:
+				if (HandsFree)					// If hands free
 				{
 					AutoLevel = true;			// Activate autolevel mode
 				}	
@@ -708,15 +775,19 @@ while(1)
 		}
 
 		// Autolevel mode ON
-		//if (AutoLevel) 
-		if (1) 	// Debug
+		if (AutoLevel) 
 		{
 			ReadAcc();			// Only read Accs if in AutoLevel mode
 			getEstimatedAttitude();
 		}
+        else
+        {
+            // Reset IMU each time autolevel restarted
+            FirstTimeIMU = true;
+        }
 
 
-		// Remove RC noise when sticks centered
+		// Remove RC noise and detect when sticks centered
 		RC_Deadband();
 
 		// Calculate PID
@@ -725,7 +796,7 @@ while(1)
 		// Calculate mix
 		ProcessMixer();
 
-		// Transfer Config.Channel[i].value data to servos
+		// Transfer Config.Channel[i].value data to ServoOut[i] and check limits
 		UpdateServos();
 
 		//************************************************************
