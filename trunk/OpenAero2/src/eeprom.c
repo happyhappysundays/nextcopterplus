@@ -57,9 +57,12 @@ void Set_EEPROM_Default_Config(void)
 	//
 	Config.AccRollZeroTrim	= 0;		// User-set ACC trim
 	Config.AccPitchZeroTrim	= 0;
+/*	Config.AccRollZero	= 621;			// Acc calibration defaults
+	Config.AccPitchZero	= 623;
+	Config.AccZedZero	= 767;*/		// Debug
 	Config.AccRollZero	= 621;			// Acc calibration defaults
 	Config.AccPitchZero	= 623;
-	Config.AccZedZero	= 767;
+	Config.AccZedZero	= 641;
 	//
 	Config.Roll.P_mult = 60;			// PID defaults			
 	Config.Roll.I_mult = 0;

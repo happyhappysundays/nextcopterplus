@@ -66,7 +66,7 @@ void CalibrateAcc(void)
 
 	Config.AccPitchZero = accZero[PITCH];
 	Config.AccRollZero 	= accZero[ROLL];
-	Config.AccZedZero = accZero[YAW];
+	//Config.AccZedZero = accZero[YAW]; // Debug. need new cal procedure
 
 	Save_Config_to_EEPROM();
 }
