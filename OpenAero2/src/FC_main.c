@@ -305,7 +305,7 @@ int main(void)
 		menu_beep(5);
 	}
 */
-/*
+
 uint16_t counter = 0;
 
 while(1)
@@ -324,7 +324,7 @@ while(1)
 	ReadGyros();
 	getEstimatedAttitude();
 
-	accADC[YAW] += 125;
+	//accADC[YAW] += 125;
 
 	if (counter > 100)
 	{
@@ -374,7 +374,7 @@ while(1)
 
 	_delay_ms(2);
 }
-*/
+
 //************************************************************
 //* Test Code - End
 //************************************************************
