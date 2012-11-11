@@ -196,7 +196,6 @@ http://i.imgur.com/YjFka.jpg
  # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%. This can be changed with the trigger setting.
  # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
  # *ON:* Always on
- # *Handsfree:* On when the sticks are released
  * *Trigger:* Stick position to enable (-125% to 125%)
  * *Roll P:* PID Proportional gain for the roll gyro
  * *Roll I:* PID I-term gain for the roll gyro
