@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\main.h"
+#include "..\inc\glcd_driver.h"
 
 /*************************************************************************/
 // Replacement for missing include files...
@@ -59,7 +60,6 @@ typedef struct
 #define mugui_int64_t int64_t
 
 // Externals
-extern void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 extern uint8_t buffer[];
 
 // Prototypes
@@ -247,11 +247,11 @@ mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x,
 					bit = data & mask;
 					if(bit)
 					{
-						mugui_ctrl_setPixel(tx+x,ty+y,1);
+						setpixel(buffer,tx+x,ty+y,1);
 					}
 					else
 					{
-						mugui_ctrl_setPixel(tx+x,ty+y,0);
+						setpixel(buffer,tx+x,ty+y,0);
 					}
 					ty++;
 			}

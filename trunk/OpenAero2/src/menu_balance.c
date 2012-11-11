@@ -31,6 +31,8 @@ void Display_balance(void);
 
 void Display_balance(void)
 {
+	int16_t	x_pos, y_pos;
+
 	while(BUTTON1 != 0)
 	{
 		if (BUTTON4 == 0)
@@ -39,7 +41,11 @@ void Display_balance(void)
 			CalibrateAcc();
 		}
 
-		int16_t	x_pos, y_pos;
+		if (BUTTON3 == 0)
+		{
+			_delay_ms(500);
+			CalibrateInvAcc();
+		}
 
 		ReadAcc();
 

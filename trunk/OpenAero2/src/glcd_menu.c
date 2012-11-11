@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1a2"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1a3"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Resetting to";				// Init
 const char PText2[]  PROGMEM = "defaults";
@@ -77,7 +77,7 @@ const char MainMenuItem15[] PROGMEM = "M5 mix";
 const char MainMenuItem16[] PROGMEM = "M6 mix";
 const char MainMenuItem17[] PROGMEM = "M7 mix";
 const char MainMenuItem18[] PROGMEM = "M8 mix";
-const char MainMenuItem10[] PROGMEM = "Balance meter";
+const char MainMenuItem10[] PROGMEM = "Level cal.";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "PWM1"; 		
@@ -85,7 +85,7 @@ const char RXMode2[]  PROGMEM = "PWM2";
 const char RXMode3[]  PROGMEM = "PWM3"; 		
 const char RXMode4[]  PROGMEM = "Aero"; 
 const char RXMode5[]  PROGMEM = "F.Wing";
-const char RXMode6[]  PROGMEM = "Swash120";
+const char RXMode6[]  PROGMEM = "S.120";
 //
 const char PText15[] PROGMEM = "Gyro";
 const char PText16[] PROGMEM = "X";

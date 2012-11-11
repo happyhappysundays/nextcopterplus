@@ -41,6 +41,12 @@ void Display_sensors(void)
 			CalibrateGyros();
 		}
 
+		if (BUTTON3 == 0)
+		{
+			_delay_ms(500);
+			CalibrateInvAcc();
+		}
+
 		ReadGyros();
 		ReadAcc();
 

@@ -114,7 +114,7 @@ int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
  // Reduce RxIn noise and also detect the hands-off situation
 void RC_Deadband(void)
 {
-	// Deadband bulling
+	// Deadband culling
 	if ((RCinputs[AILERON] < DEAD_BAND) && (RCinputs[AILERON] > -DEAD_BAND))
 	{
 		RCinputs[AILERON] = 0;

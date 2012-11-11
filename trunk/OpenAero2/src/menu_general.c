@@ -107,7 +107,8 @@ void menu_general(void)
 						get_preset_mix(AEROPLANE_MIX);
 						break;	
 					case FLYINGWING:
-						get_preset_mix(FLYING_WING_MIX);
+						get_preset_mix(AEROPLANE_MIX);
+						//get_preset_mix(FLYING_WING_MIX);
 						break;
 					case CAMSTAB:
 						get_preset_mix(CAM_STAB);
