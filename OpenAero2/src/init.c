@@ -175,10 +175,8 @@ void init(void)
 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);				// Clear
-		_delay_ms(1000);
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
-		//write_buffer(buffer,1);
 	}
 
 	//***********************************************************

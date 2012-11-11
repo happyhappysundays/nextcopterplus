@@ -163,8 +163,6 @@ typedef struct
 	uint16_t	AccRollZero;			// Acc calibration results
 	uint16_t	AccPitchZero;
 	uint16_t	AccZedZero;
-	int16_t		AccMin[3];				// Full calibration limits
-	int16_t		AccMax[3];
 
 	// 
 	uint16_t	Dummy_2;

@@ -91,6 +91,8 @@
 // Alpha 2	Removed PRESET channels and replaced with per-output trims.
 //			Added HANDSFREE autolevel modes (autolevel at centered sticks)
 //			Added working differential (finally)
+// Alpha 3	Added IMU fixes for inverted flight. New inverted calibration mode
+//			Code now 100.0% full. Had to remove one mixer preset.
 //
 //***********************************************************
 //* To do
@@ -259,53 +261,6 @@ int main(void)
 //* Test Code - Start
 //************************************************************
 /*
-	uint8_t axis;
-	while(1)
-	{
-		while(BUTTON1 != 0)
-		{
-	        for (axis = 0; axis < 3; axis++) 
-			{
-				ReadAcc();								// Updates accADC[] with zeroed values
-	            if (accADC[axis] < Config.AccMin[axis])
-				{
-	                Config.AccMin[axis] = accADC[axis];
-	                menu_beep(1);
-				}
-				if (accADC[axis] > Config.AccMax[axis])
-				{
-	                Config.AccMax[axis] = accADC[axis];
-					menu_beep(2);
-				}
-			}
-
-			LCD_Display_Text(27,(prog_uchar*)Verdana8,0,10);	// X
-			LCD_Display_Text(28,(prog_uchar*)Verdana8,0,20);	// Y
-			LCD_Display_Text(29,(prog_uchar*)Verdana8,0,30);	// Z
-
-			LCD_Display_Text(27,(prog_uchar*)Verdana8,64,10);	// X
-			LCD_Display_Text(28,(prog_uchar*)Verdana8,64,20);	// Y
-			LCD_Display_Text(29,(prog_uchar*)Verdana8,64,30);	// Z
-
-			mugui_lcd_puts(itoa(Config.AccMin[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
-			mugui_lcd_puts(itoa(Config.AccMin[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,20);
-			mugui_lcd_puts(itoa(Config.AccMin[YAW],pBuffer,10),(prog_uchar*)Verdana8,10,30);
-
-			mugui_lcd_puts(itoa(Config.AccMax[PITCH],pBuffer,10),(prog_uchar*)Verdana8,74,10);
-			mugui_lcd_puts(itoa(Config.AccMax[ROLL],pBuffer,10),(prog_uchar*)Verdana8,74,20);
-			mugui_lcd_puts(itoa(Config.AccMax[YAW],pBuffer,10),(prog_uchar*)Verdana8,74,30);
-
-			// Update buffer
-			write_buffer(buffer,1);
-			clear_buffer(buffer);
-
-		}
-
-		Save_Config_to_EEPROM();
-		menu_beep(5);
-	}
-*/
-
 uint16_t counter = 0;
 
 while(1)
@@ -374,7 +329,7 @@ while(1)
 
 	_delay_ms(2);
 }
-
+*/
 //************************************************************
 //* Test Code - End
 //************************************************************
@@ -514,9 +469,11 @@ while(1)
 		{
 			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
 			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
-			EIMSK  |= (1 << INT0);				// Enable INT0 (Elevator input)
-			EIMSK  |= (1 << INT1);				// Enable INT1 (Aileron input)
-			EIMSK  |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
+			//EIMSK  |= (1 << INT0);				// Enable INT0 (Elevator input)
+			//EIMSK  |= (1 << INT1);				// Enable INT1 (Aileron input)
+			//EIMSK  |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
+
+			EIMSK  |= (1 << 0x07);				// Enable INT0, 1 and 2 
 		}
 		else // CPPM mode
 		{

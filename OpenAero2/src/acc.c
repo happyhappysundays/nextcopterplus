@@ -22,6 +22,7 @@
 
 void ReadAcc(void);
 void CalibrateAcc(void);
+void CalibrateInvAcc(void);
 void get_raw_accs(void);
 
 //************************************************************
@@ -45,10 +46,11 @@ void CalibrateAcc(void)
 {
 	uint8_t i;
 
-	accZero[PITCH] 	= 0;		// Get average zero value (over 32 readings)			
+	accZero[PITCH] 	= 0;		
 	accZero[ROLL]	= 0;
 	accZero[YAW]	= 0;	
 
+	// Get average zero value (over 32 readings)
 	for (i=0;i<32;i++)
 	{
 		get_raw_accs();			// Updates gyroADC[]
@@ -66,7 +68,31 @@ void CalibrateAcc(void)
 
 	Config.AccPitchZero = accZero[PITCH];
 	Config.AccRollZero 	= accZero[ROLL];
-	//Config.AccZedZero = accZero[YAW]; // Debug. need new cal procedure
+	Config.AccZedZero = accZero[YAW];
+
+	Save_Config_to_EEPROM();
+}
+
+void CalibrateInvAcc(void)
+{
+	uint8_t i;
+	int16_t temp;
+
+	accZero[YAW] = 0;
+
+	// Get average zero value (over 32 readings)
+	for (i=0;i<32;i++)
+	{
+		get_raw_accs();			// Updates gyroADC[]
+		accZero[YAW] += accADC[YAW];		
+		_delay_ms(10);			// Get a better acc average over time
+	}
+
+	accZero[YAW] = (accZero[YAW] >> 5);	// Inverted zero point
+
+	// Reset zero to halfway between min and max Z
+	temp = ((Config.AccZedZero - accZero[YAW]) >> 1);
+	Config.AccZedZero = accZero[YAW] + temp;
 
 	Save_Config_to_EEPROM();
 }

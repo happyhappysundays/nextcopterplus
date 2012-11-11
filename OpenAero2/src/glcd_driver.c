@@ -39,7 +39,6 @@
 
 void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);
-void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 void write_buffer(uint8_t *buffer, uint8_t type);
 
 //***********************************************************
@@ -155,24 +154,6 @@ void clear_buffer(uint8_t *buff)
 //***********************************************************
 //* Graphics API code
 //***********************************************************
-
-// Set a single pixel - muGUI
-void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color) 
-{
-	if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
-	{
-		return;
-	}
-	// x is which column
-	if (color)
-	{
-		buffer[x+ (y/8)*128] |= (1 << (7-(y%8)));  
-	}
-	else
-	{
-		buffer[x+ (y/8)*128] &= ~(1 << (7-(y%8))); 
-	}
-}
 
 // Set a single pixel
 void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color) 

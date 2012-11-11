@@ -90,7 +90,6 @@ void write_buffer(uint8_t *buffer, uint8_t type);
 void clear_screen(void);
 void clear_buffer(uint8_t *buff);
 void write_logo_buffer(uint8_t *buffer);
-void mugui_ctrl_setPixel(uint16_t x, uint16_t y, uint8_t color);
 
 void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color);
 void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color);

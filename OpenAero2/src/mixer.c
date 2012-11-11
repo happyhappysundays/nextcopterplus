@@ -27,6 +27,7 @@ void UpdateLimits(void);
 void get_preset_mix (channel_t*);
 
 int16_t scale32(int16_t value16, int16_t multiplier16);
+uint16_t scale_percent(int8_t value);
 
 //************************************************************
 // Mix tables (both RC inputs and servo/ESC outputs)
@@ -51,7 +52,7 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,THROTTLE,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH7,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Right aileron)
 	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, REVERSED,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, // ServoOut8 (Rudder)
 }; 
-
+/*
 channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
 {
 	// Rudder -= Yaw; (normal)
@@ -69,7 +70,7 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,0,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
 	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8
 }; 
-
+*/
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For presets, use
@@ -304,26 +305,13 @@ void ProcessMixer(void)
 void UpdateLimits(void)
 {
 	uint8_t i;
-	int16_t min, max, failsafe, trim;
 	int16_t temp;
 
-	// Update stability trigger
-	temp = Config.Stablimit;
-	temp = ((temp * 12) + 3750);
-	Config.Stabtrigger = temp;
-
-	// Update hands-free trigger (0 to 250)
+	// Update triggers
 	Config.HandsFreetrigger = Config.Autolimit + 125;
-
-	// Update autolevel trigger
-	temp = Config.Autolimit * 12;
-	Config.Autotrigger = temp + 3750;
-
-	// Update hand launch trigger
-	temp = Config.LaunchThrPos;
-	temp = ((temp * 12) + 3750);
-	Config.Launchtrigger = temp;
-
+	Config.Stabtrigger = scale_percent(Config.Stablimit);
+	Config.Autotrigger = scale_percent(Config.Autolimit);
+	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
 
 	// Update I-term limits
 	for (i = 0; i < 3; i++)
@@ -335,21 +323,10 @@ void UpdateLimits(void)
 	// Update travel limits
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		min = Config.Channel[i].min_travel;
-		min = ((min * 12) + 3750);
-		Config.Limits[i].minimum = min;
-
-		max = Config.Channel[i].max_travel;
-		max = ((max * 12) + 3750);
-		Config.Limits[i].maximum = max;
-
-		failsafe = Config.Channel[i].Failsafe;
-		failsafe = ((failsafe * 12) + 3750);
-		Config.Limits[i].failsafe = failsafe;
-
-		trim = Config.Channel[i].Offset;
-		trim = ((trim * 12) + 3750);
-		Config.Limits[i].trim = trim;
+		Config.Limits[i].minimum = scale_percent(Config.Channel[i].min_travel);
+		Config.Limits[i].maximum = scale_percent(Config.Channel[i].max_travel);
+		Config.Limits[i].failsafe = scale_percent(Config.Channel[i].Failsafe);
+		Config.Limits[i].trim = scale_percent(Config.Channel[i].Offset);
 	}
 }
 
@@ -415,4 +392,13 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 	}
 
 	return value16;
+}
+
+// Scale percentages to position
+uint16_t scale_percent(int8_t value)
+{
+	uint16_t temp;
+
+	temp = ((value * 12) + 3750);
+	return temp;
 }

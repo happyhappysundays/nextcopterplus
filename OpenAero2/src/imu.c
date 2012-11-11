@@ -157,10 +157,18 @@ void getEstimatedAttitude(void)
 
 	if (!((acc_0_6G > AccMag) || (AccMag > acc_1_4G))) 
 	{
-		for (axis = 0; axis < 2; axis++)
+		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
+
+		// The CF algorithm will fail when inverted as acc moves opposite gyro
+		// so when inverted, use acc only. A compromise... 
+		if (accADC[YAW] > 0)
 		{
-			deltaGyroAngle[axis] = ((deltaGyroAngle[axis] * GYR_CMPF_FACTOR) - accSmooth[axis]) * INV_GYR_CMPF_FACTOR;
+			deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 		}
+		else
+		{
+			deltaGyroAngle[PITCH] = - accSmooth[PITCH];
+		}	
 	}
 
 	// Simple IMU as used in OpenAero2 to V1.0 (Beta 4.1)
