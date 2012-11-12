@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.00 Release - September 2012
+// Version 1.1 Beta 1 - November 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -30,7 +30,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V1.00	Based on OpenAero V1.13 Beta 8 code
+// V1.0		Based on OpenAero V1.13 Beta 8 code
 //			Initial code base.
 // Alpha 1	First release to alpha testers
 // Alpha 2  Fixed channel number bug, added second aileron to default mixer
@@ -82,7 +82,7 @@
 //			Added General menu settings for Acc LPF and IMU CF factor.
 // Beta 4.1 Trial fix for Autolevel switch-on issue (Successful).
 //	
-// V1.10	Based on OpenAero2 Beta 4.1 code
+// V1.1		Based on OpenAero2 Beta 4.1 code
 // Alpha 1	Stability and Autolevel switch setpoint adjustment	
 //			RC mixers moved to main mixers. Fixed balance meter movement
 //			Main mixers can now cross-mix up to four channels
@@ -90,22 +90,21 @@
 //			Added 120 degree swashplate preset. 
 // Alpha 2	Removed PRESET channels and replaced with per-output trims.
 //			Added HANDSFREE autolevel modes (autolevel at centered sticks)
-//			Added working differential (finally)
+//			Added working differential mode (finally)
 // Alpha 3	Added IMU fixes for inverted flight. New inverted calibration mode
 //			Code now 100.0% full. Had to remove one mixer preset.
+// Beta 1	Bugfix for three-position function. Minor tweaks for Beta 1
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // For V1.1 Beta 1
-//	Update to attitude measurement for inverted flight
 //
-// Future
+// Future???
 //	Aeroplane attitude lock mode (for 3D)
 //	CamStab RC control with servo speed setting
-//  Camera stabilisation refinements (separate PID settings)
-//
+//  Camera stabilisation refinements
 //
 //***********************************************************
 //* Flight configurations (Servo number)
@@ -663,7 +662,7 @@ while(1)
 				else
 				{
 					AutoLevel = false;			// De-activate autolevel mode
-				}	
+				}
 				break;
 			case ALWAYSON:
 				AutoLevel = true;				// Activate autolevel mode

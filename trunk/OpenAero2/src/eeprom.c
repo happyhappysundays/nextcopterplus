@@ -100,11 +100,12 @@ void Set_EEPROM_Default_Config(void)
 	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
 	Config.AutoChan = GEAR;				// Channel AUX2 switches autolevel by default
 	Config.FlapChan = THROTTLE;			// Most people will use the throttle input I imagine
-	Config.Stabtrigger = 3500;
-	Config.Autotrigger = 3500;
-	Config.LaunchMode = OFF;			// Launch mode on/off
+
+	Config.Autolimit = 10;				// Autolevel trigger setting
+	Config.Stablimit = -30;				// Stability trigger setting
 	Config.LaunchThrPos = 0;			// Launch mode throttle position
-	Config.Launchtrigger = 3500;		// Respanned launch trigger
+
+	Config.LaunchMode = OFF;			// Launch mode on/off
 
 	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
 	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
@@ -113,7 +114,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
 
 	Config.CamStab = OFF;
-	Config.RCMix = OFF;					// RC mixer defaults to OFF for speed
 
 	Config.Orientation = 0;				// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast

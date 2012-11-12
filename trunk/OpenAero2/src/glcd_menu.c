@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1a3"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1b1"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Resetting to";				// Init
 const char PText2[]  PROGMEM = "defaults";
@@ -144,7 +144,6 @@ const char StabMenuItem13[]  PROGMEM = "Trigger:";
 const char ExpoMenuItem3[]  PROGMEM = "Differential:";		// Expo text
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
-const char MixerMenuItem1[]  PROGMEM = "RC mix:";
 const char MixerMenuItem2[]  PROGMEM = "Horiz.";
 const char MixerMenuItem3[]  PROGMEM = "Vert.";
 //
@@ -224,7 +223,11 @@ const char *text_menu[] PROGMEM =
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3, 												// 18 to 21 RX mode
 		//
-		RXMode4, RXMode5, MainMenuItem6, RXMode6,											// 22 to 25 Mix presets
+#ifdef AERO
+		RXMode4, MainMenuItem6, RXMode5, Dummy0,											// 22 to 25 Mix presets for Aero, Camstab, F.Wing
+#else
+		RXMode4, MainMenuItem6, RXMode6, Dummy0,											// 22 to 25 Mix presets for Aero, Camstab, S.120
+#endif
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
@@ -286,9 +289,9 @@ const char *text_menu[] PROGMEM =
 		RCMenuItem0, RCMenuItem1, RCMenuItem2, RCMenuItem3, 								// 149 to 157 rc menu
 		RCMenuItem4, Dummy0, Dummy0, Dummy0, Dummy0,
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,MixerMenuItem1,				// 158 to 168 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 158 to 168 general
 		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 	
-		GeneralText8,	
+		GeneralText8, Dummy0,
 		//
 		MixerItem0, MixerItem2, MixerItem13, MixerItem2, MixerItem4, MixerItem1, 			// 169 to 194 
 		MixerItem5, MixerItem1, MixerItem6,  MixerItem1, MixerItem7, MixerItem1, 

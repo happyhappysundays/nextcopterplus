@@ -52,25 +52,7 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,THROTTLE,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH7,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Right aileron)
 	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, REVERSED,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, // ServoOut8 (Rudder)
 }; 
-/*
-channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	// Rudder -= Yaw; (normal)
-	// LAileron += Roll; (reversed)
-	// LElevator -= Pitch; (normal)
-	// RAileron += Roll;(reversed)
-	// RElevator += Pitch;(reversed)
-	
-	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut1
-	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut2
-	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut3
-	{0,NOCHAN,  100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0},  	// ServoOut4
-	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH5,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5
-	{0,ELEVATOR,100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,CH6,0,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (left elevon)
-	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,0,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
-	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8
-}; 
-*/
+
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For presets, use
@@ -91,8 +73,27 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	{0,ELEVATOR,100,NOCHAN,0,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,CH6,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut6 (Tilt axis)
 	{0,RUDDER, 100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON,NORMAL, OFF,NORMAL,OFF,NORMAL,CH7,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Pan axis)
 	{0,AILERON,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0},  // ServoOut8 (Roll axis)
-}; 
+};
 
+#ifdef AERO
+channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
+{
+	// Rudder -= Yaw; (normal)
+	// LAileron += Roll; (reversed)
+	// LElevator -= Pitch; (normal)
+	// RAileron += Roll;(reversed)
+	// RElevator += Pitch;(reversed)
+	
+	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut1
+	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut2
+	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut3
+	{0,NOCHAN,  100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0},  	// ServoOut4
+	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH5,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5
+	{0,ELEVATOR,100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,CH6,0,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (left elevon)
+	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,0,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
+	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8
+}; 
+#else
 // 120 degree Swashplate mixer defaults
 channel_t SWASH120_MIX[MAX_OUTPUTS] PROGMEM = 
 {
@@ -115,7 +116,7 @@ channel_t SWASH120_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,THROTTLE,60, NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH7,100,CH3,30,CH2,60,0,0,-100,100,0,0},// ServoOut7 (CYC1)
 	{0,THROTTLE,60, NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,100,CH3,30,CH2,-60,0,0,-100,100,0,0},// ServoOut8 (CYC2)
 }; 
-
+#endif
 //************************************************************
 // Get preset mix from Program memory
 void get_preset_mix(channel_t* preset)
@@ -145,7 +146,7 @@ void ProcessMixer(void)
 	{
 		// Primary aileron channel
 		temp = RCinputs[AILERON];
-		if (temp < 0)			// For one side only
+		if (temp > 0)			// For one side only
 		{
 			temp = scale32(temp, (100 - Config.Differential));
 		}
@@ -308,7 +309,7 @@ void UpdateLimits(void)
 	int16_t temp;
 
 	// Update triggers
-	Config.HandsFreetrigger = Config.Autolimit + 125;
+	Config.HandsFreetrigger = Config.Autolimit * 5;
 	Config.Stabtrigger = scale_percent(Config.Stablimit);
 	Config.Autotrigger = scale_percent(Config.Autolimit);
 	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);

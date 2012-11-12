@@ -24,7 +24,6 @@ extern void menu_expo(void);
 extern void menu_mixer(uint8_t i);
 extern void menu_general(void);
 extern void	menu_camstab(void);
-extern void menu_rcmixer(uint8_t i);
 
 extern  uint8_t button;
 
