@@ -46,7 +46,7 @@ const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 101, 0
 const menu_range_t auto_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,HANDSFREE,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
-	{-125,125,10,0,0},
+	{-125,125,10,0,10},
 	{0,127,1,0,30},
 	{0,127,1,0,30},
 	{-127,127,1,0,0}, 

@@ -46,7 +46,7 @@ const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 
 const menu_range_t stab_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,STABCHAN}, 	// Min, Max, Increment, Style, Default
-	{-125,125,10,0,0},
+	{-125,125,10,0,-30},
 	{0,127,1,0,60},
 	{0,127,1,0,0},
 	{0,127,1,0,0},

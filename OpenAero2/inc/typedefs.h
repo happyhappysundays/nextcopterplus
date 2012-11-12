@@ -6,6 +6,13 @@
 #define TYPE_DEFS_H_
 
 /*********************************************************************
+ * Temporary compile defs
+ ********************************************************************/
+
+//#define AERO	// Build version with Aero, F.Wing and Camstab
+#define HELI	// Build version with Aero, S.120 and Camstab
+
+/*********************************************************************
  * Type definitions
  ********************************************************************/
 
@@ -140,7 +147,6 @@ typedef struct
 	int8_t		Orientation;			// Horizontal / vertical
 	int8_t		Contrast;				// Contrast setting
 	int8_t		Status_timer;			// Status screen timer
-	int8_t		RCMix;					// RC mixer enable
 	int8_t		LMA_enable;				// LMA setting
 	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
