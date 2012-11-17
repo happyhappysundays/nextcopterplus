@@ -109,7 +109,7 @@ static const motorMixer_t mixerVtail4[] = {
 
 // Keep this synced with MultiType struct in mw.h!
 const mixer_t mixers[] = {
-//    Mo Se Mixtable
+//    numberMotor,useServo,motorMixer_t *motor
     { 0, 0, NULL },                // entry 0
     { 3, 1, mixerTri },            // MULTITYPE_TRI
     { 4, 0, mixerQuadP },          // MULTITYPE_QUADP
@@ -193,10 +193,18 @@ void writeServos(void)
             break;
 
         case MULTITYPE_AIRPLANE:
-
+            pwmWriteServo(0, servo[0]); // debug
+            pwmWriteServo(1, servo[1]);
+            pwmWriteServo(2, servo[2]);
+            pwmWriteServo(3, servo[3]);
+            pwmWriteServo(4, servo[4]);
             break;
 
         case MULTITYPE_FLYING_WING:
+            pwmWriteServo(0, servo[0]); // debug
+            pwmWriteServo(1, servo[1]);
+            break;
+
         case MULTITYPE_GIMBAL:
             pwmWriteServo(0, servo[0]);
             pwmWriteServo(1, servo[1]);
@@ -234,52 +242,119 @@ void writeAllMotors(int16_t mc)
 
 static void airplaneMixer(void)
 {
-#if 0
+	static int16_t flaperons = 0;
+	static int16_t flap = 0;
+	static int16_t slowFlaps = 0;
+	static uint8_t flapskip;
+		
+	uint8_t i, speed;
+	uint8_t roll_channel;
     uint16_t servomid[8];
-    int16_t flaperons[2] = { 0, 0 };
 
-    for (i = 0; i < 8; i++) {
-        servomid[i] = 1500 + cfg.servotrim[i]; // servo center is 1500?
+    // Start by setting the mid points
+	for (i = 0; i < 8; i++) 
+	{
+//		servomid[i] = 1500 + cfg.servotrim[i]; 		// cfg.servotrim[] are not set anywhere yet... duh!
+		servomid[i] = 1500; 		// Servo center is 1500?
+		servo[i] = 0; // Debug
     }
 
+	// Reconstruct extra channels
+	rcCommand[AUX1] = rcData[AUX1] - cfg.midrc;
+	rcCommand[AUX2] = rcData[AUX2] - cfg.midrc;
+	rcCommand[AUX3] = rcData[AUX3] - cfg.midrc;
+	rcCommand[AUX4] = rcData[AUX4] - cfg.midrc;
+	rcCommand[NOCHAN] = 0; // Debug
+		
+	// Throttle is handled separately here
     if (!f.ARMED)
-        motor[0] = cfg.mincommand; // Kill throttle when disarmed
-    else
-        motor[0] = rcData[THROTTLE];
-
-    if (cfg.flaperons) {
-        
-        
+	{
+		motor[0] = cfg.mincommand; 					// Kill throttle when disarmed
     }
+	else
+	{
+		motor[0] = rcData[THROTTLE];
+	}
+	// Do flap speed control
+	if (cfg.flapchan != NOCHAN)						// Ignore if no flap channel
+	{
+		flap = rcCommand[cfg.flapchan];
+	}
+	
+	if (cfg.flapspeed) 
+	{
+		if (abs(slowFlaps - flap) >= cfg.flapstep)	// Difference larger than one step, so ok
+		{
+			speed = cfg.flapstep;					// Need to manipulate speed as target approaches										
+		}
+		else
+		{
+			speed = 1;								// Otherwise this will oscillate
+		}
 
-    if (cfg.flaps) {
-        int16_t flap = 1500 - constrain(rcData[cfg.flaps], cfg.servoendpoint_low[2], cfg.servoendpoint_high[2]);
-        static int16_t slowFlaps = flap;
+		if ((slowFlaps < flap) && (flapskip == cfg.flapspeed))
+		{
+			slowFlaps += speed;
+		} 
+		else if ((slowFlaps > flap) && (flapskip == cfg.flapspeed)) 
+		{
+			slowFlaps -= speed;
+		}				
+	} 
+	else
+	{
+	 	slowFlaps = flap;
+	}
 
-        if (cfg.flapspeed) {
-            if (slowFlaps < flap) {
-                slowFlaps += cfg.flapspeed;
-            } else if (slowFlaps > flap) {
-                slowFlaps -= cfg.flapspeed;
-            }
-        } else {
-            slowFlaps = flap;
-        }
-        servo[2] = servomid[2] + (slowFlaps * cfg.servoreverse[2]);
+	flapskip++;
+	if (flapskip > cfg.flapspeed) flapskip = 0;
+		
+	// Add in flap and reverse as necessary
+	flaperons = (slowFlaps * cfg.servoreverse[cfg.flapchan]);
+	
+	// Basic flaps - one separate channel
+	if (cfg.flapmode == BASIC_FLAP)
+	{
+		roll_channel = ROLL;
+	}
+	
+	// Flaperons - two idependant channels
+	else
+	{
+		roll_channel = cfg.aileron2;
+	}			
+
+    if (f.PASSTHRU_MODE) { // More-or-less Direct passthru from RX
+        servo[0] = (rcCommand[ROLL] + flaperons) * cfg.servoreverse[0];     	//   Reversible left flaperon or Aileron
+        servo[1] = (rcCommand[roll_channel] + flaperons) * cfg.servoreverse[1]; //   Reversible right flaperon
+        servo[2] = rcCommand[YAW] * cfg.servoreverse[2];                       	//   Reversible Rudder
+        servo[3] = rcCommand[PITCH] * cfg.servoreverse[3];                     	//   Reversible Elevator
+		servo[4] = rcCommand[cfg.flapchan] * cfg.servoreverse[4];     			//   Reversible flap
     }
+	 
+	else {
+		if (f.HORIZON_MODE)
+		{	// Autolevel
+			servo[0] = cfg.gimbal_roll_gain * angle[ROLL] / 16;   // Create new gain variable
+			servo[1] = cfg.gimbal_roll_gain * angle[ROLL] / 16;
+	    	servo[3] = cfg.gimbal_pitch_gain * angle[PITCH] / 16;	
+		}
+			
+		// Assisted modes (gyro only or gyro+acc according to AUX configuration in GUI)
+        servo[0] += (axisPID[ROLL] + flaperons) * cfg.servoreverse[0];     	//   Reversible, stabilised left flaperon or Aileron
+        servo[1] += (axisPID[ROLL] - rcCommand[ROLL] + rcCommand[roll_channel] + flaperons) * cfg.servoreverse[1];   //   Reversible, stabilised right flaperon
+        servo[2] = axisPID[YAW] * cfg.servoreverse[2];                       	//   Reversible, stabilised Rudder
+        servo[3] += axisPID[PITCH] * cfg.servoreverse[3];                     	//   Reversible, stabilised Elevator
+		servo[4] = flaperons;        		 									//   Reversible, speed-controlled flap
+	}
+		
+	// Offset, then check all servo outputs against endpoints
+	for (i = 0; i < 8; i++) 
+	{
+		servo[i] = servo[i] + servomid[i];
+		servo[i] = constrain(servo[i], cfg.servoendpoint_low[i], cfg.servoendpoint_high[i]);
+	}
 
-    if (f.PASSTHRU_MODE) { // Direct passthru from RX
-        servo[3] = servomid[3] + ((rcCommand[ROLL] + flapperons[0]) * cfg.servoreverse[3]);     //   Wing 1
-        servo[4] = servomid[4] + ((rcCommand[ROLL] + flapperons[1]) * cfg.servoreverse[4]);     //   Wing 2
-        servo[5] = servomid[5] + (rcCommand[YAW] * cfg.servoreverse[5]);                        //   Rudder
-        servo[6] = servomid[6] + (rcCommand[PITCH] * cfg.servoreverse[6]);                      //   Elevator
-    } else { // Assisted modes (gyro only or gyro+acc according to AUX configuration in Gui
-        servo[3] = (servomid[3] + ((axisPID[ROLL] + flapperons[0]) * cfg.servoreverse[3]));     //   Wing 1
-        servo[4] = (servomid[4] + ((axisPID[ROLL] + flapperons[1]) * cfg.servoreverse[4]));     //   Wing 2
-        servo[5] = (servomid[5] + (axisPID[YAW] * cfg.servoreverse[5]));                        //   Rudder
-        servo[6] = (servomid[6] + (axisPID[PITCH] * cfg.servoreverse[6]));                      //   Elevator
-    }
-#endif
 }
 
 void mixTable(void)
@@ -319,17 +394,15 @@ void mixTable(void)
 
         case MULTITYPE_FLYING_WING:
             motor[0] = rcCommand[THROTTLE];
-            if (f.PASSTHRU_MODE) {
-                // do not use sensors for correction, simple 2 channel mixing
-                servo[0]  = cfg.pitch_direction_l * (rcData[PITCH] - cfg.midrc) + cfg.roll_direction_l * (rcData[ROLL] - cfg.midrc);
-                servo[1]  = cfg.pitch_direction_r * (rcData[PITCH] - cfg.midrc) + cfg.roll_direction_r * (rcData[ROLL] - cfg.midrc);
-            } else {
-                // use sensors to correct (gyro only or gyro + acc)
-                servo[0]  = cfg.pitch_direction_l * axisPID[PITCH] + cfg.roll_direction_l * axisPID[ROLL];
-                servo[1]  = cfg.pitch_direction_r * axisPID[PITCH] + cfg.roll_direction_r * axisPID[ROLL];
+            if (f.PASSTHRU_MODE) { // do not use sensors for correction, simple 2 channel mixing
+                int p = 0, r = 0;
+                servo[0] = p * (rcData[PITCH] - cfg.midrc) + r * (rcData[ROLL] - cfg.midrc);
+                servo[1] = p * (rcData[PITCH] - cfg.midrc) + r * (rcData[ROLL] - cfg.midrc);
+            } else { // use sensors to correct (gyro only or gyro+acc)
+                int p = 0, r = 0;
+                servo[0] = p * axisPID[PITCH] + r * axisPID[ROLL];
+                servo[1] = p * axisPID[PITCH] + r * axisPID[ROLL];
             }
-            servo[0] = constrain(servo[0] + cfg.wing_left_mid, cfg.wing_left_min, cfg.wing_left_max);
-            servo[1] = constrain(servo[1] + cfg.wing_right_mid, cfg.wing_right_min, cfg.wing_right_max);
             break;
     }
 
@@ -346,7 +419,7 @@ void mixTable(void)
         servo[1] = cfg.gimbal_roll_mid + aux[1];
 
         if (rcOptions[BOXCAMSTAB]) {
-            servo[0] += cfg.gimbal_pitch_gain * angle[PITCH] / 16;
+            servo[0] += cfg.gimbal_pitch_gain * angle[PITCH] / 16;		
             servo[1] += cfg.gimbal_roll_gain * angle[ROLL]  / 16;
         }
 

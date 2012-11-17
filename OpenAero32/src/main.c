@@ -30,7 +30,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V1.00a	Based on Baseflight r218 code
+// V1.00a	Based on Baseflight r208 code
 //			Initial code base.
 
 #include "board.h"
@@ -43,6 +43,7 @@ extern rcReadRawDataPtr rcReadRawFunc;
 extern uint16_t pwmReadRawRC(uint8_t chan);
 extern uint16_t spektrumReadRawRC(uint8_t chan);
 
+// For printf implementation via UART
 static void _putc(void *p, char c)
 {
     uartWrite(c);
@@ -63,16 +64,6 @@ int main(void)
     // We have these sensors
     sensorsSet(SENSOR_ACC | SENSOR_BARO | SENSOR_MAG);
 
-    if (feature(FEATURE_SPEKTRUM)) {
-        spektrumInit();
-        rcReadRawFunc = spektrumReadRawRC;
-    } else {
-        // spektrum and GPS are mutually exclusive
-        // Optional GPS - available in both PPM and PWM input mode, in PWM input, reduces number of available channels by 2.
-        if (feature(FEATURE_GPS))
-            gpsInit(cfg.gps_baudrate);
-    }
-
     mixerInit(); // this will set useServo var depending on mixer type
 
     // when using airplane/wing mixer, servo/motor outputs are remapped
@@ -80,7 +71,6 @@ int main(void)
         pwm_params.airplane = true;
     else
         pwm_params.airplane = false;
-    pwm_params.useUART = feature(FEATURE_GPS);
     pwm_params.usePPM = feature(FEATURE_PPM);
     pwm_params.enableInput = !feature(FEATURE_SPEKTRUM); // disable inputs if using spektrum
     pwm_params.useServos = useServo;
@@ -94,7 +84,7 @@ int main(void)
     rcReadRawFunc = pwmReadRawRC;
 
     // Flash LEDS encouragingly at the user
-	LED1_ON;
+		LED1_ON;
     LED0_OFF;
     for (i = 0; i < 10; i++) {
         LED1_TOGGLE;
@@ -115,7 +105,22 @@ int main(void)
     if (feature(FEATURE_VBAT))
         batteryInit();
 
+    // Init spektrum if fitted
+		if (feature(FEATURE_SPEKTRUM)) {
+        spektrumInit();
+        rcReadRawFunc = spektrumReadRawRC;
+    } else {
+        // spektrum and GPS are mutually exclusive
+        // Optional GPS - available only when using PPM, otherwise required pins won't be usable
+        if (feature(FEATURE_PPM)) {
+            if (feature(FEATURE_GPS))
+                gpsInit(cfg.gps_baudrate);
+        }
+    }
+
     previousTime = micros();
+		
+		// Do wierd calibration thing
     if (cfg.mixerConfiguration == MULTITYPE_GIMBAL)
         calibratingA = 400;
     calibratingG = 1000;
@@ -129,7 +134,7 @@ int main(void)
 
 void HardFault_Handler(void)
 {
-    // fall out of the sky
+    // Fall out of the sky - Would not a soft reset be an better idea?
     writeAllMotors(cfg.mincommand);
     while (1);
 }

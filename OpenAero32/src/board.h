@@ -139,3 +139,4 @@ typedef struct baro_t
 #include "drv_l3g4200d.h"
 #include "drv_pwm.h"
 #include "drv_uart.h"
+#include "drv_hcsr04.h"

@@ -13,7 +13,7 @@ config_t cfg;
 const char rcChannelLetters[] = "AERT1234";
 
 static uint32_t enabledSensors = 0;
-uint8_t checkNewConf = 31;
+uint8_t checkNewConf = 28;
 
 void parseRcChannels(const char *input)
 {
@@ -36,6 +36,7 @@ void readEEPROM(void)
     for (i = 0; i < 6; i++)
         lookupPitchRollRC[i] = (2500 + cfg.rcExpo8 * (i * i - 25)) * i * (int32_t) cfg.rcRate8 / 2500;
 
+		// Create expo lookup
     for (i = 0; i < 11; i++) {
         int16_t tmp = 10 * i - cfg.thrMid8;
         uint8_t y = 1;
@@ -85,32 +86,37 @@ void checkFirstTime(bool reset)
 
     // Default settings
     cfg.version = checkNewConf;
-    cfg.mixerConfiguration = MULTITYPE_QUADX;
+    //cfg.mixerConfiguration = MULTITYPE_QUADX;
+	cfg.mixerConfiguration = MULTITYPE_AIRPLANE;
     featureClearAll();
     featureSet(FEATURE_VBAT);
 
     cfg.looptime = 0;
     cfg.P8[ROLL] = 40;
-    cfg.I8[ROLL] = 30;
-    cfg.D8[ROLL] = 23;
+    //cfg.I8[ROLL] = 30;
+    //cfg.D8[ROLL] = 23;
+	cfg.I8[ROLL] = 0;
+	cfg.D8[ROLL] = 0;
     cfg.P8[PITCH] = 40;
-    cfg.I8[PITCH] = 30;
-    cfg.D8[PITCH] = 23;
+    //cfg.I8[PITCH] = 30;
+    //cfg.D8[PITCH] = 23;
+    cfg.I8[PITCH] = 0;
+    cfg.D8[PITCH] = 0;
     cfg.P8[YAW] = 85;
     cfg.I8[YAW] = 45;
     cfg.D8[YAW] = 0;
     cfg.P8[PIDALT] = 16;
     cfg.I8[PIDALT] = 15;
     cfg.D8[PIDALT] = 7;
-    cfg.P8[PIDPOS] = 11; // POSHOLD_P * 100;
-    cfg.I8[PIDPOS] = 0; // POSHOLD_I * 100;
+    cfg.P8[PIDPOS] = 11; 	// POSHOLD_P * 100;
+    cfg.I8[PIDPOS] = 0; 	// POSHOLD_I * 100;
     cfg.D8[PIDPOS] = 0;
-    cfg.P8[PIDPOSR] = 20; // POSHOLD_RATE_P * 10;
-    cfg.I8[PIDPOSR] = 8; // POSHOLD_RATE_I * 100;
-    cfg.D8[PIDPOSR] = 45; // POSHOLD_RATE_D * 1000;
-    cfg.P8[PIDNAVR] = 14; // NAV_P * 10;
-    cfg.I8[PIDNAVR] = 20; // NAV_I * 100;
-    cfg.D8[PIDNAVR] = 80; // NAV_D * 1000;
+    cfg.P8[PIDPOSR] = 20; 	// POSHOLD_RATE_P * 10;
+    cfg.I8[PIDPOSR] = 8; 	// POSHOLD_RATE_I * 100;
+    cfg.D8[PIDPOSR] = 45; 	// POSHOLD_RATE_D * 1000;
+    cfg.P8[PIDNAVR] = 14; 	// NAV_P * 10;
+    cfg.I8[PIDNAVR] = 20; 	// NAV_I * 100;
+    cfg.D8[PIDNAVR] = 80; 	// NAV_D * 1000;
     cfg.P8[PIDLEVEL] = 70;
     cfg.I8[PIDLEVEL] = 10;
     cfg.D8[PIDLEVEL] = 20;
@@ -132,24 +138,20 @@ void checkFirstTime(bool reset)
     cfg.accZero[0] = 0;
     cfg.accZero[1] = 0;
     cfg.accZero[2] = 0;
-    cfg.mag_declination = 0;    // For example, -6deg 37min, = -637 Japan, format is [sign]dddmm (degreesminutes) default is zero.
+    cfg.mag_declination = 0;    		// For example, -6deg 37min, = -637 Japan, format is [sign]dddmm (degreesminutes) default is zero.
     cfg.acc_hardware = ACC_DEFAULT;     // default/autodetect
     cfg.acc_lpf_factor = 4;
-    cfg.acc_lpf_for_velocity = 10;
-    cfg.accz_deadband = 50;
-    cfg.gyro_cmpf_factor = 400; // default MWC
+    cfg.gyro_cmpf_factor = 400; 		// default MWC
     cfg.gyro_lpf = 42;
     cfg.mpu6050_scale = 1; // fuck invensense
-    cfg.baro_tab_size = 21;
-    cfg.baro_noise_lpf = 0.6f;
-    cfg.baro_cf = 0.985f;
     cfg.gyro_smoothing_factor = 0x00141403;     // default factors of 20, 20, 3 for R/P/Y
     cfg.vbatscale = 110;
     cfg.vbatmaxcellvoltage = 43;
     cfg.vbatmincellvoltage = 33;
 
     // Radio
-    parseRcChannels("AETR1234");
+    //parseRcChannels("AETR1234"); 
+	parseRcChannels("TAER1234"); // Debug - JR
     cfg.deadband = 0;
     cfg.yawdeadband = 0;
     cfg.alt_hold_throttle_neutral = 20;
@@ -160,7 +162,7 @@ void checkFirstTime(bool reset)
     cfg.retarded_arm = 0;       // disable arm/disarm on roll left/right
 
     // Failsafe Variables
-    cfg.failsafe_delay = 10;            // 1sec
+    cfg.failsafe_delay = 10;    // 1sec
     cfg.failsafe_off_delay = 200;       // 20sec
     cfg.failsafe_throttle = 1200;       // decent default which should always be below hover throttle for people.
 
@@ -176,18 +178,6 @@ void checkFirstTime(bool reset)
     cfg.tri_yaw_middle = 1500;
     cfg.tri_yaw_min = 1020;
     cfg.tri_yaw_max = 2000;
-
-    // flying wing
-    cfg.wing_left_min = 1020;
-    cfg.wing_left_mid = 1500;
-    cfg.wing_left_max = 2000;
-    cfg.wing_right_min = 1020;
-    cfg.wing_right_mid = 1500;
-    cfg.wing_right_max = 2000;
-    cfg.pitch_direction_l = 1;
-    cfg.pitch_direction_r = -1;
-    cfg.roll_direction_l = 1;
-    cfg.roll_direction_r = 1;
 
     // gimbal
     cfg.gimbal_pitch_gain = 10;
@@ -213,6 +203,20 @@ void checkFirstTime(bool reset)
     // serial (USART1) baudrate
     cfg.serial_baudrate = 115200;
 
+	// Aeroplane stuff
+	cfg.flapmode = BASIC_FLAP;				// Switch for flaperon mode?
+	cfg.flapchan = AUX1;					// RC channel number for simple flaps)
+	cfg.aileron2 = ROLL;					// RC channel number for second aileron
+	cfg.flapspeed = 1;						// Desired rate of change of flaps 
+	cfg.flapstep = 3;						// Steps for each flap movement
+
+    for (i = 0; i < 8; i++)					// Servo limits
+	{
+		cfg.servoendpoint_low[i] = 1000;
+		cfg.servoendpoint_high[i] = 2000;
+		cfg.servoreverse[i] = 1;
+	}	
+				
     // custom mixer. clear by defaults.
     for (i = 0; i < MAX_MOTORS; i++)
         cfg.customMixer[i].throttle = 0.0f;

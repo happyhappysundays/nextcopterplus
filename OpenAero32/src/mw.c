@@ -18,7 +18,7 @@ int16_t telemTemperature1;      // gyro sensor temperature
 int16_t failsafeCnt = 0;
 int16_t failsafeEvents = 0;
 int16_t rcData[8] = { 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502 }; // interval [1000;2000]
-int16_t rcCommand[4];           // interval [1000;2000] for THROTTLE and [-500;+500] for ROLL/PITCH/YAW 
+int16_t rcCommand[9];           // interval [1000;2000] for THROTTLE and [-500;+500] for ROLL/PITCH/YAW 
 int16_t lookupPitchRollRC[6];   // lookup table for expo & RC rate PITCH+ROLL
 int16_t lookupThrottleRC[11];   // lookup table for expo & mid THROTTLE
 rcReadRawDataPtr rcReadRawFunc = NULL;  // receive data from default (pwm/ppm) or additional (spek/sbus/?? receiver drivers)
@@ -47,10 +47,10 @@ int16_t nav[2];
 int16_t nav_rated[2];               // Adding a rate controller to the navigation to make it smoother
 int8_t nav_mode = NAV_MODE_NONE;    // Navigation mode
 
-//Automatic ACC Offset Calibration
+// Automatic ACC Offset Calibration
 // **********************
 uint16_t InflightcalibratingA = 0;
-int16_t AccInflightCalibrationArmed;
+int16_t  AccInflightCalibrationArmed;
 uint16_t AccInflightCalibrationMeasurementDone = 0;
 uint16_t AccInflightCalibrationSavetoEEProm = 0;
 uint16_t AccInflightCalibrationActive = 0;
@@ -100,6 +100,7 @@ void annexCode(void)
         }
     }
 
+		// Deadband, stick rates
     for (axis = 0; axis < 3; axis++) {
         tmp = min(abs(rcData[axis] - cfg.midrc), 500);
         if (axis != 2) {        // ROLL & PITCH
@@ -137,6 +138,7 @@ void annexCode(void)
     tmp2 = tmp / 100;
     rcCommand[THROTTLE] = lookupThrottleRC[tmp2] + (tmp - tmp2 * 100) * (lookupThrottleRC[tmp2 + 1] - lookupThrottleRC[tmp2]) / 100;    // [0;1000] -> expo -> [MINTHROTTLE;MAXTHROTTLE]
 
+		// Override pitch/roll RC when in headfree mode
     if(f.HEADFREE_MODE) {
         float radDiff = (heading - headFreeModeHold) * M_PI / 180.0f;
         float cosDiff = cosf(radDiff);
@@ -291,7 +293,7 @@ void loop(void)
 
         if (rcData[THROTTLE] < cfg.mincheck) {
             errorGyroI[ROLL] = 0;
-            errorGyroI[PITCH] = 0;
+            errorGyroI[PITCH] = 0;	// Reset I-terms
             errorGyroI[YAW] = 0;
             errorAngleI[ROLL] = 0;
             errorAngleI[PITCH] = 0;
@@ -525,7 +527,8 @@ void loop(void)
         }
     }
 
-    currentTime = micros();
+		// Do IMU etc if due
+		currentTime = micros();
     if (cfg.looptime == 0 || (int32_t)(currentTime - loopTime) >= 0) {
         loopTime = currentTime + cfg.looptime;
 
@@ -539,6 +542,7 @@ void loop(void)
 #endif
 
 #ifdef MAG
+				// Handle mag hold
         if (sensors(SENSOR_MAG)) {
             if (abs(rcCommand[YAW]) < 70 && f.MAG_MODE) {
                 int16_t dif = heading - magHold;
@@ -554,6 +558,7 @@ void loop(void)
 #endif
 
 #ifdef BARO
+				// Do alt hold
         if (sensors(SENSOR_BARO)) {
             if (f.BARO_MODE) {
                 if (abs(rcCommand[THROTTLE] - initialThrottleHold) > cfg.alt_hold_throttle_neutral) {
@@ -563,7 +568,7 @@ void loop(void)
             }
         }
 #endif
-
+				// Do GPS navigation
         if (sensors(SENSOR_GPS)) {
             // Check that we really need to navigate ?
             if ((!f.GPS_HOME_MODE && !f.GPS_HOLD_MODE) || !f.GPS_FIX_HOME) {
