@@ -136,7 +136,7 @@ enum {
     TYPE_IP = 0x10,
     TYPE_IW = 0x20,
     TYPE_M = 0x40,
-    TYPE_S = 0x80
+    TYPE_S = 0x80,
 };
 
 static pwmPortData_t pwmPorts[MAX_PORTS];
@@ -466,7 +466,7 @@ bool pwmInit(drv_pwm_config_t *init)
     if (init->airplane)
         i = 2; // switch to air hardware config
     if (init->usePPM)
-        i++; // next index is for PPM
+        i++; // next index is for PPM - wow, select the airPPM config map
 
     setup = hardwareMaps[i];
 
@@ -476,10 +476,6 @@ bool pwmInit(drv_pwm_config_t *init)
 
         if (setup[i] == 0xFF) // terminator
             break;
-
-        // skip UART ports for GPS
-        if (init->useUART && (port == PWM3 || port == PWM4))
-            continue;
 
         // hacks to allow current functionality
         if (mask & (TYPE_IP | TYPE_IW) && !init->enableInput)

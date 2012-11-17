@@ -54,10 +54,11 @@ enum {
     PITCH,
     YAW,
     THROTTLE,
-    AUX1,
-    AUX2,
+    AUX1,		// Second aileron default
+    AUX2, 	// Flap defualt
     AUX3,
-    AUX4
+    AUX4,
+		NOCHAN 	// Null channel
 };
 
 enum {
@@ -91,6 +92,10 @@ enum {
     BOXLLIGHTS,
     BOXHEADADJ,
     CHECKBOXITEMS
+};
+enum {
+    BASIC_FLAP,
+		ADV_FLAP
 };
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -139,15 +144,10 @@ typedef struct config_t {
     // sensor-related stuff
     uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
     uint8_t acc_lpf_factor;                 // Set the Low Pass Filter factor for ACC. Increasing this value would reduce ACC noise (visible in GUI), but would increase ACC lag time. Zero = no filter
-    uint8_t acc_lpf_for_velocity;           // ACC lowpass for AccZ height hold
-    uint8_t accz_deadband;                  // ??
     uint16_t gyro_lpf;                      // mpuX050 LPF setting
     uint16_t gyro_cmpf_factor;              // Set the Gyro Weight for Gyro/Acc complementary filter. Increasing this value would reduce and delay Acc influence on the output of the filter.
     uint32_t gyro_smoothing_factor;         // How much to smoothen with per axis (32bit value with Roll, Pitch, Yaw in bits 24, 16, 8 respectively
     uint8_t mpu6050_scale;                  // seems es/non-es variance between MPU6050 sensors, half my boards are mpu6000ES, need this to be dynamic. fucking invenshit won't release chip IDs so I can't autodetect it.
-    uint8_t baro_tab_size;                  // size of baro filter array
-    float baro_noise_lpf;                   // additional LPF to reduce baro noise
-    float baro_cf;                          // apply Complimentary Filter to keep the calculated velocity based on baro velocity (i.e. near real velocity)
 
     uint16_t activate[CHECKBOXITEMS];       // activate switches
     uint8_t vbatscale;                      // adjust this to match battery voltage to reported value
@@ -185,18 +185,6 @@ typedef struct config_t {
     uint16_t tri_yaw_min;                   // tail servo min
     uint16_t tri_yaw_max;                   // tail servo max
 
-    // flying wing related configuration
-    uint16_t wing_left_min;                 // min/mid/max servo travel
-    uint16_t wing_left_mid;
-    uint16_t wing_left_max;
-    uint16_t wing_right_min;
-    uint16_t wing_right_mid;
-    uint16_t wing_right_max;
-    int8_t pitch_direction_l;               // left servo - pitch orientation
-    int8_t pitch_direction_r;               // right servo - pitch orientation (opposite sign to pitch_direction_l if servos are mounted mirrored)
-    int8_t roll_direction_l;                // left servo - roll orientation
-    int8_t roll_direction_r;                // right servo - roll orientation  (same sign as ROLL_DIRECTION_L, if servos are mounted in mirrored orientation)
-
     // gimbal-related configuration
     int8_t gimbal_pitch_gain;               // gimbal pitch servo gain (tied to angle) can be negative to invert movement
     int8_t gimbal_roll_gain;                // gimbal roll servo gain (tied to angle) can be negative to invert movement
@@ -222,6 +210,16 @@ typedef struct config_t {
     uint32_t serial_baudrate;
 
     motorMixer_t customMixer[MAX_MOTORS];   // custom mixtable
+		
+		// Airplane mixer stuff
+		uint8_t flapmode;								// Switch for flaperon mode?
+		uint8_t flapchan;								// RC channel number for simple flaps)
+		uint8_t aileron2;								// RC channel number for second aileron
+		uint8_t flapspeed;								// Desired rate of change of flaps 
+		uint8_t flapstep;								// Steps for each flap movement
+		uint16_t servoendpoint_low[8];			 		// Servo limits (min)
+		uint16_t servoendpoint_high[8];				 	// Servo limits (max)
+		
 } config_t;
 
 typedef struct flags_t {
@@ -246,7 +244,7 @@ extern int16_t gyroZero[3];
 extern int16_t gyroData[3];
 extern int16_t angle[2];
 extern int16_t axisPID[3];
-extern int16_t rcCommand[4];
+extern int16_t rcCommand[9];
 extern uint8_t rcOptions[CHECKBOXITEMS];
 extern int16_t failsafeCnt;
 

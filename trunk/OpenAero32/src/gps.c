@@ -96,9 +96,6 @@ static void gpsPrint(const char *str)
             delay(4);
         str++;
     }
-    // wait to send all
-    while (!uart2TransmitEmpty());
-    delay(30);
 }
 
 /*-----------------------------------------------------------
