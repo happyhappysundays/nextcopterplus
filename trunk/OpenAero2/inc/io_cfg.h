@@ -122,13 +122,7 @@ enum RPYArrayIndex {ROLL = 0, PITCH, YAW, NO_GYRO};
 //enum SensorArrayIndex  {X = 0, Y, Z, NO_ACC};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
-
-#ifdef AERO
-	enum MIX_Modes		{AEROPLANE = 0, CAMSTAB, FLYINGWING};
-#else
-	enum MIX_Modes		{AEROPLANE = 0, CAMSTAB, SWASH120};
-#endif
-
+enum MIX_Modes		{AEROPLANE = 0, CAMSTAB};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, UNUSED};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX2, NOCHAN};
@@ -140,5 +134,6 @@ enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN
 enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, NO_MOTORS};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
+enum I_term_type	{STD = 0, AUTO, FIXED};
 
 #endif //IO_CFG_H

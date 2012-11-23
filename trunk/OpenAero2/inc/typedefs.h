@@ -9,8 +9,8 @@
  * Temporary compile defs
  ********************************************************************/
 
-//#define AERO	// Build version with Aero, F.Wing and Camstab
-#define HELI	// Build version with Aero, S.120 and Camstab
+#define AERO	// Build version with Aero, F.Wing and Camstab
+//#define HELI	// Build version with Aero, S.120 and Camstab
 
 /*********************************************************************
  * Type definitions
