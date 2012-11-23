@@ -42,14 +42,10 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 101};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 48};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-#ifdef AERO
-	{AEROPLANE,FLYINGWING,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
-#else
-	{AEROPLANE,SWASH120,1,1,AEROPLANE}, 	// Min, Max, Increment, Style, Default
-#endif
+	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
 	{28,50,1,0,38}, 	// Contrast
 	{1,30,1,0,5},		// Status menu timeout
@@ -58,7 +54,7 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 	{LOW,HIGH,1,1,LOW},	// Camstab servo rate
 	{1,64,1,0,8},		// Acc. LPF
 	{10,100,5,0,30},	// CF factor
-	{OFF,ON,1,1,OFF},	// Yaw HH auto-center
+	{STD,FIXED,1,1,STD},// HH mode
 };
 
 //************************************************************
@@ -112,15 +108,6 @@ void menu_general(void)
 					case CAMSTAB:
 						get_preset_mix(CAM_STAB);
 						break;
-#ifdef AERO
-					case FLYINGWING:
-						get_preset_mix(FLYING_WING_MIX);
-						break;
-#else
-					case SWASH120:
-						get_preset_mix(SWASH120_MIX);
-						break;
-#endif
 					default:
 						break;
 				}

@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1b1"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1b3"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Resetting to";				// Init
 const char PText2[]  PROGMEM = "defaults";
@@ -155,7 +155,7 @@ const char GeneralText4[] PROGMEM =  "Low";
 const char GeneralText5[] PROGMEM =  "High";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
-const char GeneralText8[] PROGMEM =  "Yaw magic:";
+const char GeneralText8[] PROGMEM =  "H.Hold:";
 //
 const char MixerItem0[] PROGMEM = "Source A:";				// Mixer menu items
 const char MixerItem13[] PROGMEM = "Source B:";
@@ -206,6 +206,9 @@ const char MOUT6[] PROGMEM = "M6";
 const char MOUT7[] PROGMEM = "M7";	
 const char MOUT8[] PROGMEM = "M8";	
 //
+const char HeadingHold1[] PROGMEM = "Auto";	
+const char HeadingHold2[] PROGMEM = "3D";
+//
 const char Dummy0[] PROGMEM = "";
 //
 const char IMU0[] PROGMEM = "AHRS";
@@ -223,11 +226,7 @@ const char *text_menu[] PROGMEM =
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3, 												// 18 to 21 RX mode
 		//
-#ifdef AERO
 		RXMode4, MainMenuItem6, RXMode5, Dummy0,											// 22 to 25 Mix presets for Aero, Camstab, F.Wing
-#else
-		RXMode4, MainMenuItem6, RXMode6, Dummy0,											// 22 to 25 Mix presets for Aero, Camstab, S.120
-#endif
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
@@ -240,7 +239,7 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem9, AutoMenuItem10,														// 46 to 47 Autolevel, stability
 		// 
-		Dummy0, Dummy0, Dummy0, Dummy0, 													// 48 to 52 
+		MixerItem11, HeadingHold1, HeadingHold2, Dummy0, 									// 48 to 52 HH modes (Normal, Auto, 3D)
 		Dummy0, 
 		//
 		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 53 to 59 

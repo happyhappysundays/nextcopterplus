@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero software for KK2.0
 // ===========================
-// Version 1.1 Beta 1 - November 2012
+// Version 1.1 Beta 3 - November 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -94,15 +94,14 @@
 // Alpha 3	Added IMU fixes for inverted flight. New inverted calibration mode
 //			Code now 100.0% full. Had to remove one mixer preset.
 // Beta 1	Bugfix for three-position function. Minor tweaks for Beta 1
+// Beta 2	Bugfix - fixed vertical orientation mode.
+// Beta 3	New I-term modes trial
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// For V1.1 Beta 1
-//
-// Future???
-//	Aeroplane attitude lock mode (for 3D)
+// Future
 //	CamStab RC control with servo speed setting
 //  Camera stabilisation refinements
 //

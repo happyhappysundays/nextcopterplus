@@ -15,6 +15,7 @@
 #include "..\inc\init.h"
 #include "..\inc\acc.h"
 #include "..\inc\imu.h"
+#include "..\inc\rc.h"
 
 //************************************************************
 // Defines
@@ -60,6 +61,7 @@ void Calculate_PID(void)
 	int32_t PID_acc_temp;
 	int32_t PID_Gyro_I_temp;
 	int8_t	axis;
+	int8_t	RCinputsAxis[3] = {AILERON, ELEVATOR, RUDDER}; // Cross-ref for actual RCinput elements
 
 	//************************************************************
 	// Increment and limit I-terms, pre-calculate D-terms
@@ -67,24 +69,33 @@ void Calculate_PID(void)
 
 	for (axis = 0; axis <= YAW; axis ++)
 	{
-		// Reduce Gyro drift noise into the I-terms
-		if ((gyroADC[axis] > GYRO_DEADBAND) || (gyroADC[axis] < -GYRO_DEADBAND)) 
+		if (Stability)
 		{
-			IntegralGyro[axis] += gyroADC[axis]; 
-		}
-
-		// Handle auto-centering of Yaw in CamStab mode
-		// If no significant gyro input and IntegralGyro[YAW] is non-zero, pull it back slowly.
-		else if ((Config.CamStab == ON) && (Config.AutoCenter == ON))
-		{
-			if (IntegralGyro[YAW] > 0)
+			// For 3D mode, change neutral with sticks
+			if (Config.AutoCenter == FIXED)
 			{
-				IntegralGyro[YAW] --;
+				IntegralGyro[axis] += (RCinputs[RCinputsAxis[axis]] >> 4); 
+			}	
+
+			// Reduce Gyro drift noise before adding into I-term
+			if ((gyroADC[axis] > GYRO_DEADBAND) || (gyroADC[axis] < -GYRO_DEADBAND)) 
+			{
+				IntegralGyro[axis] += gyroADC[axis]; 
 			}
-			else if (IntegralGyro[YAW] < 0)
-			{	
-				IntegralGyro[YAW] ++;
-			}
+
+			// Handle auto-centering of Yaw in CamStab mode
+			// If no significant gyro input and IntegralGyro[YAW] is non-zero, pull it back slowly.
+			else if (Config.AutoCenter == AUTO)
+			{
+				if (IntegralGyro[axis] > 0)
+				{
+					IntegralGyro[axis] --;
+				}
+				else if (IntegralGyro[axis] < 0)
+				{	
+					IntegralGyro[axis] ++;
+				}
+			}		
 		}
 
 		// Anti wind-up limits

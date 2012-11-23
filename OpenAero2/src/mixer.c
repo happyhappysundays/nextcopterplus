@@ -44,9 +44,9 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	// (OUT) source_a,source_a_volume,source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
 	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,CH2,0,CH3,0,CH4,0,-100,100,0,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut2
-	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut3
-	{0,NOCHAN  ,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0},  		// ServoOut4
+	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut2
+	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut3
+	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0,0,0,-100,100,0,0},  		// ServoOut4
 	{0,ELEVATOR,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,CH5,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5 (Elevator)
 	{0,AILERON ,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH6,100,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (Left aileron)
 	{0,THROTTLE,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH7,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Right aileron)
@@ -75,48 +75,6 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	{0,AILERON,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0},  // ServoOut8 (Roll axis)
 };
 
-#ifdef AERO
-channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	// Rudder -= Yaw; (normal)
-	// LAileron += Roll; (reversed)
-	// LElevator -= Pitch; (normal)
-	// RAileron += Roll;(reversed)
-	// RElevator += Pitch;(reversed)
-	
-	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut1
-	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut2
-	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut3
-	{0,NOCHAN,  100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0},  	// ServoOut4
-	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH5,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5
-	{0,ELEVATOR,100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,CH6,0,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (left elevon)
-	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,0,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
-	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8
-}; 
-#else
-// 120 degree Swashplate mixer defaults
-channel_t SWASH120_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	// Aileron = aileron * 60%
-	// Elevator = elevator * 60%
-	// Collective = collective * 60%
-	// CYC0 = Collective - elevator
-	// CYC1 = Collective + elevator/2 + aileron
-	// CYC2 = Collective + elevator/2 - aileron
-
-	// (IN) Value,source_a,src_vol,source_b,src_vol,roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
-	// (OUT) source_a,source_a_volume,source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume,min,max,failsafe,trim
-
-	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut1 (Collective)
-	{0,AILERON ,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH2,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut2 (Stabilised Aileron)
-	{0,ELEVATOR,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,CH3,0,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut3 (Stabilised Elevator)
-	{0,NOCHAN  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH4,0,0,0,0,0,0,0,-100,100,0,0},  		// ServoOut4 
-	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH5,100,0,0,0,0,0,0,-100,100,0,0}, 		// ServoOut5 (Yaw)
-	{0,THROTTLE,60, NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH6,100,CH3,-60,0,0,0,0,-100,100,0,0},	// ServoOut6 (CYC0)
-	{0,THROTTLE,60, NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH7,100,CH3,30,CH2,60,0,0,-100,100,0,0},// ServoOut7 (CYC1)
-	{0,THROTTLE,60, NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,100,CH3,30,CH2,-60,0,0,-100,100,0,0},// ServoOut8 (CYC2)
-}; 
-#endif
 //************************************************************
 // Get preset mix from Program memory
 void get_preset_mix(channel_t* preset)
@@ -161,27 +119,38 @@ void ProcessMixer(void)
 		RCinputs[Config.FlapChan] = temp;
 	}
 
-	// Process RC mixing, expo and source volume calculation
-	for (i = 0; i < outputs; i++)
+	// Skip RC part if in 3D mode as input comes from I-terms
+	if (!(Stability && (Config.AutoCenter == FIXED)))
 	{
-		// Source A
-		temp = RCinputs[Config.Channel[i].source_a];
-		temp = scale32(temp, Config.Channel[i].source_a_volume);
-		temp = get_expo_value(temp, expos[i]);
-
-		// Skip Source B if no RC mixing required for this channel
-		if (Config.Channel[i].source_b_volume != 0)
+		// Process RC mixing, expo and source volume calculation
+		for (i = 0; i < outputs; i++)
 		{
-			temp2 = RCinputs[Config.Channel[i].source_b];
-			temp2 = scale32(temp2, Config.Channel[i].source_b_volume);
-			temp2 = get_expo_value(temp2, expos[i]);
+			// Source A
+			temp = RCinputs[Config.Channel[i].source_a];
+			temp = scale32(temp, Config.Channel[i].source_a_volume);
+			temp = get_expo_value(temp, expos[i]);
 
-			// Sum the mixers
-			temp = temp + temp2;
+			// Skip Source B if no RC mixing required for this channel
+			if (Config.Channel[i].source_b_volume != 0)
+			{
+				temp2 = RCinputs[Config.Channel[i].source_b];
+				temp2 = scale32(temp2, Config.Channel[i].source_b_volume);
+				temp2 = get_expo_value(temp2, expos[i]);
+
+				// Sum the mixers
+				temp = temp + temp2;
+			}
+
+			// Save solution for now
+			Config.Channel[i].value = temp;
 		}
-
-		// Save solution for now
-		Config.Channel[i].value = temp;
+	}
+	else
+	{
+		for (i = 0; i < outputs; i++)
+		{
+			Config.Channel[i].value = 0;
+		}
 	}
 
 	// Process sensor mixers
