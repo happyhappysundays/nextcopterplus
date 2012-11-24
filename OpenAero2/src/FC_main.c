@@ -95,7 +95,8 @@
 //			Code now 100.0% full. Had to remove one mixer preset.
 // Beta 1	Bugfix for three-position function. Minor tweaks for Beta 1
 // Beta 2	Bugfix - fixed vertical orientation mode.
-// Beta 3	New I-term modes trial
+// Beta 3	New I-term modes: Normal. Auto and 3D.
+//			Reversed Yaw gyro setting in aeroplane mixer preset...
 //
 //***********************************************************
 //* To do
@@ -331,7 +332,6 @@ while(1)
 //************************************************************
 //* Test Code - End
 //************************************************************
-
 
 	// Main loop
 	while (1)
