@@ -50,7 +50,7 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,ELEVATOR,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,CH5,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5 (Elevator)
 	{0,AILERON ,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH6,100,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (Left aileron)
 	{0,THROTTLE,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH7,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Right aileron)
-	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, REVERSED,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, // ServoOut8 (Rudder)
+	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, // ServoOut8 (Rudder)
 }; 
 
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -275,7 +275,9 @@ void ProcessMixer(void)
 void UpdateLimits(void)
 {
 	uint8_t i;
-	int16_t temp;
+	int8_t temp8;
+	int32_t temp32;
+	int8_t gains[3] = {Config.Roll.I_mult, Config.Pitch.I_mult, Config.Yaw.I_mult};
 
 	// Update triggers
 	Config.HandsFreetrigger = Config.Autolimit * 5;
@@ -283,11 +285,20 @@ void UpdateLimits(void)
 	Config.Autotrigger = scale_percent(Config.Autolimit);
 	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
 
-	// Update I-term limits
+	// Update I_term limits
 	for (i = 0; i < 3; i++)
 	{
-		temp = Config.I_Limits[i]; 				// 0 to 125%
-		Config.Raw_I_Limits[i] = temp * 160;	// Multiply by 160 (max is 160 x 125 = 20000)
+		temp8 	= Config.I_Limits[i];			// 0 to 125%
+		temp32 	= temp8; 						// Promote
+
+		// I-term output (throw)
+		// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
+		Config.Raw_I_Limits[i] = temp32 * 640;	// 125% * 640 = 80,000
+
+		// I-term source limits. These have to be different due to the I-term gain setting
+		// For a gain of 32 and 125%, Constrain = 80,000
+		// For a gain of 100 and 125%, Constrain = 20,480
+		Config.Raw_I_Constrain[i] = temp32 * 640 / (gains[i] / 32);
 	}
 
 	// Update travel limits

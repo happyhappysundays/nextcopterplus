@@ -127,7 +127,8 @@ typedef struct
 	int8_t		I_Limits[3];			// I-term limits for all axis (0 to 125%)
 
 	// Servo travel limts
-	int16_t		Raw_I_Limits[3];		// Actual, unspanned I-term limits to save recalculation each loop
+	int32_t		Raw_I_Limits[3];		// Actual, unspanned I-term out limits to save recalculation each loop
+	int32_t		Raw_I_Constrain[3];		// Actual, unspanned I-term in limits to save recalculation each loop
 
 	// Triggers
 	int16_t		Stabtrigger;			// Actual, unspanned stability trigger to save recalculation each loop

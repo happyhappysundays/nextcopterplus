@@ -81,6 +81,7 @@ void Set_EEPROM_Default_Config(void)
 	{
 		Config.I_Limits[i] = 0;
 		Config.Raw_I_Limits[i] = 0;
+		Config.Raw_I_Constrain[i] = 0;
 	}
 
 	//
