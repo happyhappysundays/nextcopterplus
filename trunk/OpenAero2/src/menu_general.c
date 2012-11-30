@@ -33,7 +33,7 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 10 		// Number of menu items
+#define GENERALITEMS 10 	// Number of menu items
 #define GENERALSTART 158 	// Start of Menu text items
 #define GENERALTEXT	 22 	// Start of value text items
 #define GENOFFSET	 78		// Value offsets
@@ -45,7 +45,7 @@ void menu_general(void);
 const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 48};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
+	{AEROPLANE,FWING,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
 	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
 	{28,50,1,0,38}, 	// Contrast
 	{1,30,1,0,5},		// Status menu timeout
@@ -105,8 +105,8 @@ void menu_general(void)
 					case AEROPLANE:
 						get_preset_mix(AEROPLANE_MIX);
 						break;	
-					case CAMSTAB:
-						get_preset_mix(CAM_STAB);
+					case FWING:
+						get_preset_mix(FLYING_WING_MIX);
 						break;
 					default:
 						break;

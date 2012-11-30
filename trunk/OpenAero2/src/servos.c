@@ -18,18 +18,18 @@
 //************************************************************
 
 void output_servo_ppm(void);
-void output_servo_ppm_asm1(uint16_t ServoOut1, uint16_t ServoOut2, uint16_t ServoOut3, uint16_t ServoOut4);
-void output_servo_ppm_asm2(uint16_t ServoOut5, uint16_t ServoOut6, uint16_t ServoOut7, uint16_t ServoOut8);
+void output_servo_ppm_asm1(int16_t ServoOut1, int16_t ServoOut2, int16_t ServoOut3, int16_t ServoOut4);
+void output_servo_ppm_asm2(int16_t ServoOut5, int16_t ServoOut6, int16_t ServoOut7, int16_t ServoOut8);
 
 //************************************************************
 // Code
 //************************************************************
-uint16_t ServoOut[MAX_OUTPUTS];
+int16_t ServoOut[MAX_OUTPUTS];
 
 void output_servo_ppm(void)
 {
-	uint32_t temp;
-	uint16_t i;
+	int32_t temp;
+	uint8_t i;
 
 	// Scale servo from 2500~5000 to 1000~2000
 	for (i = 0; i < MAX_OUTPUTS; i++)

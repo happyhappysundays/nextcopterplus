@@ -27,7 +27,7 @@ void UpdateLimits(void);
 void get_preset_mix (channel_t*);
 
 int16_t scale32(int16_t value16, int16_t multiplier16);
-uint16_t scale_percent(int8_t value);
+int16_t scale_percent(int8_t value);
 
 //************************************************************
 // Mix tables (both RC inputs and servo/ESC outputs)
@@ -53,6 +53,24 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,RUDDER  ,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, // ServoOut8 (Rudder)
 }; 
 
+channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
+{
+	// Rudder -= Yaw; (normal)
+	// LAileron += Roll; (reversed)
+	// LElevator -= Pitch; (normal)
+	// RAileron += Roll;(reversed)
+	// RElevator += Pitch;(reversed)
+	
+	{0,THROTTLE,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut1
+	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut2
+	{0,NOCHAN,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut3
+	{0,NOCHAN,  100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH1,0,0,0,0,0,0,0,-100,100,0,0},  	// ServoOut4
+	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,CH5,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut5
+	{0,ELEVATOR,100,NOCHAN,0,ON, REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,CH6,0,0,0,0,0,0,0,-100,100,0,0},	// ServoOut6 (left elevon)
+	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,0,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
+	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8
+}; 
+/*
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For presets, use
@@ -74,7 +92,7 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	{0,RUDDER, 100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON,NORMAL, OFF,NORMAL,OFF,NORMAL,CH7,0,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Pan axis)
 	{0,AILERON,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH8,0,0,0,0,0,0,0,-100,100,0,0},  // ServoOut8 (Roll axis)
 };
-
+*/
 //************************************************************
 // Get preset mix from Program memory
 void get_preset_mix(channel_t* preset)
@@ -85,7 +103,7 @@ void get_preset_mix(channel_t* preset)
 void ProcessMixer(void)
 {
 	uint8_t i, outputs;
-	int16_t temp, temp2 = 0;
+	int16_t temp, temp2, flap = 0;
 	// Quick fudge to allow easy look-up of which channels require expo
 	uint8_t expos[MAX_OUTPUTS] = {0,0,0,0,Config.ElevatorExpo,Config.AileronExpo,Config.AileronExpo,Config.RudderExpo};
 
@@ -99,7 +117,13 @@ void ProcessMixer(void)
 		outputs = MAX_OUTPUTS;
 	}
 
-	// Process differential for dual-aileron setups first
+	// Reset output values
+	for (i = 0; i < outputs; i++)
+	{
+		Config.Channel[i].value = 0;
+	}
+
+	// Process differential for dual-aileron setups next
 	if (Config.Differential != 0) // Skip if zero
 	{
 		// Primary aileron channel
@@ -119,8 +143,8 @@ void ProcessMixer(void)
 		RCinputs[Config.FlapChan] = temp;
 	}
 
-	// Skip RC part if in 3D mode as input comes from I-terms
-	if (!(Stability && (Config.AutoCenter == FIXED)))
+	// Do RC input mixing if required and when in pass-through mode
+	if ((Stability == false) && (AutoLevel == false))
 	{
 		// Process RC mixing, expo and source volume calculation
 		for (i = 0; i < outputs; i++)
@@ -145,91 +169,105 @@ void ProcessMixer(void)
 			Config.Channel[i].value = temp;
 		}
 	}
-	else
+	
+	else // Non-pass-through
 	{
+		// Do magic reconstruction of Flaperon function first
+		// but only if a flaperon channel has been set up
+		if (Config.FlapChan != NOCHAN)
+		{
+			temp = RCinputs[ROLL] - RCinputs[Config.FlapChan]; 	// Aileron common movement (Flap x 2). Roll cancelled
+			flap  = temp >> 1; 
+
+			// Copy to flaperon channels
+			Config.Channel[ROLL].value = flap;
+			Config.Channel[Config.FlapChan].value = flap;
+		}
+
+		temp = 0;
+
+		// Process sensor mixers
 		for (i = 0; i < outputs; i++)
 		{
-			Config.Channel[i].value = 0;
-		}
-	}
-
-	// Process sensor mixers
-	for (i = 0; i < outputs; i++)
-	{
-		// Get source
-		temp = Config.Channel[i].value;
-
-		// Post-PID gyro input
-		if (Stability)
-		{
-			if (Config.Channel[i].roll_gyro == ON)
+			// Use PID gyro values
+			if (Stability)
 			{
-				if (Config.Channel[i].roll_gyro_polarity == REVERSED)
+				if (Config.Channel[i].roll_gyro == ON)
 				{
-					temp -=	PID_Gyros[ROLL];
+					if (Config.Channel[i].roll_gyro_polarity == REVERSED)
+					{
+						temp = -PID_Gyros[ROLL];
+					}
+					else
+					{
+						temp = PID_Gyros[ROLL];
+					}
 				}
-				else
+
+				if (Config.Channel[i].pitch_gyro == ON)
 				{
-					temp +=	PID_Gyros[ROLL];
+					if (Config.Channel[i].pitch_gyro_polarity == REVERSED)
+					{
+						temp = -PID_Gyros[PITCH];
+					}
+					else
+					{
+						temp = PID_Gyros[PITCH];
+					}
+				}
+
+				if (Config.Channel[i].yaw_gyro == ON)
+				{
+					if (Config.Channel[i].yaw_gyro_polarity == REVERSED)
+					{
+						temp = -PID_Gyros[YAW];
+					}
+					else
+					{
+						temp = PID_Gyros[YAW];
+					}
 				}
 			}
 
-			if (Config.Channel[i].pitch_gyro == ON)
-			{
-				if (Config.Channel[i].pitch_gyro_polarity == REVERSED)
-				{
-					temp -=	PID_Gyros[PITCH];
-				}
-				else
-				{
-					temp +=	PID_Gyros[PITCH];
-				}
-			}
 
-			if (Config.Channel[i].yaw_gyro == ON)
+			// Add PID acc values including trim
+			if (AutoLevel)
 			{
-				if (Config.Channel[i].yaw_gyro_polarity == REVERSED)
+				if (Config.Channel[i].roll_acc == ON)
 				{
-					temp -=	PID_Gyros[YAW];
-				}
-				else
-				{
-					temp +=	PID_Gyros[YAW];
-				}
-			}
-		}
+					// Add in Roll trim
+					temp +=Config.AccRollZeroTrim;
 
+					if (Config.Channel[i].roll_acc_polarity == REVERSED)
+					{
+						temp -= temp - PID_ACCs[ROLL];
+					}
+					else
+					{
+						temp += temp + PID_ACCs[ROLL];
+					}
+				}
+				if (Config.Channel[i].pitch_acc == ON)
+				{
+					// Add in Pitch trim
+					temp += Config.AccPitchZeroTrim;
 
-		// Post-PID acc input
-		if (AutoLevel)
-		{
-			if (Config.Channel[i].roll_acc == ON)
-			{
-				if (Config.Channel[i].roll_acc_polarity == REVERSED)
-				{
-					temp -=	PID_ACCs[ROLL];
+					if (Config.Channel[i].pitch_acc_polarity == REVERSED)
+					{
+						temp -= temp - PID_ACCs[PITCH];
+					}
+					else
+					{
+						temp += temp + PID_ACCs[PITCH];
+					}
 				}
-				else
-				{
-					temp +=	PID_ACCs[ROLL];
-				}
-			}
-			if (Config.Channel[i].pitch_acc == ON)
-			{
-				if (Config.Channel[i].pitch_acc_polarity == REVERSED)
-				{
-					temp -=	PID_ACCs[PITCH];
-				}
-				else
-				{
-					temp +=	PID_ACCs[PITCH];
-				}
-			}
-		}
+			} // Autolevel
 
-		// Update channel data solution
-		Config.Channel[i].value = temp;
-	}
+			// Update channel data solution
+			Config.Channel[i].value += temp;
+		} // Process sensor mixers
+	} // Non-pass-through
+		
 
 	// Process output mixers
 	for (i = 0; i < outputs; i++)
@@ -276,7 +314,7 @@ void UpdateLimits(void)
 {
 	uint8_t i;
 	int8_t temp8;
-	int32_t temp32;
+	int32_t temp32, gain32;
 	int8_t gains[3] = {Config.Roll.I_mult, Config.Pitch.I_mult, Config.Yaw.I_mult};
 
 	// Update triggers
@@ -293,12 +331,25 @@ void UpdateLimits(void)
 
 		// I-term output (throw)
 		// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
-		Config.Raw_I_Limits[i] = temp32 * 640;	// 125% * 640 = 80,000
+		Config.Raw_I_Limits[i] = temp32 * (int32_t)640;	// 125% * 640 = 80,000
 
 		// I-term source limits. These have to be different due to the I-term gain setting
 		// For a gain of 32 and 125%, Constrain = 80,000
-		// For a gain of 100 and 125%, Constrain = 20,480
-		Config.Raw_I_Constrain[i] = temp32 * 640 / (gains[i] / 32);
+		// For a gain of 100 and 125%, Constrain = 32,768
+		// For a gain of 10 and 25%, Constrain = 51,200
+		// For a gain of 1 and 100%, Constrain = 2,048,000
+		// For a gain of 127 and 125%, Constrain = 20,157
+		if (gains[i] != 0)
+		{
+			gain32 = (int32_t)gains[i];
+			gain32 = gain32 << 7;				// Multiply divisor by 128
+			Config.Raw_I_Constrain[i] = Config.Raw_I_Limits[i] / (gain32 / (int32_t)32);
+			Config.Raw_I_Constrain[i] = Config.Raw_I_Constrain[i] << 7; // Restore by multiplying total by 128
+		}
+		else 
+		{
+			Config.Raw_I_Constrain[i] = 0;
+		}
 	}
 
 	// Update travel limits
@@ -376,10 +427,12 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 }
 
 // Scale percentages to position
-uint16_t scale_percent(int8_t value)
+int16_t scale_percent(int8_t value)
 {
-	uint16_t temp;
+	int16_t temp16_1, temp16_2;
 
-	temp = ((value * 12) + 3750);
-	return temp;
+	temp16_1 = value; // Promote
+	temp16_2 = ((temp16_1 * (int16_t)12) + 3750);
+
+	return temp16_2;
 }

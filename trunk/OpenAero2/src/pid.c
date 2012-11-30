@@ -53,23 +53,28 @@ int32_t	IntegralGyro[3];					// PID I-terms (gyro) for each axis
 
 void Calculate_PID(void)
 {
-	static int16_t currentError[4];			// Used with lastError to keep track of D-Terms in PID calculations
-	static	int16_t lastError[4];
+	static 	int32_t currentError[4];		// Used with lastError to keep track of D-Terms in PID calculations
+	static	int32_t lastError[4];
+
 	int16_t DifferentialGyro;				// Holds difference between last two errors (angular acceleration)
 	int32_t PID_gyro_temp;
 	int32_t PID_acc_temp;
-	int32_t PID_Gyro_I_temp = 0;				// Temporary i-terms bound to max throw
-	int32_t PID_Gyro_I_actual = 0;				// Actual unbound i-terms
+	int32_t PID_Gyro_I_temp = 0;			// Temporary i-terms bound to max throw
+	int32_t PID_Gyro_I_actual = 0;			// Actual unbound i-terms
 	int8_t	axis;
-	int8_t	RCinputsAxis[3] = {AILERON, ELEVATOR, RUDDER}; // Cross-ref for actual RCinput elements
-	// Cludgy fix to reduce code space
+	int8_t	RCinputsAxis[3] = {AILERON, ELEVATOR, RUDDER}; 	// Cross-ref for actual RCinput elements
+	int8_t	RCinputsFlap[3] = {Config.FlapChan, NOCHAN, NOCHAN}; // Offset for handling flaperon
+
+	// Initialise arrays with gain values. Cludgy fix to reduce code space
 	int8_t 	P_gain[3] = {Config.Roll.P_mult, Config.Pitch.P_mult, Config.Yaw.P_mult};
 	int8_t 	I_gain[3] = {Config.Roll.I_mult, Config.Pitch.I_mult, Config.Yaw.I_mult};
 	int8_t 	D_gain[3] = {Config.Roll.D_mult, Config.Pitch.D_mult, Config.Yaw.D_mult};
 	int8_t 	L_gain[2] = {Config.A_Roll_P_mult, Config.A_Pitch_P_mult};
 
+	int16_t	RCinputOffset = 0;
+
 	//************************************************************
-	// Increment and limit I-terms, pre-calculate D-terms
+	// Increment and limit I-terms, handle heading hold modes
 	//************************************************************
 
 	for (axis = 0; axis <= YAW; axis ++)
@@ -79,7 +84,8 @@ void Calculate_PID(void)
 			// For 3D mode, change neutral with sticks
 			if (Config.AutoCenter == FIXED)
 			{
-				// Reset the I-terms when you need to reset the I-term with RC
+				// Reset the I-terms when you need to set the I-term with RC
+				// Note that the I-term is not constrained when no RC input is present.
 				if (RCinputs[RCinputsAxis[axis]] != 0)
 				{
 					if (IntegralGyro[axis] > Config.Raw_I_Constrain[axis])
@@ -91,6 +97,7 @@ void Calculate_PID(void)
 						IntegralGyro[axis] = -Config.Raw_I_Constrain[axis];
 					}
 
+					// Adjust I-term with RC input (scaled down by 8)
 					IntegralGyro[axis] += (RCinputs[RCinputsAxis[axis]] >> 3); 
 				}
 			}	
@@ -101,8 +108,8 @@ void Calculate_PID(void)
 				IntegralGyro[axis] += gyroADC[axis]; 
 			}
 
-			// Handle auto-centering of Yaw in CamStab mode
-			// If no significant gyro input and IntegralGyro[YAW] is non-zero, pull it back slowly.
+			// Handle auto-centering of I-terms in Auto mode
+			// If no significant gyro input and IntegralGyro[axis] is non-zero, pull it back slowly.
 			else if (Config.AutoCenter == AUTO)
 			{
 				if (IntegralGyro[axis] > 0)
@@ -119,19 +126,41 @@ void Calculate_PID(void)
 		//************************************************************
 		// Calculate PID
 		//************************************************************
-		// Error
-		currentError[axis] = gyroADC[axis];	
+		// Error calculation - gyro
+		// We have to make sure fixed offsets (like flaperons) are taken into account
+		// and not seen as error info into the PID loop
+		if (RCinputsFlap[axis] != NOCHAN)
+		{
+			// Check to see if there is an offset for this axis
+			RCinputOffset = RCinputs[RCinputsAxis[axis]];
+		}
+		else
+		{
+			RCinputOffset = 0;
+		}
+
+		// Note that gyro polarity always opposes RC so we add here to get the difference 
+		// Also, remove any fixed offset (flaperon channel)
+		// When also in Autolevel, don't use RC input as it will fight that of the Autolevel
+		if (!AutoLevel)
+		{
+			currentError[axis] = gyroADC[axis] + ((RCinputs[RCinputsAxis[axis]] + RCinputOffset) >> 1);	
+		}
+		else
+		{
+			currentError[axis] = gyroADC[axis];
+		}
 
 		// Gyro P-term
 		PID_gyro_temp = currentError[axis] * P_gain[axis];			// Multiply P-term (Max gain of 127)
-		PID_gyro_temp = PID_gyro_temp * 3;							// Multiply by 3
+		PID_gyro_temp = PID_gyro_temp * (int32_t)3;					// Multiply by 3
 
 		// Gyro I-term
 		PID_Gyro_I_actual = IntegralGyro[axis] * I_gain[axis];		// Multiply I-term (Max gain of 127)
 		PID_Gyro_I_actual = PID_Gyro_I_actual >> 5;					// Divide by 32
 
 		// Gyro D-term
-		DifferentialGyro = currentError[axis] - lastError[axis];
+		DifferentialGyro = (int16_t)(currentError[axis] - lastError[axis]);
 		lastError[axis] = currentError[axis];
 		DifferentialGyro *= D_gain[axis];							// Multiply D-term by up to 127
 		DifferentialGyro = DifferentialGyro << 4;					// Multiply by 16
@@ -139,12 +168,27 @@ void Calculate_PID(void)
 		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
 		if (AutoLevel && (axis < YAW)) 
 		{
-			// Acc P terms
-			PID_acc_temp = angle[axis] * L_gain[axis];				// P-term of accelerometer (Max gain of 127)
-			PID_ACCs[axis] = PID_acc_temp >> 2;						// Accs need much less scaling
+			// Process requested angle. angle[] is in degrees, but RC is +/-1000 steps
+			PID_acc_temp = ((RCinputs[RCinputsAxis[axis]] + RCinputOffset) >> 4); 	// 1000 = 62.5 degrees max
+
+			// Limit maximum angle to that stored in Config.A_Limits ("Max:" in Autolevel menu)
+			if (PID_acc_temp > Config.A_Limits)
+			{
+				PID_acc_temp = Config.A_Limits;
+			}
+			if (PID_acc_temp < -Config.A_Limits)
+			{
+				PID_acc_temp = -Config.A_Limits;
+			}
+
+			// Acc P terms and error calculation
+			PID_acc_temp = PID_acc_temp + angle[axis];
+			PID_acc_temp *= L_gain[axis];							// P-term of accelerometer (Max gain of 127)
+
+			PID_ACCs[axis] = (int16_t)(PID_acc_temp >> 2);			// Accs need much less scaling
 		}
 
-		// I-term limits
+		// I-term output limits. Maximum 125% limit is full servo throw 
 		if (PID_Gyro_I_actual > Config.Raw_I_Limits[axis]) 
 		{
 			PID_Gyro_I_temp = Config.Raw_I_Limits[axis];
@@ -159,7 +203,6 @@ void Calculate_PID(void)
 		}
 
 		// Sum Gyro P and D terms and rescale	
-		PID_Gyros[axis] = (PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6;
-
+		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
 	}
 }

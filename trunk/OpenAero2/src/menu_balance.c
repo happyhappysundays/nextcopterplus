@@ -35,18 +35,6 @@ void Display_balance(void)
 
 	while(BUTTON1 != 0)
 	{
-		if (BUTTON4 == 0)
-		{
-			_delay_ms(500);
-			CalibrateAcc();
-		}
-
-		if (BUTTON3 == 0)
-		{
-			_delay_ms(500);
-			CalibrateInvAcc();
-		}
-
 		ReadAcc();
 
 		x_pos = accADC[PITCH] + 32;
@@ -59,14 +47,13 @@ void Display_balance(void)
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 2, 55); 	// Left
-		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 53); 	// Calibrate
 
 		// Draw balance meter
-		drawrect(buffer, 0, 0, 128, 64, 1);
-		drawcircle(buffer, 64, 32, 10, 1);
-		drawline(buffer, 64, 8, 64, 56, 1); 
+		drawrect(buffer, 0, 0, 128, 64, 1);		// Border
+		drawrect(buffer, 54, 22, 21, 21, 1);	// Target
+		drawline(buffer, 64, 8, 64, 56, 1); 	// Crosshairs
 		drawline(buffer, 32, 32, 96, 32, 1); 
-		fillcircle(buffer, y_pos, x_pos, 8, 1);
+		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
