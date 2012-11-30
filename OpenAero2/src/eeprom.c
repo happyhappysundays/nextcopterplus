@@ -30,7 +30,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x05		// eePROM signature - change for each eePROM structure change 0x05 = V1.1b1
+#define MAGIC_NUMBER 0x06		// eePROM signature - change for each eePROM structure change 0x06 = V1.1b4
 								// to force factory reset
 
 //************************************************************
@@ -59,7 +59,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccPitchZeroTrim	= 0;
 	Config.AccRollZero	= 621;			// Acc calibration defaults
 	Config.AccPitchZero	= 623;
-	Config.AccZedZero	= 643;
+	Config.AccZedZero	= 643; 			// 643 is the centre, 520 is inverted
 	//
 	Config.Roll.P_mult = 60;			// PID defaults			
 	Config.Roll.I_mult = 0;
@@ -86,27 +86,22 @@ void Set_EEPROM_Default_Config(void)
 
 	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
-	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
+	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
 	Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
 	Config.BatteryCells = 3;			// Default to 3S
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 360;
 	Config.MaxVoltage = 420;
 
-	Config.Modes = 20; 					// LVA mode (1) = buzzer (bit 4), 
-										// Stability mode (0) (bit 3),
-										// Pot mode (1) = inactive (bit 2) eeprom mode
-										// (bit 1) (0) unused
-										// Autolevel (0) = inactive (bit 0);
 	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
 	Config.AutoChan = GEAR;				// Channel AUX2 switches autolevel by default
-	Config.FlapChan = THROTTLE;			// Most people will use the throttle input I imagine
+	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
 
 	Config.Autolimit = 10;				// Autolevel trigger setting
 	Config.Stablimit = -30;				// Stability trigger setting
 	Config.LaunchThrPos = 0;			// Launch mode throttle position
-
 	Config.LaunchMode = OFF;			// Launch mode on/off
+	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
 
 	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
 	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
@@ -122,7 +117,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.LMA_enable = 1;				// Default to 1 minute
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
-
 }
 
 void Save_Config_to_EEPROM(void)

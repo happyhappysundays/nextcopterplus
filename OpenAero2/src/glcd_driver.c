@@ -173,20 +173,6 @@ void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color)
 	}
 }
 
-void drawbitmap(uint8_t *buff, uint8_t x, uint8_t y, const uint8_t bitmap, uint8_t w, uint8_t h, uint8_t color) 
-{
-	for (uint8_t j=0; j<h; j++) 
-	{
-		for (uint8_t i=0; i<w; i++ ) 
-		{
-			if (pgm_read_byte(bitmap + i + (j/8)*w) & (1 << (j%8))) 
-			{
-				setpixel(buff, x+i, y+j, color);
-			}
-		}
-	}
-}
-
 // Bresenham's algorithm - From wikpedia
 void drawline(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color) 
 {
@@ -267,45 +253,6 @@ void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t
 	} 
 }
 
-// Draw a circle
-void drawcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color) 
-{
-	int8_t f = 1 - r;
-	int8_t ddF_x = 1;
-	int8_t ddF_y = -2 * r;
-	int8_t x = 0;
-	int8_t y = r;
-
-	setpixel(buff, x0, y0+r, color);
-	setpixel(buff, x0, y0-r, color);
-	setpixel(buff, x0+r, y0, color);
-	setpixel(buff, x0-r, y0, color);
-
-	while (x<y) 
-	{
-		if (f >= 0) 
-		{
-			y--;
-			ddF_y += 2;
-			f += ddF_y;
-		}
-
-		x++;
-		ddF_x += 2;
-		f += ddF_x;
-
-		setpixel(buff, x0 + x, y0 + y, color);
-		setpixel(buff, x0 - x, y0 + y, color);
-		setpixel(buff, x0 + x, y0 - y, color);
-		setpixel(buff, x0 - x, y0 - y, color);
-
-		setpixel(buff, x0 + y, y0 + x, color);
-		setpixel(buff, x0 - y, y0 + x, color);
-		setpixel(buff, x0 + y, y0 - x, color);
-		setpixel(buff, x0 - y, y0 - x, color);
-	}
-}
-
 // Draw a filled circle
 void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color) 
 {
@@ -343,23 +290,6 @@ void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color)
 			setpixel(buff, x0+y, i, color);
 			setpixel(buff, x0-y, i, color);
 		}    
-	}
-}
-
-// Clear screen (does not clear buffer)
-void clear_screen(void) 
-{
-	uint8_t p, c;
-
-	for(p = 0; p < 8; p++) 
-	{
-		st7565_command(CMD_SET_PAGE | p);								// Set page to p
-		for(c = 0; c < 128; c++) 										// Was 129, which I think is wrong...
-		{
-			st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
-			st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));	// Set column to c
-			st7565_data(0x00);											// Clear data
-		}     
 	}
 }
 

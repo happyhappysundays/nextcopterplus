@@ -171,39 +171,28 @@ void getEstimatedAttitude(void)
 		}	
 	}
 
-	// Simple IMU as used in OpenAero2 to V1.0 (Beta 4.1)
-	if (0)
+	// Calculate the roll and pitch angles properly
+	// then convert to degrees
+	tempf = atan(deltaGyroAngle[PITCH] / sqrt(roll_sq + yaw_sq));
+	angle[PITCH]  = tempf * (180 / M_PI);
+
+	tempf = atan(deltaGyroAngle[ROLL]  / sqrt(pitch_sq + yaw_sq));
+	angle[ROLL]  = tempf * (180 / M_PI);
+
+	// And I think this solves the upside down issue...
+	// Handle roll reversal when inverted
+	if (accADC[YAW] < 0)
 	{
-		angle[ROLL] = (int16_t)deltaGyroAngle[ROLL];
-		angle[PITCH] = (int16_t)deltaGyroAngle[PITCH];
-	}
-
-	// Better IMU. Correctly calculates angles
-	// And allows upside down correction
-	else
-	{
-		// Calculate the roll and pitch angles properly
-		// then convert to degrees
-		tempf = atan(deltaGyroAngle[PITCH] / sqrt(roll_sq + yaw_sq));
-		angle[PITCH]  = tempf * (180 / M_PI);
-
-		tempf = atan(deltaGyroAngle[ROLL]  / sqrt(pitch_sq + yaw_sq));
-		angle[ROLL]  = tempf * (180 / M_PI);
-
-		// And I think this solves the upside down issue...
-		// Handle roll reversal when inverted
-		if (accADC[YAW] < 0)
+		if (accADC[ROLL] < 0)
 		{
-			if (accADC[ROLL] < 0)
-			{
-				angle[ROLL] = (180 - angle[ROLL]);
-			}
-			else
-			{
-				angle[ROLL] = (-180 - angle[ROLL]);
-			}
+			angle[ROLL] = (180 - angle[ROLL]);
+		}
+		else
+		{
+			angle[ROLL] = (-180 - angle[ROLL]);
 		}
 	}
+
 }
 
 void UpdateIMUvalues(void)

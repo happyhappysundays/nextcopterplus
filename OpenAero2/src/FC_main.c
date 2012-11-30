@@ -1,11 +1,10 @@
 // **************************************************************************
-// OpenAero software for KK2.0
+// OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 3 - November 2012
+// Version 1.1 Beta 4 - November 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
-// Includes PID and Auto-level functions inspired by the open-sourced MultiWii project
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -23,7 +22,7 @@
 // * GNU General Public License for more details.
 // * 
 // * You should have received a copy of the GNU General Public License
-// * along with this program.If not, see <http://www.gnu.org/licenses/>.
+// * along with this program. If not, see <http://www.gnu.org/licenses/>.
 // * 
 // * NB: Summary - all derivative code MUST be released with the source code!
 // *
@@ -95,8 +94,14 @@
 //			Code now 100.0% full. Had to remove one mixer preset.
 // Beta 1	Bugfix for three-position function. Minor tweaks for Beta 1
 // Beta 2	Bugfix - fixed vertical orientation mode.
-// Beta 3	New I-term modes: Normal. Auto and 3D.
+// Beta 3	New I-term modes: Normal, Auto and 3D.
 //			Reversed Yaw gyro setting in aeroplane mixer preset...
+// Beta 4	Completely changed PID loop to take sticks into account.
+//			Added offset calculation to exclude flaperon movement.
+//			Totally changed mixer so that stability/autolevel has exclusive control of outputs (no RC).
+//			Added Maximum turn angle setting in Autolevel mode.
+//			Updated Z cal to make it easier to do and harder to screw up.
+//			Restored missing ACC trims. Fixed I-term constrain calculation.
 //
 //***********************************************************
 //* To do
@@ -106,46 +111,6 @@
 //	CamStab RC control with servo speed setting
 //  Camera stabilisation refinements
 //
-//***********************************************************
-//* Flight configurations (Servo number)
-//***********************************************************
-
-/*
-Standard mode
-
-			 X <--  M1 (Throttle - CPPM mode)
-             |
-     M6 -----+----- M7 Ailerons (Second aileron channel)
-             |
-             |
-        M5 --+--    Elevator
-             |
-             M8     Rudder
-
-
-Flying Wing
-
-		 	X <-- 	M1 (Throttle - CPPM mode)
-         __/^\__
-        /       \
-      /           \
-     |______|______|
-     |_____/|\_____|
-
-        M6     M7 (Elevons/Flaperons)
-       Left   Right
-
-            M8
-          Rudder
-
-Camera Gimbal (if enabled)
-
- M2 Pitch (Tilt)
- M3 Yaw	(Pan)
- M4 Roll (Roll - only for 3-axis gimbals)
-
-*/
-
 //***********************************************************
 //* Includes
 //***********************************************************
@@ -222,7 +187,6 @@ int main(void)
 	bool ServoTick = false;
 	// Alarms
 	bool BUZZER_ON = false;
-	bool LED_ON = false;
 	bool Model_lost = false;		// Model lost flag
 	bool LMA_Alarm = false;			// Lost model alarm active
 	bool LVA_Alarm = false;			// Low voltage alarm active
@@ -239,7 +203,6 @@ int main(void)
 	uint32_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
-
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
@@ -254,84 +217,7 @@ int main(void)
 
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 
-	init();									// Do all init tasks
-
-//************************************************************
-//* Test Code - Start
-//************************************************************
-/*
-uint16_t counter = 0;
-
-while(1)
-{
-
-	counter++;
-
-	if (BUTTON4 == 0)
-	{
-		_delay_ms(500);
-		CalibrateAcc();
-	}
-
-	ReadAcc();
-	//get_raw_accs();
-	ReadGyros();
-	getEstimatedAttitude();
-
-	//accADC[YAW] += 125;
-
-	if (counter > 100)
-	{
-		counter = 0;
-
-		LCD_Display_Text(26,(prog_uchar*)Verdana8,0,0);		// Gyro
-		LCD_Display_Text(27,(prog_uchar*)Verdana8,0,10);	// X
-		LCD_Display_Text(28,(prog_uchar*)Verdana8,0,20);	// Y
-		LCD_Display_Text(29,(prog_uchar*)Verdana8,0,30);	// Z
-
-		LCD_Display_Text(30,(prog_uchar*)Verdana8,64,0); 	// Acc
-		LCD_Display_Text(27,(prog_uchar*)Verdana8,64,10);	// X
-		LCD_Display_Text(28,(prog_uchar*)Verdana8,64,20);	// Y
-		LCD_Display_Text(29,(prog_uchar*)Verdana8,64,30);	// Z
-
-		LCD_Display_Text(61,(prog_uchar*)Verdana8,0,45); 	// AHRS
-		LCD_Display_Text(30,(prog_uchar*)Verdana8,0,55); 	// Acc
-
-		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,10);
-		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,20);
-		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,10,30);
-
-		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,74,10);
-		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,74,20);
-		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,74,30);
-
-		// Angles
-		mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,45); // AHRS
-		mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,45);
-
-		mugui_lcd_puts(itoa(-accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,35,55); // Acc
-		mugui_lcd_puts(itoa(-accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,65,55);
-
-		// AccMag
-		mugui_lcd_puts(itoa(AccMag,pBuffer,10),(prog_uchar*)Verdana8,100,55);
-
-
-		// Update buffer
-		write_buffer(buffer,1);
-		clear_buffer(buffer);
-	}
-
-	// Measure the current loop rate
-	cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
-	LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
-	ticker_32 += cycletime;
-
-	_delay_ms(2);
-}
-*/
-//************************************************************
-//* Test Code - End
-//************************************************************
+	init();							// Do all init tasks
 
 	// Main loop
 	while (1)
@@ -381,7 +267,6 @@ while(1)
 				// Wait for timeout
 				Menu_mode = WAITING_TIMEOUT_BD;
 				break;
-
 
 			// Status screen up, but button still down ;)
 			case WAITING_TIMEOUT_BD:
@@ -438,7 +323,6 @@ while(1)
 				break;
 		}
 
-
 		//************************************************************
 		//* Status menu refreshing
 		//************************************************************
@@ -467,28 +351,19 @@ while(1)
 		{
 			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
 			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
-			//EIMSK  |= (1 << INT0);				// Enable INT0 (Elevator input)
-			//EIMSK  |= (1 << INT1);				// Enable INT1 (Aileron input)
-			//EIMSK  |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
-
-			EIMSK  |= (1 << 0x07);				// Enable INT0, 1 and 2 
+			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
 		}
 		else // CPPM mode
 		{
 			PCMSK1 = 0;							// Disable AUX
 			PCMSK3 = 0;							// Disable THR
-			EIMSK = 0;							// Disable external interrupts
-			EIMSK  |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
+			EIMSK = 0x04;						// Enable INT2 (Rudder/CPPM input)
 		}
 
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)
 		//* 
-		//* (Ticker_Count &128) 	 	= 152.6Hz
-		//* ((Ticker_Count >> 8) &2) 	= 38.1Hz
 		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (LMA and LVA alarms)
-		//* ((Ticker_Count >> 8) &32)	= 0.59Hz (LED mode alarms)
-		//* 
 		//************************************************************
 
 		// Ticker_Count increments at 19.531 kHz, in loop cycle chunks
@@ -502,15 +377,6 @@ while(1)
 		else 
 		{
 			BUZZER_ON = false;
-		}
-
-		if ((Ticker_Count >> 8) &64) 
-		{
-			LED_ON = true;		// 0.59Hz flash
-		}
-		else 
-		{
-			LED_ON = false;
 		}
 
 		//************************************************************
@@ -667,7 +533,6 @@ while(1)
 				AutoLevel = true;				// Activate autolevel mode
 				break;
 			default:							// Disable by default
-				AutoLevel = false;				// De-activate autolevel mode
 				break;
 		}
 
@@ -711,7 +576,6 @@ while(1)
 				Stability = true;			// Activate autolevel mode
 				break;
 			default:							// Disable by default
-				Stability = false;				// De-activate autolevel mode
 				break;
 		}
 

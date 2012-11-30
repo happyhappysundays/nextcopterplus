@@ -90,7 +90,7 @@ void init(void)
 	// Timer2 8bit - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
 	// Used to time arm/disarm intervals
 	TCCR2A = 0;	
-	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);	// Clk/1024 = 19.531kHz
+	TCCR2B = 0x07;						// Clk/1024 = 19.531kHz
 	TIMSK2 = 0;
 	TIFR2 = 0;
 	TCNT2 = 0;							// Reset counter
@@ -100,25 +100,25 @@ void init(void)
 	//***********************************************************
 
 	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
-	PCICR  |= (1 << PCIE1);				// PCINT8  to PCINT15 (PCINT1 group - AUX)
-	PCICR  |= (1 << PCIE3);				// PCINT24 to PCINT31 (PCINT3 group - THR)
+	PCICR  = 0x0A;						// PCINT8  to PCINT15 (PCINT1 group - AUX)
+										// PCINT24 to PCINT31 (PCINT3 group - THR)
 	PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
 	PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
-	PCIFR  |= (1 << PCIF0);				// Clear PCIF0 interrupt flag 
-	PCIFR  |= (1 << PCIF1);				// Clear PCIF1 interrupt flag 
-	PCIFR  |= (1 << PCIF2);				// Clear PCIF2 interrupt flag 
-	PCIFR  |= (1 << PCIF3);				// Clear PCIF3 interrupt flag 
+	PCIFR  = 0x0F;						// Clear PCIF0 interrupt flag 
+										// Clear PCIF1 interrupt flag 
+										// Clear PCIF2 interrupt flag 
+										// Clear PCIF3 interrupt flag 
 
 	// External interrupts INT0 (Elevator) and INT1 (Aileron) and INT2 (Rudder)
-	EIMSK |= (1 << INT0);				// Enable INT0 (Elevator input)
-	EIMSK |= (1 << INT1);				// Enable INT1 (Aileron input)
-	EIMSK |= (1 << INT2);				// Enable INT2 (Rudder/CPPM input)
-	EICRA |= (1 << ISC00);				// Any change INT0
-	EICRA |= (1 << ISC10);				// Any change INT1
-	EICRA |= (1 << ISC20);				// Any change INT2
-	EIFR  |= (1 << INTF0); 				// Clear INT0 interrupt flag (Elevator)
-	EIFR  |= (1 << INTF1); 				// Clear INT1 interrupt flag (Aileron)
-	EIFR  |= (1 << INTF2); 				// Clear INT2 interrupt flag (Rudder/CPPM)
+	EIMSK = 0x07;						// Enable INT0 (Elevator input)
+										// Enable INT1 (Aileron input)
+										// Enable INT2 (Rudder/CPPM input)
+	EICRA = 0x15;						// Any change INT0
+										// Any change INT1
+										// Any change INT2
+	EIFR  = 0x07; 						// Clear INT0 interrupt flag (Elevator)
+										// Clear INT1 interrupt flag (Aileron)
+										// Clear INT2 interrupt flag (Rudder/CPPM)
 
 	//***********************************************************
 
@@ -146,7 +146,6 @@ void init(void)
 	st7565_command(CMD_DISPLAY_ON); 		// Check (AF)
 	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
 	st7565_set_brightness(0x26);
-	clear_screen();
 	write_buffer(buffer,0);					// Display logo
 	_delay_ms(1000);
 	clear_buffer(buffer);					// Clear

@@ -6,13 +6,6 @@
 #define TYPE_DEFS_H_
 
 /*********************************************************************
- * Temporary compile defs
- ********************************************************************/
-
-#define AERO	// Build version with Aero, F.Wing and Camstab
-//#define HELI	// Build version with Aero, S.120 and Camstab
-
-/*********************************************************************
  * Type definitions
  ********************************************************************/
 
@@ -32,16 +25,16 @@ typedef struct
 
 typedef struct
 {
-	uint16_t	minimum;
-	uint16_t	maximum;
-	uint16_t	failsafe;
-	uint16_t	trim;
+	int16_t	minimum;
+	int16_t	maximum;
+	int16_t	failsafe;
+	int16_t	trim;
 } servo_limits_t;
 
 // Input mixer definition
 typedef struct
 {
-	uint16_t	value;					// Current value
+	int16_t		value;					// Current value
 	int8_t		source_a;				// Source A RC input for calculation
 	int8_t		source_a_volume;		// Percentage of source to pass on
 	int8_t		source_b;				// Optional source B RC input for calculation
@@ -113,6 +106,7 @@ typedef struct
 	int8_t		Autolimit;				// Autolevel switch point (-125% to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		A_Pitch_P_mult;
+	int8_t		A_Limits;				// Max inclination (in degrees) via sticks during autolevel 
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;
 	int8_t		LaunchMode;				// Launch mode on/off
@@ -159,9 +153,6 @@ typedef struct
 	// Non-menu items 
 	// Input channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// RC channel mixing data	
-
-	// Misc
-	int8_t		Modes;					// Misc flight mode flag
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
