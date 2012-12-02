@@ -45,7 +45,7 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 {
 	{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
 	{-125,125,5,0,100},				// Source A volume (%)
-	{THROTTLE,NOCHAN,1,1,CH1}, 		// Source B
+	{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Source B
 	{-125,125,5,0,0},				// Source B volume (%)
 	{OFF, ON,1,1,OFF},				// roll_gyro
 	{NORMAL, REVERSED,1,1,NORMAL},	// polarity

@@ -308,7 +308,7 @@ const char *text_menu[] PROGMEM =
 		MixerItem15,MixerItem2, MixerItem15, MixerItem2,
 		MixerItem8, MixerItem9,	MixerItem10, MixerItem16, 
 		//
-		ChannelRef1, ChannelRef2, ChannelRef0, ExpoMenuItem3,								// 195 to 198 
+		ChannelRef1, ChannelRef2, ChannelRef3, ExpoMenuItem3,								// 195 to 198 
 		//
 		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 199 to 204  Flight modes
 		AutoMenuItem15, AutoMenuItem17, 
