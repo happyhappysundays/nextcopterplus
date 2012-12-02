@@ -149,27 +149,40 @@ void ProcessMixer(void)
 
 	//************************************************************
 	// Process differential for dual-aileron setups 
-	// This needs to be updated to work well with flaperons DEBUG... <-- !!!!!!!!!!!!
 	//************************************************************
 
 	if (Config.Differential != 0) // Skip if zero
 	{
-		// Primary aileron channel
-		temp = RCinputs[AILERON];
+		// If flaperons set up 
+		if (Config.FlapChan != NOCHAN)
+		{
+			// Recreate actual roll signal from flaperons
+			temp  = RCinputs[AILERON] + RCinputs[Config.FlapChan];
+			temp  = temp >> 1;
+			temp2 = temp;
+		}
+		else
+		{
+			temp  = RCinputs[AILERON];
+			temp2 = RCinputs[Config.FlapChan];
+		}
+
+		// Apply differential
 		if (temp > 0)			// For one side only
 		{
 			temp = scale32(temp, (100 - Config.Differential));
 		}
-		RCinputs[AILERON] = temp;
 
-		// Secondary aileron channel
-		temp = RCinputs[Config.FlapChan];
-		if (temp < 0)			// For one side only
+		if (temp2 < 0)			// For one side only
 		{
-			temp = scale32(temp, (100 - Config.Differential));
+			temp2 = scale32(temp2, (100 - Config.Differential));
 		}
-		RCinputs[Config.FlapChan] = temp;
-		temp = 0;
+
+		RCinputs[AILERON] = temp + flap;
+		RCinputs[Config.FlapChan] = temp2 - flap;
+
+		temp  = 0;
+		temp2 = 0;
 	}
 
 	//************************************************************
@@ -213,9 +226,10 @@ void ProcessMixer(void)
 			// Discard RC part of fly-by-wire channels as this is done inside the PID loop
 			if ((Config.FlightMode == FLYBYWIRE) &&
 			   ((Config.Channel[i].source_a == AILERON)	||
+			    (Config.Channel[i].source_a == Config.FlapChan) ||
 				(Config.Channel[i].source_a == ELEVATOR)||
-				(Config.Channel[i].source_a == RUDDER)	||
-				(Config.Channel[i].source_a == Config.FlapChan)))
+			// Rudder is a special case as AutoLevel will only supply values for Roll/Pitch
+			   ((Config.Channel[i].source_a == RUDDER) && !AutoLevel)))
 			{
 				// Clear solution if a fly-by-wire channel
 				temp = 0;

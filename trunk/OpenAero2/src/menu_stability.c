@@ -35,7 +35,7 @@ void menu_stab_control(void);
 
 #define STABITEMS 16 	// Number of menu items
 #define STABSTART 124 	// Start of Menu text items
-#define STABTEXT 199 	// Start of value text items
+#define STABTEXT  199 	// Start of value text items
 #define STABOFFSET 75	// Value offsets
 
 //************************************************************

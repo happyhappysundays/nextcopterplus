@@ -48,7 +48,7 @@ const menu_range_t rc_menu_ranges[] PROGMEM =
 	{CPPM_MODE,PWM3,1,1,PWM1},
 	{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
 	{THROTTLE,NOCHAN,1,1,GEAR},		// Autochan
-	{THROTTLE,NOCHAN,1,1,THROTTLE},	// Second aileron
+	{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
 };
 //************************************************************
 // Main menu-specific setup

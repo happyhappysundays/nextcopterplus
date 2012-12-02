@@ -103,7 +103,7 @@
 //			Updated Z cal to make it easier to do and harder to screw up.
 //			Restored missing ACC trims. Fixed I-term constrain calculation.
 //			Added Normal/FlyByWire flight modes.
-//			Added Dynamic gaim setting.
+//			Added Dynamic gain setting. Many bug fixes.
 //
 //***********************************************************
 //* To do
