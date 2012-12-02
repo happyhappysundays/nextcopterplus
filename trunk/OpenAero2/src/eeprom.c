@@ -71,11 +71,15 @@ void Set_EEPROM_Default_Config(void)
 	Config.Yaw.I_mult = 0;
 	Config.Yaw.D_mult = 0;
 	//
-	Config.A_Roll_P_mult = 30;
-	Config.A_Pitch_P_mult = 30;
+	Config.A_Roll_P_mult = 60;
+	Config.A_Pitch_P_mult = 60;
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
 	Config.AutoCenter = OFF;
+	Config.FlightMode = RETRO;
+	Config.DynGainSrc = NOCHAN;
+	Config.DynGain = 0;
+
 	//
 	for (i = 0; i < 3; i++)
 	{

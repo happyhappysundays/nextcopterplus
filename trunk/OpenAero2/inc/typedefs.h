@@ -115,6 +115,8 @@ typedef struct
 	// Stability PID settings
 	int8_t		StabMode;				// Stability switch mode
 	int8_t		Stablimit;				// Stability switch point (-125% to 125%)
+	int8_t		DynGainSrc;				// Dynamic gain source channel
+	int8_t		DynGain;				// Dynamic gain attenuation (0% to 100%)
 	PID_mult_t	Roll;					// Gyro PID settings
 	PID_mult_t	Pitch;
 	PID_mult_t	Yaw;
@@ -129,6 +131,9 @@ typedef struct
 	int16_t		Autotrigger;			// Actual, unspanned autolevel trigger to save recalculation each loop
 	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
+
+	//Dynamic gain divisor
+	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
 	// Battery settings
 	int16_t		BatteryType;			// LiPo, NiMh
@@ -148,7 +153,7 @@ typedef struct
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		AutoCenter;				// Yaw heading hold auto centering
-	int8_t		Dummy_1;
+	int8_t		FlightMode;				// Normal/Fly-by-wire
 			
 	// Non-menu items 
 	// Input channel configuration

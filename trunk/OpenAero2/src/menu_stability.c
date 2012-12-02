@@ -33,7 +33,7 @@ void menu_stab_control(void);
 // Defines
 //************************************************************
 
-#define STABITEMS 14 	// Number of menu items
+#define STABITEMS 16 	// Number of menu items
 #define STABSTART 124 	// Start of Menu text items
 #define STABTEXT 199 	// Start of value text items
 #define STABOFFSET 75	// Value offsets
@@ -42,11 +42,13 @@ void menu_stab_control(void);
 // STAB menu items
 //************************************************************
 
-const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint8_t StabMenuText[STABITEMS] PROGMEM = {STABTEXT, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 const menu_range_t stab_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,ALWAYSON,1,1,STABCHAN}, 	// Min, Max, Increment, Style, Default
 	{-125,125,10,0,-30},
+	{THROTTLE,NOCHAN,1,1,NOCHAN}, 		// Dynamic P gain channel
+	{0,100,5,0,0},						// Dynamic gain amount
 	{0,127,1,0,60},
 	{0,127,1,0,0},
 	{0,127,1,0,0},
