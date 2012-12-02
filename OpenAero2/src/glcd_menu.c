@@ -142,6 +142,8 @@ const char StabMenuItem10[]  PROGMEM = "Roll I Limit:";
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
 const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
 const char StabMenuItem13[]  PROGMEM = "Trigger:";
+const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch:";
+const char StabMenuItem15[]  PROGMEM = "Dyn.Gain:";
 //
 const char ExpoMenuItem3[]  PROGMEM = "Differential:";		// Expo text
 //
@@ -158,6 +160,7 @@ const char GeneralText5[] PROGMEM =  "High";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char GeneralText8[] PROGMEM =  "H.Hold:";
+const char GeneralText9[] PROGMEM =  "Flight mode:";
 //
 const char MixerItem0[] PROGMEM = "Source A:";				// Mixer menu items
 const char MixerItem13[] PROGMEM = "Source B:";
@@ -210,6 +213,7 @@ const char MOUT8[] PROGMEM = "M8";
 //
 const char HeadingHold1[] PROGMEM = "Auto";	
 const char HeadingHold2[] PROGMEM = "3D";
+const char FlightMode1[]  PROGMEM = "FlyByWire";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -266,20 +270,22 @@ const char *text_menu[] PROGMEM =
 		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
 		MixerMenuItem2, MixerMenuItem3,														// 103 to 104 H/V
 		//
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 118 Ch. nums
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
-		Dummy0, Dummy0, Dummy0, Dummy0,	
+		Dummy0, Dummy0, 
+		//
+		MixerItem11, FlightMode1,															// 116 to 118 Flight mode
 		Dummy0,
 		//
 		GeneralText4, GeneralText5,															// 119, 120 LOW, HIGH
 		//
 		Status0, Status1, Status2,															// 121 to 123 Press any button
 		//
-		StatusText1,StabMenuItem13, AutoMenuItem1, StabMenuItem2, StabMenuItem3,  			// 124 to 137 Stability menu
+		StatusText1,StabMenuItem13, StabMenuItem14, StabMenuItem15, AutoMenuItem1, 			// 124 to 140 Stability menu
+		StabMenuItem2, StabMenuItem3,  
 		AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, 
 		StabMenuItem9, StabMenuItem10,StabMenuItem11,StabMenuItem12,
-		//
-		RCMenuItem6, RCMenuItem7, Dummy0,													// 138 to 140 JR/Futaba
+		Dummy0,
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
@@ -294,7 +300,7 @@ const char *text_menu[] PROGMEM =
 		//
 		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 158 to 168 general
 		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 	
-		GeneralText8, Dummy0,
+		GeneralText8, GeneralText9,
 		//
 		MixerItem0, MixerItem2, MixerItem13, MixerItem2, MixerItem4, MixerItem1, 			// 169 to 194 
 		MixerItem5, MixerItem1, MixerItem6,  MixerItem1, MixerItem7, MixerItem1, 
@@ -306,6 +312,8 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 199 to 204  Flight modes
 		AutoMenuItem15, AutoMenuItem17, 
+		//
+		RCMenuItem6, RCMenuItem7, Dummy0,													// 205 to 207 JR/Futaba
 	}; 
 
 //************************************************************

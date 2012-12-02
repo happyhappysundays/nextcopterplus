@@ -102,6 +102,8 @@
 //			Added Maximum turn angle setting in Autolevel mode.
 //			Updated Z cal to make it easier to do and harder to screw up.
 //			Restored missing ACC trims. Fixed I-term constrain calculation.
+//			Added Normal/FlyByWire flight modes.
+//			Added Dynamic gaim setting.
 //
 //***********************************************************
 //* To do
@@ -604,7 +606,6 @@ int main(void)
             // Reset IMU each time autolevel restarted
             FirstTimeIMU = true;
         }
-
 
 		// Remove RC noise and detect when sticks centered
 		RC_Deadband();

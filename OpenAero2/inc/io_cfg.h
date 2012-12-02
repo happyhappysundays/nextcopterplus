@@ -135,5 +135,6 @@ enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LO
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
 enum I_term_type	{STD = 0, AUTO, FIXED};
+enum Flight_mode	{RETRO = 0, FLYBYWIRE};
 
 #endif //IO_CFG_H

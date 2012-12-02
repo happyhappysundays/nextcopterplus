@@ -16,6 +16,8 @@
 #include "..\inc\acc.h"
 #include "..\inc\imu.h"
 #include "..\inc\rc.h"
+#include "..\inc\mixer.h"
+#include "..\inc\isr.h"
 
 //************************************************************
 // Defines
@@ -62,8 +64,7 @@ void Calculate_PID(void)
 	int32_t PID_Gyro_I_temp = 0;			// Temporary i-terms bound to max throw
 	int32_t PID_Gyro_I_actual = 0;			// Actual unbound i-terms
 	int8_t	axis;
-	int8_t	RCinputsAxis[3] = {AILERON, ELEVATOR, RUDDER}; 	// Cross-ref for actual RCinput elements
-	int8_t	RCinputsFlap[3] = {Config.FlapChan, NOCHAN, NOCHAN}; // Offset for handling flaperon
+	int16_t	RCinputsAxis[3] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; // Cross-ref for actual RCinput elements
 
 	// Initialise arrays with gain values. Cludgy fix to reduce code space
 	int8_t 	P_gain[3] = {Config.Roll.P_mult, Config.Pitch.P_mult, Config.Yaw.P_mult};
@@ -71,22 +72,64 @@ void Calculate_PID(void)
 	int8_t 	D_gain[3] = {Config.Roll.D_mult, Config.Pitch.D_mult, Config.Yaw.D_mult};
 	int8_t 	L_gain[2] = {Config.A_Roll_P_mult, Config.A_Pitch_P_mult};
 
-	int16_t	RCinputOffset = 0;
+	int16_t	roll_actual = 0;
+	int16_t temp16 = 0;
 
 	//************************************************************
-	// Increment and limit I-terms, handle heading hold modes
+	// Modify gains dynamically as required
+	//************************************************************
+
+	// If dynamic gain set up 
+	if (Config.DynGainSrc != NOCHAN)
+	{
+		for (axis = 0; axis <= YAW; axis ++)
+		{
+			// Channel controlling the dynamic gain
+			temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
+
+			// Scale 0 - 2500 to 0 - Config.DynGain
+			temp16 = temp16 / Config.DynGainDiv;
+
+			P_gain[axis] = P_gain[axis] - (int8_t)scale32(P_gain[axis], temp16);
+		}
+	}
+
+	//************************************************************
+	// Un-mix ailerons from flaperons as required
+	//************************************************************
+	
+	// If flaperons set up 
+	if (Config.FlapChan != NOCHAN)
+	{
+		// Recreate actual roll signal from flaperons
+		roll_actual = RCinputs[AILERON] + RCinputs[Config.FlapChan];
+		RCinputsAxis[ROLL] = roll_actual >> 1;
+	}
+	// Otherwise roll is just roll...
+	else
+	{
+		RCinputsAxis[ROLL] = RCinputs[AILERON];
+	}
+
+	//************************************************************
+	// PID loop
 	//************************************************************
 
 	for (axis = 0; axis <= YAW; axis ++)
 	{
+
+		//************************************************************
+		// Increment and limit gyro I-terms, handle heading hold modes
+		//************************************************************
+
 		if (Stability)
 		{
 			// For 3D mode, change neutral with sticks
 			if (Config.AutoCenter == FIXED)
 			{
-				// Reset the I-terms when you need to set the I-term with RC
+				// Reset the I-terms when you need to adjust the I-term with RC
 				// Note that the I-term is not constrained when no RC input is present.
-				if (RCinputs[RCinputsAxis[axis]] != 0)
+				if (RCinputsAxis[axis] != 0)
 				{
 					if (IntegralGyro[axis] > Config.Raw_I_Constrain[axis])
 					{
@@ -98,7 +141,7 @@ void Calculate_PID(void)
 					}
 
 					// Adjust I-term with RC input (scaled down by 8)
-					IntegralGyro[axis] += (RCinputs[RCinputsAxis[axis]] >> 3); 
+					IntegralGyro[axis] += (RCinputsAxis[axis] >> 3); 
 				}
 			}	
 
@@ -121,35 +164,27 @@ void Calculate_PID(void)
 					IntegralGyro[axis] ++;
 				}
 			}		
-		}
+		} // Stability
 
 		//************************************************************
-		// Calculate PID
+		// Define gyro error term based on flight mode
 		//************************************************************
-		// Error calculation - gyro
-		// We have to make sure fixed offsets (like flaperons) are taken into account
-		// and not seen as error info into the PID loop
-		if (RCinputsFlap[axis] != NOCHAN)
+		
+		// Fly-by-wire mode. When in Autolevel, don't use RC input for error calc as it will fight that of the Autolevel
+		if ((!AutoLevel) && (Config.FlightMode == FLYBYWIRE))
 		{
-			// Check to see if there is an offset for this axis
-			RCinputOffset = RCinputs[RCinputsAxis[axis]];
+			// Note that gyro polarity always opposes RC so we add here to get the difference 
+			currentError[axis] = gyroADC[axis] + RCinputsAxis[axis];
 		}
-		else
-		{
-			RCinputOffset = 0;
-		}
-
-		// Note that gyro polarity always opposes RC so we add here to get the difference 
-		// Also, remove any fixed offset (flaperon channel)
-		// When also in Autolevel, don't use RC input as it will fight that of the Autolevel
-		if (!AutoLevel)
-		{
-			currentError[axis] = gyroADC[axis] + ((RCinputs[RCinputsAxis[axis]] + RCinputOffset) >> 1);	
-		}
+		// Standard OE2 flight style
 		else
 		{
 			currentError[axis] = gyroADC[axis];
 		}
+
+		//************************************************************
+		// Calculate PID gains
+		//************************************************************
 
 		// Gyro P-term
 		PID_gyro_temp = currentError[axis] * P_gain[axis];			// Multiply P-term (Max gain of 127)
@@ -166,29 +201,45 @@ void Calculate_PID(void)
 		DifferentialGyro = DifferentialGyro << 4;					// Multiply by 16
 
 		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
+		// Limit the tilt angles by stick setting in Fly-By-Wire mode only
 		if (AutoLevel && (axis < YAW)) 
 		{
-			// Process requested angle. angle[] is in degrees, but RC is +/-1000 steps
-			PID_acc_temp = ((RCinputs[RCinputsAxis[axis]] + RCinputOffset) >> 4); 	// 1000 = 62.5 degrees max
+			//************************************************************
+			// Define acc error term based on flight mode
+			//************************************************************
 
-			// Limit maximum angle to that stored in Config.A_Limits ("Max:" in Autolevel menu)
-			if (PID_acc_temp > Config.A_Limits)
+			if (Config.FlightMode == FLYBYWIRE)
 			{
-				PID_acc_temp = Config.A_Limits;
+				// Process requested angle. angle[] is in degrees, but RC is +/-1000 steps
+				PID_acc_temp = (RCinputsAxis[axis] >> 4); 				// 1000 = 62.5 degrees max
+
+				// Limit maximum angle to that stored in Config.A_Limits ("Max:" in Autolevel menu)
+				if (PID_acc_temp > Config.A_Limits)
+				{
+					PID_acc_temp = Config.A_Limits;
+				}
+				if (PID_acc_temp < -Config.A_Limits)
+				{
+					PID_acc_temp = -Config.A_Limits;
+				}
+
+				// Acc P terms and error calculation
+				PID_acc_temp = PID_acc_temp + angle[axis];
 			}
-			if (PID_acc_temp < -Config.A_Limits)
+			else
 			{
-				PID_acc_temp = -Config.A_Limits;
+				PID_acc_temp = angle[axis];
 			}
 
-			// Acc P terms and error calculation
-			PID_acc_temp = PID_acc_temp + angle[axis];
 			PID_acc_temp *= L_gain[axis];							// P-term of accelerometer (Max gain of 127)
-
 			PID_ACCs[axis] = (int16_t)(PID_acc_temp >> 2);			// Accs need much less scaling
 		}
 
-		// I-term output limits. Maximum 125% limit is full servo throw 
+		//************************************************************
+		// I-term output limits
+		//************************************************************
+
+		// Maximum 125% limit is full servo throw 
 		if (PID_Gyro_I_actual > Config.Raw_I_Limits[axis]) 
 		{
 			PID_Gyro_I_temp = Config.Raw_I_Limits[axis];
@@ -202,7 +253,11 @@ void Calculate_PID(void)
 			PID_Gyro_I_temp = PID_Gyro_I_actual;
 		}
 
-		// Sum Gyro P and D terms and rescale	
+		//************************************************************
+		// Sum Gyro P and D terms and rescale
+		//************************************************************
+	
 		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
-	}
+
+	} // PID loop
 }

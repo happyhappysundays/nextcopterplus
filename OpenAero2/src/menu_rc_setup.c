@@ -34,7 +34,7 @@ void menu_rc_setup(void);
 
 #define RCITEMS 5 	// Number of menu items
 #define RCSTART 149 // Start of Menu text items
-#define RCTEXT 138 	// Start of value text items
+#define RCTEXT 205 	// Start of value text items
 #define RCOFFSET 92	// Value offsets
 
 //************************************************************

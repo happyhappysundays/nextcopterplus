@@ -33,7 +33,7 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 10 	// Number of menu items
+#define GENERALITEMS 11 	// Number of menu items
 #define GENERALSTART 158 	// Start of Menu text items
 #define GENERALTEXT	 22 	// Start of value text items
 #define GENOFFSET	 78		// Value offsets
@@ -42,7 +42,7 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 48};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 48, 116};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
 	{AEROPLANE,FWING,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
@@ -55,6 +55,7 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 	{1,64,1,0,8},		// Acc. LPF
 	{10,100,5,0,30},	// CF factor
 	{STD,FIXED,1,1,STD},// HH mode
+	{RETRO,FLYBYWIRE,1,1,RETRO},// Flight mode
 };
 
 //************************************************************
