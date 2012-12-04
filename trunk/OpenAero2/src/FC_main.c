@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 4 - November 2012
+// Version 1.1 Beta 4 - December 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -109,9 +109,6 @@
 //* To do
 //***********************************************************
 //
-// Future
-//	CamStab RC control with servo speed setting
-//  Camera stabilisation refinements
 //
 //***********************************************************
 //* Includes

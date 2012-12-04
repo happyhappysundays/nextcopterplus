@@ -159,13 +159,15 @@ void ProcessMixer(void)
 			// Recreate actual roll signal from flaperons
 			temp  = RCinputs[AILERON] + RCinputs[Config.FlapChan];
 			temp  = temp >> 1;
-			temp2 = temp;
 		}
+		// If flaperons not set up
 		else
 		{
 			temp  = RCinputs[AILERON];
-			temp2 = RCinputs[Config.FlapChan];
 		}
+
+		// Copy to other flaperon
+		temp2 = temp;
 
 		// Apply differential
 		if (temp > 0)			// For one side only
@@ -178,11 +180,15 @@ void ProcessMixer(void)
 			temp2 = scale32(temp2, (100 - Config.Differential));
 		}
 
+		// Add flap back into aileron
 		RCinputs[AILERON] = temp + flap;
-		RCinputs[Config.FlapChan] = temp2 - flap;
-
-		temp  = 0;
-		temp2 = 0;
+		
+		// If flaperons set up 
+		if (Config.FlapChan != NOCHAN)
+		{
+			// Add flap back into aileron
+			RCinputs[Config.FlapChan] = temp2 - flap;
+		}
 	}
 
 	//************************************************************
