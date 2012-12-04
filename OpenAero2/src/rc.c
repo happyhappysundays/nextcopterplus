@@ -114,6 +114,8 @@ int16_t get_expo_value (int16_t RCvalue, uint8_t Expolevel)
  // Reduce RxIn noise and also detect the hands-off situation
 void RC_Deadband(void)
 {
+	int16_t	aileron_actual = 0;
+
 	// Deadband culling
 	if ((RCinputs[AILERON] < DEAD_BAND) && (RCinputs[AILERON] > -DEAD_BAND))
 	{
@@ -128,9 +130,23 @@ void RC_Deadband(void)
 		RCinputs[RUDDER] = 0;
 	}
 
-	// Hands-free detection
-	if (((RCinputs[AILERON] < Config.HandsFreetrigger) && (RCinputs[AILERON] > -Config.HandsFreetrigger))
-	 && ((RCinputs[RUDDER]  < Config.HandsFreetrigger) && (RCinputs[RUDDER]  > -Config.HandsFreetrigger)))
+	// If flaperons set up 
+	if (Config.FlapChan != NOCHAN)
+	{
+		// Recreate actual roll signal from flaperons
+		aileron_actual  = RCinputs[AILERON] + RCinputs[Config.FlapChan];
+		aileron_actual  = aileron_actual >> 1;
+	}
+	// If flaperons not set up
+	else
+	{
+		aileron_actual  = RCinputs[AILERON];
+	}
+
+
+	// Hands-free detection (won't work with flaperons set)
+	if (((aileron_actual < Config.HandsFreetrigger) && (aileron_actual > -Config.HandsFreetrigger))
+	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
 	{
 		HandsFree = true;
 	}

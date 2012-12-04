@@ -47,8 +47,8 @@ const menu_range_t auto_menu_ranges[] PROGMEM =
 {
 	{DISABLED,HANDSFREE,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
 	{-125,125,10,0,10},
-	{0,127,1,0,30},
-	{0,127,1,0,30},
+	{0,127,1,0,60},
+	{0,127,1,0,60},
 	{10, 60, 5, 0, 45},	// Maximum angle
 	{-127,127,1,0,0}, 
 	{-127,127,1,0,0},
