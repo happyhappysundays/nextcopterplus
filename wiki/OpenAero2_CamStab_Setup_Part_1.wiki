@@ -8,7 +8,7 @@ While it is possible to do both, there are limitations. This will be covered in 
 
 There will also be a separate guide explaining how to set up OpenAero2 to allow the camera mount to be controlled during stabilisation.
 
-*Note:* The features described in this document are only available in Openaero2 versions greater than V1.0 Beta 3.
+*Note:* The features described in this document are only available in Openaero2 version V1.0. An updated document will cover V1.1.
 
 ==Step 1: Set Camstab mixer mode==
 
