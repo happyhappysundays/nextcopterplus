@@ -370,25 +370,25 @@ Due to countless requests you now have absolute freedom in how to enable these m
 In the Stability and Autolevel Settings menus you can select which method of control you wish to use.
 
  * OFF: Always off
- * Autochan: On when the channel set as "Autochan" in RC settings is more than 50%
- * Stabchan: On when the channel set as "Stabchan" in RC settings is more than 50%
- * 3-pos: Stability on when the 3-pos switch is more than 33%. Autolevel also on when the 3-pos switch is more than 66%
+ * Autochan: On when the channel set as "Autochan" in RC settings is more than the trigger.
+ * Stabchan: On when the channel set as "Stabchan" in RC settings is more than the trigger.
+ * 3-pos: Stability on when the 3-pos switch is more than the stability trigger. Autolevel also on when the 3-pos switch is more than the autolevel trigger.
  * ON: Always on
  * Handsfree: On when the sticks are released. Please make sure a stick centering procedure has been done before using this more, otherwise the software will be unable to determine the handsfree status.
 
 *3-pos switch*
 The three-position switch mode allows you to have both Stability and Autolevel on one switch, but have them selectable.
 The way it works is this:
-For the switch position between minimum and about 33% = Stability off, Autolevel off.
-For the switch position between 33% and about 66% = Stability on, Autolevel off.
-For the switch position above 66% = Stability on, Autolevel on.
+For the switch position between -100% and the stability trigger = Stability off, Autolevel off.
+For the switch position between the stability trigger and the autolevel trigger = Stability on, Autolevel off.
+For the switch position above the autolevel trigger = Stability on, Autolevel on.
 
-Note that you can now change the positions at which these trigger. The "trigger" settings of both the stability and autolevel channels will set these positions.
+Note that you can change the positions at which these trigger. The "trigger" settings of both the stability and autolevel channels will set these positions.
 
 *RC Setting defaults*
 Stabchan = GEAR (AUX input on KK2 board)
 Autochan = GEAR (AUX input on KK2 board)
-Flapchan = THROTTLE (THROTTLE input on KK2 board)
+2nd. Aileron = NOCHAN (No second aileron)
 
 ==Initial setup and calibration==
 The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
@@ -401,14 +401,14 @@ Go into the General menu and change the Mode to that which suits your model. The
  * If you are using CPPM, also select the channel order between either JR/Spektrum or Futaba.
  * Select which input channel you plan to use for stability. PWM users will normally select the fifth channel (GEAR) as that corresponds to the fifth (AUX) input on the KK2. CPPM users can pick any unused channel.
  * Select which input channel you plan to use for autolevel. PWM users may select the unused throttle input (THROTTLE) or double-up the two functions on the fifth channel (GEAR). CPPM users can pick any unused channel.
- * If your radio carries the second aileron channel on a channel different to the default of FLAP (channel 6) set that here too.
+ * If your radio carries the second aileron channel set that here too.
 *Step 3: Stability settings*
  * For now, just alter the Mode as described above in "Stability and Autolevel switching".
 *Step 4: Autolevel settings*
  * For now, just alter the Mode as described above in "Stability and Autolevel switching".
 *Step 5: RC check*
  * Go to the RC Inputs screen and switch on your transmitter and receiver. You should immediately see values appearing in both columns next to each connected channel.
- * Make sure all the tranmitter channels are centered and the throttle to minimum, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
+ * Make sure all the tranmitter channels are centered including the throttle, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
  * The right-hand column should now all be zero and change +/-1000 or so at the extremes of throw.
 
 *Step 6: Servo direction*
@@ -425,9 +425,10 @@ Go into the General menu and change the Mode to that which suits your model. The
  * Finally, yaw the model left and right while observing the rudder. Adjust the M8 mixer menu to reverse the yaw gyro as required.
 
 *Step 8: Auto-level setup*
- * Firstly, go into the balance meter screen of the menu and observe the balance meter. The black dot indicates where OpenAero2 thinks "down" is.
+ * Firstly, go into the sensor screen where you can calibrate the autolevel.
  * Place the model on a flat surface and chock up the tail or nose until it is level and in its normal flying attitude.
- * Keeping the model perfectly still, carefully press button 4 under the screen marker "Cal." After a short pause the black dot will move to the center of the display.
+ * Keeping the model perfectly still, carefully press button 4 under the screen marker "Cal." After a short pause the LED will flash.
+ * If you wish the inverted performance to be optimal, at this point you can flip the model over into the inverted position and press button 3 "Inv.". You cannot redo this until you redo the initial calibration with button 4.
  * Go back to the status menu.
  * Switch off stability control and switch ON autolevel.
  * Tilt the model in pitch and roll while watching the respective surfaces. They should move slightly to compensate and remain in that position.
