@@ -229,20 +229,30 @@ void ProcessMixer(void)
 		// Process sensor mixers
 		for (i = 0; i < outputs; i++)
 		{
-			// Discard RC part of fly-by-wire channels as this is done inside the PID loop
-			if ((Config.FlightMode == FLYBYWIRE) &&
-			   ((Config.Channel[i].source_a == AILERON)	||
-			    (Config.Channel[i].source_a == Config.FlapChan) ||
-				(Config.Channel[i].source_a == ELEVATOR)||
-			// Rudder is a special case as AutoLevel will only supply values for Roll/Pitch
-			   ((Config.Channel[i].source_a == RUDDER) && !AutoLevel)))
+			// Discard RC part of fly-by-wire or 3D channels as these are replaced by that from the PID loop
+			if (
+				// For fly-by-wire flight mode or when in 3D Heading hold mode
+				(((Config.FlightMode == FLYBYWIRE) || (Config.AutoCenter == FIXED))
+			     &&
+				 // ...and for the RC channels
+			     (
+					(Config.Channel[i].source_a == AILERON)	||
+					(Config.Channel[i].source_a == Config.FlapChan) ||
+					(Config.Channel[i].source_a == ELEVATOR)||
+
+					// ...except rudder which is a special case as AutoLevel will only replace values for Roll/Pitch
+					((Config.Channel[i].source_a == RUDDER) && !AutoLevel)
+				 )
+				)
+			   )
 			{
-				// Clear solution if a fly-by-wire channel
+				// Clear solution
 				temp = 0;
 			}
+
 			else
 			{
-				// Otherwise...
+				// Otherwise use the RC value as a base
 				temp = Config.Channel[i].value;
 			}
 
