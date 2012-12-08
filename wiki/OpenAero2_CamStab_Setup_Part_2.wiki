@@ -5,7 +5,7 @@
 
 This guide assumes that you plan to use OpenAero2 for camera stability and that you want the camera mount to be controlled during stabilisation.
 
-*Note:* The features described in this document are only available in Openaero2 versions greater than V1.0 Beta 3.
+*Note:* The features described in this document are only available in Openaero2 version V1.0. An updated document will cover V1.1.
 
 ==Step 1: Set Camstab mixer mode==
 
@@ -77,7 +77,7 @@ Remove all servo connections and re-insert the first axis you wish to stabilise 
 Assuming that there are valid P-term gain values set in the Autolevel control menu, tilting the mount *in the axis being set up* will casue the mount to move in one direction.
 Take note of the direction the mount moves. If it moves in the *same* direction as your movement, the accelerometer will need to be reversed. If it moves in the *opposite* direction, then you may proceed with the next steps.
 
-To reverse an accelerometer, go into the mixer setup menu for the channel to which you are connected (e.g. M2 for the Pitch/Tilt axis).
+To reverse an accelerometer, go into the mixer setup menu for the channel to which you are connected (e.g. M6 for the Pitch/Tilt axis).
 Change the polarity of the relevant ACC to "Reversed".
 Return to the Status menu to confirm that the accelerometer direction is now correct.
 
