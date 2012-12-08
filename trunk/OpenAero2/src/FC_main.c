@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 4 - December 2012
+// Version 1.1 Beta 5 - December 2012
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -104,6 +104,7 @@
 //			Restored missing ACC trims. Fixed I-term constrain calculation.
 //			Added Normal/FlyByWire flight modes.
 //			Added Dynamic gain setting. Many bug fixes.
+// Beta 5	Fixed 3D mode mixing.
 //
 //***********************************************************
 //* To do

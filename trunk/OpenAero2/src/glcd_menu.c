@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1b4"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1b5"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Resetting to";				// Init
 const char PText2[]  PROGMEM = "defaults";
