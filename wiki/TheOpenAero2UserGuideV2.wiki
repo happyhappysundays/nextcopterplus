@@ -31,10 +31,10 @@ For those needing a throttle control, you can just take the throttle output of y
 
 In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
 
-===Camera Stability===
+===Camera Stability (disabled in Betas)===
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
-===Swash120===
+===Swash120 (disabled in Betas)===
 In Swash120 mode there are four stabilised outputs - Cyclic 0, Cyclic 1, Cyclic 2 and Rudder.
 A collective output is also available to connect directly to the ESC for your motor.
 
@@ -44,7 +44,7 @@ There is no +5V power supplied to M2 to M8, so you must supply your own 5V to an
 Do not connect the 5V rail of M2 to m8 directly to M1 or the RX connecions as this will result in the KK2 board rebooting when subject to high servo loads.
 
 ===Receiver connections===
-For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input.
+For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
 
 If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
 
@@ -87,19 +87,19 @@ OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
 ===Servo connections===
 For conventional aeroplanes the connections are as follows:
  * M1: Throttle (CPPM only)
- * M2: Free channel or Pitch/Tilt for camera stabilising
- * M3: Free channel or Yaw/Pan for camera stabilising
- * M4: Free channel or Roll for camera stabilising
+ * M2: Free channel
+ * M3: Free channel
+ * M4: Free channel
  * M5: Elevator
- * M6: Left aileron
+ * M6: Left aileron (or primary aileron)
  * M7: Right aileron
  * M8: Rudder
 
 For flying wing models the connections are as follows:
  * M1: Throttle (CPPM only)
- * M2: Free channel or Pitch/Tilt for camera stabilising
- * M3: Free channel or Yaw/Pan for camera stabilising
- * M4: Free channel or Roll for camera stabilising
+ * M2: Free channel
+ * M3: Free channel
+ * M4: Free channel
  * M5: Elevator
  * M6: Left elevon
  * M7: Right elevon
@@ -167,7 +167,13 @@ http://i.imgur.com/S77MW.jpg
 
  * *Acc LPF:* Allows adjustment of the accelerometer Low-Pass Filter from 1 (infinite) to 64 (about 1 Hz)
  * *CF factor:* Controls the fusion of Accelerometer and Gyros. The higher the number the faster as gyro is favoured, the lower the more accurate but slower.
- * *Yaw magic:* Automatically centers the Yaw axis when in heading hold mode if the yaw has drifted off-center.
+ * *H. Hold:* Heading hold mode. There are three options.
+ # *Normal:* Heading hold is processed normally when the I-terms and I-term limits are set correctly.
+ # *Auto:* Automatically centers all axis when in heading hold mode if they have drifted off-center.
+ # *3D:* Allows the sticks to re-center the I-term neutral when in heading hold mode. Use with great caution and test the mode out first before attempting to fly. Also, make absolutely sure you can switch off stability if required.
+ * *Flight mode:* There are two options.
+ # *Normal:* As per V1.0 and earlier. Sticks over-ride gyro input but gyros dampen sticks.
+ # *FlyByWire:* Sticks taken into account. Sticks set gyro rotation rate in stability mode and so are much more responsive. In autolevel mode, the sticks set the pitch/roll angle up to a maximum limit of 60 degrees. See Autolevel menu for more.
 
 ===Adjusting LCD Contrast===
 http://i.imgur.com/WzAeW.jpg
@@ -192,11 +198,13 @@ need a fixed offset to feed that channel. These can be set up here.
 http://i.imgur.com/YjFka.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
- # *Autochan:* On when the channel set as "Autochan" in RC settings is more than 50%. This can be changed with the trigger setting.
- # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%. This can be changed with the trigger setting.
- # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ # *Autochan:* On when the channel set as "Autochan" in RC settings is more than the trigger setting. 
+ # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than the trigger setting. 
+ # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than the stability trigger. Autolevel also on when the channel set as 3-pos in RC settings is more than the autolevel trigger. Make sure that your 3-position switch is set to -100%, 0% and 100% to reliably trigger with the default settings.
  # *ON:* Always on
  * *Trigger:* Stick position to enable (-125% to 125%)
+ * *Dyn.Gain Ch:* The channel used to influence the overall PID gain of all axis. 
+ * *Dyn.Gain:* The amount of attenuation you desire at the 100% point of the Dynamic gain channel source. Setting 100 will completely remove stability at 100% of the source channel's value.
  * *Roll P:* PID Proportional gain for the roll gyro
  * *Roll I:* PID I-term gain for the roll gyro
 
@@ -222,14 +230,15 @@ http://i.imgur.com/sTnwi.jpg
 http://i.imgur.com/bMfnM.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
- # *Autochan:* On when the channel set as "Autochan" in RC settings is more than 50%. This can be changed with the trigger setting.
- # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than 50%. This can be changed with the trigger setting.
- # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than 33%. Autolevel also on when the channel set as 3-pos in RC settings is more than 66%
+ # *Autochan:* On when the channel set as "Autochan" in RC settings is more than the trigger setting.
+ # *Stabchan:* On when the channel set as "Stabchan" in RC settings is more than the trigger setting.
+ # *3-pos:* Stability on when the channel set as "3-pos" in RC settings is more than the stability trigger. Autolevel also on when the channel set as 3-pos in RC settings is more than the autolevel trigger. Make sure that your 3-position switch is set to -100%, 0% and 100% to reliably trigger with the default settings.
  # *ON:* Always on
- # *Handsfree:* On when the sticks are released
+ # *Handsfree:* On when the sticks are released. Margin to determine when the sticks are released is determined by the Trigger.
  * *Trigger:* Stick position to enable (-125% to 125%)
  * *Roll P:* PID Proportional gain for the roll accelerometer
  * *Pitch P:* PID Proportional gain for the pitch accelerometer
+ * *Max:* Maximum roll/pitch angle allowed in FlyByWire mode. Model will not roll/pitch beyond this point.
 
 http://i.imgur.com/TjPUm.jpg
  * *Roll trim:* For fine roll tuning of the autolevel.
@@ -261,7 +270,7 @@ http://i.imgur.com/WlVhb.jpg
 
 The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
 
-Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered and throttle at minimum before calibration.
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered including the throttle at before calibration.
 
 Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
 Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
@@ -273,13 +282,12 @@ http://i.imgur.com/qUqmL.jpg
 The sensor inputs screen shows you the current values of all sensors. 
 Pressing button 4 "Cal." calibrates the accelerometers. The gyros are calibrated at start-up.
 
-Note: pressing button 3 will initiate an extra inverted calibration step. After doing the normal calibration above, invert the model and press button 3. This helps the software to more accurately detect the inverted attitude.
+Pressing button 3 "Inv." will initiate an extra inverted calibration step. After doing the normal calibration above, invert the model and press button 3. This helps the software to more accurately detect the inverted attitude.
 
-===Balance Meter Screen===
+===Level Meter Screen===
 http://i.imgur.com/L4Qte.jpg
 
-The balance meter screen shows you a graphical representation of where the board considers "down" to be. Pressing button 4 "Cal." calibrates the accelerometers. 
-A detailed description of the correct use of this screen is given in the section "Initial setup and calibration".
+The level meter screen shows you a graphical representation of where the board considers "down" to be. 
 
 ===Mixer Menu 1 to 8===
 Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
