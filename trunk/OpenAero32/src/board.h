@@ -101,7 +101,6 @@ typedef struct baro_t
 #define ACC
 #define MAG
 #define BARO
-#define LEDRING
 
 // Helpful macros
 #define LED0_TOGGLE              digitalToggle(LED0_GPIO, LED0_PIN);

@@ -48,7 +48,7 @@
 #define MMA8452_CTRL_REG1_ACTIVE        0x01
 
 extern uint16_t acc_1G;
-static uint8_t device_id;
+//static uint8_t device_id;
 
 static void mma8452Init(void);
 static void mma8452Read(int16_t *accelData);
@@ -66,7 +66,7 @@ bool mma8452Detect(sensor_t *acc)
     acc->init = mma8452Init;
     acc->read = mma8452Read;
     acc->align = mma8452Align;
-    device_id = sig;
+    //device_id = sig;
     return true;
 }
 

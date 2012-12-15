@@ -79,7 +79,6 @@ retry:
         }
     }
 
-#ifdef BARO
     // Detect what pressure sensors are available. baro->update() is set to sensor-specific update function
     if (!ms5611Detect(&baro)) {
         // ms5611 disables BMP085, and tries to initialize + check PROM crc. if this works, we have a baro
@@ -88,7 +87,6 @@ retry:
             sensorsClear(SENSOR_BARO);
         }
     }
-#endif
 
     // Now time to init things, acc first
     if (sensors(SENSOR_ACC))
@@ -234,7 +232,6 @@ void ACC_getADC(void)
     ACC_Common();
 }
 
-#ifdef BARO
 void Baro_update(void)
 {
     static uint32_t baroDeadline = 0;
@@ -270,7 +267,6 @@ void Baro_update(void)
             break;
     }
 }
-#endif /* BARO */
 
 static void GYRO_Common(void)
 {

@@ -44,8 +44,8 @@
 #define INBUF_SIZE 64
 
 static const char boxnames[] =
-    "ANGLE;"
-    "HORIZON;"
+    "STABILITY;"
+    "AUTOLEVEL;"
     "BARO;"
     "MAG;"
     "CAMSTAB;"
@@ -227,9 +227,9 @@ static void evaluateCommand(void)
         serialize16(cycleTime);
         serialize16(i2cGetErrorCounter());
         serialize16(sensors(SENSOR_ACC) | sensors(SENSOR_BARO) << 1 | sensors(SENSOR_MAG) << 2 | sensors(SENSOR_GPS) << 3);
-        serialize32(f.ANGLE_MODE << BOXANGLE | f.HORIZON_MODE << BOXHORIZON | f.BARO_MODE << BOXBARO | f.MAG_MODE << BOXMAG | f.ARMED << BOXARM | 
+        serialize32(f.STABILITY_MODE << BOXSTABILITY | f.AUTOLEVEL_MODE << BOXAUTOLEVEL | f.BARO_MODE << BOXBARO | f.MAG_MODE << BOXMAG | f.ARMED << BOXARM | 
                     rcOptions[BOXCAMSTAB] << BOXCAMSTAB | rcOptions[BOXCAMTRIG] << BOXCAMTRIG | 
-                    f.GPS_HOME_MODE << BOXGPSHOME | f.GPS_HOLD_MODE << BOXGPSHOLD | f.HEADFREE_MODE << BOXHEADFREE | f.PASSTHRU_MODE << BOXPASSTHRU | 
+                    f.GPS_HOME_MODE << BOXGPSHOME | f.GPS_HOLD_MODE << BOXGPSHOLD | f.PASSTHRU_MODE << BOXPASSTHRU | 
                     rcOptions[BOXBEEPERON] << BOXBEEPERON | rcOptions[BOXLEDMAX] << BOXLEDMAX | rcOptions[BOXLLIGHTS] << BOXLLIGHTS | rcOptions[BOXHEADADJ] << BOXHEADADJ);
         break;
     case MSP_RAW_IMU:
