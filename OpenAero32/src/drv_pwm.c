@@ -185,7 +185,7 @@ static const uint8_t multiPWM[] = {
 static const uint8_t airPPM[] = {
     PWM1 | TYPE_IP,     // PPM input
     PWM9 | TYPE_M,      // motor #1
-    PWM10 | TYPE_M,     // motor #2
+    PWM10 | TYPE_M,     // motor #2		   (not fitted to AfroMini)
     PWM11 | TYPE_S,     // servo #1
     PWM12 | TYPE_S,
     PWM13 | TYPE_S,
@@ -481,18 +481,18 @@ bool pwmInit(drv_pwm_config_t *init)
         if (mask & (TYPE_IP | TYPE_IW) && !init->enableInput)
             mask = 0;
 
-        if (init->useServos) {
-            // remap PWM9+10 as servos
+        if (init->useServos && !init->airplane) {
+            // remap PWM9+10 as servos (but not in airplane mode LOL)
             if (port == PWM9 || port == PWM10)
                 mask = TYPE_S;
         }
 
-        if (init->extraServos) {
+        if (init->extraServos && !init->airplane) {
             // remap PWM5..8 as servos when used in extended servo mode
             if (port >= PWM5 && port <= PWM8)
                 mask = TYPE_S;
         }
-
+		
         if (mask & TYPE_IP) {
             pwmInConfig(port, ppmCallback, 0);
             numInputs = 8;

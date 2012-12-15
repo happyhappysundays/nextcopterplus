@@ -76,8 +76,8 @@ enum {
 };
 
 enum {
-    BOXANGLE = 0,
-    BOXHORIZON,
+    BOXSTABILITY = 0,
+    BOXAUTOLEVEL,
     BOXBARO,
     BOXMAG,
     BOXCAMSTAB,
@@ -94,8 +94,9 @@ enum {
     CHECKBOXITEMS
 };
 enum {
-    BASIC_FLAP,
-		ADV_FLAP
+    BASIC_FLAP, 	// No flaperons - one aileron channel copied to both
+	PREMIXED_FLAP,	// Flaperons - two ailerons with flaps pre-mixed in the TX
+	ADV_FLAP		// Flaperons - two independant aileron channels + one flap input on cfg.flapchan
 };
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -226,13 +227,13 @@ typedef struct flags_t {
     uint8_t OK_TO_ARM;
     uint8_t ARMED;
     uint8_t ACC_CALIBRATED;
-    uint8_t ANGLE_MODE;
-    uint8_t HORIZON_MODE;
+    uint8_t STABILITY_MODE;
+    uint8_t AUTOLEVEL_MODE;
     uint8_t MAG_MODE;
     uint8_t BARO_MODE;
     uint8_t GPS_HOME_MODE;
     uint8_t GPS_HOLD_MODE;
-    uint8_t HEADFREE_MODE;
+    //uint8_t HEADFREE_MODE;
     uint8_t PASSTHRU_MODE;
     uint8_t GPS_FIX;
     uint8_t GPS_FIX_HOME;
@@ -300,6 +301,10 @@ extern baro_t baro;
 
 // main
 void loop(void);
+
+// RC
+void computeRC(void);
+uint16_t pwmReadRawRC(uint8_t chan);
 
 // IMU
 void imuInit(void);

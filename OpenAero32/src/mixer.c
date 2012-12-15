@@ -1,7 +1,7 @@
 #include "board.h"
 #include "mw.h"
 
-static uint8_t numberMotor = 0;
+uint8_t numberMotor = 0;
 uint8_t useServo = 0;
 int16_t motor[MAX_MOTORS];
 int16_t servo[8] = { 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500 };
@@ -124,7 +124,7 @@ const mixer_t mixers[] = {
     { 8, 0, mixerOctoX8 },         // MULTITYPE_OCTOX8
     { 8, 0, mixerOctoFlatP },      // MULTITYPE_OCTOFLATP
     { 8, 0, mixerOctoFlatX },      // MULTITYPE_OCTOFLATX
-    { 1, 1, NULL },                // * MULTITYPE_AIRPLANE
+    { 2, 1, NULL },                // * MULTITYPE_AIRPLANE
     { 0, 1, NULL },                // * MULTITYPE_HELI_120_CCPM
     { 0, 1, NULL },                // * MULTITYPE_HELI_90_DEG
     { 4, 0, mixerVtail4 },         // MULTITYPE_VTAIL4
@@ -141,6 +141,7 @@ void mixerInit(void)
     if (feature(FEATURE_SERVO_TILT))
         useServo = 1;
 
+	// Copy from custom mixer if selected
     if (cfg.mixerConfiguration == MULTITYPE_CUSTOM) {
         // load custom mixer into currentMixer
         for (i = 0; i < MAX_MOTORS; i++) {
@@ -150,10 +151,13 @@ void mixerInit(void)
             currentMixer[i] = cfg.customMixer[i];
             numberMotor++;
         }
-    } else {
+    } 
+	// Copy from non-NULL, non-Custom mixers
+	else 
+	{
         numberMotor = mixers[cfg.mixerConfiguration].numberMotor;
-        // copy motor-based mixers
-        if (mixers[cfg.mixerConfiguration].motor) {
+        // Copy motor-based mixers if defined (not NULL)
+        if (mixers[cfg.mixerConfiguration].motor != NULL) {
             for (i = 0; i < numberMotor; i++)
                 currentMixer[i] = mixers[cfg.mixerConfiguration].motor[i];
         }
@@ -193,7 +197,7 @@ void writeServos(void)
             break;
 
         case MULTITYPE_AIRPLANE:
-            pwmWriteServo(0, servo[0]); // debug
+            pwmWriteServo(0, servo[0]);
             pwmWriteServo(1, servo[1]);
             pwmWriteServo(2, servo[2]);
             pwmWriteServo(3, servo[3]);
@@ -201,7 +205,7 @@ void writeServos(void)
             break;
 
         case MULTITYPE_FLYING_WING:
-            pwmWriteServo(0, servo[0]); // debug
+            pwmWriteServo(0, servo[0]);
             pwmWriteServo(1, servo[1]);
             break;
 
@@ -227,7 +231,7 @@ void writeMotors(void)
     uint8_t i;
 
     for (i = 0; i < numberMotor; i++)
-        pwmWriteMotor(i, motor[i]);
+        pwmWriteMotor(i, motor[i]); // Put a breakpoint here and check numberMotor
 }
 
 void writeAllMotors(int16_t mc)
@@ -244,20 +248,28 @@ static void airplaneMixer(void)
 {
 	static int16_t flaperons = 0;
 	static int16_t flap = 0;
+	static int16_t left_roll = 0;
+	static int16_t right_roll = 0;
 	static int16_t slowFlaps = 0;
 	static uint8_t flapskip;
 		
 	uint8_t i, speed;
-	uint8_t roll_channel;
+	//uint8_t roll_channel;
     uint16_t servomid[8];
 
     // Start by setting the mid points
 	for (i = 0; i < 8; i++) 
 	{
-//		servomid[i] = 1500 + cfg.servotrim[i]; 		// cfg.servotrim[] are not set anywhere yet... duh!
-		servomid[i] = 1500; 		// Servo center is 1500?
-		servo[i] = 0; // Debug
+//		servomid[i] = cfg.midrc + cfg.servotrim[i]; 		// cfg.servotrim[] are not set anywhere yet... duh!
+		servomid[i] = cfg.midrc; 		// Servo center is normally 1500
+		servo[i] = 0;
     }
+
+	
+	// Reconstruct primary channels
+	rcCommand[ROLL] = rcData[ROLL] - cfg.midrc;
+	rcCommand[PITCH] = rcData[PITCH] - cfg.midrc;
+	rcCommand[YAW] = rcData[YAW] - cfg.midrc;
 
 	// Reconstruct extra channels
 	rcCommand[AUX1] = rcData[AUX1] - cfg.midrc;
@@ -267,20 +279,66 @@ static void airplaneMixer(void)
 	rcCommand[NOCHAN] = 0; // Debug
 		
 	// Throttle is handled separately here
-    if (!f.ARMED)
+	motor[0] = rcData[THROTTLE];	  				// Send directly from RC for now
+	motor[1] = rcData[THROTTLE];	  				// Copy to motor[0] for now (not fitted to Afro-mini)
+
+	// Recover flap and aileron info
+	switch(cfg.flapmode)
 	{
-		motor[0] = cfg.mincommand; 					// Kill throttle when disarmed
-    }
-	else
-	{
-		motor[0] = rcData[THROTTLE];
+		// No flaperons - one aileron channel copied to both
+		case BASIC_FLAP:
+			left_roll = rcCommand[ROLL];
+			right_roll = left_roll;
+			// Ignore if no flap channel
+			if (cfg.flapchan != NOCHAN)
+			{
+				flap = rcCommand[cfg.flapchan];
+			}
+			else flap = 0;
+			break;
+		
+		// Flaperons - two ailerons with flaps pre-mixed in the TX
+		case PREMIXED_FLAP:
+			// Recreate actual roll signal from flaperons
+			if (cfg.aileron2 != NOCHAN)	
+			{
+				left_roll = rcCommand[ROLL] + rcCommand[cfg.aileron2];
+				left_roll = left_roll >> 1;
+			}
+			else left_roll = rcCommand[ROLL];
+			right_roll = left_roll;
+		
+			// Recreate flap signal from flaperons
+			if (cfg.aileron2 != NOCHAN)	
+			{
+				flap = rcCommand[ROLL] - rcCommand[cfg.aileron2]; 	// Get flap data
+				flap = flap >> 1; 
+			}
+			else flap = 0; 
+			break;
+		
+		// Flaperons - two independant aileron channels + one flap input on cfg.flapchan
+		case ADV_FLAP:
+			left_roll = rcCommand[ROLL];
+			if (cfg.aileron2 != NOCHAN)	
+			{
+				right_roll = rcCommand[cfg.aileron2];
+			}
+			else right_roll = rcCommand[ROLL];
+			
+			// Ignore if no flap channel
+			if (cfg.flapchan != NOCHAN)
+			{
+				flap = rcCommand[cfg.flapchan];
+			}
+			else flap = 0;
+			break;
+		
+		default:
+			break;
 	}
+
 	// Do flap speed control
-	if (cfg.flapchan != NOCHAN)						// Ignore if no flap channel
-	{
-		flap = rcCommand[cfg.flapchan];
-	}
-	
 	if (cfg.flapspeed) 
 	{
 		if (abs(slowFlaps - flap) >= cfg.flapstep)	// Difference larger than one step, so ok
@@ -301,6 +359,7 @@ static void airplaneMixer(void)
 			slowFlaps -= speed;
 		}				
 	} 
+	// No speed control requested so copy flaps
 	else
 	{
 	 	slowFlaps = flap;
@@ -311,51 +370,32 @@ static void airplaneMixer(void)
 		
 	// Add in flap and reverse as necessary
 	flaperons = (slowFlaps * cfg.servoreverse[cfg.flapchan]);
-	
-	// Basic flaps - one separate channel
-	if (cfg.flapmode == BASIC_FLAP)
-	{
-		roll_channel = ROLL;
-	}
-	
-	// Flaperons - two idependant channels
-	else
-	{
-		roll_channel = cfg.aileron2;
-	}			
-
-    if (f.PASSTHRU_MODE) { // More-or-less Direct passthru from RX
-        servo[0] = (rcCommand[ROLL] + flaperons) * cfg.servoreverse[0];     	//   Reversible left flaperon or Aileron
-        servo[1] = (rcCommand[roll_channel] + flaperons) * cfg.servoreverse[1]; //   Reversible right flaperon
-        servo[2] = rcCommand[YAW] * cfg.servoreverse[2];                       	//   Reversible Rudder
-        servo[3] = rcCommand[PITCH] * cfg.servoreverse[3];                     	//   Reversible Elevator
-		servo[4] = rcCommand[cfg.flapchan] * cfg.servoreverse[4];     			//   Reversible flap
-    }
-	 
-	else {
-		if (f.HORIZON_MODE)
-		{	// Autolevel
-			servo[0] = cfg.gimbal_roll_gain * angle[ROLL] / 16;   // Create new gain variable
-			servo[1] = cfg.gimbal_roll_gain * angle[ROLL] / 16;
-	    	servo[3] = cfg.gimbal_pitch_gain * angle[PITCH] / 16;	
-		}
 			
-		// Assisted modes (gyro only or gyro+acc according to AUX configuration in GUI)
-        servo[0] += (axisPID[ROLL] + flaperons) * cfg.servoreverse[0];     	//   Reversible, stabilised left flaperon or Aileron
-        servo[1] += (axisPID[ROLL] - rcCommand[ROLL] + rcCommand[roll_channel] + flaperons) * cfg.servoreverse[1];   //   Reversible, stabilised right flaperon
-        servo[2] = axisPID[YAW] * cfg.servoreverse[2];                       	//   Reversible, stabilised Rudder
-        servo[3] += axisPID[PITCH] * cfg.servoreverse[3];                     	//   Reversible, stabilised Elevator
-		servo[4] = flaperons;        		 									//   Reversible, speed-controlled flap
+
+	// Basic functions
+    servo[0] = left_roll + flaperons;     				// Left flaperon or Aileron
+    servo[1] = right_roll + flaperons; 					// Right flaperon
+    servo[2] = rcCommand[YAW];                       	// Rudder
+    servo[3] = rcCommand[PITCH];                     	// Elevator
+	servo[4] = flaperons;								// Speed-controlled flap
+
+	// Ignore if in pass-through mode
+    if (!f.PASSTHRU_MODE)
+	{
+		servo[0] += axisPID[ROLL];     					// Stabilised left flaperon or Aileron
+		servo[1] += axisPID[ROLL]; 				  		// Stabilised right flaperon
+		servo[2] += axisPID[YAW];                    	// Stabilised Rudder
+		servo[3] += axisPID[PITCH];                 	// Stabilised Elevator
 	}
 		
-	// Offset, then check all servo outputs against endpoints
+	// Reverse, offset, then check all servo outputs against endpoints
 	for (i = 0; i < 8; i++) 
 	{
+		servo[i] = servo[i] * cfg.servoreverse[i];
 		servo[i] = servo[i] + servomid[i];
 		servo[i] = constrain(servo[i], cfg.servoendpoint_low[i], cfg.servoendpoint_high[i]);
 	}
-
-}
+}																						 
 
 void mixTable(void)
 {
@@ -368,10 +408,10 @@ void mixTable(void)
     }
 
     // motors for non-servo mixes
-    if (numberMotor > 1)
+ /*   if (numberMotor > 1)
         for (i = 0; i < numberMotor; i++)
             motor[i] = rcCommand[THROTTLE] * currentMixer[i].throttle + axisPID[PITCH] * currentMixer[i].pitch + axisPID[ROLL] * currentMixer[i].roll + cfg.yaw_direction * axisPID[YAW] * currentMixer[i].yaw;
-
+ */
     // airplane / servo mixes
     switch (cfg.mixerConfiguration) {
         case MULTITYPE_BI:
@@ -436,11 +476,12 @@ void mixTable(void)
     }
 
     maxMotor = motor[0];
-    for (i = 1; i < numberMotor; i++)
+ /*   for (i = 1; i < numberMotor; i++)
         if (motor[i] > maxMotor)
             maxMotor = motor[i];
+*/
     for (i = 0; i < numberMotor; i++) {
-        if (maxMotor > cfg.maxthrottle)     // this is a way to still have good gyro corrections if at least one motor reaches its max.
+/*        if (maxMotor > cfg.maxthrottle)     // this is a way to still have good gyro corrections if at least one motor reaches its max.
             motor[i] -= maxMotor - cfg.maxthrottle;
         motor[i] = constrain(motor[i], cfg.minthrottle, cfg.maxthrottle);
         if ((rcData[THROTTLE]) < cfg.mincheck) {
@@ -449,6 +490,7 @@ void mixTable(void)
             else
                 motor[i] = cfg.mincommand;
         }
+*/
         if (!f.ARMED)
             motor[i] = cfg.mincommand;
     }

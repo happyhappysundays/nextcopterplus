@@ -1,5 +1,17 @@
+//*********************************************************************
+//* config.c
+//*********************************************************************
+
+//***********************************************************
+//* Includes
+//***********************************************************
+
 #include "board.h"
 #include "mw.h"
+
+//************************************************************
+// Variables
+//************************************************************
 #include <string.h>
 
 #ifndef FLASH_PAGE_COUNT
@@ -19,11 +31,14 @@ void parseRcChannels(const char *input)
 {
     const char *c, *s;
 
-    for (c = input; *c; c++) {
+    for (c = input; *c; c++) 
+	{
         s = strchr(rcChannelLetters, *c);
         if (s)
+		{
             cfg.rcmap[s - rcChannelLetters] = c - input;
-    }
+     	}
+	}
 }
 
 void readEEPROM(void)
@@ -89,7 +104,8 @@ void checkFirstTime(bool reset)
     //cfg.mixerConfiguration = MULTITYPE_QUADX;
 	cfg.mixerConfiguration = MULTITYPE_AIRPLANE;
     featureClearAll();
-    featureSet(FEATURE_VBAT);
+    //featureSet(FEATURE_VBAT);		// Enable Vbat monitoring
+	featureSet(FEATURE_PPM);	  // Enable CPPM input
 
     cfg.looptime = 0;
     cfg.P8[ROLL] = 40;
@@ -103,7 +119,8 @@ void checkFirstTime(bool reset)
     cfg.I8[PITCH] = 0;
     cfg.D8[PITCH] = 0;
     cfg.P8[YAW] = 85;
-    cfg.I8[YAW] = 45;
+	cfg.I8[YAW] = 0;
+    //cfg.I8[YAW] = 45;
     cfg.D8[YAW] = 0;
     cfg.P8[PIDALT] = 16;
     cfg.I8[PIDALT] = 15;
@@ -117,9 +134,12 @@ void checkFirstTime(bool reset)
     cfg.P8[PIDNAVR] = 14; 	// NAV_P * 10;
     cfg.I8[PIDNAVR] = 20; 	// NAV_I * 100;
     cfg.D8[PIDNAVR] = 80; 	// NAV_D * 1000;
-    cfg.P8[PIDLEVEL] = 70;
-    cfg.I8[PIDLEVEL] = 10;
-    cfg.D8[PIDLEVEL] = 20;
+    cfg.P8[PIDLEVEL] = 40;
+    cfg.I8[PIDLEVEL] = 0;
+    cfg.D8[PIDLEVEL] = 100;
+    //cfg.P8[PIDLEVEL] = 70;
+    //cfg.I8[PIDLEVEL] = 10;
+    //cfg.D8[PIDLEVEL] = 20;
     cfg.P8[PIDMAG] = 40;
     cfg.P8[PIDVEL] = 0;
     cfg.I8[PIDVEL] = 0;
@@ -204,10 +224,10 @@ void checkFirstTime(bool reset)
     cfg.serial_baudrate = 115200;
 
 	// Aeroplane stuff
-	cfg.flapmode = BASIC_FLAP;				// Switch for flaperon mode?
-	cfg.flapchan = AUX1;					// RC channel number for simple flaps)
-	cfg.aileron2 = ROLL;					// RC channel number for second aileron
-	cfg.flapspeed = 1;						// Desired rate of change of flaps 
+	cfg.flapmode = ADV_FLAP;				// Switch for flaperon mode?
+	cfg.flapchan = AUX2;					// RC channel number for simple flaps)
+	cfg.aileron2 = AUX1;					// RC channel number for second aileron
+	cfg.flapspeed = 10;						// Desired rate of change of flaps 
 	cfg.flapstep = 3;						// Steps for each flap movement
 
     for (i = 0; i < 8; i++)					// Servo limits

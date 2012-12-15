@@ -251,7 +251,6 @@ static void getEstimatedAttitude(void)
 #endif
 }
 
-#ifdef BARO
 #define UPDATE_INTERVAL 25000   // 40hz update rate (20hz LPF on acc)
 #define INIT_DELAY      4000000 // 4 sec initialization delay
 #define BARO_TAB_SIZE   40
@@ -304,4 +303,3 @@ void getEstimatedAltitude(void)
     temp32 = errorAltitudeI / 500; // I in range +/-60
     BaroPID += temp32;
 }
-#endif /* BARO */

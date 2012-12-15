@@ -169,7 +169,7 @@ const clivalue_t valueTable[] = {
 	{ "flapchan", VAR_UINT8, &cfg.flapchan, ROLL, AUX4 },
 	{ "aileron2", VAR_UINT8, &cfg.aileron2, ROLL, AUX4 },
 	{ "flapspeed", VAR_UINT8, &cfg.flapspeed, 0, 50 },
-	{ "flapstep", VAR_UINT8, &cfg.flapstep, 0, 10 },	
+	{ "flapstep", VAR_UINT8, &cfg.flapstep, 1, 10 },	
 	{ "s0_min", VAR_UINT16, &cfg.servoendpoint_low[0], 1000, 2000 },
 	{ "s0_max", VAR_UINT16, &cfg.servoendpoint_high[0], 1000, 2000 },
 	{ "s1_min", VAR_UINT16, &cfg.servoendpoint_low[1], 1000, 2000 },
