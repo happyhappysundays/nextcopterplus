@@ -150,7 +150,7 @@ void uartPrint(char *str)
 
 /* -------------------------- UART2 (Spektrum, GPS) ----------------------------- */
 uartReceiveCallbackPtr uart2Callback = NULL;
-#define UART2_BUFFER_SIZE    64
+#define UART2_BUFFER_SIZE    128
 
 volatile uint8_t tx2Buffer[UART2_BUFFER_SIZE];
 uint32_t tx2BufferTail = 0;
@@ -219,6 +219,11 @@ void uart2Write(uint8_t ch)
     tx2BufferHead = (tx2BufferHead + 1) % UART2_BUFFER_SIZE;
 
     USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+}
+
+bool uart2TransmitEmpty(void)
+{
+	return tx2BufferTail == tx2BufferHead;
 }
 
 void USART2_IRQHandler(void)

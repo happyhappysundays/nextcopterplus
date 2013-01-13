@@ -24,8 +24,9 @@
 config_t cfg;
 const char rcChannelLetters[] = "AERT1234";
 
+static uint8_t EEPROM_CONF_VERSION = 34;
 static uint32_t enabledSensors = 0;
-uint8_t checkNewConf = 28;
+static void resetConf(void);
 
 void parseRcChannels(const char *input)
 {
@@ -41,12 +42,38 @@ void parseRcChannels(const char *input)
 	}
 }
 
+static uint8_t validEEPROM(void)
+{
+    const config_t *temp = (const config_t *)FLASH_WRITE_ADDR;
+    const uint8_t *p;
+    uint8_t chk = 0;
+
+    // check version number
+    if (EEPROM_CONF_VERSION != temp->version)
+        return 0;
+
+    // check size and magic numbers
+    if (temp->size != sizeof(config_t) || temp->magic_be != 0xBE || temp->magic_ef != 0xEF)
+        return 0;
+
+    // verify integrity of temporary copy
+    for (p = (const uint8_t *)temp; p < ((const uint8_t *)temp + sizeof(config_t)); p++)
+        chk ^= *p;
+
+    // checksum failed
+    if (chk != 0)
+        return 0;
+
+    // looks good, let's roll!
+    return 1;
+}
+
 void readEEPROM(void)
 {
     uint8_t i;
 
     // Read flash
-    memcpy(&cfg, (char *) FLASH_WRITE_ADDR, sizeof(config_t));
+    memcpy(&cfg, (char *)FLASH_WRITE_ADDR, sizeof(config_t));
 
     for (i = 0; i < 6; i++)
         lookupPitchRollRC[i] = (2500 + cfg.rcExpo8 * (i * i - 25)) * i * (int32_t) cfg.rcRate8 / 2500;
@@ -70,9 +97,21 @@ void writeParams(uint8_t b)
 {
     FLASH_Status status;
     uint32_t i;
+    uint8_t chk = 0;
+    const uint8_t *p;
 
+    cfg.version = EEPROM_CONF_VERSION;
+    cfg.size = sizeof(config_t);
+    cfg.magic_be = 0xBE;
+    cfg.magic_ef = 0xEF;
+    cfg.chk = 0;
+    // recalculate checksum before writing
+    for (p = (const uint8_t *)&cfg; p < ((const uint8_t *)&cfg + sizeof(config_t)); p++)
+        chk ^= *p;
+    cfg.chk = chk;
+
+    // write it
     FLASH_Unlock();
-
     FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);
 
     if (FLASH_ErasePage(FLASH_WRITE_ADDR) == FLASH_COMPLETE) {
@@ -82,7 +121,6 @@ void writeParams(uint8_t b)
                 break;          // TODO: fail
         }
     }
-
     FLASH_Lock();
 
     readEEPROM();
@@ -92,15 +130,20 @@ void writeParams(uint8_t b)
 
 void checkFirstTime(bool reset)
 {
-    uint8_t test_val, i;
+    // check the EEPROM integrity before resetting values
+    if (!validEEPROM() || reset)
+        resetConf();
+}
 
-    test_val = *(uint8_t *) FLASH_WRITE_ADDR;
+// Default settings
+static void resetConf(void)
+{
+    int i;
+    const int8_t default_align[3][3] = { /* GYRO */ { 0, 0, 0 }, /* ACC */ { 0, 0, 0 }, /* MAG */ { -2, -3, 1 } };
 
-    if (!reset && test_val == checkNewConf)
-        return;
+    memset(&cfg, 0, sizeof(config_t));
 
-    // Default settings
-    cfg.version = checkNewConf;
+    cfg.version = EEPROM_CONF_VERSION;
     //cfg.mixerConfiguration = MULTITYPE_QUADX;
 	cfg.mixerConfiguration = MULTITYPE_AIRPLANE;
     featureClearAll();
@@ -159,15 +202,23 @@ void checkFirstTime(bool reset)
     cfg.accZero[1] = 0;
     cfg.accZero[2] = 0;
     cfg.mag_declination = 0;    		// For example, -6deg 37min, = -637 Japan, format is [sign]dddmm (degreesminutes) default is zero.
+	memcpy(&cfg.align, default_align, sizeof(cfg.align));
     cfg.acc_hardware = ACC_DEFAULT;     // default/autodetect
     cfg.acc_lpf_factor = 4;
+	cfg.acc_lpf_for_velocity = 10;
+	cfg.accz_deadband = 50;
     cfg.gyro_cmpf_factor = 400; 		// default MWC
     cfg.gyro_lpf = 42;
     cfg.mpu6050_scale = 1; // fuck invensense
+	cfg.baro_tab_size = 21;
+	cfg.baro_noise_lpf = 0.6f;
+	cfg.baro_cf = 0.985f;
+	cfg.moron_threshold = 32;
     cfg.gyro_smoothing_factor = 0x00141403;     // default factors of 20, 20, 3 for R/P/Y
     cfg.vbatscale = 110;
     cfg.vbatmaxcellvoltage = 43;
     cfg.vbatmincellvoltage = 33;
+	// cfg.power_adc_channel = 0;
 
     // Radio
     //parseRcChannels("AETR1234"); 

@@ -74,34 +74,6 @@
 
 typedef void pwmCallbackPtr(uint8_t port, uint16_t capture);
 
-// This indexes into the read-only hardware definition structure below, as well as into pwmPorts[] structure with dynamic data.
-enum {
-    PWM1 = 0,
-    PWM2,
-    PWM3,
-    PWM4,
-    PWM5,
-    PWM6,
-    PWM7,
-    PWM8,
-    PWM9,
-    PWM10,
-    PWM11,
-    PWM12,
-    PWM13,
-    PWM14,
-    MAX_PORTS
-};
-
-typedef struct {
-    TIM_TypeDef *tim;
-    GPIO_TypeDef *gpio;
-    uint32_t pin;
-    uint8_t channel;
-    uint8_t irq;
-    uint8_t outputEnable;
-} pwmHardware_t;
-
 static pwmHardware_t timerHardware[] = {
     { TIM2, GPIOA, GPIO_Pin_0, TIM_Channel_1, TIM2_IRQn, 0, },          // PWM1
     { TIM2, GPIOA, GPIO_Pin_1, TIM_Channel_2, TIM2_IRQn, 0, },          // PWM2
@@ -136,7 +108,7 @@ enum {
     TYPE_IP = 0x10,
     TYPE_IW = 0x20,
     TYPE_M = 0x40,
-    TYPE_S = 0x80,
+    TYPE_S = 0x80
 };
 
 static pwmPortData_t pwmPorts[MAX_PORTS];
@@ -185,7 +157,7 @@ static const uint8_t multiPWM[] = {
 static const uint8_t airPPM[] = {
     PWM1 | TYPE_IP,     // PPM input
     PWM9 | TYPE_M,      // motor #1
-    PWM10 | TYPE_M,     // motor #2		   (not fitted to AfroMini)
+    PWM10 | TYPE_M,     // motor #2
     PWM11 | TYPE_S,     // servo #1
     PWM12 | TYPE_S,
     PWM13 | TYPE_S,
@@ -228,7 +200,7 @@ static void pwmTimeBase(TIM_TypeDef *tim, uint32_t period)
 
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
     TIM_TimeBaseStructure.TIM_Period = period - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 72 - 1; // all TIM on F1 runs at 72MHz
+    TIM_TimeBaseStructure.TIM_Prescaler = (SystemCoreClock / 1000000) - 1; // all timers run at 1MHz
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(tim, &TIM_TimeBaseStructure);
@@ -466,7 +438,7 @@ bool pwmInit(drv_pwm_config_t *init)
     if (init->airplane)
         i = 2; // switch to air hardware config
     if (init->usePPM)
-        i++; // next index is for PPM - wow, select the airPPM config map
+        i++; // next index is for PPM
 
     setup = hardwareMaps[i];
 
@@ -476,6 +448,14 @@ bool pwmInit(drv_pwm_config_t *init)
 
         if (setup[i] == 0xFF) // terminator
             break;
+
+        // skip UART ports for GPS
+        if (init->useUART && (port == PWM3 || port == PWM4))
+            continue;
+
+        // skip ADC for powerMeter if configured
+        if (init->adcChannel && (init->adcChannel == port))
+            continue;
 
         // hacks to allow current functionality
         if (mask & (TYPE_IP | TYPE_IW) && !init->enableInput)
@@ -492,7 +472,7 @@ bool pwmInit(drv_pwm_config_t *init)
             if (port >= PWM5 && port <= PWM8)
                 mask = TYPE_S;
         }
-		
+
         if (mask & TYPE_IP) {
             pwmInConfig(port, ppmCallback, 0);
             numInputs = 8;

@@ -30,7 +30,7 @@ static float _atof(const char *p);
 static char *ftoa(float x, char *floatString);
 
 // sync this with MultiType enum from mw.h
-const char *mixerNames[] = {
+const char * const mixerNames[] = {
     "TRI", "QUADP", "QUADX", "BI",
     "GIMBAL", "Y6", "HEX6",
     "FLYING_WING", "Y4", "HEX6X", "OCTOX8", "OCTOFLATP", "OCTOFLATX",
@@ -38,7 +38,7 @@ const char *mixerNames[] = {
 };
 
 // sync this with AvailableFeatures enum from board.h
-const char *featureNames[] = {
+const char * const featureNames[] = {
     "PPM", "VBAT", "INFLIGHT_ACC_CAL", "SPEKTRUM", "MOTOR_STOP",
     "SERVO_TILT", "GYRO_SMOOTHING", "LED_RING", "GPS",
     "FAILSAFE", "SONAR", "TELEMETRY",
@@ -46,12 +46,12 @@ const char *featureNames[] = {
 };
 
 // sync this with AvailableSensors enum from board.h
-const char *sensorNames[] = {
+const char * const sensorNames[] = {
     "ACC", "BARO", "MAG", "SONAR", "GPS", NULL
 };
 
 // 
-const char *accNames[] = {
+const char * const accNames[] = {
     "", "ADXL345", "MPU6050", "MMA845x", NULL
 };
 
@@ -82,7 +82,8 @@ typedef enum {
     VAR_INT8,
     VAR_UINT16,
     VAR_INT16,
-    VAR_UINT32
+    VAR_UINT32,
+	VAR_FLOAT
 } vartype_e;
 
 typedef struct {
@@ -115,6 +116,7 @@ const clivalue_t valueTable[] = {
     { "vbatscale", VAR_UINT8, &cfg.vbatscale, 10, 200 },
     { "vbatmaxcellvoltage", VAR_UINT8, &cfg.vbatmaxcellvoltage, 10, 50 },
     { "vbatmincellvoltage", VAR_UINT8, &cfg.vbatmincellvoltage, 10, 50 },
+	{ "power_adc_channel", VAR_UINT8, &cfg.power_adc_channel, 0, 9 },
     { "yaw_direction", VAR_INT8, &cfg.yaw_direction, -1, 1 },
     { "tri_yaw_middle", VAR_UINT16, &cfg.tri_yaw_middle, 0, 2000 },
     { "tri_yaw_min", VAR_UINT16, &cfg.tri_yaw_min, 0, 2000 },
@@ -128,11 +130,27 @@ const clivalue_t valueTable[] = {
     { "gimbal_roll_min", VAR_UINT16, &cfg.gimbal_roll_min, 100, 3000 },
     { "gimbal_roll_max", VAR_UINT16, &cfg.gimbal_roll_max, 100, 3000 },
     { "gimbal_roll_mid", VAR_UINT16, &cfg.gimbal_roll_mid, 100, 3000 },
+    { "align_gyro_x", VAR_INT8, &cfg.align[ALIGN_GYRO][0], -3, 3 },
+    { "align_gyro_y", VAR_INT8, &cfg.align[ALIGN_GYRO][1], -3, 3 },
+    { "align_gyro_z", VAR_INT8, &cfg.align[ALIGN_GYRO][2], -3, 3 },
+    { "align_acc_x", VAR_INT8, &cfg.align[ALIGN_ACCEL][0], -3, 3 },
+    { "align_acc_y", VAR_INT8, &cfg.align[ALIGN_ACCEL][1], -3, 3 },
+    { "align_acc_z", VAR_INT8, &cfg.align[ALIGN_ACCEL][2], -3, 3 },
+    { "align_mag_x", VAR_INT8, &cfg.align[ALIGN_MAG][0], -3, 3 },
+    { "align_mag_y", VAR_INT8, &cfg.align[ALIGN_MAG][1], -3, 3 },
+    { "align_mag_z", VAR_INT8, &cfg.align[ALIGN_MAG][2], -3, 3 },
     { "acc_hardware", VAR_UINT8, &cfg.acc_hardware, 0, 3 },
     { "acc_lpf_factor", VAR_UINT8, &cfg.acc_lpf_factor, 0, 250 },
+	{ "acc_lpf_for_velocity", VAR_UINT8, &cfg.acc_lpf_for_velocity, 1, 250 },
+	{ "acc_trim_pitch", VAR_INT16, &cfg.angleTrim[PITCH], -300, 300 },
+	{ "acc_trim_roll", VAR_INT16, &cfg.angleTrim[ROLL], -300, 300 },
     { "gyro_lpf", VAR_UINT16, &cfg.gyro_lpf, 0, 256 },
     { "gyro_cmpf_factor", VAR_UINT16, &cfg.gyro_cmpf_factor, 100, 1000 },
     { "mpu6050_scale", VAR_UINT8, &cfg.mpu6050_scale, 0, 1 },
+	{ "baro_tab_size", VAR_UINT8, &cfg.baro_tab_size, 0, BARO_TAB_SIZE_MAX },
+	{ "baro_noise_lpf", VAR_FLOAT, &cfg.baro_noise_lpf, 0, 1 },
+	{ "baro_cf", VAR_FLOAT, &cfg.baro_cf, 0, 1 },
+	{ "moron_threshold", VAR_UINT8, &cfg.moron_threshold, 0, 128 },
     { "mag_declination", VAR_INT16, &cfg.mag_declination, -18000, 18000 },
     { "gps_type", VAR_UINT8, &cfg.gps_type, 0, 3 },
     { "gps_pos_p", VAR_UINT8, &cfg.P8[PIDPOS], 0, 200 },
@@ -632,6 +650,7 @@ static void cliSave(char *cmdline)
 static void cliPrintVar(const clivalue_t *var, uint32_t full)
 {
     int32_t value = 0;
+	char buf[8];
 
     switch (var->type) {
         case VAR_UINT8:
@@ -653,6 +672,15 @@ static void cliPrintVar(const clivalue_t *var, uint32_t full)
         case VAR_UINT32:
             value = *(uint32_t *)var->ptr;
             break;
+
+		case VAR_FLOAT:
+			printf("%s", ftoa(*(float *)var->ptr, buf));
+			if (full) 
+			{
+				printf(" %s", ftoa((float)var->min, buf));
+				printf(" %s", ftoa((float)var->max, buf));
+			}
+			return; // return from case for float only
     }
     printf("%d", value);
     if (full)
@@ -675,6 +703,10 @@ static void cliSetVar(const clivalue_t *var, const int32_t value)
         case VAR_UINT32:
             *(int *)var->ptr = (int)value;
             break;
+
+	   case VAR_FLOAT:
+			*(float *)var->ptr = *(float *)&value;
+			break;
     }
 }
 
@@ -685,6 +717,7 @@ static void cliSet(char *cmdline)
     const clivalue_t *val;
     char *eqptr = NULL;
     int32_t value = 0;
+    float valuef = 0;
 
     len = strlen(cmdline);
 
@@ -701,12 +734,12 @@ static void cliSet(char *cmdline)
         eqptr++;
         len--;
         value = atoi(eqptr);
+        valuef = _atof(eqptr);
         for (i = 0; i < VALUE_COUNT; i++) {
             val = &valueTable[i];
             if (strncasecmp(cmdline, valueTable[i].name, strlen(valueTable[i].name)) == 0) {
-                // found
-                if (value >= valueTable[i].min && value <= valueTable[i].max) {
-                    cliSetVar(val, value);
+                if (valuef >= valueTable[i].min && valuef <= valueTable[i].max) { // here we compare the float value since... it should work, RIGHT?
+                    cliSetVar(val, valueTable[i].type == VAR_FLOAT ? *(uint32_t *)&valuef : value); // this is a silly dirty hack. please fix me later.
                     printf("%s set to ", valueTable[i].name);
                     cliPrintVar(val, 0);
                 } else {
@@ -728,7 +761,7 @@ static void cliStatus(char *cmdline)
         millis() / 1000, vbat, batteryCellCount);
     mask = sensorsMask();
 
-    uartPrint("Detected sensors: ");
+    printf("CPU %dMHz, detected sensors: ", (SystemCoreClock / 1000000));
     for (i = 0; ; i++) {
         if (sensorNames[i] == NULL)
             break;
@@ -744,7 +777,7 @@ static void cliStatus(char *cmdline)
 
 static void cliVersion(char *cmdline)
 {
-    uartPrint("Afro32 CLI version 2.0 " __DATE__ " / " __TIME__);
+    uartPrint("Afro32 CLI version 2.1 " __DATE__ " / " __TIME__);
 }
 
 void cliProcess(void)
