@@ -30,7 +30,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V1.00a	Based on Baseflight r208 code
+// V1.00a	Based on Baseflight r240 code
 //			Initial code base.
 
 #include "board.h"
@@ -54,11 +54,24 @@ int main(void)
 {
     uint8_t i;
     drv_pwm_config_t pwm_params;
+	drv_adc_config_t adc_params;
 
     systemInit();
     init_printf(NULL, _putc);
-    readEEPROM();
+
     checkFirstTime(false);
+	readEEPROM();
+
+    // configure power ADC
+    if (cfg.power_adc_channel > 0 && (cfg.power_adc_channel == 1 || cfg.power_adc_channel == 9))
+        adc_params.powerAdcChannel = cfg.power_adc_channel;
+    else {
+        adc_params.powerAdcChannel = 0;
+        cfg.power_adc_channel = 0;
+    }
+
+    adcInit(&adc_params);
+
     serialInit(cfg.serial_baudrate);
 
     // We have these sensors
@@ -71,18 +84,48 @@ int main(void)
         pwm_params.airplane = true;
     else
         pwm_params.airplane = false;
+
+	pwm_params.useUART = feature(FEATURE_GPS) || feature(FEATURE_SPEKTRUM); // spektrum support uses UART too
     pwm_params.usePPM = feature(FEATURE_PPM);
     pwm_params.enableInput = !feature(FEATURE_SPEKTRUM); // disable inputs if using spektrum
     pwm_params.useServos = useServo;
     pwm_params.extraServos = cfg.gimbal_flags & GIMBAL_FORWARDAUX;
     pwm_params.motorPwmRate = cfg.motor_pwm_rate;
     pwm_params.servoPwmRate = cfg.servo_pwm_rate;
+    switch (cfg.power_adc_channel) {
+        case 1:
+            pwm_params.adcChannel = PWM2;
+            break;
+        case 9:
+            pwm_params.adcChannel = PWM8;
+            break;
+        default:
+            pwm_params.adcChannel = 0;
+        break;
+    }
 
     pwmInit(&pwm_params);
 
-    // configure PWM/CPPM read function. spektrum will override that
+    // configure PWM/CPPM read function. spektrum below will override that
     rcReadRawFunc = pwmReadRawRC;
-
+	
+    // Init spektrum if fitted
+	if (feature(FEATURE_SPEKTRUM)) 
+	{
+		spektrumInit();
+		rcReadRawFunc = spektrumReadRawRC;
+	} 
+	else 
+	{
+		// Spektrum and GPS are mutually exclusive
+		// Optional GPS - available in both PPM and PWM input mode, in PWM input, reduces number of available channels by 2.
+		if (feature(FEATURE_GPS))
+		{
+			gpsInit(cfg.gps_baudrate);
+		}
+	}	
+	
+	
     // Flash LEDS encouragingly at the user
 		LED1_ON;
     LED0_OFF;
@@ -104,19 +147,6 @@ int main(void)
     // Check battery type/voltage
     if (feature(FEATURE_VBAT))
         batteryInit();
-
-    // Init spektrum if fitted
-		if (feature(FEATURE_SPEKTRUM)) {
-        spektrumInit();
-        rcReadRawFunc = spektrumReadRawRC;
-    } else {
-        // spektrum and GPS are mutually exclusive
-        // Optional GPS - available only when using PPM, otherwise required pins won't be usable
-        if (feature(FEATURE_PPM)) {
-            if (feature(FEATURE_GPS))
-                gpsInit(cfg.gps_baudrate);
-        }
-    }
 
     previousTime = micros();
 		

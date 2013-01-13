@@ -47,8 +47,8 @@ static const motorMixer_t mixerHex6P[] = {
     { 1.0f, -1.0f, -0.866025f, -1.0f },     // FRONT_R
     { 1.0f,  1.0f,  0.866025f,  1.0f },     // REAR_L
     { 1.0f,  1.0f, -0.866025f, -1.0f },     // FRONT_L
-    { 1.0f,  0.0f,  0.866025f,  1.0f },     // FRONT
-    { 1.0f,  0.0f, -0.866025f, -1.0f },     // REAR
+    { 1.0f,  0.0f, -0.866025f,  1.0f },     // FRONT
+    { 1.0f,  0.0f, 0.866025f, -1.0f },     // REAR
 };
 
 static const motorMixer_t mixerY4[] = {
@@ -265,19 +265,6 @@ static void airplaneMixer(void)
 		servo[i] = 0;
     }
 
-	
-	// Reconstruct primary channels
-	rcCommand[ROLL] = rcData[ROLL] - cfg.midrc;
-	rcCommand[PITCH] = rcData[PITCH] - cfg.midrc;
-	rcCommand[YAW] = rcData[YAW] - cfg.midrc;
-
-	// Reconstruct extra channels
-	rcCommand[AUX1] = rcData[AUX1] - cfg.midrc;
-	rcCommand[AUX2] = rcData[AUX2] - cfg.midrc;
-	rcCommand[AUX3] = rcData[AUX3] - cfg.midrc;
-	rcCommand[AUX4] = rcData[AUX4] - cfg.midrc;
-	rcCommand[NOCHAN] = 0; // Debug
-		
 	// Throttle is handled separately here
 	motor[0] = rcData[THROTTLE];	  				// Send directly from RC for now
 	motor[1] = rcData[THROTTLE];	  				// Copy to motor[0] for now (not fitted to Afro-mini)
@@ -299,20 +286,23 @@ static void airplaneMixer(void)
 		
 		// Flaperons - two ailerons with flaps pre-mixed in the TX
 		case PREMIXED_FLAP:
-			// Recreate actual roll signal from flaperons
+			// Select left/right aileron channels if available
 			if (cfg.aileron2 != NOCHAN)	
 			{
-				left_roll = rcCommand[ROLL] + rcCommand[cfg.aileron2];
-				left_roll = left_roll >> 1;
+				left_roll 	= rcCommand[ROLL];
+				right_roll 	= rcCommand[cfg.aileron2];
 			}
-			else left_roll = rcCommand[ROLL];
-			right_roll = left_roll;
-		
-			// Recreate flap signal from flaperons
+			// Else copy to both
+			else 
+			{
+				left_roll = rcCommand[ROLL];
+				right_roll = left_roll;
+			}
+
+			// Select flap signal decoded from flaperons if available
 			if (cfg.aileron2 != NOCHAN)	
 			{
-				flap = rcCommand[ROLL] - rcCommand[cfg.aileron2]; 	// Get flap data
-				flap = flap >> 1; 
+				flap = rcCommand[cfg.flapchan]; 	// Get flap data
 			}
 			else flap = 0; 
 			break;
@@ -373,8 +363,10 @@ static void airplaneMixer(void)
 			
 
 	// Basic functions
+	//servo[0] = left_roll;     				// Left flaperon or Aileron
+    //servo[1] = right_roll; 					// Right flaperon
     servo[0] = left_roll + flaperons;     				// Left flaperon or Aileron
-    servo[1] = right_roll + flaperons; 					// Right flaperon
+    servo[1] = right_roll - flaperons; 					// Right flaperon
     servo[2] = rcCommand[YAW];                       	// Rudder
     servo[3] = rcCommand[PITCH];                     	// Elevator
 	servo[4] = flaperons;								// Speed-controlled flap
@@ -382,9 +374,9 @@ static void airplaneMixer(void)
 	// Ignore if in pass-through mode
     if (!f.PASSTHRU_MODE)
 	{
-		servo[0] += axisPID[ROLL];     					// Stabilised left flaperon or Aileron
-		servo[1] += axisPID[ROLL]; 				  		// Stabilised right flaperon
-		servo[2] += axisPID[YAW];                    	// Stabilised Rudder
+		servo[0] -= axisPID[ROLL];     					// Stabilised left flaperon or Aileron
+		servo[1] -= axisPID[ROLL]; 				  		// Stabilised right flaperon
+		servo[2] -= axisPID[YAW];                    	// Stabilised Rudder
 		servo[3] += axisPID[PITCH];                 	// Stabilised Elevator
 	}
 		
@@ -459,8 +451,16 @@ void mixTable(void)
         servo[1] = cfg.gimbal_roll_mid + aux[1];
 
         if (rcOptions[BOXCAMSTAB]) {
-            servo[0] += cfg.gimbal_pitch_gain * angle[PITCH] / 16;		
-            servo[1] += cfg.gimbal_roll_gain * angle[ROLL]  / 16;
+            if (cfg.gimbal_flags & GIMBAL_MIXTILT) 
+			{
+				servo[0] = (-cfg.gimbal_roll_gain) * angle[PITCH] / 16 - cfg.gimbal_roll_gain * angle[ROLL] / 16;
+				servo[1] = (-cfg.gimbal_roll_gain) * angle[PITCH] / 16 - cfg.gimbal_roll_gain * angle[ROLL] / 16;	
+			}
+			else 
+			{
+				servo[0] += cfg.gimbal_pitch_gain * angle[PITCH] / 16;
+				servo[1] += cfg.gimbal_roll_gain * angle[ROLL]  / 16;
+			}
         }
 
         servo[0] = constrain(servo[0], cfg.gimbal_pitch_min, cfg.gimbal_pitch_max);

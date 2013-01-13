@@ -3,6 +3,7 @@
 /* for VBAT monitoring frequency */
 #define VBATFREQ 6        // to read battery voltage - nth number of loop iterations
 
+#define BARO_TAB_SIZE_MAX 48
 #define  VERSION  211
 
 #define LAT  0
@@ -46,6 +47,7 @@ typedef enum GimbalFlags {
     GIMBAL_TILTONLY = 1 << 1,
     GIMBAL_DISABLEAUX34 = 1 << 2,
     GIMBAL_FORWARDAUX = 1 << 3,
+	GIMBAL_MIXTILT = 1 << 4,
 } GimbalFlags;
 
 /*********** RC alias *****************/
@@ -116,9 +118,17 @@ typedef struct mixer_t {
     uint8_t useServo;
     const motorMixer_t *motor;
 } mixer_t;
+   
+enum {
+	ALIGN_GYRO = 0,
+	ALIGN_ACCEL = 1,
+	ALIGN_MAG = 2
+};
 
 typedef struct config_t {
     uint8_t version;
+	uint16_t size;
+	uint8_t magic_be; // magic number, should be 0xBE
     uint8_t mixerConfiguration;
     uint32_t enabledFeatures;
 
@@ -143,17 +153,25 @@ typedef struct config_t {
     int16_t angleTrim[2];                   // accelerometer trim
 
     // sensor-related stuff
+	int8_t align[3][3];                     // acc, gyro, mag alignment (ex: with sensor output of X, Y, Z, align of 1 -3 2 would return X, -Z, Y)
     uint8_t acc_hardware;                   // Which acc hardware to use on boards with more than one device
     uint8_t acc_lpf_factor;                 // Set the Low Pass Filter factor for ACC. Increasing this value would reduce ACC noise (visible in GUI), but would increase ACC lag time. Zero = no filter
+	uint8_t acc_lpf_for_velocity;           // ACC lowpass for AccZ height hold
+	uint8_t accz_deadband;                  //
     uint16_t gyro_lpf;                      // mpuX050 LPF setting
     uint16_t gyro_cmpf_factor;              // Set the Gyro Weight for Gyro/Acc complementary filter. Increasing this value would reduce and delay Acc influence on the output of the filter.
     uint32_t gyro_smoothing_factor;         // How much to smoothen with per axis (32bit value with Roll, Pitch, Yaw in bits 24, 16, 8 respectively
     uint8_t mpu6050_scale;                  // seems es/non-es variance between MPU6050 sensors, half my boards are mpu6000ES, need this to be dynamic. fucking invenshit won't release chip IDs so I can't autodetect it.
+	uint8_t baro_tab_size; 					// size of baro filter array
+	float baro_noise_lpf; 					// additional LPF to reduce baro noise
+	float baro_cf; 							// apply Complimentary Filter to keep the calculated velocity based on baro velocity (i.e. near real velocity)
+	uint8_t moron_threshold;                // people keep forgetting that moving model while init results in wrong gyro offsets. and then they never reset gyro. so this is now on by default.
 
     uint16_t activate[CHECKBOXITEMS];       // activate switches
     uint8_t vbatscale;                      // adjust this to match battery voltage to reported value
     uint8_t vbatmaxcellvoltage;             // maximum voltage per cell, used for auto-detecting battery voltage in 0.1V units, default is 43 (4.3V)
     uint8_t vbatmincellvoltage;             // minimum voltage per cell, this triggers battery out alarms, in 0.1V units, default is 33 (3.3V)
+    uint8_t power_adc_channel;              // which channel is used for current sensor. Right now, only 2 places are supported: RC_CH2 (unused when in CPPM mode, = 1), RC_CH8 (last channel in PWM mode, = 9)
 
     // Radio/ESC-related configuration
     uint8_t rcmap[8];                       // mapping of radio channels to internal RPYTA+ order
@@ -211,15 +229,17 @@ typedef struct config_t {
     uint32_t serial_baudrate;
 
     motorMixer_t customMixer[MAX_MOTORS];   // custom mixtable
+	uint8_t magic_ef; // magic number, should be 0xEF
+	uint8_t chk; // XOR checksum
 		
-		// Airplane mixer stuff
-		uint8_t flapmode;								// Switch for flaperon mode?
-		uint8_t flapchan;								// RC channel number for simple flaps)
-		uint8_t aileron2;								// RC channel number for second aileron
-		uint8_t flapspeed;								// Desired rate of change of flaps 
-		uint8_t flapstep;								// Steps for each flap movement
-		uint16_t servoendpoint_low[8];			 		// Servo limits (min)
-		uint16_t servoendpoint_high[8];				 	// Servo limits (max)
+	// Airplane mixer stuff
+	uint8_t flapmode;								// Switch for flaperon mode?
+	uint8_t flapchan;								// RC channel number for simple flaps)
+	uint8_t aileron2;								// RC channel number for second aileron
+	uint8_t flapspeed;								// Desired rate of change of flaps 
+	uint8_t flapstep;								// Steps for each flap movement
+	uint16_t servoendpoint_low[8];			 		// Servo limits (min)
+	uint16_t servoendpoint_high[8];				 	// Servo limits (max)
 		
 } config_t;
 
@@ -241,9 +261,14 @@ typedef struct flags_t {
     uint8_t CALIBRATE_MAG;
 } flags_t;
 
+// RC globals
+extern int16_t	roll_actual;
+extern int16_t	flap_actual;
+
 extern int16_t gyroZero[3];
 extern int16_t gyroData[3];
 extern int16_t angle[2];
+extern uint8_t dynP8[3], dynD8[3];
 extern int16_t axisPID[3];
 extern int16_t rcCommand[9];
 extern uint8_t rcOptions[CHECKBOXITEMS];

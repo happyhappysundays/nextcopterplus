@@ -127,7 +127,7 @@ void batteryInit(void)
 
     // average up some voltage readings
     for (i = 0; i < 32; i++) {
-        voltage += adcGetBattery();
+        voltage += adcGetChannel(ADC_BATTERY);
         delay(10);
     }
 
@@ -140,6 +140,29 @@ void batteryInit(void)
     }
     batteryCellCount = i;
     batteryWarningVoltage = i * cfg.vbatmincellvoltage; // 3.3V per cell minimum, configurable in CLI
+}
+
+// (Type)
+// ALIGN_GYRO = 0,
+// ALIGN_ACCEL = 1,
+// ALIGN_MAG = 2
+static void alignSensors(uint8_t type, int16_t *data)
+{
+    int i;
+    int16_t tmp[3];
+
+    // make a copy :(
+    tmp[0] = data[0];
+    tmp[1] = data[1];
+    tmp[2] = data[2];
+
+    for (i = 0; i < 3; i++) {
+        int8_t axis = cfg.align[type][i];
+        if (axis > 0)
+            data[axis - 1] = tmp[i];
+        else
+            data[-axis - 1] = -tmp[i];
+    }
 }
 
 static void ACC_Common(void)
@@ -227,7 +250,11 @@ static void ACC_Common(void)
 void ACC_getADC(void)
 {
     acc.read(accADC);
-    acc.align(accADC);
+    // if we have CUSTOM alignment configured, user is "assumed" to know what they're doing
+    if (cfg.align[ALIGN_ACCEL][0])
+        alignSensors(ALIGN_ACCEL, accADC);
+    else
+        acc.align(accADC);
 
     ACC_Common();
 }
@@ -268,24 +295,72 @@ void Baro_update(void)
     }
 }
 
+typedef struct stdev_t
+{
+    float m_oldM, m_newM, m_oldS, m_newS;
+    int m_n;
+} stdev_t;
+
+static void devClear(stdev_t *dev)
+{
+    dev->m_n = 0;
+}
+
+static void devPush(stdev_t *dev, float x)
+{
+    dev->m_n++;
+    if (dev->m_n == 1) {
+        dev->m_oldM = dev->m_newM = x;
+        dev->m_oldS = 0.0f;
+    } else {
+        dev->m_newM = dev->m_oldM + (x - dev->m_oldM) / dev->m_n;
+        dev->m_newS = dev->m_oldS + (x - dev->m_oldM) * (x - dev->m_newM);
+        dev->m_oldM = dev->m_newM;
+        dev->m_oldS = dev->m_newS;
+    }
+}
+
+static float devVariance(stdev_t *dev)
+{
+    return ((dev->m_n > 1) ? dev->m_newS / (dev->m_n - 1) : 0.0f);
+}
+
+static float devStandardDeviation(stdev_t *dev)
+{
+    return sqrtf(devVariance(dev));
+}
+
 static void GYRO_Common(void)
 {
+    int axis;
     static int16_t previousGyroADC[3] = { 0, 0, 0 };
     static int32_t g[3];
-    int axis;
+    static stdev_t var[3];
 
     if (calibratingG > 0) {
         for (axis = 0; axis < 3; axis++) {
             // Reset g[axis] at start of calibration
-            if (calibratingG == 1000)
+            if (calibratingG == 1000) {
                 g[axis] = 0;
+                devClear(&var[axis]);
+            }
             // Sum up 1000 readings
             g[axis] += gyroADC[axis];
-            // g[axis] += (1000 - calibratingG) >> 1;
+            devPush(&var[axis], gyroADC[axis]);
             // Clear global variables for next reading
             gyroADC[axis] = 0;
             gyroZero[axis] = 0;
             if (calibratingG == 1) {
+                float dev = devStandardDeviation(&var[axis]);
+                // check deviation and startover if idiot was moving the model
+                if (cfg.moron_threshold && dev > cfg.moron_threshold) {
+                    calibratingG = 1000;
+                    devClear(&var[0]);
+                    devClear(&var[1]);
+                    devClear(&var[2]);
+                    g[0] = g[1] = g[2] = 0;
+                    continue;
+                }
                 gyroZero[axis] = g[axis] / 1000;
                 blinkLED(10, 15, 1);
             }
@@ -304,7 +379,11 @@ void Gyro_getADC(void)
 {
     // range: +/- 8192; +/- 2000 deg/sec
     gyro.read(gyroADC);
-    gyro.align(gyroADC);
+    // if we have CUSTOM alignment configured, user is "assumed" to know what they're doing
+    if (cfg.align[ALIGN_GYRO][0])
+        alignSensors(ALIGN_GYRO, gyroADC);
+    else
+        gyro.align(gyroADC);
 
     GYRO_Common();
 }
@@ -315,13 +394,14 @@ static uint8_t magInit = 0;
 
 static void Mag_getRawADC(void)
 {
-    static int16_t rawADC[3];
-    hmc5883lRead(rawADC);
+    hmc5883lRead(magADC);
 
+    // Default mag orientation is -2, -3, 1 or
     // no way? is THIS finally the proper orientation?? (by GrootWitBaas)
-    magADC[ROLL] = rawADC[2]; // X
-    magADC[PITCH] = -rawADC[0]; // Y
-    magADC[YAW] = -rawADC[1]; // Z
+    // magADC[ROLL] = rawADC[2]; // X
+    // magADC[PITCH] = -rawADC[0]; // Y
+    // magADC[YAW] = -rawADC[1]; // Z
+    alignSensors(ALIGN_MAG, magADC);
 }
 
 void Mag_init(void)

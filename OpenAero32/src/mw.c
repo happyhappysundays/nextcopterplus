@@ -1,5 +1,5 @@
 //*********************************************************************
-//* mw.c
+//* mw.c  October 2012     V2.1-dev
 //*********************************************************************
 
 //***********************************************************
@@ -36,7 +36,8 @@ uint8_t rcOptions[CHECKBOXITEMS];
 //rcReadRawDataPtr rcReadRawFunc = NULL;  // Function to receive data from default receiver driver
 																								
 // PID
-uint8_t dynP8[3], dynI8[3], dynD8[3];
+uint8_t dynP8[3], dynD8[3];
+uint8_t	dynI8[3];
 int16_t axisPID[3];
 
 // GPS
@@ -94,6 +95,7 @@ void loop(void)
     static uint32_t loopTime;
     uint16_t auxState = 0;
     int16_t prop;
+
 
     // This will return false if spektrum is disabled. shrug.
     if (spektrumFrameComplete())
@@ -432,7 +434,7 @@ void loop(void)
             f.PASSTHRU_MODE = 0;
         }
         
-    } 
+    } // 50Hz loop
 	
 	
 	// Full-speed loop but not RC
@@ -547,20 +549,21 @@ void loop(void)
                 }
             }
         }
-
+		
+		// Measure size of largest command input
+        prop = max(abs(rcCommand[PITCH]), abs(rcCommand[ROLL])); // range [0;500]
+		
 		//*********************************************************************
 		//* Flight PITCH & ROLL & YAW PID
 		//********************************************************************/
-  
-        prop = max(abs(rcCommand[PITCH]), abs(rcCommand[ROLL])); // range [0;500]
-
+		
         for (axis = 0; axis < 3; axis++) 
 		{
             // Roll/Pitch accelerometers
 			if (f.AUTOLEVEL_MODE && axis < 2) 
 			{ 
                 // Error
-                errorAngle = constrain(2 * rcCommand[axis] + GPS_angle[axis], -500, +500) - angle[axis] + cfg.angleTrim[axis]; // 50 degrees max inclination	    
+                errorAngle = constrain(GPS_angle[axis] - rcCommand[axis], -500, +500) - angle[axis] + cfg.angleTrim[axis]; // 50 degrees max inclination	    
 
 				// P-term
                 PTermACC = (int32_t)errorAngle * cfg.P8[PIDLEVEL] / 100; // 32 bits is needed for calculation
@@ -638,94 +641,20 @@ void loop(void)
 void annexCode(void)
 {
 	static uint32_t calibratedAccTime;
-	uint16_t tmp, tmp2;
+//	uint16_t tmp, tmp2;
 	static uint8_t buzzerFreq;  // Delay between buzzer ring
 	static uint8_t vbatTimer = 0;
-	uint8_t axis, prop1, prop2;
 	static uint8_t ind = 0;
 	uint16_t vbatRaw = 0;
 	static uint16_t vbatRawArray[8];
 	uint8_t i;
-	
-	// PITCH & ROLL dynamic PID adjustment, depending on throttle value
-	if (rcData[THROTTLE] < BREAKPOINT) 
-	{
-		prop2 = 100;
-	} 
-	else 
-	{
-		if (rcData[THROTTLE] < 2000) 
-		{
-			prop2 = 100 - (uint16_t) cfg.dynThrPID * (rcData[THROTTLE] - BREAKPOINT) / (2000 - BREAKPOINT);
-		} 
-		else 
-		{
-			prop2 = 100 - cfg.dynThrPID;
-		}
-	}
-
-	// Deadband, stick rates
-	for (axis = 0; axis < 3; axis++) 
-	{
-		tmp = min(abs(rcData[axis] - cfg.midrc), 500);
-		if (axis != 2) 
-		{ // ROLL & PITCH
-			if (cfg.deadband) 
-			{
-				if (tmp > cfg.deadband) 
-				{
-					tmp -= cfg.deadband;
-				} 
-				else 
-				{
-					tmp = 0;
-				}
-			}
-		
-		    tmp2 = tmp / 100;
-		    rcCommand[axis] = lookupPitchRollRC[tmp2] + (tmp - tmp2 * 100) * (lookupPitchRollRC[tmp2 + 1] - lookupPitchRollRC[tmp2]) / 100;
-		    prop1 = 100 - (uint16_t) cfg.rollPitchRate * tmp / 500;
-		    prop1 = (uint16_t) prop1 *prop2 / 100;
-		} 
-		else 
-		{ // YAW
-			if (cfg.yawdeadband) 
-			{
-				if (tmp > cfg.yawdeadband) 
-				{
-					tmp -= cfg.yawdeadband;
-				} 
-				else 
-				{
-					tmp = 0;
-				}
-			}
-			rcCommand[axis] = tmp;
-			prop1 = 100 - (uint16_t) cfg.yawRate * tmp / 500;
-		}
-
-		// Calculate dynamic P and D values
-		dynP8[axis] = (uint16_t) cfg.P8[axis] * prop1 / 100;
-		dynD8[axis] = (uint16_t) cfg.D8[axis] * prop1 / 100;
-
-		if (rcData[axis] < cfg.midrc)
-		{
-			rcCommand[axis] = -rcCommand[axis];		 // This is stupid... but it will do for now
-		}
-	}
-
-	// Throttle scaling
-    tmp = constrain(rcData[THROTTLE], cfg.mincheck, 2000);
-    tmp = (uint32_t) (tmp - cfg.mincheck) * 1000 / (2000 - cfg.mincheck);       // [MINCHECK;2000] -> [0;1000]
-    tmp2 = tmp / 100;
-    rcCommand[THROTTLE] = lookupThrottleRC[tmp2] + (tmp - tmp2 * 100) * (lookupThrottleRC[tmp2 + 1] - lookupThrottleRC[tmp2]) / 100;    // [0;1000] -> expo -> [MINTHROTTLE;MAXTHROTTLE]
 
 	// Battery alarm
     if (feature(FEATURE_VBAT)) 
 	{
         if (!(++vbatTimer % VBATFREQ)) 
 		{
-            vbatRawArray[(ind++) % 8] = adcGetBattery();
+            vbatRawArray[(ind++) % 8] = adcGetChannel(ADC_BATTERY);
             for (i = 0; i < 8; i++)
             {
 				vbatRaw += vbatRawArray[i];

@@ -5,13 +5,13 @@
 #define sq(x) ((x)*(x))
 #endif
 
-uint32_t init_speed[5] = { 9600, 19200, 38400, 57600, 115200 };
+const uint32_t init_speed[5] = { 9600, 19200, 38400, 57600, 115200 };
 
 static void GPS_NewData(uint16_t c);
 static void GPS_set_pids(void);
 static void gpsPrint(const char *str);
 
-static const char *gpsInitStrings[] = {
+static const char * const gpsInitStrings[] = {
     "$PUBX,41,1,0003,0001,19200,0*23\r\n",      // UBX0..3
     "$PUBX,41,1,0003,0001,38400,0*26\r\n",
     "$PUBX,41,1,0003,0001,57600,0*2D\r\n",
@@ -96,6 +96,9 @@ static void gpsPrint(const char *str)
             delay(4);
         str++;
     }
+    // wait to send all
+    while (!uart2TransmitEmpty());
+    delay(30);
 }
 
 /*-----------------------------------------------------------
@@ -190,8 +193,8 @@ static void reset_PID(PID *pid)
     pid->last_derivative = 0;
 }
 
-#define _X 1
-#define _Y 0
+#define GPS_X 1
+#define GPS_Y 0
 
 /****************** PI and PID controllers for GPS ********************///32938 -> 33160
 
@@ -209,7 +212,7 @@ static float GPS_scaleLonDown;  // this is used to offset the shrinking longitud
 static int16_t rate_error[2];
 static int32_t error[2];
 
-//Currently used WP
+// Currently used WP
 static int32_t GPS_WP[2];
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -482,14 +485,14 @@ static void GPS_calc_velocity(void)
 
     if (init) {
         float tmp = 1.0f / dTnav;
-        actual_speed[_X] = (float) (GPS_coord[LON] - last[LON]) * GPS_scaleLonDown * tmp;
-        actual_speed[_Y] = (float) (GPS_coord[LAT] - last[LAT]) * tmp;
+        actual_speed[GPS_X] = (float) (GPS_coord[LON] - last[LON]) * GPS_scaleLonDown * tmp;
+        actual_speed[GPS_Y] = (float) (GPS_coord[LAT] - last[LAT]) * tmp;
 
-        actual_speed[_X] = (actual_speed[_X] + speed_old[_X]) / 2;
-        actual_speed[_Y] = (actual_speed[_Y] + speed_old[_Y]) / 2;
+        actual_speed[GPS_X] = (actual_speed[GPS_X] + speed_old[GPS_X]) / 2;
+        actual_speed[GPS_Y] = (actual_speed[GPS_Y] + speed_old[GPS_Y]) / 2;
 
-        speed_old[_X] = actual_speed[_X];
-        speed_old[_Y] = actual_speed[_Y];
+        speed_old[GPS_X] = actual_speed[GPS_X];
+        speed_old[GPS_Y] = actual_speed[GPS_Y];
     }
     init = 1;
 
@@ -556,8 +559,8 @@ static void GPS_calc_nav_rate(int max_speed)
 
     // nav_bearing includes crosstrack
     temp = (9000l - nav_bearing) * RADX100;
-    trig[_X] = cosf(temp);
-    trig[_Y] = sinf(temp);
+    trig[GPS_X] = cosf(temp);
+    trig[GPS_Y] = sinf(temp);
 
     for (axis = 0; axis < 2; axis++) {
         rate_error[axis] = (trig[axis] * max_speed) - actual_speed[axis];
