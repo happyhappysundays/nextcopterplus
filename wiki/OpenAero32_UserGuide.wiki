@@ -1,0 +1,100 @@
+#summary The OpenAero32 User guide
+
+=The OpenAero32 User Guide (Alpha 1)=
+==What is OpenAero32?==
+OpenAero32 is an aeroplane stabilising software for the Naze32 AfroMini STM32-based boards. You put the board in between your receiver and the servos in your aircraft. When deactivated, OpenAero32 just passes the servo signals from your receiver to the servos. When activated, the gyros and accelerometers are used to move the servos to counteract any unwanted movement of the aircraft.
+
+OpenAero32 has eight output channels which can all mix from eight RC channels in CPPM mode. 
+
+
+==What models can OpenAero32 be used with?==
+OpenAero32 currently supports only conventional, fixed-wing aircraft, but will soon be able to support flying wings.
+
+===Aeroplane mode===
+In aeroplane mode there are up to six outputs - Throttle, Left Aileron, Right aileron, Elevator, Rudder and Flap.
+In CPPM mode there is a copy of the throttle signal from the receiver decoded onto the first motor output.
+
+==How do I connect up my model?==
+===Receiver connections===
+For a standard multi-wire PWM receiver you need to use the extended PWM inputs of the Naze32 board. 
+If you have a CPPM receiver, just connect the single wire to the CPPM input.
+The following are the default channel allocations. many can be changed from the command-line interface (CLI).
+See the Naze32 user guide for guidance on teh use of CLI mode.
+ 
+ * CH1: Aileron signal input
+ * CH2: Elevator signal input
+ * CH3: Throttle signal input
+ * CH4: Rudder signal input
+ * CH5: Second aileron signal input
+ * CH6: Flap signal input
+ * CH7: Stability switch input
+ * CH8: Autolevel switch input
+
+===CPPM channel order===
+For CPPM mode to work correctly, you have to know the channel order of your transmitter. Two examples are shown below.
+You can configure the channel order via the CLI.
+
+*JR/Spektrum*
+ * CH1: Throttle
+ * CH2: Aileron #1
+ * CH3: Elevator
+ * CH4: Rudder
+ * CH5: Gear switch
+ * CH6: Aileron #2
+ * CH7: Aux 1
+ * CH8: Aux 2 
+*Futaba*
+ * CH1: Aileron #1
+ * CH2: Elevator
+ * CH3: Throttle
+ * CH4: Rudder
+ * CH5: Gear switch
+ * CH6: Aileron #2
+ * CH7: Aux 1
+ * CH8: Aux 2 
+
+===Servo connections===
+For conventional aeroplanes the connections are as follows:
+
+Naze32
+ * M1: Throttle 1
+ * M2: Throttle 2 (unused)
+ * M3: Left aileron
+ * M4: Right aileron
+ * M5: Rudder
+ * M6: Elevator
+
+AfroMini
+ * PPM: CPPM input
+ * THR: Throttle output
+ * S1: Left aileron
+ * S2: Right aileron
+ * S3: Rudder
+ * S4: Elevator
+
+==Set up==
+The setup procedure is extremely important and must be followed to get good results from OpenAero32.
+
+===RC setup===
+Using the CLI set the receiver mode(PWM or CPPM) using the "feature" command as such:
+To enable *CPPM type* "feature ppm".
+To enable Spektrum receiver support type "feature SPEKTRUM".
+
+To set the *CPPM channel order*, type "map AETR1234" where each character is the channel name/number.
+
+To set the channel to be used for the *second aileron*, type "set aileron2 (channel)" where (channel) is the channel number (0 to 7) of the second aileron.
+
+To set the channel to be used for the *dedicated flap* (if required), type "set flapchan (channel)" where (channel) is the channel number (0 to 7) of the flap signal.
+
+Most importantly, set the *flap mode* to the method you plan to use.
+There are three modes.
+
+*Basic Flap:* Use this mode when you only have one aileron channel.
+The one aileron channel will be copied to both ailerons. Type "set flapmode = 0" to set this mode.
+
+*Premixed flap:* Use this mode when you have two aileron channels, mixed with flaperons in the TX. Type "set flapmode = 1" to set this mode. If you do not set this mode with flaperon mixing enabled in the TX, OpenAero32 will not be able to accurately decode the roll and flap components from the signals.
+
+*Advanced flap:* Use this mode when you have two independent aileron channels and a flap channel. OpenAero32 will mix these into on-board flaperons. Type "set flapmode = 2" to set this mode.
+
+Type "save" afterwards to store the settings permanently.
+
