@@ -109,9 +109,11 @@ Typing *"cal acc"* will recalibrate the accelerometers and therefore the autolev
 
 Typing *"cal mag"* will recalibrate the magnetometer. You have to move the model through all axis within 30 seconds after initiating a mag cal, as per the normal Naze32 operation. Untested.
 
-Typing *"cal sticks"* will zero all the RC inputs. This is very important as a last step after trimming the model on the ground. openAero32 uses the stick zeros to accurately extract roll and flap info from premixed falperon data. 
+Typing *"cal sticks"* will zero all the RC inputs. This is very important as a last step after trimming the model on the ground. openAero32 uses the stick zeros to accurately extract roll and flap info from premixed flaperon data. 
 
 ===RC setup===
+First of all, in the CLI type "defaults" to reset the board to the factory defaults.
+
 Using the CLI set the receiver mode(PWM or CPPM) using the "feature" command as such:
 To enable *CPPM type* "feature ppm".
 To enable Spektrum receiver support type "feature SPEKTRUM".
@@ -133,6 +135,8 @@ The one aileron channel will be copied to both ailerons. Type "set flapmode = 0"
 *Advanced flap:* Use this mode when you have two independent aileron channels and a flap channel. OpenAero32 will mix these into on-board flaperons. Type "set flapmode = 2" to set this mode.
 
 Type "save" afterwards to store the settings permanently.
+
+Next, using nicodh's GUI, you can set the stability/autolevel RC activation and also confirm that all the RC and sensors are working correctly.
 
 ==Required tools==
 Android and Windows-based GUI by nicodh. You must use this tool to set the new variables and the RC activation methods.
