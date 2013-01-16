@@ -3,6 +3,7 @@
 
 // we unset this on 'exit'
 extern uint8_t cliMode;
+static void cliCalibrate(char *cmdline);
 static void cliCMix(char *cmdline);
 static void cliDefaults(char *cmdline);
 static void cliExit(char *cmdline);
@@ -63,6 +64,7 @@ typedef struct {
 
 // should be sorted a..z for bsearch()
 const clicmd_t cmdTable[] = {
+    { "cal", "calibrate gyro, acc, mag or sticks", cliCalibrate },	
     { "cmix", "design custom mixer", cliCMix },
     { "defaults", "reset to defaults and reboot", cliDefaults },
     { "exit", "", cliExit },
@@ -98,7 +100,7 @@ const clivalue_t valueTable[] = {
     { "deadband", VAR_UINT8, &cfg.deadband, 0, 32 },
     { "yawdeadband", VAR_UINT8, &cfg.yawdeadband, 0, 100 },
     { "alt_hold_throttle_neutral", VAR_UINT8, &cfg.alt_hold_throttle_neutral, 1, 250 },
-    { "midrc", VAR_UINT16, &cfg.midrc, 1200, 1700 },
+	{ "defaultrc", VAR_UINT16, &cfg.defaultrc, 1200, 1700 },
     { "minthrottle", VAR_UINT16, &cfg.minthrottle, 0, 2000 },
     { "maxthrottle", VAR_UINT16, &cfg.maxthrottle, 0, 2000 },
     { "mincommand", VAR_UINT16, &cfg.mincommand, 0, 2000 },
@@ -187,7 +189,17 @@ const clivalue_t valueTable[] = {
 	{ "flapchan", VAR_UINT8, &cfg.flapchan, ROLL, AUX4 },
 	{ "aileron2", VAR_UINT8, &cfg.aileron2, ROLL, AUX4 },
 	{ "flapspeed", VAR_UINT8, &cfg.flapspeed, 0, 50 },
-	{ "flapstep", VAR_UINT8, &cfg.flapstep, 1, 10 },	
+	{ "flapstep", VAR_UINT8, &cfg.flapstep, 1, 10 },
+	{ "dynPIDchan", VAR_UINT8, &cfg.DynPIDchan, ROLL, AUX4 },
+	{ "dynPIDbp", VAR_UINT8, &cfg.DynPIDbreakpoint, 0, 1999 },
+    { "S0_trim", VAR_UINT16, &cfg.servotrim[0], 1200, 1700 },
+	{ "S1_trim", VAR_UINT16, &cfg.servotrim[1], 1200, 1700 },
+	{ "S2_trim", VAR_UINT16, &cfg.servotrim[2], 1200, 1700 },
+	{ "S3_trim", VAR_UINT16, &cfg.servotrim[3], 1200, 1700 },
+	{ "S4_trim", VAR_UINT16, &cfg.servotrim[4], 1200, 1700 },
+	{ "S5_trim", VAR_UINT16, &cfg.servotrim[5], 1200, 1700 },
+	{ "S6_trim", VAR_UINT16, &cfg.servotrim[6], 1200, 1700 },
+	{ "S7_trim", VAR_UINT16, &cfg.servotrim[7], 1200, 1700 },	
 	{ "s0_min", VAR_UINT16, &cfg.servoendpoint_low[0], 1000, 2000 },
 	{ "s0_max", VAR_UINT16, &cfg.servoendpoint_high[0], 1000, 2000 },
 	{ "s1_min", VAR_UINT16, &cfg.servoendpoint_low[1], 1000, 2000 },
@@ -405,6 +417,37 @@ static int cliCompare(const void *a, const void *b)
 {
     const clicmd_t *ca = a, *cb = b;
     return strncasecmp(ca->name, cb->name, strlen(cb->name));
+}
+
+
+static void cliCalibrate(char *cmdline)
+{
+	uint8_t len;
+
+	if (len == 0) 
+	{
+		uartPrint("Calibrate: Specify gyro, acc, mag or sticks");
+	}
+	else if (strncasecmp(cmdline, "gyro", 4) == 0) 
+	{
+		uartPrint("Calibrating gyro");
+		calibratingG = 1000;
+	}
+	else if (strncasecmp(cmdline, "acc", 3) == 0) 
+	{
+		uartPrint("Calibrating acc");
+		calibratingA = 400;
+	}
+	else if (strncasecmp(cmdline, "mag", 3) == 0) 
+	{
+		uartPrint("Calibrating mag");
+		f.CALIBRATE_MAG = 1;
+	}
+	else if (strncasecmp(cmdline, "sticks", 6) == 0) 
+	{
+		uartPrint("Calibrating sticks");
+		calibratingS = 50;
+	}
 }
 
 static void cliCMix(char *cmdline)

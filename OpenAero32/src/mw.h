@@ -179,7 +179,8 @@ typedef struct config_t {
     uint8_t yawdeadband;                    // introduce a deadband around the stick center for yaw axis. Must be greater than zero.
     uint8_t alt_hold_throttle_neutral;      // defines the neutral zone of throttle stick during altitude hold, default setting is +/-20
     uint8_t spektrum_hires;                 // spektrum high-resolution y/n (1024/2048bit)
-    uint16_t midrc;                         // Some radios have not a neutral point centered on 1500. can be changed here
+    uint16_t midrc[8];                      // Stick center for each channel
+	uint16_t defaultrc;                     // Default rc center
     uint16_t mincheck;                      // minimum rc end
     uint16_t maxcheck;                      // maximum rc end
     uint8_t retarded_arm;                   // allow disarsm/arm on throttle down + roll left/right
@@ -234,13 +235,15 @@ typedef struct config_t {
 		
 	// Airplane mixer stuff
 	uint8_t flapmode;								// Switch for flaperon mode?
-	uint8_t flapchan;								// RC channel number for simple flaps)
+	uint8_t flapchan;								// RC channel number for simple flaps
 	uint8_t aileron2;								// RC channel number for second aileron
 	uint8_t flapspeed;								// Desired rate of change of flaps 
 	uint8_t flapstep;								// Steps for each flap movement
 	uint16_t servoendpoint_low[8];			 		// Servo limits (min)
 	uint16_t servoendpoint_high[8];				 	// Servo limits (max)
-		
+	uint8_t DynPIDchan;								// RC channel number for dynamic PID control
+	uint16_t DynPIDbreakpoint;				 		// Servo limits (max)
+
 } config_t;
 
 typedef struct flags_t {
@@ -261,10 +264,6 @@ typedef struct flags_t {
     uint8_t CALIBRATE_MAG;
 } flags_t;
 
-// RC globals
-extern int16_t	roll_actual;
-extern int16_t	flap_actual;
-
 extern int16_t gyroZero[3];
 extern int16_t gyroData[3];
 extern int16_t angle[2];
@@ -282,6 +281,7 @@ extern uint32_t previousTime;
 extern uint16_t cycleTime;
 extern uint16_t calibratingA;
 extern uint16_t calibratingG;
+extern uint16_t calibratingS;
 extern int16_t heading;
 extern int16_t annex650_overrun_count;
 extern int32_t BaroAlt;

@@ -24,7 +24,7 @@
 config_t cfg;
 const char rcChannelLetters[] = "AERT1234";
 
-static uint8_t EEPROM_CONF_VERSION = 34;
+static uint8_t EEPROM_CONF_VERSION = 36;
 static uint32_t enabledSensors = 0;
 static void resetConf(void);
 
@@ -75,10 +75,11 @@ void readEEPROM(void)
     // Read flash
     memcpy(&cfg, (char *)FLASH_WRITE_ADDR, sizeof(config_t));
 
-    for (i = 0; i < 6; i++)
+    // Create expo lookup
+	for (i = 0; i < 6; i++)
         lookupPitchRollRC[i] = (2500 + cfg.rcExpo8 * (i * i - 25)) * i * (int32_t) cfg.rcRate8 / 2500;
 
-		// Create expo lookup
+	// Create throttle expo lookup
     for (i = 0; i < 11; i++) {
         int16_t tmp = 10 * i - cfg.thrMid8;
         uint8_t y = 1;
@@ -201,7 +202,11 @@ static void resetConf(void)
     cfg.accZero[0] = 0;
     cfg.accZero[1] = 0;
     cfg.accZero[2] = 0;
-    cfg.mag_declination = 0;    		// For example, -6deg 37min, = -637 Japan, format is [sign]dddmm (degreesminutes) default is zero.
+	// Magnetic declination: format is [sign]dddmm (degreesminutes) default is zero. 
+	// +12deg 31min = 1231 Sydney, Australia 
+	// -6deg 37min = -637 Southern Japan
+    // cfg.mag_declination = 0;    		
+	cfg.mag_declination = 1231;
 	memcpy(&cfg.align, default_align, sizeof(cfg.align));
     cfg.acc_hardware = ACC_DEFAULT;     // default/autodetect
     cfg.acc_lpf_factor = 4;
@@ -227,15 +232,19 @@ static void resetConf(void)
     cfg.yawdeadband = 0;
     cfg.alt_hold_throttle_neutral = 20;
     cfg.spektrum_hires = 0;
-    cfg.midrc = 1500;
-    cfg.mincheck = 1100;
+    for (i = 0; i < 8; i++)					// RC stick centers
+	{
+		cfg.midrc[i] = 1500;
+    }
+	cfg.defaultrc = 1500;
+	cfg.mincheck = 1100;
     cfg.maxcheck = 1900;
-    cfg.retarded_arm = 0;       // disable arm/disarm on roll left/right
+    cfg.retarded_arm = 0;       			// disable arm/disarm on roll left/right
 
     // Failsafe Variables
-    cfg.failsafe_delay = 10;    // 1sec
-    cfg.failsafe_off_delay = 200;       // 20sec
-    cfg.failsafe_throttle = 1200;       // decent default which should always be below hover throttle for people.
+    cfg.failsafe_delay = 10;    			// 1sec
+    cfg.failsafe_off_delay = 200;       	// 20sec
+    cfg.failsafe_throttle = 1200;       	// decent default which should always be below hover throttle for people.
 
     // Motor/ESC/Servo
     cfg.minthrottle = 1150;
@@ -280,12 +289,15 @@ static void resetConf(void)
 	cfg.aileron2 = AUX1;					// RC channel number for second aileron
 	cfg.flapspeed = 10;						// Desired rate of change of flaps 
 	cfg.flapstep = 3;						// Steps for each flap movement
+	cfg.DynPIDchan = THROTTLE;				// Dynamic PID source channel
+	cfg.DynPIDbreakpoint = 1500;			// Dynamic PID breakpoint
 
     for (i = 0; i < 8; i++)					// Servo limits
 	{
 		cfg.servoendpoint_low[i] = 1000;
 		cfg.servoendpoint_high[i] = 2000;
 		cfg.servoreverse[i] = 1;
+		cfg.servotrim[i] = 1500;			// Set servo trim to default
 	}	
 				
     // custom mixer. clear by defaults.

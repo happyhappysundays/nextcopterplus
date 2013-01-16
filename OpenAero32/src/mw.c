@@ -64,6 +64,9 @@ uint16_t AccInflightCalibrationMeasurementDone = 0;
 uint16_t AccInflightCalibrationSavetoEEProm = 0;
 uint16_t AccInflightCalibrationActive = 0;
 
+// Stick calibration
+uint16_t InflightcalibratingS = 0;
+
 // Battery monitoring stuff
 uint8_t vbat;                   	// Battery voltage in 0.1V steps
 uint8_t batteryCellCount = 3;   	// Cell count
@@ -118,7 +121,7 @@ void loop(void)
 			{ // Stabilize, and set Throttle to specified level
                 for (i = 0; i < 3; i++)
                 {
-					rcData[i] = cfg.midrc;      // after specified guard time after RC signal is lost (in 0.1sec)
+					rcData[i] = cfg.midrc[i];      // after specified guard time after RC signal is lost (in 0.1sec)
                 }
 				rcData[THROTTLE] = cfg.failsafe_throttle;
                 if (failsafeCnt > 5 * (cfg.failsafe_delay + cfg.failsafe_off_delay)) 
@@ -178,7 +181,7 @@ void loop(void)
                     }
                 }
             } 
-			// debug
+			// TODO - think of something to do with arming...
 			if (1)
 			{
 				f.ARMED = 1;
@@ -518,7 +521,7 @@ void loop(void)
 				{
 					f.BARO_MODE = 0;   // so that a new althold reference is defined
                 }
-				rcCommand[THROTTLE] = initialThrottleHold + BaroPID;
+				rcCommand[THROTTLE] = initialThrottleHold + BaroPID; //TODO - check usage of throttle zero
             }
         }
 		
@@ -641,7 +644,6 @@ void loop(void)
 void annexCode(void)
 {
 	static uint32_t calibratedAccTime;
-//	uint16_t tmp, tmp2;
 	static uint8_t buzzerFreq;  // Delay between buzzer ring
 	static uint8_t vbatTimer = 0;
 	static uint8_t ind = 0;

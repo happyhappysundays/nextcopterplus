@@ -3,6 +3,7 @@
 
 uint16_t calibratingA = 0;       // the calibration is done is the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
 uint16_t calibratingG = 0;
+uint16_t calibratingS = 0;
 uint16_t acc_1G = 256;         // this is the 1G measured acceleration.
 int16_t heading, magHold;
 
