@@ -12,14 +12,13 @@ OpenAero32 currently supports only conventional, fixed-wing aircraft, but will s
 
 ===Aeroplane mode===
 In aeroplane mode there are up to six outputs - Throttle, Left Aileron, Right aileron, Elevator, Rudder and Flap.
-In CPPM mode there is a copy of the throttle signal from the receiver decoded onto the first motor output.
 
 ==How do I connect up my model?==
 ===Receiver connections===
 For a standard multi-wire PWM receiver you need to use the extended PWM inputs of the Naze32 board. 
 If you have a CPPM receiver, just connect the single wire to the CPPM input.
 The following are the default channel allocations. many can be changed from the command-line interface (CLI).
-See the Naze32 user guide for guidance on teh use of CLI mode.
+See the Naze32 user guide for guidance on the use of CLI mode.
  
  * CH1: Aileron signal input
  * CH2: Elevator signal input
@@ -75,6 +74,43 @@ AfroMini
 ==Set up==
 The setup procedure is extremely important and must be followed to get good results from OpenAero32.
 
+===New CLI commands and variables===
+OpenAero32 supports most of the Naze32 CLI commands but has many more for aeroplane functionality.
+
+The following new variables can be set using the "set" command.
+
+*defaultrc* - 1200 to 1700. The default "neutral" RC input position. Not related to RC stick zeros.
+
+*flapmode* - 0 to 2. For setting Basic Flap, Premixed Flap and Advanced Flap modes. See below for more info.
+
+*flapchan* - 0 to 7. The RC channel carrying flap info or, the RC channel to carry dummy flap info.
+
+*aileron2* - 0 to 7. The RC channel carrying the second aileron info.
+
+*flapspeed* - 0 to 50. The flap deflection speed. 0 is full speed. 50 is very slow.
+
+*flapstep* - 1 to 10. The flap movement increment. Larger moves in larger steps.
+
+*dynPIDchan* - 0 to 7. The channel to be used as the source for Dynamic PID gain adjustment.
+
+*dynPIDbp* - 0 to 1999. The point above which Dynamic PID gain becomes active for that channel.
+
+*sX_trim* - 1200 to 1700. The servo trim where "[X]" can be 0 to 7 for each of the eight channels. Use to adjust the flying surface positions.
+
+*sX_min* - 1000 to 2000. The minimum servo travel point where "[X]" can be 0 to 7 for each of the eight channels.
+
+*sX_max* - 1000 to 2000. The maximum servo travel point where "[X]" can be 0 to 7 for each of the eight channels.
+
+There is also a new CLI command for calibrating. The usage is described below.
+
+Typing *"cal gyro"* will recalibrate the gyros.
+
+Typing *"cal acc"* will recalibrate the accelerometers and therefore the autolevel position.
+
+Typing *"cal mag"* will recalibrate the magnetometer. You have to move the model through all axis within 30 seconds after initiating a mag cal, as per the normal Naze32 operation. Untested.
+
+Typing *"cal sticks"* will zero all the RC inputs. This is very important as a last step after trimming the model on the ground. openAero32 uses the stick zeros to accurately extract roll and flap info from premixed falperon data. 
+
 ===RC setup===
 Using the CLI set the receiver mode(PWM or CPPM) using the "feature" command as such:
 To enable *CPPM type* "feature ppm".
@@ -98,3 +134,9 @@ The one aileron channel will be copied to both ailerons. Type "set flapmode = 0"
 
 Type "save" afterwards to store the settings permanently.
 
+==Required tools==
+Android and Windows-based GUI by nicodh. You must use this tool to set the new variables and the RC activation methods.
+
+    Android version: http://www.rcgroups.com/forums/showthread.php?t=1667520
+
+    Windows version: http://www.rcgroups.com/forums/showthread.php?t=1667516
