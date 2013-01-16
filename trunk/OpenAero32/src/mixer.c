@@ -252,16 +252,11 @@ static void airplaneMixer(void)
 	static int16_t right_roll = 0;
 	static int16_t slowFlaps = 0;
 	static uint8_t flapskip;
-		
 	uint8_t i, speed;
-	//uint8_t roll_channel;
-    uint16_t servomid[8];
 
-    // Start by setting the mid points
+    // Start by zeroing the servos
 	for (i = 0; i < 8; i++) 
 	{
-//		servomid[i] = cfg.midrc + cfg.servotrim[i]; 		// cfg.servotrim[] are not set anywhere yet... duh!
-		servomid[i] = cfg.midrc; 		// Servo center is normally 1500
 		servo[i] = 0;
     }
 
@@ -276,46 +271,28 @@ static void airplaneMixer(void)
 		case BASIC_FLAP:
 			left_roll = rcCommand[ROLL];
 			right_roll = left_roll;
-			// Ignore if no flap channel
+			// Use RC flap channel if set
 			if (cfg.flapchan != NOCHAN)
 			{
 				flap = rcCommand[cfg.flapchan];
 			}
+			// Zero if no RC flap channel
 			else flap = 0;
 			break;
 		
 		// Flaperons - two ailerons with flaps pre-mixed in the TX
 		case PREMIXED_FLAP:
-			// Select left/right aileron channels if available
-			if (cfg.aileron2 != NOCHAN)	
-			{
-				left_roll 	= rcCommand[ROLL];
-				right_roll 	= rcCommand[cfg.aileron2];
-			}
-			// Else copy to both
-			else 
-			{
-				left_roll = rcCommand[ROLL];
-				right_roll = left_roll;
-			}
-
-			// Select flap signal decoded from flaperons if available
-			if (cfg.aileron2 != NOCHAN)	
-			{
-				flap = rcCommand[cfg.flapchan]; 	// Get flap data
-			}
-			else flap = 0; 
+			// Select left/right aileron channels
+			left_roll 	= rcCommand[ROLL];
+			right_roll 	= rcCommand[cfg.aileron2];
+			// Select flap signal decoded from flaperons
+			flap = rcCommand[cfg.flapchan]; 	// Get flap data
 			break;
 		
 		// Flaperons - two independant aileron channels + one flap input on cfg.flapchan
 		case ADV_FLAP:
 			left_roll = rcCommand[ROLL];
-			if (cfg.aileron2 != NOCHAN)	
-			{
-				right_roll = rcCommand[cfg.aileron2];
-			}
-			else right_roll = rcCommand[ROLL];
-			
+			right_roll = rcCommand[cfg.aileron2];
 			// Ignore if no flap channel
 			if (cfg.flapchan != NOCHAN)
 			{
@@ -359,12 +336,9 @@ static void airplaneMixer(void)
 	if (flapskip > cfg.flapspeed) flapskip = 0;
 		
 	// Add in flap and reverse as necessary
-	flaperons = (slowFlaps * cfg.servoreverse[cfg.flapchan]);
-			
+	flaperons = (slowFlaps * cfg.servoreverse[cfg.flapchan]);	
 
 	// Basic functions
-	//servo[0] = left_roll;     				// Left flaperon or Aileron
-    //servo[1] = right_roll; 					// Right flaperon
     servo[0] = left_roll + flaperons;     				// Left flaperon or Aileron
     servo[1] = right_roll - flaperons; 					// Right flaperon
     servo[2] = rcCommand[YAW];                       	// Rudder
@@ -384,7 +358,7 @@ static void airplaneMixer(void)
 	for (i = 0; i < 8; i++) 
 	{
 		servo[i] = servo[i] * cfg.servoreverse[i];
-		servo[i] = servo[i] + servomid[i];
+		servo[i] = servo[i] + cfg.servotrim[i];
 		servo[i] = constrain(servo[i], cfg.servoendpoint_low[i], cfg.servoendpoint_high[i]);
 	}
 }																						 
@@ -425,11 +399,11 @@ void mixTable(void)
             break;
 
         case MULTITYPE_FLYING_WING:
-            motor[0] = rcCommand[THROTTLE];
+            motor[0] = rcData[THROTTLE];
             if (f.PASSTHRU_MODE) { // do not use sensors for correction, simple 2 channel mixing
                 int p = 0, r = 0;
-                servo[0] = p * (rcData[PITCH] - cfg.midrc) + r * (rcData[ROLL] - cfg.midrc);
-                servo[1] = p * (rcData[PITCH] - cfg.midrc) + r * (rcData[ROLL] - cfg.midrc);
+                servo[0] = p * (rcData[PITCH] - cfg.midrc[PITCH]) + r * (rcData[ROLL] - cfg.midrc[ROLL]);
+                servo[1] = p * (rcData[PITCH] - cfg.midrc[PITCH]) + r * (rcData[ROLL] - cfg.midrc[ROLL]);
             } else { // use sensors to correct (gyro only or gyro+acc)
                 int p = 0, r = 0;
                 servo[0] = p * axisPID[PITCH] + r * axisPID[ROLL];
@@ -443,9 +417,9 @@ void mixTable(void)
         uint16_t aux[2] = { 0, 0 };
 
         if ((cfg.gimbal_flags & GIMBAL_NORMAL) || (cfg.gimbal_flags & GIMBAL_TILTONLY))
-            aux[0] = rcData[AUX3] - cfg.midrc;
+            aux[0] = rcData[AUX3] - cfg.midrc[AUX3];
         if (!(cfg.gimbal_flags & GIMBAL_DISABLEAUX34))
-            aux[1] = rcData[AUX4] - cfg.midrc;
+            aux[1] = rcData[AUX4] - cfg.midrc[AUX4];
 
         servo[0] = cfg.gimbal_pitch_mid + aux[0];
         servo[1] = cfg.gimbal_roll_mid + aux[1];

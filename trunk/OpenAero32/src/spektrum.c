@@ -75,7 +75,7 @@ uint16_t spektrumReadRawRC(uint8_t chan)
     }
 
     if (chan >= SPEK_MAX_CHANNEL || !spekDataIncoming) {
-        data = cfg.midrc;
+        data = cfg.defaultrc;
     } else {
         if (cfg.spektrum_hires)
             data = 988 + (spekChannelData[cfg.rcmap[chan]] >> 1);   // 2048 mode

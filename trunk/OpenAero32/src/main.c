@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero32 software for AfroFlight32
 // ====================================
-// Version 1.00 Alpha 1 - September 2012
+// Version 1.00 Alpha 1 - January 2013
 //
 // Based on baseflight by timecop and others
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -31,7 +31,13 @@
 // Version History
 // ===============
 // V1.00a	Based on Baseflight r240 code
-//			Initial code base.
+//			Fixed aeroplane mixer and slow flaps.
+//			Added many new config variables for flaps, RC and servo control.
+//			Added calibrate cli commands for gyro, acc, mag and sticks.
+//			Added stick calibration and per-channel RC zeros.
+//			Added cli settings for servo trim and defaultrc.
+//			Added cli settings dynamic PID channel and breakpoint.
+//
 
 #include "board.h"
 #include "mw.h"
