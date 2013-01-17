@@ -8,10 +8,11 @@ OpenAero32 has eight output channels which can all mix from eight RC channels in
 
 
 ==What models can OpenAero32 be used with?==
-OpenAero32 currently supports only conventional, fixed-wing aircraft, but will soon be able to support flying wings.
-
+OpenAero32 currently supports only conventional, fixed-wing aircraft, and flying wings.
 ===Aeroplane mode===
 In aeroplane mode there are up to six outputs - Throttle, Left Aileron, Right aileron, Elevator, Rudder and Flap.
+===Flying Wing mode===
+In flying wing mode there are up to four outputs - Throttle, Left Elevon, Right Elevon, and Rudder.
 
 ==How do I connect up my model?==
 ===Receiver connections===
@@ -101,6 +102,12 @@ The following new variables can be set using the "set" command.
 
 *sX_max* - 1000 to 2000. The maximum servo travel point where "[X]" can be 0 to 7 for each of the eight channels.
 
+*roll_rev* - -1 to 1. The global polarity of the gyro/acc roll PID influence.
+
+*pitch_rev* - -1 to 1. The global polarity of the gyro/acc pitch PID influence.
+
+*yaw_rev* - -1 to 1. The global polarity of the gyro/acc pitch PID influence.
+
 There is also a new CLI command for calibrating. The usage is described below.
 
 Typing *"cal gyro"* will recalibrate the gyros.
@@ -118,11 +125,14 @@ Using the CLI set the receiver mode(PWM or CPPM) using the "feature" command as 
 To enable *CPPM type* "feature ppm".
 To enable Spektrum receiver support type "feature SPEKTRUM".
 
-To set the *CPPM channel order*, type "map AETR1234" where each character is the channel name/number.
+To set the *airplane type*, type "mixer airplane" or "mixer flying_wing".
+
+To set the *CPPM channel order*, type "map AETR1234" where each character is the channel name/number. Note that the code defaults to the JR channel order of "TAER1234".
 
 To set the channel to be used for the *second aileron*, type "set aileron2 (channel)" where (channel) is the channel number (0 to 7) of the second aileron.
 
 To set the channel to be used for the *dedicated flap* (if required), type "set flapchan (channel)" where (channel) is the channel number (0 to 7) of the flap signal.
+It is important to set this to an usused channel number if you are using pre-mixed flaperons. Any channel will do, even if your TX does not support it.
 
 Most importantly, set the *flap mode* to the method you plan to use.
 There are three modes.
@@ -144,3 +154,7 @@ Android and Windows-based GUI by nicodh. You must use this tool to set the new v
     Android version: http://www.rcgroups.com/forums/showthread.php?t=1667520
 
     Windows version: http://www.rcgroups.com/forums/showthread.php?t=1667516
+
+Terminal emulator
+I use Hyperterm myself but Hercules is also recommended.
+Set the serial data to 112kbaud, 8 bits, no parity.
