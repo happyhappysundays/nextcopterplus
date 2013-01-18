@@ -118,7 +118,7 @@ const mixer_t mixers[] = {
     { 0, 1, NULL },                // * MULTITYPE_GIMBAL
     { 6, 0, mixerY6 },             // MULTITYPE_Y6
     { 6, 0, mixerHex6P },          // MULTITYPE_HEX6
-    { 1, 1, NULL },                // * MULTITYPE_FLYING_WING
+    { 2, 1, NULL },                // * MULTITYPE_FLYING_WING
     { 4, 0, mixerY4 },             // MULTITYPE_Y4
     { 6, 0, mixerHex6X },          // MULTITYPE_HEX6X
     { 8, 0, mixerOctoX8 },         // MULTITYPE_OCTOX8
@@ -252,13 +252,7 @@ static void airplaneMixer(void)
 	static int16_t right_roll = 0;
 	static int16_t slowFlaps = 0;
 	static uint8_t flapskip;
-	uint8_t i, speed;
-
-    // Start by zeroing the servos
-	for (i = 0; i < 8; i++) 
-	{
-		servo[i] = 0;
-    }
+	uint8_t speed;
 
 	// Throttle is handled separately here
 	motor[0] = rcData[THROTTLE];	  				// Send directly from RC for now
@@ -348,36 +342,23 @@ static void airplaneMixer(void)
 	// Ignore if in pass-through mode
     if (!f.PASSTHRU_MODE)
 	{
-		servo[0] -= axisPID[ROLL];     					// Stabilised left flaperon or Aileron
-		servo[1] -= axisPID[ROLL]; 				  		// Stabilised right flaperon
-		servo[2] -= axisPID[YAW];                    	// Stabilised Rudder
-		servo[3] += axisPID[PITCH];                 	// Stabilised Elevator
-	}
-		
-	// Reverse, offset, then check all servo outputs against endpoints
-	for (i = 0; i < 8; i++) 
-	{
-		servo[i] = servo[i] * cfg.servoreverse[i];
-		servo[i] = servo[i] + cfg.servotrim[i];
-		servo[i] = constrain(servo[i], cfg.servoendpoint_low[i], cfg.servoendpoint_high[i]);
+		servo[0] -= (cfg.rollPIDpol * axisPID[ROLL]);	// Stabilised left flaperon or Aileron
+		servo[1] -= (cfg.rollPIDpol * axisPID[ROLL]); 	// Stabilised right flaperon
+		servo[2] -= (cfg.yawPIDpol * axisPID[YAW]);    	// Stabilised Rudder
+		servo[3] += (cfg.pitchPIDpol * axisPID[PITCH]); // Stabilised Elevator
 	}
 }																						 
 
 void mixTable(void)
 {
-    int16_t maxMotor;
     uint32_t i;
 
-    if (numberMotor > 3) {
-        // prevent "yaw jump" during yaw correction
-        axisPID[YAW] = constrain(axisPID[YAW], -100 - abs(rcCommand[YAW]), +100 + abs(rcCommand[YAW]));
-    }
+    // Start by zeroing the servos
+	for (i = 0; i < 8; i++) 
+	{
+		servo[i] = 0;
+    }	
 
-    // motors for non-servo mixes
- /*   if (numberMotor > 1)
-        for (i = 0; i < numberMotor; i++)
-            motor[i] = rcCommand[THROTTLE] * currentMixer[i].throttle + axisPID[PITCH] * currentMixer[i].pitch + axisPID[ROLL] * currentMixer[i].roll + cfg.yaw_direction * axisPID[YAW] * currentMixer[i].yaw;
- */
     // airplane / servo mixes
     switch (cfg.mixerConfiguration) {
         case MULTITYPE_BI:
@@ -399,16 +380,25 @@ void mixTable(void)
             break;
 
         case MULTITYPE_FLYING_WING:
-            motor[0] = rcData[THROTTLE];
-            if (f.PASSTHRU_MODE) { // do not use sensors for correction, simple 2 channel mixing
-                int p = 0, r = 0;
-                servo[0] = p * (rcData[PITCH] - cfg.midrc[PITCH]) + r * (rcData[ROLL] - cfg.midrc[ROLL]);
-                servo[1] = p * (rcData[PITCH] - cfg.midrc[PITCH]) + r * (rcData[ROLL] - cfg.midrc[ROLL]);
-            } else { // use sensors to correct (gyro only or gyro+acc)
-                int p = 0, r = 0;
-                servo[0] = p * axisPID[PITCH] + r * axisPID[ROLL];
-                servo[1] = p * axisPID[PITCH] + r * axisPID[ROLL];
-            }
+			// Throttle
+			motor[0] = rcData[THROTTLE];	  				// Send directly from RC for now
+			motor[1] = rcData[THROTTLE];	  				// Copy to motor[0] for now (not fitted to Afro-mini)
+
+			// Basic functions
+			servo[0] = (rcCommand[PITCH] + rcCommand[ROLL]) >> 1; 	// Left elevon
+			servo[1] = (rcCommand[PITCH] - rcCommand[ROLL]) >> 1; 	// Right elevon
+			servo[2] = rcCommand[YAW];                     			// Rudder
+		
+			// Ignore if in pass-through mode
+			if (!f.PASSTHRU_MODE)
+			{
+				// Stabilised left elevon
+				servo[0] = servo[0] + (cfg.pitchPIDpol * axisPID[PITCH]) + (cfg.rollPIDpol * axisPID[ROLL]);   
+				// Stabilised right elevon
+				servo[1] = servo[1] + (cfg.pitchPIDpol * axisPID[PITCH]) - (cfg.rollPIDpol * axisPID[ROLL]);	
+				// Stabilised Rudder
+				servo[2] -= axisPID[YAW]; 
+			}
             break;
     }
 
@@ -449,23 +439,20 @@ void mixTable(void)
             pwmWriteServo(i + offset, rcData[AUX1 + i]);
     }
 
-    maxMotor = motor[0];
- /*   for (i = 1; i < numberMotor; i++)
-        if (motor[i] > maxMotor)
-            maxMotor = motor[i];
-*/
-    for (i = 0; i < numberMotor; i++) {
-/*        if (maxMotor > cfg.maxthrottle)     // this is a way to still have good gyro corrections if at least one motor reaches its max.
-            motor[i] -= maxMotor - cfg.maxthrottle;
-        motor[i] = constrain(motor[i], cfg.minthrottle, cfg.maxthrottle);
-        if ((rcData[THROTTLE]) < cfg.mincheck) {
-            if (!feature(FEATURE_MOTOR_STOP))
-                motor[i] = cfg.minthrottle;
-            else
-                motor[i] = cfg.mincommand;
-        }
-*/
+	// Kill motors when not armed
+    for (i = 0; i < numberMotor; i++) 
+	{
         if (!f.ARMED)
             motor[i] = cfg.mincommand;
     }
+			
+	// Reverse, offset, then check all servo outputs against endpoints
+	for (i = 0; i < 8; i++) 
+	{
+		servo[i] = servo[i] * cfg.servoreverse[i];
+		servo[i] = servo[i] + cfg.servotrim[i];
+		servo[i] = constrain(servo[i], cfg.servoendpoint_low[i], cfg.servoendpoint_high[i]);
+	}
+	
+	
 }

@@ -28,7 +28,7 @@ typedef enum MultiType
     MULTITYPE_GIMBAL = 5,
     MULTITYPE_Y6 = 6,
     MULTITYPE_HEX6 = 7,
-    MULTITYPE_FLYING_WING = 8,      // UNSUPPORTED, do not select!
+    MULTITYPE_FLYING_WING = 8, 
     MULTITYPE_Y4 = 9,
     MULTITYPE_HEX6X = 10,
     MULTITYPE_OCTOX8 = 11,          // Java GUI is same for the next 3 configs
@@ -57,10 +57,10 @@ enum {
     YAW,
     THROTTLE,
     AUX1,		// Second aileron default
-    AUX2, 	// Flap defualt
+    AUX2, 		// Flap defualt
     AUX3,
     AUX4,
-		NOCHAN 	// Null channel
+	NOCHAN 		// Null channel
 };
 
 enum {
@@ -243,6 +243,10 @@ typedef struct config_t {
 	uint16_t servoendpoint_high[8];				 	// Servo limits (max)
 	uint8_t DynPIDchan;								// RC channel number for dynamic PID control
 	uint16_t DynPIDbreakpoint;				 		// Servo limits (max)
+	int8_t	rollPIDpol;								// Roll PID polarity
+	int8_t	pitchPIDpol;							// Pitch PID polarity
+	int8_t	yawPIDpol;								// Yaw PID polarity
+	
 
 } config_t;
 

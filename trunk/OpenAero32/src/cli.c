@@ -191,6 +191,7 @@ const clivalue_t valueTable[] = {
 	{ "flapspeed", VAR_UINT8, &cfg.flapspeed, 0, 50 },
 	{ "flapstep", VAR_UINT8, &cfg.flapstep, 1, 10 },
 	{ "dynPIDchan", VAR_UINT8, &cfg.DynPIDchan, ROLL, AUX4 },
+	{ "dynPIDrate", VAR_UINT8, &cfg.dynThrPID, 0, 100 },
 	{ "dynPIDbp", VAR_UINT16, &cfg.DynPIDbreakpoint, 0, 1999 },
     { "S0_trim", VAR_INT16, &cfg.servotrim[0], 1200, 1700 },
 	{ "S1_trim", VAR_INT16, &cfg.servotrim[1], 1200, 1700 },
@@ -224,6 +225,9 @@ const clivalue_t valueTable[] = {
 	{ "s5_rev", VAR_INT8, &cfg.servoreverse[5], -1, 1 },	
 	{ "s6_rev", VAR_INT8, &cfg.servoreverse[6], -1, 1 },	
 	{ "s7_rev", VAR_INT8, &cfg.servoreverse[7], -1, 1 },	
+	{ "roll_rev", VAR_INT8, &cfg.rollPIDpol, -1, 1 },	
+	{ "pitch_rev", VAR_INT8, &cfg.pitchPIDpol, -1, 1 },	
+	{ "yaw_rev", VAR_INT8, &cfg.yawPIDpol, -1, 1 },	
 };
 
 #define VALUE_COUNT (sizeof(valueTable) / sizeof(valueTable[0]))
