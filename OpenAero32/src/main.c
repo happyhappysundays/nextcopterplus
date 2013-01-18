@@ -10,7 +10,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2012 David Thompson
+// * Copyright (C) 2013 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,9 @@
 //			Added calibrate cli commands for gyro, acc, mag and sticks.
 //			Added stick calibration and per-channel RC zeros.
 //			Added cli settings for servo trim and defaultrc.
-//			Added cli settings dynamic PID channel and breakpoint.
+//			Added cli settings dynamic PID channel, rate and breakpoint.
+//			Added reversing for PID axis functions
+//			Flying Wing mode updated
 //
 
 #include "board.h"

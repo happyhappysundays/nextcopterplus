@@ -149,15 +149,15 @@ static void resetConf(void)
 	cfg.mixerConfiguration = MULTITYPE_AIRPLANE;
     featureClearAll();
     //featureSet(FEATURE_VBAT);		// Enable Vbat monitoring
-	featureSet(FEATURE_PPM);	  // Enable CPPM input
+	//featureSet(FEATURE_PPM);	  	// Enable CPPM input
 
     cfg.looptime = 0;
-    cfg.P8[ROLL] = 40;
+    cfg.P8[ROLL] = 20;
     //cfg.I8[ROLL] = 30;
     //cfg.D8[ROLL] = 23;
 	cfg.I8[ROLL] = 0;
 	cfg.D8[ROLL] = 0;
-    cfg.P8[PITCH] = 40;
+    cfg.P8[PITCH] = 20;
     //cfg.I8[PITCH] = 30;
     //cfg.D8[PITCH] = 23;
     cfg.I8[PITCH] = 0;
@@ -166,30 +166,30 @@ static void resetConf(void)
 	cfg.I8[YAW] = 0;
     //cfg.I8[YAW] = 45;
     cfg.D8[YAW] = 0;
-    cfg.P8[PIDALT] = 16;
-    cfg.I8[PIDALT] = 15;
-    cfg.D8[PIDALT] = 7;
-    cfg.P8[PIDPOS] = 11; 	// POSHOLD_P * 100;
+    cfg.P8[PIDALT] = 0;
+    cfg.I8[PIDALT] = 0;
+    cfg.D8[PIDALT] = 0;
+    cfg.P8[PIDPOS] = 0; 	// POSHOLD_P * 100;
     cfg.I8[PIDPOS] = 0; 	// POSHOLD_I * 100;
     cfg.D8[PIDPOS] = 0;
-    cfg.P8[PIDPOSR] = 20; 	// POSHOLD_RATE_P * 10;
-    cfg.I8[PIDPOSR] = 8; 	// POSHOLD_RATE_I * 100;
-    cfg.D8[PIDPOSR] = 45; 	// POSHOLD_RATE_D * 1000;
-    cfg.P8[PIDNAVR] = 14; 	// NAV_P * 10;
-    cfg.I8[PIDNAVR] = 20; 	// NAV_I * 100;
-    cfg.D8[PIDNAVR] = 80; 	// NAV_D * 1000;
-    cfg.P8[PIDLEVEL] = 40;
+    cfg.P8[PIDPOSR] = 0; 	// POSHOLD_RATE_P * 10;
+    cfg.I8[PIDPOSR] = 0; 	// POSHOLD_RATE_I * 100;
+    cfg.D8[PIDPOSR] = 0; 	// POSHOLD_RATE_D * 1000;
+    cfg.P8[PIDNAVR] = 0; 	// NAV_P * 10;
+    cfg.I8[PIDNAVR] = 0; 	// NAV_I * 100;
+    cfg.D8[PIDNAVR] = 0; 	// NAV_D * 1000;
+    cfg.P8[PIDLEVEL] = 80;
     cfg.I8[PIDLEVEL] = 0;
     cfg.D8[PIDLEVEL] = 100;
     //cfg.P8[PIDLEVEL] = 70;
     //cfg.I8[PIDLEVEL] = 10;
     //cfg.D8[PIDLEVEL] = 20;
-    cfg.P8[PIDMAG] = 40;
+    cfg.P8[PIDMAG] = 0;
     cfg.P8[PIDVEL] = 0;
     cfg.I8[PIDVEL] = 0;
     cfg.D8[PIDVEL] = 0;
-    cfg.rcRate8 = 90;
-    cfg.rcExpo8 = 65;
+    cfg.rcRate8 = 100;
+    cfg.rcExpo8 = 0;
     cfg.rollPitchRate = 0;
     cfg.yawRate = 0;
     cfg.dynThrPID = 0;
@@ -226,8 +226,8 @@ static void resetConf(void)
 	// cfg.power_adc_channel = 0;
 
     // Radio
-    //parseRcChannels("AETR1234"); 
-	parseRcChannels("TAER1234"); // Debug - JR
+    parseRcChannels("AETR1234"); 
+	//parseRcChannels("TAER1234"); // Debug - JR
     cfg.deadband = 0;
     cfg.yawdeadband = 0;
     cfg.alt_hold_throttle_neutral = 20;
@@ -291,6 +291,9 @@ static void resetConf(void)
 	cfg.flapstep = 3;						// Steps for each flap movement
 	cfg.DynPIDchan = THROTTLE;				// Dynamic PID source channel
 	cfg.DynPIDbreakpoint = 1500;			// Dynamic PID breakpoint
+	cfg.rollPIDpol = 1;
+	cfg.pitchPIDpol = 1;
+	cfg.yawPIDpol = 1;
 
     for (i = 0; i < 8; i++)					// Servo limits
 	{
