@@ -129,7 +129,7 @@ void init(void)
 	FirstTimeIMU = true;
 
 	// Button acceleration
-	button_multiplier = 1;
+	//button_multiplier = 1;
 
 	Initial_EEPROM_Config_Load();			// Loads config at start-up 
 	UpdateLimits();							// Update travel limts	

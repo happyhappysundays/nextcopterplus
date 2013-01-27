@@ -66,6 +66,6 @@ extern const char *text_menu[];
 
 
 // Button acceleration
-uint8_t button_multiplier;
+//uint8_t button_multiplier;
 
 

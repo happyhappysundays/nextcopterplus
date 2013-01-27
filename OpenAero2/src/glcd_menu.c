@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1b5"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1b6"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //
@@ -337,7 +337,7 @@ void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y)
 void idle_screen(void)
 {
 	clear_buffer(buffer);
-	LCD_Display_Text(121,(prog_uchar*)Verdana14,40,12); 	// "Press"
+	LCD_Display_Text(121,(prog_uchar*)Verdana14,40,12); // "Press"
 	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,32); // "for status"
 	write_buffer(buffer,1);
 };

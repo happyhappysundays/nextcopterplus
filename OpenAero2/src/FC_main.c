@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 5 - December 2012
+// Version 1.1 Beta 6 - January 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -9,7 +9,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2012 David Thompson
+// * Copyright (C) 2013 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -107,6 +107,7 @@
 // Beta 5	Fixed 3D mode mixing. Fixed autolevel in Vertical mode.
 //			Increased 3D-mode RC input by 2x as per KeiTora request.
 //			Added "Upside down" orientation.
+// Beta 6	Fixed Flying Wing and Camstab mixer presets
 //
 //***********************************************************
 //* To do
