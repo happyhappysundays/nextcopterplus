@@ -90,8 +90,6 @@ bool 	FirstTimeIMU;
 
 int16_t	angle[2]; 			// Attitude
 
-uint16_t	AccMag;			// Debug
-
 void getEstimatedAttitude(void)
 {
 	static float deltaGyroAngle[3] = {0.0f,0.0f,0.0f};
@@ -102,7 +100,7 @@ void getEstimatedAttitude(void)
 	uint32_t 	CurrentTime;
 	int16_t		roll_sq, pitch_sq, yaw_sq;
 	uint8_t		axis;
-	//uint16_t		AccMag = 0;
+	uint16_t	AccMag = 0;
 
 	// Get global timestamp
 	// The first calculation has no PreviousTime to measure from, so zero and move on.
@@ -119,8 +117,6 @@ void getEstimatedAttitude(void)
 		deltaTime = deltaTime * GYRO_SCALE;
 		PreviousTime = CurrentTime;
 	}
-
-	AccMag = 0; // Debug
 
 	// Initialization
 	for (axis = 0; axis < 3; axis++) 
