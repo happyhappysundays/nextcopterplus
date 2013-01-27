@@ -104,7 +104,9 @@
 //			Restored missing ACC trims. Fixed I-term constrain calculation.
 //			Added Normal/FlyByWire flight modes.
 //			Added Dynamic gain setting. Many bug fixes.
-// Beta 5	Fixed 3D mode mixing.
+// Beta 5	Fixed 3D mode mixing. Fixed autolevel in Vertical mode.
+//			Increased 3D-mode RC input by 2x as per KeiTora request.
+//			Added "Upside down" orientation.
 //
 //***********************************************************
 //* To do

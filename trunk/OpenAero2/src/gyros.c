@@ -27,14 +27,28 @@ void get_raw_gyros(void);
 int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
+// Polarity handling table
+int8_t Gyro_Pol[3][3] = // ROLL, PITCH, YAW
+	{
+		{1,1,-1},		// Horizontal
+		{1,1,-1},		// Vertical
+		{1,-1,1},		// Upside down
+	};
+
 void ReadGyros(void)					// Conventional orientation
 {
+	uint8_t i;
+
 	get_raw_gyros();					// Updates gyroADC[]
 
-	// Remove offsets from gyro outputs
-	gyroADC[ROLL] -= gyroZero[ROLL];
-	gyroADC[PITCH] -= gyroZero[PITCH];
-	gyroADC[YAW] -= gyroZero[YAW];
+	for (i=0;i<3;i++)					// For all axis
+	{
+		// Remove offsets from gyro outputs
+		gyroADC[i] -= gyroZero[i];
+
+		// Change polarity as per orientation mode
+		gyroADC[i] *= Gyro_Pol[Config.Orientation][i];
+	}
 }
 
 void CalibrateGyros(void)
@@ -70,5 +84,5 @@ void get_raw_gyros(void)
 	gyroADC[PITCH] = ADCW;
 
 	read_adc(AIN_Z_GYRO);				// Read yaw gyro ADC2 (Yaw)
-	gyroADC[YAW] = -ADCW;				// Reverse gyro sense
+	gyroADC[YAW] = ADCW;
 }

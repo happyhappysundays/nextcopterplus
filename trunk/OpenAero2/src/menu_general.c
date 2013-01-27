@@ -42,11 +42,11 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 103, 101, 0, 0, 101, 119, 0, 0, 48, 116};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 208, 101, 0, 0, 101, 119, 0, 0, 48, 116};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
 	{AEROPLANE,FWING,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
-	{HORIZONTAL,VERTICAL,1,1,HORIZONTAL},
+	{HORIZONTAL,UPSIDEDOWN,1,1,HORIZONTAL},
 	{28,50,1,0,38}, 	// Contrast
 	{1,30,1,0,5},		// Status menu timeout
 	{0,30,1,0,1},		// LMA enable

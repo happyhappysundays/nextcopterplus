@@ -26,36 +26,45 @@ void CalibrateInvAcc(void);
 void get_raw_accs(void);
 
 //************************************************************
-// Defines
-//************************************************************
-
-#define Z_UNCAL_DEFAULT 643 	// Uncalibrated default
-
-//************************************************************
 // Code
 //************************************************************
 
-uint16_t accADC[3];				// Holds Acc ADC values
-uint16_t accZero[3];			// Used for calibrating Accs on ground
+int16_t accADC[3];				// Holds Acc ADC values
+int16_t accZero[3];				// Used for calibrating Accs on ground
+int16_t tempaccZero;
 bool	inv_cal_done;
 bool	normal_cal_done;
 
+// Uncalibrated default values of Z middle per orientation
+int16_t UncalDef[3] = {640, 615, 640};// 764-515, 488-743, 515-764
+
+// Polarity handling table
+int8_t Acc_Pol[3][3] =  // ROLL, PITCH, YAW
+	{
+		{1,1,1},		// Horizontal
+		{1,-1,-1},		// Vertical
+		{-1,1,-1},		// Upside down
+	};	
+
 void ReadAcc()					// At rest range is approx 300 - 700?
 {
+	uint8_t i;
+
 	get_raw_accs();				// Updates accADC[]
 
-	// Remove offsets from acc outputs
-	accADC[ROLL] -= Config.AccRollZero;
-	accADC[PITCH] -= Config.AccPitchZero;
+	for (i=0;i<3;i++)			// For all axis
+	{
+		// Remove offsets from acc outputs
+		accADC[i] -= Config.AccZero[i];
 
-	// Only update official Z cal if it has been done (properly)
-	if (inv_cal_done)
-	{
-		accADC[YAW] -= Config.AccZedZero;
+		// Change polarity as per orientation mode
+		accADC[i] *= Acc_Pol[Config.Orientation][i];
 	}
-	else
+
+	// Use default inverse calibration value if not done yet
+	if (!inv_cal_done)
 	{
-		accADC[YAW] -= Z_UNCAL_DEFAULT;
+		Config.AccZero[YAW] = UncalDef[Config.Orientation];
 	}
 }
 
@@ -79,9 +88,12 @@ void CalibrateAcc(void)
 		_delay_ms(10);			// Get a better acc average over time
 	}
 
-	Config.AccPitchZero = (accZero[PITCH] >> 5);						
-	Config.AccRollZero = (accZero[ROLL] >> 5);
-	Config.AccZedZero = (accZero[YAW] 	>> 5);
+	for (i=0;i<3;i++)			// For all axis
+	{
+		Config.AccZero[i] = (accZero[i] >> 5);
+	}
+
+	tempaccZero = Config.AccZero[YAW];
 
 	normal_cal_done = true;
 	inv_cal_done = false;
@@ -110,11 +122,12 @@ void CalibrateInvAcc(void)
 		accZero[YAW] = (accZero[YAW] >> 5);	// Inverted zero point
 
 		// Test if board is actually inverted
-		if (accZero[YAW] < Z_UNCAL_DEFAULT)
+		if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZero[YAW] < UncalDef[Config.Orientation])) || // Horizontal
+		    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZero[YAW] > UncalDef[Config.Orientation])))  // Vertical and Upside down
 		{
 			// Reset zero to halfway between min and max Z
-			temp = ((Config.AccZedZero - accZero[YAW]) >> 1);
-			Config.AccZedZero -= temp;
+			temp = ((tempaccZero - accZero[YAW]) >> 1);
+			Config.AccZero[YAW] = tempaccZero - temp;
 
 			inv_cal_done = true;
 			normal_cal_done = false;

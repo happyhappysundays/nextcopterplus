@@ -232,7 +232,8 @@ void ProcessMixer(void)
 			// Discard RC part of fly-by-wire or 3D channels as these are replaced by that from the PID loop
 			if (
 				// For fly-by-wire flight mode or when in 3D Heading hold mode
-				(((Config.FlightMode == FLYBYWIRE) || (Config.AutoCenter == FIXED))
+				(
+				 ((Config.FlightMode == FLYBYWIRE) || (Config.AutoCenter == FIXED))
 			     &&
 				 // ...and for the RC channels
 			     (

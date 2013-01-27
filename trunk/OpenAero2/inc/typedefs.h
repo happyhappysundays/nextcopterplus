@@ -163,9 +163,7 @@ typedef struct
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
 	// Acc
-	uint16_t	AccRollZero;			// Acc calibration results
-	uint16_t	AccPitchZero;
-	uint16_t	AccZedZero;
+	uint16_t	AccZero[3];				// Acc calibration results
 
 	// 
 	uint16_t	Dummy_2;
