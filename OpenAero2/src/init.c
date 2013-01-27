@@ -168,9 +168,7 @@ void init(void)
 
 	if ((PINB & 0xf0) == 0)
 	{
-
-		LCD_Display_Text(1,(prog_uchar*)Verdana14,15,10);
-		LCD_Display_Text(2,(prog_uchar*)Verdana14,31,30);
+		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);				// Clear

@@ -23,12 +23,12 @@ void read_adc(uint8_t channel);
 //					Z_ACC used for X_ACC
 //					X_ACC used for Z_ACC	
 //***********************************************************
-
 //	 Vcc			Roll		Yaw			Vbat	Pitch		PitchA		RollA		ZA
-//{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal definition
+//{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal/UD definition
 //{AIN_VCC	  , AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
 
 int8_t ADCseqVert[8] PROGMEM = {AIN_VCC, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
+
 
 void Init_ADC(void)
 {
@@ -48,5 +48,5 @@ void read_adc(uint8_t channel)
 	}
 
 	ADCSRA 	= 0b11000110;					// ADEN, ADSC, ADPS1,2
-	while (ADCSRA & (1 << ADSC));			// Wait to complete
+	while (ADCSRA & (1 << ADSC));			// Wait to complete. Result is in ADCW
 }

@@ -30,7 +30,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x06		// eePROM signature - change for each eePROM structure change 0x06 = V1.1b4
+#define MAGIC_NUMBER 0x07		// eePROM signature - change for each eePROM structure change 0x07 = V1.1b5
 								// to force factory reset
 
 //************************************************************
@@ -39,8 +39,6 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 
 uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAER1234)
 uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETR1234)
-
-//uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {2,0,1,3,4,5,6,7}; 	// Futaba channel sequence
 
 void Set_EEPROM_Default_Config(void)
 {
@@ -57,21 +55,22 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
 	//
-	Config.AccRollZeroTrim	= 0;		// User-set ACC trim
-	Config.AccPitchZeroTrim	= 0;
-	Config.AccRollZero	= 621;			// Acc calibration defaults
-	Config.AccPitchZero	= 623;
-	Config.AccZedZero	= 643; 			// 643 is the centre, 520 is inverted
+	//Config.AccRollZeroTrim	= 0;		// User-set ACC trim
+	//Config.AccPitchZeroTrim	= 0;
+	//
+	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
+	Config.AccZero[PITCH]	= 623;
+	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
 	//
 	Config.Roll.P_mult = 60;			// PID defaults			
-	Config.Roll.I_mult = 0;
-	Config.Roll.D_mult = 0;
+	//Config.Roll.I_mult = 0;
+	//Config.Roll.D_mult = 0;
 	Config.Pitch.P_mult = 60;
-	Config.Pitch.I_mult = 0;
-	Config.Pitch.D_mult = 0;
+	//Config.Pitch.I_mult = 0;
+	//Config.Pitch.D_mult = 0;
 	Config.Yaw.P_mult = 60;
-	Config.Yaw.I_mult = 0;
-	Config.Yaw.D_mult = 0;
+	//Config.Yaw.I_mult = 0;
+	//Config.Yaw.D_mult = 0;
 	//
 	Config.A_Roll_P_mult = 60;
 	Config.A_Pitch_P_mult = 60;
@@ -80,20 +79,21 @@ void Set_EEPROM_Default_Config(void)
 	Config.AutoCenter = OFF;
 	Config.FlightMode = RETRO;
 	Config.DynGainSrc = NOCHAN;
-	Config.DynGain = 0;
+	//Config.DynGain = 0;
 
-	//
+	/*
 	for (i = 0; i < 3; i++)
 	{
 		Config.I_Limits[i] = 0;
 		Config.Raw_I_Limits[i] = 0;
 		Config.Raw_I_Constrain[i] = 0;
 	}
+	*/
 
 	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
-	Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
+	//Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
 	Config.BatteryCells = 3;			// Default to 3S
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 360;
@@ -105,19 +105,19 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Autolimit = 10;				// Autolevel trigger setting
 	Config.Stablimit = -30;				// Stability trigger setting
-	Config.LaunchThrPos = 0;			// Launch mode throttle position
+	//Config.LaunchThrPos = 0;			// Launch mode throttle position
 	Config.LaunchMode = OFF;			// Launch mode on/off
 	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
 
-	Config.AileronExpo = 0;				// Amount of expo on Aileron channel
-	Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
-	Config.RudderExpo = 0;				// Amount of expo on Rudder channel
-	Config.Differential = 0;			// Amount of differential on Aileron channels
-	Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
+	//Config.AileronExpo = 0;				// Amount of expo on Aileron channel
+	//Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
+	//Config.RudderExpo = 0;				// Amount of expo on Rudder channel
+	//Config.Differential = 0;			// Amount of differential on Aileron channels
+	//Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
 
 	Config.CamStab = OFF;
 
-	Config.Orientation = 0;				// Horizontal / vertical
+	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 5;			// Refresh timeout
 	Config.LMA_enable = 1;				// Default to 1 minute
