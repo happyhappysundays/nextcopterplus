@@ -35,7 +35,7 @@ const char * const mixerNames[] = {
     "TRI", "QUADP", "QUADX", "BI",
     "GIMBAL", "Y6", "HEX6",
     "FLYING_WING", "Y4", "HEX6X", "OCTOX8", "OCTOFLATP", "OCTOFLATX",
-    "AIRPLANE", "HELI_120_CCPM", "HELI_90_DEG", "VTAIL4", "CUSTOM", NULL
+    "AIRPLANE", "HELI_120_CCPM", "HELI_90_DEG", "VTAIL4", "CUSTOM", "FW_DRAG", NULL
 };
 
 // sync this with AvailableFeatures enum from board.h
@@ -191,7 +191,6 @@ const clivalue_t valueTable[] = {
 	{ "flapspeed", VAR_UINT8, &cfg.flapspeed, 0, 50 },
 	{ "flapstep", VAR_UINT8, &cfg.flapstep, 1, 10 },
 	{ "dynPIDchan", VAR_UINT8, &cfg.DynPIDchan, ROLL, AUX4 },
-	{ "dynPIDrate", VAR_UINT8, &cfg.dynThrPID, 0, 100 },
 	{ "dynPIDbp", VAR_UINT16, &cfg.DynPIDbreakpoint, 0, 1999 },
     { "S0_trim", VAR_INT16, &cfg.servotrim[0], 1200, 1700 },
 	{ "S1_trim", VAR_INT16, &cfg.servotrim[1], 1200, 1700 },
