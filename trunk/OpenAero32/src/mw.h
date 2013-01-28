@@ -39,7 +39,8 @@ typedef enum MultiType
     MULTITYPE_HELI_90_DEG = 16,
     MULTITYPE_VTAIL4 = 17,
     MULTITYPE_CUSTOM = 18,          // no current GUI displays this
-    MULTITYPE_LAST = 19
+    MULTITYPE_FW_DRAG = 19,			// Flying wing with drag rudders
+    MULTITYPE_LAST = 20
 } MultiType;
 
 typedef enum GimbalFlags {

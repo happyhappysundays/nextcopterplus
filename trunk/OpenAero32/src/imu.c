@@ -2,7 +2,7 @@
 #include "mw.h"
 
 #define INACCURATE 1
-
+//#define INACCURATE 0		// Debug
 
 int16_t gyroADC[3], accADC[3], accSmooth[3], magADC[3];
 float accLPFVel[3];

@@ -114,6 +114,34 @@ void loop(void)
         if (!feature(FEATURE_SPEKTRUM))
             computeRC();
 
+#ifdef MAG
+		// Handle mag hold
+        if (sensors(SENSOR_MAG)) 
+		{
+            if (abs(rcCommand[YAW]) < 70 && f.MAG_MODE) 
+			{
+                int16_t dif = heading - magHold;
+                if (dif <= -180)
+				{
+                    dif += 360;
+                }
+				if (dif >= +180)
+                {
+				    dif -= 360;
+                }
+				if (f.SMALL_ANGLES_25)
+                {
+					// For my system mag must increment Yaw, not decrement
+				    rcCommand[YAW] += dif * cfg.P8[PIDMAG] / 30;    // 18 deg
+				}
+            } 
+			else
+			{
+                magHold = heading;
+			}
+        }
+#endif
+
         // Failsafe routine
         if (feature(FEATURE_FAILSAFE)) 
 		{
@@ -484,7 +512,7 @@ void loop(void)
 #ifdef MPU6050_DMP
         mpu6050DmpLoop();
 #endif
-
+/*
 #ifdef MAG
 		// Handle mag hold
         if (sensors(SENSOR_MAG)) 
@@ -511,7 +539,7 @@ void loop(void)
 			}
         }
 #endif
-
+*/
 		// Do alt hold	   <-- but for aeroplanes
         if (sensors(SENSOR_BARO)) 
 		{

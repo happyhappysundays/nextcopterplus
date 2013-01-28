@@ -40,6 +40,9 @@
 //			Added reversing for PID axis functions
 //			Flying Wing mode updated
 // V1.1a	Fixed elevator zero trim bug
+//			Added Flying wing + drag rudder mixer
+//			Updated to include baseflight revisions to r251
+//			Fixed mag hold
 //
 
 #include "board.h"
@@ -89,7 +92,9 @@ int main(void)
     mixerInit(); // this will set useServo var depending on mixer type
 
     // when using airplane/wing mixer, servo/motor outputs are remapped
-    if (cfg.mixerConfiguration == MULTITYPE_AIRPLANE || cfg.mixerConfiguration == MULTITYPE_FLYING_WING)
+    if (cfg.mixerConfiguration == MULTITYPE_AIRPLANE || 
+		cfg.mixerConfiguration == MULTITYPE_FLYING_WING ||
+		cfg.mixerConfiguration == MULTITYPE_FW_DRAG)
         pwm_params.airplane = true;
     else
         pwm_params.airplane = false;

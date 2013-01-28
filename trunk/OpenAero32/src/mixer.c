@@ -129,6 +129,7 @@ const mixer_t mixers[] = {
     { 0, 1, NULL },                // * MULTITYPE_HELI_90_DEG
     { 4, 0, mixerVtail4 },         // MULTITYPE_VTAIL4
     { 0, 0, NULL },                // MULTITYPE_CUSTOM
+	{ 2, 1, NULL },                // * MULTITYPE_FW_DRAG
 };
 
 void mixerInit(void)
@@ -197,17 +198,25 @@ void writeServos(void)
             break;
 
         case MULTITYPE_AIRPLANE:
-            pwmWriteServo(0, servo[0]);
-            pwmWriteServo(1, servo[1]);
-            pwmWriteServo(2, servo[2]);
-            pwmWriteServo(3, servo[3]);
-            pwmWriteServo(4, servo[4]);
+            pwmWriteServo(0, servo[0]); // Left aileron
+            pwmWriteServo(1, servo[1]); // Right aileron
+            pwmWriteServo(2, servo[2]); // Rudder
+            pwmWriteServo(3, servo[3]); // Elevator
+            pwmWriteServo(4, servo[4]); // Flap
             break;
 
+        case MULTITYPE_FW_DRAG:
+            pwmWriteServo(0, servo[0]); // Left elevon
+            pwmWriteServo(1, servo[1]); // Right elevon
+            pwmWriteServo(2, servo[2]); // Left drag rudder
+            pwmWriteServo(3, servo[3]); // Right drag rudder
+			break;
+
         case MULTITYPE_FLYING_WING:
-            pwmWriteServo(0, servo[0]);
-            pwmWriteServo(1, servo[1]);
-            break;
+            pwmWriteServo(0, servo[0]); // Left elevon
+            pwmWriteServo(1, servo[1]); // Right elevon
+			pwmWriteServo(2, servo[2]); // Rudder
+            break;	
 
         case MULTITYPE_GIMBAL:
             pwmWriteServo(0, servo[0]);
@@ -400,6 +409,53 @@ void mixTable(void)
 				servo[2] -= axisPID[YAW]; 
 			}
             break;
+
+		case MULTITYPE_FW_DRAG:
+			// Throttle
+			motor[0] = rcData[THROTTLE];	  				// Send directly from RC for now
+			motor[1] = rcData[THROTTLE];	  				// Copy to motor[0] for now (not fitted to Afro-mini)
+
+			// Basic functions
+			servo[0] = (rcCommand[PITCH] + rcCommand[ROLL]) >> 1; 	// Left elevon
+			servo[1] = (rcCommand[PITCH] - rcCommand[ROLL]) >> 1; 	// Right elevon
+		
+			if (rcCommand[YAW] >= 0)
+			{
+				servo[2] = rcCommand[YAW];                  // Left drag rudder
+			}
+			else 
+			{
+				servo[2] = 0;
+			}
+			
+			if (rcCommand[YAW] <= 0)
+			{
+				servo[3] = rcCommand[YAW];                  // Right drag rudder
+			}
+			else 
+			{
+				servo[3] = 0;
+			}
+		
+			// Ignore if in pass-through mode
+			if (!f.PASSTHRU_MODE)
+			{
+				// Stabilised left elevon
+				servo[0] = servo[0] + (cfg.pitchPIDpol * axisPID[PITCH]) - (cfg.rollPIDpol * axisPID[ROLL]);   
+				// Stabilised right elevon
+				servo[1] = servo[1] + (cfg.pitchPIDpol * axisPID[PITCH]) + (cfg.rollPIDpol * axisPID[ROLL]);	
+				
+				// Stabilised drag rudders (only for one side of movement)
+				if (axisPID[YAW] < 0)
+				{
+					servo[2] -= axisPID[YAW]; 
+				}
+				if (axisPID[YAW] > 0)
+				{
+					servo[3] -= axisPID[YAW]; 
+				}
+			}
+            break;
     }
 
     // do camstab
@@ -417,8 +473,8 @@ void mixTable(void)
         if (rcOptions[BOXCAMSTAB]) {
             if (cfg.gimbal_flags & GIMBAL_MIXTILT) 
 			{
-				servo[0] = (-cfg.gimbal_roll_gain) * angle[PITCH] / 16 - cfg.gimbal_roll_gain * angle[ROLL] / 16;
-				servo[1] = (-cfg.gimbal_roll_gain) * angle[PITCH] / 16 - cfg.gimbal_roll_gain * angle[ROLL] / 16;	
+				servo[0] -= (-cfg.gimbal_pitch_gain) * angle[PITCH] / 16 - cfg.gimbal_roll_gain * angle[ROLL] / 16;
+				servo[1] += (-cfg.gimbal_pitch_gain) * angle[PITCH] / 16 + cfg.gimbal_roll_gain * angle[ROLL] / 16;	
 			}
 			else 
 			{

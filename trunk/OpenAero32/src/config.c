@@ -178,13 +178,13 @@ static void resetConf(void)
     cfg.P8[PIDNAVR] = 0; 	// NAV_P * 10;
     cfg.I8[PIDNAVR] = 0; 	// NAV_I * 100;
     cfg.D8[PIDNAVR] = 0; 	// NAV_D * 1000;
-    cfg.P8[PIDLEVEL] = 80;
+    cfg.P8[PIDLEVEL] = 20;
     cfg.I8[PIDLEVEL] = 0;
     cfg.D8[PIDLEVEL] = 100;
     //cfg.P8[PIDLEVEL] = 70;
     //cfg.I8[PIDLEVEL] = 10;
     //cfg.D8[PIDLEVEL] = 20;
-    cfg.P8[PIDMAG] = 0;
+    cfg.P8[PIDMAG] = 40;
     cfg.P8[PIDVEL] = 0;
     cfg.I8[PIDVEL] = 0;
     cfg.D8[PIDVEL] = 0;
