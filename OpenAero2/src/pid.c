@@ -140,8 +140,8 @@ void Calculate_PID(void)
 						IntegralGyro[axis] = -Config.Raw_I_Constrain[axis];
 					}
 
-					// Adjust I-term with RC input (scaled down by 8)
-					IntegralGyro[axis] += (RCinputsAxis[axis] >> 3); 
+					// Adjust I-term with RC input (scaled down by Config.Stick_3D_rate)
+					IntegralGyro[axis] += (RCinputsAxis[axis] >> Config.Stick_3D_rate); 
 				}
 			}	
 

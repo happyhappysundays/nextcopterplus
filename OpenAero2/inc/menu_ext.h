@@ -20,7 +20,7 @@ extern void menu_pid(void);
 extern void menu_stab_control(void);
 extern void menu_al_control(void);
 extern void menu_rc_setup(void);
-extern void menu_expo(void);
+extern void menu_failsafe(void);
 extern void menu_mixer(uint8_t i);
 extern void menu_general(void);
 extern void	menu_camstab(void);

@@ -33,8 +33,8 @@ void menu_general(void);
 // Defines
 //************************************************************
 
-#define GENERALITEMS 11 	// Number of menu items
-#define GENERALSTART 158 	// Start of Menu text items
+#define GENERALITEMS 12 	// Number of menu items
+#define GENERALSTART 213 	// Start of Menu text items
 #define GENERALTEXT	 22 	// Start of value text items
 #define GENOFFSET	 78		// Value offsets
 
@@ -42,10 +42,10 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 208, 101, 0, 0, 101, 119, 0, 0, 48, 116};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 208, 101, 0, 0, 101, 119, 0, 0, 48, 0, 116};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
-	{AEROPLANE,FWING,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
+	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
 	{HORIZONTAL,UPSIDEDOWN,1,1,HORIZONTAL},
 	{28,50,1,0,38}, 	// Contrast
 	{1,30,1,0,5},		// Status menu timeout
@@ -55,6 +55,7 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 	{1,64,1,0,8},		// Acc. LPF
 	{10,100,5,0,30},	// CF factor
 	{STD,FIXED,1,1,STD},// HH mode
+	{0,5,1,0,4},		// 3D rate (0 is fastest, 5 slowest)
 	{RETRO,FLYBYWIRE,1,1,RETRO},// Flight mode
 };
 
@@ -108,6 +109,9 @@ void menu_general(void)
 						break;	
 					case FWING:
 						get_preset_mix(FLYING_WING_MIX);
+						break;
+					case CAMSTAB:
+						get_preset_mix(CAM_STAB);
 						break;
 					default:
 						break;

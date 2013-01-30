@@ -97,7 +97,7 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_al_control();
 			break;
 		case MAINSTART+4:
-			menu_expo();
+			menu_failsafe();
 			break;
 		case MAINSTART+5:
 			menu_battery();
