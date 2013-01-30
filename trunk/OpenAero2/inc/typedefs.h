@@ -95,11 +95,12 @@ typedef struct
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
 	int8_t		FlapChan;				// Channel number for second aileron input
 
-	// Expo items
-	uint8_t		AileronExpo;			// Amount of expo on Aileron channel
-	uint8_t		ElevatorExpo;			// Amount of expo on Elevator channel
-	uint8_t		RudderExpo;				// Amount of expo on Rudder channel
-	uint8_t		Differential;			// Amount of differential on Aileron channels
+	// Failsafe items
+	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
+	int8_t		FailsafeThrottle;		// Throttle position in failsafe
+	int8_t		FailsafeElevator;		// Elevator trim in failsafe
+	int8_t		FailsafeAileron;		// Aileron trim in failsafe
+	int8_t		FailsafeRudder;			// Rudder trim in failsafe
 	
 	// Autolevel settings
 	int8_t		AutoMode;
@@ -153,6 +154,7 @@ typedef struct
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		AutoCenter;				// Yaw heading hold auto centering
+	int8_t		Stick_3D_rate;			// 3D mode stick rate
 	int8_t		FlightMode;				// Normal/Fly-by-wire
 			
 	// Non-menu items 

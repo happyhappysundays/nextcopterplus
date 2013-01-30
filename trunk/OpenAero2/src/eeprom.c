@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include <string.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
@@ -30,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x07		// eePROM signature - change for each eePROM structure change 0x07 = V1.1b5
+#define MAGIC_NUMBER 0x08		// eePROM signature - change for each eePROM structure change 0x08 = V1.1b6
 								// to force factory reset
 
 //************************************************************
@@ -43,6 +44,9 @@ uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel 
 void Set_EEPROM_Default_Config(void)
 {
 	uint8_t i;
+	
+	// Clear entire Config space first but don't clobber the setup byte
+	memset(&Config.ChannelOrder[0],0,(sizeof(Config) - 1));
 
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
@@ -54,24 +58,13 @@ void Set_EEPROM_Default_Config(void)
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
-	//
-	//Config.AccRollZeroTrim	= 0;		// User-set ACC trim
-	//Config.AccPitchZeroTrim	= 0;
-	//
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
 	//
 	Config.Roll.P_mult = 60;			// PID defaults			
-	//Config.Roll.I_mult = 0;
-	//Config.Roll.D_mult = 0;
 	Config.Pitch.P_mult = 60;
-	//Config.Pitch.I_mult = 0;
-	//Config.Pitch.D_mult = 0;
 	Config.Yaw.P_mult = 60;
-	//Config.Yaw.I_mult = 0;
-	//Config.Yaw.D_mult = 0;
-	//
 	Config.A_Roll_P_mult = 60;
 	Config.A_Pitch_P_mult = 60;
 	Config.Acc_LPF = 8;
@@ -79,18 +72,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.AutoCenter = OFF;
 	Config.FlightMode = RETRO;
 	Config.DynGainSrc = NOCHAN;
-	//Config.DynGain = 0;
+	Config.Stick_3D_rate = 4;
 
-	/*
-	for (i = 0; i < 3; i++)
-	{
-		Config.I_Limits[i] = 0;
-		Config.Raw_I_Limits[i] = 0;
-		Config.Raw_I_Constrain[i] = 0;
-	}
-	*/
-
-	//
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
 	//Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
@@ -109,10 +92,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.LaunchMode = OFF;			// Launch mode on/off
 	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
 
-	//Config.AileronExpo = 0;				// Amount of expo on Aileron channel
-	//Config.ElevatorExpo = 0;			// Amount of expo on Elevator channel
-	//Config.RudderExpo = 0;				// Amount of expo on Rudder channel
-	//Config.Differential = 0;			// Amount of differential on Aileron channels
 	//Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
 
 	Config.CamStab = OFF;
@@ -123,6 +102,13 @@ void Set_EEPROM_Default_Config(void)
 	Config.LMA_enable = 1;				// Default to 1 minute
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
+
+	// Failsafe
+	//Config.FailsafeType = 0;			// Simple or Advanced (Autolevel)
+	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
+	//Config.FailsafeElevator = 0;		// Elevator trim in failsafe
+	//Config.FailsafeAileron = 0;			// Aileron trim in failsafe
+	//Config.FailsafeRudder = 0;			// Rudder trim in failsafe
 }
 
 void Save_Config_to_EEPROM(void)

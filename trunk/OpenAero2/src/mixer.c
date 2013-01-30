@@ -70,7 +70,7 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,AILERON, 100,NOCHAN,0,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,CH7,100,0,0,0,0,0,0,-100,100,0,0},// ServoOut7 (right elevon)
 	{0,RUDDER,  100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut8 (rudder)
 }; 
-/*
+
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For presets, use
@@ -92,7 +92,7 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	{0,RUDDER, 100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON,NORMAL, OFF,NORMAL,OFF,NORMAL,CH7,100,0,0,0,0,0,0,-100,100,0,0}, 	// ServoOut7 (Pan axis)
 	{0,AILERON,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,CH8,100,0,0,0,0,0,0,-100,100,0,0},	// ServoOut8 (Roll axis)
 };
-*/
+
 //************************************************************
 // Get preset mix from Program memory
 void get_preset_mix(channel_t* preset)
@@ -106,9 +106,8 @@ void ProcessMixer(void)
 	int16_t temp = 0;
 	int16_t temp2 = 0;
 	int16_t flap = 0;
-
-	// Quick fudge to allow easy look-up of which channels require expo
-	uint8_t expos[MAX_OUTPUTS] = {0,0,0,0,Config.ElevatorExpo,Config.AileronExpo,Config.AileronExpo,Config.RudderExpo};
+	int16_t	pitch_trim = 0;
+	int16_t	roll_trim = 0;
 
 	//************************************************************
 	// Limit output mixing as needed to save processing power
@@ -148,51 +147,7 @@ void ProcessMixer(void)
 	}
 
 	//************************************************************
-	// Process differential for dual-aileron setups 
-	//************************************************************
-
-	if (Config.Differential != 0) // Skip if zero
-	{
-		// If flaperons set up 
-		if (Config.FlapChan != NOCHAN)
-		{
-			// Recreate actual roll signal from flaperons
-			temp  = RCinputs[AILERON] + RCinputs[Config.FlapChan];
-			temp  = temp >> 1;
-		}
-		// If flaperons not set up
-		else
-		{
-			temp  = RCinputs[AILERON];
-		}
-
-		// Copy to other flaperon
-		temp2 = temp;
-
-		// Apply differential
-		if (temp > 0)			// For one side only
-		{
-			temp = scale32(temp, (100 - Config.Differential));
-		}
-
-		if (temp2 < 0)			// For one side only
-		{
-			temp2 = scale32(temp2, (100 - Config.Differential));
-		}
-
-		// Add flap back into aileron
-		RCinputs[AILERON] = temp + flap;
-		
-		// If flaperons set up 
-		if (Config.FlapChan != NOCHAN)
-		{
-			// Add flap back into aileron
-			RCinputs[Config.FlapChan] = temp2 - flap;
-		}
-	}
-
-	//************************************************************
-	// Process RC mixing, expo and source volume calculation
+	// Process RC mixing and source volume calculation
 	//************************************************************
 
 	for (i = 0; i < outputs; i++)
@@ -201,15 +156,11 @@ void ProcessMixer(void)
 		temp = RCinputs[Config.Channel[i].source_a];
 		temp = scale32(temp, Config.Channel[i].source_a_volume);
 
-		// Apply any expo as set by user
-		temp = get_expo_value(temp, expos[i]);
-
 		// Skip Source B if no RC mixing required for this channel
 		if (Config.Channel[i].source_b_volume != 0)
 		{
 			temp2 = RCinputs[Config.Channel[i].source_b];
 			temp2 = scale32(temp2, Config.Channel[i].source_b_volume);
-			temp2 = get_expo_value(temp2, expos[i]);
 
 			// Sum the mixers
 			temp = temp + temp2;
@@ -226,26 +177,39 @@ void ProcessMixer(void)
 	// Stabilised modes
 	if (Stability || AutoLevel)
 	{
+		// Offset Autolevel trims in failsafe mode
+		if ((Config.FailsafeType == 1) && Failsafe && (Config.CamStab == OFF))
+		{
+			roll_trim += Config.FailsafeAileron;
+			roll_trim = roll_trim << 4;
+			pitch_trim += Config.FailsafeElevator;
+			pitch_trim = pitch_trim << 4;
+		}
+
+		// Add autolevel trims			
+		roll_trim += Config.AccRollZeroTrim;
+		pitch_trim += Config.AccPitchZeroTrim;
+
 		// Process sensor mixers
 		for (i = 0; i < outputs; i++)
 		{
 			// Discard RC part of fly-by-wire or 3D channels as these are replaced by that from the PID loop
-			if (
-				// For fly-by-wire flight mode or when in 3D Heading hold mode
-				(
-				 ((Config.FlightMode == FLYBYWIRE) || (Config.AutoCenter == FIXED))
-			     &&
-				 // ...and for the RC channels
-			     (
-					(Config.Channel[i].source_a == AILERON)	||
-					(Config.Channel[i].source_a == Config.FlapChan) ||
-					(Config.Channel[i].source_a == ELEVATOR)||
+			if 	(
+					// For fly-by-wire flight mode or when in 3D Heading hold mode
+					(
+						((Config.FlightMode == FLYBYWIRE) || (Config.AutoCenter == FIXED))
+					     &&
+						 // ...and for the RC channels
+					    (
+							(Config.Channel[i].source_a == AILERON)	||
+							(Config.Channel[i].source_a == Config.FlapChan) ||
+							(Config.Channel[i].source_a == ELEVATOR)||
 
-					// ...except rudder which is a special case as AutoLevel will only replace values for Roll/Pitch
-					((Config.Channel[i].source_a == RUDDER) && !AutoLevel)
-				 )
+							// ...except rudder which is a special case as AutoLevel will only replace values for Roll/Pitch
+							((Config.Channel[i].source_a == RUDDER) && !AutoLevel)
+						)
+					)
 				)
-			   )
 			{
 				// Clear solution
 				temp = 0;
@@ -304,7 +268,7 @@ void ProcessMixer(void)
 				if (Config.Channel[i].roll_acc == ON)
 				{
 					// Add in Roll trim
-					temp += Config.AccRollZeroTrim;
+					temp += roll_trim;
 
 					if (Config.Channel[i].roll_acc_polarity == REVERSED)
 					{
@@ -319,7 +283,7 @@ void ProcessMixer(void)
 				if (Config.Channel[i].pitch_acc == ON)
 				{
 					// Add in Pitch trim
-					temp += Config.AccPitchZeroTrim;
+					temp += pitch_trim;
 
 					if (Config.Channel[i].pitch_acc_polarity == REVERSED)
 					{
@@ -400,6 +364,44 @@ void ProcessMixer(void)
 	{
 		Config.Channel[i].value += Config.Limits[i].trim;
 	}
+
+	//************************************************************
+	// Handle Failsafe condition
+	//************************************************************ 
+
+	if (Failsafe && (Config.CamStab == OFF))
+	{
+		// Simple failsafe. Replace outputs with user-set values
+		if (Config.FailsafeType == 0) 
+		{
+			for (i = 0; i < MAX_OUTPUTS; i++)
+			{
+				Config.Channel[i].value = Config.Limits[i].failsafe;
+			}
+		}
+
+		// Advanced failsafe. Autolevel ON, use failsafe trims to adjust autolevel.
+		if (Config.FailsafeType == 1)
+		{
+			for (i = 0; i < MAX_OUTPUTS; i++)
+			{
+				// Over-ride throttle
+				if (Config.Channel[i].source_a == THROTTLE)
+				{
+					// Convert throttle setting to servo value
+					Config.Channel[i].value = scale_percent(Config.FailsafeThrottle);				
+				}
+
+				// Tweak rudder channel						
+				if (Config.Channel[i].source_a == RUDDER)
+				{
+					temp = Config.FailsafeRudder;
+					temp = temp << 4;
+					Config.Channel[i].value += temp;
+				}
+			}
+		}
+	} // Failsafe
 }
 
 // Update actual limits value with that from the mix setting percentages

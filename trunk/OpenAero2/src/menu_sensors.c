@@ -47,6 +47,12 @@ void Display_sensors(void)
 			CalibrateInvAcc();
 		}
 
+		if (BUTTON2 == 0)
+		{
+			_delay_ms(500);
+			CalibrateGyros();
+		}
+
 		ReadGyros();
 		ReadAcc();
 
@@ -70,6 +76,7 @@ void Display_sensors(void)
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
+		LCD_Display_Text(26, (prog_uchar*)Verdana8, 32, 55); 	// Gyro
 		LCD_Display_Text(157, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 

@@ -130,7 +130,7 @@ void Display_status(void)
 		{
 			LCD_Display_Text(75,(prog_uchar*)Verdana14,51,13); 	// No
 			LCD_Display_Text(76,(prog_uchar*)Verdana14,39,33);  // Signal
-			menu_beep(3);
+			//menu_beep(3);
 		}
 		else if((General_error & (1 << LOST_MODEL)) != 0)
 		{

@@ -63,7 +63,7 @@ const char MainMenuItem0[]  PROGMEM = "General"; 			// Main menu list text
 const char MainMenuItem1[]  PROGMEM = "RC setup"; 
 const char MainMenuItem2[]  PROGMEM = "Stability";
 const char MainMenuItem3[]  PROGMEM = "Autolevel";
-const char MainMenuItem4[]  PROGMEM = "Expo";
+const char MainMenuItem4[]  PROGMEM = "Failsafe";
 const char MainMenuItem5[]  PROGMEM = "Battery";
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
 const char MainMenuItem8[]  PROGMEM = "Sensors";
@@ -107,7 +107,7 @@ const char AutoMenuItem12[] PROGMEM = "AutoChan";
 const char AutoMenuItem13[] PROGMEM = "StabChan";
 const char AutoMenuItem14[] PROGMEM = "3-pos";
 const char AutoMenuItem15[] PROGMEM = "ON"; 
-const char AutoMenuItem16[] PROGMEM = "THR. pos"; 
+const char AutoMenuItem16[] PROGMEM = "THR.pos %"; 
 const char AutoMenuItem17[] PROGMEM = "Hands Free"; 
 //
 const char BattMenuItem0[]  PROGMEM = "Batt type:"; 		// Battery text
@@ -159,7 +159,8 @@ const char GeneralText5[] PROGMEM =  "High";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char GeneralText8[] PROGMEM =  "H.Hold:";
-const char GeneralText9[] PROGMEM =  "Flight mode:";
+const char GeneralText9[] PROGMEM =  "3D rate:";
+const char GeneralText10[] PROGMEM =  "Flight mode:";
 //
 const char MixerItem0[] PROGMEM = "Src A:";				// Mixer menu items
 const char MixerItem13[] PROGMEM = "Src B:";
@@ -212,6 +213,7 @@ const char MOUT8[] PROGMEM = "M8";
 const char HeadingHold1[] PROGMEM = "Auto";	
 const char HeadingHold2[] PROGMEM = "3D";
 const char FlightMode1[]  PROGMEM = "FlyByWire";
+const char FSmode[]  PROGMEM = "Adv.";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -230,7 +232,7 @@ const char *text_menu[] PROGMEM =
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3, 												// 18 to 21 RX mode
 		//
-		RXMode4, RXMode5, Dummy0, Dummy0,													// 22 to 25 Mix presets for Aero, F.Wing
+		RXMode4, RXMode5, MainMenuItem6, Dummy0,											// 22 to 25 Mix presets for Aero, F.Wing, Camstab
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
@@ -267,8 +269,8 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
 		//
-		Dummy0, Dummy0, 																	// 103 to 104
-				//
+		MixerItem11, FSmode, 																// 103 to 104 Normal, Advanced
+		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
 		Dummy0, Dummy0, 
@@ -297,9 +299,10 @@ const char *text_menu[] PROGMEM =
 		//
 		SensorMenuItem2,																	// 157 Inv.Cal.
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 158 to 168 general
-		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 	
-		GeneralText8, GeneralText9,
+		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 158 to 162 Failsafe
+		//
+		Dummy0, Dummy0, Dummy0,Dummy0, 														// 163 to 168 spare
+		Dummy0, Dummy0, 
 		//
 		MixerItem0, MixerItem2, MixerItem13, MixerItem2, MixerItem4, MixerItem1, 			// 169 to 194 
 		MixerItem5, MixerItem1, MixerItem6,  MixerItem1, MixerItem7, MixerItem1, 
@@ -315,6 +318,11 @@ const char *text_menu[] PROGMEM =
 		RCMenuItem6, RCMenuItem7, Dummy0,													// 205 to 207 JR/Futaba
 		//
 		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,										// 208 to 210 H/V/UD
+		Dummy0, Dummy0,																		// 211 to 212 spare
+		//
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 213 to 224 general
+		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 				// Don't forget to change the CONTRAST define in menu_driver.c
+		GeneralText8, GeneralText9, GeneralText10,
 	}; 
 
 //************************************************************

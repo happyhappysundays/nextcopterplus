@@ -19,7 +19,7 @@
 #include "..\inc\menu_ext.h"
 #include "..\inc\rc.h"
 
-#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 215 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -190,12 +190,6 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 			mugui_text_sizestring((char*)pBuffer, (prog_uchar*)Verdana14, &size);
 			LCD_Display_Text(text_link + value, (prog_uchar*)Verdana14,((128-size.x)/2),25);
-		}
-
-		// Draw expo graph if required
-		if (offset != 0)
-		{
-			draw_expo(value);
 		}
 
 		// Print bottom markers
@@ -431,43 +425,3 @@ void print_cursor(uint8_t line)
 	LCD_Display_Text(13, (prog_uchar*)Wingdings, CURSOROFFSET, line);
 }
 
-//************************************************************
-// Draw expo chart on pop-up window.
-// uses actual expo table to draw graph.
-// Really painful to maintain as it includes many hard-coded 
-// values that are highly sensitive to changes in the source data.
-// Just as well it's cute...
-//************************************************************
-
-void draw_expo(int16_t value)
-{
-	mugui_size16_t a, b;
-	int16_t expo = 0;
-	
-	drawline(buffer, 127, 0, 127, 52, 1); 				// Y-axis
-	drawline(buffer, 55, 52, 127, 52, 1); 				// X-axis
-
-	a.x = 60;
-	a.y = 52;
-	b.x = 0;
-	b.y = 0;
-
-	for (int16_t i = 0; i < 928; i+= 50)
-	{
-		if (value < 5) value = 5; 						// Bodge
-
-		expo = get_expo_value (i, (uint8_t)value-1);	// Get expo value from table
-
-		b.x = 70 + (i/16);								// Calculate next point location
-		b.y = 52 - (expo/20);
-
-		if (b.x > 127) b.x = 127;						// Limit graph points
-		if (b.x <= 0) b.x = 0;
-		if (b.y > 63) b.y = 63;
-		if (b.y <= 0) b.y = 0;
-
-		drawline(buffer, a.x, a.y, b.x, b.y, 1);		// Draw segment
-		a.x =	b.x;
-		a.y =	b.y;
-	}
-}

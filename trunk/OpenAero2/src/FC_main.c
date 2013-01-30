@@ -108,6 +108,12 @@
 //			Increased 3D-mode RC input by 2x as per KeiTora request.
 //			Added "Upside down" orientation.
 // Beta 6	Fixed Flying Wing and Camstab mixer presets
+//			Removed expo and differential settings and menu.
+//			3D-mode RC input scaling now menu settable.
+//			New failsafe menu and items. Set buzzer in failsafe.
+//			Added extra gyro recal button.
+//			Simplified buzzer code. Clear eeprom properly on reset.
+//			Just squeezed Camstab preset mixer back in :)
 //
 //***********************************************************
 //* To do
@@ -191,8 +197,8 @@ int main(void)
 	// Alarms
 	bool BUZZER_ON = false;
 	bool Model_lost = false;		// Model lost flag
-	bool LMA_Alarm = false;			// Lost model alarm active
 	bool LVA_Alarm = false;			// Low voltage alarm active
+	bool SIG_Alarm = false;			// No signal alarm active
 
 	// Launch mode
 	bool Launch_Mode = false;		// Launch mode ON flag
@@ -219,6 +225,8 @@ int main(void)
 	uint8_t Status_seconds = 0;
 
 	uint8_t Menu_mode = STATUS_TIMEOUT;
+
+	uint8_t i = 0;
 
 	init();							// Do all init tasks
 
@@ -315,6 +323,7 @@ int main(void)
 
 			// In MENU mode, 
 			case MENU:
+				LVA = 0;	// Make sure buzzer is off :)
 				menu_main();
 				// Switch back to status screen when leaving menu
 				Menu_mode = STATUS;
@@ -405,20 +414,11 @@ int main(void)
 			LostModel_timer = 0;
 		}
 
-		// Trigger lost model alarm if enabled and due
+		// Trigger lost model alarm if enabled and due or failsafe
 		if ((LMA_minutes >= Config.LMA_enable) && (Config.LMA_enable != 0))	
 		{
 			Model_lost = true;
 			General_error |= (1 << LOST_MODEL); // Set lost model bit
-		}
-
-		if (BUZZER_ON && Model_lost) 
-		{
-			LMA_Alarm = true;					// Turn on buzzer
-		}
-		else 
-		{
-			LMA_Alarm = false;					// Otherwise turn off buzzer
 		}
 
 		// Low-voltage alarm (LVA)
@@ -426,7 +426,7 @@ int main(void)
 
 
 		// Beep buzzer if Vbat lower than trigger
-		if ((vBat < Config.PowerTrigger) && BUZZER_ON) 
+		if (vBat < Config.PowerTrigger)
 		{
 			LVA_Alarm = true;
 			General_error |= (1 << LOW_BATT); 	// Set low battery bit
@@ -437,8 +437,8 @@ int main(void)
 			General_error &= ~(1 << LOW_BATT); 	// Clear low battery bit
 		}
 
-		// Turn on buzzer if in alarm state
-		if ((LVA_Alarm) || (LMA_Alarm)) 
+		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
+		if ((LVA_Alarm || Model_lost || SIG_Alarm) && BUZZER_ON) 
 		{
 			LVA = 1;
 		}
@@ -483,11 +483,34 @@ int main(void)
 		}
 
 		//************************************************************
+		//* Get RC data
+		//************************************************************
+
+		// Update zeroed RC channel data
+		RxGetChannels();
+
+		// Zero RC when in Failsafe
+		if (Failsafe)
+		{
+			for (i = 0; i < MAX_RC_CHANNELS; i++)
+			{
+				RCinputs[i] = 0;
+			}
+		}
+
+		// Clear Throttle High error once throtle reset
+		if (RCinputs[THROTTLE] < 250)
+		{
+			General_error &= ~(1 << THROTTLE_HIGH);	
+		}
+
+		//************************************************************
 		//* Autolevel mode selection
 		//************************************************************
 		//* Primary override:
 		//*		Autolevel always OFF if Config.AutoMode = OFF (default)
 		//*		Autolevel disabled if Launch_Block = true
+		//*		Autolevel ON if in Advanced failsafe condition
 		//*
 		//* Five switchable modes:
 		//*		1. Disabled by Config.AutoMode = OFF
@@ -496,15 +519,6 @@ int main(void)
 		//*		4. Enabled if HandsFree and Config.AutoMode = HANDSFREE
 		//*		5. Enabled by Config.AutoMode = ON
 		//************************************************************
-
-		// Update zeroed RC channel data
-		RxGetChannels();
-
-		// Clear Throttle High error once throtle reset
-		if (RCinputs[THROTTLE] < 250)
-		{
-			General_error &= ~(1 << THROTTLE_HIGH);	
-		}
 
 		switch(Config.AutoMode)
 		{
@@ -543,6 +557,12 @@ int main(void)
 		if (Launch_Block)
 		{
 			AutoLevel = false;					// De-activate autolevel mode
+		}
+
+		// Check for advanced Failsafe
+		if ((Config.FailsafeType == 1) && Failsafe && (Config.CamStab == OFF))
+		{
+			AutoLevel = true;
 		}
 
 		//************************************************************
@@ -657,10 +677,12 @@ int main(void)
 		if (Overdue && (Config.CamStab == OFF))
 		{
 			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
+			SIG_Alarm = true;
 		}
 		else
 		{
 			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
+			SIG_Alarm = false;
 		}
 
 		// Check for failsafe condition (Had RC lock but now overdue)
@@ -668,17 +690,6 @@ int main(void)
 		{
 			Failsafe = true;
 			RC_Lock = false;
-		}
-
-		// Set failsafe positions when RC lock lost
-		// Obviously not desired in CamStab mode (no RC)
-		if (Failsafe && (Config.CamStab == OFF))
-		{
-			uint8_t i;
-			for (i = 0; i < MAX_OUTPUTS; i++)
-			{
-				ServoOut[i] = Config.Limits[i].failsafe;
-			}
 		}
 
 		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
