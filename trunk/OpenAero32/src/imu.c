@@ -399,7 +399,7 @@ void getEstimatedAltitude(void)
     lastBaroAlt = EstAlt;
     debug[1] = baroVel;
 
-    // apply Complimentary Filter to keep near zero caluculated velocity based on baro velocity
+    // apply Complimentary Filter to keep near zero calculated velocity based on baro velocity
     vel = vel * cfg.baro_cf + baroVel * (1.0f - cfg.baro_cf);
     // vel = constrain(vel, -300, 300); // constrain velocity +/- 300cm/s
     debug[2] = vel;
