@@ -40,7 +40,7 @@
 //			Added reversing for PID axis functions
 //			Flying Wing mode updated
 // V1.1a	Fixed elevator zero trim bug
-//			Added Flying wing + drag rudder mixer
+// V1.2a	Added Flying wing + drag rudder mixer
 //			Updated to include baseflight revisions to r251
 //			Fixed mag hold
 //
