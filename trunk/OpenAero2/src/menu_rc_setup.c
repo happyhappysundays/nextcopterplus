@@ -56,30 +56,29 @@ const menu_range_t rc_menu_ranges[] PROGMEM =
 
 void menu_rc_setup(void)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = RCSTART;
-	uint8_t temp = 0;
+	static	uint8_t rc_top = RCSTART;
 	int8_t values[RCITEMS];
 	menu_range_t range;
-	uint8_t i = 0;
 	uint8_t text_link;
-	
+
+	uint8_t i = 0;
+		
 	while(button != BACK)
 	{
 		// Load values from eeprom
 		memcpy(&values[0],&Config.TxSeq,sizeof(int8_t) * RCITEMS);
 
 		// Print menu
-		print_menu_items(top, RCSTART, &values[0], RCITEMS, (prog_uchar*)rc_menu_ranges, RCOFFSET, (prog_uchar*)RCMenuText, cursor);
+		print_menu_items(rc_top, RCSTART, &values[0], RCITEMS, (prog_uchar*)rc_menu_ranges, RCOFFSET, (prog_uchar*)RCMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(RCITEMS, RCSTART, button, &cursor, &top, &temp);
-		range = get_menu_range ((prog_uchar*)rc_menu_ranges, temp - RCSTART);
+		update_menu(RCITEMS, RCSTART, button, &cursor, &rc_top, &menu_temp);
+		range = get_menu_range ((prog_uchar*)rc_menu_ranges, menu_temp - RCSTART);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&RCMenuText[temp - RCSTART]);
-			values[temp - RCSTART] = do_menu_item(temp, values[temp - RCSTART], range, 0, text_link);
+			text_link = pgm_read_byte(&RCMenuText[menu_temp - RCSTART]);
+			values[menu_temp - RCSTART] = do_menu_item(menu_temp, values[menu_temp - RCSTART], range, 0, text_link);
 		}
 
 		// Update value in config structure

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 6 - January 2013
+// Version 1.1 Beta 7 - January 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -114,6 +114,8 @@
 //			Added extra gyro recal button.
 //			Simplified buzzer code. Clear eeprom properly on reset.
 //			Just squeezed Camstab preset mixer back in :)
+// Beta 7	Changed Failsafe text from "Normal" to "Fixed".
+//			Restore submenu position if going back into the same submenu.
 //
 //***********************************************************
 //* To do

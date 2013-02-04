@@ -77,11 +77,9 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 
 void menu_mixer(uint8_t i)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = MIXERSTART;
+	static	uint8_t mix_top = MIXERSTART;
 	int8_t values[MIXERITEMS];
 	menu_range_t range;
-	uint8_t temp = 0;
 	uint8_t text_link = 0;
 
 	while(button != BACK)
@@ -90,16 +88,16 @@ void menu_mixer(uint8_t i)
 		memcpy(&values[0],&Config.Channel[i].source_a,sizeof(int8_t) * MIXERITEMS);
 
 		// Print menu
-		print_menu_items(top, MIXERSTART, &values[0], MIXERITEMS,(prog_uchar*)mixer_menu_ranges, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
+		print_menu_items(mix_top, MIXERSTART, &values[0], MIXERITEMS,(prog_uchar*)mixer_menu_ranges, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(MIXERITEMS, MIXERSTART, button, &cursor, &top, &temp);
-		range = get_menu_range ((prog_uchar*)mixer_menu_ranges, temp - MIXERSTART);
+		update_menu(MIXERITEMS, MIXERSTART, button, &cursor, &mix_top, &menu_temp);
+		range = get_menu_range ((prog_uchar*)mixer_menu_ranges, menu_temp - MIXERSTART);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&MixerMenuText[temp - MIXERSTART]);
-			values[temp - MIXERSTART] = do_menu_item(temp, values[temp - MIXERSTART], range, 0, text_link);
+			text_link = pgm_read_byte(&MixerMenuText[menu_temp - MIXERSTART]);
+			values[menu_temp - MIXERSTART] = do_menu_item(menu_temp, values[menu_temp - MIXERSTART], range, 0, text_link);
 		}
 
 		// Update value in config structure

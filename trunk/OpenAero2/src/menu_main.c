@@ -39,10 +39,11 @@ void do_main_menu_item(uint8_t menuitem);
 
 void menu_main(void)
 {
-	static uint8_t cursor = LINE0;	// These are now static so as to remember the menu position
-	static uint8_t top = MAINSTART;
-	static uint8_t temp = 0;
-	
+	static uint8_t main_cursor = LINE0;	// These are now static so as to remember the main menu position
+	static uint8_t main_top = MAINSTART;
+	static uint8_t main_temp = 0;
+	static uint8_t old_menu = 0;
+
 	button = NONE;
 
 	// Wait until user's finger is off button 1
@@ -57,22 +58,38 @@ void menu_main(void)
 		clear_buffer(buffer);	
 
 		// Print menu
-		print_menu_frame(0);											// Frame
-		LCD_Display_Text(top,(prog_uchar*)Verdana8,ITEMOFFSET,LINE0);	// First line
-		LCD_Display_Text(top+1,(prog_uchar*)Verdana8,ITEMOFFSET,LINE1); // Second line
-		LCD_Display_Text(top+2,(prog_uchar*)Verdana8,ITEMOFFSET,LINE2); // Third line
-		LCD_Display_Text(top+3,(prog_uchar*)Verdana8,ITEMOFFSET,LINE3);	// Fourth line
-		print_cursor(cursor);											// Cursor
+		print_menu_frame(0);													// Frame
+		
+		for (uint8_t i = 0; i < 4; i++)
+		{
+			LCD_Display_Text(main_top+i,(prog_uchar*)Verdana8,ITEMOFFSET,lines[i]);	// Lines
+		}
+		//LCD_Display_Text(main_top,(prog_uchar*)Verdana8,ITEMOFFSET,LINE0);	// First line
+		//LCD_Display_Text(main_top+1,(prog_uchar*)Verdana8,ITEMOFFSET,LINE1); 	// Second line
+		//LCD_Display_Text(main_top+2,(prog_uchar*)Verdana8,ITEMOFFSET,LINE2); 	// Third line
+		//LCD_Display_Text(main_top+3,(prog_uchar*)Verdana8,ITEMOFFSET,LINE3);	// Fourth line
+
+		print_cursor(main_cursor);												// Cursor
 		write_buffer(buffer,1);
 
 		// Poll buttons when idle
 		poll_buttons();
 
 		// Handle menu changes
-		update_menu(MAINITEMS, MAINSTART, button, &cursor, &top, &temp);
+		update_menu(MAINITEMS, MAINSTART, button, &main_cursor, &main_top, &main_temp);
+
+		// If main menu item has changed, reset submenu positions
+		if (main_temp != old_menu)
+		{
+			cursor = LINE0;
+			menu_temp = 0;
+			old_menu = main_temp;
+		}
+
+		// If ENTER pressed, jump to menu 
 		if (button == ENTER)
 		{
-			do_main_menu_item(temp);
+			do_main_menu_item(main_temp);
 			button = NONE;
 		}
 	}

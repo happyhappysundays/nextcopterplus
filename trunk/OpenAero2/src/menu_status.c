@@ -75,7 +75,7 @@ void Display_status(void)
 	{
 		temp = 0;
 	}
-	if (temp <= 0) temp = 0;
+	//if (temp <= 0) temp = 0;
 	if (temp > 50) temp = 50;
 
 	fillrect(buffer, 100,54-temp, 28, temp, 1);				// Battery filler (max is 60)

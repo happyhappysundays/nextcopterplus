@@ -192,10 +192,7 @@ void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_ui
 /************************************************************************/
 mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y)
 {
-	mugui_uint16_t alignment = 0;			//byte orientation
-	mugui_bool     proportional = false; 	//proportional or monospace font
 	mugui_uint16_t startcharacter = 0; 		//startcharacter of the font
-	mugui_uint16_t numberofbitmaps = 0; 	//number of bitmaps
 	mugui_uint16_t height = 0;				//height of the bitmap
 	mugui_uint16_t width = 0; 				//width of the bitmap
 	mugui_uint8_t  index = 0; 				//index of the bitmap
@@ -213,10 +210,7 @@ mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x,
 
 	/* Read header of the font          */
 	/* pgm_read_byte is ATMega specific */
-	proportional = pgm_read_byte(&font[0]);
-	alignment = pgm_read_byte(&font[1]);
 	startcharacter = pgm_read_byte(&font[2]);
-	numberofbitmaps = pgm_read_byte(&font[3]);
 	height = pgm_read_byte(&font[4]);
 
 	/* Read the rest of the header */

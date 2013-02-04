@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 
-const char VersionRef0[] PROGMEM = "V1.1b6"; 				// <-- Change version number here !!!
+const char VersionRef0[] PROGMEM = "V1.1b7"; 				// <-- Change version number here !!!
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //
@@ -213,7 +213,8 @@ const char MOUT8[] PROGMEM = "M8";
 const char HeadingHold1[] PROGMEM = "Auto";	
 const char HeadingHold2[] PROGMEM = "3D";
 const char FlightMode1[]  PROGMEM = "FlyByWire";
-const char FSmode[]  PROGMEM = "Adv.";
+const char FSmode0[]  PROGMEM = "Fixed";
+const char FSmode1[]  PROGMEM = "Adv.";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -269,7 +270,7 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
 		//
-		MixerItem11, FSmode, 																// 103 to 104 Normal, Advanced
+		FSmode0, FSmode1, 																	// 103 to 104 Fixed, Adv.
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
