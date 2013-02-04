@@ -30,13 +30,12 @@ void get_raw_accs(void);
 //************************************************************
 
 int16_t accADC[3];				// Holds Acc ADC values
-int16_t accZero[3];				// Used for calibrating Accs on ground
 int16_t tempaccZero;
 bool	inv_cal_done;
 bool	normal_cal_done;
 
 // Uncalibrated default values of Z middle per orientation
-int16_t UncalDef[3] = {640, 615, 640};// 764-515, 488-743, 515-764
+int16_t UncalDef[3] = {640, 615, 640}; // 764-515, 488-743, 515-764
 
 // Polarity handling table
 int8_t Acc_Pol[3][3] =  // ROLL, PITCH, YAW
@@ -71,10 +70,7 @@ void ReadAcc()					// At rest range is approx 300 - 700?
 void CalibrateAcc(void)
 {
 	uint8_t i;
-
-	accZero[PITCH] 	= 0;		
-	accZero[ROLL]	= 0;
-	accZero[YAW]	= 0;	
+	int16_t accZero[3] = {0,0,0};	// Used for calibrating Accs on ground
 
 	// Get average zero value (over 32 readings)
 	for (i=0;i<32;i++)
@@ -105,28 +101,27 @@ void CalibrateInvAcc(void)
 {
 	uint8_t i;
 	int16_t temp;
+	int16_t accZeroYaw = 0;
 
 	// Only update the cal value if preceeded by a normal calibration
 	if (normal_cal_done)
 	{
-		accZero[YAW] = 0;
-
 		// Get average zero value (over 32 readings)
 		for (i=0;i<32;i++)
 		{
 			get_raw_accs();					// Updates gyroADC[]
-			accZero[YAW] += accADC[YAW];		
+			accZeroYaw += accADC[YAW];		
 			_delay_ms(10);					// Get a better acc average over time
 		}
 
-		accZero[YAW] = (accZero[YAW] >> 5);	// Inverted zero point
+		accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
 
 		// Test if board is actually inverted
-		if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZero[YAW] < UncalDef[Config.Orientation])) || // Horizontal
-		    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZero[YAW] > UncalDef[Config.Orientation])))  // Vertical and Upside down
+		if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal
+		    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZeroYaw > UncalDef[Config.Orientation])))  // Vertical and Upside down
 		{
 			// Reset zero to halfway between min and max Z
-			temp = ((tempaccZero - accZero[YAW]) >> 1);
+			temp = ((tempaccZero - accZeroYaw) >> 1);
 			Config.AccZero[YAW] = tempaccZero - temp;
 
 			inv_cal_done = true;

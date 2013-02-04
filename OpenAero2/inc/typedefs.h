@@ -167,9 +167,6 @@ typedef struct
 	// Acc
 	uint16_t	AccZero[3];				// Acc calibration results
 
-	// 
-	uint16_t	Dummy_2;
-
 } CONFIG_STRUCT;
 
 typedef struct

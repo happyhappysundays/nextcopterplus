@@ -65,12 +65,11 @@ const menu_range_t general_menu_ranges[] PROGMEM =
 
 void menu_general(void)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = GENERALSTART;
-	uint8_t temp = 0;
+	static	uint8_t gen_top = GENERALSTART;
 	int8_t values[GENERALITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
+
 	uint8_t temp_type = 0;
 
 	while(button != BACK)
@@ -82,16 +81,16 @@ void menu_general(void)
 		temp_type = Config.MixMode;
 
 		// Print menu
-		print_menu_items(top, GENERALSTART, &values[0], GENERALITEMS, (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
+		print_menu_items(gen_top, GENERALSTART, &values[0], GENERALITEMS, (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &top, &temp);
-		range = get_menu_range ((prog_uchar*)general_menu_ranges, temp - GENERALSTART);
+		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &gen_top, &menu_temp);
+		range = get_menu_range ((prog_uchar*)general_menu_ranges, menu_temp - GENERALSTART);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&GeneralMenuText[temp - GENERALSTART]);
-			values[temp - GENERALSTART] = do_menu_item(temp, values[temp - GENERALSTART], range, 0, text_link);
+			text_link = pgm_read_byte(&GeneralMenuText[menu_temp - GENERALSTART]);
+			values[menu_temp - GENERALSTART] = do_menu_item(menu_temp, values[menu_temp - GENERALSTART], range, 0, text_link);
 		}
 
 		// Update value in config structure

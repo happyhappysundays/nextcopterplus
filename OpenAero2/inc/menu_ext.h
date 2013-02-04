@@ -64,8 +64,9 @@ extern const char *text_menu[];
 #define ENTER	0xe0 	// S4 pressed
 #define NONE	0xf0 	// No button pressed
 
-
-// Button acceleration
-//uint8_t button_multiplier;
+// Global menu variables
+extern uint8_t cursor;
+extern uint8_t menu_temp;
+extern uint8_t lines[4];
 
 

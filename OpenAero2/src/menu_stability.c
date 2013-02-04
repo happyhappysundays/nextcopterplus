@@ -69,9 +69,7 @@ const menu_range_t stab_menu_ranges[] PROGMEM =
 
 void menu_stab_control(void)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = STABSTART;
-	uint8_t temp = 0;
+	static	uint8_t stab_top = STABSTART;
 	int8_t values[STABITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
@@ -82,16 +80,16 @@ void menu_stab_control(void)
 		memcpy(&values[0],&Config.StabMode,sizeof(int8_t) * STABITEMS);
 
 		// Print menu
-		print_menu_items(top, STABSTART, &values[0], STABITEMS, (prog_uchar*)stab_menu_ranges, STABOFFSET, (prog_uchar*)StabMenuText, cursor);
+		print_menu_items(stab_top, STABSTART, &values[0], STABITEMS, (prog_uchar*)stab_menu_ranges, STABOFFSET, (prog_uchar*)StabMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(STABITEMS, STABSTART, button, &cursor, &top, &temp);
-		range = get_menu_range ((prog_uchar*)stab_menu_ranges, temp - STABSTART);
+		update_menu(STABITEMS, STABSTART, button, &cursor, &stab_top, &menu_temp);
+		range = get_menu_range ((prog_uchar*)stab_menu_ranges, menu_temp - STABSTART);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&StabMenuText[temp - STABSTART]);
-			values[temp - STABSTART] = do_menu_item(temp, values[temp - STABSTART], range, 0, text_link);
+			text_link = pgm_read_byte(&StabMenuText[menu_temp - STABSTART]);
+			values[menu_temp - STABSTART] = do_menu_item(menu_temp, values[menu_temp - STABSTART], range, 0, text_link);
 		}
 
 		// Update value in config structure

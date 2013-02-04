@@ -52,6 +52,9 @@ uint8_t lines[4] = {LINE0, LINE1, LINE2, LINE3};
 // Button acceleration
 uint8_t button_multiplier;
 
+// Menu globals
+uint8_t cursor = LINE0;
+uint8_t menu_temp = 0;
 
 //************************************************************
 // Print basic menu frame
@@ -143,11 +146,11 @@ void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_ucha
 }
 
 //************************************************************
-// get_menu_range - Get raneg info from PROGMEM for a specific item
+// get_menu_range - Get range info from PROGMEM for a specific item
 //************************************************************
 
 // Get range from Program memory
-menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem)
+menu_range_t get_menu_range(prog_uchar* menu_ranges, uint8_t menuitem)
 {
 	menu_range_t	range;
 	memcpy_P(&range, &menu_ranges[menuitem * sizeof(range)], sizeof(range));

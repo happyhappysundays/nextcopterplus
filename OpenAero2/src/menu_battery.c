@@ -57,12 +57,11 @@ const menu_range_t batt_menu_ranges[] PROGMEM =
 
 void menu_battery(void)
 {
-	uint8_t cursor = LINE0;
-	uint8_t top = BATTSTART;
-	uint8_t temp = 0;
+	static uint8_t batt_top = BATTSTART;
 	int16_t values[BATTITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
+
 	uint8_t temp_cells = 0;
 	uint16_t temp_minvoltage = 0;
 	
@@ -76,16 +75,16 @@ void menu_battery(void)
 		temp_minvoltage = Config.MinVoltage;
 
 		// Print menu
-		print_menu_items_16(top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
+		print_menu_items_16(batt_top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(BATTITEMS, BATTSTART, button, &cursor, &top, &temp);
-		range = get_menu_range ((prog_uchar*)batt_menu_ranges, temp - BATTSTART);
+		update_menu(BATTITEMS, BATTSTART, button, &cursor, &batt_top, &menu_temp);
+		range = get_menu_range ((prog_uchar*)batt_menu_ranges, menu_temp - BATTSTART);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&BattMenuText[temp - BATTSTART]);
-			values[temp - BATTSTART] = do_menu_item(temp, values[temp - BATTSTART], range, 0, text_link);
+			text_link = pgm_read_byte(&BattMenuText[menu_temp - BATTSTART]);
+			values[menu_temp - BATTSTART] = do_menu_item(menu_temp, values[menu_temp - BATTSTART], range, 0, text_link);
 		}
 
 		// See if cell number or min_volts has changed
