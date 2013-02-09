@@ -62,9 +62,9 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
 	//
-	Config.Roll.P_mult = 60;			// PID defaults			
-	Config.Pitch.P_mult = 60;
-	Config.Yaw.P_mult = 60;
+	Config.Roll.P_mult = 80;			// PID defaults			
+	Config.Pitch.P_mult = 80;
+	Config.Yaw.P_mult = 80;
 	Config.A_Roll_P_mult = 60;
 	Config.A_Pitch_P_mult = 60;
 	Config.Acc_LPF = 8;

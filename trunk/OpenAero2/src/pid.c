@@ -97,9 +97,9 @@ void Calculate_PID(void)
 	//************************************************************
 	// Un-mix ailerons from flaperons as required
 	//************************************************************
-	
-	// If flaperons set up 
-	if (Config.FlapChan != NOCHAN)
+
+	// If in AEROPLANE mixer mode and flaperons set up
+	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
 	{
 		// Recreate actual roll signal from flaperons
 		roll_actual = RCinputs[AILERON] + RCinputs[Config.FlapChan];
@@ -174,7 +174,8 @@ void Calculate_PID(void)
 		if ((!AutoLevel) && (Config.FlightMode == FLYBYWIRE))
 		{
 			// Note that gyro polarity always opposes RC so we add here to get the difference 
-			currentError[axis] = gyroADC[axis] + RCinputsAxis[axis];
+			// Reduce RC weight by 50%
+			currentError[axis] = gyroADC[axis] + (RCinputsAxis[axis] >> 1);
 		}
 		// Standard OE2 flight style
 		else
@@ -223,9 +224,10 @@ void Calculate_PID(void)
 					PID_acc_temp = -Config.A_Limits;
 				}
 
-				// Acc P terms and error calculation
+				// Calculate error between stick position and actual attitude
 				PID_acc_temp = PID_acc_temp + angle[axis];
 			}
+			// Else just use angle for error
 			else
 			{
 				PID_acc_temp = angle[axis];
