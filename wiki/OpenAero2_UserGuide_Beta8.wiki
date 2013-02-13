@@ -6,18 +6,12 @@ OpenAero2 Beta 8 is a full-featured aeroplane and camera stabilization software 
 
 Once reprogrammed with OpenAero2, the KK2 board can be installed between your receiver and servos with your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
-==Flight Modes==
+==What models can OpenAero2 be used with?==
+OpenAero2 
 
-OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely from the transmitter during flight, upon a designated receiver channel.
+have a completely flexible mixer which allows it to control just about anything, but comes with a number of preset mix tables depending on the version.
 
-1 - *Manual mode* - Deactivates all assistance from OpenAero2, by passing all servo control signals through from the receiver to the servos.
-
-2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the affects of wind and air turbulence upon the aeroplane.
-
-3 - *Auto-leveling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
-
-
-===Aeroplane===
+==Aeroplane==
 In aeroplane mode there are four stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder.
 For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor.
 
@@ -36,20 +30,24 @@ For those needing a throttle control, you can just take the throttle output of y
 
 In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
 
-===Camera Stability (disabled in Betas)===
+==Camera Stability==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
-
-===Swash120 (disabled in Betas)===
-In Swash120 mode there are four stabilised outputs - Cyclic 0, Cyclic 1, Cyclic 2 and Rudder.
-A collective output is also available to connect directly to the ESC for your motor.
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
 
 http://i.imgur.com/zCdGA.jpg?1
 
-==What models can OpenAero2 be used with?==
-OpenAero2 have a completely flexible mixer which allows it to control just about anything, but comes with a number of preset mix tables depending on the version.
+==Flight Modes==
+
+OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely from the transmitter during flight, upon a designated receiver channel.
+
+1 - *Manual mode* - Deactivates all assistance from OpenAero2, by passing all servo control signals through from the receiver to the servos.
+
+2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the affects of wind and air turbulence upon the aeroplane.
+
+3 - *Auto-leveling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
+
 
 
 
