@@ -8,7 +8,7 @@ Once reprogrammed with OpenAero2, the KK2 board can be installed between your re
 
 OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely from the transmitter during flight, upon a designated receiver channel.
 
-1 - *Manual mode* - Deactivates all assistance from OpenAero2, by passing all servo signals through from the receiver to the servos.
+1 - *Manual mode* - Deactivates all assistance from OpenAero2, by passing all servo control signals through from the receiver to the servos.
 
 2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the affect of wind and air turbulence upon the aeroplane.
 
