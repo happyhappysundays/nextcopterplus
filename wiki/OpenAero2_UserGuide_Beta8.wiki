@@ -2,9 +2,20 @@
 
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 ==What is OpenAero2?==
-OpenAero2 Beta 8 is a full-featured aeroplane and camera stabilising software for [http://www.hobbyking.com/hobbyking/store/__24723__Hobbyking_KK2_0_Multi_rotor_LCD_Flight_Control_Board.html Hobbyking's KK2 multi-rotor board], replacing the manufactures original firmware, primarily developed for various multi-rotor aircraft's.
+OpenAero2 Beta 8 is a full-featured aeroplane and camera stabilizing software for [http://www.hobbyking.com/hobbyking/store/__24723__Hobbyking_KK2_0_Multi_rotor_LCD_Flight_Control_Board.html Hobbyking's KK2 multi-rotor board], replacing the manufactures original firmware, primarily developed for various multi-rotor aircraft's.
 
-Once You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros and accelerometers on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
+Once reprogrammed with OpenAero2, the KK2 board can be installed between your receiver and servos, within your aeroplane or on a camera gimbal. 
+
+OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely from the transmitter during flight, upon a designated receiver channel.
+
+1 - Manual mode - Deactivates all assistance from OpenAero2, by passing all servo signals through from the receiver to the servos.
+
+2 - Stabilization mode - Activates OpenAero's gyro stabilization to reduce the affect of wind and air turbulence upon the aeroplane.
+
+3 - Auto-leveling mode - Activates OpenAero's accelerometers to return the aeroplane to level flight.
+
+
+When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros and accelerometers on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
