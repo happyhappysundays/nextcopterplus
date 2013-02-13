@@ -58,6 +58,21 @@ void RxGetChannels(void)
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
 
+	// Reverse primary channels as requested
+	if (Config.AileronPol == REVERSED)
+	{
+		RCinputs[AILERON] = -RCinputs[AILERON];
+		RCinputs[Config.FlapChan] = -RCinputs[Config.FlapChan]; // Reverse 2nd aileron too
+	}
+	if (Config.ElevatorPol == REVERSED)
+	{
+		RCinputs[ELEVATOR] = -RCinputs[ELEVATOR];
+	}
+	if (Config.RudderPol == REVERSED)
+	{
+		RCinputs[RUDDER] = -RCinputs[RUDDER];
+	}
+
 	// Calculate RX activity
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
 	RxSumDiff = RxSum - OldRxSum;
@@ -101,7 +116,7 @@ void RC_Deadband(void)
 	}
 
 
-	// Hands-free detection (won't work with flaperons set)
+	// Hands-free detection
 	if (((aileron_actual < Config.HandsFreetrigger) && (aileron_actual > -Config.HandsFreetrigger))
 	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
 	{

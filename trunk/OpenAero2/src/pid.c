@@ -64,7 +64,10 @@ void Calculate_PID(void)
 	int32_t PID_Gyro_I_temp = 0;			// Temporary i-terms bound to max throw
 	int32_t PID_Gyro_I_actual = 0;			// Actual unbound i-terms
 	int8_t	axis;
-	int16_t	RCinputsAxis[3] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; // Cross-ref for actual RCinput elements
+
+	// Cross-ref for actual RCinput elements
+	// I have no idea why pitch has to be reversed here...
+	int16_t	RCinputsAxis[3] = {RCinputs[AILERON], -RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values. Cludgy fix to reduce code space
 	int8_t 	P_gain[3] = {Config.Roll.P_mult, Config.Pitch.P_mult, Config.Yaw.P_mult};
@@ -141,7 +144,7 @@ void Calculate_PID(void)
 					}
 
 					// Adjust I-term with RC input (scaled down by Config.Stick_3D_rate)
-					IntegralGyro[axis] += (RCinputsAxis[axis] >> Config.Stick_3D_rate); 
+					IntegralGyro[axis] -= (RCinputsAxis[axis] >> Config.Stick_3D_rate); 
 				}
 			}	
 
@@ -167,21 +170,10 @@ void Calculate_PID(void)
 		} // Stability
 
 		//************************************************************
-		// Define gyro error term based on flight mode
+		// Calculate gyro error from gyro and stick data
 		//************************************************************
 		
-		// Fly-by-wire mode. When in Autolevel, don't use RC input for error calc as it will fight that of the Autolevel
-		if ((!AutoLevel) && (Config.FlightMode == FLYBYWIRE))
-		{
-			// Note that gyro polarity always opposes RC so we add here to get the difference 
-			// Reduce RC weight by 50%
-			currentError[axis] = gyroADC[axis] + (RCinputsAxis[axis] >> 1);
-		}
-		// Standard OE2 flight style
-		else
-		{
-			currentError[axis] = gyroADC[axis];
-		}
+		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> 2);	// Reduce RC weight to counter P-gain increase
 
 		//************************************************************
 		// Calculate PID gains
@@ -200,42 +192,6 @@ void Calculate_PID(void)
 		lastError[axis] = currentError[axis];
 		DifferentialGyro *= D_gain[axis];							// Multiply D-term by up to 127
 		DifferentialGyro = DifferentialGyro << 4;					// Multiply by 16
-
-		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
-		// Limit the tilt angles by stick setting in Fly-By-Wire mode only
-		if (AutoLevel && (axis < YAW)) 
-		{
-			//************************************************************
-			// Define acc error term based on flight mode
-			//************************************************************
-
-			if (Config.FlightMode == FLYBYWIRE)
-			{
-				// Process requested angle. angle[] is in degrees, but RC is +/-1000 steps
-				PID_acc_temp = (RCinputsAxis[axis] >> 4); 				// 1000 = 62.5 degrees max
-
-				// Limit maximum angle to that stored in Config.A_Limits ("Max:" in Autolevel menu)
-				if (PID_acc_temp > Config.A_Limits)
-				{
-					PID_acc_temp = Config.A_Limits;
-				}
-				if (PID_acc_temp < -Config.A_Limits)
-				{
-					PID_acc_temp = -Config.A_Limits;
-				}
-
-				// Calculate error between stick position and actual attitude
-				PID_acc_temp = PID_acc_temp + angle[axis];
-			}
-			// Else just use angle for error
-			else
-			{
-				PID_acc_temp = angle[axis];
-			}
-
-			PID_acc_temp *= L_gain[axis];							// P-term of accelerometer (Max gain of 127)
-			PID_ACCs[axis] = (int16_t)(PID_acc_temp >> 2);			// Accs need much less scaling
-		}
 
 		//************************************************************
 		// I-term output limits
@@ -260,6 +216,23 @@ void Calculate_PID(void)
 		//************************************************************
 	
 		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
+
+		//************************************************************
+		// Calculate acc error from angle data (roll and pitch only)
+		//************************************************************
+
+		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
+		if (AutoLevel && (axis < YAW)) 
+		{
+			PID_acc_temp = angle[axis];
+
+			PID_acc_temp *= L_gain[axis];							// P-term of accelerometer (Max gain of 127)
+			PID_ACCs[axis] = (int16_t)(PID_acc_temp >> 2);			// Accs need much less scaling
+		}
+		else
+		{
+			PID_ACCs[axis] = 0;										// Ensure these are zeroed when autolevel OFF
+		}
 
 	} // PID loop
 }
