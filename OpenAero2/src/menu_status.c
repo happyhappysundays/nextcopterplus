@@ -42,8 +42,8 @@ void Display_status(void)
 	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
-	LCD_Display_Text(46,(prog_uchar*)Verdana8,0,33); 	// Stability
-	LCD_Display_Text(47,(prog_uchar*)Verdana8,0,44); 	// Autolevel
+	LCD_Display_Text(227,(prog_uchar*)Verdana8,0,33); 	// Stability
+	LCD_Display_Text(228,(prog_uchar*)Verdana8,0,44); 	// Autolevel
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down

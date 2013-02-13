@@ -37,6 +37,13 @@ typedef struct
 	int16_t		value;					// Current value
 	int8_t		source_a;				// Source A RC input for calculation
 	int8_t		source_a_volume;		// Percentage of source to pass on
+	int8_t		source_mix;				// Source RC included in stabilised modes
+	int8_t		Offset;					// Trim/neutral position (-125 to 125)
+	int8_t		min_travel;				// Minimum output value (-125 to 125)
+	int8_t		max_travel;				// Maximum output value (-125 to 125)
+	int8_t		Failsafe;				// Failsafe position (-125 to 125)
+	int8_t		output_a;				// Channel A for calculation
+	int8_t		output_a_volume;		// Percentage of output to use
 	int8_t		source_b;				// Optional source B RC input for calculation
 	int8_t		source_b_volume;		// Percentage of source to pass on
 	int8_t		roll_gyro;				// Use roll gyro
@@ -49,18 +56,12 @@ typedef struct
 	int8_t		roll_acc_polarity;		// Roll acc normal/reverse
 	int8_t		pitch_acc;				// Use pitch acc
 	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
-	int8_t		output_a;				// Channel A for calculation
-	int8_t		output_a_volume;		// Percentage of output to use
 	int8_t		output_b;				// Channel B for calculation
 	int8_t		output_b_volume;		// Percentage of output to use
 	int8_t		output_c;				// Channel C for calculation
 	int8_t		output_c_volume;		// Percentage of output to use
 	int8_t		output_d;				// Channel D for calculation
 	int8_t		output_d_volume;		// Percentage of output to use
-	int8_t		min_travel;				// Minimum output value (-125 to 125)
-	int8_t		max_travel;				// Maximum output value (-125 to 125)
-	int8_t		Failsafe;				// Failsafe position (-125 to 125)
-	int8_t		Offset;					// Trim/neutral position (-125 to 125)
 } channel_t;
 
 // PID type
@@ -94,6 +95,9 @@ typedef struct
 	int8_t		StabChan;				// Channel number to select stability mode
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
 	int8_t		FlapChan;				// Channel number for second aileron input
+	int8_t		AileronPol;				// RC input polarity
+	int8_t		ElevatorPol;			// RC input polarity
+	int8_t		RudderPol;				// RC input polarity
 
 	// Failsafe items
 	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
@@ -155,7 +159,7 @@ typedef struct
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		AutoCenter;				// Yaw heading hold auto centering
 	int8_t		Stick_3D_rate;			// 3D mode stick rate
-	int8_t		FlightMode;				// Normal/Fly-by-wire
+	int8_t		IMUType;				// IMU style (old/new)
 			
 	// Non-menu items 
 	// Input channel configuration

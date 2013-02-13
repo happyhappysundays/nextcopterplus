@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x08		// eePROM signature - change for each eePROM structure change 0x08 = V1.1b6
+#define MAGIC_NUMBER 0x0A		// eePROM signature - change for each eePROM structure change 0x0A = V1.1b8
 								// to force factory reset
 
 //************************************************************
@@ -69,14 +69,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.A_Pitch_P_mult = 60;
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
-	Config.AutoCenter = OFF;
-	Config.FlightMode = RETRO;
 	Config.DynGainSrc = NOCHAN;
-	Config.Stick_3D_rate = 4;
+	Config.Stick_3D_rate = 2;
 
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
-	//Config.PowerTrigger = 0; 			// 7.33V for 2S, 10.8V for 3S are good values here
 	Config.BatteryCells = 3;			// Default to 3S
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 360;
@@ -88,13 +85,7 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Autolimit = 10;				// Autolevel trigger setting
 	Config.Stablimit = -30;				// Stability trigger setting
-	//Config.LaunchThrPos = 0;			// Launch mode throttle position
-	Config.LaunchMode = OFF;			// Launch mode on/off
 	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
-
-	//Config.MixMode = AEROPLANE;			// Aeroplane/Flying Wing/Manual
-
-	Config.CamStab = OFF;
 
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
@@ -104,11 +95,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 
 	// Failsafe
-	//Config.FailsafeType = 0;			// Simple or Advanced (Autolevel)
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
-	//Config.FailsafeElevator = 0;		// Elevator trim in failsafe
-	//Config.FailsafeAileron = 0;			// Aileron trim in failsafe
-	//Config.FailsafeRudder = 0;			// Rudder trim in failsafe
 }
 
 void Save_Config_to_EEPROM(void)

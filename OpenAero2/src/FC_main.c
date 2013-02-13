@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 7 - February 2013
+// Version 1.1 Beta 8 - February 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -119,10 +119,20 @@
 //			Changed Flying Wing mixing to on-board only.
 //			Reduce FBW RC input to 50%. Adjusted PID defaults.
 //			Fixed failsafe throttle default.
+// Beta 8	Add IMU mode switch (Normal/Advanced.)
+//			Added primary channel reversing in RC setup menu.
+//			Changed mixer order and added "Source mix" manual option.
+//			No Fly-by-wire mode as for gyros always take stick input. Acc mixes in autolevel mode.
+//			Fixed flap handling in stabilised modes. Normalised sensor polarity with RC.
+//			Linked local G measurement with IMU calculation to solve negative G and (hopefully)
+//			coordinated turn issues.
 //
 //***********************************************************
 //* To do
 //***********************************************************
+//
+// Dynamic gain linked to RC control so no R Cat max suppression (Use Source mix to to solve)
+//
 //
 //
 //***********************************************************

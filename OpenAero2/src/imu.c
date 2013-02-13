@@ -17,6 +17,8 @@
 #include "..\inc\acc.h"
 #include "..\inc\gyros.h"
 #include "..\inc\main.h"
+#include <avr/pgmspace.h> 
+#include "..\inc\menu_ext.h"
 
 //************************************************************
 // Prototypes
@@ -101,6 +103,7 @@ void getEstimatedAttitude(void)
 	int16_t		roll_sq, pitch_sq, yaw_sq;
 	uint8_t		axis;
 	uint16_t	AccMag = 0;
+	bool		G_is_Normal = false;
 
 	// Get global timestamp
 	// The first calculation has no PreviousTime to measure from, so zero and move on.
@@ -109,6 +112,13 @@ void getEstimatedAttitude(void)
 		deltaTime = 0.0f;
 		FirstTimeIMU = false;
 		PreviousTime = ticker_32;
+		
+		// Reset accumulating variables if Autolevel has been off.
+		for (axis = 0; axis < 3; axis++) 
+		{	
+			accSmooth[axis] = 0;
+			deltaGyroAngle[axis] = 0;
+		}
 	}
 	else
 	{
@@ -146,18 +156,18 @@ void getEstimatedAttitude(void)
 
 	// Apply complimentary filter (Gyro drift correction)
 	// If accel magnitude >1.4G or <0.6G => we neutralize the effect of accelerometers in the angle estimation.
-	// To do that, we just skip the filter temporarily
+	// To do that, we just skip the filter temporarily and use the old andgle estimation code.
 	// Note that this equation is a cheat to save doing a square root on the right-hand side.
 	// The equation is really just mag^2 = x^2 + y^2 + z^2.
 	// 125^2 or 15625 represents 1G (standing still). 0.6G is 5625 and 1.4G is 30625.
 
-	if (!((acc_0_6G > AccMag) || (AccMag > acc_1_4G))) 
-	{
+	if (!((acc_0_6G > AccMag) || (AccMag > acc_1_4G))) // While under normal G
+	{ 
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
 
 		// The CF algorithm will fail when inverted as acc moves opposite gyro
-		// so when inverted, use acc only. A compromise... 
-		if (accADC[YAW] > 0)
+		// When inverted, use acc only. In old IMU mode don't bother.
+		if ((accADC[YAW] > 0) || (Config.IMUType == 0))
 		{
 			deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 		}
@@ -165,30 +175,48 @@ void getEstimatedAttitude(void)
 		{
 			deltaGyroAngle[PITCH] = - accSmooth[PITCH];
 		}	
-	}
+		
+		G_is_Normal = true;
 
-	// Calculate the roll and pitch angles properly
-	// then convert to degrees
-	tempf = atan(deltaGyroAngle[PITCH] / sqrt(roll_sq + yaw_sq));
-	angle[PITCH]  = tempf * (180 / M_PI);
-
-	tempf = atan(deltaGyroAngle[ROLL]  / sqrt(pitch_sq + yaw_sq));
-	angle[ROLL]  = tempf * (180 / M_PI);
-
-	// And I think this solves the upside down issue...
-	// Handle roll reversal when inverted
-	if (accADC[YAW] < 0)
+	} 
+	
+	// Whoooooaaaaaa
+	else
 	{
-		if (accADC[ROLL] < 0)
-		{
-			angle[ROLL] = (180 - angle[ROLL]);
-		}
-		else
-		{
-			angle[ROLL] = (-180 - angle[ROLL]);
-		}
+		G_is_Normal = false;
 	}
 
+	// If advanced IMU type and when under normal G
+	if ((Config.IMUType == 1) && (G_is_Normal == true))
+	{
+		// Calculate the roll and pitch angles properly
+		// then convert to degrees
+		tempf = atan(deltaGyroAngle[PITCH] / sqrt(roll_sq + yaw_sq));
+		angle[PITCH]  = tempf * (180 / M_PI);
+
+		tempf = atan(deltaGyroAngle[ROLL]  / sqrt(pitch_sq + yaw_sq));
+		angle[ROLL]  = tempf * (180 / M_PI);
+
+		// And I think this solves the upside down issue...
+		// Handle roll reversal when inverted
+		if (accADC[YAW] < 0)
+		{
+			if (accADC[ROLL] < 0)
+			{
+				angle[ROLL] = (180 - angle[ROLL]);
+			}
+			else
+			{
+				angle[ROLL] = (-180 - angle[ROLL]);
+			}
+		}
+	}
+	// Use simple IMU when under unusual acceleration
+	else
+	{
+		angle[ROLL] = (int16_t)deltaGyroAngle[ROLL];
+		angle[PITCH] = (int16_t)deltaGyroAngle[PITCH];
+	}
 }
 
 void UpdateIMUvalues(void)
