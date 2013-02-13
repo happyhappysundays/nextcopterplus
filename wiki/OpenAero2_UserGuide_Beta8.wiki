@@ -2,7 +2,7 @@
 
 =The OpenAero2 User Guide (V1.1 Beta8)=
 ==What is OpenAero2?==
-OpenAero2 is an aeroplane stabilising software for the KK2 multicopter board. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros and accelerometers on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
+OpenAero2 is an aeroplane and camera stabilising software for the [http://www.hobbyking.com/hobbyking/store/__24723__Hobbyking_KK2_0_Multi_rotor_LCD_Flight_Control_Board.html Hobbyking KK2 multi-rotor board]. You put the programmed KK board in between your receiver and the servos in your aircraft. When deactivated, OpenAero2 just passes the servo signals from your receiver to the servos. When activated, the gyros and accelerometers on your KK board are used to move the servos to counteract any unwanted movement of the aircraft.
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
