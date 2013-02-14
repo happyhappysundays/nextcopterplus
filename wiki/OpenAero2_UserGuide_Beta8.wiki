@@ -20,7 +20,7 @@
   * Receiver connections
 
 ==What is OpenAero2?==
-OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
+OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
 ==What models can OpenAero2 stabilize?==
 OpenAero2 has been designed with two selectable presets, for easy setup of the on-board mixers, to control single / dual aileron aeroplane's or flying-wing's.
@@ -54,7 +54,7 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 ==Where can I purchase a KK2 board from?==
-The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 KK2 multi-rotor board] is manufactured and sold by only [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 HobbyKing]. 
+The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing]. Any alternative source is not recommended.
 
 HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
 
