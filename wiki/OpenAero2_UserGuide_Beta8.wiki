@@ -72,10 +72,31 @@ Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.a
 ===Dual Power Supplies==
 Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, to prevent receiver brown-outs and a second to power the servos.
 
-There is no +5V power supplied to M2 to M8, so you must supply your own 5V to any of M2 to M8 via a BESC or battery pack.
+A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this can be the 5 volt supply from the ESC's internal BEC.
+
+A second BEC must be connected to any of the pin marked M2-M8, to provide power to move the servos. Depending upon the specification of your servos, 5 to 6 volts can be used.
+
+We recommend the following external BEC's from Hobbyking.
+
+TURNIGY 3A UBEC w/ Noise Reduction
+http://www.hobbyking.com/hobbyking/store/catalog/TR-UBEC-3A.jpg
+Spec.
+Output: 5v/3A or 6v/3A (Selectable via jumper)
+Noise: <50mVp-p(@2A/12v)
+Input: 5.5v-23v (2-5S Lipo pack, 5-15cells NiMh)
+Size: 41.6x16.6x7.0mm
+Weight: 7.5g
+
+HobbyKing HKU5 5V/5A UBEC
+http://www.hobbyking.com/hobbyking/store/catalog/hkus.jpg
+Specifications:
+Input: 6V-23V (2-5S Li-Po)
+Output: 5V/5A 
+Dimension: 22.9mm*20.3mm*13.4.6mm (L*W*H)
+Weight: 7.1g (wires included)
 
 
-*Do not connect the 5V supply of M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
+*Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
 
 ===Receiver connections===
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
