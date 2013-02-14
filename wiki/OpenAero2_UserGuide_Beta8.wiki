@@ -12,12 +12,10 @@ OpenAero2 has been designed with two selectable presets, for easy configuration 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
 
 ===Aeroplane===
-In aeroplane mode there are four stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder.
-For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor.
 
-In CPPM mode there are five stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder, plus a copy of the throttle signal from the receiver on M1.
+Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with the any typical PWM or CPPM receiver.
 
-Read more about the differences between PWM and CPPM receivers elsewhere in this Wiki.
+The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
 ===Flying Wing===
 Flying wings normally have delta/flaperon mixing done by the transmitter. This allows you to set the aileron/elevator mixing as best suits you and your aircraft.
@@ -30,7 +28,7 @@ For those needing a throttle control, you can just take the throttle output of y
 
 In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
 
-==Camera Stability==
+==What camera gimbals can OpenAero2 stabilize?==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
