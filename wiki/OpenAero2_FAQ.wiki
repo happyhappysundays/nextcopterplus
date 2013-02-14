@@ -49,7 +49,7 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 ==Where can I purchase a KK2 board from?==
-The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing]. Any alternative source is not recommended.
+The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing]. Any alternative sources are not recommended.
 
 HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
 
