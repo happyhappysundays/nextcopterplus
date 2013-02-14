@@ -44,7 +44,7 @@ Unlike other boards, the KK2 board benefits from the stability of two regulated 
 There is no +5V power supplied to M2 to M8, so you must supply your own 5V to any of M2 to M8 via a BESC or battery pack.
 
 
-*Do not connect the 5V rail of M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
+*Do not connect the 5V supply of M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
 
 ===Receiver connections===
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
