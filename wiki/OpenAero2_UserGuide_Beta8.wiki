@@ -8,7 +8,11 @@
   * Aeroplane Mixers
   * Flying Wing Mixers
   * Flight Modes
-
+ # What camera gimbals can OpenAero2 stabilize?
+ # Can I purchase a KK2 board with OpenAero2 installed?
+ # Where can I purchase a KK2 board from?
+ # How do I flash my KK2 board with OpenAero2?
+ # How do I connect up my model?
 
 ==What is OpenAero2?==
 OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
