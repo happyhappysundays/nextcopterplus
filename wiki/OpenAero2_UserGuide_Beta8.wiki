@@ -38,10 +38,13 @@ In Camera stability mode both gyros and accelerometers are enabled to stabilise 
 ==How do I connect up my model?==
 Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
-==Dual Power Supplies==
-*A note about servo connections*
-There is no +5V power supplied to M2 to M8, so you must supply your own 5V to any of M2 to M8 via a BESC or battery pack.
-Do not connect the 5V rail of M2 to m8 directly to M1 or the RX connecions as this will result in the KK2 board rebooting when subject to high servo loads.
+===Dual Power Supplies==
+Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, to prevent receiver brown-outs and a second to power the servos.
+
+
+
+*There is no +5V power supplied to M2 to M8, so you must supply your own 5V to any of M2 to M8 via a BESC or battery pack.
+Do not connect the 5V rail of M2 to m8 directly to M1 or the RX connecions as this will result in the KK2 board rebooting when subject to high servo loads.*
 
 ===Receiver connections===
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
