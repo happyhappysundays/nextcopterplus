@@ -7,8 +7,8 @@
  # What models can OpenAero2 stabilize?
   * Aeroplane Mixers
   * Flying Wing Mixers
-  * Flight Modes
   * Custom Mixers
+  * Flight Modes
  # What camera gimbals can OpenAero2 stabilize?
  # Can I purchase a KK2 board with OpenAero2 installed?
  # Where can I purchase a KK2 board from?
