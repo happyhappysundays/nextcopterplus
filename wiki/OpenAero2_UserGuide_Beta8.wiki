@@ -1,4 +1,4 @@
-#summary The OpenAero2 User guide (V1.1 Beta 8)
+#summary OpenAero2  - User guide (V1.1 Beta 8)
 
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 
