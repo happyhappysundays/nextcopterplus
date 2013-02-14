@@ -59,6 +59,4 @@ The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK
 
 HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
 
-===Where can I download OpenAero from?===
-
-The latest version of OpenAero2 can be download [http://code.google.com/p/nextcopterplus/downloads/list here].
+*The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
