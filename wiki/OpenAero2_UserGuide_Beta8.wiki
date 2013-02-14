@@ -11,7 +11,7 @@ OpenAero2 has been designed with two selectable presets, for easy configuration 
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channel outputs or up to 8 directly connected servos.
 
-==Aeroplane==
+===Aeroplane===
 In aeroplane mode there are four stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder.
 For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor.
 
