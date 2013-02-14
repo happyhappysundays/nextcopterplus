@@ -56,10 +56,12 @@ In Camera stability mode both gyros and accelerometers are enabled to stabilise 
 ==Where can I purchase a KK2 board from?==
 The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 KK2 multi-rotor board] is manufactured and sold by only [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 HobbyKing]. 
 
-*Royalties are paid by HobbyKing for each unit sold to Rolf R Bakke, the original KK Designer.
+HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
 
 ===Can I purchase a KK2 board with OpenAero2 installed?===
+OpenAero2 has been developed as a free software download only.
 
+The process of loading the software, onto the KK2 board, can easily be done by following our guide.
 
 ===How do I flash my KK2 board with OpenAero2?===
 
