@@ -19,14 +19,18 @@ The latest version of OpenAero2 can be downloaded from [http://www.rcgroups.com/
 ==How do I flash my KK2 board with OpenAero2?==
 
  # Download the latest version of [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 OpenAero2].
+ # Extract the 'OpenAero2.hex' file to an 'OpenAero2' on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
- # Decompress the contains of the zip to a folder on your desktop.
+ # Extract the contains of the zip to a 'flash tool' folder on your desktop.
  # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to programming head labeled JP1, in the lower left of the board, with the ribbon facing towards the screen.
  # Connect the USBasp to a free port on your computer. A green light on the USBasp should be lit and the screen of KK2 board should now display the text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you can [http://www.hobbyking.com/hobbyking/store/supportform.asp return] the board to your nearest HobbyKing warehouse.
- # Run 'kkMulticopterFlashTool.cmd' from the 'KKMulticopter Flashtool' folder on your desktop,
+ # Run 'kkMulticopterFlashTool.cmd' from the 'flash tool' folder on your desktop,
  # Select 'USBasp' from the programmer drop-down menu,
  # Select 'Hobbyking KK2.0 (32kB flash)' from the controller drop-down menu,
- # On the 'Flashing firmware' tab, 
+ # On the 'Flashing firmware' tab, click upon the floppy disc icon,
+ # Navigate to the 'OpenAero2' folder upon your desktop,
+ # Select the 'OpenAero2.hex' file and click 'open',
+ # 
 
 ==How do I connect the KK2 board in my model?==
 Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
