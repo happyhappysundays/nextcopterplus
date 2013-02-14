@@ -17,7 +17,7 @@ The [OpenAero2_Getting_Started Getting Started Guide] describes the process of h
 ==What is OpenAero2?==
 OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturers original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
-While OpenAero2 is an open-source project and is free, it's is also the result of many hundreds of hours of hard work.
+While OpenAero2 is an open-source project and is free, it's also the result of many hundreds of hours of hard work.
 
 If you feel motivated to donate to the project please feel free.
 
@@ -26,10 +26,10 @@ If you feel motivated to donate to the project please feel free.
 ==What models can OpenAero2 stabilize?==
 OpenAero2 has been designed with two selectable mixer presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
-Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
+Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos.
 
 ===Aeroplane Mixers===
-Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with the any typical PWM or CPPM receiver.
+Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with any typical PWM or CPPM receiver.
 
 The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
