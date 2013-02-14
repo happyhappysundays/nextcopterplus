@@ -15,7 +15,7 @@
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
 
 ==What is OpenAero2?==
-OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
+OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturers original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
 While OpenAero2 is an open-source project and is free, it's is also the result of many hundreds of hours of hard work.
 
@@ -58,5 +58,7 @@ In Camera stability mode both gyros and accelerometers are enabled to stabilise 
 The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
 
 HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
+
+
 
 *The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
