@@ -2,9 +2,9 @@
 
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 ==What is OpenAero2?==
-OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/__24723__Hobbyking_KK2_0_Multi_rotor_LCD_Flight_Control_Board.html Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
+OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
-Once reprogrammed with OpenAero2, the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
+Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
 ==What models can OpenAero2 stabilize?==
 OpenAero2 has been designed with two selectable presets, for easy configuration of the on-board mixers, to control dual-aileron aeroplane's or flying-wing's.
