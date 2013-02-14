@@ -11,15 +11,22 @@ OpenAero2 has been designed with two selectable presets, for easy setup of the o
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
 
-===Aeroplane Mode===
+===On-board Aeroplane Mixers===
 
 Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with the any typical PWM or CPPM receiver.
 
 The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
-===Flying Wing Mode===
+===On-board Flying Wing Mixers===
 
 Mixing for flying-wing's is now supported by the on-board mixers, allowing OpenAero2 to stabilize the left flaperon, right flaperon and rudder.
+
+===Mixers===
+
+OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
+Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
+
+http://i.imgur.com/zCdGA.jpg?1
 
 ===Flight Modes===
 
@@ -30,13 +37,6 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the affects of wind and air turbulence upon the aeroplane.
 
 3 - *Auto-leveling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
-
-===Mixers===
-
-OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
-Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
-
-http://i.imgur.com/zCdGA.jpg?1
 
 ==What camera gimbals can OpenAero2 stabilize?==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
