@@ -35,7 +35,7 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 ==What camera gimbals can OpenAero2 stabilize?==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
-==Can I purchase a KK2 board with OpenAero installed==
+==Can I purchase a KK2 board with OpenAero installed?==
 
 
 ==Where can I purchase a KK2 board from?==
