@@ -62,5 +62,6 @@ HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Desi
 
 ===Where can I download OpenAero from?===
 
+The latest version of OpenAero2 can be download {http://code.google.com/p/nextcopterplus/downloads/list here].
 
-The [OpenAero2_Getting_Started Getting Started Guide] describes the process of loading the software onto the KK2 board.
+The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero onto the KK2 board.
