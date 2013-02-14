@@ -11,17 +11,17 @@ OpenAero2 has been designed with two selectable presets, for easy setup of the o
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
 
-===On-board Aeroplane Mixers===
+===Aeroplane Mixers===
 
 Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with the any typical PWM or CPPM receiver.
 
 The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
-===On-board Flying Wing Mixers===
+===Flying Wing Mixers===
 
 Mixing for flying-wing's is now supported by the on-board mixers, allowing OpenAero2 to stabilize the left flaperon, right flaperon and rudder.
 
-===Mixers===
+===Custom Mixers===
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
