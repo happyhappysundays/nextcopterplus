@@ -76,7 +76,7 @@ A 5 volt regulated power supply must be connected to the pin marked M1. Typicall
 
 A second BEC must be connected to any of the pin marked M2-M8, to provide power to move the servos. Depending upon the specification of your servos, 5 to 6 volts can be used.
 
-We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] UBEC external BEC's from Hobbyking.
+We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
 
 
 *Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
