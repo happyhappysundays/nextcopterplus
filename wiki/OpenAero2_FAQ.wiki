@@ -11,9 +11,8 @@
   * Example 1
   * Example 2
  # Where can I purchase a KK2 board from?
- # Where can I download OpenAero from?
 
-
+The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero and connect the KK2 between your receiver and servos.
 
 ==What is OpenAero2?==
 OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
@@ -62,6 +61,4 @@ HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Desi
 
 ===Where can I download OpenAero from?===
 
-The latest version of OpenAero2 can be download {http://code.google.com/p/nextcopterplus/downloads/list here].
-
-The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero onto the KK2 board.
+The latest version of OpenAero2 can be download [http://code.google.com/p/nextcopterplus/downloads/list here].
