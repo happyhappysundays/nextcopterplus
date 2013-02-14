@@ -14,7 +14,7 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAe
 
 ==Where can I download OpenAero from?==
 
-The link to the latest version of OpenAero2 can be found on[http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 RC Groups.com]
+The link to the latest version of OpenAero2 can be found on [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 RC Groups.com]
 
 ==How do I flash my KK2 board with OpenAero2?==
 
