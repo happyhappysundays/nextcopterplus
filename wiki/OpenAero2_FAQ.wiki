@@ -47,12 +47,12 @@ OpenAero2 offers three unique flight modes for aeroplanes, interchangeable remot
 
 1 - *Manual mode* - Deactivates all assistance from OpenAero2, passing all servo control signals from the receiver to the servos.
 
-2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the affects of wind and air turbulence upon the aeroplane.
+2 - *Stabilization mode* - Activates OpenAero2's gyro stabilization to reduce the effects of wind and air turbulence on the aeroplane.
 
-3 - *Auto-leveling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
+3 - *Auto-levelling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
 
 ==What camera gimbals can OpenAero2 stabilize?==
-In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
+In Camera stability mode, both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 ==Where can I purchase a KK2 board from?==
 The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
