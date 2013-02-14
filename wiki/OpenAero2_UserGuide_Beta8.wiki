@@ -7,7 +7,7 @@ OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software
 Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
 ==What models can OpenAero2 stabilize?==
-OpenAero2 has been designed with two selectable presets, for easy configuration of the on-board mixers, to control single-aileron, dual aileron aeroplane's or flying-wing's.
+OpenAero2 has been designed with two selectable presets, for easy configuration of the on-board mixers, to control single / dual aileron aeroplane's or flying-wing's.
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
 
