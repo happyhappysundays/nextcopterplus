@@ -18,15 +18,8 @@ Aeroplane mode has the ability to stabilize all three axis, support the use of f
 The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
 ===Flying Wing===
-Flying wings normally have delta/flaperon mixing done by the transmitter. This allows you to set the aileron/elevator mixing as best suits you and your aircraft.
-When these signals pass through the OpenAero2 software the gyro stabilising has to accommodate the flying wing channel mixing. 
-For instance, in response to pitch input, the standard version of Openaero2 would simply adjust the elevator servo. However the flying wing version adjusts both flaperons to have the desired effect.
 
-In flying wing mode there are three stabilised outputs - Left Flaperon, Right Flaperon and Rudder.
-
-For those needing a throttle control, you can just take the throttle output of your receiver directly to the ESC for your motor. 
-
-In CPPM mode there are four stabilised outputs - Left Flaperon, Right Flaperon and Rudder, and a copy of the throttle signal from the receiver on M1.
+Mixing for flying-wing's is now supported by the on-board mixers, allowing OpenAero2 to stabilize the left flaperon, right flaperon and rudder.
 
 ==What camera gimbals can OpenAero2 stabilize?==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
