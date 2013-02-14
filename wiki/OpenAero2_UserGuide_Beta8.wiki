@@ -2,7 +2,7 @@
 
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 
-Please refer to the Frequently asked Questions 
+Please refer to the [OpenAero2_FAQ Frequently asked Questions]
 
 ==The LCD Menu System==
 
