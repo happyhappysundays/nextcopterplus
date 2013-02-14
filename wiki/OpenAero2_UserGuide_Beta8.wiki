@@ -1,8 +1,8 @@
-#summary OpenAero2  - User guide (V1.1 Beta 8)
+#summary OpenAero2  - Aeroplane User guide (V1.1 Beta 8)
 
-=The OpenAero2 User Guide (V1.1 Beta 8)=
+=Aeroplane User guide (V1.1 Beta 8)=
 
-Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] and the [OpenAero2_Getting_Started 'Getting Started Guide'] before proceeding to setup OpenAero2 on am aircraft.
+Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] and the [OpenAero2_Getting_Started 'Getting Started Guide'] before proceeding to setup OpenAero2 on a aeroplane.
 
 ==The LCD Menu System==
 
