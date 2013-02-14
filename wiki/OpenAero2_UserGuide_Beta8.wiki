@@ -31,17 +31,15 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 
 3 - *Auto-leveling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
 
-==What camera gimbals can OpenAero2 stabilize?==
-In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
+===Mixers===
 
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
 
 http://i.imgur.com/zCdGA.jpg?1
 
-
-
-
+==What camera gimbals can OpenAero2 stabilize?==
+In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 ==How do I connect up my model?==
 *A note about servo connections*
