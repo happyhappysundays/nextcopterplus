@@ -3,7 +3,7 @@
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 
 ==Frequently asked Questions==
-[WikiSyntax#What_is_OpenAero2?]
+[What_is_OpenAero2?]
 
 [WikiSyntax#What_is_OpenAero2?]
 [WikiSyntax#What models can OpenAero2 stabilize?]
