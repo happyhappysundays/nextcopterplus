@@ -8,8 +8,6 @@
   * Custom Mixers
  # What flight modes does OpenAero2 support?
  # What camera gimbals can OpenAero2 stabilize?
-  * Example 1
-  * Example 2
  # Where can I purchase a KK2 board from?
 
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
