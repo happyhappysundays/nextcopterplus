@@ -5,9 +5,9 @@
 ==Frequently asked Questions==
  # What is OpenAero2?
  # What models can OpenAero2 stabilize?
-  *Aeroplane Mixers
-  *Flying Wing Mixers
-  *Flight Modes
+  * Aeroplane Mixers
+  * Flying Wing Mixers
+  * Flight Modes
 
 
 ==What is OpenAero2?==
