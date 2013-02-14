@@ -3,11 +3,11 @@
 =The OpenAero2 User Guide (V1.1 Beta 8)=
 
 ==Frequently asked Questions==
-[WikiSyntax#What_is_OpenAero2?]
-[WikiSyntax#What models can OpenAero2 stabilize?]
-[WikiSyntax#Aeroplane Mixers]
-[WikiSyntax#Flying Wing Mixers]
-[WikiSyntax#Flight Modes]
+#What_is_OpenAero2?
+#What models can OpenAero2 stabilize?
+#Aeroplane Mixers
+#Flying Wing Mixers
+#Flight Modes
 
 
 ==What is OpenAero2?==
