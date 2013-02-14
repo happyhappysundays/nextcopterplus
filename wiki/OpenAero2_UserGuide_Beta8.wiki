@@ -4,8 +4,6 @@
 
 Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] and the [OpenAero2_Getting_Started 'Getting Started Guide'] before proceeding to setup OpenAero2 on am aircraft.
 
-Please refer to the [OpenAero2_FAQ Frequently asked Questions]
-
 ==The LCD Menu System==
 
 ===The Status Screen===
