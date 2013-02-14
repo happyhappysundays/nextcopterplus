@@ -14,8 +14,10 @@
   * Example 2
  # Where can I purchase a KK2 board from?
   * Can I purchase a KK2 board with OpenAero2 installed?
-  * How do I flash my KK2 board with OpenAero2?
- # How do I connect up my model?
+  * How do I load OpenAero2 onto a KK2 board?
+ # How do I connect the KK2 board in my model?
+  * Dual Power Supplies
+  * Receiver connections
 
 ==What is OpenAero2?==
 OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
@@ -51,16 +53,18 @@ OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely f
 ==What camera gimbals can OpenAero2 stabilize?==
 In Camera stability mode both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
-==Can I purchase a KK2 board with OpenAero2 installed?==
-
-
 ==Where can I purchase a KK2 board from?==
+The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 KK2 multi-rotor board] is manufactured and sold by only [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723&aff=97114 HobbyKing]. 
+
+*Royalties are paid by HobbyKing for each unit sold to Rolf R Bakke, the original KK Designer.
+
+===Can I purchase a KK2 board with OpenAero2 installed?===
 
 
-==How do I flash my KK2 board with OpenAero2?==
+===How do I flash my KK2 board with OpenAero2?===
 
 
-==How do I connect up my model?==
+==How do I connect the KK2 board in my model?==
 Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
 ===Dual Power Supplies==
