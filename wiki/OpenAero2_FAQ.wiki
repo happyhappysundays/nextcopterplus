@@ -56,4 +56,4 @@ HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Desi
 ===Can I purchase a KK2 board with OpenAero2 installed?===
 OpenAero2 has been developed as a free software download only.
 
-The process of loading the software, onto the KK2 board, can be done easily by following our guide.
+The process of loading the software, onto the KK2 board, can be done easily by following our [OpenAero2_Getting_Started Getting Started Guide]
