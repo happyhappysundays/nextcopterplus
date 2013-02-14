@@ -9,7 +9,7 @@ Once reprogrammed with OpenAero2, the KK2 board can be installed between your re
 ==What models can OpenAero2 stabilize?==
 OpenAero2 has been designed with two selectable presets, for easy configuration of the on-board mixers, to control dual-aileron aeroplane's or flying-wing's.
 
-Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channel outputs or up to 8 directly connected servos.
+Unlike other solutions, OpenAero2's on-board mixers are completely flexible, to allow control of up to 8 individual channels or directly connected servos.
 
 ===Aeroplane===
 In aeroplane mode there are four stabilised outputs - Left Aileron, Right aileron, Elevator and Rudder.
