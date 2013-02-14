@@ -6,16 +6,25 @@
   * Aeroplane Mixers
   * Flying Wing Mixers
   * Custom Mixers
-  * Flight Modes
+ # What flight modes does OpenAero2 support?
  # What camera gimbals can OpenAero2 stabilize?
   * Example 1
   * Example 2
  # Where can I purchase a KK2 board from?
- # Can I purchase a KK2 board with OpenAero2 installed?
+ # Where can I download OpenAero from?
+
 
 
 ==What is OpenAero2?==
-OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
+OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
+
+OpenAero2 is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
+If you feel motivated to donate to the project please feel free. I'm always happy to make special versions for people.
+
+http://i.imgur.com/uaRIu.png
+
+Yeah Google Code sucks and the button won't work. You can find a working button on the OpenAero2 Project page at the following link.
+https://sites.google.com/site/openaerowiki/home
 
 ==What models can OpenAero2 stabilize?==
 OpenAero2 has been designed with two selectable mixer presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
@@ -36,7 +45,7 @@ Each of the eight output channels can have any or all sensors mixed together. Al
 
 http://i.imgur.com/zCdGA.jpg?1
 
-===Flight Modes===
+===What flight modes does OpenAero2 support?===
 OpenAero2 offers three unique flight modes for aeroplanes, switchable remotely from the transmitter during flight, upon a designated receiver channel.
 
 1 - *Manual mode* - Deactivates all assistance from OpenAero2, by passing all servo control signals through from the receiver to the servos.
@@ -53,7 +62,7 @@ The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK
 
 HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Designer.
 
-===Can I purchase a KK2 board with OpenAero2 installed?===
-OpenAero2 has been developed as a free software download only.
+===Where can I download OpenAero from?===
+
 
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of loading the software onto the KK2 board.
