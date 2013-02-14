@@ -21,7 +21,7 @@ The latest version of OpenAero2 can be downloaded from [http://www.rcgroups.com/
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
  # Decompress the contains of the zip to a folder on your desktop.
  # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to programming head labeled JP1, in the lower left of the board, with the ribbon facing towards the screen.
- # Connect the USBasp to a free port on your computer. A green light on the USBasp should be lit and the screen of KK2 board should now display the text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you may have a faulty board.
+ # Connect the USBasp to a free port on your computer. A green light on the USBasp should be lit and the screen of KK2 board should now display the text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you can [http://www.hobbyking.com/hobbyking/store/supportform.asp return] the board to your to HobbyKing.
 
 ==How do I connect the KK2 board in my model?==
 Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
