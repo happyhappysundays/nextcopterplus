@@ -11,13 +11,8 @@
   * Example 1
   * Example 2
  # Where can I purchase a KK2 board from?
-  * Can I purchase a KK2 board with OpenAero2 installed?
-  * How do I load OpenAero2 onto a KK2 board?
- # How do I connect the KK2 board in my model?
-  * Dual Power Supplies
-  * Receiver connections
-   * PWM Receivers
-   * CPPM Receivers
+ # Can I purchase a KK2 board with OpenAero2 installed?
+
 
 ==What is OpenAero2?==
 OpenAero2 Beta 8 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufactures original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
@@ -62,83 +57,3 @@ HobbyKing pay royalties for each unit sold to Rolf R Bakke, the original KK Desi
 OpenAero2 has been developed as a free software download only.
 
 The process of loading the software, onto the KK2 board, can be done easily by following our guide.
-
-===How do I flash my KK2 board with OpenAero2?===
-
-
-==How do I connect the KK2 board in my model?==
-Once reprogrammed with a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321&aff=97114 USBasp], the KK2 board can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
-
-===Dual Power Supplies==
-Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, to prevent receiver brown-outs and a second to power the servos.
-
-A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this can be the 5 volt supply from the ESC's internal BEC.
-
-A second BEC must be connected to any of the pin marked M2-M8, to provide power to move the servos. Depending upon the specification of your servos, 5 to 6 volts can be used.
-
-We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
-
-
-*Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
-
-===Receiver connections===
-For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
-
-If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
-
- * AIL: Aileron signal input (required)
- * ELE: Elevator signal input (required)
- * THR: Second aileron signal input (optional)
- * RUD: Rudder signal input (optional) CPPM input
- * AUX: Stability switch input (required)
-
-Please make careful note that for OpenAero2 to output servo signals, at least two inputs, including the stability switch input *MUST* be connected to the KK2 board.
-
-Using the OpenAero2 menus, you can set up how you wish to control stability and autolevel. This will be discussed later in the guide.
-
-Here is a diagram showing how to connect up a PWM receiver.
-http://i.imgur.com/S2xRY.jpg
-
-===CPPM channel order===
-CPPM mode requires that the receiver and a transmitter can reallocate channels if not matching the JR/Spektrum or Futaba channel order.
-OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
-
-*JR/Spektrum*
- * CH1: Throttle
- * CH2: Aileron #1
- * CH3: Elevator
- * CH4: Rudder
- * CH5: Gear switch
- * CH6: Aileron #2
- * CH7: Aux 1
- * CH8: Aux 2 
-*Futaba*
- * CH1: Aileron #1
- * CH2: Elevator
- * CH3: Throttle
- * CH4: Rudder
- * CH5: Gear switch
- * CH6: Aileron #2
- * CH7: Aux 1
- * CH8: Aux 2 
-
-===Servo connections===
-For conventional aeroplanes the connections are as follows:
- * M1: Throttle (CPPM only)
- * M2: Free channel
- * M3: Free channel
- * M4: Free channel
- * M5: Elevator
- * M6: Left aileron (or primary aileron)
- * M7: Right aileron
- * M8: Rudder
-
-For flying wing models the connections are as follows:
- * M1: Throttle (CPPM only)
- * M2: Free channel
- * M3: Free channel
- * M4: Free channel
- * M5: Elevator
- * M6: Left elevon
- * M7: Right elevon
- * M8: Rudder
