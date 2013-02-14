@@ -57,7 +57,7 @@ In Camera stability mode, both gyros and accelerometers are enabled to stabilise
 ==Where can I purchase a KK2 board from?==
 The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
 
-Additionally, a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] from Hobbyking, is required to load the OpenAero2 software onto the KK2 board.
+Additionally, a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] from [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 Hobbyking] is required to load the OpenAero2 software onto the KK2 board.
 
 
 
