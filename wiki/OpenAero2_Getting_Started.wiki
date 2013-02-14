@@ -1,5 +1,11 @@
 #summary OpenAero2 - Getting started guide.
 
+==Please refer to the [OpenAero2_FAQ 'Frequently Ask Questions' 
+
+= The Getting Started Guide=
+
+
+ # How do I load OpenAero2 onto a KK2 board?
  # How do I connect the KK2 board in my model?
   * Dual Power Supplies
   * Receiver connections
