@@ -1,4 +1,4 @@
-#summary The OpenAero2 User guide (V1.1)
+#summary OpenAero2 - User guide (V1.1)
 
 =The OpenAero2 User Guide (V1.1)=
 ==What is OpenAero2?==
