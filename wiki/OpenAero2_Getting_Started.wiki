@@ -22,7 +22,7 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
  # Extract the 'OpenAero2.hex' file to an 'OpenAero2' on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
  # Extract the contains of the zip to a 'flash tool' folder on your desktop.
- # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to programming head labeled JP1, in the lower left of the board, with the ribbon facing towards the screen.
+ # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to programming head labeled JP1, in the lower left of the KK2 board, with the ribbon facing towards the screen.
  # Connect the USBasp to a free port on your computer. A green light on the USBasp should now be lit and the screen of KK2 board should now display text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you can [http://www.hobbyking.com/hobbyking/store/supportform.asp return] the board to your nearest HobbyKing warehouse.
  # Run 'kkMulticopterFlashTool.cmd' from the 'flash tool' folder on your desktop,
  # Select 'USBasp' from the programmer drop-down menu,
