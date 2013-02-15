@@ -148,8 +148,8 @@ typedef struct
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
 
 	// General items
-	int8_t		MixMode;				// Aeroplane/Flying Wing/Manual
-	int8_t		Orientation;			// Horizontal / vertical
+	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
+	int8_t		Orientation;			// Horizontal / vertical / upside-down
 	int8_t		Contrast;				// Contrast setting
 	int8_t		Status_timer;			// Status screen timer
 	int8_t		LMA_enable;				// LMA setting

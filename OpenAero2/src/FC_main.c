@@ -131,9 +131,11 @@
 //* To do
 //***********************************************************
 //
-// Dynamic gain linked to RC control so no R Cat max suppression (Use Source mix to to solve)
-//
-//
+// Dynamic gain linked to RC control so no RC at max suppression (trial fix done - test)
+// Check out flying wing mixing and polarities
+// Test failsafe modes and settings
+// Test Autolevel modes, hands-free, launch mode
+// Check orientation modes
 //
 //***********************************************************
 //* Includes
