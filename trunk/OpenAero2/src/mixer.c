@@ -38,7 +38,7 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 {
 	// Rudder -= Yaw; (normal)
 	// Aileron -= Roll; (normal)
-	// Elevator -= Pitch; (normal)
+	// Elevator += Pitch; (normal)
 
 	// Value, source_a,src_vol,source_mix, 
 	// Offset, min_travel, max_travel, Failsafe, source_a, source_a_vol

@@ -78,10 +78,11 @@ void Calculate_PID(void)
 	int16_t	roll_actual = 0;
 	int16_t temp16 = 0;
 
+
 	//************************************************************
 	// Modify gains dynamically as required
 	//************************************************************
-
+/*
 	// If dynamic gain set up 
 	if (Config.DynGainSrc != NOCHAN)
 	{
@@ -90,13 +91,14 @@ void Calculate_PID(void)
 			// Channel controlling the dynamic gain
 			temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
 
-			// Scale 0 - 2500 to 0 - Config.DynGain
+			// Scale 0 - 2500 down to 0 - Config.DynGain (%)
 			temp16 = temp16 / Config.DynGainDiv;
 
+			// scale32() needs a percentage
 			P_gain[axis] = P_gain[axis] - (int8_t)scale32(P_gain[axis], temp16);
 		}
 	}
-
+*/
 	//************************************************************
 	// Un-mix ailerons from flaperons as required
 	//************************************************************
@@ -216,6 +218,28 @@ void Calculate_PID(void)
 		//************************************************************
 	
 		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
+
+
+		//************************************************************
+		// Modify gains dynamically as required
+		// Do this by mixing between raw RC(no PID gain) and (RC + gyro)
+		//************************************************************
+
+//debug
+		// If dynamic gain set up 
+		if (Config.DynGainSrc != NOCHAN)
+		{
+			// Channel controlling the dynamic gain
+			temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
+
+			// Scale 0 - 2500 down to 0 - Config.DynGain (%)
+			temp16 = temp16 / Config.DynGainDiv;
+
+			// Dynamically vary the PID response depending on the dynamic gain input amount
+			PID_Gyros[axis] = (PID_Gyros[axis] * (Config.DynGainDiv - temp16) - RCinputsAxis[axis] * temp16) / Config.DynGainDiv;
+		}
+
+//debug
 
 		//************************************************************
 		// Calculate acc error from angle data (roll and pitch only)
