@@ -23,10 +23,10 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
 ==How do I flash my KK2 board with OpenAero2?==
 
  # Download the latest version of [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 OpenAero2].
- # Extract the 'OpenAero2.hex' file to an 'OpenAero2' on your desktop,
+ # Extract the 'OpenAero2.hex' file to a 'OpenAero2' folder on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
- # Extract the contains of the zip to a 'flash tool' folder on your desktop.
- # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to programming head labeled JP1, in the lower left of the KK2 board, with the ribbon facing towards the screen.
+ # Extract the contains of the zip file to a 'flash tool' folder on your desktop.
+ # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to the ISP programming head labeled JP1, in the lower left of the KK2 board, with the ribbon facing towards the screen.
  # Connect the USBasp to a free port on your computer. A green light on the USBasp should now be lit and the screen of KK2 board should now display text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you can [http://www.hobbyking.com/hobbyking/store/supportform.asp return] the board to your nearest HobbyKing warehouse.
  # Run 'kkMulticopterFlashTool.cmd' from the 'flash tool' folder on your desktop,
  # Select 'USBasp' from the programmer drop-down menu,
@@ -43,6 +43,10 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
 
 For best results, the KK2 board needs to be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
 
+As shown in the following diagram, the two piezo buzzer output pins indicate the front of the KK2 board, while the four buttons indicate the rear of the board.
+
+http://i.imgur.com/S2xRY.jpg
+
 ==How do I connect the KK2 board in my model?==
 
 The KK2 board should be installed between your receiver and servos, within your aircraft, to stabilize an aeroplane or a camera gimbal. 
@@ -51,7 +55,7 @@ The KK2 board should be installed between your receiver and servos, within your 
 
 Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, one to prevent receiver brown-outs and a second to power the servos.
 
-*Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
+*Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos in flight will cause the KK2 board to rebooting and crash your aircraft*
 
 ===KK2 Board===
 
@@ -73,16 +77,17 @@ The KK2 board supports either common multi-wire PWM receivers or single-wire CCP
 
 ===PWM Receivers===
 
-
-
-For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
-
+Common multi-wire PWM receivers are limited to the following inputs.
 
  * AIL: Aileron signal input (required)
  * ELE: Elevator signal input (required)
  * THR: Second aileron signal input (optional)
  * RUD: Rudder signal input (optional) CPPM input
  * AUX: Stability switch input (required)
+
+
+For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
+
 
 Please make careful note that for OpenAero2 to output servo signals, at least two inputs, including the stability switch input *MUST* be connected to the KK2 board.
 
