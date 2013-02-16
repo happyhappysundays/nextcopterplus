@@ -45,7 +45,7 @@ For best results, the KK2 board needs to be securely mounted with [http://www.ho
 
 ==How do I connect the KK2 board in my model?==
 
-can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
+The KK2 board should be installed between your receiver and servos, within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
 ==How do I power the KK2 board?==
 
