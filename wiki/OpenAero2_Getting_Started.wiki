@@ -35,8 +35,10 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
  # Once complete, ensure the read process has a 100% success rate.
  # Close the 'KKMulticopter Flashtool' and remove the USBasp from the computer.
 
+==How do I mount the KK2 board in my aeroplane?==
+For best results, the KK2 board needs to be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
+
 ==How do I connect the KK2 board in my model?==
-For best results, the KK2 board needs to be securely 
 
 can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
