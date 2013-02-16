@@ -1,4 +1,4 @@
-#summary How to use OpenAero2 for camera stability with RC control
+#summary OpenAero2 - Camera Stabilisation Guide with RC control
 
 =OpenAero2 Camera Stabilisation Setup Guide=
 =Part 2 - Stabilisation under RC control=
