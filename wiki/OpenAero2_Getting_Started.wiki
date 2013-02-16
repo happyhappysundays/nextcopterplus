@@ -69,13 +69,14 @@ We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UB
 
 ==How do I connect my receiver==
 
-The KK2 board supports either common PWM receivers, like Spektrum, or CCPM receivers.
+The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
 ===PWM Receivers===
 
+
+
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
 
-If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
 
  * AIL: Aileron signal input (required)
  * ELE: Elevator signal input (required)
@@ -91,6 +92,9 @@ Here is a diagram showing how to connect up a PWM receiver.
 http://i.imgur.com/S2xRY.jpg
 
 ===CPPM Receivers===
+
+If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
+
 
 CPPM mode requires that the receiver and a transmitter can reallocate channels if not matching the JR/Spektrum or Futaba channel order.
 OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
