@@ -1,4 +1,4 @@
-#summary How to use OpenAero2 for camera stability
+#summary OpenAero2 - Camera Stabilisation Guide
 
 =OpenAero2 Camera Stabilisation Setup Guide=
 =Part 1 - Stabilisation only=
