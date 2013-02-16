@@ -1,4 +1,4 @@
-#summary The OpenAero32 User guide
+#summary OpenAero32 - User Guide (Alpha 1)
 
 =The OpenAero32 User Guide (Alpha 1)=
 ==What is OpenAero32?==
