@@ -15,6 +15,8 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAe
   * PWM Receivers
   * CPPM Receivers
  # How do I connect my servos?
+  * Aeroplane Mode
+  * Flying-Wing Mode
 
 ==Where can I download OpenAero from?==
 
@@ -125,7 +127,7 @@ OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
 
 The OpenAero2 mixer presets support either conventional 'aeroplane mode' or 'flying-wing mode'.
 
-All unassigned channels designated as 'none' by the mixer presets can be manually customized for other purposes.
+All unassigned channels, designated as 'none' by the mixer presets, can be manually customized for other purposes.
 
 ===Aeroplane Mode===
 
