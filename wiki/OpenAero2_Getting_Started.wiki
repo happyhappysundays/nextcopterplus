@@ -89,18 +89,16 @@ Since V1.1 Beta 6, the throttle input channel can be used for the following purp
 
  * *Throttle* - Pass-through to M1 with receivers failsafe,
 
- * *Throttle* - Pass-through to M1 with OpenAero2's internal failsafe. Orange R610 receiver only.
+ * *Throttle* - Pass-through to M1 with OpenAero2's internal failsafe. Orange [http://www.hobbyking.com/hobbyking/store/__11965__OrangeRx_R610_Spektrum_DSM2_6Ch_2_4Ghz_Receiver_w_Sat_Port_.html R610] receiver only.
  * *Second Aileron* - For use for pre-mixed flaperons from transmitter.
 
 Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
 
 ===CPPM Receivers===
 
-If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
+Single-wire receivers can be connected to the *rudder* input for both signal and power.
 
-
-CPPM mode requires that the receiver and a transmitter can reallocate channels if not matching the JR/Spektrum or Futaba channel order.
-OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
+OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
 
 *JR/Spektrum*
  * CH1: Throttle
@@ -121,24 +119,34 @@ OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
  * CH7: Aux 1
  * CH8: Aux 2 
 
+*'CPPM mode' must be selected with the 'RC Setup' menu.*
+
 ==How do I connect my servos?==
 
-For conventional aeroplanes the connections are as follows:
- * M1: Throttle (CPPM only)
- * M2: Free channel
- * M3: Free channel
- * M4: Free channel
- * M5: Elevator
- * M6: Left aileron (or primary aileron)
- * M7: Right aileron
- * M8: Rudder
+The OpenAero2 mixer presets support either conventional 'aeroplane mode' or 'flying-wing mode'.
 
-For flying wing models the connections are as follows:
- * M1: Throttle (CPPM only)
- * M2: Free channel
- * M3: Free channel
- * M4: Free channel
- * M5: Elevator
- * M6: Left elevon
- * M7: Right elevon
- * M8: Rudder
+All unassigned channels designated as 'none' by the mixer preset can be manually customized for other purposes.
+
+===Aeroplane Mode===
+
+  * M1: Throttle - PWM pass-through or CPPM
+  * M2: None
+  * M3: None
+  * M4: None
+  * M5: Elevator
+  * M6: Left aileron
+  * M7: Right aileron
+  * M8: Rudder
+
+*Where a single aileron servo is required, M6 will become the master and M7 will remain unassigned as 'none'.*
+
+===Flying-Wing Mode===
+
+  * M1: Throttle - PWM pass-through or CPPM
+  * M2: None
+  * M3: None
+  * M4: None
+  * M5: Elevator
+  * M6: Left elevon
+  * M7: Right elevon
+  * M8: Rudder
