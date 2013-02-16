@@ -125,9 +125,11 @@ OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
 
 The OpenAero2 mixer presets support either conventional 'aeroplane mode' or 'flying-wing mode'.
 
-All unassigned channels designated as 'none' by the mixer preset can be manually customized for other purposes.
+All unassigned channels designated as 'none' by the mixer presets can be manually customized for other purposes.
 
 ===Aeroplane Mode===
+
+The following channel assignment will apply to most conventional aeroplanes.
 
   * M1: Throttle - PWM pass-through or CPPM
   * M2: None
@@ -138,7 +140,7 @@ All unassigned channels designated as 'none' by the mixer preset can be manually
   * M7: Right aileron
   * M8: Rudder
 
-*Where a single aileron servo is required, M6 will become the master and M7 will remain unassigned as 'none'.*
+Where a single aileron servo is required, M6 will become the master and M7 will remain unassigned as 'none'.
 
 ===Flying-Wing Mode===
 
