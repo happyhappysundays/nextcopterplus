@@ -23,7 +23,7 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
 ==How do I flash my KK2 board with OpenAero2?==
 
  # Download the latest version of [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 OpenAero2].
- # Extract the 'OpenAero2.hex' file to a 'OpenAero2' folder on your desktop,
+ # Extract the 'OpenAero2.hex' file an 'OpenAero2' folder on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
  # Extract the contains of the zip file to a 'flash tool' folder on your desktop.
  # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to the ISP programming head labeled JP1, in the lower left of the KK2 board, with the ribbon facing towards the screen.
@@ -31,17 +31,17 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
  # Run 'kkMulticopterFlashTool.cmd' from the 'flash tool' folder on your desktop,
  # Select 'USBasp' from the programmer drop-down menu,
  # Select 'Hobbyking KK2.0 (32kB flash)' from the controller drop-down menu,
- # On the 'Flashing firmware' tab, click upon the floppy disc icon,
- # Navigate to the 'OpenAero2' folder upon your desktop,
+ # On the 'Flashing firmware' tab, click on the floppy disc icon,
+ # Navigate to the 'OpenAero2' folder on your desktop,
  # Select the 'OpenAero2.hex' file and click 'open',
- # Maximize the application window, to see the writing and reading progress in the next step,
+ # Maximize the application window to see the writing and reading progress in the next step,
  # Click the green icon next to the floppy disc to start the writing process.
  # Once complete, ensure the read process has a 100% success rate.
  # Close the 'KKMulticopter Flashtool' and remove the USBasp from the computer.
 
 ==How do I mount the KK2 board in my aeroplane?==
 
-For best results, the KK2 board needs to be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
+For best results, the KK2 board should be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
 
 As shown in the following diagram, the two piezo buzzer output pins indicate the front of the KK2 board, while the four buttons indicate the rear of the board.
 
@@ -49,13 +49,13 @@ http://i.imgur.com/S2xRY.jpg
 
 ==How do I connect the KK2 board in my model?==
 
-The KK2 board should be installed between your receiver and servos, within your aircraft, to stabilize an aeroplane or a camera gimbal. 
+The KK2 board should be installed within your aircraft, between your receiver and servos, to stabilize an aeroplane or a camera gimbal. 
 
 ==How do I power the KK2 board?==
 
 Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, one to prevent receiver brown-outs and a second to power the servos.
 
-*Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos in flight will cause the KK2 board to rebooting and crash your aircraft*
+*Do not connect the 5V supply from M1, or the receiver to the servos on M2-M8, else the electrical noise from the servos in flight will cause the KK2 board to reboot and crash your aircraft*
 
 ===KK2 Board===
 
@@ -65,9 +65,9 @@ This will provide power to both the KK2 board and the receiver.
 
 ===Servos===
 
-A second BEC must be connected to any of the pin marked M2-M8, to power the servos. 
+A second BEC must be connected to any of the pins marked M2-M8, to power the servos. 
 
-Depending upon the specification of your servos, typically a 5 to 6 volt external BEC will be used.
+Depending on the specification of your servos, typically a 5 to 6 volt external BEC will be used.
 
 We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
 
@@ -79,22 +79,20 @@ The KK2 board supports either common multi-wire PWM receivers or single-wire CCP
 
 Common multi-wire PWM receivers are limited to the following inputs.
 
- * AIL: Aileron signal input (required)
- * ELE: Elevator signal input (required)
- * THR: Second aileron signal input (optional)
- * RUD: Rudder signal input (optional) CPPM input
- * AUX: Stability switch input (required)
+ * Aileron - Required
+ * Elevator - Required
+ * Throttle - Optional
+ * Rudder - Required
+ * Auxiliary - Flight mode switch (required)
 
+Since V1.1 Beta 6, the throttle input channel can be used for the following purposes.
 
-For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
+ * *Throttle* - Pass-through to M1 with receivers failsafe,
 
+ * *Throttle* - Pass-through to M1 with OpenAero2's internal failsafe. Orange R610 receiver only.
+ * *Second Aileron* - For use for pre-mixed flaperons from transmitter.
 
-Please make careful note that for OpenAero2 to output servo signals, at least two inputs, including the stability switch input *MUST* be connected to the KK2 board.
-
-Using the OpenAero2 menus, you can set up how you wish to control stability and autolevel. This will be discussed later in the guide.
-
-Here is a diagram showing how to connect up a PWM receiver.
-http://i.imgur.com/S2xRY.jpg
+Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
 
 ===CPPM Receivers===
 
