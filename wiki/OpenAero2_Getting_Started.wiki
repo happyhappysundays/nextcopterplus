@@ -77,9 +77,11 @@ We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UB
 
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
+Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
+
 ===PWM Receivers===
 
-Common multi-wire PWM receivers are limited to the following inputs.
+The KK2 board limits common multi-wire PWM receivers to the following inputs.
 
  * Aileron - Required
  * Elevator - Required
@@ -92,9 +94,7 @@ Since V1.1 Beta 6, the throttle input channel can be used for the following purp
  * *Throttle* - Pass-through to M1 with receivers failsafe,
 
  * *Throttle* - Pass-through to M1 with OpenAero2's internal failsafe. Orange [http://www.hobbyking.com/hobbyking/store/__11965__OrangeRx_R610_Spektrum_DSM2_6Ch_2_4Ghz_Receiver_w_Sat_Port_.html R610] receiver only.
- * *Second Aileron* - For use for pre-mixed flaperons from transmitter.
-
-Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
+ * *Second Aileron* - For use with pre-mixed flaperons from transmitter.
 
 ===CPPM Receivers===
 
