@@ -6,11 +6,15 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAe
 
  # Where can I download OpenAero from?
  # How do I load OpenAero2 onto a KK2 board?
+ # How do I mount the KK2 board in my aeroplane?
  # How do I connect the KK2 board in my model?
-  * Dual Power Supplies
-  * Receiver connections
-   * PWM Receivers
-   * CPPM Receivers
+ # How do I power the KK2 board?
+  * KK2 board
+  * Servos
+ # How do I connect my receiver?
+  * PWM Receivers
+  * CPPM Receivers
+ # How do I connect my servos?
 
 ==Where can I download OpenAero from?==
 
@@ -36,25 +40,39 @@ The link to the latest version of OpenAero2 can be found on [http://www.rcgroups
  # Close the 'KKMulticopter Flashtool' and remove the USBasp from the computer.
 
 ==How do I mount the KK2 board in my aeroplane?==
+
 For best results, the KK2 board needs to be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
 
 ==How do I connect the KK2 board in my model?==
 
 can be installed between your receiver and servos within your aircraft, to stabilize an aeroplane or a camera gimbal. 
 
-===Dual Power Supplies==
-Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, to prevent receiver brown-outs and a second to power the servos.
+==How do I power the KK2 board?==
 
-A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this can be the 5 volt supply from the ESC's internal BEC.
-
-A second BEC must be connected to any of the pin marked M2-M8, to provide power to move the servos. Depending upon the specification of your servos, 5 to 6 volts can be used.
-
-We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
-
+Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, one to prevent receiver brown-outs and a second to power the servos.
 
 *Do not connect the 5V supply from M1 or the receiver to the servos on M2-M8, else, the electrical noise from the servos will cause the KK2 board to rebooting during flight and crash your aircraft*
 
-===Receiver connections===
+===KK2 Board===
+
+A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this will be the 5 volt supply from the ESC's internal BEC.
+
+This will provide power to both the KK2 board and the receiver.
+
+===Servos===
+
+A second BEC must be connected to any of the pin marked M2-M8, to power the servos. 
+
+Depending upon the specification of your servos, typically a 5 to 6 volt external BEC will be used.
+
+We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
+
+==How do I connect my receiver==
+
+The KK2 board supports either common PWM receivers, like Spektrum, or CCPM receivers.
+
+===PWM Receivers===
+
 For a standard multi-wire PWM receiver you need to use the normal PWM inputs of the KK board. However, the THR input of the KK board has been repurposed to be the secondary aileron input. *Do not connect the throttle signal from your RX to this input.*
 
 If you have a CPPM receiver, connect the single wire to the RUDDER input. Also, don't forget to enable CPPM mode in the RC Setup menu.
@@ -72,7 +90,8 @@ Using the OpenAero2 menus, you can set up how you wish to control stability and 
 Here is a diagram showing how to connect up a PWM receiver.
 http://i.imgur.com/S2xRY.jpg
 
-===CPPM channel order===
+===CPPM Receivers===
+
 CPPM mode requires that the receiver and a transmitter can reallocate channels if not matching the JR/Spektrum or Futaba channel order.
 OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
 
@@ -95,7 +114,8 @@ OpenAero2 supports JR/Spektrum and Futaba CPPM channel order as shown below.
  * CH7: Aux 1
  * CH8: Aux 2 
 
-===Servo connections===
+==How do I connect my servos?==
+
 For conventional aeroplanes the connections are as follows:
  * M1: Throttle (CPPM only)
  * M2: Free channel
