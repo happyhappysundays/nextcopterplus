@@ -1,9 +1,16 @@
-#summary OpenAero2  - Aeroplane User guide (V1.1 Beta 8)
+#summary OpenAero2  - Aeroplane - Advanced User guide (V1.1 Beta 8)
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
-=Aeroplane User guide (V1.1 Beta 8)=
+=Aeroplane - Advanced User guide (V1.1 Beta 8)=
 
-Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] and the [OpenAero2_Getting_Started 'Getting Started Guide'] before proceeding to setup OpenAero2 on a aeroplane.
+Please ensure you have read the manuals in the following order.
+
+ # [OpenAero2_FAQ Frequently Ask Questions]
+ # [OpenAero2_Getting_Started Getting Started Guide]
+ # [OpenAero2_SetupGuide_Beta8 Aeroplane - Setup Guide (V1.1 Beta 8)] - Writing in progress
+ # [OpenAero2_UserGuide_Beta8 Aeroplane - Advanced User Guide (V1.1 Beta 8)]
+ 
+Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
 ==The LCD Menu System==
 
