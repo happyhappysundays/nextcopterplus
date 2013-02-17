@@ -322,7 +322,9 @@ Go into the General menu and change the Mode to that which suits your model. The
  * Make sure all the tranmitter channels are centered including the throttle, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
  * The right-hand column should now all be zero and change +/-1000 or so at the extremes of throw.
 *EXTREMELY IMPORTANT*
+
 Make sure that when you have both sticks away from you and to the right, all values are POSITIVE. 
+
 If they are negative, then reverse those channels in your TX until they are. 
 If your TX cannot reverse channels, go back into the RC Setup menu and use the Aileron/Elevator/Rudder reverse settings.
 Do not contine unless all the readings are positive when the sticks are held away from you and to the right. This is the OpenAero2 standard.
@@ -331,7 +333,10 @@ Do not contine unless all the readings are positive when the sticks are held awa
 
  * Once returned to the status menu, the servos should be activated and you should be able to control all outputs with the transmitter. Please make sure that stability and autolevel are both OFF to continue. Their status can easily be seen in the status menu.
 
- * Move all surfaces and check that they move as expected. While you can reverse the channels in the M1 to M8 mixers, it is best to reverse them in the transmitter first.
+ * Move all surfaces and check that they move as expected. If they are reversed, you must reverse the channels in the M1 to M8 mixers. Do not reverse them with the TX.
+
+ * To reverse the M1 to M8 channels, set the Primary Volume (normally 100%) to -100%.
+
 
 *Step 7: Gyro direction*
  * Now, switch on stability control while leaving autolevel OFF.
