@@ -13,43 +13,85 @@ Please post any questions and tips on [http://www.rcgroups.com/forums/showthread
 
 =Aeroplane - Setup guide (V1.1 Beta 8)=
 
-This guide presumes all values have been reset to their factory default values, for a quick and easy setup process, from 'factory reset' to 'ready to fly'.
-
 ==1. Factory reset==
 
+This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from 'factory reset' to 'ready to fly'.
+
  # Hold down all four buttons while powering up the KK2 board,
- # A "Reset" message will briefly appear on the screen after the OpenAero2 logo is displayed,
+ # A "*Reset*" message will briefly appear on the screen after the OpenAero2 logo is displayed,
  # Release all buttons once the red LED has blinked,
  # OpenAero will continue to display the status screen.
 
-==2. Mixer Preset==
+http://i.imgur.com/dHXBPzZ.jpg
 
-General, Mode - Aeroplane or Flying-wing
+==2. Model Type==
 
-==3. KK2 Board Orientation==
+OpenAero2 has been designed with two selectable model types, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
-General, Orientation - Horizontal, Vertical or Upside-down
+To display these model types, enter the *'General'* sub-menu and select '*Mode:*'.
 
-==4. Receiver setup==
+http://i.imgur.com/ekizXep.jpg
 
-RC setup
+Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
- # RX mode - PWM1, PWM2, PWM3 or CCPM - PWM1 defauts to rudder channel
- # CPPM order - JR/Spk or Futaba - 
- # Stab input - Optional - Gear for PWM
- # Autolevel input - Optional - Gear for PWM
- # 2nd Aileron - Aileron or remap throttle input for PWM
+Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on how to customize the mixers.
 
-==5. Stick Calibration==
+==5. Receiver setup==
+
+The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
+
+To setup OpenAero2 with your receiver, navigate through the following options, within the '*RC Setup*' sub-menu.
+
+ # CPPM order - *JR/Spk* or *Futaba* - Single-wire CPPM receivers *only*,
+ # RX mode - *PW1* or *CCPM* - Select '*PWM1*' for PWM receivers or '*CCPM*' for CPPM receivers,
+ # Stab input - *Gear* - Default for both PWM and most CPPM receivers,
+ # Autolevel input - *Gear* - Default for PWM receivers and optional for CPPM receivers,
+ # 2nd Aileron - Defines how M6 operates a second aileron servo.
+  * *None* - M6 will remain unassigned and will *not* operate a second aileron servo.
+  * *Aileron* - Primary aileron channel used to operate second aileron. Commonly used to simplify setup.
+  * *Aileron2* - CPPM receivers *only*. Allows use of additional channel to utilize flaperon mixing within transmitter.
+  * *Throttle* - PWM receivers *only*. Allows re-purposing of throttle channel to utilize flaperon mixing within transmitter.
+
+
+Set the Rx mode to suit your radio. Unless you are using CPPM, start with PWM1. CPPM users select CPPM.
+If you are using CPPM, also select the channel order between either JR/Spektrum or Futaba.
+Select which input channel you plan to use for stability. PWM users will normally select the fifth channel (GEAR) as that corresponds to the fifth (AUX) input on the KK2. CPPM users can pick any unused channel.
+Select which input channel you plan to use for autolevel. PWM users may select the unused throttle input (THROTTLE) or double-up the two functions on the fifth channel (GEAR). CPPM users can pick any unused channel.
+If your radio carries the second aileron channel set that here too.
+
+==6. Stick Calibration==
 
 RC Inputs, Calibrate
 
-CPPM throttle at 50%
+http://i.imgur.com/GFkv1lu.jpg
 
-==6. 
+The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
+
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered including the throttle before calibration.
+
+==7. Stability Mode==
+
+Stability, Mode - 3 position switch
+
+==8. Auto-level Mode==
+
+Autolevel, Mode - 3 position switch
 
 
 
  # Aileron reverse - Normal/Reverse
  # Elevator reverse - Normal/Reverse
  # Rudder reverse - Normal/Reverse
+
+
+
+
+
+
+==3. KK2 Board Orientation==
+
+General, Orientation - Horizontal, Vertical or Upside-down
+
+==4. Status Time==
+
+General, status time - 5 > 30
