@@ -15,6 +15,41 @@ Please post any questions and tips on [http://www.rcgroups.com/forums/showthread
 
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup process, from 'factory reset' to 'ready to fly'.
 
- # Factory reset
+==1. Factory reset==
 
-Hold down all four buttons while powering up the KK2 board. A "Resetting to defaults" will appear on the screen after a short delay, then release all buttons.
+ # Hold down all four buttons while powering up the KK2 board,
+ # A "Reset" message will briefly appear on the screen after the OpenAero2 logo is displayed,
+ # Release all buttons once the red LED has blinked,
+ # OpenAero will continue to display the status screen.
+
+==2. Mixer Preset==
+
+General, Mode - Aeroplane or Flying-wing
+
+==3. KK2 Board Orientation==
+
+General, Orientation - Horizontal, Vertical or Upside-down
+
+==4. Receiver setup==
+
+RC setup
+
+ # RX mode - PWM1, PWM2, PWM3 or CCPM - PWM1 defauts to rudder channel
+ # CPPM order - JR/Spk or Futaba - 
+ # Stab input - Optional - Gear for PWM
+ # Autolevel input - Optional - Gear for PWM
+ # 2nd Aileron - Aileron or remap throttle input for PWM
+
+==5. Stick Calibration==
+
+RC Inputs, Calibrate
+
+CPPM throttle at 50%
+
+==6. 
+
+
+
+ # Aileron reverse - Normal/Reverse
+ # Elevator reverse - Normal/Reverse
+ # Rudder reverse - Normal/Reverse
