@@ -1,5 +1,14 @@
 #summary OpenAero2 - Frequently Ask Questions
 
+Please ensure you read the manuals in the following order.
+
+ # [OpenAero2_FAQ Frequently Ask Questions]
+ # [OpenAero2_Getting_Started Getting Started Guide]
+ # [OpenAero2_SetupGuide_Beta8 Aeroplane - Setup Guide (V1.1 Beta 8)] - Writing in progress
+ # [OpenAero2_UserGuide_Beta8 Aeroplane - Advanced User Guide (V1.1 Beta 8)]
+ 
+Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
+
 =Frequently asked Questions=
  # What is OpenAero2?
  # What models can OpenAero2 stabilize?
