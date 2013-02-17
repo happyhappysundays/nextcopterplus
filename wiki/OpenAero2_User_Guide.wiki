@@ -1,4 +1,4 @@
-#summary OpenAero2 - User guide (V1.1 Beta 4)
+#summary OpenAero2 - User guide (V1.0 Beta 4)
 
 =The OpenAero2 User Guide (Beta 4)=
 ==What is OpenAero2?==
