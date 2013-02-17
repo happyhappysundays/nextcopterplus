@@ -85,7 +85,7 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Autolimit = 10;				// Autolevel trigger setting
 	Config.Stablimit = -30;				// Stability trigger setting
-	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
+//	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
 
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast

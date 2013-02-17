@@ -97,7 +97,7 @@ const char PText26[] PROGMEM = "Raw";
 const char AutoMenuItem2[]  PROGMEM = "Launch:";			// Autolevel text
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
-const char AutoMenuItem5[]  PROGMEM = "Max:";
+//const char AutoMenuItem5[]  PROGMEM = "Max:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char AutoMenuItem9[]  PROGMEM = "Autolevel:";
@@ -246,8 +246,8 @@ const char *text_menu[] PROGMEM =
 		//
 		//
 		StatusText1, StabMenuItem13, AutoMenuItem1,											// 37 to 45 Autolevel menu
-		AutoMenuItem4, AutoMenuItem5, AutoMenuItem7, AutoMenuItem8, 
-		AutoMenuItem2, AutoMenuItem16, 
+		AutoMenuItem4, AutoMenuItem7, AutoMenuItem8, 
+		AutoMenuItem2, AutoMenuItem16, Dummy0,
 		//
 		Dummy0, Dummy0, 																	// 
 		// 
