@@ -64,6 +64,10 @@ void Calculate_PID(void)
 	int32_t PID_Gyro_I_temp = 0;			// Temporary i-terms bound to max throw
 	int32_t PID_Gyro_I_actual = 0;			// Actual unbound i-terms
 	int8_t	axis;
+	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
+	int32_t mult32 = 0;
+	int32_t RC_Input_32;
+	int32_t PID_Gyros_32;
 
 	// Cross-ref for actual RCinput elements
 	// I have no idea why pitch has to be reversed here...
@@ -80,25 +84,15 @@ void Calculate_PID(void)
 
 
 	//************************************************************
-	// Modify gains dynamically as required
+	// Set up dynamic gain variable once per loop
 	//************************************************************
-/*
-	// If dynamic gain set up 
-	if (Config.DynGainSrc != NOCHAN)
-	{
-		for (axis = 0; axis <= YAW; axis ++)
-		{
-			// Channel controlling the dynamic gain
-			temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
 
-			// Scale 0 - 2500 down to 0 - Config.DynGain (%)
-			temp16 = temp16 / Config.DynGainDiv;
+	// Channel controlling the dynamic gain
+	temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
 
-			// scale32() needs a percentage
-			P_gain[axis] = P_gain[axis] - (int8_t)scale32(P_gain[axis], temp16);
-		}
-	}
-*/
+	// Scale 0 - 2500 down to 0 - Config.DynGain (%)
+	temp16 = temp16 / Config.DynGainDiv;
+
 	//************************************************************
 	// Un-mix ailerons from flaperons as required
 	//************************************************************
@@ -110,6 +104,14 @@ void Calculate_PID(void)
 		roll_actual = RCinputs[AILERON] + RCinputs[Config.FlapChan];
 		RCinputsAxis[ROLL] = roll_actual >> 1;
 	}
+
+	// In in Flying Wing mode RCinputsAxis is 50% of controls
+	else if (Config.MixMode == FWING)
+	{
+		RCinputsAxis[ROLL] = RCinputs[AILERON] >> 1;
+		RCinputsAxis[PITCH] = -RCinputs[ELEVATOR] >> 1;
+	}
+
 	// Otherwise roll is just roll...
 	else
 	{
@@ -219,27 +221,34 @@ void Calculate_PID(void)
 	
 		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
 
-
 		//************************************************************
 		// Modify gains dynamically as required
-		// Do this by mixing between raw RC(no PID gain) and (RC + gyro)
+		// Do this by mixing between raw RC(no PID) and PID
+		// PID gains are not changed but the effect is the same
 		//************************************************************
 
-//debug
 		// If dynamic gain set up 
 		if (Config.DynGainSrc != NOCHAN)
 		{
-			// Channel controlling the dynamic gain
-			temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
+			temp32 = 0;
+			mult32 = 0;
 
-			// Scale 0 - 2500 down to 0 - Config.DynGain (%)
-			temp16 = temp16 / Config.DynGainDiv;
+			// Promote to 32 bits and multiply
+			temp32 = PID_Gyros[axis];
+			mult32 = Config.DynGain - temp16;
+			PID_Gyros_32 = temp32 * mult32;
+
+			// Promote to 32 bits and multiply
+			temp32 = RCinputsAxis[axis];
+			mult32 = temp16;
+			RC_Input_32 = temp32 * mult32;
 
 			// Dynamically vary the PID response depending on the dynamic gain input amount
-			PID_Gyros[axis] = (PID_Gyros[axis] * (Config.DynGainDiv - temp16) - RCinputsAxis[axis] * temp16) / Config.DynGainDiv;
-		}
+			temp32 = ((PID_Gyros_32 - RC_Input_32) / (int32_t)Config.DynGain);
 
-//debug
+			// Cast back to native size
+			PID_Gyros[axis] = (int16_t)temp32;
+		}
 
 		//************************************************************
 		// Calculate acc error from angle data (roll and pitch only)

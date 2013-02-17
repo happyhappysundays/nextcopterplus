@@ -111,7 +111,7 @@ typedef struct
 	int8_t		Autolimit;				// Autolevel switch point (-125% to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		A_Pitch_P_mult;
-	int8_t		A_Limits;				// Max inclination (in degrees) via sticks during autolevel 
+//	int8_t		A_Limits;				// Max inclination (in degrees) via sticks during autolevel 
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;
 	int8_t		LaunchMode;				// Launch mode on/off

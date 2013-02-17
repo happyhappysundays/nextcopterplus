@@ -49,8 +49,8 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH2,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut2
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH3,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut3
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH4,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut4
-	{0,ELEVATOR,100,OFF,0,-100,100,   0,CH5,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,0,0,0,0,0,0},	// ServoOut5 (Elevator)
-	{0,AILERON,100, OFF,0,-100,100,   0,CH6,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut6 (Left aileron)
+	{0,ELEVATOR,100,OFF,0,-100,100,   0,CH5,-100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,0,0,0,0,0,0},	// ServoOut5 (Elevator)
+	{0,AILERON,100, OFF,0,-100,100,   0,CH6,-100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut6 (Left aileron)
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH7,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut7 (Right aileron)
 	{0,RUDDER,100, 	OFF,0,-100,100,   0,CH8,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut8 (Rudder)
 }; 
@@ -66,8 +66,8 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH3,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut3
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH4,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut4
 	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH5,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut5
-	{0,ELEVATOR,50,	OFF,0,-100,100,   0,CH6,100,AILERON,-50,ON, REVERSED,ON,NORMAL,OFF,NORMAL,ON,REVERSED,ON,NORMAL,0,0,0,0,0,0},	 // ServoOut6 (Left elevon)
-	{0,AILERON, 50,	OFF,0,-100,100,   0,CH7,100,ELEVATOR,50,OFF,REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,0,0,0,0,0,0},// ServoOut7 (Left elevon)
+	{0,ELEVATOR,-50,OFF,0,-100,100,   0,CH6,100,AILERON,-50,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,0,0,0,0,0,0}, // ServoOut6 (Left elevon)
+	{0,AILERON, 50,	OFF,0,-100,100,   0,CH7,100,ELEVATOR,-50,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,0,0,0,0,0,0},// ServoOut7 (Left elevon)
 	{0,RUDDER,100, 	OFF,0,-100,100,   0,CH8,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut8 (Rudder)
 }; 
 
@@ -237,14 +237,14 @@ void ProcessMixer(void)
 		if ((Config.FailsafeType == 1) && Failsafe && (Config.CamStab == OFF))
 		{
 			roll_trim += Config.FailsafeAileron;
-			roll_trim = roll_trim << 4;
+			roll_trim = roll_trim << 2;
 			pitch_trim += Config.FailsafeElevator;
-			pitch_trim = pitch_trim << 4;
+			pitch_trim = pitch_trim << 2;
 		}
 
-		// Add autolevel trims			
-		roll_trim += Config.AccRollZeroTrim;
-		pitch_trim += Config.AccPitchZeroTrim;
+		// Add autolevel trims * 4		
+		roll_trim += (Config.AccRollZeroTrim << 2);
+		pitch_trim += (Config.AccPitchZeroTrim << 2);
 
 		// Mix in accelerometers
 		for (i = 0; i < outputs; i++)
@@ -292,24 +292,21 @@ void ProcessMixer(void)
 	// Re-mix flaps from flaperons as required
 	//************************************************************ 
 
-	if (Stability)
+	if ((Stability) && (Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
 	{
 		for (i = 0; i < outputs; i++)
 		{
 			// Get solution
 			temp = Config.Channel[i].value;
 
-			// If set up for flaperons restore flaps
-			if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
+			// Restore flaps
+			if (Config.Channel[i].source_a == AILERON)
 			{
-				if (Config.Channel[i].source_a == AILERON)
-				{
-					temp += flap;
-				}
-				if (Config.Channel[i].source_a == Config.FlapChan)
-				{
-					temp -= flap;
-				}
+				temp += flap;
+			}
+			if (Config.Channel[i].source_a == Config.FlapChan)
+			{
+				temp -= flap;
 			}
 
 			// Update channel data solution

@@ -126,15 +126,14 @@
 //			Fixed flap handling in stabilised modes. Normalised sensor polarity with RC.
 //			Linked local G measurement with IMU calculation to solve negative G and (hopefully)
 //			coordinated turn issues.
+//			Dynamic gain updated to suit new code. Flying wing mixer changed and tested in all modes.
+//			Increased autolevel trim response x 4 
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Dynamic gain linked to RC control so no RC at max suppression (trial fix done - test)
-// Check out flying wing mixing and polarities
-// Test failsafe modes and settings
-// Test Autolevel modes, hands-free, launch mode
+// Make note in guide re -100% throttle in failsafe mode :)
 // Check orientation modes
 //
 //***********************************************************

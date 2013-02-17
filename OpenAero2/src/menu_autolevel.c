@@ -33,23 +33,22 @@ void menu_al_control(void);
 // Defines
 //************************************************************
 
-#define AUTOITEMS 9 	// Number of menu items
+#define AUTOITEMS 8 	// Number of menu items
 #define AUTOSTART 37 	// Start of Menu text items
 #define AUTOTEXT 199 	// Start of value text items
-#define AUTOOFFSET 75	// Value offsets
+#define AUTOOFFSET 72	// Value offsets
 
 //************************************************************
 // AUTO menu items
 //************************************************************
 
-const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 0, 101, 0};
+const uint8_t AutoMenuText[AUTOITEMS] PROGMEM = {AUTOTEXT, 0, 0, 0, 0, 0, 101, 0};
 const menu_range_t auto_menu_ranges[] PROGMEM = 
 {
 	{DISABLED,HANDSFREE,1,1,AUTOCHAN}, 	// Min, Max, Increment, Style, Default
 	{-125,125,10,0,10},
 	{0,127,1,0,60},
 	{0,127,1,0,60},
-	{10, 60, 5, 0, 45},	// Maximum angle
 	{-127,127,1,0,0}, 
 	{-127,127,1,0,0},
 	{OFF,ON,1,1,OFF},	// Launch mode
