@@ -2,8 +2,6 @@
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
-=Aeroplane - Setup guide (V1.1 Beta 8)=
-
 Please ensure you have read the manuals in the following order.
 
  # [OpenAero2_FAQ Frequently Ask Questions]
@@ -12,3 +10,11 @@ Please ensure you have read the manuals in the following order.
  # [OpenAero2_UserGuide_Beta8 Aeroplane - Advanced User Guide (V1.1 Beta 8)]
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
+
+=Aeroplane - Setup guide (V1.1 Beta 8)=
+
+This guide presumes all values have been reset to their factory default values, for a quick and easy setup process, from 'factory reset' to 'ready to fly'.
+
+ # Factory reset
+
+Hold down all four buttons while powering up the KK2 board. A "Resetting to defaults" will appear on the screen after a short delay, then release all buttons.
