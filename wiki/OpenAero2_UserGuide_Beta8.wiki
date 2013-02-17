@@ -13,7 +13,7 @@ For performance reasons the status screen will switch back to the idle screen af
 
 *Status screen*
 
-http://i.imgur.com/4xbBz.jpg
+http://i.imgur.com/dHXBPzZ.jpg
 
  * *Mode:* The current mixer preset
  * *Version:* The version number of the loaded firmware
@@ -27,10 +27,10 @@ Pressing button 1 goes to the main menu.
 
 *Idle screen*
 
-http://i.imgur.com/kGAvd.jpg
+http://i.imgur.com/RG7ysDN.jpg
 
 ===Main Menu===
-http://i.imgur.com/jJ5LF.jpg
+http://i.imgur.com/MRclMpq.jpg
 
 *Main menu*
 The main menu stops the loop. The main menu controls should be self-explanatory.
@@ -49,31 +49,30 @@ RIGHT saves the item
 UD/DOWN increments and decrements the item
 
 ===General Menu===
-http://i.imgur.com/d1CeG.jpg
+http://i.imgur.com/ekizXep.jpg
 
  * *Mode:* Allows you to select from the input preset mixers. Currently there are presets for dual-aileron aeroplane and flying wing.
- * *Orientation:* Remaps the sensors so that you can mount the board vertically (buttons down) in space-restricted areas.
+ * *Orient:* Remaps the sensors so that you can mount the board vertically (buttons down) in space-restricted areas.
  * *Contrast:* Allows you to change the contrast of the LCD. See below.
  * *Status time:* Allows you to set the amount of time the status screen is displayed until it is replaced by the idle mode screen. Settable from 1 to 30 seconds.
 
-http://i.imgur.com/EFUhY.jpg
+http://i.imgur.com/cc9ncjb.jpg
 
- * *RC mix:* Enables the eight on-board RC mixers.
  * *LMA timeout:*  Allows you to set the amount of time without RC activity before the Lost Model Alarm goes off. Setting to zero disables the alarm.
  * *Camera stab.:* Setting this to ON allows the board to function without an external RC source. Use only for stand-alone camera stability.
  * *Servo rate:* If Camera Stab is ON, you can increase the servo refresh rate on M1 to M4 to 300Hz. 
-
-http://i.imgur.com/S77MW.jpg
-
  * *Acc LPF:* Allows adjustment of the accelerometer Low-Pass Filter from 1 (infinite) to 64 (about 1 Hz)
+
+http://i.imgur.com/8GNlSJ2.jpg
+
  * *CF factor:* Controls the fusion of Accelerometer and Gyros. The higher the number the faster as gyro is favoured, the lower the more accurate but slower.
  * *H. Hold:* Heading hold mode. There are three options.
  # *Normal:* Heading hold is processed normally when the I-terms and I-term limits are set correctly.
  # *Auto:* Automatically centers all axis when in heading hold mode if they have drifted off-center.
  # *3D:* Allows the sticks to re-center the I-term neutral when in heading hold mode. Use with great caution and test the mode out first before attempting to fly. Also, make absolutely sure you can switch off stability if required.
- * *Flight mode:* There are two options.
- # *Normal:* As per V1.0 and earlier. Sticks over-ride gyro input but gyros dampen sticks.
- # *FlyByWire:* Sticks taken into account. Sticks set gyro rotation rate in stability mode and so are much more responsive. In autolevel mode, the sticks set the pitch/roll angle up to a maximum limit of 60 degrees. See Autolevel menu for more.
+ * *Adv.IMU:* There are two options.
+ # *OFF:* As per V1.0 and earlier. Sticks over-ride gyro input but gyros dampen sticks.
+ # *ON:* Sticks taken into account. Sticks set gyro rotation rate in stability mode and so are much more responsive. Autolevel mode is the same as V1.0 but the IMU takes inverted attitudes into account.
 
 ===Adjusting LCD Contrast===
 http://i.imgur.com/WzAeW.jpg
@@ -84,18 +83,23 @@ http://i.imgur.com/tjW92.jpg
  * Increasing the number increases contrast.
 
 ===RC Setup Menu===
-http://i.imgur.com/asuS7.jpg
+http://i.imgur.com/thOmcij.jpg
 
- * *CPPM Ch. Order:* When using CPPM input, this setting allows you to select either JR/Spektrum (TAER) or Futaba (AETR) channel order. 
+ * *CPPM order:* When using CPPM input, this setting allows you to select either JR/Spektrum (TAER) or Futaba (AETR) channel order. 
  * *RX mode:* Many users have previously experienced trouble with their receivers and OpenAero. For many it was because they did not use a rudder input. The rudder input was used by the software to signify that all channel data had been received. Synching on the rudder was called PWM1. Next I tried the option of synching on the stabilisation channel as it is normally a higher channel number, That is called PWM2. PWM1 and PWM2 are the same as in OpenAero, but PWM3 is new. PWM3 is for synching with whatever is on that fifth channel the KK2 has. If you have no servo jitter, then PWM1 is working for you, but if you use PWM, please try PWM2 and PWM3 to see what difference they make.
- * *Stability input:* Set this to the channel number that you plan to use for stability control.
- * *Autolevel input:* Set this to the channel number that you plan to use for autolevel control. It can be the same as for stability if you like.
-http://i.imgur.com/Szm8F.jpg
+ * *Stab input:* Set this to the channel number that you plan to use for stability control.
+ * *Autolevel input:* Set this to the channel number that you plan to use for autolev input. It can be the same as for stability if you like.
+
+http://i.imgur.com/GLfbPvq.jpg
+
  * *2nd aileron:* Set this to the channel number that your radio uses for the second aileron channel.
 need a fixed offset to feed that channel. These can be set up here.
+ * *Aileron rev:* If your TX cannot reverse channels to suit OpenAero2 then you can do this here. Remember to do this FIRST of all when setting up.
+ * *Elevator rev:* If your TX cannot reverse channels to suit OpenAero2 then you can do this here. Remember to do this FIRST of all when setting up. 
+ * *Rudder rev:* If your TX cannot reverse channels to suit OpenAero2 then you can do this here. Remember to do this FIRST of all when setting up.
 
 ===Stability Control Menu===
-http://i.imgur.com/YjFka.jpg
+http://i.imgur.com/iU30Ehk.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
  # *Autochan:* On when the channel set as "Autochan" in RC settings is more than the trigger setting. 
@@ -105,29 +109,32 @@ http://i.imgur.com/YjFka.jpg
  * *Trigger:* Stick position to enable (-125% to 125%)
  * *Dyn.Gain Ch:* The channel used to influence the overall PID gain of all axis. 
  * *Dyn.Gain:* The amount of attenuation you desire at the 100% point of the Dynamic gain channel source. Setting 100 will completely remove stability at 100% of the source channel's value.
+
+http://i.imgur.com/tKhfv5x.jpg
+
  * *Roll P:* PID Proportional gain for the roll gyro
  * *Roll I:* PID I-term gain for the roll gyro
-
-http://i.imgur.com/gVblu.jpg
  * *Roll D:* PID Differential gain for the roll gyro
  * *Pitch P:* PID Proportional gain for the pitch gyro
+
+http://i.imgur.com/93J7hml.jpg
+
  * *Pitch I:* PID I-term gain for the roll gyro
  * *Pitch D:* PID Differential gain for the pitch gyro
-
-http://i.imgur.com/xzu6E.jpg
  * *Yaw P Gain:* PID Proportional gain for the yaw gyro
  * *Yaw I Gain:* PID I-term gain for the roll gyro
+
+http://i.imgur.com/Rlag2QR.jpg
+
  * *Yaw D Gain:* PID Differential gain for the yaw gyro
  * *Roll I Limit:* Maximum influence of I-term (-125% to 125%)
-
-http://i.imgur.com/sTnwi.jpg
  * *Pitch I Limit:* Maximum influence of I-term (-125% to 125%)
  * *Yaw I Limit:* Maximum influence of I-term (-125% to 125%)
 
 
 *Note:* The function of PID gain controls is outside the scope of this basic User's Guide.
 ===Autolevel Control Menu===
-http://i.imgur.com/bMfnM.jpg
+http://i.imgur.com/I6797Ij.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
  # *Autochan:* On when the channel set as "Autochan" in RC settings is more than the trigger setting.
@@ -138,46 +145,45 @@ http://i.imgur.com/bMfnM.jpg
  * *Trigger:* Stick position to enable (-125% to 125%)
  * *Roll P:* PID Proportional gain for the roll accelerometer
  * *Pitch P:* PID Proportional gain for the pitch accelerometer
- * *Max:* Maximum roll/pitch angle allowed in FlyByWire mode. Model will not roll/pitch beyond this point.
 
-http://i.imgur.com/TjPUm.jpg
+http://i.imgur.com/Yubz6rP.jpg
+
  * *Roll trim:* For fine roll tuning of the autolevel.
  * *Pitch trim:* For fine pitch tuning of the autolevel.
  * *Launch:* Enable/disable launch mode. When enabled, the autolevel will be disabled for 10 seconds after it is triggered by a throttle position higher than set by "THR.pos".
  * *THR.pos:* Throttle stick position to enable launch timer.
 
-===Expo Menu===
-http://i.imgur.com/UJCkf.jpg
- * *Aileron:* Aileron expo in %.
- * *Elevator:* Elevator expo in %.
- * *Rudder:* Rudder expo in %.
- * *Differential(%):* Sets aileron differential. 0% results in even travel, 100% results in 100% upward travel and no downward travel.
-http://i.imgur.com/m797m.jpg
- * The on-screen graph is drawn using the actual expo table and so gives you an accurate view of the response curve.
+===Failsafe Menu===
+http://i.imgur.com/r5r2OeI.jpg
+ * *THR.pos %:* Throttle position when in advanced failsafe (in %). Note that the throttle position ranges from -100% (min) to 100% (max).
+ * *Elevator:* Elevator trim when in advanced failsafe.
+ * *Aileron:* Aileron trim when in advanced failsafe.
+ * *Rudder:* Rudder trim when in advanced failsafe.
 
 ===Battery Menu===
-http://i.imgur.com/AMTKt.jpg
+http://i.imgur.com/3Xlq3a2.jpg
  * *Battery type:* Used internally to preset the min and max cell volatges.
  * *Cells:* Number of cells in your battery pack. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
  * *Alarm (mV):* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
  * *Max (mV):* Set this to the maximum cell voltage that you like to use. Defaults to 420 (4.2V) for LiPo.
-http://i.imgur.com/FCbur.jpg
+http://i.imgur.com/GVg5Zjd.jpg
  * *Min (mV):* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
 
 
 ===RC inputs Screen===
-http://i.imgur.com/WlVhb.jpg
+http://i.imgur.com/GFkv1lu.jpg
 
 The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
 
-Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered including the throttle at before calibration.
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered *including the throttle* before calibration.
 
 Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
 Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
 It is recommended that receivers with built-in failsafe be set up and used.
+Regardless of your plan to use failsafe, please center all sticks and *set the throttle to minimum* and press button 3. This will set a safe default failsafe.
 
 ===Sensor Inputs Screen===
-http://i.imgur.com/qUqmL.jpg
+http://i.imgur.com/7dhO81Z.jpg
 
 The sensor inputs screen shows you the current values of all sensors. 
 Pressing button 4 "Cal." calibrates the accelerometers. The gyros are calibrated at start-up.
@@ -185,57 +191,62 @@ Pressing button 4 "Cal." calibrates the accelerometers. The gyros are calibrated
 Pressing button 3 "Inv." will initiate an extra inverted calibration step. After doing the normal calibration above, invert the model and press button 3. This helps the software to more accurately detect the inverted attitude.
 
 ===Level Meter Screen===
-http://i.imgur.com/L4Qte.jpg
+http://i.imgur.com/It14TuJ.jpg
 
 The level meter screen shows you a graphical representation of where the board considers "down" to be. 
 
 ===Mixer Menu 1 to 8===
 Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
 
-http://i.imgur.com/YWty6.jpg
+http://i.imgur.com/n7MnGIn.jpg
+
 There is a pair of RC mixers on each output channel. These can be used as the source channel.
 You can therefore do delta, taileron, elevon etc mixing with OpeAero2 without needing special transmitter mixing functions.
- * *Source A:* Set the first channel source to be mixed here. 
+The second source channel is on the next screen.
+ * *Source A:* Set the primary channel source to be mixed. 
  * *Volume (%):* Set the amount of channel A required.
- * *Source B:* Set the second channel source to be mixed here. 
- * *Volume (%):* Set the amount of channel B required.
-Note that you can reverse the source channel by using a negative source volume, such as -100%.
+ * *Source mix:* Copies the RC source through to the mixer. Normally OFF. Advanced users only.
+ * *Offset(%):* The center servo position -125% to 125%. Please use this to mechanically center your control surfaces, not the TX trims.
 
-http://i.imgur.com/bU7aY.jpg
+http://i.imgur.com/BFh2Lxz.jpg
+ * *Min(%):* The minimum servo travel limit -125% to 125%.
+ * *Max(%):* The minimum servo travel limit -125% to 125%.
+ * *Failsafe(%):* The failsafe servo position -125% to 125%. Over-ridden by pressing the failsafe button on the RC Inputs screen.
+
+http://i.imgur.com/izYOfCC.jpg
+
+ * *Primary:* This is the primary source for the output mixer. Normally this defaults to the current channel. This tells the software what to send to the servo or ESC.
+ * *Volume (%):* The amount of the primary channel to be send to the servo/ESC. Note that you can reverse the source channel by using a negative source volume, such as -100%. If you need to reverse a channel, *do it here* by setting this to -100%.
+ * *Source B:* Set the secondary channel source to be mixed. 
+ * *Volume (%):* Set the amount of channel B required.
+
+http://i.imgur.com/436xVhf.jpg
 
  * *Roll gyro:* Roll gyro signal enable/disable (Off/On). If you wish this output to respond to roll, enable this. 
  * *Polarity:* If the response is backwards to what you need, set this to Reversed.
  * *Pitch gyro:* Pitch gyro signal enable/disable (Off/On). If you wish this output to respond to pitch, enable this. 
  * *Polarity:* If the response is backwards to what you need, set this to Reversed.
 
-http://i.imgur.com/yyRGU.jpg
+http://i.imgur.com/4CbBTax.jpg
 
  * *Yaw gyro:* Yaw gyro signal enable/disable (Off/On). If you wish this output to respond to yaw, enable this. 
  * *Polarity:* If the response is backwards to what you need, set this to Reversed.
  * *Roll acc:* Roll accelerometer signal enable/disable (Off/On). If you wish this output to respond to the roll accelerometer, enable this. 
  * *Polarity:* If the response is backwards to what you need, set this to Reversed.
 
-http://i.imgur.com/qr4KJ.jpg
+http://i.imgur.com/9879VwY.jpg
 
  * *Pitch acc:* Pitch accelerometer signal enable/disable (Off/On). If you wish this output to respond to the pitch accelerometer, enable this. 
  * *Polarity:* If the response is backwards to what you need, set this to Reversed.
- * *Primary:* This is the primary source for the output mixer. Normally this defaults to the current channel. This tells the software what to send to the servo or ESC.
- * *Volume (%):* The amount of the primary channel to be send to the servo/ESC.
-
-http://i.imgur.com/AaoUP.jpg
  * *Crossmix:* This is the second source for the output mixer. This will be mixed with the primary.
  * *Volume (%):* The amount of the second channel to be send to the servo/ESC.
+
+http://i.imgur.com/tUKAiAQ.jpg
+
  * *Crossmix:* This is the third source for the output mixer. This will be mixed with the primary.
  * *Volume (%):* The amount of the third channel to be send to the servo/ESC.
  * *Crossmix:* This is the fourth source for the output mixer. This will be mixed with the primary.
  * *Volume (%):* The amount of the fourth channel to be send to the servo/ESC.
-
-http://i.imgur.com/MsMWo.jpg
-
- * *Min(%):* The minimum servo travel limit -125% to 125%.
- * *Max(%):* The minimum servo travel limit -125% to 125%.
- * *Failsafe(%):* The failsafe servo position -125% to 125%. Over-ridden by pressing the failsafe button on the RC Inputs screen.
- * *Offset(%):* The center servo position -125% to 125%.
 
 ==Error messages==
 If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
@@ -310,6 +321,11 @@ Go into the General menu and change the Mode to that which suits your model. The
  * Go to the RC Inputs screen and switch on your transmitter and receiver. You should immediately see values appearing in both columns next to each connected channel.
  * Make sure all the tranmitter channels are centered including the throttle, and press button 4, under the screen label "Cal." This performs a stick centering calibration.
  * The right-hand column should now all be zero and change +/-1000 or so at the extremes of throw.
+*EXTREMELY IMPORTANT*
+Make sure that when you have both sticks away from you and to the right, all values are POSITIVE. 
+If they are negative, then reverse those channels in your TX until they are. 
+If your TX cannot reverse channels, go back into the RC Setup menu and use the Aileron/Elevator/Rudder reverse settings.
+Do not contine unless all the readings are positive when the sticks are held away from you and to the right. This is the OpenAero2 standard.
 
 *Step 6: Servo direction*
 
