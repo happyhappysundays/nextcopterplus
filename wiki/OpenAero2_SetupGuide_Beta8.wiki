@@ -36,7 +36,11 @@ Unlike other solutions, OpenAero2's on-board mixers are completely flexible to a
 
 Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on how to customize the mixers.
 
-==5. Receiver setup==
+==3. Board Orientation==
+
+General, Orientation - Horizontal, Vertical or Upside-down
+
+==4. Receiver setup==
 
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
@@ -54,7 +58,7 @@ To setup OpenAero2 with your receiver, navigate through the following options, w
   * *Aileron2* - CPPM receivers *only*. Allows use of additional channel to utilize flaperon mixing within transmitter.
   * *Throttle* - PWM receivers *only*. Allows re-purposing of throttle channel to utilize flaperon mixing within transmitter.
 
-==6. Stick Calibration==
+==5. Stick Calibration==
 
 Center stick calibration allows OpenAero2 to determine pilot commands to roll an axis and possible automatic activation of advanced features.
 
@@ -66,29 +70,44 @@ Within the '*RC Inputs*' sub-menu, select 'Calibrate' (button 4), to return all 
 
 When using a CPPM or PWM receiver with throttle pass-through, ensure the throttle stick is also at center stick.
 
-==7. Stability Mode==
+Note - if using 3-position flight switch, ensure the physical switch  is centered when calibrating the input channels.
 
-Stability, Mode - 3 position switch
+==6. Stick Polarity==
 
-==8. Auto-level Mode==
+With both sticks in their top right corners, ensure all the values are positive.
 
-Autolevel, Mode - 3 position switch
+If not, reverse the problematic channel in RC Setup.
 
+Bug with aileron input reversal.
 
-
- # Aileron reverse - Normal/Reverse
+# Aileron reverse - Normal/Reverse
  # Elevator reverse - Normal/Reverse
  # Rudder reverse - Normal/Reverse
 
+==7. Stability Setup==
+
+Stability, Mode - 3 position switch
+
+==8. Auto-level Setup==
+
+Autolevel, Mode - 3 position switch
+
+==9. Sensor Calibration==
+
+Calibrate
+
+Inverted calibrate
+
+==10. Level Meter==
+
+Check circle in square
 
 
 
 
 
-==3. KK2 Board Orientation==
 
-General, Orientation - Horizontal, Vertical or Upside-down
 
-==4. Status Time==
+14.Failsafe Settings
 
-General, status time - 5 > 30
+16.Battery Monitor
