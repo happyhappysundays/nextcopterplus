@@ -38,13 +38,13 @@ Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_User
 
 ==3. Board Orientation==
 
-OpenAero2 currently supports the following 3 mounting orientations.
+OpenAero2 supports the following 3 mounting orientations.
 
  # Horizontal - Default orientation, buttons facing aft with screen to the front.
- # Vertical - Buttons down with screen on top.
- # Upside down - Inverted, buttons facing aft with screen to the front.
+ # Vertical - Buttons down with the screen on top.
+ # Upside down - Inverted, buttons facing aft with the screen to the front.
 
-To change the default orientation from horizontal, modify the 'orient' option within the 'general' menu.
+To change the default orientation from horizontal, modify the '*orient*' option within the '*general*' menu.
 
 ==4. Receiver setup==
 
