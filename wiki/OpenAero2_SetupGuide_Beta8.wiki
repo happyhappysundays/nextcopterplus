@@ -34,7 +34,7 @@ http://i.imgur.com/ekizXep.jpg
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
-Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on how to customize the mixers.
+Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on how to customize the mixers
 
 ==3. Board Orientation==
 
@@ -104,16 +104,27 @@ By default, the '*StabChan*' option allows a 2-position switch to activate gyro 
 
 http://i.imgur.com/thOmcij.jpg
 
-Optionally, selecting '*3-pos*' allows a 3-position to alternate between all three flight modes upon the single '*gear*' channel. 
+Optionally, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single '*gear*' channel. 
 
 Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
 ==8. Auto-level Setup==
 
-Similar to stability mode, 
+Similar to stability mode, OpenAero2 supports the remote activation of autoleveling either via a two or three position switch.
 
+http://i.imgur.com/I6797Ij.jpg
 
-Autolevel, Mode - 3 position switch
+By default, the '*AutoChan*' option allows a 2-position switch to activate autoleveling via the '*gear*' channel, defined by '*Autolev input*' within '*RC Setup*' menu. A 2-position flight switch will be limited to autoleveling *on* or *off*.
+
+However, if the '*gear*' channel is used for both '*StabChan*' and '*AutoChan*', both stabilization and autoleveling will be switch on and off together.
+
+Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on 'Hands Free' mode.
+
+http://i.imgur.com/thOmcij.jpg
+
+Optionally, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single '*gear*' channel. 
+
+Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
 ==9. Sensor Calibration==
 
