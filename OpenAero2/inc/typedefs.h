@@ -11,7 +11,7 @@
 
 #define INPUT 	0
 #define OUTPUT 	1
-#define MAX_RC_SOURCES 15				// Maximum input channels including non-RX channels
+#define MAX_RC_SOURCES 9				// Maximum input channels including non-RX channels
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define MAX_OUTPUTS 8					// Maximum output channels
 #define MIN_OUTPUTS 4					// Minimum output channels
@@ -31,21 +31,24 @@ typedef struct
 	int16_t	trim;
 } servo_limits_t;
 
-// Input mixer definition
+// Channel mixer definition
 typedef struct
 {
-	int16_t		value;					// Current value
-	int8_t		source_a;				// Source A RC input for calculation
-	int8_t		source_a_volume;		// Percentage of source to pass on
-	int8_t		source_mix;				// Source RC included in stabilised modes
+	int16_t		value;					// Current value of this channel
+
+	// Servo menu
+	int8_t		Servo_reverse;			// Reversal of output channel
 	int8_t		Offset;					// Trim/neutral position (-125 to 125)
 	int8_t		min_travel;				// Minimum output value (-125 to 125)
 	int8_t		max_travel;				// Maximum output value (-125 to 125)
 	int8_t		Failsafe;				// Failsafe position (-125 to 125)
-	int8_t		output_a;				// Channel A for calculation
-	int8_t		output_a_volume;		// Percentage of output to use
+
+	// Input mix menu
+	int8_t		source_a;				// Source A RC input for calculation
+	int8_t		source_a_volume;		// Percentage of source to pass on
 	int8_t		source_b;				// Optional source B RC input for calculation
 	int8_t		source_b_volume;		// Percentage of source to pass on
+	int8_t		source_mix;				// Source RC included in stabilised modes
 	int8_t		roll_gyro;				// Use roll gyro
 	int8_t		roll_gyro_polarity;		// Roll gyro normal/reverse
 	int8_t		pitch_gyro;				// Use pitch gyro
@@ -56,6 +59,8 @@ typedef struct
 	int8_t		roll_acc_polarity;		// Roll acc normal/reverse
 	int8_t		pitch_acc;				// Use pitch acc
 	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
+
+	// Ouput mix menu
 	int8_t		output_b;				// Channel B for calculation
 	int8_t		output_b_volume;		// Percentage of output to use
 	int8_t		output_c;				// Channel C for calculation
@@ -80,7 +85,7 @@ typedef struct
 	// Menu adjustable items
 	// RC settings
 	uint8_t		ChannelOrder[MAX_RC_CHANNELS];	// Assign channel numbers to hard-coded channel order
-										// OpenAeroEvo uses Thr, Ail, Ele, Rud, Gear, Flap, Aux1, Aux2
+										// OpenAero2 uses Thr, Ail, Ele, Rud, Gear, Flap, Aux1, Aux2
 										// THROTTLE will always return the correct data for the assigned throttle channel
 										// AILERON will always return the correct data for the assigned aileron channel
 										// ELEVATOR will always return the correct data for the assigned elevator channel
@@ -111,7 +116,6 @@ typedef struct
 	int8_t		Autolimit;				// Autolevel switch point (-125% to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		A_Pitch_P_mult;
-//	int8_t		A_Limits;				// Max inclination (in degrees) via sticks during autolevel 
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 	int8_t		AccPitchZeroTrim;
 	int8_t		LaunchMode;				// Launch mode on/off
@@ -170,6 +174,9 @@ typedef struct
 
 	// Acc
 	uint16_t	AccZero[3];				// Acc calibration results
+	
+	// Menu channel number
+	int8_t		MenuChannel;			// Current M1 to M8 channel
 
 } CONFIG_STRUCT;
 

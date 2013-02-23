@@ -22,7 +22,6 @@ extern CONFIG_STRUCT Config;
 //* Project defines
 //***********************************************************
 
-#define VERSION 20		// OpenAero version number
 #define MENUITEMS 34
 
 //***********************************************************
@@ -128,7 +127,7 @@ enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX
 enum SwitchModes	{DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE};
 enum Availability	{OFF = 0, ON};
 enum BatteryType	{LIPO = 0, NIMH};
-enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN};
+enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, NO_MOTORS};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};

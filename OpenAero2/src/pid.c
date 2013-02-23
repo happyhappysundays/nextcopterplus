@@ -86,6 +86,9 @@ void Calculate_PID(void)
 	//************************************************************
 	// Set up dynamic gain variable once per loop
 	//************************************************************
+	//
+	// Config.DynGainDiv = 2500 / Config.DynGain;
+	//
 
 	// Channel controlling the dynamic gain
 	temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
@@ -235,15 +238,15 @@ void Calculate_PID(void)
 
 			// Promote to 32 bits and multiply
 			temp32 = PID_Gyros[axis];
-			mult32 = Config.DynGain - temp16;
-			PID_Gyros_32 = temp32 * mult32;
+			mult32 = 100 - temp16;				// Max (100%) - Current setting (0 to Config.DynGain)
+			PID_Gyros_32 = temp32 * mult32;		// Scale to Config.DynGain (100% down to 0%)
 
 			// Promote to 32 bits and multiply
 			temp32 = RCinputsAxis[axis];
 			mult32 = temp16;
-			RC_Input_32 = temp32 * mult32;
+			RC_Input_32 = temp32 * mult32;		// Scale to current setting (0% up to 100%)
 
-			// Dynamically vary the PID response depending on the dynamic gain input amount
+			// Combine and normalise the PID vs. RC
 			temp32 = ((PID_Gyros_32 - RC_Input_32) / (int32_t)Config.DynGain);
 
 			// Cast back to native size

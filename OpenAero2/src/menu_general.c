@@ -42,7 +42,7 @@ void menu_general(void);
 // RC menu items
 //************************************************************
 
-const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 208, 101, 0, 0, 101, 119, 0, 0, 48, 0, 101};
+const uint8_t GeneralMenuText[GENERALITEMS] PROGMEM = {GENERALTEXT, 124, 101, 0, 0, 101, 119, 0, 0, 48, 0, 101};
 const menu_range_t general_menu_ranges[] PROGMEM = 
 {
 	{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 		// Min, Max, Increment, Style, Default
@@ -84,7 +84,7 @@ void menu_general(void)
 		print_menu_items(gen_top, GENERALSTART, &values[0], GENERALITEMS, (prog_uchar*)general_menu_ranges, GENOFFSET, (prog_uchar*)GeneralMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(GENERALITEMS, GENERALSTART, button, &cursor, &gen_top, &menu_temp);
+		update_menu(GENERALITEMS, GENERALSTART, 0, button, &cursor, &gen_top, &menu_temp);
 		range = get_menu_range ((prog_uchar*)general_menu_ranges, menu_temp - GENERALSTART);
 
 		if (button == ENTER)
