@@ -38,7 +38,7 @@ Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_User
 
 ==3. Board Orientation==
 
-OpenAero2 supports the following 3 mounting orientations.
+OpenAero2 supports the following three mounting orientations.
 
  # Horizontal - Default orientation, buttons facing aft with screen to the front.
  # Vertical - Buttons down with the screen on top.
@@ -66,7 +66,7 @@ To setup OpenAero2 with your receiver, navigate through the following options, w
 
 ==5. Stick Calibration==
 
-Center stick calibration allows OpenAero2 to determine pilot commands to roll an axis and possible automatic activation of advanced features.
+Center stick calibration allows OpenAero2 to determine pilot commands, roll an axis and activate auto leveling.
 
 http://i.imgur.com/GFkv1lu.jpg
 
@@ -76,25 +76,42 @@ Within the '*RC Inputs*' sub-menu, select 'Calibrate' (button 4), to return all 
 
 When using a CPPM or PWM receiver with throttle pass-through, ensure the throttle stick is also at center stick.
 
-Note - if using 3-position flight switch, ensure the physical switch  is centered when calibrating the input channels.
+Additionally, if using a 3-position flight switch, ensure the switch  also centered.
 
 ==6. Stick Polarity==
 
-With both sticks in their top right corners, ensure all the values are positive.
+OpenAero2 has been designed to unify the polarity of all receivers and prevent setup errors.
 
-If not, reverse the problematic channel in RC Setup.
+While viewing the '*RC Input*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
 
-Bug with aileron input reversal.
+ * Move the rudder stick right, 
+ * Move the aileron stick right,
 
-# Aileron reverse - Normal/Reverse
- # Elevator reverse - Normal/Reverse
- # Rudder reverse - Normal/Reverse
+ * Push the elevator stick forwards / away.
+ * Move the throttle stick to full throttle.
+
+Once the above has been completed, all positive values should be displayed within '*RC Input*', when both sticks are pushed forwards / away and to the right.
+
+*Ensure the motor has been disconnect prior to completing the above setup.*
 
 ==7. Stability Setup==
 
-Stability, Mode - 3 position switch
+OpenAero2 supports the remote activation of gyro stabilization either via a two or three position switch.
+
+http://i.imgur.com/iU30Ehk.jpg
+
+By default, the '*StabChan*' option allows a 2-position switch to activate gyro stabilization via the '*gear*' channel, defined by '*stab input*' within '*RC Setup*' menu. A 2-position flight switch will be limited to gyro stabilization *on* or *off*.
+
+http://i.imgur.com/thOmcij.jpg
+
+Optionally, selecting '*3-pos*' allows a 3-position to alternate between all three flight modes upon the single '*gear*' channel. 
+
+Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
 ==8. Auto-level Setup==
+
+Similar to stability mode, 
+
 
 Autolevel, Mode - 3 position switch
 
