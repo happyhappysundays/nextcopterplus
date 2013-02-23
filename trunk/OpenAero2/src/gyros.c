@@ -28,12 +28,13 @@ int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
 // Polarity handling table
-int8_t Gyro_Pol[3][3] = // ROLL, PITCH, YAW
-	{
-		{1,1,-1},		// Horizontal
-		{1,1,-1},		// Vertical
-		{1,-1,1},		// Upside down
-	};
+int8_t Gyro_Pol[4][3] = // ROLL, PITCH, YAW
+{
+	{1,1,-1},		// Horizontal
+	{1,1,-1},		// Vertical
+	{1,-1,1},		// Upside down
+	{-1,-1,-1},		// Aft
+};
 
 void ReadGyros(void)					// Conventional orientation
 {

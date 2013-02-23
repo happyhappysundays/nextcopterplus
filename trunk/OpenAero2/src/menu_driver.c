@@ -19,7 +19,7 @@
 #include "..\inc\menu_ext.h"
 #include "..\inc\rc.h"
 
-#define CONTRAST 215 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 188 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -29,7 +29,7 @@
 void print_menu_frame(uint8_t style);
 
 // Menu management
-void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
+void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
 uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
@@ -40,7 +40,6 @@ void menu_beep(uint8_t beeps);
 uint8_t poll_buttons(void);
 void print_cursor(uint8_t line);
 void draw_expo(int16_t value);
-uint8_t button;
 menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
 
 // Special print routine - prints either numeric or text
@@ -53,6 +52,7 @@ uint8_t lines[4] = {LINE0, LINE1, LINE2, LINE3};
 uint8_t button_multiplier;
 
 // Menu globals
+uint8_t button;
 uint8_t cursor = LINE0;
 uint8_t menu_temp = 0;
 
@@ -241,14 +241,19 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 // Update menu list, cursor, calculate selected item
 // items	= Total number of menu items in list
 // start	= Text list start position
+// offset	= Offset into special lists
 // button	= Current button state/value
 // cursor* 	= Location of cursor
 // top*		= Item number currently on top line
 // temp*	= Currently selected item number
 //************************************************************
 
-void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp)
+void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp)
 {
+	// Temporarily add in offset :(
+	*top = *top + offset;
+	start = start + offset;
+
 	// Calculate which function has been requested
 	if (button == ENTER)
 	{
@@ -323,16 +328,19 @@ void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, 
 	}
 
 	// When cursor is at limits and button pressed
-	if (*cursor == PREVLINE)						
+	if (*cursor == PREVLINE)								// Up				
 	{
 		*cursor  = LINE0;
-		if (*top > start) *top = *top - 1;				// Shuffle list up
+		if (*top > start) *top = *top - 1;					// Shuffle list up
 	}
-	if (*cursor == NEXTLINE)
+	if (*cursor == NEXTLINE)								// Down
 	{
 		*cursor  = LINE3;
-		if ((*top+3) < ((start + items)-1)) *top = *top + 1;	// Shuffle list down
+		if ((*top+3) < ((start + items)-1)) *top = *top + 1;// Shuffle list down
 	}
+
+	// Remove temporary offset
+	*top = *top - offset;
 }
 
 //************************************************************

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 8 - February 2013
+// Version 1.1 Beta 9 - February 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -125,16 +125,22 @@
 //			No Fly-by-wire mode as for gyros always take stick input. Acc mixes in autolevel mode.
 //			Fixed flap handling in stabilised modes. Normalised sensor polarity with RC.
 //			Linked local G measurement with IMU calculation to solve negative G and (hopefully)
-//			coordinated turn issues.
-//			Dynamic gain updated to suit new code. Flying wing mixer changed and tested in all modes.
+//			coordinated turn issues. Dynamic gain updated to suit new code. 
+//			Flying wing mixer changed and tested in all modes.
 //			Increased autolevel trim response x 4 
+// Beta 9	Fixed Dynamic gain bug.
+//			Split M1-M8 menus into three sections.	
+//			Compacted several of the settings menus into one.	
+//			New servo menus added, menus edited.
+//			Added "aft" orientation
+//
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Make note in guide re -100% throttle in failsafe mode :)
 // Check orientation modes
+// Check that reversing aileron reversed values in the RC input screen
 //
 //***********************************************************
 //* Includes
@@ -192,7 +198,6 @@
 //***********************************************************
 
 // Flight variables
-uint16_t cycletime;					// Loop time
 uint32_t ticker_32;					// Incrementing system ticker
 
 // Misc
@@ -208,6 +213,8 @@ char pBuffer[16];					// Print buffer
 
 int main(void)
 {
+	uint16_t cycletime;				// Loop time
+
 	bool Overdue = false;
 	bool ServoTick = false;
 	// Alarms
@@ -437,12 +444,8 @@ int main(void)
 			General_error |= (1 << LOST_MODEL); // Set lost model bit
 		}
 
-		// Low-voltage alarm (LVA)
-		GetVbat();								// Check battery
-
-
 		// Beep buzzer if Vbat lower than trigger
-		if (vBat < Config.PowerTrigger)
+		if (GetVbat() < Config.PowerTrigger)
 		{
 			LVA_Alarm = true;
 			General_error |= (1 << LOW_BATT); 	// Set low battery bit

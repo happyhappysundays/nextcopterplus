@@ -78,7 +78,7 @@ void menu_battery(void)
 		print_menu_items_16(batt_top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(BATTITEMS, BATTSTART, button, &cursor, &batt_top, &menu_temp);
+		update_menu(BATTITEMS, BATTSTART, 0, button, &cursor, &batt_top, &menu_temp);
 		range = get_menu_range ((prog_uchar*)batt_menu_ranges, menu_temp - BATTSTART);
 
 		if (button == ENTER)

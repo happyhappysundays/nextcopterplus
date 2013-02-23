@@ -64,10 +64,6 @@ void menu_main(void)
 		{
 			LCD_Display_Text(main_top+i,(prog_uchar*)Verdana8,ITEMOFFSET,lines[i]);	// Lines
 		}
-		//LCD_Display_Text(main_top,(prog_uchar*)Verdana8,ITEMOFFSET,LINE0);	// First line
-		//LCD_Display_Text(main_top+1,(prog_uchar*)Verdana8,ITEMOFFSET,LINE1); 	// Second line
-		//LCD_Display_Text(main_top+2,(prog_uchar*)Verdana8,ITEMOFFSET,LINE2); 	// Third line
-		//LCD_Display_Text(main_top+3,(prog_uchar*)Verdana8,ITEMOFFSET,LINE3);	// Fourth line
 
 		print_cursor(main_cursor);												// Cursor
 		write_buffer(buffer,1);
@@ -76,7 +72,7 @@ void menu_main(void)
 		poll_buttons();
 
 		// Handle menu changes
-		update_menu(MAINITEMS, MAINSTART, button, &main_cursor, &main_top, &main_temp);
+		update_menu(MAINITEMS, MAINSTART, 0, button, &main_cursor, &main_top, &main_temp);
 
 		// If main menu item has changed, reset submenu positions
 		if (main_temp != old_menu)
@@ -102,19 +98,19 @@ void do_main_menu_item(uint8_t menuitem)
 	switch(menuitem) 
 	{
 		case MAINSTART:
-			menu_general();	
+			menu_rc_setup(5);
 			break;
 		case MAINSTART+1:
-			menu_rc_setup();	
+			menu_rc_setup(1);	
 			break;
 		case MAINSTART+2:
-			menu_stab_control();
+			menu_rc_setup(4);
 			break;
 		case MAINSTART+3:
-			menu_al_control();
+			menu_rc_setup(3);
 			break;
 		case MAINSTART+4:
-			menu_failsafe();
+			menu_rc_setup(2);
 			break;
 		case MAINSTART+5:
 			menu_battery();
@@ -129,28 +125,25 @@ void do_main_menu_item(uint8_t menuitem)
 			Display_balance();
 			break;
 		case MAINSTART+9:
-			menu_mixer(0);
-			break;
-		case MAINSTART+10:
 			menu_mixer(1);
 			break;
-		case MAINSTART+11:
+		case MAINSTART+10:
 			menu_mixer(2);
 			break;
+		case MAINSTART+11:
+			menu_servo_setup(1);
+			break;
 		case MAINSTART+12:
-			menu_mixer(3);
+			menu_servo_setup(2);
 			break;
 		case MAINSTART+13:
-			menu_mixer(4);
+			menu_servo_setup(3);
 			break;
 		case MAINSTART+14:
-			menu_mixer(5);
+			menu_servo_setup(4);
 			break;
 		case MAINSTART+15:
-			menu_mixer(6);
-			break;
-		case MAINSTART+16:
-			menu_mixer(7);
+			menu_servo_setup(5);
 			break;
 		default:
 			break;

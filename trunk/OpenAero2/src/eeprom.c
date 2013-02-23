@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x0A		// eePROM signature - change for each eePROM structure change 0x0A = V1.1b8
+#define MAGIC_NUMBER 0x0B		// eePROM signature - change for each eePROM structure change 0x0A = V1.1b9
 								// to force factory reset
 
 //************************************************************
@@ -85,7 +85,6 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Autolimit = 10;				// Autolevel trigger setting
 	Config.Stablimit = -30;				// Stability trigger setting
-//	Config.A_Limits = 45;				// Roll/Pitch limit in Autolevel mode
 
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast

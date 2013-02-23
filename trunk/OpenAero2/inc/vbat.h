@@ -6,6 +6,5 @@
 //* Externals
 //***********************************************************
 
-extern void GetVbat(void);	
-extern uint16_t	vBat;
+extern uint16_t GetVbat(void);	
 

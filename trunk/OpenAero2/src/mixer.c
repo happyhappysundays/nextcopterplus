@@ -25,7 +25,6 @@ void ProcessMixer(void);
 void UpdateServos(void);
 void UpdateLimits(void);
 void get_preset_mix (channel_t*);
-
 int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
 
@@ -40,19 +39,19 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	// Aileron -= Roll; (normal)
 	// Elevator += Pitch; (normal)
 
-	// Value, source_a,src_vol,source_mix, 
-	// Offset, min_travel, max_travel, Failsafe, source_a, source_a_vol
-	// source_b,src_vol,roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
+	// Value, Servo_reverse, Offset, min_travel, max_travel, Failsafe,
+	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100, ON,0,-100,100,-100,CH1,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH2,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut2
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH3,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut3
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH4,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut4
-	{0,ELEVATOR,100,OFF,0,-100,100,   0,CH5,-100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,0,0,0,0,0,0},	// ServoOut5 (Elevator)
-	{0,AILERON,100, OFF,0,-100,100,   0,CH6,-100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut6 (Left aileron)
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH7,100,NOCHAN,0,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut7 (Right aileron)
-	{0,RUDDER,100, 	OFF,0,-100,100,   0,CH8,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut8 (Rudder)
+	{0,NORMAL,0,-100,100,-100,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,REVERSED,0,-100,100, 0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
+	{0,REVERSED,0,-100,100, 0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
+	{0,NORMAL,0,-100,100,   0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+
 }; 
 
 channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
@@ -60,15 +59,15 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	// Rudder -= Yaw (normal)
 	// L.Elevon + Roll (reversed) - Pitch (normal)
 	// R.Elevon + Roll (reversed) + Pitch (reversed)
-	
-	{0,THROTTLE,100, ON,0,-100,100,-100,CH1,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH2,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut2
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH3,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut3
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH4,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut4
-	{0,NOCHAN,100, 	OFF,0,-100,100,   0,CH5,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut5
-	{0,ELEVATOR,-50,OFF,0,-100,100,   0,CH6,100,AILERON,-50,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,0,0,0,0,0,0}, // ServoOut6 (Left elevon)
-	{0,AILERON, 50,	OFF,0,-100,100,   0,CH7,100,ELEVATOR,-50,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,0,0,0,0,0,0},// ServoOut7 (Left elevon)
-	{0,RUDDER,100, 	OFF,0,-100,100,   0,CH8,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut8 (Rudder)
+
+	{0,NORMAL,0,-100,100,-100,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,NORMAL,0,-100,100, 	0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5
+	{0,NORMAL,0,-100,100, 	0,ELEVATOR,-50,AILERON,-50,OFF,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut6 (Left elevon)
+	{0,NORMAL,0,-100,100,   0,AILERON,50,ELEVATOR,-50,OFF,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut7 (Left elevon)
+	{0,NORMAL,0,-100,100,   0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 }; 
 
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -82,15 +81,14 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	// M6 Pitch (Tilt) + Pitch gyro;
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
-		
-	{0,NOCHAN,100,OFF,0,-100,100,-100,CH1,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut1
-	{0,NOCHAN,100,OFF,0,-100,100,-100,CH2,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,0,0,0,0,0,0},	// ServoOut2 (Tilt axis)
-	{0,NOCHAN,100,OFF,0,-100,100,-100,CH3,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut3 (Pan axis)
-	{0,NOCHAN,100,OFF,0,-100,100,-100,CH4,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},	// ServoOut4 (Roll axis)
-	{0,NOCHAN,100,OFF,0,-100,100,-100,CH5,100,NOCHAN,0,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0}, // ServoOut5
-	{0,ELEVATOR,100,OFF,0,-100,100,-100,CH5,100,NOCHAN,0,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,0,0,0,0,0,0},// ServoOut6 (Tilt axis)
-	{0,RUDDER,100,OFF,0,-100,100,-100,CH5,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,0,0,0,0,0,0}, // ServoOut7 (Pan axis)
-	{0,AILERON,100,OFF,0,-100,100,-100,CH5,100,NOCHAN,0,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,0,0,0,0,0,0},// ServoOut8 (Roll axis)
+	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
+	{0,NORMAL,0,-100,100,0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,NORMAL,0,-100,100,0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
+	{0,NORMAL,0,-100,100,0,AILERON,100,NOCHAN,0,OFF,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 };
 
 //************************************************************
@@ -320,26 +318,29 @@ void ProcessMixer(void)
 
 	for (i = 0; i < outputs; i++)
 	{
-		// Get primary value (normally its own channel)
-		temp = Config.Channel[Config.Channel[i].output_a].value;
+
+		// Get primary value
+		temp = Config.Channel[i].value;
 		
-		if (Config.Channel[i].output_a_volume !=0) // Mix in primary output volume
+		if (Config.Channel[i].Servo_reverse == ON) // Reverse this channel's primary
 		{	
-			temp = scale32(temp, Config.Channel[i].output_a_volume);
+			temp = -temp;
 		}
-		if (Config.Channel[i].output_b_volume !=0) // Mix in first extra output
+
+		// Mix in other outputs here
+		if ((Config.Channel[i].output_b_volume !=0) && (Config.Channel[i].output_b != UNUSED)) // Mix in first extra output
 		{
 			temp2 = Config.Channel[Config.Channel[i].output_b].value;
 			temp2 = scale32(temp2, Config.Channel[i].output_b_volume);
 			temp = temp + temp2;
 		}
-		if (Config.Channel[i].output_c_volume !=0) // Mix in second extra output
+		if ((Config.Channel[i].output_c_volume !=0) && (Config.Channel[i].output_c != UNUSED)) // Mix in second extra output
 		{
 			temp2 = Config.Channel[Config.Channel[i].output_c].value;
 			temp2 = scale32(temp2, Config.Channel[i].output_c_volume);
 			temp = temp + temp2;
 		}
-		if (Config.Channel[i].output_d_volume !=0) // Mix in third extra output
+		if ((Config.Channel[i].output_d_volume !=0) && (Config.Channel[i].output_d != UNUSED)) // Mix in third extra output
 		{
 			temp2 = Config.Channel[Config.Channel[i].output_d].value;
 			temp2 = scale32(temp2, Config.Channel[i].output_d_volume);

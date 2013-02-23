@@ -21,8 +21,7 @@
 //************************************************************
 
 void ReadAcc(void);
-void CalibrateAcc(void);
-void CalibrateInvAcc(void);
+void CalibrateAcc(int8_t type);
 void get_raw_accs(void);
 
 //************************************************************
@@ -30,7 +29,6 @@ void get_raw_accs(void);
 //************************************************************
 
 int16_t accADC[3];				// Holds Acc ADC values
-int16_t tempaccZero;
 bool	inv_cal_done;
 bool	normal_cal_done;
 
@@ -38,12 +36,13 @@ bool	normal_cal_done;
 int16_t UncalDef[3] = {640, 615, 640}; // 764-515, 488-743, 515-764
 
 // Polarity handling table
-int8_t Acc_Pol[3][3] =  // ROLL, PITCH, YAW
-	{
-		{1,1,1},		// Horizontal
-		{1,-1,-1},		// Vertical
-		{-1,1,-1},		// Upside down
-	};	
+int8_t Acc_Pol[4][3] =  // ROLL, PITCH, YAW
+{
+	{1,1,1},		// Normal
+	{1,-1,-1},		// Vertical
+	{-1,1,-1},		// Upside down
+	{-1,-1,1},		// Aft
+};
 
 void ReadAcc()					// At rest range is approx 300 - 700?
 {
@@ -67,67 +66,71 @@ void ReadAcc()					// At rest range is approx 300 - 700?
 	}
 }
 
-void CalibrateAcc(void)
+void CalibrateAcc(int8_t type)
 {
 	uint8_t i;
 	int16_t accZero[3] = {0,0,0};	// Used for calibrating Accs on ground
-
-	// Get average zero value (over 32 readings)
-	for (i=0;i<32;i++)
-	{
-		get_raw_accs();			// Updates accADC[]
-
-		accZero[ROLL] += accADC[ROLL];
-		accZero[PITCH] += accADC[PITCH];						
-		accZero[YAW] += accADC[YAW];		
-
-		_delay_ms(10);			// Get a better acc average over time
-	}
-
-	for (i=0;i<3;i++)			// For all axis
-	{
-		Config.AccZero[i] = (accZero[i] >> 5);
-	}
-
-	tempaccZero = Config.AccZero[YAW];
-
-	normal_cal_done = true;
-	inv_cal_done = false;
-
-	Save_Config_to_EEPROM();
-}
-
-void CalibrateInvAcc(void)
-{
-	uint8_t i;
 	int16_t temp;
 	int16_t accZeroYaw = 0;
+	int16_t tempaccZero = 0;
 
-	// Only update the cal value if preceeded by a normal calibration
-	if (normal_cal_done)
+	// Calibrate acc
+	if (type == 0)
 	{
 		// Get average zero value (over 32 readings)
 		for (i=0;i<32;i++)
 		{
-			get_raw_accs();					// Updates gyroADC[]
-			accZeroYaw += accADC[YAW];		
-			_delay_ms(10);					// Get a better acc average over time
+			get_raw_accs();			// Updates accADC[]
+
+			accZero[ROLL] += accADC[ROLL];
+			accZero[PITCH] += accADC[PITCH];						
+			accZero[YAW] += accADC[YAW];		
+
+			_delay_ms(10);			// Get a better acc average over time
 		}
 
-		accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
-
-		// Test if board is actually inverted
-		if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal
-		    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZeroYaw > UncalDef[Config.Orientation])))  // Vertical and Upside down
+		for (i=0;i<3;i++)			// For all axis
 		{
-			// Reset zero to halfway between min and max Z
-			temp = ((tempaccZero - accZeroYaw) >> 1);
-			Config.AccZero[YAW] = tempaccZero - temp;
+			Config.AccZero[i] = (accZero[i] >> 5);
+		}
 
-			inv_cal_done = true;
-			normal_cal_done = false;
+		tempaccZero = Config.AccZero[YAW];
 
-			Save_Config_to_EEPROM();
+		normal_cal_done = true;
+		inv_cal_done = false;
+
+		Save_Config_to_EEPROM();
+	}
+
+	else
+	// Calibrate inverted acc
+	{
+		// Only update the cal value if preceeded by a normal calibration
+		if (normal_cal_done)
+		{
+			// Get average zero value (over 32 readings)
+			for (i=0;i<32;i++)
+			{
+				get_raw_accs();					// Updates gyroADC[]
+				accZeroYaw += accADC[YAW];		
+				_delay_ms(10);					// Get a better acc average over time
+			}
+
+			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
+
+			// Test if board is actually inverted
+			if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal
+			    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZeroYaw > UncalDef[Config.Orientation])))  // Vertical and Upside down
+			{
+				// Reset zero to halfway between min and max Z
+				temp = ((tempaccZero - accZeroYaw) >> 1);
+				Config.AccZero[YAW] = tempaccZero - temp;
+
+				inv_cal_done = true;
+				normal_cal_done = false;
+
+				Save_Config_to_EEPROM();
+			}
 		}
 	}
 }

@@ -1,5 +1,5 @@
 //***********************************************************
-//* menu_sensors.c
+//* display_sensors.c
 //***********************************************************
 
 //***********************************************************
@@ -37,14 +37,14 @@ void Display_sensors(void)
 		if (BUTTON4 == 0)
 		{
 			_delay_ms(500);
-			CalibrateAcc();
+			CalibrateAcc(0);
 			CalibrateGyros();
 		}
 
 		if (BUTTON3 == 0)
 		{
 			_delay_ms(500);
-			CalibrateInvAcc();
+			CalibrateAcc(1);
 		}
 
 		if (BUTTON2 == 0)
@@ -69,15 +69,10 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,25);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
 
-		//Debug
-		//mugui_lcd_puts(itoa(Config.AccZero[YAW],pBuffer,10),(prog_uchar*)Verdana8,10,45); // ZedZero
-		//mugui_lcd_puts(itoa(tempaccZero,pBuffer,10),(prog_uchar*)Verdana8,45,45);		// Temporary Z zer (post initial cal)
-		//mugui_lcd_puts(itoa(accZero[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,45);		// accZero[YAW]
-
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
 		LCD_Display_Text(26, (prog_uchar*)Verdana8, 32, 55); 	// Gyro
-		LCD_Display_Text(157, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
+		LCD_Display_Text(37, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 
 		// Update buffer

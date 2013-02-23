@@ -16,15 +16,10 @@ extern void idle_screen(void);
 // Menus
 extern void menu_main(void);
 extern void menu_battery(void);
-extern void menu_pid(void);
-extern void menu_stab_control(void);
-extern void menu_al_control(void);
-extern void menu_rc_setup(void);
-extern void menu_failsafe(void);
+extern void menu_rc_setup(uint8_t i);
 extern void menu_mixer(uint8_t i);
-extern void menu_general(void);
 extern void	menu_camstab(void);
-
+extern void menu_servo_setup(uint8_t section);
 extern  uint8_t button;
 
 // Menu frames, items
@@ -39,7 +34,7 @@ extern void menu_beep(uint8_t beeps);
 extern void print_cursor(uint8_t line);
 
 // Menu management
-extern void update_menu(uint8_t items, uint8_t start, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
+extern void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
 extern uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
 
 // Special print routine - prints either numeric or text

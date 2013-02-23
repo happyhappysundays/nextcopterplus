@@ -171,7 +171,7 @@ ISR(INT2_vect)
 		} // Switch
 
 		// Work out the highest channel number automagically
-		if (ch_num > max_chan)	
+		if ((ch_num > max_chan || ch_num > MAX_RC_SOURCES))	
 		{
 			max_chan = ch_num;					// Reset max channel number
 		}

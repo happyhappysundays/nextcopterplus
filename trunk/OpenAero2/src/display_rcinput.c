@@ -1,5 +1,5 @@
 //***********************************************************
-//* menu_rcinput.c
+//* display_rcinput.c
 //***********************************************************
 
 //***********************************************************
@@ -70,7 +70,7 @@ void Display_rcinput(void)
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(175, (prog_uchar*)Verdana8, 40, 55); 	// Failsafe
+		LCD_Display_Text(81, (prog_uchar*)Verdana8, 40, 55); 	// Failsafe
 		fillrect(buffer, 77,54, 22, 10, 0);						// Chop off (:) to save memory :)
 		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 100, 55); 	// Cal.
