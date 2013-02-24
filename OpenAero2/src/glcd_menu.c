@@ -59,23 +59,24 @@ const char MenuFrame6[] PROGMEM = "Back";					// Back
 const char MenuFrame7[] PROGMEM = "Def.";					// Default
 const char MenuFrame8[] PROGMEM = "Save";					// Save
 //
-const char MainMenuItem0[]  PROGMEM = "General"; 			// Main menu list text
-const char MainMenuItem1[]  PROGMEM = "RX setup"; 
-const char MainMenuItem2[]  PROGMEM = "Stability";
-const char MainMenuItem3[]  PROGMEM = "Autolevel";
-const char MainMenuItem4[]  PROGMEM = "Failsafe settings";
-const char MainMenuItem5[]  PROGMEM = "Battery monitor";
+const char MainMenuItem0[]  PROGMEM = "1. General"; 			// Main menu list text
+const char MainMenuItem1[]  PROGMEM = "2. RX setup"; 
+const char MainMenuItem9[]  PROGMEM = "3. RX inputs";
+const char MainMenuItem2[]  PROGMEM = "4. Stability setup";
+const char MainMenuItem3[]  PROGMEM = "5. Autolevel setup";
+const char MainMenuItem8[]  PROGMEM = "6. Sensor calibration";
+const char MainMenuItem10[] PROGMEM = "7. Level meter";
+const char MainMenuItem12[] PROGMEM = "8. Channel mixing";
+const char MainMenuItem13[] PROGMEM = "9. Output mixing";
+const char MainMenuItem20[] PROGMEM = "10. Servo direction";
+const char MainMenuItem21[] PROGMEM = "11. Servo trim (%)";
+const char MainMenuItem22[] PROGMEM = "12. Neg. Servo trvl. (%)";
+const char MainMenuItem23[] PROGMEM = "13. Pos. Servo trvl. (%)";
+const char MainMenuItem4[]  PROGMEM = "14. Failsafe settings";
+const char MainMenuItem24[] PROGMEM = "15. Failsafe positions";
+const char MainMenuItem5[]  PROGMEM = "16. Battery monitor";
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
-const char MainMenuItem8[]  PROGMEM = "Sensors";
-const char MainMenuItem9[]  PROGMEM = "RX inputs";
-const char MainMenuItem12[] PROGMEM = "Channel mixing";
-const char MainMenuItem13[] PROGMEM = "Output mixing";
-const char MainMenuItem10[] PROGMEM = "Level meter";
-const char MainMenuItem20[] PROGMEM = "Servo direction";
-const char MainMenuItem21[] PROGMEM = "Servo trim (%)";
-const char MainMenuItem22[] PROGMEM = "Neg. Servo trvl. (%)";
-const char MainMenuItem23[] PROGMEM = "Pos. Servo trvl. (%)";
-const char MainMenuItem24[] PROGMEM = "Failsafe positions";
+
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode4[]  PROGMEM = "Aero"; 
@@ -94,8 +95,8 @@ const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
-const char AutoMenuItem9[]  PROGMEM = "Autolevel setup:";
-const char AutoMenuItem10[] PROGMEM = "Stability setup:";
+const char AutoMenuItem9[]  PROGMEM = "Autolevel:";
+const char AutoMenuItem10[] PROGMEM = "Stability:";
 const char AutoMenuItem11[] PROGMEM = "OFF";
 const char AutoMenuItem12[] PROGMEM = "AutoChan";
 const char AutoMenuItem13[] PROGMEM = "StabChan";
@@ -115,6 +116,7 @@ const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
 const char SensorMenuItem1[]  PROGMEM = "Cal.";				 // Sensors text
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	
+const char SensorMenuItem3[]  PROGMEM = "F/S";	
 //
 const char RCMenuItem0[]  PROGMEM = "CPPM order:"; 			 // RC setup text
 const char RCMenuItem1[]  PROGMEM = "RX sync:"; 
@@ -241,7 +243,7 @@ const char *text_menu[] PROGMEM =
 		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 38 to 43  Flight modes 
 		AutoMenuItem15, AutoMenuItem17, 
 		//
-		Dummy0, Dummy0, 
+		SensorMenuItem3, Dummy0, 															// 44 F/S
 		//
 		AutoMenuItem9, AutoMenuItem10,														// 46 to 47 Autolevel, stability													// 
 		// 
@@ -260,10 +262,10 @@ const char *text_menu[] PROGMEM =
 		//
 		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
-		MainMenuItem0, MainMenuItem1, MainMenuItem2, MainMenuItem3, MainMenuItem4, 			// 77 to 93 Main menu
-		MainMenuItem5, MainMenuItem9, MainMenuItem8,MainMenuItem10, 
-		MainMenuItem12,MainMenuItem13,MainMenuItem20, MainMenuItem21, MainMenuItem22, 
-		MainMenuItem23, MainMenuItem24, Dummy0,
+		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem2, MainMenuItem3, 			// 77 to 93 Main menu
+		MainMenuItem8, MainMenuItem10, MainMenuItem12,MainMenuItem13, 
+		MainMenuItem20,MainMenuItem21,MainMenuItem22, MainMenuItem23, MainMenuItem4, 
+		MainMenuItem24, MainMenuItem5, Dummy0,
 		//
 		Dummy0, Dummy0, Dummy0,	Dummy0,														// Dummy 94 to 97
 		//

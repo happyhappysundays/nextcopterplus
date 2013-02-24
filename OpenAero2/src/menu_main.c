@@ -30,7 +30,7 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 17	// Number of menu items
+#define MAINITEMS 16	// Number of menu items
 #define MAINSTART 77	// Start of Menu text items
 
 //************************************************************
@@ -98,52 +98,52 @@ void do_main_menu_item(uint8_t menuitem)
 	switch(menuitem) 
 	{
 		case MAINSTART:
-			menu_rc_setup(5);
+			menu_rc_setup(5); 		// 1.General
 			break;
 		case MAINSTART+1:
-			menu_rc_setup(1);	
+			menu_rc_setup(1); 		// 2.RX setup	
 			break;
 		case MAINSTART+2:
-			menu_rc_setup(4);
+			Display_rcinput();		// 3.RX inputs
 			break;
 		case MAINSTART+3:
-			menu_rc_setup(3);
+			menu_rc_setup(4);		// 4.Stability setup
 			break;
 		case MAINSTART+4:
-			menu_rc_setup(2);
+			menu_rc_setup(3); 		// 5.Autolevel setup
 			break;
 		case MAINSTART+5:
-			menu_battery();
+			Display_sensors();		// 6.Sensor calibration
 			break;
 		case MAINSTART+6:
-			Display_rcinput();
+			Display_balance();		// 7.Level meter
 			break;
 		case MAINSTART+7:
-			Display_sensors();
+			menu_mixer(1);			// 8.Channel mixing
 			break;
 		case MAINSTART+8:
-			Display_balance();
+			menu_mixer(2);			// 9.Output mixing
 			break;
 		case MAINSTART+9:
-			menu_mixer(1);
+			menu_servo_setup(1);	// 10.Servo direction
 			break;
-		case MAINSTART+10:
-			menu_mixer(2);
+		case MAINSTART+10: 
+			menu_servo_setup(2); 	// 11.Servo trim (%)
 			break;
 		case MAINSTART+11:
-			menu_servo_setup(1);
+			menu_servo_setup(3); 	// 12.Neg. Servo trvl. (%)
 			break;
 		case MAINSTART+12:
-			menu_servo_setup(2);
+			menu_servo_setup(4); 	// 13.Pos. Servo trvl. (%)
 			break;
 		case MAINSTART+13:
-			menu_servo_setup(3);
+			menu_rc_setup(2); 		// 14.Failsafe settings
 			break;
 		case MAINSTART+14:
-			menu_servo_setup(4);
+			menu_servo_setup(5); 	// 15.Failsafe positions
 			break;
 		case MAINSTART+15:
-			menu_servo_setup(5);
+			menu_battery(); 		// 16.Battery monitor
 			break;
 		default:
 			break;
