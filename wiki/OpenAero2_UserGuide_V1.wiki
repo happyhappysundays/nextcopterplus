@@ -1,4 +1,4 @@
-#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 9)(Coming)
+#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 9)(Coming Soon)
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
@@ -11,7 +11,7 @@ Please ensure you have read the manuals in the following order.
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
-=Aeroplane - Setup guide (V1.1 Beta 9)(Coming)=
+=Aeroplane - Setup guide (V1.1 Beta 9)(Coming Soon)=
 
 ===Factory reset===
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
@@ -25,15 +25,11 @@ http://i.imgur.com/dHXBPzZ.jpg
 
 ==1. General==
 ===Model Type===
-OpenAero2 has been designed with three selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
+OpenAero2 has been designed with selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
- * Aero - Aeroplane - Default preset for both single and dual aileron aeroplane's,
- * F.Wing - Second aeroplane preset for flying-wing
- * CamStab - For '*camera stabilization*' only. 
-   * [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_1 OpenAero2 - Camera Stabilization Guide]
-   * [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_2 OpenAero2 - Camera Stabilization Guide with RC control]
-
-To display these model types, enter the *'1.General'* sub-menu and select '*Mode:*'.
+ * Aero - Default preset for both *single* and *dual aileron* aeroplane's.
+ * F.Wing - Selectable preset for *flying-wing*'s.
+ * CamStab - For standalone [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_1 camera stabilization] & with  [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_2  RC control] only.
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
@@ -47,26 +43,28 @@ OpenAero2 supports the following four mounting orientations.
  * Inverted - *Inverted* horizontal, buttons facing *aft* with screen to the *front*.
  * Vertical - *Upright*, buttons *down* with the screen on *top*.
 
-To change the default orientation from horizontal, modify the '*orient*' option within the '*1.General*' menu.
-
-===Flight Control===
-
-
-
 ==2. Receiver setup==
-The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
+===Receiver Sync===
+While the KK2 board is limited to 5 channels from a common multi-wire PWM receivers, OpenAero2 can support 8 channels from a single-wire CCPM receiver.
 
-To setup OpenAero2 with your receiver, navigate through the following options, within the '*RC Setup*' sub-menu.
+ * CCPM - Listens for a compatible multi-channel stream on the *rudder* input only.
+ * Rudder - Default for most multi-wire PWM receivers.
 
- # CPPM order - *JR/Spk* or *Futaba* - Defines OpenAero2's channel order for CPPM receivers,
- # RX mode - *Rudder* or *CCPM* - Typically '*PWM1*' for PWM receivers and '*CCPM*' for CPPM receivers,
- # Stability input - *Gear* - Default for both PWM and most CPPM receivers,
- # Autolevel input - Defines a second channel for manual activation of autoleveling.
+===CPPM order===
+With a compatible single-wire CCPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order.
+
+===Stability input===
+*Gear* - Default for both PWM and most CPPM receivers,
+
+===Autolevel input===
+Defines a second channel for manual activation of autoleveling.
   * *Gear* - Typical for PWM receivers and optional for CPPM receivers,
   * *Throttle* - PWM receivers *only*. Allows re-purposing of KK2 throttle channel as second channel to control autoleveling.
- # 2nd Aileron - Defines how M6 operates a second aileron servo.
+
+===2nd Aileron===
+Defines how M6 operates a second aileron servo.
   * *None* - M6 will remain unassigned and will *not* operate a second aileron servo.
-  * *Aileron* - Primary aileron channel used to operate second aileron. Commonly used to simplify setup.
+  * Primary aileron channel used to operate second aileron. Commonly used to simplify setup.
   * *Aileron2* - CPPM receivers *only*. Allows use of additional channel to utilize flaperon mixing within transmitter.
   * *Throttle* - PWM receivers *only*. Allows re-purposing of throttle channel to utilize flaperon mixing within transmitter.
 
