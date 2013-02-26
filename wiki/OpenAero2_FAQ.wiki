@@ -10,18 +10,26 @@ Please ensure you read the manuals in the following order.
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
 =Frequently asked Questions=
- # What is OpenAero2?
- # What models can OpenAero2 stabilize?
+==Basics==
+ * What is OpenAero2?
+ * Where can I purchase a KK2 board from?
+==OpenAero2 Features==
+ * What models can OpenAero2 stabilize?
   * Aeroplane Mixers
   * Flying Wing Mixers
   * Custom Mixers
- # What flight modes does OpenAero2 support?
- # What camera gimbals can OpenAero2 stabilize?
- # Where can I purchase a KK2 board from?
+ * What flight modes does OpenAero2 support?
+==Receivers==
+ * Which receivers does OpenAero2 support?
+ * Which CPPM receivers does OpenAero2 support?
+==Camera Stabilization==
+ * What camera gimbals can OpenAero2 stabilize?
 
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
 
-==What is OpenAero2?==
+==Basics==
+
+===What is OpenAero2?===
 OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturers original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
 While OpenAero2 is an open-source project and is free, it's also the result of many hundreds of hours of hard work.
@@ -30,20 +38,27 @@ If you feel motivated to donate to the project please feel free.
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
-==What models can OpenAero2 stabilize?==
+===Where can I purchase a KK2 board from?===
+The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
+
+Additionally, a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] from [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 Hobbyking] is required to load the OpenAero2 software onto the KK2 board.
+
+==OpenAero2 Features==
+
+===What models can OpenAero2 stabilize?===
 OpenAero2 has been designed with two selectable model types, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos.
 
-===Aeroplane Mixers===
+====Aeroplane Mixers====
 Aeroplane mode has the ability to stabilize all three axis, support the use of flaps or pre-mixed flaperons, with any typical PWM or CPPM receiver.
 
 The stabilized outputs are simply referred to as aileron, elevator and rudder.
 
-===Flying Wing Mixers===
+====Flying Wing Mixers====
 Mixing for flying-wing's is now supported by the on-board mixers, allowing OpenAero2 to stabilize the left flaperon, right flaperon and rudder.
 
-===Custom Mixers===
+====Custom Mixers====
 OpenAero2 has eight output channels which can all mix from five PWM RC channels in PWM mode, and eight RC channels in CPPM mode. 
 Each of the eight output channels can have any or all sensors mixed together. Also, each of the output channels can mix any two RC inputs together.
 
@@ -58,15 +73,21 @@ OpenAero2 offers three unique flight modes for aeroplanes, interchangeable remot
 
 3 - *Auto-levelling mode* - Activates OpenAero2's accelerometers to return the aeroplane to level flight.
 
-==What camera gimbals can OpenAero2 stabilize?==
+==Receivers==
+
+===Which receivers does OpenAero2 support?===
+The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
+
+===Which CPPM receivers does OpenAero2 support?===
+While there are many brands available, the following have been tested.
+
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=48 FrSky V8R7-SP]
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=119 FrSky D4R-II]
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=126 FrSky D8R-XP]
+
+==Camera Stabilization==
+
+===What camera gimbals can OpenAero2 stabilize?===
 In Camera stability mode, both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
-
-==Where can I purchase a KK2 board from?==
-The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
-
-Additionally, a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] from [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 Hobbyking] is required to load the OpenAero2 software onto the KK2 board.
-
-
-
 
 *The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load OpenAero2 and connect the KK2 board between your receiver and servos.
