@@ -14,7 +14,7 @@ Please post any questions and tips on [http://www.rcgroups.com/forums/showthread
 =Aeroplane - Setup guide (V1.1 Beta 9)(Coming)=
 
 ===Factory reset===
-This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from 'factory reset' to 'ready to fly'.
+This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
 
  # Hold down all four buttons while powering up the KK2 board,
  # A "*Reset*" message will briefly appear on the screen after the OpenAero2 logo is displayed,
@@ -25,7 +25,13 @@ http://i.imgur.com/dHXBPzZ.jpg
 
 ==1. General==
 ===Model Type===
-OpenAero2 has been designed with two selectable model types, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
+OpenAero2 has been designed with three selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
+
+ * Aero - Aeroplane - Default preset for both single and dual aileron aeroplane's,
+ * F.Wing - Second aeroplane preset for flying-wing
+ * CamStab - For '*camera stabilization*' only. 
+   * [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_1 OpenAero2 - Camera Stabilization Guide]
+   * [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_2 OpenAero2 - Camera Stabilization Guide with RC control]
 
 To display these model types, enter the *'1.General'* sub-menu and select '*Mode:*'.
 
