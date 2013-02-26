@@ -13,8 +13,7 @@ Please post any questions and tips on [http://www.rcgroups.com/forums/showthread
 
 =Aeroplane - Setup guide (V1.1 Beta 9)(Coming)=
 
-==1. Factory reset==
-
+===Factory reset===
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from 'factory reset' to 'ready to fly'.
 
  # Hold down all four buttons while powering up the KK2 board,
@@ -24,36 +23,37 @@ This guide presumes all values have been reset to their factory default values, 
 
 http://i.imgur.com/dHXBPzZ.jpg
 
-==2. Model Type==
-
+==1. General==
+===Model Type===
 OpenAero2 has been designed with two selectable model types, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
-To display these model types, enter the *'General'* sub-menu and select '*Mode:*'.
-
-http://i.imgur.com/ekizXep.jpg
+To display these model types, enter the *'1.General'* sub-menu and select '*Mode:*'.
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
-Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on how to customize the mixers
+Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_V1 'Aeroplane - Advanced User Guide (V1.1 Beta 9)'] for more information on how to customize the mixers
 
-==3. Board Orientation==
+===Board Orientation===
+OpenAero2 supports the following four mounting orientations.
 
-OpenAero2 supports the following three mounting orientations.
+ * Forward - Default horizontal orientation, buttons facing *aft* with screen to the *front*.
+ * Aft - Horizontal, buttons facing *front* with screen to the *aft*.
+ * Inverted - *Inverted* horizontal, buttons facing *aft* with screen to the *front*.
+ * Vertical - *Upright*, buttons *down* with the screen on *top*.
 
- # Horizontal - Default orientation, buttons facing aft with screen to the front.
- # Vertical - Buttons down with the screen on top.
- # Upside down - Inverted, buttons facing aft with the screen to the front.
+To change the default orientation from horizontal, modify the '*orient*' option within the '*1.General*' menu.
 
-To change the default orientation from horizontal, modify the '*orient*' option within the '*general*' menu.
+===Flight Control===
 
-==4. Receiver setup==
 
+
+==2. Receiver setup==
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
 To setup OpenAero2 with your receiver, navigate through the following options, within the '*RC Setup*' sub-menu.
 
  # CPPM order - *JR/Spk* or *Futaba* - Defines OpenAero2's channel order for CPPM receivers,
- # RX mode - *PW1* or *CCPM* - Typically '*PWM1*' for PWM receivers and '*CCPM*' for CPPM receivers,
+ # RX mode - *Rudder* or *CCPM* - Typically '*PWM1*' for PWM receivers and '*CCPM*' for CPPM receivers,
  # Stability input - *Gear* - Default for both PWM and most CPPM receivers,
  # Autolevel input - Defines a second channel for manual activation of autoleveling.
   * *Gear* - Typical for PWM receivers and optional for CPPM receivers,
@@ -64,8 +64,8 @@ To setup OpenAero2 with your receiver, navigate through the following options, w
   * *Aileron2* - CPPM receivers *only*. Allows use of additional channel to utilize flaperon mixing within transmitter.
   * *Throttle* - PWM receivers *only*. Allows re-purposing of throttle channel to utilize flaperon mixing within transmitter.
 
-==5. Stick Calibration==
-
+==3. Receiver Inputs==
+===Stick Calibration===
 Center stick calibration allows OpenAero2 to determine pilot commands, roll an axis and activate auto leveling.
 
 http://i.imgur.com/GFkv1lu.jpg
@@ -78,8 +78,7 @@ When using a CPPM or PWM receiver with throttle pass-through, ensure the throttl
 
 Additionally, if using a 3-position flight switch, ensure the switch  also centered.
 
-==6. Stick Polarity==
-
+===Stick Polarity===
 OpenAero2 has been designed to unify the polarity of all receivers and prevent setup errors.
 
 While viewing the '*RC Input*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
