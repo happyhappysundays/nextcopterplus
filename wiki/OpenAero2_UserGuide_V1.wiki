@@ -1,4 +1,4 @@
-#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 9)
+#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 9)(Coming)
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
@@ -11,7 +11,7 @@ Please ensure you have read the manuals in the following order.
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
-=Aeroplane - Setup guide (V1.1 Beta 9)=
+=Aeroplane - Setup guide (V1.1 Beta 9)(Coming)=
 
 ==1. Factory reset==
 
