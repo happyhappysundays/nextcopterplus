@@ -47,25 +47,27 @@ OpenAero2 supports the following four mounting orientations.
 ===Receiver Sync===
 While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, OpenAero2 can support 8 CPPM channels from a single-wire receiver.
 
- * CCPM - Listens for a compatible multi-channel stream on the *rudder* input only.
  * Rudder - Default for most multi-wire PWM receivers.
-
+ * CCPM - Listens for a compatible multi-channel stream on the *rudder* input only.
+ 
 ===CPPM order===
-With a compatible single-wire CCPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order.
+With a compatible CPPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order. 
+
+The order of the channels will be define by the brand of your transmitter.
 
 ===Stability input===
 OpenAero2 allows any input channel to remotely enable or disable gyro stability.
 
-By default, both PWM & CPPM setups commonly use the 'gear' channel.
+By default, both PWM & CPPM setups commonly use the '*gear*' channel.
 
 ===Autolevel input===
-Similar to stability mode, OpenAero2 allows any input channel to enable or disable auto-leveling.
+Similar to stability mode, OpenAero2 allows any input channel to remotely enable or disable auto-leveling.
 
- * Gear - Typically used by PWM receivers on the same flight switch.
- * AUX1 - Commonly used by CPPM receivers on a second flight switch.
+ * *Gear* - Typically used by PWM receivers on the same 2 or 3 position flight switch.
+ * *AUX1* - Commonly used by CPPM receivers on a second individual flight switch.
 
 ===2nd Aileron===
-
+Optionally, OpenAero2 can control a second aileron ....
 
   * *Throttle* - PWM receivers *only*. Allows re-purposing of KK2 throttle channel as second channel to control autoleveling.
 
