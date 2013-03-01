@@ -1,4 +1,4 @@
-#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 9)(Coming Soon)
+#summary OpenAero2 - Aeroplane - Quick Setup guide (V1.1 Beta 9)(Coming Soon)
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
@@ -6,7 +6,7 @@ Please ensure you have read the manuals in the following order.
 
  # [OpenAero2_FAQ Frequently Ask Questions]
  # [OpenAero2_Getting_Started Getting Started Guide]
- # [OpenAero2_UserGuide_V1 Aeroplane - Setup Guide (V1.1 Beta 9)]
+ # [OpenAero2_UserGuide_V1 Aeroplane - Quick Setup Guide (V1.1 Beta 9)]
  # [OpenAero2_UserGuide_Beta8 Aeroplane - Advanced User Guide (V1.1 Beta 8)]
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
