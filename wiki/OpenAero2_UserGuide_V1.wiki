@@ -11,7 +11,7 @@ Please ensure you have read the manuals in the following order.
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
-=Aeroplane - Setup guide (V1.1 Beta 9)(Coming Soon)=
+=Aeroplane - Quick Setup guide (V1.1 Beta 9)(Coming Soon)=
 
 ===Factory reset===
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
