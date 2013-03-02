@@ -28,7 +28,7 @@ void Display_status(void);
 // Code
 //************************************************************
 
-int8_t	General_error;	// Global error flag
+volatile int8_t	General_error;	// Global error flag
 
 void Display_status(void)
 {
@@ -52,7 +52,6 @@ void Display_status(void)
 
 	// Display values
 	print_menu_text(0, 1, (18 + Config.RxMode), 50, 22);
-	LCD_Display_Text(0,(prog_uchar*)Verdana8,50,11); 
 	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);

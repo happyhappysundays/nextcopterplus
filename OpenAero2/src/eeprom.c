@@ -71,6 +71,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
 	Config.Stick_3D_rate = 2;
+	Config.IMUType = 1;					// Advanced IMU ON
 
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE

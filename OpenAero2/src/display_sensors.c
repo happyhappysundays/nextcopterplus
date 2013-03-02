@@ -37,14 +37,14 @@ void Display_sensors(void)
 		if (BUTTON4 == 0)
 		{
 			_delay_ms(500);
-			CalibrateAcc(0);
+			CalibrateAcc(NORMAL);
 			CalibrateGyros();
 		}
 
 		if (BUTTON3 == 0)
 		{
 			_delay_ms(500);
-			CalibrateAcc(1);
+			CalibrateAcc(REVERSED);
 		}
 
 		if (BUTTON2 == 0)

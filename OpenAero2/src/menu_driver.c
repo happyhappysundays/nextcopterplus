@@ -18,6 +18,8 @@
 #include "..\inc\vbat.h"
 #include "..\inc\menu_ext.h"
 #include "..\inc\rc.h"
+#include <avr/interrupt.h>
+#include "..\inc\mixer.h"
 
 #define CONTRAST 188 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
@@ -30,7 +32,7 @@ void print_menu_frame(uint8_t style);
 
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
-uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link);
+uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
@@ -44,6 +46,10 @@ menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
 
 // Special print routine - prints either numeric or text
 void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
+
+// Servo driver
+void output_servo_ppm_asm3(int16_t servo_number, int16_t value);
+void output_servo_ppm_asm2(int16_t ServoOut5, int16_t ServoOut6, int16_t ServoOut7, int16_t ServoOut8);
 
 // Hard-coded line positions
 uint8_t lines[4] = {LINE0, LINE1, LINE2, LINE3};
@@ -166,9 +172,10 @@ menu_range_t get_menu_range(prog_uchar* menu_ranges, uint8_t menuitem)
 // text_link = Start of text list for the values if not numeric
 //************************************************************
 
-uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link)
+uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
 {
 	mugui_size16_t size;
+	int16_t temp16;
 
 	button = NONE;
 
@@ -224,13 +231,33 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		}
 
 		// Limit values to set ranges
-		if (value < range.lower) value = range.lower;
-		if (value > range.upper) value = range.upper;
+		if (value < range.lower) 
+		{
+			value = range.lower;
+		}
+		
+		if (value > range.upper) 
+		{
+			value = range.upper;
+		}
 
 		// Update contrast setting
 		if (menuitem == CONTRAST)
 		{
 			st7565_set_brightness(value);
+		}
+
+		// Set servo position if required
+		if (servo_enable)
+		{
+			temp16 = scale_percent(value);	// Convert to servo position (from %)
+			temp16 = ((temp16 << 2) / 10); 	// Span back to what the output wants
+
+			cli();
+			output_servo_ppm_asm3(servo_number, temp16);
+			sei();
+
+			_delay_ms(20);
 		}
 	}
 	button = ENTER;

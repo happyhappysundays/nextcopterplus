@@ -38,7 +38,7 @@ void menu_rc_setup(uint8_t i);
 #define RCSTART 149 	// Start of Menu text items
 #define RCOFFSET 78		// LCD offsets
 
-#define RCTEXT 116 		// Start of value text items
+#define RCTEXT 18 		// Start of value text items
 #define FSTEXT 103
 #define AUTOTEXT 38 
 #define STABTEXT 38
@@ -56,7 +56,7 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[NUMMENUITEMS] PROGMEM = 
 {
-	RCTEXT, 18, 105, 105, 105, 141, 141, 141,	// RC setup
+	RCTEXT, 116, 105, 105, 105, 141, 141, 141,	// RC setup
 	FSTEXT, 0, 0, 0, 0,							// Failsafe
 	AUTOTEXT, 0, 0, 0, 0, 0, 101, 0,			// Autolevel
 	STABTEXT, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // Stability
@@ -67,14 +67,14 @@ const uint8_t RCMenuText[NUMMENUITEMS] PROGMEM =
 const menu_range_t rc_menu_ranges[] PROGMEM = 
 {
 	// RC setup (8)
-	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Min, Max, Increment, Style, Default
-	{CPPM_MODE,PWM3,1,1,PWM1},
+	{CPPM_MODE,PWM3,1,1,PWM1},		// Min, Max, Increment, Style, Default
+	{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
 	{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
 	{THROTTLE,NOCHAN,1,1,GEAR},		// Autochan
 	{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
-	{NORMAL, REVERSED,1,1,NORMAL},	// Aileron reverse
-	{NORMAL, REVERSED,1,1,NORMAL},	// Elevator reverse
-	{NORMAL, REVERSED,1,1,NORMAL},	// Rudder reverse
+	{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
+	{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
+	{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
 
 	// Failsafe (5)
 	{0,1,1,1,1}, 	
@@ -123,7 +123,7 @@ const menu_range_t rc_menu_ranges[] PROGMEM =
 	{10,100,5,0,30},				// CF factor
 	{STD,FIXED,1,1,STD},			// HH mode
 	{0,5,1,0,4},					// 3D rate (0 is fastest, 5 slowest)
-	{OFF,ON,1,1,OFF},				// Advanced IMUType
+	{OFF,ON,1,1,ON},				// Advanced IMUType
 
 };
 //************************************************************
@@ -184,7 +184,7 @@ void menu_rc_setup(uint8_t section)
 	while(button != BACK)
 	{
 		// Load values from eeprom
-		memcpy(&values[0],&Config.TxSeq,sizeof(int8_t) * RCITEMS);
+		memcpy(&values[0],&Config.RxMode,sizeof(int8_t) * RCITEMS);
 		memcpy(&values[RCITEMS],&Config.FailsafeType,sizeof(int8_t) * FSITEMS);
 		memcpy(&values[RCITEMS + FSITEMS],&Config.AutoMode,sizeof(int8_t) * AUTOITEMS);
 		memcpy(&values[RCITEMS + FSITEMS + AUTOITEMS],&Config.StabMode,sizeof(int8_t) * STABITEMS);
@@ -203,11 +203,11 @@ void menu_rc_setup(uint8_t section)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&RCMenuText[menu_temp - RCSTART]);
-			values[menu_temp - RCSTART] = do_menu_item(menu_temp, values[menu_temp - RCSTART], range, 0, text_link);
+			values[menu_temp - RCSTART] = do_menu_item(menu_temp, values[menu_temp - RCSTART], range, 0, text_link, false, 0);
 		}
 
 		// Update value in config structure
-		memcpy(&Config.TxSeq,&values[0],sizeof(int8_t) * RCITEMS);
+		memcpy(&Config.RxMode,&values[0],sizeof(int8_t) * RCITEMS);
 		memcpy(&Config.FailsafeType,&values[RCITEMS],sizeof(int8_t) * FSITEMS);
 		memcpy(&Config.AutoMode,&values[RCITEMS + FSITEMS],sizeof(int8_t) * AUTOITEMS);
 		memcpy(&Config.StabMode,&values[RCITEMS + FSITEMS + AUTOITEMS],sizeof(int8_t) * STABITEMS);

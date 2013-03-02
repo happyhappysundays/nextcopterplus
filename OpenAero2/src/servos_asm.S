@@ -144,6 +144,96 @@ f8:
 	.endfunc	
 
 ;*************************************************************************	
+; void output_servo_ppm_asm3(servo_number, value);
+;
+; regs = r24,r25 (servo_number), r22,23 (value)
+;
+;*************************************************************************
+
+	.global output_servo_ppm_asm3
+	.func   output_servo_ppm_asm3
+output_servo_ppm_asm3:
+	push	16			// Save regs
+	push	17
+	push	18
+
+	ldi 	16,0x98		// Set loop count to 898h or 2200(us)
+	ldi		17,0x08	
+	clr		0
+
+jump_table:
+	cpi		r24,0x00	; 0				
+	breq	in1
+	cpi		r24,0x01	; 1
+	breq	in2
+	cpi		r24,0x02	; 2
+	breq	in3
+	cpi		r24,0x03	; 3
+	breq	in4
+	cpi		r24,0x04	; 4
+	breq	in5
+	cpi		r24,0x05	; 5
+	breq	in6
+	cpi		r24,0x06	; 6
+	breq	in7
+	cpi		r24,0x07	; 7
+	breq	in8
+
+in1:sbi 	M1			// Set output high
+	jmp		loopin
+in2:sbi 	M2
+	jmp		loopin
+in3:sbi 	M3	
+	jmp		loopin
+in4:sbi 	M4
+	jmp		loopin
+in5:sbi 	M5
+	jmp		loopin
+in6:sbi 	M6
+	jmp		loopin
+in7:sbi 	M7
+	jmp		loopin
+in8:sbi 	M8
+	jmp		loopin
+
+// Loop - 20 cycles = 1us
+loopin:
+	nop					// 1 <---------	Left column is skip execution path
+	nop					// 1 	<----	Right column is pulse end execution path
+	nop					// 1
+	nop					// 1
+
+	nop					// 1
+	nop					// 1
+	nop					// 1
+	nop					// 1
+
+	nop					// 1
+	nop					// 1
+	nop					// 1
+	nop					// 1			16 cycles
+
+	subi	r22,1		// 1 			Time servo pulse
+	sbc 	r23,0		// 1
+	brne	loopout		// 2	1
+
+// Clear outputs if done
+	ldi		r18,0x00	 // 1
+	out 	SERVO_OUT,r18// 1			Boom.
+
+// Exit
+loopout:
+	subi 	16,1		// 1			+4 cycles = total 20 cycles
+	sbc 	17,0		// 1
+	brne	loopin		// 2	1		Loop until zero
+
+	pop		18
+	pop		17			// Restore regs
+	pop		16
+	ret	
+	.endfunc	
+
+;*************************************************************************	
 ; void glcd_delay(void) 250ns delay for glcd clock
 ;*************************************************************************
 

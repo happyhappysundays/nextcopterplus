@@ -1,18 +1,14 @@
 /*********************************************************************
- * main.h
+ * glcd_menu.h
  ********************************************************************/
-#include <stdbool.h>
 
 //***********************************************************
 //* Externals
 //***********************************************************
 
-extern bool	AutoLevel;
-extern bool	Stability;
-extern char pBuffer[16];
-extern bool	Failsafe;
-extern uint8_t	buffer[];
-extern bool	RefreshStatus;
-extern volatile int8_t General_error;
-extern uint32_t ticker_32;	
-extern uint16_t StackCount(void);	
+extern void LCD_Display_Text (uint8_t menuitem, prog_uchar* font,uint16_t x, uint16_t y);
+extern void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y);
+
+
+
+
