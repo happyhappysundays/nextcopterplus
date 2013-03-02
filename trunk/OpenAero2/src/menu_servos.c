@@ -125,6 +125,8 @@ void menu_servo_setup(uint8_t section)
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i = 0;
+	bool	servo_enable = false;
+	bool	zero_setting = false;
 
 	// Get menu offsets
 	// 1 = Reverse, 2 = Offset, 3 = Min, 4 = Max, 5 = Failsafe
@@ -148,12 +150,17 @@ void menu_servo_setup(uint8_t section)
 					break;
 				case 2:
 					memcpy(&values[i],&Config.Channel[i].Offset,sizeof(int8_t));
+					servo_enable = true;
 					break;
 				case 3:
 					memcpy(&values[i],&Config.Channel[i].min_travel,sizeof(int8_t));
+					servo_enable = true;
+					zero_setting = true;
 					break;
 				case 4:
 					memcpy(&values[i],&Config.Channel[i].max_travel,sizeof(int8_t));
+					servo_enable = true;
+					zero_setting = true;
 					break;
 				case 5:
 					memcpy(&values[i],&Config.Channel[i].Failsafe,sizeof(int8_t));
@@ -174,8 +181,23 @@ void menu_servo_setup(uint8_t section)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&ServoMenuText[section - 1][menu_temp - SERVOSTART]);
-			values[menu_temp - SERVOSTART] = do_menu_item(menu_temp, values[menu_temp - SERVOSTART], range, 0, text_link);
+			// Zero limits if adjusting
+			if (zero_setting)
+			{
+				values[menu_temp - SERVOSTART] = 0;
+			}
+
+			// Do not allow servo enable for throttle
+			if (Config.Channel[menu_temp - SERVOSTART].source_a == THROTTLE)
+			{
+				servo_enable = false;
+			}
+
+			values[menu_temp - SERVOSTART] = do_menu_item(menu_temp, values[menu_temp - SERVOSTART], range, 0, text_link, servo_enable, (menu_temp - SERVOSTART));
 		}
+
+		// Disable servos
+		servo_enable = false;
 
 		// Update value in config structure
 		for (i = 0; i < SERVOITEMS; i++)
@@ -208,7 +230,7 @@ void menu_servo_setup(uint8_t section)
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
-
+	UpdateLimits();					// Update actual servo trims
 	_delay_ms(200);
 }
 

@@ -95,8 +95,8 @@ typedef struct
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
 	// RC items
-	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		RxMode;					// PWM or CPPM mode
+	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		StabChan;				// Channel number to select stability mode
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
 	int8_t		FlapChan;				// Channel number for second aileron input

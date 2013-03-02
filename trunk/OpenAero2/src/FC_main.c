@@ -132,15 +132,16 @@
 //			Split M1-M8 menus into three sections.	
 //			Compacted several of the settings menus into one.	
 //			New servo menus added, menus edited.
-//			Added "aft" orientation
-//
+//			Added "aft" orientation. Fixed inv. cal. bug.
+//			Adv. IMU defaults to ON. Added trim recording button.
+//			Added real-time servo updating for min/max/trim adjustment.
+//			Compacted Winddings fonts.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
 // Check orientation modes
-// Check that reversing aileron reversed values in the RC input screen
 //
 //***********************************************************
 //* Includes

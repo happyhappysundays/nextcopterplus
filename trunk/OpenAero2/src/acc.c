@@ -31,20 +31,21 @@ void get_raw_accs(void);
 int16_t accADC[3];				// Holds Acc ADC values
 bool	inv_cal_done;
 bool	normal_cal_done;
+int16_t tempaccZero = 0;
 
 // Uncalibrated default values of Z middle per orientation
-int16_t UncalDef[3] = {640, 615, 640}; // 764-515, 488-743, 515-764
+int16_t UncalDef[4] = {640, 615, 640, 640}; // 764-515, 488-743, 515-764, 764-515
 
 // Polarity handling table
 int8_t Acc_Pol[4][3] =  // ROLL, PITCH, YAW
 {
-	{1,1,1},		// Normal
+	{1,1,1},		// Forward
 	{1,-1,-1},		// Vertical
 	{-1,1,-1},		// Upside down
 	{-1,-1,1},		// Aft
 };
 
-void ReadAcc()					// At rest range is approx 300 - 700?
+void ReadAcc()					// At rest range is approx 300 - 700
 {
 	uint8_t i;
 
@@ -72,10 +73,9 @@ void CalibrateAcc(int8_t type)
 	int16_t accZero[3] = {0,0,0};	// Used for calibrating Accs on ground
 	int16_t temp;
 	int16_t accZeroYaw = 0;
-	int16_t tempaccZero = 0;
 
 	// Calibrate acc
-	if (type == 0)
+	if (type == NORMAL)
 	{
 		// Get average zero value (over 32 readings)
 		for (i=0;i<32;i++)
@@ -119,7 +119,7 @@ void CalibrateAcc(int8_t type)
 			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
 
 			// Test if board is actually inverted
-			if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal
+			if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal and 
 			    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZeroYaw > UncalDef[Config.Orientation])))  // Vertical and Upside down
 			{
 				// Reset zero to halfway between min and max Z
@@ -140,9 +140,9 @@ void get_raw_accs(void)
 	read_adc(AIN_X_ACC);		// Read X acc ADC5 (Pitch)
 	accADC[PITCH] = ADCW;
 
-	read_adc(AIN_Y_ACC);		// Read pitch gyro ADC4 (Pitch)
+	read_adc(AIN_Y_ACC);		// Read Y acc ADC4 (Roll)
 	accADC[ROLL] = ADCW;
 
-	read_adc(AIN_Z_ACC);		// Read yaw gyro ADC2 (Yaw)
+	read_adc(AIN_Z_ACC);		// Read Z acc ADC2 (inverted)
 	accADC[YAW] = ADCW;
 }

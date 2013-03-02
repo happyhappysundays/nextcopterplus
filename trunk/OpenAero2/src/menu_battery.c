@@ -84,7 +84,7 @@ void menu_battery(void)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&BattMenuText[menu_temp - BATTSTART]);
-			values[menu_temp - BATTSTART] = do_menu_item(menu_temp, values[menu_temp - BATTSTART], range, 0, text_link);
+			values[menu_temp - BATTSTART] = do_menu_item(menu_temp, values[menu_temp - BATTSTART], range, 0, text_link, false, 0);
 		}
 
 		// See if cell number or min_volts has changed

@@ -16,6 +16,7 @@
 #include "..\inc\pid.h"
 #include "..\inc\main.h"
 #include <avr/pgmspace.h> 
+#include "..\inc\mixer.h"
 
 //************************************************************
 // Prototypes
@@ -25,8 +26,10 @@ void ProcessMixer(void);
 void UpdateServos(void);
 void UpdateLimits(void);
 void get_preset_mix (channel_t*);
+void SetTrims(void);
 int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
+int8_t scale_position(int16_t value);
 
 //************************************************************
 // Mix tables (both RC inputs and servo/ESC outputs)
@@ -395,6 +398,7 @@ void ProcessMixer(void)
 				}
 			}
 		}
+
 	} // Failsafe
 }
 
@@ -491,6 +495,19 @@ void UpdateServos(void)
 	}
 }
 
+
+// Update servo trims to suit current RC setting
+void SetTrims(void)
+{
+	uint8_t i;
+
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		Config.Channel[i].Offset = scale_position(ServoOut[i]);
+		//Config.Channel[i].Offset = scale_position(3550);
+	}
+}
+
 // 32 bit multiply/scale for broken GCC
 // Returns immediately if multiplier is 100
 int16_t scale32(int16_t value16, int16_t multiplier16)
@@ -541,4 +558,18 @@ int16_t scale_percent(int8_t value)
 	temp16_2 = ((temp16_1 * (int16_t)12) + 3750);
 
 	return temp16_2;
+}
+
+// Scale position to percentages
+int8_t scale_position(int16_t value)
+{
+	int8_t temp8;
+	int16_t temp16;
+
+	temp16 = value - 3750;
+	temp16 = temp16 / 12;
+
+	temp8 = (int8_t)temp16; 		// Demote
+
+	return temp8;
 }

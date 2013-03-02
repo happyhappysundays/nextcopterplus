@@ -138,7 +138,7 @@ void menu_mixer(uint8_t section)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&MixerMenuText[menu_temp - MIXERSTART]);
-			values[menu_temp - MIXERSTART] = do_menu_item(menu_temp, values[menu_temp - MIXERSTART], range, 0, text_link);
+			values[menu_temp - MIXERSTART] = do_menu_item(menu_temp, values[menu_temp - MIXERSTART], range, 0, text_link, false, 0);
 		}
 
 		// Save modified data back to Config
