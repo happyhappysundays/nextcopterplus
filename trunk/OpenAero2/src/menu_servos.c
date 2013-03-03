@@ -81,24 +81,24 @@ const menu_range_t servo_menu_ranges[5][SERVOITEMS] PROGMEM =
 		{-125,125,1,0,0}, 				// Offset
 	},
 	{
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
-		{-125,125,5,0,-100}, 			// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
+		{-125,0,5,0,-100}, 				// Min travel
 	},
 	{
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
-		{-125,125,5,0,100}, 			// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
+		{0,125,5,0,100}, 				// Max travel
 	},
 	{
 		{-125,125,5,0,0}, 				// Failsafe

@@ -480,17 +480,39 @@ void UpdateServos(void)
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 	
-		if (Config.Channel[i].value < Config.Limits[i].minimum) 
+		// Normal case
+		if (Config.Channel[i].Servo_reverse == OFF)
 		{
-			ServoOut[i] = Config.Limits[i].minimum;
+			if (Config.Channel[i].value < Config.Limits[i].minimum)
+			{
+				ServoOut[i] = Config.Limits[i].minimum;
+			}
+
+			if (Config.Channel[i].value > Config.Limits[i].maximum)
+			{
+				ServoOut[i] = Config.Limits[i].maximum;
+			}
+			else
+			{
+				ServoOut[i] = Config.Channel[i].value;
+			}
 		}
-		else if (Config.Channel[i].value > Config.Limits[i].maximum)
-		{
-			ServoOut[i] = Config.Limits[i].maximum;
-		}
+		// Make sure you take servo reversing into account
 		else
 		{
-			ServoOut[i] = Config.Channel[i].value;
+			if (Config.Channel[i].value > -Config.Limits[i].minimum)
+			{
+				ServoOut[i] = -Config.Limits[i].minimum;
+			}
+
+			if (Config.Channel[i].value < -Config.Limits[i].maximum)
+			{
+				ServoOut[i] = -Config.Limits[i].maximum;
+			}
+			else
+			{
+				ServoOut[i] = Config.Channel[i].value;
+			}
 		}
 	}
 }
@@ -503,8 +525,11 @@ void SetTrims(void)
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].Offset = scale_position(ServoOut[i]);
-		//Config.Channel[i].Offset = scale_position(3550);
+		// Do not set the throttle trim with this button
+		if (Config.Channel[i].source_a != THROTTLE)
+		{
+			Config.Channel[i].Offset = scale_position(ServoOut[i]);
+		}
 	}
 }
 

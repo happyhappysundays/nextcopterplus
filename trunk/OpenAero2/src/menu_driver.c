@@ -49,7 +49,6 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 
 // Servo driver
 void output_servo_ppm_asm3(int16_t servo_number, int16_t value);
-void output_servo_ppm_asm2(int16_t ServoOut5, int16_t ServoOut6, int16_t ServoOut7, int16_t ServoOut8);
 
 // Hard-coded line positions
 uint8_t lines[4] = {LINE0, LINE1, LINE2, LINE3};

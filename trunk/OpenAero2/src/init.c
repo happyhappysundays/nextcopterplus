@@ -30,6 +30,9 @@
 #include "..\inc\menu_ext.h"
 #include "..\inc\imu.h"
 
+
+extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
+
 //************************************************************
 // Defines
 //************************************************************

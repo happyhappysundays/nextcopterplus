@@ -1,6 +1,7 @@
 //***********************************************************
 //* stack.c
 //* Copied from public code on AVRfreaks via Michael McTernan
+//* http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=52249
 //***********************************************************
 
 //***********************************************************
@@ -10,7 +11,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 
-extern uint8_t _end;
+extern uint8_t __bss_end;
 extern uint8_t __stack; 
 
 //***********************************************************
@@ -23,7 +24,7 @@ extern uint8_t __stack;
 // Prototypes
 //************************************************************
 
-void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
+void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init3")));
 uint16_t StackCount(void);	
 
 //************************************************************
@@ -32,7 +33,7 @@ uint16_t StackCount(void);
 
 uint16_t StackCount(void)
 {
-    const uint8_t *p = &_end;
+    const uint8_t *p = &__bss_end;
     uint16_t       c = 0;
 
     while(*p == STACK_CANARY && p <= &__stack)
@@ -55,9 +56,9 @@ void StackPaint(void)
         p++;
     }
 #else
-    __asm volatile ("    ldi r30,lo8(_end)\n"
-                    "    ldi r31,hi8(_end)\n"
-                    "    ldi r24,lo8(0xc5)\n" /* STACK_CANARY = 0xc5 */
+    __asm volatile ("    ldi r30,lo8(__bss_end)\n"
+                    "    ldi r31,hi8(__bss_end)\n"
+                    "    ldi r24,lo8(0xc5)\n" 
                     "    ldi r25,hi8(__stack)\n"
                     "    rjmp .cmp\n"
                     ".loop:\n"
