@@ -18,6 +18,8 @@
 #include <util/delay.h>
 #include "..\inc\menu_ext.h"
 
+extern uint16_t StackCount(void);	
+
 //************************************************************
 // Prototypes
 //************************************************************
@@ -33,7 +35,7 @@ volatile int8_t	General_error;	// Global error flag
 void Display_status(void)
 {
 	int16_t temp, min, max, range, scale;
-	uint16_t vbat_temp;
+	uint16_t vbat_temp, free_ram;
 	int8_t	pos1, pos2, pos3;
 	mugui_size16_t size;
 
@@ -45,6 +47,7 @@ void Display_status(void)
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
 	LCD_Display_Text(46,(prog_uchar*)Verdana8,0,33); 	// Stability
 	LCD_Display_Text(47,(prog_uchar*)Verdana8,0,44); 	// Autolevel
+	LCD_Display_Text(133,(prog_uchar*)Verdana8,45,55); 	// Free
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
@@ -55,6 +58,10 @@ void Display_status(void)
 	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
+
+	// Display unused RAM
+	free_ram = StackCount();
+	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,70,55);
 
 	// Draw battery
 	drawrect(buffer, 100,4, 28, 50, 1);					// Battery body
@@ -108,7 +115,7 @@ void Display_status(void)
 	}
 
 	// Draw error messages, if any
-	if (General_error != 0)
+	if ((General_error & 0x3F) != 0)
 	{
 		// Create message box
 		fillrect(buffer, 14,8, 96, 48, 0);	// White box

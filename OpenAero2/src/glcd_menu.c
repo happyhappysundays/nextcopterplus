@@ -40,12 +40,13 @@ void idle_screen(void);
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Ver: V1.1b9";			// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Ver:      V1.1b9";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Input:";
 const char StatusText3[]  PROGMEM = "Status";
 const char StatusText4[]  PROGMEM = ".";
 const char StatusText5[]  PROGMEM = "0";	
+const char StatusText6[]  PROGMEM = "RAM:";
 //
 const char MenuFrame0[] PROGMEM = "A"; 						// Down marker
 const char MenuFrame2[] PROGMEM = "B";						// Right
@@ -287,11 +288,13 @@ const char *text_menu[] PROGMEM =
 		Status0, Status2, Dummy0,															// 121 to 123 Press any button
 		//
 		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,	MixerMenuItem5,						// 124 to 127 H/V/UD/Aft
+		//																
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,													// 128 to 132 Spare
 		//
-		Dummy0, 																			// 128 to 140 Spare
-		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,
-		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,
-		Dummy0,Dummy0,
+		StatusText6,																		// 133 Free 
+		//
+		Dummy0,Dummy0,Dummy0,Dummy0,														// 134 to 140 Spare
+		Dummy0,Dummy0,Dummy0,
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//

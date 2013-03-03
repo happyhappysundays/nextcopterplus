@@ -135,7 +135,9 @@
 //			Added "aft" orientation. Fixed inv. cal. bug.
 //			Adv. IMU defaults to ON. Added trim recording button.
 //			Added real-time servo updating for min/max/trim adjustment.
-//			Compacted Winddings fonts.
+//			Compacted Winddings fonts. Reduced RAM requirement in settings menu.
+//			Added unused RAM usage meter in status screen.
+//			Fixed min/max limits bug. Set trims doesn't set throttle trim.
 //
 //***********************************************************
 //* To do
