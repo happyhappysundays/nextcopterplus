@@ -1,4 +1,4 @@
-#summary OpenAero2 - Aeroplane - Setup guide (V1.1 Beta 8)
+#summary OpenAero2 - Aeroplane - Quick Setup guide (V1.1 Beta 8)
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
@@ -6,12 +6,12 @@ Please ensure you have read the manuals in the following order.
 
  # [OpenAero2_FAQ Frequently Ask Questions]
  # [OpenAero2_Getting_Started Getting Started Guide]
- # [OpenAero2_SetupGuide_Beta8 Aeroplane - Setup Guide (V1.1 Beta 8)]
+ # [OpenAero2_SetupGuide_Beta8 Aeroplane - Quick Setup Guide (V1.1 Beta 8)]
  # [OpenAero2_UserGuide_Beta8 Aeroplane - Advanced User Guide (V1.1 Beta 8)]
  
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
-=Aeroplane - Setup guide (V1.1 Beta 8)=
+=Aeroplane - Quick Setup guide (V1.1 Beta 8)=
 
 ==1. Factory reset==
 
@@ -125,23 +125,3 @@ http://i.imgur.com/thOmcij.jpg
 Optionally, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single '*gear*' channel. 
 
 Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
-
-==9. Sensor Calibration==
-
-Calibrate
-
-Inverted calibrate
-
-==10. Level Meter==
-
-Check circle in square
-
-
-
-
-
-
-
-14.Failsafe Settings
-
-16.Battery Monitor
