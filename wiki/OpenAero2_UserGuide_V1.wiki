@@ -82,28 +82,22 @@ Allows both ailerons to be used as flaperons, where the flaps and ailerons are p
 The 'Receiver Inputs' screen shows the current receiver values of the first five channels with either a PWM or CPPM receiver.
 
 ===Stick Calibration===
-Center stick calibration allows OpenAero2 to determine pilot commands, roll an axis and activate auto leveling.
+Center stick calibration allows OpenAero2 to center both PWM & CPPM receivers input, to ensure correct roll rate and selection of flight modes.
 
 http://i.imgur.com/GFkv1lu.jpg
 
-Stick calibration should be ran for both PWM & CPPM receiver 
-
-When using a CPPM or PWM receiver with throttle pass-through, ensure the throttle stick is also at center stick.
-
-Additionally, if using a 3-position flight switch, ensure the switch  also centered.
-
-Within the '*RC Inputs*' sub-menu, select 'Calibrate' (button 4), to return all the values to zero.
+When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.
 
 ===Stick Polarity===
 OpenAero2 has been designed to unify the polarity of all receivers and prevent setup errors.
 
-While viewing the '*RC Input*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
+While viewing the '*Receiver Inputs*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
 
- * Move the rudder stick right, 
- * Move the aileron stick right,
-
- * Push the elevator stick forwards / away.
- * Move the throttle stick to full throttle.
+ # Move the rudder stick right, check the rudder polarity.
+ # Move the aileron stick right, check the aileron polarity.
+ # Move the aileron stick right, check the polarity of the second aileron, define by '2nd aileron'.
+ # Push the elevator stick forwards / away, check the elevator polarity.
+ # Move the throttle stick to full throttle,  check the throttle polarity.
 
 Once the above has been completed, all positive values should be displayed within '*RC Input*', when both sticks are pushed forwards / away and to the right.
 
