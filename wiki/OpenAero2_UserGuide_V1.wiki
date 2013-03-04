@@ -48,7 +48,7 @@ OpenAero2 supports the following four mounting orientations.
 While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, OpenAero2 can support 8 CPPM channels from a single-wire receiver.
 
  * Rudder - Default for most multi-wire PWM receivers.
- * CCPM - Listens for a compatible multi-channel stream on the *rudder* input only.
+ * CPPM - Listens for a compatible multi-channel stream on the *rudder* input only.
  
 ===CPPM order===
 With a compatible CPPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order. 
@@ -67,16 +67,22 @@ Similar to stability mode, OpenAero2 allows any input channel to remotely enable
  * *AUX1* - Commonly used by CPPM receivers on a second individual flight switch.
 
 ===2nd Aileron===
-Optionally, OpenAero2 can control a second aileron ....
+In addition an aileron on output 6, OpenAero2 can setup and control a second aileron on output 7. Three methods are supported.
 
-  * *Throttle* - PWM receivers *only*. Allows re-purposing of KK2 throttle channel as second channel to control autoleveling.
+ * *None* - M7 will remain unassigned and will *not* operate a second aileron 
 
+====Primary Aileron====
+Uses the primary aileron input of the KK2 board to control a second aileron on output 7.
 
-Defines how M6 operates a second aileron servo.
-  * *None* - M6 will remain unassigned and will *not* operate a second aileron servo.
-  * Primary aileron channel used to operate second aileron. Commonly used to simplify setup.
-  * *Aileron2* - CPPM receivers *only*. Allows use of additional channel to utilize flaperon mixing within transmitter.
-  * *Throttle* - PWM receivers *only*. Allows re-purposing of throttle channel to utilize flaperon mixing within transmitter.
+ * *Aileron* - Commonly used with PWM receivers. 
+
+This could allow 'dynamic gains' or 'throttle pass-through' to be controlled through the 'throttle' input of the KK2 board.
+
+====Flaperon====
+Allows both ailerons to be used as flaperons, where the flaps and ailerons are pre-mixed within the transmitter, prior to OpenAero2.
+
+ * *Throttle* - PWM receivers only.
+ * *AUX1* - CPPM receivers only.
 
 ==3. Receiver Inputs==
 ===Stick Calibration===
