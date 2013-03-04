@@ -58,8 +58,8 @@ UD/DOWN increments and decrements the item
 ===General Menu===
 http://i.imgur.com/ekizXep.jpg
 
- * *Mode:* Allows you to select from the input preset mixers. Currently there are presets for dual-aileron aeroplane and flying wing.
- * *Orient:* Remaps the sensors so that you can mount the board vertically (buttons down) in space-restricted areas.
+ * *Mode:* Allows you to select from the input preset mixers. Currently there are presets for dual-aileron aeroplane, flying wing and camera stability.
+ * *Orient:* Remaps the sensors so that you can mount the board in one of four different ways.
  * *Contrast:* Allows you to change the contrast of the LCD. See below.
  * *Status time:* Allows you to set the amount of time the status screen is displayed until it is replaced by the idle mode screen. Settable from 1 to 30 seconds.
 
@@ -192,64 +192,55 @@ http://i.imgur.com/It14TuJ.jpg
 The level meter screen shows you a graphical representation of where the board considers "down" to be. 
 
 ===Channel Mixing Menu===
-Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
+This menu has changed quite a bit from earlier builds.
+Now you first select the output number that you wish to modify with the "Setting for:" item.
+Once this is set to the right output number you may continue down the settings.
 
-http://i.imgur.com/n7MnGIn.jpg
+http://i.imgur.com/vMKqZbv.jpg
 
-There is a pair of RC mixers on each output channel. These can be used as the source channel.
-You can therefore do delta, taileron, elevon etc mixing with OpeAero2 without needing special transmitter mixing functions.
-The second source channel is on the next screen.
- * *Source A:* Set the primary channel source to be mixed. 
- * *Volume (%):* Set the amount of channel A required.
- * *Source B:* Set the secondary channel source to be mixed. 
- * *Volume (%):* Set the amount of channel B required.
+There is a pair of RC mixers on each output channel. 
+You can do delta, taileron, elevon etc mixing with OpenAero2 without needing special transmitter mixing functions.
+ * *Src A:* Set the primary channel source to be mixed. 
+ * *Vol. (%):* Set the amount of channel A required.
+ * *Src B:* Set the secondary channel source to be mixed. 
+ * *Vol.(%):* Set the amount of channel B required.
+
+http://i.imgur.com/Km8NsBh.jpg
+
  * *Source mix:* Copies the RC source through to the mixer. Normally OFF. Advanced users only.
- * *Offset(%):* The center servo position -125% to 125%. Please use this to mechanically center your control surfaces, not the TX trims.
-
-http://i.imgur.com/BFh2Lxz.jpg
- * *Min(%):* The minimum servo travel limit -125% to 125%.
- * *Max(%):* The minimum servo travel limit -125% to 125%.
- * *Failsafe(%):* The failsafe servo position -125% to 125%. Over-ridden by pressing the failsafe button on the RC Inputs screen.
-
-http://i.imgur.com/izYOfCC.jpg
-
- * *Primary:* This is the primary source for the output mixer. Normally this defaults to the current channel. This tells the software what to send to the servo or ESC.
- * *Volume (%):* The amount of the primary channel to be send to the servo/ESC. Note that you can reverse the source channel by using a negative source volume, such as -100%. If you need to reverse a channel, *do it here* by setting this to -100%.
-
-
-http://i.imgur.com/436xVhf.jpg
-
  * *Roll gyro:* Roll gyro signal enable/disable (Off/On). If you wish this output to respond to roll, enable this. 
- * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Direction:* If the response is backwards to what you need, set this to Reversed.
+
+http://i.imgur.com/qoGAYKp.jpg
+
  * *Pitch gyro:* Pitch gyro signal enable/disable (Off/On). If you wish this output to respond to pitch, enable this. 
- * *Polarity:* If the response is backwards to what you need, set this to Reversed.
-
-http://i.imgur.com/4CbBTax.jpg
-
+ * *Direction:* If the response is backwards to what you need, set this to Reversed.
  * *Yaw gyro:* Yaw gyro signal enable/disable (Off/On). If you wish this output to respond to yaw, enable this. 
- * *Polarity:* If the response is backwards to what you need, set this to Reversed.
+ * *Direction:* If the response is backwards to what you need, set this to Reversed.
+
+http://i.imgur.com/uLbQQmh.jpg
+
  * *Roll acc:* Roll accelerometer signal enable/disable (Off/On). If you wish this output to respond to the roll accelerometer, enable this. 
- * *Polarity:* If the response is backwards to what you need, set this to Reversed.
-
-http://i.imgur.com/9879VwY.jpg
-
+ * *Direction:* If the response is backwards to what you need, set this to Reversed.
  * *Pitch acc:* Pitch accelerometer signal enable/disable (Off/On). If you wish this output to respond to the pitch accelerometer, enable this. 
- * *Polarity:* If the response is backwards to what you need, set this to Reversed.
- * *Crossmix:* This is the second source for the output mixer. This will be mixed with the primary.
- * *Volume (%):* The amount of the second channel to be send to the servo/ESC.
-
-http://i.imgur.com/tUKAiAQ.jpg
-
- * *Crossmix:* This is the third source for the output mixer. This will be mixed with the primary.
- * *Volume (%):* The amount of the third channel to be send to the servo/ESC.
- * *Crossmix:* This is the fourth source for the output mixer. This will be mixed with the primary.
- * *Volume (%):* The amount of the fourth channel to be send to the servo/ESC.
+ * *Direction:* If the response is backwards to what you need, set this to Reversed.
 
 ===Output Mixing Menu===
+This menu has changed quite a bit from earlier builds.
+Now you first select the output number that you wish to modify with the "Setting for:" item.
+Once this is set to the right output number you may continue down the settings.
 
+http://i.imgur.com/ox2b9Lm.jpg
 
+ * *From:* This is the second source for the output mixer. This will be mixed with the primary.
+ * *Vol. (%):* The amount of the second channel to be send to the servo/ESC.
+ * *From:* This is the third source for the output mixer. This will be mixed with the primary.
+ * *Vol. (%):* The amount of the third channel to be send to the servo/ESC.
 
+http://i.imgur.com/IwfS0Li.jpg
 
+ * *From:* This is the fourth source for the output mixer. This will be mixed with the primary.
+ * *Vol(%):* The amount of the fourth channel to be send to the servo/ESC.
 
 ===Servo Direction Menu===
 You can reverse the direction of the servos for each channel here.
@@ -269,6 +260,7 @@ You can set the maximum positive throw of each servo from this menu. Note that n
 
 ===Failsafe Menu===
 http://i.imgur.com/r5r2OeI.jpg
+ * *Mode:* There are two options: *Fixed* which simply transfers the settings from the "Failsafe positions" menu to the servos, and *Adv.* which uses the settings below. In Advanced mode, autolevel is enabled automatically.
  * *THR.pos %:* Throttle position when in advanced failsafe (in %). Note that the throttle position ranges from -100% (min) to 100% (max).
  * *Elevator:* Elevator trim when in advanced failsafe.
  * *Aileron:* Aileron trim when in advanced failsafe.
