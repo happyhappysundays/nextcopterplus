@@ -67,9 +67,9 @@ Similar to stability mode, OpenAero2 allows any input channel to remotely enable
  * *AUX1* - Commonly used by CPPM receivers on a second individual flight switch.
 
 ===2nd Aileron===
-In addition an aileron on output 6, OpenAero2 can setup and control a second aileron on output 7. Three methods are supported.
+In addition to an aileron on output 6, OpenAero2 can setup and control a second aileron on output 7. Three methods are supported.
 
- * *None* - M7 will remain unassigned and will *not* operate a second aileron 
+ * *None* - M7 remains unassigned and will *not* operate a second aileron 
 
 ====Primary Aileron====
 Uses the primary aileron input of the KK2 board to control a second aileron on output 7.
