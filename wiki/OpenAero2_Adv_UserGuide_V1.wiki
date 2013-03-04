@@ -20,7 +20,7 @@ For performance reasons the status screen will switch back to the idle screen af
 
 *Status screen*
 
-http://i.imgur.com/dHXBPzZ.jpg
+http://i.imgur.com/He4gOjG.jpg
 
  * *Mode:* The current mixer preset
  * *Version:* The version number of the loaded firmware
@@ -34,10 +34,10 @@ Pressing button 1 goes to the main menu.
 
 *Idle screen*
 
-http://i.imgur.com/RG7ysDN.jpg
+http://i.imgur.com/966nbo0.jpg
 
 ===Main Menu===
-http://i.imgur.com/MRclMpq.jpg
+http://i.imgur.com/ZvJ0rRg.jpg
 
 *Main menu*
 The main menu stops the loop. The main menu controls should be self-explanatory.
@@ -89,7 +89,7 @@ http://i.imgur.com/tjW92.jpg
  * Pressing button 1 "Def." returns the value to the default of 38.
  * Increasing the number increases contrast.
 
-===RC Setup Menu===
+===Receiver Setup Menu===
 http://i.imgur.com/thOmcij.jpg
 
  * *CPPM order:* When using CPPM input, this setting allows you to select either JR/Spektrum (TAER) or Futaba (AETR) channel order. 
@@ -105,7 +105,25 @@ need a fixed offset to feed that channel. These can be set up here.
  * *Elevator rev:* If your TX cannot reverse channels to suit OpenAero2 then you can do this here. Remember to do this FIRST of all when setting up. 
  * *Rudder rev:* If your TX cannot reverse channels to suit OpenAero2 then you can do this here. Remember to do this FIRST of all when setting up.
 
-===Stability Control Menu===
+http://i.imgur.com/AUK1PAK.jpg
+ * *Differential:* If you wish to use aileron differential, do not set it up in the transmitter, use this setting. Setting 0% is no differential, 50% will limit the upward throw of ailerons to 50% and 100% will result in split ailerons (no upward travel).
+
+===Receiver  inputs Screen===
+http://i.imgur.com/twBvVzO.jpg
+
+The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
+
+Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered *including the throttle* before calibration.
+
+Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
+Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
+It is recommended that receivers with built-in failsafe be set up and used.
+Regardless of your plan to use failsafe, please center all sticks and *set the throttle to minimum* and press button 3. This will set a safe default failsafe.
+
+Pressing button 2 "Trim" will transfer the current TX trim settings into the servo offsets. Bear in mind that as soon as you press this button and exit back to the status menu, your servos will move temporarily out of trim. This is because you now have BOTH TX trims AND OpenAero2 trims set. Simply set the TX trims back to zero and the servos sould be at exactly the same position as you had adjusted previously using the TX trims.
+If you screw uo the servo neutral positions by pressing "trim" you will have to reset each of them from the "Servo trims" menu.
+
+===Stability Setup Menu===
 http://i.imgur.com/iU30Ehk.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
@@ -140,7 +158,7 @@ http://i.imgur.com/Rlag2QR.jpg
 
 
 *Note:* The function of PID gain controls is outside the scope of this basic User's Guide.
-===Autolevel Control Menu===
+===Autolevel Setup Menu===
 http://i.imgur.com/I6797Ij.jpg
  * *Mode:* This setting determines how the stability is to be controlled. There six options.
  # *OFF:* Always off
@@ -160,36 +178,7 @@ http://i.imgur.com/Yubz6rP.jpg
  * *Launch:* Enable/disable launch mode. When enabled, the autolevel will be disabled for 10 seconds after it is triggered by a throttle position higher than set by "THR.pos".
  * *THR.pos:* Throttle stick position to enable launch timer.
 
-===Failsafe Menu===
-http://i.imgur.com/r5r2OeI.jpg
- * *THR.pos %:* Throttle position when in advanced failsafe (in %). Note that the throttle position ranges from -100% (min) to 100% (max).
- * *Elevator:* Elevator trim when in advanced failsafe.
- * *Aileron:* Aileron trim when in advanced failsafe.
- * *Rudder:* Rudder trim when in advanced failsafe.
-
-===Battery Menu===
-http://i.imgur.com/3Xlq3a2.jpg
- * *Battery type:* Used internally to preset the min and max cell volatges.
- * *Cells:* Number of cells in your battery pack. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
- * *Alarm (mV):* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
- * *Max (mV):* Set this to the maximum cell voltage that you like to use. Defaults to 420 (4.2V) for LiPo.
-http://i.imgur.com/GVg5Zjd.jpg
- * *Min (mV):* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
-
-
-===RC inputs Screen===
-http://i.imgur.com/GFkv1lu.jpg
-
-The RC inputs screen shows you the current values received by the system in either PWM or CPPM mode. In CPPM mode, only the first five channels are shown.
-
-Pressing button 4 "Cal." performs a stick centering calibration. This should make all the numbers on the right-hand column drop to zero. Make sure all controls are centered *including the throttle* before calibration.
-
-Pressing button 3 'Failsafe" saves the current stick positions to the M1 to M8 failsafe setting. The servos will adopt this position in the event of a loss of input signal.
-Note that most receivers will still transmit the last known RC values if it loses the TX signal, so this is no test of failsafe. You need to physically disconnect the receiver.
-It is recommended that receivers with built-in failsafe be set up and used.
-Regardless of your plan to use failsafe, please center all sticks and *set the throttle to minimum* and press button 3. This will set a safe default failsafe.
-
-===Sensor Inputs Screen===
+===Sensor Calibration Screen===
 http://i.imgur.com/7dhO81Z.jpg
 
 The sensor inputs screen shows you the current values of all sensors. 
@@ -202,7 +191,7 @@ http://i.imgur.com/It14TuJ.jpg
 
 The level meter screen shows you a graphical representation of where the board considers "down" to be. 
 
-===Mixer Menu 1 to 8===
+===Channel Mixing Menu===
 Each of the mixer menus M1 to M8 works in the same way - a selected RC channel is manipulated and mixed with the sensors to result in the desired effect.
 
 http://i.imgur.com/n7MnGIn.jpg
@@ -212,6 +201,8 @@ You can therefore do delta, taileron, elevon etc mixing with OpeAero2 without ne
 The second source channel is on the next screen.
  * *Source A:* Set the primary channel source to be mixed. 
  * *Volume (%):* Set the amount of channel A required.
+ * *Source B:* Set the secondary channel source to be mixed. 
+ * *Volume (%):* Set the amount of channel B required.
  * *Source mix:* Copies the RC source through to the mixer. Normally OFF. Advanced users only.
  * *Offset(%):* The center servo position -125% to 125%. Please use this to mechanically center your control surfaces, not the TX trims.
 
@@ -224,8 +215,7 @@ http://i.imgur.com/izYOfCC.jpg
 
  * *Primary:* This is the primary source for the output mixer. Normally this defaults to the current channel. This tells the software what to send to the servo or ESC.
  * *Volume (%):* The amount of the primary channel to be send to the servo/ESC. Note that you can reverse the source channel by using a negative source volume, such as -100%. If you need to reverse a channel, *do it here* by setting this to -100%.
- * *Source B:* Set the secondary channel source to be mixed. 
- * *Volume (%):* Set the amount of channel B required.
+
 
 http://i.imgur.com/436xVhf.jpg
 
@@ -254,6 +244,51 @@ http://i.imgur.com/tUKAiAQ.jpg
  * *Volume (%):* The amount of the third channel to be send to the servo/ESC.
  * *Crossmix:* This is the fourth source for the output mixer. This will be mixed with the primary.
  * *Volume (%):* The amount of the fourth channel to be send to the servo/ESC.
+
+===Output Mixing Menu===
+
+
+
+
+
+===Servo Direction Menu===
+You can reverse the direction of the servos for each channel here.
+
+http://i.imgur.com/MilvOqE.jpg
+
+===Servo Trim (%) Menu===
+You can set the neutral position of each servo from this menu. Note that now the servo updates the new postion in real-time so that you can see the effect immediately.
+
+http://i.imgur.com/GP54Zg3.jpg
+
+===Neg. Servo Trvl(%) Menu===
+You can set the maximum negative throw of each servo from this menu. Note that now the servo updates the new postion in real-time so that you can see the effect immediately.
+
+===Pos. Servo Trvl(%) Menu===
+You can set the maximum positive throw of each servo from this menu. Note that now the servo updates the new postion in real-time so that you can see the effect immediately.
+
+===Failsafe Menu===
+http://i.imgur.com/r5r2OeI.jpg
+ * *THR.pos %:* Throttle position when in advanced failsafe (in %). Note that the throttle position ranges from -100% (min) to 100% (max).
+ * *Elevator:* Elevator trim when in advanced failsafe.
+ * *Aileron:* Aileron trim when in advanced failsafe.
+ * *Rudder:* Rudder trim when in advanced failsafe.
+
+===Failsafe Positions Menu===
+You can set here a specific servo position that the servos will move to in Failsafe mode when Failsafe is set to "fixed".
+Note that pressing "F/S" on the RC input screen will load the current values into these settings.
+Note also that when Failsafe is set to "Advanced", these settinsg will not be used as the settings on the "Failsafe settings" menu will be used instead.
+
+http://i.imgur.com/GP54Zg3.jpg
+
+===Battery Menu===
+http://i.imgur.com/3Xlq3a2.jpg
+ * *Battery type:* Used internally to preset the min and max cell volatges.
+ * *Cells:* Number of cells in your battery pack. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
+ * *Alarm (mV):* This is the low battery alarm (LVA) setting. You can change this value at any time, but changing either the number of cells or the minimum cell voltage will over-write the LVA. "1000" equales to 10.00 volts.
+ * *Max (mV):* Set this to the maximum cell voltage that you like to use. Defaults to 420 (4.2V) for LiPo.
+http://i.imgur.com/GVg5Zjd.jpg
+ * *Min (mV):* Set this to the minimum cell voltage that you like to use. defaults to 360 (3.6V) for LiPo. When you change this value, OpenAero2 will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
 
 ==Error messages==
 If an error or alarm is detected the buzzer will sound and a message will be displayed on the screen. There are five possible screen messages.
