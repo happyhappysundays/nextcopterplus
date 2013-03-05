@@ -79,17 +79,17 @@ Allows both ailerons to be used as flaperons, where the flaps and ailerons are p
  * *AUX1* - CPPM receivers only.
 
 ==3. Receiver Inputs==
-The 'Receiver Inputs' screen shows the current receiver values of the first five channels with either a PWM or CPPM receiver.
+The 'Receiver Inputs' screen shows the current receiver values of the first five channels from a PWM or CPPM receiver.
 
 ===Stick Calibration===
 Center stick calibration allows OpenAero2 to center both PWM & CPPM receivers input, to ensure correct roll rate and selection of flight modes.
 
 http://i.imgur.com/GFkv1lu.jpg
 
-When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.
+*When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.*
 
 ===Stick Polarity===
-OpenAero2 has been designed to unify the polarity of all receivers and prevent setup errors.
+OpenAero2 has been designed to unify the polarity of all receivers to reduce setup errors.
 
 While viewing the '*Receiver Inputs*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
 
@@ -101,7 +101,7 @@ While viewing the '*Receiver Inputs*' display, complete the following checks and
 
 Once the above has been completed, all positive values should be displayed within '*RC Input*', when both sticks are pushed forwards / away and to the right.
 
-*Ensure the motor has been disconnect prior to completing the above setup.*
+Ensure the motor has been disconnect prior to completing the above setup.
 
 ==7. Stability Setup==
 
