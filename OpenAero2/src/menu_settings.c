@@ -34,7 +34,6 @@ void menu_rc_setup(uint8_t i);
 // Defines
 //************************************************************
 
-#define NUMMENUITEMS 49	// Total number of all menu items
 #define RCSTART 149 	// Start of Menu text items
 #define RCOFFSET 78		// LCD offsets
 
@@ -44,7 +43,7 @@ void menu_rc_setup(uint8_t i);
 #define STABTEXT 38
 #define GENERALTEXT	22
 
-#define RCITEMS 8 		// Number of menu items
+#define RCITEMS 9 		// Number of menu items
 #define FSITEMS 5 
 #define AUTOITEMS 8 
 #define STABITEMS 16 
@@ -56,7 +55,7 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[5][STABITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 105, 141, 141, 141},				// RC setup
+	{RCTEXT, 116, 105, 105, 105, 141, 141, 141, 0},				// RC setup
 	{FSTEXT, 0, 0, 0, 0},										// Failsafe
 	{AUTOTEXT, 0, 0, 0, 0, 0, 101, 0},							// Autolevel
 	{STABTEXT, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Stability
@@ -68,7 +67,7 @@ const uint8_t RCMenuText[5][STABITEMS] PROGMEM =
 const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM = 
 {
 	{
-		// RC setup (8)
+		// RC setup (9)
 		{CPPM_MODE,PWM3,1,1,PWM1},		// Min, Max, Increment, Style, Default
 		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
@@ -77,10 +76,11 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
+		{0,100,5,0,0},					// Differential
 	},
 	{
 		// Failsafe (5)
-		{0,1,1,1,1}, 	
+		{0,1,1,1,0}, 	
 		{-100,100,1,0,-100},
 		{-125,125,1,0,0},
 		{-125,125,1,0,0},

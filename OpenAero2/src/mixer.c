@@ -104,6 +104,7 @@ void ProcessMixer(void)
 	int16_t flap = 0;
 	int16_t	pitch_trim = 0;
 	int16_t	roll_trim = 0;
+	bool	TwoAilerons = false;
 
 	//************************************************************
 	// Limit output mixing as needed to save processing power
@@ -288,6 +289,51 @@ void ProcessMixer(void)
 		}
 	} // Autolevel
 
+	//************************************************************
+	// Process differential if set up and two ailerons used
+	//************************************************************
+
+	if ((Config.FlapChan != NOCHAN) && (Config.Differential != 0))
+	{
+		// Search through outputs for aileron channels
+		for (i = 0; i < outputs; i++)
+		{
+			// Get current channel value
+			temp = Config.Channel[i].value;
+
+			// If some kind of aileron channel
+			if ((Config.Channel[i].source_a == AILERON) || (Config.Channel[i].source_a == Config.FlapChan))
+			{
+				// For the second aileron (RHS)
+				if (TwoAilerons)			
+				{
+					// Limit positive-going values
+					if (temp > 0)
+					{
+						temp = scale32(temp, (100 - Config.Differential));
+						Config.Channel[i].value = temp;
+					}
+				}
+
+				// For the first aileron (LHS) 
+				// Limit positive-going values
+				else if (temp < 0)			
+				{
+					temp = scale32(temp, (100 - Config.Differential));
+					Config.Channel[i].value = temp;
+					TwoAilerons = true; // Found an aileron
+				}
+
+				// Else was the normal side of the first aileron
+				else
+				{
+					TwoAilerons = true; // Found an aileron
+				}
+			}
+		}
+		// Reset after all outputs done
+		TwoAilerons = false;
+	}
 
 	//************************************************************
 	// Re-mix flaps from flaperons as required

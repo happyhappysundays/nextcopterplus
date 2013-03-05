@@ -37,11 +37,11 @@ void Display_balance(void)
 	{
 		ReadAcc();
 
-		x_pos = accADC[PITCH] + 32;
+		x_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 32;
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
 
-		y_pos = accADC[ROLL] + 64;
+		y_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 64;
 		if (y_pos < 0) y_pos = 0;
 		if (y_pos > 128) y_pos = 128;
 
