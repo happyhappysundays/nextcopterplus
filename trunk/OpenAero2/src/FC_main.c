@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 9 - February 2013
+// Version 1.1 Beta 9 - March 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -138,6 +138,8 @@
 //			Compacted Winddings fonts. Reduced RAM requirement in settings menu.
 //			Added unused RAM usage meter in status screen.
 //			Fixed min/max limits bug. Set trims doesn't set throttle trim.
+//			Added basic aileron differential setting to RC menu
+//			Level meter responds properly in all orientations
 //
 //***********************************************************
 //* To do

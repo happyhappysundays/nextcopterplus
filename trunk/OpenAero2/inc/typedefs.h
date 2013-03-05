@@ -103,6 +103,7 @@ typedef struct
 	int8_t		AileronPol;				// RC input polarity
 	int8_t		ElevatorPol;			// RC input polarity
 	int8_t		RudderPol;				// RC input polarity
+	int8_t		Differential;			// Aileron differential
 
 	// Failsafe items
 	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)

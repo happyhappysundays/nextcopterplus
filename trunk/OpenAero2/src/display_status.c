@@ -130,7 +130,7 @@ void Display_status(void)
 		}
 		else if((General_error & (1 << LOW_BATT)) != 0)
 		{
-			LCD_Display_Text(82,(prog_uchar*)Verdana14,33,14); 	// Battery
+			LCD_Display_Text(134,(prog_uchar*)Verdana14,33,14); // Battery
 			LCD_Display_Text(119,(prog_uchar*)Verdana14,46,34); // Low
 		}
 		else if((General_error & (1 << NO_SIGNAL)) != 0)
