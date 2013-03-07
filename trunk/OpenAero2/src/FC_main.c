@@ -140,6 +140,8 @@
 //			Fixed min/max limits bug. Set trims doesn't set throttle trim.
 //			Added basic aileron differential setting to RC menu
 //			Level meter responds properly in all orientations
+//			Added stick calibration screen for idiots
+//			Shrunk last bit of space out of fonts.
 //
 //***********************************************************
 //* To do

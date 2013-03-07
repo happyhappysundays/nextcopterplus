@@ -115,7 +115,7 @@ void Display_status(void)
 	}
 
 	// Draw error messages, if any
-	if ((General_error & 0x3F) != 0)
+	if (General_error != 0)
 	{
 		// Create message box
 		fillrect(buffer, 14,8, 96, 48, 0);	// White box
@@ -137,7 +137,6 @@ void Display_status(void)
 		{
 			LCD_Display_Text(75,(prog_uchar*)Verdana14,51,13); 	// No
 			LCD_Display_Text(76,(prog_uchar*)Verdana14,39,33);  // Signal
-			//menu_beep(3);
 		}
 		else if((General_error & (1 << LOST_MODEL)) != 0)
 		{
@@ -148,7 +147,6 @@ void Display_status(void)
 		{
 			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
 			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
-			menu_beep(6);
 		}
 	}
 

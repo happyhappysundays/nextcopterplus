@@ -61,22 +61,23 @@ const char MenuFrame8[] PROGMEM = "Save";					// Save
 //
 const char MainMenuItem0[]  PROGMEM = "1. General"; 		// Main menu list text
 const char MainMenuItem1[]  PROGMEM = "2. Receiver setup"; 
-const char MainMenuItem9[]  PROGMEM = "3. Receiver inputs";
-const char MainMenuItem2[]  PROGMEM = "4. Stability setup";
-const char MainMenuItem3[]  PROGMEM = "5. Autolevel setup";
-const char MainMenuItem8[]  PROGMEM = "6. Sensor calibration";
-const char MainMenuItem10[] PROGMEM = "7. Level meter";
-const char MainMenuItem12[] PROGMEM = "8. Channel mixing";
-const char MainMenuItem13[] PROGMEM = "9. Output mixing";
-const char MainMenuItem20[] PROGMEM = "10. Servo direction";
-const char MainMenuItem21[] PROGMEM = "11. Servo trim (%)";
-const char MainMenuItem22[] PROGMEM = "12. Neg. Servo trvl. (%)";
-const char MainMenuItem23[] PROGMEM = "13. Pos. Servo trvl. (%)";
-const char MainMenuItem4[]  PROGMEM = "14. Failsafe settings";
-const char MainMenuItem24[] PROGMEM = "15. Failsafe positions";
-const char MainMenuItem5[]  PROGMEM = "16. Battery monitor";
+const char MainMenuItem7[]  PROGMEM = "3. Stick polarity"; 
+const char MainMenuItem9[]  PROGMEM = "4. Receiver inputs";
+const char MainMenuItem2[]  PROGMEM = "5. Stability setup";
+const char MainMenuItem3[]  PROGMEM = "6. Autolevel setup";
+const char MainMenuItem8[]  PROGMEM = "7. Sensor calibration";
+const char MainMenuItem10[] PROGMEM = "8. Level meter";
+const char MainMenuItem12[] PROGMEM = "9. Channel mixing";
+const char MainMenuItem13[] PROGMEM = "10. Output mixing";
+const char MainMenuItem20[] PROGMEM = "11. Servo direction";
+const char MainMenuItem21[] PROGMEM = "12. Servo trim (%)";
+const char MainMenuItem22[] PROGMEM = "13. Neg. Servo trvl. (%)";
+const char MainMenuItem23[] PROGMEM = "14. Pos. Servo trvl. (%)";
+const char MainMenuItem4[]  PROGMEM = "15. Failsafe settings";
+const char MainMenuItem24[] PROGMEM = "16. Failsafe positions";
+const char MainMenuItem5[]  PROGMEM = "17. Battery monitor";
+//
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
-
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode4[]  PROGMEM = "Aero"; 
@@ -116,14 +117,14 @@ const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
 const char SensorMenuItem1[]  PROGMEM = "Cal.";			 	// Sensors text
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	
-const char SensorMenuItem3[]  PROGMEM = "F/S";	
+const char SensorMenuItem3[]  PROGMEM = "Failsafe";	
 //
 const char RCMenuItem0[]  PROGMEM = "CPPM order:"; 			// RC setup text
 const char RCMenuItem1[]  PROGMEM = "RX sync:"; 
 const char RCMenuItem2[]  PROGMEM = "Stab input:";
 const char RCMenuItem3[]  PROGMEM = "Autolev input:";
 const char RCMenuItem4[]  PROGMEM = "2nd Ail:";
-const char RCMenuItem6[]  PROGMEM = "JR/Spk"; 
+const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
 const char RCMenuItem8[]  PROGMEM = "Ail. input:";
 const char RCMenuItem9[]  PROGMEM = "Ele. input:";
@@ -200,6 +201,9 @@ const char ErrorText6[] PROGMEM = "Lost";
 const char ErrorText7[] PROGMEM = "Model";
 const char Status3[] 	PROGMEM = "Battery";
 //
+const char WizardText0[] PROGMEM = "No RX signal!"; 				// Wizard screen
+const char WizardText1[] PROGMEM = "Hold as shown";
+//
 const char Status0[] PROGMEM = "Press";						// Idle text
 const char Status2[] PROGMEM = "for status";
 //
@@ -264,12 +268,13 @@ const char *text_menu[] PROGMEM =
 		//
 		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
-		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem2, MainMenuItem3, 			// 77 to 93 Main menu
+		MainMenuItem0, MainMenuItem1, MainMenuItem7, MainMenuItem9, MainMenuItem2, 
+		MainMenuItem3, 																		// 77 to 94 Main menu
 		MainMenuItem8, MainMenuItem10, MainMenuItem12,MainMenuItem13, 
 		MainMenuItem20,MainMenuItem21,MainMenuItem22, MainMenuItem23, MainMenuItem4, 
-		MainMenuItem24, MainMenuItem5, Dummy0,
+		MainMenuItem24, MainMenuItem5,
 		//
-		Dummy0, Dummy0, Dummy0,	Dummy0,														// Dummy 94 to 97
+		Dummy0, Dummy0, Dummy0,	Dummy0,														// Dummy 95 to 97
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 Error, lost, model
 		//
@@ -297,8 +302,9 @@ const char *text_menu[] PROGMEM =
 		//
 		Status3,																			// 134 Battery
 		//
-		Dummy0,Dummy0,Dummy0,																// 135 to 140 Spare
-		Dummy0,Dummy0,Dummy0,
+		WizardText0,WizardText1,Dummy0,														// 135 to 137
+		//
+		Dummy0,Dummy0,Dummy0,																// 138 to 140
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//

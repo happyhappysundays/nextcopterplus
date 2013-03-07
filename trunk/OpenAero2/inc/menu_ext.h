@@ -11,6 +11,7 @@ extern void Display_status(void);
 extern void Display_balance(void);
 extern void Display_sensors(void);
 extern void Display_rcinput(void);
+extern void Display_sticks(void);
 extern void idle_screen(void);
 
 // Menus
