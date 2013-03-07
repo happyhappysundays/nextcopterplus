@@ -49,19 +49,6 @@ void Display_rcinput(void)
 			SetFailsafe();
 		}
 
-		if (BUTTON2 == 0)
-		{
-			//_delay_ms(100);	
-			Stability = 0;				// Make sure stability modes are off 
-			AutoLevel = 0;
-			Failsafe = 0;
-			ProcessMixer();				// Process mix - values in Config.Channel[i].value
-			UpdateServos();				// Values now in ServoOut[i]
-			SetTrims();					// Convert and copy servo positions to offsets (trim percentages)
-			UpdateLimits();				// Update actual servo trims from offsets
-			Save_Config_to_EEPROM();	// Save new trim values
-		}
-
 		RxGetChannels();
 
 		LCD_Display_Text(32,(prog_uchar*)Verdana8,0,0);
@@ -85,9 +72,7 @@ void Display_rcinput(void)
 
 		// Print bottom text and markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(45, (prog_uchar*)Verdana8, 15, 55); 	// Trim
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 41, 59); 	// Down
-		LCD_Display_Text(44, (prog_uchar*)Verdana8, 60, 55); 	// F/S
+		LCD_Display_Text(44, (prog_uchar*)Verdana8, 40, 55); 	// Failsafe
 		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 100, 55); 	// Cal.
 		LCD_Display_Text(9, (prog_uchar*)Wingdings, 119, 59); 	// Down
