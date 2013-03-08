@@ -1,4 +1,4 @@
-#summary OpenAero2 - Camera Stabilisation Guide with RC control
+#summary OpenAero2 - Camera - Stabilisation Guide with RC control V1.1
 
 =OpenAero2 Camera Stabilisation Setup Guide=
 =Part 2 - Stabilisation under RC control=
