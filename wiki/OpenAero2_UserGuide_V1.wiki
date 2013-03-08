@@ -190,10 +190,9 @@ Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more 
 ==11. Servo Direction==
 OpenAero2 allows the direction any output to be reversed internally, rather than externally or mechanically.
 
-In the event a control surface is moving in the wrong direction, simply reversed the affected out here rather than in the transmitter.
+In the event a control surface is moving in the wrong direction, simply reversed the affected output here rather than in the transmitter.
 
 ==12. Servo Trim==
-
 
 ==13. Negative Servo Travel==
 
