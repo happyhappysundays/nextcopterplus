@@ -23,11 +23,14 @@ This guide presumes all values have been reset to their factory default values, 
  # Release all buttons once the red LED has blinked,
  # OpenAero will continue to display the status screen.
 
-http://i.imgur.com/dHXBPzZ.jpg
+http://i.imgur.com/966nbo0.jpg
+http://i.imgur.com/He4gOjG.jpg
 
 ==1. General==
 ===Model Type===
 OpenAero2 has been designed with selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
+
+http://i.imgur.com/ekizXep.jpg
 
  * Aero - Default preset for both *single* and *dual aileron* aeroplane's.
  * F.Wing - Selectable preset for *flying-wing*'s.
@@ -35,10 +38,12 @@ OpenAero2 has been designed with selectable model presets, for easy setup to con
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
-Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_V1 'Aeroplane - Advanced User Guide (V1.1 Beta 9)'] for more information on how to customize the mixers
+Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information on how to customize the mixers
 
 ===Board Orientation===
 OpenAero2 supports the following four mounting orientations.
+
+http://i.imgur.com/ekizXep.jpg
 
  * Forward - Default horizontal orientation, buttons facing *aft* with screen to the *front*.
  * Aft - Horizontal, buttons facing *front* with screen to the *aft*.
@@ -68,6 +73,8 @@ Similar to stability mode, OpenAero2 allows any input channel to remotely enable
  * *Gear* - Typically used by PWM receivers on the same 2 or 3 position flight switch.
  * *AUX1* - Commonly used by CPPM receivers on a second individual flight switch.
 
+If the '*gear*' channel is used for both '*Stab input*' and '*Autolev input*', both stabilization and autoleveling will be switch on and off together.
+
 ===2nd Aileron===
 In addition to an aileron on output 6, OpenAero2 can control a second aileron on output 7. Three methods are supported.
 
@@ -80,7 +87,16 @@ Allows both ailerons to be used as flaperons, where the flaps and ailerons are p
  * *Throttle* - PWM receivers only.
  * *AUX1* - CPPM receivers only.
 
-==3. Receiver Inputs==
+==3. Stick Polarity==
+OpenAero2 has been designed to unify the polarity of stick inputs for all flight modes.
+
+Once the 'Stick polarity' menu has been entered, promptly complete the following actions.
+
+ # Move both sticks forward and into top right corners,
+ # Wait till 'done' is displayed and the red light blinks,
+ # The main menu will be displayed upon completion.
+
+==4. Receiver Inputs==
 The 'Receiver Inputs' screen shows the current receiver values of the first five channels from a PWM or CPPM receiver.
 
 ===Stick Calibration===
@@ -88,12 +104,10 @@ Center stick calibration allows OpenAero2 to center both PWM & CPPM receivers in
 
 http://i.imgur.com/GFkv1lu.jpg
 
-*When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.*
+When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.
 
-===Stick Polarity===
-OpenAero2 has been designed to unify the polarity of all receivers to reduce setup errors.
-
-While viewing the '*Receiver Inputs*' display, complete the following checks and reverse the transmitter channel if a *negative* value is displayed.
+===Stick Polarity Check===
+Prior to setting up the flight modes, complete the following checks, ensuring *positive* values are displayed.
 
  # Move the rudder stick right, check the rudder polarity.
  # Move the aileron stick right, check the aileron polarity.
@@ -101,58 +115,90 @@ While viewing the '*Receiver Inputs*' display, complete the following checks and
  # Push the elevator stick forwards / away, check the elevator polarity.
  # Move the throttle stick to full throttle,  check the throttle polarity.
 
-Once the above has been completed, all positive values should be displayed within '*RC Input*', when both sticks are pushed forwards / away and to the right.
+Once the above has been completed, all positive values should be displayed when both sticks are pushed forwards / away and to the right.
 
-Ensure the motor has been disconnect prior to completing the above setup.
-
-==7. Stability Setup==
-
+==5. Stability Setup==
 OpenAero2 supports the remote activation of gyro stabilization either via a two or three position switch.
 
 http://i.imgur.com/iU30Ehk.jpg
 
-By default, the '*StabChan*' option allows a 2-position switch to activate gyro stabilization via the '*gear*' channel, defined by '*stab input*' within '*RC Setup*' menu. A 2-position flight switch will be limited to gyro stabilization *on* or *off*.
+By default, '*StabChan*' allows a 2-position switch to activate gyro stabilization via the '*gear*' channel. 
 
-http://i.imgur.com/thOmcij.jpg
+A 2-position flight switch will be limited to gyro stabilization *on* or *off*.
 
-Optionally, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single '*gear*' channel. 
+Ensure your 2-position stability switch is set to -100% & +100% for correct mode selection.
 
-Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
+Alternatively, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single channel. 
 
-==8. Auto-level Setup==
+Ensure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
+==6. Autolevel Setup==
 Similar to stability mode, OpenAero2 supports the remote activation of autoleveling either via a two or three position switch.
 
 http://i.imgur.com/I6797Ij.jpg
 
-By default, the '*AutoChan*' option allows a 2-position switch to activate autoleveling via the '*gear*' channel, defined by '*Autolev input*' within '*RC Setup*' menu. A 2-position flight switch will be limited to autoleveling *on* or *off*.
+By default, the '*AutoChan*' option allows a 2-position switch to activate autoleveling via the '*gear*' channel. A 2-position flight switch will be limited to autoleveling *on* or *off*.
 
-However, if the '*gear*' channel is used for both '*StabChan*' and '*AutoChan*', both stabilization and autoleveling will be switch on and off together.
+Ensure your 2-position stabilization switch is set to -100% & +100% for correct mode selection.
 
-Please refer to the [http://code.google.com/p/nextcopterplus/wiki/OpenAero2_UserGuide_Beta8 'Aeroplane - Advanced User Guide (V1.1 Beta 8)'] for more information on 'Hands Free' mode.
+If the '*gear*' channel is used for both '*Stab input*' and '*Autolev input*', both stabilization and autoleveling will be switch on and off together.
+
+Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information on 'Hands Free' mode.
 
 http://i.imgur.com/thOmcij.jpg
 
-Optionally, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single '*gear*' channel. 
+Alternatively, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single channel. 
 
 Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
-==9. Sensor Calibration==
+==7. Sensor Calibration==
+OpenAero2 uses both gyro's and accelerometers to determine the angle of the aeroplane and add corrections.
 
-Calibrate
+Once the KK2 board has firmly been mounted within the aeroplane, the sensors require calibrating.
 
-Inverted calibrate
+===Calibrate===
+This option calibrates the accelerometers only, so OpenAero2 can determine the angle horizontal to the ground.
 
-==10. Level Meter==
+Prior selecting 'Cal', available on button 4, ensure the model is perfectly horizontal in the upright position.
 
-Check circle in square
+For best results, firmly prop up the model on a hard surface and use a spirt level to ensure the model is perfectly level.
+
+===Inverted calibrate===
+Once calibrated successfully, OpenAero2 will be able to upright the aircraft from an inverted position.
+
+This option will only become active once the above calibration has successfully been completed.
+
+Prior selecting 'Inv', available on button 3, ensure the model is perfectly horizontal in the inverted position. 
+
+For best results, firmly prop up the model on a hard surface and use a spirt level to ensure the model is perfectly level.
+
+==8. Level Meter==
+This is a visual representation of what OpenAero2 believes to be level, based on the successful calibration of the accelerometers.
+
+==9. Channel Mixing==
+For advanced users, OpenAero2 has the flexibility to mix multiple receiver and sensor inputs, to produce the desired outs.
+
+For typical single and dual aileron aeroplane's, the default settings will work successfully.
+
+Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information.
+
+==10. Output Mixing==
+For advanced users, OpenAero2 has the flexibility to mix multiple outs, to produce an additional out with a combined result.
+
+Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information.
+
+==11. Servo Direction==
 
 
 
+==12. Servo Trim==
 
+==13. Negative Servo Travel==
 
+==14. Positive Servo Travel==
 
+==15. Failsafe Settings==
 
-14.Failsafe Settings
+==16. Failsafe Positions==
 
-16.Battery Monitor
+==17. Battery Monitor==
