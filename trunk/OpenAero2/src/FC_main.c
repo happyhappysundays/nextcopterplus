@@ -146,6 +146,7 @@
 //			Level meter responds properly in all orientations
 //			Added stick calibration screen for idiots
 //			Shrunk last bit of space out of fonts.
+//			Added second aileron reversing independent of main aileron and added success confirmation.
 //
 //***********************************************************
 //* To do
