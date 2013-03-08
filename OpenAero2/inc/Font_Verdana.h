@@ -452,91 +452,91 @@ const unsigned char Verdana14[] PROGMEM =
 //
 	0x1, 0x29, // Index 11 (offset: 297)
 	0x1, 0x29, // Index 12 (offset: 297)
-	0x1, 0x36, // Index 13 (offset: 310) // - 19
-	0x1, 0x49, // Index 14 (offset: 329) // . 7
-	0x1, 0x50, // Index 15 (offset: 336) // / 0
-	0x1, 0x50, // Index 16 (offset: 336) // 0 31
-	0x1, 0x6F, // Index 17 (offset: 367) // 1 25
-	0x1, 0x88, // Index 18 (offset: 392) // 2 28
-	0x1, 0xA4, // Index 19 (offset: 420) // 3 28
-	0x1, 0xC0, // Index 20 (offset: 448) // 4 31
+	0x1, 0x36, // Index 13 (offset: 310)
+	0x1, 0x49, // Index 14 (offset: 329)
+	0x1, 0x50, // Index 15 (offset: 336)
+	0x1, 0x50, // Index 16 (offset: 336)
+	0x1, 0x6F, // Index 17 (offset: 367)
+	0x1, 0x88, // Index 18 (offset: 392)
+	0x1, 0xA4, // Index 19 (offset: 420)
+	0x1, 0xC0, // Index 20 (offset: 448)
 //
-	0x1, 0xDF, // Index 21 (offset: 479) 28
-	0x1, 0xFB, // Index 22 (offset: 507)31
-	0x2, 0x1A, // Index 23 (offset: 538)28
-	0x2, 0x36, // Index 24 (offset: 566)31
-	0x2, 0x55, // Index 25 (offset: 597)31
-	0x2, 0x74, // Index 26 (offset: 628)7
-	0x2, 0x7B, // Index 27 (offset: 635)0
-	0x2, 0x7B, // Index 28 (offset: 635)0
-	0x2, 0x7B, // Index 29 (offset: 635)0
-	0x2, 0x7B, // Index 30 (offset: 635)0
+	0x1, 0xDF, // Index 21 (offset: 479)
+	0x1, 0xFB, // Index 22 (offset: 507)
+	0x2, 0x1A, // Index 23 (offset: 538)
+	0x2, 0x36, // Index 24 (offset: 566)
+	0x2, 0x55, // Index 25 (offset: 597)
+	0x2, 0x74, // Index 26 (offset: 628)
+	0x2, 0x7B, // Index 27 (offset: 635)
+	0x2, 0x7B, // Index 28 (offset: 635)
+	0x2, 0x7B, // Index 29 (offset: 635)
+	0x2, 0x7B, // Index 30 (offset: 635)
 //
-	0x2, 0x7B, // Index 31 (offset: 635)25
-	0x2, 0x94, // Index 32 (offset: 660)0
-	0x2, 0x94, // Index 33 (offset: 660)40
-	0x2, 0xBC, // Index 34 (offset: 700)31
-	0x2, 0xDB, // Index 35 (offset: 731)34
-	0x2, 0xFD, // Index 36 (offset: 765)37
-	0x3, 0x22, // Index 37 (offset: 802)28
-	0x3, 0x3E, // Index 38 (offset: 830)28
-	0x3, 0x5A, // Index 39 (offset: 858)40G
-	0x3, 0x82, // Index 40 (offset: 898)31
+	0x2, 0x7B, // Index 31 (offset: 635)
+	0x2, 0x94, // Index 32 (offset: 660)
+	0x2, 0x94, // Index 33 (offset: 660)
+	0x2, 0xBC, // Index 34 (offset: 700)
+	0x2, 0xDB, // Index 35 (offset: 731)
+	0x2, 0xFD, // Index 36 (offset: 765)
+	0x3, 0x22, // Index 37 (offset: 802)
+	0x3, 0x3E, // Index 38 (offset: 830)
+	0x3, 0x5A, // Index 39 (offset: 858)
+	0x3, 0x82, // Index 40 (offset: 898)
 //
-	0x3, 0xA1, // Index 41 (offset: 929)19
-	0x3, 0xB4, // Index 42 (offset: 948)22
-	0x3, 0xCA, // Index 43 (offset: 970)34
-	0x3, 0xEC, // Index 44 (offset: 1004)28
-	0x4, 0x08, // Index 45 (offset: 1032)37
-	0x4, 0x2D, // Index 46 (offset: 1069)31
-	0x4, 0x4C, // Index 47 (offset: 1100)40
-	0x4, 0x74, // Index 48 (offset: 1140)25
-	0x4, 0x8D, // Index 49 (offset: 1165)40
-	0x4, 0xB5, // Index 50 (offset: 1205)34
+	0x3, 0xA1, // Index 41 (offset: 929)
+	0x3, 0xB4, // Index 42 (offset: 948)
+	0x3, 0xCA, // Index 43 (offset: 970)
+	0x3, 0xEC, // Index 44 (offset: 1004)
+	0x4, 0x08, // Index 45 (offset: 1032)
+	0x4, 0x2D, // Index 46 (offset: 1069)
+	0x4, 0x4C, // Index 47 (offset: 1100)
+	0x4, 0x74, // Index 48 (offset: 1140)
+	0x4, 0x8D, // Index 49 (offset: 1165)
+	0x4, 0xB5, // Index 50 (offset: 1205)
 //
-	0x4, 0xD7, // Index 51 (offset: 1239)34
-	0x4, 0xF9, // Index 52 (offset: 1273)37
-	0x5, 0x1E, // Index 53 (offset: 1310)31
-	0x5, 0x3D, // Index 54 (offset: 1341)40
-	0x5, 0x65, // Index 55 (offset: 1381)52
-	0x5, 0x99, // Index 56 (offset: 1433)34
-	0x5, 0xBB, // Index 57 (offset: 1467)37
-	0x5, 0xE0, // Index 58 (offset: 1504)34
-	0x6, 0x02, // Index 59 (offset: 1538)0
-	0x6, 0x02, // Index 60 (offset: 1538)25
+	0x4, 0xD7, // Index 51 (offset: 1239)
+	0x4, 0xF9, // Index 52 (offset: 1273)
+	0x5, 0x1E, // Index 53 (offset: 1310)
+	0x5, 0x3D, // Index 54 (offset: 1341)
+	0x5, 0x65, // Index 55 (offset: 1381)
+	0x5, 0x99, // Index 56 (offset: 1433)
+	0x5, 0xBB, // Index 57 (offset: 1467)
+	0x5, 0xE0, // Index 58 (offset: 1504)
+	0x6, 0x02, // Index 59 (offset: 1538)
+	0x6, 0x02, // Index 60 (offset: 1538)
 //
-	0x6, 0x1B, // Index 61 (offset: 1563)0
-	0x6, 0x1B, // Index 62 (offset: 1563)0
-	0x6, 0x1B, // Index 63 (offset: 1563)0
-	0x6, 0x1B, // Index 64 (offset: 1563)0
-	0x6, 0x1B, // Index 65 (offset: 1563)25A
-	0x6, 0x34, // Index 66 (offset: 1588)28B
-	0x6, 0x50, // Index 67 (offset: 1616)25C
-	0x6, 0x69, // Index 68 (offset: 1641)28D
-	0x6, 0x85, // Index 69 (offset: 1669)28E
-	0x6, 0xA1, // Index 70 (offset: 1697)19F
+	0x6, 0x1B, // Index 61 (offset: 1563)
+	0x6, 0x1B, // Index 62 (offset: 1563)
+	0x6, 0x1B, // Index 63 (offset: 1563)
+	0x6, 0x1B, // Index 64 (offset: 1563)
+	0x6, 0x1B, // Index 65 (offset: 1563)
+	0x6, 0x34, // Index 66 (offset: 1588)
+	0x6, 0x50, // Index 67 (offset: 1616)
+	0x6, 0x69, // Index 68 (offset: 1641)
+	0x6, 0x85, // Index 69 (offset: 1669)
+	0x6, 0xA1, // Index 70 (offset: 1697)
 //
-	0x6, 0xB4, // Index 71 (offset: 1716)28G
-	0x6, 0xD0, // Index 72 (offset: 1744)25
-	0x6, 0xE9, // Index 73 (offset: 1769)7
-	0x6, 0xF0, // Index 74 (offset: 1776)16J
-	0x7, 0x00, // Index 75 (offset: 1792)28K
-	0x7, 0x1C, // Index 76 (offset: 1820)7
-	0x7, 0x23, // Index 77 (offset: 1827)43M
-	0x7, 0x4E, // Index 78 (offset: 1870)25N
-	0x7, 0x67, // Index 79 (offset: 1895)31
-	0x7, 0x86, // Index 80 (offset: 1926)28P
+	0x6, 0xB4, // Index 71 (offset: 1716)
+	0x6, 0xD0, // Index 72 (offset: 1744)
+	0x6, 0xE9, // Index 73 (offset: 1769)
+	0x6, 0xF0, // Index 74 (offset: 1776)
+	0x7, 0x00, // Index 75 (offset: 1792)
+	0x7, 0x1C, // Index 76 (offset: 1820)
+	0x7, 0x23, // Index 77 (offset: 1827)
+	0x7, 0x4E, // Index 78 (offset: 1870)
+	0x7, 0x67, // Index 79 (offset: 1895)
+	0x7, 0x86, // Index 80 (offset: 1926)
 //
-	0x7, 0xA2, // Index 81 (offset: 1954)28Q
-	0x7, 0xBE, // Index 82 (offset: 1982)19R
-	0x7, 0xD1, // Index 83 (offset: 2001)25S
-	0x7, 0xEA, // Index 84 (offset: 2026)19T
-	0x7, 0xFD, // Index 85 (offset: 2045)25U
-	0x8, 0x16, // Index 86 (offset: 2070)28V
-	0x8, 0x32, // Index 87 (offset: 2098)43W
-	0x8, 0x5D, // Index 88 (offset: 2141)28X
-	0x8, 0x79, // Index 89 (offset: 2169)28Y
-	0x8, 0x95, // Index 90 (offset: 2197)Z
+	0x7, 0xA2, // Index 81 (offset: 1954)
+	0x7, 0xBE, // Index 82 (offset: 1982)
+	0x7, 0xD1, // Index 83 (offset: 2001)
+	0x7, 0xEA, // Index 84 (offset: 2026)
+	0x7, 0xFD, // Index 85 (offset: 2045)
+	0x8, 0x16, // Index 86 (offset: 2070)
+	0x8, 0x32, // Index 87 (offset: 2098)
+	0x8, 0x5D, // Index 88 (offset: 2141)
+	0x8, 0x79, // Index 89 (offset: 2169)
+	0x8, 0x95, // Index 90 (offset: 2197)
 
 	/* Index 0, character 32 " " (10 width: 3 pixels) */
 	0x3, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

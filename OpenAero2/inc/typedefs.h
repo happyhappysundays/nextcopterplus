@@ -100,9 +100,11 @@ typedef struct
 	int8_t		StabChan;				// Channel number to select stability mode
 	int8_t		AutoChan;				// Channel number for Autolevel switch input
 	int8_t		FlapChan;				// Channel number for second aileron input
-	int8_t		AileronPol;				// RC input polarity
-	int8_t		ElevatorPol;			// RC input polarity
-	int8_t		RudderPol;				// RC input polarity
+	int8_t		AileronPol;				// Aileron RC input polarity
+	int8_t		SecAileronPol;			// Second aileron RC input polarity
+	int8_t		ElevatorPol;			// Elevator RC input polarity
+	int8_t		RudderPol;				// Rudder RC input polarity
+	int8_t		Differential;			// Aileron differential
 	int8_t		Differential;			// Aileron differential
 
 	// Failsafe items

@@ -127,9 +127,10 @@ const char RCMenuItem4[]  PROGMEM = "2nd Ail:";
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
 const char RCMenuItem8[]  PROGMEM = "Ail. input:";
+const char RCMenuItem12[] PROGMEM = "2nd Ail.input:";
 const char RCMenuItem9[]  PROGMEM = "Ele. input:";
-const char RCMenuItem10[]  PROGMEM = "Rud. input:";
-const char RCMenuItem11[]  PROGMEM = "Differential:";
+const char RCMenuItem10[] PROGMEM = "Rud. input:";
+const char RCMenuItem11[] PROGMEM = "Differential:";
 //
 const char StabMenuItem2[]  PROGMEM = "Roll I:";    		// Stability text
 const char StabMenuItem3[]  PROGMEM = "Roll D:";
@@ -203,6 +204,7 @@ const char Status3[] 	PROGMEM = "Battery";
 //
 const char WizardText0[] PROGMEM = "No RX signal!"; 				// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
+const char WizardText2[] PROGMEM = "Done!";
 //
 const char Status0[] PROGMEM = "Press";						// Idle text
 const char Status2[] PROGMEM = "for status";
@@ -302,7 +304,7 @@ const char *text_menu[] PROGMEM =
 		//
 		Status3,																			// 134 Battery
 		//
-		WizardText0,WizardText1,Dummy0,														// 135 to 137
+		WizardText0,WizardText1,WizardText2,												// 135 to 137
 		//
 		Dummy0,Dummy0,Dummy0,																// 138 to 140
 		//
@@ -312,26 +314,28 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, RCMenuItem3, 								// 149 to 157 rc menu
-		RCMenuItem4, RCMenuItem8, RCMenuItem9, RCMenuItem10, RCMenuItem11,
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, RCMenuItem3, 								// 149 to 158 rc menu
+		RCMenuItem4, RCMenuItem8, RCMenuItem12, RCMenuItem9, RCMenuItem10, 
+		RCMenuItem11,
 		//
-		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 158 to 162 Failsafe
+		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 159 to 163 Failsafe
 		//
-		StatusText1, StabMenuItem13, AutoMenuItem1,											// 163 to 170 Autolevel menu
+		StatusText1, StabMenuItem13, AutoMenuItem1,											// 164 to 171 Autolevel menu
 		AutoMenuItem4, AutoMenuItem7, AutoMenuItem8, 
 		AutoMenuItem2, AutoMenuItem16,											
 		//
-		StatusText1,StabMenuItem13, StabMenuItem14, StabMenuItem15, AutoMenuItem1, 			// 171 to 186 Stability menu
+		StatusText1,StabMenuItem13, StabMenuItem14, StabMenuItem15, AutoMenuItem1, 			// 172 to 187 Stability menu
 		StabMenuItem2, StabMenuItem3,  
 		AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, 
 		StabMenuItem9, StabMenuItem10,StabMenuItem11,StabMenuItem12,
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 187 to 198 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 188 to 199 general
 		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 				// Don't forget to change the CONTRAST define in menu_driver.c
 		GeneralText8, GeneralText9, IMU0,
 		//
-		MixerItem18, MixerItem19, MixerItem16, MixerItem8, MixerItem9, MixerItem10,			// 199 to 228 Servo (29)
-		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// Input mixers
+		MixerItem18, MixerItem19, MixerItem16, MixerItem8, MixerItem9, MixerItem10,			// 200 to 205 Servo (29)
+		//
+		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 206 Input mixers
 		MixerItem17, MixerItem4, MixerItem1, MixerItem5, MixerItem1, 
 		MixerItem6, MixerItem1, MixerItem7, MixerItem1, MixerItem3, 
 		MixerItem1,

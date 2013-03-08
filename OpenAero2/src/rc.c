@@ -61,18 +61,24 @@ void RxGetChannels(void)
 	// Reverse primary channels as requested
 	if (Config.AileronPol == REVERSED)
 	{
-		RCinputs[AILERON] = -RCinputs[AILERON];
-		
-		// Only reverse second aileron if unique
-		if (Config.FlapChan != AILERON)
-		{
-			RCinputs[Config.FlapChan] = -RCinputs[Config.FlapChan]; // Reverse 2nd aileron too
-		}
+		// Note we have to reverse the source otherwise we get a double reverse if someone sets up
+		// the second aileron as AILERON
+		RCinputs[AILERON] = -(RxChannel[AILERON] - Config.RxChannelZeroOffset[AILERON]);
 	}
+
+	// Only reverse second aileron if set up
+	if ((Config.SecAileronPol == REVERSED) && (Config.FlapChan != NOCHAN))
+	{
+		// Note we have to reverse the source otherwise we get a double reverse if someone sets up
+		// the second aileron as AILERON
+		RCinputs[Config.FlapChan] = -(RxChannel[Config.FlapChan] - Config.RxChannelZeroOffset[Config.FlapChan]);
+	}
+
 	if (Config.ElevatorPol == REVERSED)
 	{
 		RCinputs[ELEVATOR] = -RCinputs[ELEVATOR];
 	}
+
 	if (Config.RudderPol == REVERSED)
 	{
 		RCinputs[RUDDER] = -RCinputs[RUDDER];
