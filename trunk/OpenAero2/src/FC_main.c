@@ -133,11 +133,15 @@
 //			Compacted several of the settings menus into one.	
 //			New servo menus added, menus edited.
 //			Added "aft" orientation. Fixed inv. cal. bug.
-//			Adv. IMU defaults to ON. Added trim recording button.
+//			Adv. IMU defaults to ON. 
 //			Added real-time servo updating for min/max/trim adjustment.
 //			Compacted Winddings fonts. Reduced RAM requirement in settings menu.
 //			Added unused RAM usage meter in status screen.
-//			Fixed min/max limits bug. Set trims doesn't set throttle trim.
+//			Fixed min/max limits bug. Added basic aileron differential setting to RC menu
+//			Level meter responds properly in all orientations
+//			Added stick calibration screen for idiots
+//			Shrunk last bit of space out of Verdana fonts.
+//			Added second aileron reversing independant of main aileron and added success confirmation.
 //			Added basic aileron differential setting to RC menu
 //			Level meter responds properly in all orientations
 //			Added stick calibration screen for idiots
