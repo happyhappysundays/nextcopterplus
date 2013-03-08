@@ -1,4 +1,6 @@
-#summary OpenAero2 - Getting Started Guide V1.1 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
+#summary OpenAero2 - Getting Started Guide V1.1
+
+[https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
 Please ensure you read the manuals in the following order.
 
