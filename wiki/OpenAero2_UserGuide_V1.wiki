@@ -154,7 +154,7 @@ Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was c
 ==7. Sensor Calibration==
 OpenAero2 uses both gyro's and accelerometers to determine the angle of the aeroplane and add corrections.
 
-Once the KK2 board has firmly been mounted within the aeroplane, the sensors require calibrating.
+Once the board has been securely mounted within the aeroplane, the sensors can be calibrating.
 
 ===Calibrate===
 This option calibrates the accelerometers only, so OpenAero2 can determine the angle horizontal to the ground.
@@ -183,15 +183,17 @@ For typical single and dual aileron aeroplane's, the default settings will work 
 Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information.
 
 ==10. Output Mixing==
-For advanced users, OpenAero2 has the flexibility to mix multiple outs, to produce an additional out with a combined result.
+For advanced users, OpenAero2 has the flexibility to combine the movements of two outputs on a third individual output
 
 Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information.
 
 ==11. Servo Direction==
+OpenAero2 allows the direction any output to be reversed internally, rather than externally or mechanically.
 
-
+In the event a control surface is moving in the wrong direction, simply reversed the affected out here rather than in the transmitter.
 
 ==12. Servo Trim==
+
 
 ==13. Negative Servo Travel==
 
