@@ -21,16 +21,37 @@ This guide presumes all values have been reset to their factory default values, 
  # Hold down all four buttons while powering up the KK2 board,
  # A "*Reset*" message will briefly appear on the screen after the OpenAero2 logo is displayed,
  # Release all buttons once the red LED has blinked,
- # OpenAero will continue to display the status screen.
+ # OpenAero will continue to display the idle screen.
+
+===Idle Screen===
+After the default 10 seconds, the status screen will time-out, to display the idle screen.
 
 http://i.imgur.com/966nbo0.jpg
-http://i.imgur.com/He4gOjG.jpg
+
+===Status Screen===
+The status screen allows OpenAero2 to provide current status information.
+
+http://i.imgur.com/TW36X8l.jpg
+
+ * Mode - *1. General* - Selected *Model Type*.
+ * Version - The version of OpenAero2 running on the board.
+ * RX sync - *2. Receiver setup* - Selected receiver type.
+ * Autolevel - *6. Autolevel Setup* - Status of autolevel mode.
+ * Stability - *5. Stability Setup* - Status of stability mode.
+ * Battery icon - *17. Battery Monitor* - Graphical representation of the flight pack voltage.
+ * Battery voltage - *17. Battery Monitor* - Numerical representation of the flight pack voltage.
+ * RAM: *Advanced feature* - Displays available processor memory after loading selected menus.
+
+===Main Menu===
+Select the 'Menu', button 1 on the left, to display the main menu.
+
+http://i.imgur.com/cM9dmLt.jpg
 
 ==1. General==
+http://i.imgur.com/CbIhAew.jpg
+
 ===Model Type===
 OpenAero2 has been designed with selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
-
-http://i.imgur.com/ekizXep.jpg
 
  * Aero - Default preset for both *single* and *dual aileron* aeroplane's.
  * F.Wing - Selectable preset for *flying-wing*'s.
