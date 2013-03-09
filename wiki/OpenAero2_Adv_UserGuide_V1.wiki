@@ -432,7 +432,7 @@ This is useful to prevent the servos from over-extending when stabilisation or a
 *Step 15: Gyro direction check*
  * Now, switch on stability control while leaving autolevel OFF.
  * Pitch the nose of the model up and down while watching the elevator. The elevator should move to counteract the pitching. Pitching the nose UP should make the elevator move DOWN.
-  * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. 
+ * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. 
  * Finally, yaw the model left and right while observing the rudder. 
 
 *Step 8: Auto-level setup*
