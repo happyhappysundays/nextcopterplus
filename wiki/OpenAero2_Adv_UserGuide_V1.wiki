@@ -419,24 +419,25 @@ If they are negative, then you have failed to use the "Stick polarity" screen to
  * Move all surfaces and check that they move as expected. If they are reversed, you must reverse the channels in the Servo direction screen. *Do not reverse them with the TX*.
 
 *Step 12: Servo trim*
- * You can now adjst the neutral point of ever output from the Servo trim screen. The servo will move in real time to indicate the trim position.
+ * You can now adjust the neutral point of every output from the Servo trim screen. The servo will move in real time to indicate the trim position.
 
-*Step 7: Gyro direction*
+*Step 13: Neg. Servo trvl.(%)*
+ * If you like, you can now adjust the minimum point of every output from this screen. The servo will move in real time to indicate the travel limit. 
+This is useful to prevent the servos from over-extending when stabilisation or autolevel movements are added to your RC control inputs.
+
+*Step 14: Pos. Servo trvl.(%)*
+ * If you like, you can now adjust the maximum point of every output from this screen. The servo will move in real time to indicate the travel limit. 
+This is useful to prevent the servos from over-extending when stabilisation or autolevel movements are added to your RC control inputs.
+
+*Step 15: Gyro direction check*
  * Now, switch on stability control while leaving autolevel OFF.
  * Pitch the nose of the model up and down while watching the elevator. The elevator should move to counteract the pitching. Pitching the nose UP should make the elevator move DOWN.
- * If this is not the case, you can reverse the pitch gyro in the M5 mixer menu.
- * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. Use the M6 and M7 mixer menus to reverse the roll gyro as required.
- * Finally, yaw the model left and right while observing the rudder. Adjust the M8 mixer menu to reverse the yaw gyro as required.
+  * Roll the model left and right while watching the ailerons. They should also move to counteract the rolling. 
+ * Finally, yaw the model left and right while observing the rudder. 
 
 *Step 8: Auto-level setup*
- * Firstly, go into the sensor screen where you can calibrate the autolevel.
- * Place the model on a flat surface and chock up the tail or nose until it is level and in its normal flying attitude.
- * Keeping the model perfectly still, carefully press button 4 under the screen marker "Cal." After a short pause the LED will flash.
- * If you wish the inverted performance to be optimal, at this point you can flip the model over into the inverted position and press button 3 "Inv.". You cannot redo this until you redo the initial calibration with button 4.
- * Go back to the status menu.
  * Switch off stability control and switch ON autolevel.
  * Tilt the model in pitch and roll while watching the respective surfaces. They should move slightly to compensate and remain in that position.
- * If they move in the reverse sense, reverse the pitch and roll acc settings in the mixer menus for M5, M6 and M7 as appropriate.
 
 
 ===Every time you power up OpenAero2===
