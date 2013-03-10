@@ -187,8 +187,8 @@ void menu_servo_setup(uint8_t section)
 				values[menu_temp - SERVOSTART] = 0;
 			}
 
-			// Do not allow servo enable for throttle
-			if (Config.Channel[menu_temp - SERVOSTART].source_a == THROTTLE)
+			// Do not allow servo enable for throttle if in CPPM mode
+			if ((Config.Channel[menu_temp - SERVOSTART].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE))
 			{
 				servo_enable = false;
 			}

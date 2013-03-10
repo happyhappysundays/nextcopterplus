@@ -69,7 +69,7 @@ void menu_main(void)
 		write_buffer(buffer,1);
 
 		// Poll buttons when idle
-		poll_buttons();
+		poll_buttons(true);
 
 		// Handle menu changes
 		update_menu(MAINITEMS, MAINSTART, 0, button, &main_cursor, &main_top, &main_temp);

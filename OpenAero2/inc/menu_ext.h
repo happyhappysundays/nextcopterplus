@@ -30,7 +30,7 @@ extern void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], pr
 extern void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc subroutines
-extern uint8_t poll_buttons(void);
+extern uint8_t poll_buttons(bool acceleration);
 extern void menu_beep(uint8_t beeps);
 extern void print_cursor(uint8_t line);
 

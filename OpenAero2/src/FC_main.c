@@ -147,6 +147,11 @@
 //			Added stick calibration screen for idiots
 //			Shrunk last bit of space out of fonts.
 //			Added second aileron reversing independent of main aileron and added success confirmation.
+//			Servos now return to center after trim, travel adjustments.
+//			Button acceleration disabled when moving servos.
+//			Battery alarm can be reset by cellcount = 0
+// Beta 10	Fixed broken travel limits
+//			Allowed trim amd travel adjustment of channels using THROTTLE as a source in PWM modes
 //
 //***********************************************************
 //* To do

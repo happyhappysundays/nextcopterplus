@@ -39,7 +39,7 @@ void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uc
 
 // Misc
 void menu_beep(uint8_t beeps);
-uint8_t poll_buttons(void);
+uint8_t poll_buttons(bool acceleration);
 void print_cursor(uint8_t line);
 void draw_expo(int16_t value);
 menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
@@ -123,7 +123,7 @@ void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uc
 
 	print_cursor(cursor);	// Cursor
 	write_buffer(buffer,1);
-	poll_buttons();
+	poll_buttons(true);
 }
 
 //*******************************************************************
@@ -175,6 +175,7 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 {
 	mugui_size16_t size;
 	int16_t temp16;
+	int8_t i;
 
 	button = NONE;
 
@@ -209,7 +210,15 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 
 		// Poll buttons when idle
-		poll_buttons();
+		// Don't use button acceleration when moving servos
+		if (servo_enable)
+		{
+			poll_buttons(false);
+		}
+		else
+		{
+			poll_buttons(true);
+		}
 
 		// Handle cursor Up/Down limits
 		if (button == DOWN)	
@@ -252,6 +261,26 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
 			temp16 = ((temp16 << 2) / 10); 	// Span back to what the output wants
 
+			// Give servos time to settle
+			for (i = 0; i < 3; i++)
+			{
+				cli();
+				output_servo_ppm_asm3(servo_number, temp16);
+				sei();
+
+				_delay_ms(20);
+			}
+		}
+	}
+	// Reset servos to neutral except for the throttle channel in CPPM mode
+	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
+	{
+		temp16 = Config.Limits[servo_number].trim;
+		temp16 = ((temp16 << 2) / 10); 		// Span back to what the output wants
+
+		// Give servos time to settle
+		for (i = 0; i < 10; i++)
+		{
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);
 			sei();
@@ -259,6 +288,8 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 			_delay_ms(20);
 		}
 	}
+
+	// Exit
 	button = ENTER;
 	return value;
 }
@@ -395,7 +426,7 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 // return button info.
 //************************************************************
 
-uint8_t poll_buttons(void)
+uint8_t poll_buttons(bool acceleration)
 {
 	static uint8_t button_count = 0;
 	uint8_t buttons = 0;
@@ -421,8 +452,8 @@ uint8_t poll_buttons(void)
 		button_multiplier = 1;
 	}
 
-	// Check for buttons being held down
-	if (button != NONE)
+	// Check for buttons being held down if requested
+	if ((button != NONE) && (acceleration))
 	{
 		// Count the number of times incremented
 		button_count++; 

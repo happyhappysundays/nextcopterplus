@@ -40,9 +40,8 @@ void idle_screen(void);
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Ver:      V1.1b9";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:  V1.1b9";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
-const char StatusText2[]  PROGMEM = "Input:";
 const char StatusText3[]  PROGMEM = "Status";
 const char StatusText4[]  PROGMEM = ".";
 const char StatusText5[]  PROGMEM = "0";	
@@ -91,7 +90,7 @@ const char PText19[] PROGMEM = "Acc";
 // 	
 const char PText26[] PROGMEM = "Trim";
 //
-const char AutoMenuItem2[]  PROGMEM = "Launch del.:";		// Autolevel text
+const char AutoMenuItem2[]  PROGMEM = "Launch delay:";		// Autolevel text
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
@@ -109,9 +108,9 @@ const char AutoMenuItem18[] PROGMEM = "Adv. mode:";
 //
 const char BattMenuItem0[]  PROGMEM = "Batt type:"; 		// Battery text
 const char BattMenuItem1[]  PROGMEM = "Cells:"; 
-const char BattMenuItem2[]  PROGMEM = "Alarm vol.:";
-const char BattMenuItem3[]  PROGMEM = "Max.cell vol.:";
-const char BattMenuItem4[]  PROGMEM = "Min.cell vol:";
+const char BattMenuItem2[]  PROGMEM = "Alarm voltage:";
+const char BattMenuItem3[]  PROGMEM = "Max.cell mV:";
+const char BattMenuItem4[]  PROGMEM = "Min.cell mV:";
 const char BattMenuItem5[]  PROGMEM = "LiPo";
 const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
@@ -121,15 +120,15 @@ const char SensorMenuItem3[]  PROGMEM = "Failsafe";
 //
 const char RCMenuItem0[]  PROGMEM = "CPPM order:"; 			// RC setup text
 const char RCMenuItem1[]  PROGMEM = "RX sync:"; 
-const char RCMenuItem2[]  PROGMEM = "Stab input:";
-const char RCMenuItem3[]  PROGMEM = "Autolev input:";
-const char RCMenuItem4[]  PROGMEM = "2nd Ail:";
+const char RCMenuItem2[]  PROGMEM = "Stability Ch.:";
+const char RCMenuItem3[]  PROGMEM = "Autolevel Ch.:";
+const char RCMenuItem4[]  PROGMEM = "2nd Ail. Ch.:";
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
-const char RCMenuItem8[]  PROGMEM = "Ail. input:";
-const char RCMenuItem12[] PROGMEM = "2nd Ail.input:";
-const char RCMenuItem9[]  PROGMEM = "Ele. input:";
-const char RCMenuItem10[] PROGMEM = "Rud. input:";
+const char RCMenuItem8[]  PROGMEM = "Aileron pol.:";
+const char RCMenuItem12[] PROGMEM = "2nd Ail. pol.:";
+const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
+const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char RCMenuItem11[] PROGMEM = "Differential:";
 //
 const char StabMenuItem2[]  PROGMEM = "Roll I:";    		// Stability text
@@ -142,11 +141,11 @@ const char StabMenuItem9[]  PROGMEM = "Yaw D:";
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
 const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
-const char StabMenuItem13[]  PROGMEM = "Trig:";
-const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch:";
+const char StabMenuItem13[]  PROGMEM = "Trigger:";
+const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch.:";
 const char StabMenuItem15[]  PROGMEM = "Dyn.Gain:";
 //
-const char MixerMenuItem0[]  PROGMEM = "Orient:";			// General text
+const char MixerMenuItem0[]  PROGMEM = "Orientation:";			// General text
 const char MixerMenuItem2[]  PROGMEM = "Forward";
 const char MixerMenuItem3[]  PROGMEM = "Vertical";
 const char MixerMenuItem4[]  PROGMEM = "Inverted";
@@ -160,13 +159,13 @@ const char GeneralText4[] PROGMEM =  "Low";
 const char GeneralText5[] PROGMEM =  "High";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
-const char GeneralText8[] PROGMEM =  "H.Hold:";
+const char GeneralText8[] PROGMEM =  "Head. hold:";
 const char GeneralText9[] PROGMEM =  "3D rate:";
 //
-const char MixerItem0[] PROGMEM = "Src A:";					// Mixer menu items
-const char MixerItem13[] PROGMEM = "Src B:";
+const char MixerItem0[] PROGMEM = "Source A:";					// Mixer menu items
+const char MixerItem13[] PROGMEM = "Source B:";
 const char MixerItem1[] PROGMEM = "Direction:";
-const char MixerItem2[] PROGMEM = "Vol.(%):";
+const char MixerItem2[] PROGMEM = "Volume(%):";
 const char MixerItem4[] PROGMEM = "Roll gyro:";
 const char MixerItem5[] PROGMEM = "Pitch gyro:";
 const char MixerItem6[] PROGMEM = "Yaw gyro:";
@@ -233,7 +232,7 @@ const char *text_menu[] PROGMEM =
 		Dummy0,																				// 0 Dummy
 		PText1, Dummy0, 																	// 1 to 2 Reset
 		//
-		StatusText0, StatusText1, StatusText2, StatusText3, StatusText4, StatusText5,		// 3 to 8 Status menu
+		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 3 to 8 Status menu
 		//
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17 Menu frame text
 		MenuFrame6, MenuFrame7, MenuFrame8, 
