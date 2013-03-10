@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x0B		// eePROM signature - change for each eePROM structure change 0x0A = V1.1b9
+#define MAGIC_NUMBER 0x0B		// eePROM signature - change for each eePROM structure change 0x0B = V1.1b9
 								// to force factory reset
 
 //************************************************************
@@ -75,7 +75,7 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
-	Config.BatteryCells = 3;			// Default to 3S
+	Config.BatteryCells = 0;			// Default to zero to disable alarm
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 360;
 	Config.MaxVoltage = 420;
@@ -89,8 +89,8 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
-	Config.Status_timer = 5;			// Refresh timeout
-	Config.LMA_enable = 1;				// Default to 1 minute
+	Config.Status_timer = 10;			// Refresh timeout
+	Config.LMA_enable = 3;				// Default to 3 minutes
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 

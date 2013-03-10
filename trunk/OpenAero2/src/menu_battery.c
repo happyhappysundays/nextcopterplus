@@ -45,7 +45,7 @@ const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
 const menu_range_t batt_menu_ranges[] PROGMEM = 
 {
 	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
-	{1,12,1,0,3},
+	{0,12,1,0,0},
 	{0,2000,1,0,1080},
 	{120,430,1,0,420},
 	{80,400,1,0,360}
@@ -62,8 +62,8 @@ void menu_battery(void)
 	menu_range_t range;
 	uint8_t text_link = 0;
 
-	uint8_t temp_cells = 0;
-	uint16_t temp_minvoltage = 0;
+	int16_t temp_cells = 0;
+	int16_t temp_minvoltage = 0;
 	
 	while(button != BACK)
 	{
@@ -90,8 +90,8 @@ void menu_battery(void)
 		// See if cell number or min_volts has changed
 		if ((temp_cells != values[1]) || (temp_minvoltage != values[4]))
 		{
+			// Recalculate if more cells
 			values[2] = values[1] * values[4];
-			Config.PowerTrigger = values[2];
 		}
 
 		// Update value in config structure

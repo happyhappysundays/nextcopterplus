@@ -35,7 +35,7 @@ void menu_rc_setup(uint8_t i);
 //************************************************************
 
 #define RCSTART 149 	// Start of Menu text items
-#define RCOFFSET 78		// LCD offsets
+#define RCOFFSET 79		// LCD offsets
 
 #define RCTEXT 18 		// Start of value text items
 #define FSTEXT 103
@@ -122,8 +122,8 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	
 		{HORIZONTAL,AFT,1,1,HORIZONTAL},
 		{28,50,1,0,38}, 				// Contrast
-		{1,30,1,0,5},					// Status menu timeout
-		{0,30,1,0,1},					// LMA enable
+		{1,60,1,0,10},					// Status menu timeout
+		{0,30,1,0,3},					// LMA enable
 		{OFF,ON,1,1,OFF},				// Camstab enable
 		{LOW,HIGH,1,1,LOW},				// Camstab servo rate
 		{1,64,1,0,8},					// Acc. LPF

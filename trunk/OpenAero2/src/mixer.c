@@ -48,8 +48,8 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
 	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
 	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,REVERSED,0,-100,100, 0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
-	{0,REVERSED,0,-100,100, 0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,NORMAL,0,-100,100, 0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
+	{0,NORMAL,0,-100,100, 0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
 	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
 	{0,NORMAL,0,-100,100,   0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 
@@ -426,8 +426,8 @@ void ProcessMixer(void)
 		{
 			for (i = 0; i < MAX_OUTPUTS; i++)
 			{
-				// Over-ride throttle
-				if (Config.Channel[i].source_a == THROTTLE)
+				// Over-ride throttle if in CPPM mode
+				if ((Config.Channel[i].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE))
 				{
 					// Convert throttle setting to servo value
 					Config.Channel[i].value = scale_percent(Config.FailsafeThrottle);				
@@ -524,40 +524,18 @@ void UpdateServos(void)
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-	
-		// Normal case
-		if (Config.Channel[i].Servo_reverse == OFF)
+		if (Config.Channel[i].value > Config.Limits[i].maximum)
 		{
-			if (Config.Channel[i].value < Config.Limits[i].minimum)
-			{
-				ServoOut[i] = Config.Limits[i].minimum;
-			}
-
-			if (Config.Channel[i].value > Config.Limits[i].maximum)
-			{
-				ServoOut[i] = Config.Limits[i].maximum;
-			}
-			else
-			{
-				ServoOut[i] = Config.Channel[i].value;
-			}
+			ServoOut[i] = Config.Limits[i].maximum;
 		}
-		// Make sure you take servo reversing into account
+
+		else if (Config.Channel[i].value < Config.Limits[i].minimum)
+		{
+			ServoOut[i] = Config.Limits[i].minimum;
+		}
 		else
 		{
-			if (Config.Channel[i].value > -Config.Limits[i].minimum)
-			{
-				ServoOut[i] = -Config.Limits[i].minimum;
-			}
-
-			if (Config.Channel[i].value < -Config.Limits[i].maximum)
-			{
-				ServoOut[i] = -Config.Limits[i].maximum;
-			}
-			else
-			{
-				ServoOut[i] = Config.Channel[i].value;
-			}
+			ServoOut[i] = Config.Channel[i].value;
 		}
 	}
 }

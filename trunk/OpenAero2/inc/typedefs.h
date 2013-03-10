@@ -148,7 +148,7 @@ typedef struct
 
 	// Battery settings
 	int16_t		BatteryType;			// LiPo, NiMh
-	int16_t		BatteryCells;			// Number of cells (2~5)	
+	int16_t		BatteryCells;			// Number of cells (0~12)	
 	int16_t		PowerTrigger;			// Trip voltage
 	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state

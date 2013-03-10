@@ -74,7 +74,8 @@ void Display_status(void)
 	range = max - min;
 	scale = range / 50;
 
-	if (vbat_temp >= min) 
+	// Look out for that divide-by-zero... :)
+	if ((vbat_temp >= min) && (scale > 0))
 	{
 		temp =(vbat_temp - min) / scale;
 	}
