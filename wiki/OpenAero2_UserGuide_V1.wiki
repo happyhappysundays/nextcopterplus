@@ -248,23 +248,31 @@ http://i.imgur.com/yE5a75i.jpg
 Again, this feature is particularly useful when stability and autoleveling is used with flaperons.
 
 ==15. Failsafe Settings==
+OpenAero2 has been designed with built-in failsafe's, which have the potential to allow the pilot to regain control and save your aircraft.
 
 http://i.imgur.com/qbFeiNm.jpg
 
- * Mode: There are two options: Fixed which simply transfers the settings from the "Failsafe positions" menu to the servos, and Adv. which uses the settings below. In Advanced mode, autolevel is enabled automatically.
- * THR.pos %: Throttle position when in advanced failsafe (in %). Note that the throttle position ranges from -100% (min) to 100% (max).
- * Elevator: Elevator trim when in advanced failsafe.
- * Aileron: Aileron trim when in advanced failsafe.
- * Rudder: Rudder trim when in advanced failsafe.
+*Mode* supports two options.
+
+ * *Fixed* - Simple fix positions
+ * *Advanced* - Automatically enables autoleveling
+
+Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information.
 
 ==16. Failsafe Positions==
-You can set here a specific servo position that the servos will move to in Failsafe mode when Failsafe is set to "fixed". Note that pressing "FS" on the Receiver input screen will load the current values into these settings. Note also that when Failsafe is set to "Advanced", these settinsg will not be used as the settings on the "Failsafe settings" menu will be used instead.
+OpenAero2 allows the '*fixed*' failsafe positions to be configured, which become active in the event the receiver signal is lost.
 
 http://i.imgur.com/oVlTxWV.jpg
 
+The initial position can be set by selecting 'Failsafe' in 'Receiver Inputs'
+
+These settings will be ignored if 'advanced' mode in 'failsafe settings' is selected.
+
 ==17. Battery Monitor==
+OpenAero2 has the ability to monitor a flight or receiver pack during flight.
 
 http://i.imgur.com/Kep5f5E.jpg
 
- * Battery type: LiPo? or NiMh?, Used internally to preset the min and max cell volatges.
- * Cells: Number of cells in your battery pack. When you change this value, OpenAero2? will automatically recalculate the LVA voltage based on the number of cells and the minimum cell voltage.
+Typically, only the number of *cells* has to be specified to suit your model.
+
+The voltage of the pack is displayed both as a graphical & numerical representation on the 'status' screen and the piezo buzzer will emit a series of warning tone in the event the low voltage has been breached.
