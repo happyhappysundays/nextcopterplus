@@ -34,15 +34,16 @@ bool	normal_cal_done;
 int16_t tempaccZero = 0;
 
 // Uncalibrated default values of Z middle per orientation
-int16_t UncalDef[4] = {640, 615, 640, 640}; // 764-515, 488-743, 515-764, 764-515
+int16_t UncalDef[5] = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
 
 // Polarity handling table
-int8_t Acc_Pol[4][3] =  // ROLL, PITCH, YAW
+int8_t Acc_Pol[5][3] =  // ROLL, PITCH, YAW
 {
 	{1,1,1},		// Forward
 	{1,-1,-1},		// Vertical
 	{-1,1,-1},		// Upside down
 	{-1,-1,1},		// Aft
+	{-1,1,1},		// Sideways
 };
 
 void ReadAcc()					// At rest range is approx 300 - 700

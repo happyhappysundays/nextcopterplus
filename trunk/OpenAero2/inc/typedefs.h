@@ -122,6 +122,7 @@ typedef struct
 	int8_t		AccPitchZeroTrim;
 	int8_t		LaunchMode;				// Launch mode on/off
 	int8_t		LaunchThrPos;			// Launch mode throttle position
+	int8_t		LaunchDelay;			// Launch mode delay time
 
 	// Stability PID settings
 	int8_t		StabMode;				// Stability switch mode

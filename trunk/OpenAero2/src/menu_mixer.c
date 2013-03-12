@@ -36,7 +36,7 @@ void menu_mixer(uint8_t i);
 #define INPUTITEMS 16
 #define OUTPUTITEMS 7
 
-#define MIXERSTART 206 	// Start of Menu text items
+#define MIXERSTART 207 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************

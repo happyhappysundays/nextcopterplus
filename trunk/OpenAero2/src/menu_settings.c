@@ -45,7 +45,7 @@ void menu_rc_setup(uint8_t i);
 
 #define RCITEMS 10 		// Number of menu items
 #define FSITEMS 5 
-#define AUTOITEMS 8 
+#define AUTOITEMS 9 
 #define STABITEMS 16 
 #define GENERALITEMS 12 
 
@@ -57,7 +57,7 @@ const uint8_t RCMenuText[5][STABITEMS] PROGMEM =
 {
 	{RCTEXT, 116, 105, 105, 105, 141, 141, 141, 141, 0},		// RC setup
 	{FSTEXT, 0, 0, 0, 0},										// Failsafe
-	{AUTOTEXT, 0, 0, 0, 0, 0, 101, 0},							// Autolevel
+	{AUTOTEXT, 0, 0, 0, 0, 0, 101, 0, 0},						// Autolevel
 	{STABTEXT, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Stability
 	{GENERALTEXT, 124, 101, 0, 0, 101, 119, 0, 0, 48, 0, 101},	// General
 };
@@ -88,7 +88,7 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{-125,125,1,0,0},
 	},
 	{
-		// Autolevel (8)
+		// Autolevel (9)
 		{DISABLED,HANDSFREE,1,1,AUTOCHAN},
 		{-125,125,10,0,10},
 		{0,127,1,0,60},
@@ -97,6 +97,7 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{-127,127,1,0,0},
 		{OFF,ON,1,1,OFF},				// Launch mode
 		{-125,125,10,0,0},				// Launch trigger
+		{0,60,1,0,10},					// Launch delay
 	},
 	{
 		// Stability (16)
@@ -120,7 +121,7 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 	{
 		// General (12)
 		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	
-		{HORIZONTAL,AFT,1,1,HORIZONTAL},
+		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL},
 		{28,50,1,0,38}, 				// Contrast
 		{1,60,1,0,10},					// Status menu timeout
 		{0,30,1,0,3},					// LMA enable
