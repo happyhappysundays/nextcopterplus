@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 9 - March 2013
+// Version 1.1 Beta 10 - March 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -135,13 +135,9 @@
 //			Added "aft" orientation. Fixed inv. cal. bug.
 //			Adv. IMU defaults to ON. 
 //			Added real-time servo updating for min/max/trim adjustment.
-//			Compacted Winddings fonts. Reduced RAM requirement in settings menu.
+//			Compacted Wingdings fonts. Reduced RAM requirement in settings menu.
 //			Added unused RAM usage meter in status screen.
 //			Fixed min/max limits bug. Added basic aileron differential setting to RC menu
-//			Level meter responds properly in all orientations
-//			Added stick calibration screen for idiots
-//			Shrunk last bit of space out of Verdana fonts.
-//			Added second aileron reversing independant of main aileron and added success confirmation.
 //			Added basic aileron differential setting to RC menu
 //			Level meter responds properly in all orientations
 //			Added stick calibration screen for idiots
@@ -152,6 +148,8 @@
 //			Battery alarm can be reset by cellcount = 0
 // Beta 10	Fixed broken travel limits
 //			Allowed trim amd travel adjustment of channels using THROTTLE as a source in PWM modes
+//			Added "Sideways" orientation. Dropped default min cell voltage to 3.3V
+//			Adjustable launch delay added. Launch resettable if throttle cut within the launch delay.
 //
 //***********************************************************
 //* To do
@@ -208,7 +206,8 @@
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
-#define LAUNCH_TIMER 195310			// Hand-launch timer (10 seconds)
+#define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
+#define LAUNCH_TIMER_RESET 3150		// Throttle position to reset timer (-50%)
 
 //***********************************************************
 //* Code and Data variables
@@ -487,27 +486,31 @@ int main(void)
 		//* Hand-launch mode handling
 		//************************************************************
 
-		if (Config.LaunchMode == ON)
+		// Only pass through here if launch block timer running
+		if ((Config.LaunchMode == ON) && (Launch_Mode == true) && (Launch_Block == true))
 		{
 			// Increment timer only if Launch mode on to save cycles
 			Launch_timer += (uint8_t) (TCNT2 - Launch_TCNT2);
 			Launch_TCNT2 = TCNT2;
 
-			// Reset Launch count if Launch_Mode false
-			if (Launch_Mode == false)
-			{														
+			// If throttle position cut, reset timer
+			if (RxChannel[THROTTLE] < LAUNCH_TIMER_RESET)	
+			{
 				Launch_timer = 0;
+				Launch_Mode = false;			// Reset state machine
+				Launch_Block = false;			// Enable autolevel
+				menu_beep(2);					// Signal launch mode timer restart
 			}
 		
-			// Re-enable autolevel if timer expires while autolevel blocked
-			if ((Launch_Block) && (Launch_timer > LAUNCH_TIMER))
+			// Re-enable autolevel when timer expires while autolevel blocked
+			if ((Launch_Block) && (Launch_timer > (LAUNCH_TIMER * Config.LaunchDelay)))
 			{
 				Launch_Block = false;
 			}
 		}
 
 		// If first time into Launch mode
-		if ((Config.LaunchMode == ON) && (Launch_Mode == false))	
+		if ((Config.LaunchMode == ON) && (Launch_Mode == false))
 		{
 			// Launch mode throttle position exceeded
 			if (RxChannel[THROTTLE] > Config.Launchtrigger)	
