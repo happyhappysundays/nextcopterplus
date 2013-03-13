@@ -43,7 +43,7 @@ int8_t Acc_Pol[5][3] =  // ROLL, PITCH, YAW
 	{1,-1,-1},		// Vertical
 	{-1,1,-1},		// Upside down
 	{-1,-1,1},		// Aft
-	{-1,1,1},		// Sideways
+	{1,-1,1},		// Sideways
 };
 
 void ReadAcc()					// At rest range is approx 300 - 700

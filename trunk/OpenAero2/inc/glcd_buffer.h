@@ -8,6 +8,10 @@
  * http://en.radzio.dxp.pl/bitmap_converter/
  ***********************************************************/
 
+// To save 1024 bytes you can get rid of the logo by replaceing the following code with this line
+// uint8_t buffer[1024];
+//
+
 uint8_t buffer[128*64/8] = 
 {
 	0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,

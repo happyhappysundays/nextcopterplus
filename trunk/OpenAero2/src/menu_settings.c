@@ -96,7 +96,8 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{-127,127,1,0,0}, 
 		{-127,127,1,0,0},
 		{OFF,ON,1,1,OFF},				// Launch mode
-		{-125,125,10,0,0},				// Launch trigger
+		{-55,125,10,0,0},				// Launch trigger
+		{1,60,1,0,10},					// Launch delay
 		{0,60,1,0,10},					// Launch delay
 	},
 	{

@@ -207,7 +207,7 @@
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
 #define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
-#define LAUNCH_TIMER_RESET 3150		// Throttle position to reset timer (-50%)
+#define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
 
 //***********************************************************
 //* Code and Data variables
@@ -503,9 +503,10 @@ int main(void)
 			}
 		
 			// Re-enable autolevel when timer expires while autolevel blocked
-			if ((Launch_Block) && (Launch_timer > (LAUNCH_TIMER * Config.LaunchDelay)))
+			if ((Launch_Block) && (Launch_timer > ((uint32_t)LAUNCH_TIMER * (uint32_t)Config.LaunchDelay)))
 			{
 				Launch_Block = false;
+				Launch_Mode = true;	
 			}
 		}
 
