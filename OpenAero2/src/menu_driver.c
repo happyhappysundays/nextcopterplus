@@ -190,8 +190,11 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		if (range.style == 0) // numeric
 		{
 			// Write numeric value, centered on screen
-			mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana22, &size);
-			mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana22,((128-size.x)/2)+offset,25);
+			//mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana22, &size);
+			//mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana22,((128-size.x)/2)+offset,25);
+
+			mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana14, &size);
+			mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana14,((128-size.x)/2)+offset,25);
 		}
 		else // Text
 		{

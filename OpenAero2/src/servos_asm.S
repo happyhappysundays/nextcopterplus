@@ -243,3 +243,34 @@ glcd_delay:
 	nop					// 1 		5 * 50ns = 250ns = 4MHz
 	ret					// 4
 	.endfunc
+
+
+;*************************************************************************	
+; void pwm_delay(void) 16us output spacing delay - 320 cycles
+; 4 cycles to call 
+; 3 cycles to lead in
+; 4 cycle to lead out
+; 4 to return leaves 305 to burn up
+;*************************************************************************
+
+	.global pwm_delay
+	.func   pwm_delay
+pwm_delay:
+	push	16			// 2			Save regs
+	ldi 	16,0x98		// 1			Set loop count to 33h or 306
+
+pwm_loop:				//				9 cycles, 8 on last
+	nop					// 1
+	nop					// 1
+	nop					// 1			33 x 9 + 8 = 305
+	nop					// 1
+	nop					// 1
+
+	subi 	16,1		// 1
+	brne	pwm_loop	// 2	1		Loop until zero	
+
+	nop					// 		1
+	nop					// 		1
+	pop		16			// 		2		Restore regs
+	ret					// 		4
+	.endfunc

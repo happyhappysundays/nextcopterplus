@@ -37,11 +37,26 @@ void Display_balance(void)
 	{
 		ReadAcc();
 
-		x_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 32;
+		// HORIZONTAL: 	Pitch = X, Roll = Y
+		// UPSIDEDOWN:	Pitch = X, Roll = Y
+		// AFT:			Pitch = X, Roll = Y
+
+		// VERTICAL:	Pitch = Y, Roll = X
+		// SIDEWAYS:	Pitch = Y, Roll = X
+
+		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
+		{
+			x_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 32;
+			y_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 64;	
+		}
+		else
+		{
+			x_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 32;
+			y_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 64;
+		}
+
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
-
-		y_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 64;
 		if (y_pos < 0) y_pos = 0;
 		if (y_pos > 128) y_pos = 128;
 

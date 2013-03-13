@@ -34,7 +34,7 @@ int8_t Gyro_Pol[5][3] = // ROLL, PITCH, YAW
 	{1,1,-1},		// Vertical
 	{1,-1,1},		// Upside down
 	{-1,-1,-1},		// Aft
-	{-1,1,-1},		// Sideways
+	{1,-1,-1},		// Sideways
 };
 
 void ReadGyros(void)					// Conventional orientation
