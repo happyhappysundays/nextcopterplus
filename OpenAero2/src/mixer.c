@@ -305,8 +305,8 @@ void ProcessMixer(void)
 				// For the second aileron (RHS)
 				if (TwoAilerons)			
 				{
-					// Limit positive-going values
-					if (temp > 0)
+					// Limit negative-going values
+					if (temp < 0)
 					{
 						temp = scale32(temp, (100 - Config.Differential));
 						Config.Channel[i].value = temp;
@@ -315,7 +315,7 @@ void ProcessMixer(void)
 
 				// For the first aileron (LHS) 
 				// Limit positive-going values
-				else if (temp < 0)			
+				else if (temp > 0)			
 				{
 					temp = scale32(temp, (100 - Config.Differential));
 					Config.Channel[i].value = temp;

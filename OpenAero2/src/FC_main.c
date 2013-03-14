@@ -150,6 +150,8 @@
 //			Allowed trim amd travel adjustment of channels using THROTTLE as a source in PWM modes
 //			Added "Sideways" orientation. Dropped default min cell voltage to 3.3V
 //			Adjustable launch delay added. Launch resettable if throttle cut within the launch delay.
+//			Differential around the right way now :)
+//			Updated PWM output driver to have XPS-style staggered outputs
 //
 //***********************************************************
 //* To do
@@ -268,6 +270,22 @@ int main(void)
 	uint8_t i = 0;
 
 	init();							// Do all init tasks
+
+	// Servo test loop
+	while (0)
+	{
+		ServoOut[0] = 5000;
+		ServoOut[1] = 5000;
+		ServoOut[2] = 5000;
+		ServoOut[3] = 2500;
+		ServoOut[4] = 5000;
+		ServoOut[5] = 5000;
+		ServoOut[6] = 5000;
+		ServoOut[7] = 2500;
+
+		RC_Lock = true;
+		output_servo_ppm();
+	}
 
 	// Main loop
 	while (1)
