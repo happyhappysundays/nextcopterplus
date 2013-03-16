@@ -85,7 +85,7 @@ void Display_rcinput(void)
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(100);
-
+/*
 		if (RCinputs[AILERON] < Config.MinAileron)
 		{
 			Config.MinAileron = RCinputs[AILERON];
@@ -105,7 +105,8 @@ void Display_rcinput(void)
 		{
 			Config.MaxAileron2 = RCinputs[Config.FlapChan];
 		}
+*/
 	}
 	// Exit
-	Save_Config_to_EEPROM();
+//	Save_Config_to_EEPROM();
 }
