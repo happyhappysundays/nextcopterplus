@@ -99,10 +99,12 @@ void ProcessMixer(void)
 	uint8_t i, outputs;
 	int16_t temp = 0;
 	int16_t temp2 = 0;
-	int16_t flap = 0;
+	static	int16_t flap = 0;
+	static	int16_t roll = 0;
 	int16_t	pitch_trim = 0;
 	int16_t	roll_trim = 0;
 	bool	TwoAilerons = false;
+	bool	FlapLock = false;
 
 	//************************************************************
 	// Limit output mixing as needed to save processing power
@@ -132,13 +134,51 @@ void ProcessMixer(void)
 
 	if (Config.FlapChan != NOCHAN)
 	{
-		// Aileron common movement (Flap x 2). Roll cancelled
-		flap = RCinputs[AILERON] - RCinputs[Config.FlapChan]; 	
-		flap = flap >> 1; 
+		// Update flap only if ailerons are within measureable positions
+	/*	if ((RCinputs[AILERON] > Config.MinAileron) && 
+			(RCinputs[AILERON] < Config.MaxAileron) &&
+			(RCinputs[Config.FlapChan] > Config.MinAileron2) && 
+			(RCinputs[Config.FlapChan] < Config.MaxAileron2))*/
+
+		if ((RCinputs[AILERON] > -1200) && 
+			(RCinputs[AILERON] < 1200) &&
+			(RCinputs[Config.FlapChan] > -1200) && 
+			(RCinputs[Config.FlapChan] < 1200))
+		{
+			flap = RCinputs[AILERON] - RCinputs[Config.FlapChan]; 	
+			flap = flap >> 1; 	
+			FlapLock = false;
+		}
+		else
+		{
+			FlapLock = true;
+		}
 	}
 	else
 	{
 		flap = 0;
+	}
+
+	//************************************************************
+	// Un-mix ailerons from flaperons as required in all modes
+	//************************************************************
+
+	// If in AEROPLANE mixer mode and flaperons set up
+	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
+	{
+/*		// If flaps over-extended then just use one side to measure roll
+		if (FlapLock)
+		{
+			roll = RCinputs[AILERON];
+		}
+		else
+		{
+*/			// Remove flap signal from flaperons, leaving ailerons only
+			roll = RCinputs[AILERON] + RCinputs[Config.FlapChan];
+			RCinputs[AILERON] = roll >> 1;
+//		}
+
+		RCinputs[Config.FlapChan] = RCinputs[AILERON];
 	}
 
 	//************************************************************
@@ -328,6 +368,7 @@ void ProcessMixer(void)
 					TwoAilerons = true; // Found an aileron
 				}
 			}
+
 		}
 		// Reset after all outputs done
 		TwoAilerons = false;
@@ -337,7 +378,8 @@ void ProcessMixer(void)
 	// Re-mix flaps from flaperons as required
 	//************************************************************ 
 
-	if ((Stability) && (Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
+	// The flap part of the signal has been removed so we have to reinsert it here.
+	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
 	{
 		for (i = 0; i < outputs; i++)
 		{

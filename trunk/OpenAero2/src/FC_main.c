@@ -152,6 +152,7 @@
 //			Adjustable launch delay added. Launch resettable if throttle cut within the launch delay.
 //			Differential around the right way now :)
 //			Updated PWM output driver to have XPS-style staggered outputs
+//			(Partially) Fixed interaction of flaperons and differential.
 //
 //***********************************************************
 //* To do

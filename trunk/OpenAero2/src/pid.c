@@ -87,7 +87,7 @@ void Calculate_PID(void)
 	// Set up dynamic gain variable once per loop
 	//************************************************************
 	//
-	// Config.DynGainDiv = 2500 / Config.DynGain;
+	// N.B. Config.DynGainDiv = 2500 / Config.DynGain;
 	//
 
 	// Channel controlling the dynamic gain

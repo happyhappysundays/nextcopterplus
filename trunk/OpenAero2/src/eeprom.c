@@ -95,8 +95,12 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 
-	// Failsafe
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
+
+	Config.MinAileron = -1200;			// Initial min/max aileron RC limits
+	Config.MaxAileron = 1200;
+	Config.MinAileron2 = -1200;
+	Config.MaxAileron2 = 1200;
 }
 
 void Save_Config_to_EEPROM(void)
