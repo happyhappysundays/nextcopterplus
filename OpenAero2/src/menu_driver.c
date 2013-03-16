@@ -179,6 +179,23 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 	button = NONE;
 
+	// Reset servo to neutral unles it is for the throttle channel in CPPM mode
+	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
+	{
+		temp16 = Config.Limits[servo_number].trim;
+		temp16 = ((temp16 << 2) / 10); 		// Span back to what the output wants
+
+		// Give servos time to settle
+		for (i = 0; i < 10; i++)
+		{
+			cli();
+			output_servo_ppm_asm3(servo_number, temp16);
+			sei();
+
+			_delay_ms(20);
+		}
+	}
+
 	while (button != ENTER)
 	{
 		clear_buffer(buffer);
@@ -275,7 +292,8 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 			}
 		}
 	}
-	// Reset servos to neutral except for the throttle channel in CPPM mode
+
+	// Reset servo to neutral unles it is for the throttle channel in CPPM mode
 	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
 	{
 		temp16 = Config.Limits[servo_number].trim;
@@ -495,4 +513,3 @@ void print_cursor(uint8_t line)
 {
 	LCD_Display_Text(13, (prog_uchar*)Wingdings, CURSOROFFSET, line);
 }
-

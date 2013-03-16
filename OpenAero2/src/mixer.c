@@ -135,15 +135,15 @@ void ProcessMixer(void)
 	if (Config.FlapChan != NOCHAN)
 	{
 		// Update flap only if ailerons are within measureable positions
-	/*	if ((RCinputs[AILERON] > Config.MinAileron) && 
+		if ((RCinputs[AILERON] > Config.MinAileron) && 
 			(RCinputs[AILERON] < Config.MaxAileron) &&
 			(RCinputs[Config.FlapChan] > Config.MinAileron2) && 
-			(RCinputs[Config.FlapChan] < Config.MaxAileron2))*/
+			(RCinputs[Config.FlapChan] < Config.MaxAileron2))
 
-		if ((RCinputs[AILERON] > -1200) && 
+	/*	if ((RCinputs[AILERON] > -1200) && 
 			(RCinputs[AILERON] < 1200) &&
 			(RCinputs[Config.FlapChan] > -1200) && 
-			(RCinputs[Config.FlapChan] < 1200))
+			(RCinputs[Config.FlapChan] < 1200))*/
 		{
 			flap = RCinputs[AILERON] - RCinputs[Config.FlapChan]; 	
 			flap = flap >> 1; 	
@@ -166,18 +166,13 @@ void ProcessMixer(void)
 	// If in AEROPLANE mixer mode and flaperons set up
 	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
 	{
-/*		// If flaps over-extended then just use one side to measure roll
-		if (FlapLock)
-		{
-			roll = RCinputs[AILERON];
-		}
-		else
-		{
-*/			// Remove flap signal from flaperons, leaving ailerons only
-			roll = RCinputs[AILERON] + RCinputs[Config.FlapChan];
-			RCinputs[AILERON] = roll >> 1;
-//		}
+		// Remove flap signal from flaperons, leaving ailerons only
+		roll = RCinputs[AILERON] + RCinputs[Config.FlapChan];
 
+		// Otherwise throw is 50% of both signals
+		RCinputs[AILERON] = roll >> 1;
+		
+		// Copy to second aileron channel
 		RCinputs[Config.FlapChan] = RCinputs[AILERON];
 	}
 
