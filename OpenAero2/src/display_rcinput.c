@@ -41,6 +41,10 @@ void Display_rcinput(void)
 		{
 			//_delay_ms(100);
 			CenterSticks();
+			Config.MinAileron = -1200;
+			Config.MaxAileron = 1200;
+			Config.MinAileron2 = -1200;
+			Config.MaxAileron2 = 1200;
 		}
 
 		if (BUTTON3 == 0)
@@ -81,5 +85,27 @@ void Display_rcinput(void)
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(100);
+
+		if (RCinputs[AILERON] < Config.MinAileron)
+		{
+			Config.MinAileron = RCinputs[AILERON];
+		}
+
+		if (RCinputs[AILERON] > Config.MaxAileron)
+		{
+			Config.MaxAileron = RCinputs[AILERON];
+		}
+
+		if (RCinputs[Config.FlapChan] < Config.MinAileron2)
+		{
+			Config.MinAileron2 = RCinputs[Config.FlapChan];
+		}
+
+		if (RCinputs[Config.FlapChan] > Config.MaxAileron2)
+		{
+			Config.MaxAileron2 = RCinputs[Config.FlapChan];
+		}
 	}
+	// Exit
+	Save_Config_to_EEPROM();
 }
