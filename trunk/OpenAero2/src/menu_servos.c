@@ -164,6 +164,8 @@ void menu_servo_setup(uint8_t section)
 					break;
 				case 5:
 					memcpy(&values[i],&Config.Channel[i].Failsafe,sizeof(int8_t));
+					servo_enable = true;
+					zero_setting = true;
 					break;
 				default:
 					memcpy(&values[i],&Config.Channel[i].Servo_reverse,sizeof(int8_t));

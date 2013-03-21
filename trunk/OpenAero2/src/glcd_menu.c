@@ -40,7 +40,7 @@ void idle_screen(void);
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:  V1.1b10";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:  V1.1b11";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Status";
 const char StatusText4[]  PROGMEM = ".";

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 10 - March 2013
+// Version 1.1 Beta 11 - March 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -154,6 +154,8 @@
 //			Updated PWM output driver to have XPS-style staggered outputs
 //			Mostly fixed interaction of flaperons and differential.
 //			Servos center before trim/travel adjustment
+// Beta 11	Allow real-time servo position setting of failsafe positions.	
+//			Integrating ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
 //
 //***********************************************************
 //* To do
@@ -276,17 +278,22 @@ int main(void)
 	// Servo test loop
 	while (0)
 	{
-		ServoOut[0] = 5000;
-		ServoOut[1] = 5000;
-		ServoOut[2] = 5000;
-		ServoOut[3] = 2500;
-		ServoOut[4] = 5000;
-		ServoOut[5] = 5000;
-		ServoOut[6] = 5000;
-		ServoOut[7] = 2500;
+		for (i = 0; i < 200; i++)
+		{
+			ServoOut[0] = (2500 + i); // Works perfectly
+			ServoOut[1] = 2503; // 1.001ms
+			ServoOut[2] = (2500 + i); // Steps
+			ServoOut[3] = 2500;
+			ServoOut[4] = 2500;
+			ServoOut[5] = 2500;
+			ServoOut[6] = 2500;
+			ServoOut[7] = 2500; // 2ms
+	
+			RC_Lock = true;
+			output_servo_ppm();
 
-		RC_Lock = true;
-		output_servo_ppm();
+			_delay_ms(100);
+		}
 	}
 
 	// Main loop
