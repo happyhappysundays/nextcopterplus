@@ -155,7 +155,7 @@
 //			Mostly fixed interaction of flaperons and differential.
 //			Servos center before trim/travel adjustment
 // Beta 11	Allow real-time servo position setting of failsafe positions.	
-//			Integrating ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
+//			Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
 //
 //***********************************************************
 //* To do
@@ -276,24 +276,31 @@ int main(void)
 	init();							// Do all init tasks
 
 	// Servo test loop
-	while (0)
-	{
-		for (i = 0; i < 200; i++)
-		{
-			ServoOut[0] = (2500 + i); // Works perfectly
-			ServoOut[1] = 2503; // 1.001ms
-			ServoOut[2] = (2500 + i); // Steps
-			ServoOut[3] = 2500;
-			ServoOut[4] = 2500;
-			ServoOut[5] = 2500;
-			ServoOut[6] = 2500;
-			ServoOut[7] = 2500; // 2ms
-	
-			RC_Lock = true;
-			output_servo_ppm();
 
-			_delay_ms(100);
-		}
+	while (0 )
+	{
+		ServoOut[0] = 4950; // 1980us
+		ServoOut[1] = 4950;
+		ServoOut[2] = 4950;
+		ServoOut[3] = 4950;
+		ServoOut[4] = 4950;
+		ServoOut[5] = 4950;
+		ServoOut[6] = 4950;
+		ServoOut[7] = 4950;
+/*
+		ServoOut[0] = 480; // 120us
+		ServoOut[1] = 480;
+		ServoOut[2] = 480;
+		ServoOut[3] = 480;
+		ServoOut[4] = 480;
+		ServoOut[5] = 480;
+		ServoOut[6] = 480;
+		ServoOut[7] = 480;
+*/				
+		RC_Lock = true;
+		output_servo_ppm();
+
+		_delay_ms(100);
 	}
 
 	// Main loop

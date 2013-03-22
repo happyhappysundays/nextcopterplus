@@ -134,6 +134,7 @@ void write_buffer(uint8_t *buffer, uint8_t type)
 		{
 			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
 		}
+
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
 		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
 		st7565_command(CMD_RMW);									// Sets auto-increment

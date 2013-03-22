@@ -135,15 +135,10 @@ void ProcessMixer(void)
 	if (Config.FlapChan != NOCHAN)
 	{
 		// Update flap only if ailerons are within measureable positions
-		if ((RCinputs[AILERON] > Config.MinAileron) && 
-			(RCinputs[AILERON] < Config.MaxAileron) &&
-			(RCinputs[Config.FlapChan] > Config.MinAileron2) && 
-			(RCinputs[Config.FlapChan] < Config.MaxAileron2))
-
-	/*	if ((RCinputs[AILERON] > -1200) && 
+		if ((RCinputs[AILERON] > -1200) && 
 			(RCinputs[AILERON] < 1200) &&
 			(RCinputs[Config.FlapChan] > -1200) && 
-			(RCinputs[Config.FlapChan] < 1200))*/
+			(RCinputs[Config.FlapChan] < 1200))
 		{
 			flap = RCinputs[AILERON] - RCinputs[Config.FlapChan]; 	
 			flap = flap >> 1; 	
