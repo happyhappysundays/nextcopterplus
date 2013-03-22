@@ -4,7 +4,7 @@
  * Created: 25/06/2012 10:53:00
  * Author: David Thompson - Originally based on code example from Cesco
  * Updated: 14/03/2013 - Added 16us staggered output concept borrowed from Jim Drew of Xtreme Power Systems
- * Updated: 18/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
+ * Updated: 22/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
  *
  */
 
@@ -64,98 +64,94 @@ output_servo_ppm_asm:
 	push	25			// 2
 
 // Trim 16-bit values to suit individual needs, 
-// Save result and copy lower 3 bits to r16 to r23
+// Save result and copy lower 3 bits to r16 to r23 (96 cycles)
+
 // M1
 	ld		XL, Z+ 		// 2			Load XL with data at address in Z
 	ld		XH, Z+		// 2			Load XH with data at address in Z+1
-	subi	XL,	0x39	// 1 			Trim servo pulse
+	subi	XL,	0xb3	// 1 			Trim servo pulse
 	sbci 	XH,	0x00	// 1
 	push	XL 			// 2			Save trimmed value to the stack
 	push	XH 			// 2
 	andi	XL,	0x07	// 1			And all but first 3 bits
-	mov		r23,XL		// 1			Copy 8-bit result to regs
+	mov		r23,XL		// 1 (12)		Copy 8-bit result to regs
 // M2
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x31	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r22,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x9a
+	sbci 	XH,	0x00
+	push	XL 		
+	push	XH 		
+	andi	XL,	0x07
+	mov		r22,XL	
 // M3
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x23	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r21,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x81
+	sbci 	XH,	0x00
+	push	XL 		
+	push	XH 		
+	andi	XL,	0x07
+	mov		r21,XL	
 // M4
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x1b	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r20,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x68 // ????????????? 67?
+	sbci 	XH,	0x00
+	push	XL 	
+	push	XH 	
+	andi	XL,	0x07
+	mov		r20,XL	
 // M5
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x13	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r19,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x4f
+	sbci 	XH,	0x00
+	push	XL 	
+	push	XH 	
+	andi	XL,	0x07
+	mov		r19,XL	
 // M6
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x0b	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r18,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x36
+	sbci 	XH,	0x00
+	push	XL 	
+	push	XH 	
+	andi	XL,	0x07
+	mov		r18,XL
 // M7
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x09	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r17,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x1d
+	sbci 	XH,	0x00
+	push	XL 	
+	push	XH 
+	andi	XL,	0x07
+	mov		r17,XL
 // M8
-	ld		XL, Z+ 		// 2
-	ld		XH, Z+		// 2
-	subi	XL,	0x01	// 1
-	sbci 	XH,	0x00	// 1
-	push	XL 			// 2
-	push	XH 			// 2
-	andi	XL,	0x07	// 1
-	mov		r16,XL		// 1
+	ld		XL, Z+
+	ld		XH, Z+
+	subi	XL,	0x04
+	sbci 	XH,	0x00
+	push	XL
+	push	XH 
+	andi	XL,	0x07
+	mov		r16,XL
 
 // Time out lower 3 bits of pulse value (Zero to 7us)
 // This front section is used to simply balance out the lower section
-// Therefore, this chunk is always executed in 168 cycles or 8.40us
+// Therefore, this chunk is always executed in 186 cycles or 9.30us + 15.8us = 25.1
+// This does affect the inter-pulse delay, but not the pulsewidth.
 
 // M1
 	ldi ZL, lo8(OUT1H) 	// 1
 	ldi ZH, hi8(OUT1H) 	// 1
-	lsr		ZH			// 1 Align with byte boundary
-	ror		ZL			// 1 ...dammit
-	clc
 	mov		r25,r23		// 1 Save a copy of r23 in r25
-	lsl		r23			// 1 Multiply by 2 as the call table is 4 bytes per entry
-	add 	ZL, r23 	// 1 Add offset to ZL
-	ldi		r24,0x00	// 1 
-	adc 	ZH, r24 	// 1 Roll up carry to ZH
-	ijmp				// 2 (11)
+	call	preproc		// 16
+	ijmp				// 2 (21)
 OUT1H:
-	call	us_delay	// 20 - 0 (7us) <------------------ Start timing from here !!!!!!!!!!!!!!!!
+	call	us_delay	// 20 - 0 (7us)
 	call	us_delay	// 20
 	call	us_delay	// 20
 	call	us_delay	// 20
@@ -163,23 +159,10 @@ OUT1H:
 	call	us_delay	// 20
 	call	us_delay	// 20 (7 x 20 = 140)
 	sbi 	M1			// 2  - 7 (0us)
-	// Reverse bottom nibble to work out the offset to exit this list
-	// Smaller numbers get converted to larger ones
-	// So large numbers exit slower, extending the pulse
-	mov		r23, r25	// 1 Recover r23 (the offset)
-	ldi		r25,0x07	// 1
-	eor		r23,r25		// 1 Reverse number
-	andi	r23,0x07	// 1
-	lsl		r23			// 1 Multiply by 2 as the call table is 2 bytes per entry
 	ldi ZL, lo8(OUT1L)	// 1
 	ldi ZH, hi8(OUT1L) 	// 1
-	lsr		ZH			// 1 Align with byte boundary
-	ror		ZL			// 1 ...dammit
-	clc					// 1
-	add 	ZL, r23 	// 1
-	ldi		r24,0x00	// 1 
-	adc 	ZH, r24 	// 1 Roll up carry to ZH
-	ijmp				// 2 (15)
+	call	postproc	// 19
+	ijmp				// 2
 OUT1L:
 	call	us_delay	// 20 - 0 (7us)
 	call	us_delay	// 20
@@ -188,18 +171,15 @@ OUT1L:
 	call	us_delay	// 20
 	call	us_delay	// 20
 	call	us_delay	// 20 (7 x 20 = 140)
+	call	pwm_delay	// 316 (15.8us)
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M2
 	ldi ZL, lo8(OUT2H)
 	ldi ZH, hi8(OUT2H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r22
-	lsl	r22
-	add ZL, r22
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT2H:
 	call	us_delay
@@ -210,19 +190,9 @@ OUT2H:
 	call	us_delay
 	call	us_delay
 	sbi 	M2
-	mov		r22, r25
-	ldi		r25,0x07
-	eor		r22,r25
-	andi	r22,0x07
-	lsl	r22
 	ldi ZL, lo8(OUT2L)
 	ldi ZH, hi8(OUT2L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r22
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT2L:
 	call	us_delay
@@ -232,18 +202,15 @@ OUT2L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M3
 	ldi ZL, lo8(OUT3H)
 	ldi ZH, hi8(OUT3H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r21
-	lsl	r21
-	add ZL, r21
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT3H:
 	call	us_delay
@@ -254,19 +221,9 @@ OUT3H:
 	call	us_delay
 	call	us_delay
 	sbi 	M3
-	mov		r21, r25
-	ldi		r25,0x07
-	eor		r21,r25
-	andi	r21,0x07
-	lsl	r21
 	ldi ZL, lo8(OUT3L)
 	ldi ZH, hi8(OUT3L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r21
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT3L:
 	call	us_delay
@@ -276,18 +233,15 @@ OUT3L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M4
 	ldi ZL, lo8(OUT4H)
 	ldi ZH, hi8(OUT4H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r20
-	lsl	r20
-	add ZL, r20
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT4H:
 	call	us_delay
@@ -298,19 +252,9 @@ OUT4H:
 	call	us_delay
 	call	us_delay
 	sbi 	M4
-	mov		r20, r25
-	ldi		r25,0x07
-	eor		r20,r25
-	andi	r20,0x07
-	lsl	r20
 	ldi ZL, lo8(OUT4L)
 	ldi ZH, hi8(OUT4L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r20
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT4L:
 	call	us_delay
@@ -320,18 +264,15 @@ OUT4L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M5
 	ldi ZL, lo8(OUT5H)
 	ldi ZH, hi8(OUT5H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r19
-	lsl	r19
-	add ZL, r19
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT5H:
 	call	us_delay
@@ -342,19 +283,9 @@ OUT5H:
 	call	us_delay
 	call	us_delay
 	sbi 	M5
-	mov		r19, r25
-	ldi		r25,0x07
-	eor		r19,r25
-	andi	r19,0x07
-	lsl	r19
 	ldi ZL, lo8(OUT5L)
 	ldi ZH, hi8(OUT5L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r19
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT5L:
 	call	us_delay
@@ -364,18 +295,15 @@ OUT5L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M6
 	ldi ZL, lo8(OUT6H)
 	ldi ZH, hi8(OUT6H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r18
-	lsl	r18
-	add ZL, r18
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT6H:
 	call	us_delay
@@ -386,19 +314,9 @@ OUT6H:
 	call	us_delay
 	call	us_delay
 	sbi 	M6
-	mov		r18, r25
-	ldi		r25,0x07
-	eor		r18,r25
-	andi	r18,0x07
-	lsl	r18
 	ldi ZL, lo8(OUT6L)
 	ldi ZH, hi8(OUT6L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r18
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT6L:
 	call	us_delay
@@ -408,18 +326,15 @@ OUT6L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 1 Tweak onto exact us boundary
+	nop
 
 // M7
 	ldi ZL, lo8(OUT7H)
 	ldi ZH, hi8(OUT7H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r17
-	lsl	r17
-	add ZL, r17
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT7H:
 	call	us_delay
@@ -430,19 +345,9 @@ OUT7H:
 	call	us_delay
 	call	us_delay
 	sbi 	M7
-	mov		r17, r25
-	ldi		r25,0x07
-	eor		r17,r25
-	andi	r17,0x07
-	lsl	r17
 	ldi ZL, lo8(OUT7L)
 	ldi ZH, hi8(OUT7L)
-	lsr	ZH
-	ror	ZL
-	clc
-	add ZL, r17
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT7L:
 	call	us_delay
@@ -452,163 +357,75 @@ OUT7L:
 	call	us_delay
 	call	us_delay
 	call	us_delay
+	call	pwm_delay
+	rjmp .+0			// 2
+	nop					// 1 Tweak onto exact us boundary
 
 // M8
 	ldi ZL, lo8(OUT8H)
 	ldi ZH, hi8(OUT8H)
-	lsr	ZH
-	ror	ZL
-	clc
 	mov	r25,r16
-	lsl	r16
-	add ZL, r16
-	ldi	r24,0x00
-	adc ZH, r24
+	call	preproc
 	ijmp
 OUT8H:
-	call	us_delay // 0
-	call	us_delay // 2
-	call	us_delay // 4
-	call	us_delay // 6
-	call	us_delay // 8
-	call	us_delay // a
-	call	us_delay // c
-					 // e
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
 	sbi 	M8
-	mov		r16, r25
-	ldi		r25,0x07
-	eor		r16,r25
-	andi	r16,0x07
 	ldi ZL, lo8(OUT8L)
 	ldi ZH, hi8(OUT8L)
-	lsr	ZH
-	ror	ZL
-	clc
-	lsl	r16
-	add ZL, r16
-	ldi	r24,0x00
-	adc ZH, r24
+	call	postproc
 	ijmp
 OUT8L:
-	call	us_delay // 0
-	call	us_delay // 2
-	call	us_delay // 4
-	call	us_delay // 6
-	call	us_delay // 8
-	call	us_delay // a
-	call	us_delay // c
-					 // e
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	call	us_delay
+	rjmp .+0			// 2
+	rjmp .+0			// 2
+	nop					// 1 Tweak onto exact us boundary
 
 // Copy trimmed array data into regs
 // This now represents steps of 8us chunks
-
-	clc					// 1
 	pop		XH			// 2
 	pop		XL			// 2
-// debug
-//	ldi		XL, 0x90	// 400 (us) ok
-//	ldi		XH, 0x02	
-//
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r16,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r16,0x32 // 50 ok
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r17,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r17,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r18,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r18,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r19,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r19,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r20,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r20,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r21,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r21,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r22,XL		// 1 (12)		Copy 8-bit result
-// Debug
-//	ldi		r22,0x01
-//
-	clc					// 1
-	pop		XH			// 2
-	pop		XL			// 2
-	lsr		XH			// 1			Rotate right into carry
-	ror		XL			// 1			Rotate right with carry from MSB
-	lsr		XH			// 1
-	ror		XL			// 1
-	lsr		XH			// 1
-	ror		XL			// 1			Divide by 8
-	mov		r23,XL		// 1 (12)		Copy 8-bit result
-//Debug
-//	ldi		r23,0x01
+	call	shuffle_8	// 10
+	mov		r16,XL		// 1 (15)
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r17,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r18,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r19,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r20,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r21,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r22,XL
+	pop		XH
+	pop		XL
+	call	shuffle_8
+	mov		r23,XL
 
 // Loop prep
 	push	YL			// 2
@@ -620,70 +437,71 @@ OUT8L:
 
 // Ninja loop - 7 cycles each side (8 x 7 = 56 + 6 to loop + 98 pad = 160 cycles)
 // 20 cyles = 1us, 160 cycles = 8us
+
 nloop:
 	subi	r23,1		// 1 			ServoOut1
 	brne	j1			// 2	1	
 	cbi 	M1			// 		2		Clear output M1 if done (+5 = 1448 = 72.4us = 48)
 	jmp		jj1			//		3
 j1:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0			// 2
+	rjmp 	.+0			// 2
 jj1:
 	subi	r22,1		// 1			ServoOut2
 	brne	j2			// 2	1
 	cbi 	M2			// 		2		Clear output M2 if done (+11 = 1285 = 64.25us = 40)
 	jmp		jj2			//		3
 j2:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp	.+0
+	rjmp	.+0
 jj2:
-	subi	r21,1		// 1			ServoOut3
-	brne	j3			// 2	1
-	cbi 	M3			// 		2		Clear output M3 if done (+18 = 1123 = 56.15us = 38)
-	jmp		jj3			//		3
+	subi	r21,1
+	brne	j3
+	cbi 	M3
+	jmp		jj3
 j3:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp	.+0
+	rjmp	.+0
 jj3:
-	subi 	r20,1		// 1			ServoOut4
-	brne	j4			// 2	1
-	cbi 	M4			// 		2		Clear output M4 if done (+25 = 961 = 48us = 30)
-	jmp		jj4			//		3
+	subi 	r20,1
+	brne	j4
+	cbi 	M4
+	jmp		jj4	
 j4:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0
+	rjmp 	.+0
 jj4:
-	subi	r19,1		// 1 			ServoOut5
-	brne	j5			// 2	1
-	cbi 	M5			// 		2		Clear output M5 if done (+32 = 799= 40us = 28)
-	jmp		jj5			//		3
+	subi	r19,1
+	brne	j5
+	cbi 	M5
+	jmp		jj5
 j5:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0
+	rjmp 	.+0
 jj5:
-	subi	r18,1		// 1			ServoOut6
-	brne	j6			// 2	1
-	cbi 	M6			// 		2		Clear output M6 if done (+39 = 637 = 31.9us = 20h)
-	jmp		jj6			//		3
+	subi	r18,1
+	brne	j6
+	cbi 	M6
+	jmp		jj6
 j6:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0
+	rjmp	.+0
 jj6:
-	subi	r17,1		// 1			ServoOut7
-	brne	j7			// 2	1
-	cbi 	M7			// 		2		Clear output M7 if done (+46 = 475 = 23.75 = 18h)
-	jmp		jj7			//		3
+	subi	r17,1
+	brne	j7
+	cbi 	M7
+	jmp		jj7
 j7:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0
+	rjmp 	.+0
 jj7:
-	subi 	r16,1		// 1			ServoOut8
-	brne	j8			// 2	1
-	cbi 	M8			// 		2		Clear output M8 if done (+53 = 312 = 15.6us = 10h)
-	jmp		jj8			//		3
+	subi 	r16,1
+	brne	j8
+	cbi 	M8
+	jmp		jj8
 j8:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
+	rjmp 	.+0
+	rjmp 	.+0
 jj8:
 	call	pad_100_delay // (100)
 
@@ -714,20 +532,8 @@ skiploop:
 	.endfunc
 
 ;*************************************************************************	
-; void output_servo_ppm_asm1;
-;*************************************************************************
-
-	.global output_servo_ppm_asm1
-	.func   output_servo_ppm_asm1
-output_servo_ppm_asm1:
-	ret					//		4
-	.endfunc
-
-;*************************************************************************	
 ; void output_servo_ppm_asm3(servo_number, value);
-;
 ; regs = r24,r25 (servo_number), r22,23 (value)
-;
 ;*************************************************************************
 
 	.global output_servo_ppm_asm3
@@ -814,8 +620,8 @@ loopout:
 	.global glcd_delay
 	.func   glcd_delay
 glcd_delay:
-	nop					// 1 		5 * 50ns = 250ns = 4MHz
-	ret					// 4
+	nop					// 1 5 * 50ns = 250ns = 4MHz
+	ret					// 4 (5 cycles)
 	.endfunc
 
 
@@ -823,8 +629,6 @@ glcd_delay:
 ; void pwm_delay(void) 16us output spacing delay
 ;*************************************************************************
 
-	.global pwm_delay
-	.func   pwm_delay
 pwm_delay:
 	push	16			// 2			Save regs
 	ldi 	16,0x22		// 1			Set loop count to 22h or 34
@@ -838,16 +642,13 @@ pwm_loop:				//				9 cycles, 8 on last
 	brne	pwm_loop	// 2	1		Loop until zero	
 
 	pop		16			// 		2		Restore regs
-	ret					// 		4
-	.endfunc
+	ret					// 		4 (314 cycles)
 
 ;*************************************************************************	
 ; pad_100_delay 98 cycle padding delay
 ; Takes 4 to call, so we need 94 cycles burnt here
 ;*************************************************************************
 
-	.global pad_100_delay
-	.func   pad_100_delay
 pad_100_delay:
 	push	16			// 		2		Save regs
 	ldi 	16,0x09		// 		1		Set loop count to 09h or 9
@@ -865,22 +666,56 @@ pad_100:				//				9 cycles, 8 on last
 	rjmp .+0			// 		2
 
 	pop		16			// 		2		Restore regs
-	ret					// 		4
-	.endfunc
+	ret					// 		4 (94 cycles)
 
 ;*************************************************************************	
 ; void us_delay(void) 1us delay for ninja skills
 ; Takes 4 to call, so we need 16 cycles burnt here
 ;*************************************************************************
 
-	.global us_delay
-	.func   us_delay
 us_delay:
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
-	rjmp .+0			// 2 (12 cycles)
-	ret					// 		4
-	.endfunc
+	rjmp .+0			// 2
+	ret					// 4 (16 cycles)
+
+;*************************************************************************	
+; Space-saving macro-ish suroutines
+;*************************************************************************
+
+shuffle_8: // (10 cycles)
+	lsr		XH			// 1 Rotate right into carry
+	ror		XL			// 1 Rotate right with carry from MSB
+	lsr		XH			// 1
+	ror		XL			// 1
+	lsr		XH			// 1
+	ror		XL			// 1
+	ret					// 4
+
+preproc: // (12 cycles)
+	mov		YL,r25		// 1 Save a copy of r23 in YL
+	lsr		ZH			// 1 Align with byte boundary from word address
+	ror		ZL			// 1 
+	clc					// 1
+	lsl		YL			// 1 Multiply by 2 as the call table is 4 bytes per entry
+	add 	ZL, YL 		// 1 Add offset to ZL
+	ldi		r24,0x00	// 1 
+	adc 	ZH, r24 	// 1 Roll up carry to ZH
+	ret					// 4
+
+postproc: // (15 cycles)
+	mov		YL, r25		// 1 Recover r23 (the offset)
+	ldi		r25,0x07	// 1
+	eor		YL,r25		// 1 Reverse number
+	andi	YL,0x07		// 1
+	lsl		YL			// 1 Multiply by 2 as the call table is 2 bytes per entry
+	lsr		ZH			// 1 Align with byte boundary
+	ror		ZL			// 1 ...dammit
+	clc					// 1
+	add 	ZL, YL 		// 1
+	ldi		r24,0x00	// 1 
+	adc 	ZH, r24 	// 1 Roll up carry to ZH
+	ret					// 4

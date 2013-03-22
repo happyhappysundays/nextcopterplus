@@ -18,14 +18,13 @@
 //************************************************************
 
 void output_servo_ppm(void);
-void output_servo_ppm_asm1(int16_t ServoOut1, int16_t ServoOut2, int16_t ServoOut3, int16_t ServoOut4);
-void output_servo_ppm_asm(int16_t	*ServoOut);
-//void output_servo_ppm_asm2(int16_t ServoOut5, int16_t ServoOut6, int16_t ServoOut7, int16_t ServoOut8);
+void output_servo_ppm_asm(volatile int16_t	*ServoOut);
 
 //************************************************************
 // Code
 //************************************************************
-int16_t ServoOut[MAX_OUTPUTS];
+
+volatile int16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
 
 void output_servo_ppm(void)
 {
@@ -43,23 +42,14 @@ void output_servo_ppm(void)
 	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{
 		// Create the output pulses if in sync with RC inputs
-		if (RC_Lock) {
-			//output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
-			//output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
-			//output_servo_ppm_asm2(&ServoOut[4]);
+		if (RC_Lock) 
+		{
 			output_servo_ppm_asm(&ServoOut[0]);
 		}
 		else if (Failsafe || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
 		{
 			cli();
-			//output_servo_ppm_asm1(ServoOut[0], ServoOut[1], ServoOut[2], ServoOut[3]);
-			// If in high speed mode, only output to M1 to M4
-			if (Config.Servo_rate == LOW)
-			{
-				//output_servo_ppm_asm2(ServoOut[4], ServoOut[5], ServoOut[6], ServoOut[7]);
-				output_servo_ppm_asm(&ServoOut[0]);
-				//output_servo_ppm_asm2(&ServoOut[4]);
-			}
+			output_servo_ppm_asm(&ServoOut[0]);
 			sei();
 		}
 	}

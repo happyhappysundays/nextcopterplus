@@ -75,7 +75,6 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
 	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
-	Config.BatteryCells = 0;			// Default to zero to disable alarm
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 330;
 	Config.MaxVoltage = 420;
@@ -96,11 +95,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
-
-	Config.MinAileron = -1200;			// Initial min/max aileron RC limits
-	Config.MaxAileron = 1200;
-	Config.MinAileron2 = -1200;
-	Config.MaxAileron2 = 1200;
 }
 
 void Save_Config_to_EEPROM(void)

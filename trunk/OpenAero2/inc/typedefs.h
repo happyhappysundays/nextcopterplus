@@ -181,12 +181,6 @@ typedef struct
 	// Menu channel number
 	int8_t		MenuChannel;			// Current M1 to M8 channel
 
-	// TX flaperon stick limits
-	int16_t		MinAileron;
-	int16_t		MaxAileron;
-	int16_t		MinAileron2;
-	int16_t		MaxAileron2;
-
 } CONFIG_STRUCT;
 
 typedef struct
