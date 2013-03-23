@@ -96,7 +96,7 @@ output_servo_ppm_asm:
 // M4
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x68 // ????????????? 67?
+	subi	XL,	0x68
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 	
@@ -140,264 +140,70 @@ output_servo_ppm_asm:
 	mov		r16,XL
 
 // Time out lower 3 bits of pulse value (Zero to 7us)
-// This front section is used to simply balance out the lower section
-// Therefore, this chunk is always executed in 186 cycles or 9.30us + 15.8us = 25.1
+// Each chunk is always executed in 1+10+1+147 = 159 cycles or 7.95us
 // This does affect the inter-pulse delay, but not the pulsewidth.
 
 // M1
-	ldi ZL, lo8(OUT1H) 	// 1
-	ldi ZH, hi8(OUT1H) 	// 1
-	mov		r25,r23		// 1 Save a copy of r23 in r25
-	call	preproc		// 16
-	ijmp				// 2 (21)
-OUT1H:
-	call	us_delay	// 20 - 0 (7us)
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20 (7 x 20 = 140)
-	sbi 	M1			// 2  - 7 (0us)
-	ldi ZL, lo8(OUT1L)	// 1
-	ldi ZH, hi8(OUT1L) 	// 1
-	call	postproc	// 19
-	ijmp				// 2
-OUT1L:
-	call	us_delay	// 20 - 0 (7us)
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20
-	call	us_delay	// 20 (7 x 20 = 140)
-	call	pwm_delay	// 316 (15.8us)
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	mov		r25,r23		// 1
+	call	DelayHigh	// 10 (where r25 = 7)
+	sbi 	M1			// 1
+	call	DelayLow	// 7 + 140 (where r25 = 0)
+	call    pwm_delay   // 1281 (64.05us)
 
 // M2
-	ldi ZL, lo8(OUT2H)
-	ldi ZH, hi8(OUT2H)
-	mov	r25,r22
-	call	preproc
-	ijmp
-OUT2H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r22
+	call	DelayHigh
 	sbi 	M2
-	ldi ZL, lo8(OUT2L)
-	ldi ZH, hi8(OUT2L)
-	call	postproc
-	ijmp
-OUT2L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M3
-	ldi ZL, lo8(OUT3H)
-	ldi ZH, hi8(OUT3H)
-	mov	r25,r21
-	call	preproc
-	ijmp
-OUT3H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r21
+	call	DelayHigh
 	sbi 	M3
-	ldi ZL, lo8(OUT3L)
-	ldi ZH, hi8(OUT3L)
-	call	postproc
-	ijmp
-OUT3L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M4
-	ldi ZL, lo8(OUT4H)
-	ldi ZH, hi8(OUT4H)
-	mov	r25,r20
-	call	preproc
-	ijmp
-OUT4H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r20
+	call	DelayHigh
 	sbi 	M4
-	ldi ZL, lo8(OUT4L)
-	ldi ZH, hi8(OUT4L)
-	call	postproc
-	ijmp
-OUT4L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M5
-	ldi ZL, lo8(OUT5H)
-	ldi ZH, hi8(OUT5H)
-	mov	r25,r19
-	call	preproc
-	ijmp
-OUT5H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r19
+	call	DelayHigh
 	sbi 	M5
-	ldi ZL, lo8(OUT5L)
-	ldi ZH, hi8(OUT5L)
-	call	postproc
-	ijmp
-OUT5L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M6
-	ldi ZL, lo8(OUT6H)
-	ldi ZH, hi8(OUT6H)
-	mov	r25,r18
-	call	preproc
-	ijmp
-OUT6H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r18
+	call	DelayHigh
 	sbi 	M6
-	ldi ZL, lo8(OUT6L)
-	ldi ZH, hi8(OUT6L)
-	call	postproc
-	ijmp
-OUT6L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 1 Tweak onto exact us boundary
-	nop
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M7
-	ldi ZL, lo8(OUT7H)
-	ldi ZH, hi8(OUT7H)
-	mov	r25,r17
-	call	preproc
-	ijmp
-OUT7H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r17
+	call	DelayHigh
 	sbi 	M7
-	ldi ZL, lo8(OUT7L)
-	ldi ZH, hi8(OUT7L)
-	call	postproc
-	ijmp
-OUT7L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	pwm_delay
-	rjmp .+0			// 2
-	nop					// 1 Tweak onto exact us boundary
+	call	DelayLow
+	call    pwm_delay   // 316 (15.8us)
 
 // M8
-	ldi ZL, lo8(OUT8H)
-	ldi ZH, hi8(OUT8H)
-	mov	r25,r16
-	call	preproc
-	ijmp
-OUT8H:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
+	mov		r25,r16
+	call	DelayHigh
 	sbi 	M8
-	ldi ZL, lo8(OUT8L)
-	ldi ZH, hi8(OUT8L)
-	call	postproc
-	ijmp
-OUT8L:
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	call	us_delay
-	rjmp .+0			// 2
-	rjmp .+0			// 2
-	nop					// 1 Tweak onto exact us boundary
+	call	DelayLow
 
 // Copy trimmed array data into regs
 // This now represents steps of 8us chunks
 	pop		XH			// 2
 	pop		XL			// 2
 	call	shuffle_8	// 10
-	mov		r16,XL		// 1 (15)
+	mov		r16,XL
 	pop		XH
 	pop		XL
 	call	shuffle_8
@@ -626,23 +432,25 @@ glcd_delay:
 
 
 ;*************************************************************************	
-; void pwm_delay(void) 16us output spacing delay
+; void pwm_delay(void) 64us output spacing delay (1280 cycles)
+; 4 cycles to call so we need 1276 burnt here
 ;*************************************************************************
 
 pwm_delay:
 	push	16			// 2			Save regs
-	ldi 	16,0x22		// 1			Set loop count to 22h or 34
+//	ldi 	16,0x8C		// 1			Set loop count to 8Ch or 140
+	ldi 	16,0x23		// 1			Set loop count to 23h or 35
 
 pwm_loop:				//				9 cycles, 8 on last
 	rjmp .+0			// 2
-	rjmp .+0			// 2			33 x 9 + 8 = 305
+	rjmp .+0			// 2			140 x 9 + 8 = 305
 	rjmp .+0			// 2
 
 	subi 	16,1		// 1
 	brne	pwm_loop	// 2	1		Loop until zero	
 
 	pop		16			// 		2		Restore regs
-	ret					// 		4 (314 cycles)
+	ret					// 		4		(1277)
 
 ;*************************************************************************	
 ; pad_100_delay 98 cycle padding delay
@@ -670,12 +478,10 @@ pad_100:				//				9 cycles, 8 on last
 
 ;*************************************************************************	
 ; void us_delay(void) 1us delay for ninja skills
-; Takes 4 to call, so we need 16 cycles burnt here
+; Takes 4 to call, 4 to return, so we need 12 cycles burnt here
 ;*************************************************************************
 
 us_delay:
-	rjmp .+0			// 2
-	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
@@ -695,27 +501,42 @@ shuffle_8: // (10 cycles)
 	ror		XL			// 1
 	ret					// 4
 
-preproc: // (12 cycles)
-	mov		YL,r25		// 1 Save a copy of r23 in YL
-	lsr		ZH			// 1 Align with byte boundary from word address
-	ror		ZL			// 1 
-	clc					// 1
-	lsl		YL			// 1 Multiply by 2 as the call table is 4 bytes per entry
-	add 	ZL, YL 		// 1 Add offset to ZL
-	ldi		r24,0x00	// 1 
-	adc 	ZH, r24 	// 1 Roll up carry to ZH
-	ret					// 4
+;*************************************************************************	
+; Lowest 8us timing IN - 10 cycles minimum and 20 for each 1us in r25
+;*************************************************************************
 
-postproc: // (15 cycles)
-	mov		YL, r25		// 1 Recover r23 (the offset)
-	ldi		r25,0x07	// 1
-	eor		YL,r25		// 1 Reverse number
-	andi	YL,0x07		// 1
-	lsl		YL			// 1 Multiply by 2 as the call table is 2 bytes per entry
-	lsr		ZH			// 1 Align with byte boundary
-	ror		ZL			// 1 ...dammit
-	clc					// 1
-	add 	ZL, YL 		// 1
-	ldi		r24,0x00	// 1 
-	adc 	ZH, r24 	// 1 Roll up carry to ZH
-	ret					// 4
+DelayHigh:				// (0)	(1)	(2+) each extra is +20
+	push	YL				
+	ldi		YL,0x07		// 1	1	1
+	eor		YL,r25		// 1 	1	1
+	breq	LoopHighOut1// 2	1	1
+LoopHigh:
+	call    us_delay	// 		16	16
+	dec 	YL			// 		1	1
+	breq	LoopHighOut2// 		2	1/2
+	rjmp	LoopHigh	// 			2
+LoopHighOut2:
+	rjmp .+0			// 		2	2
+LoopHighOut1:
+	nop					// 1	1	1
+	pop		YL
+    ret					// 4	4	4
+
+;*************************************************************************	
+; Lowest 8us timing OUT - 7 cycles minimum and 20 for each 1us in r25
+;*************************************************************************
+
+DelayLow:				// (0)	(1)	(2+) each extra is +20
+	push	YL
+    mov		YL, r25		// 1	1	1
+	breq	LoopLowOut1	// 2	1	1
+LoopLow:
+	call    us_delay	//		16	16
+	dec 	YL			//		1	1
+	breq	LoopLowOut2	//		2	1/2
+	rjmp	LoopLow		//			2
+LoopLowOut2:
+	rjmp .+0			// 		2	2
+LoopLowOut1:
+	pop		YL	
+    ret					// 4	4	4

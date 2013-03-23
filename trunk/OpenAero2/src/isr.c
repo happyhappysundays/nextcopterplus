@@ -20,7 +20,7 @@ volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Current channel number
 volatile uint8_t max_chan;			// Target channel number
-bool	 RC_Lock;					// RC sync found/lost flag
+volatile bool RC_Lock;				// RC sync found/lost flag
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms long
 

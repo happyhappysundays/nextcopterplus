@@ -156,12 +156,13 @@
 //			Servos center before trim/travel adjustment
 // Beta 11	Allow real-time servo position setting of failsafe positions.	
 //			Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
+//			Now use -mcall-prologues in linker to save space but required mods to prevent stack overflow etc. 
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Check orientation modes
+// 
 //
 //***********************************************************
 //* Includes
@@ -274,34 +275,6 @@ int main(void)
 	uint8_t i = 0;
 
 	init();							// Do all init tasks
-
-	// Servo test loop
-
-	while (0 )
-	{
-		ServoOut[0] = 4950; // 1980us
-		ServoOut[1] = 4950;
-		ServoOut[2] = 4950;
-		ServoOut[3] = 4950;
-		ServoOut[4] = 4950;
-		ServoOut[5] = 4950;
-		ServoOut[6] = 4950;
-		ServoOut[7] = 4950;
-/*
-		ServoOut[0] = 480; // 120us
-		ServoOut[1] = 480;
-		ServoOut[2] = 480;
-		ServoOut[3] = 480;
-		ServoOut[4] = 480;
-		ServoOut[5] = 480;
-		ServoOut[6] = 480;
-		ServoOut[7] = 480;
-*/				
-		RC_Lock = true;
-		output_servo_ppm();
-
-		_delay_ms(100);
-	}
 
 	// Main loop
 	while (1)
