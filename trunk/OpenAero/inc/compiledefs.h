@@ -14,7 +14,7 @@
 #define AEROPLANE_1			// Standard Aileron/Elevator/Rudder aeroplane (M2, M4 and M1 or M3)
 //#define AEROPLANE_2			// Advanced Flaperons/Elevator/Rudder aeroplane (M2 and M5, M4 and M1 or M3)
 //#define FLYING_WING			// Standard flaperon-controlled flying wing with optional rudder (M2 and M4, and M1 or M3)
-//#define AEROPLANE_3			// Same as AEROPLANE_1 but with extra flaperon channel on M3
+//efine AEROPLANE_3			// Same as AEROPLANE_1 but with extra flaperon channel on M3
 
 //(Part 2 - receiver type)
 #define PWM					// My radio is a normal radio with multiple outputs
@@ -24,7 +24,7 @@
 #define STD_KK				// My board is an unmodified KK board
 //#define KK_PLUS				// I have a KK Plus board with support for LVA and buzzer
 //#define ACC_KK				// My KK board has a DIY ACC sensor added
-//#define MEMS_KK				// I have a KK Plus board with the MEMS board fitted 
+//efine MEMS_KK				// I have a KK Plus board with the MEMS board fitted 
 //#define N6_MODE				// My board is an Eagle N6/HobbyKing i86 board
 
 //(Part 4 - special options)
