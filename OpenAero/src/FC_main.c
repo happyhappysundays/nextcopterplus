@@ -139,6 +139,8 @@
 // 			Beta 9: Added PWM flaperon mode using M3 as the additional input
 // V1.14	V1.14 release
 // V1.14.1	Bugfix for stability switch in V1.14. Oops.
+// V1.14.2	Hybrid version with extra PWM input	
+// V1.14.3	Halved pitch gain for flying wing usage
 //
 //***********************************************************
 //* To do
@@ -911,7 +913,13 @@ while (0)
 			//***********************************************************************
 
 			if ((RxInPitch < DEAD_BAND) && (RxInPitch > -DEAD_BAND)) RxInPitch = 0; // Reduce RxIn noise
-			Pitch = gyroADC[PITCH];
+			
+			// Halve pitch response for flying wings
+			#ifdef FWING
+				Pitch = gyroADC[PITCH] >> 1;
+			#else			
+				Pitch = gyroADC[PITCH];
+			#endif
 
 			currentError[PITCH] = Pitch;							// D-term
 			DifferentialGyro = currentError[PITCH] - lastError[PITCH];
