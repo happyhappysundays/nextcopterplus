@@ -157,6 +157,7 @@
 // Beta 11	Allow real-time servo position setting of failsafe positions.	
 //			Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
 //			Now use -mcall-prologues in linker to save space but required mods to prevent stack overflow etc. 
+//			Increased inter-PWM spacing to 128us and recalibrated all PWM routines.
 //
 //***********************************************************
 //* To do
@@ -193,6 +194,7 @@
 #include "..\inc\main.h"
 #include "..\inc\imu.h"
 #include "..\inc\eeprom.h"
+#include <avr/interrupt.h> // debug
 
 //***********************************************************
 //* Fonts
@@ -215,6 +217,11 @@
 #define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
 #define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
 #define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
+
+
+
+// Servo driver
+void output_servo_ppm_asm3(int16_t servo_number, int16_t value); // debug
 
 //***********************************************************
 //* Code and Data variables
@@ -275,6 +282,40 @@ int main(void)
 	uint8_t i = 0;
 
 	init();							// Do all init tasks
+
+	// Servo test loop
+	while (0)
+	{
+		uint16_t j = 0;
+		for (j = 0; j < 200; j++)
+		{
+
+			cli();
+			output_servo_ppm_asm3(0, 1500);
+			output_servo_ppm_asm3(1, 1980);
+			output_servo_ppm_asm3(2, 1000);
+			output_servo_ppm_asm3(3, 1500);
+			output_servo_ppm_asm3(4, 1500);
+			output_servo_ppm_asm3(5, 1500);
+			output_servo_ppm_asm3(6, 1500);
+			output_servo_ppm_asm3(7, 1500);
+			sei();
+/*
+			ServoOut[0] = 4950; // 1980us
+			ServoOut[1] = 4950;
+			ServoOut[2] = 4950;
+			ServoOut[3] = 4950;
+			ServoOut[4] = 4950;
+			ServoOut[5] = 4950;
+			ServoOut[6] = 4950;
+			ServoOut[7] = 4950;
+			
+			RC_Lock = true;
+			output_servo_ppm();
+*/
+			_delay_ms(500);
+		}
+	}
 
 	// Main loop
 	while (1)
