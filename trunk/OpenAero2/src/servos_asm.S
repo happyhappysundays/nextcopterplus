@@ -4,7 +4,7 @@
  * Created: 25/06/2012 10:53:00
  * Author: David Thompson - Originally based on code example from Cesco
  * Updated: 14/03/2013 - Added 16us staggered output concept borrowed from Jim Drew of Xtreme Power Systems
- * Updated: 22/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
+ * Updated: 25/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
  *
  */
 
@@ -46,6 +46,8 @@ output_servo_ppm_asm:
 	push	ZH			// 2
 	push	XL			// 2
 	push	XH			// 2
+	push	YL			// 2
+	push	YH			// 2
 	push	16			// 2
 	push	17			// 2
 	push	18			// 2
@@ -69,8 +71,8 @@ output_servo_ppm_asm:
 // M1
 	ld		XL, Z+ 		// 2			Load XL with data at address in Z
 	ld		XH, Z+		// 2			Load XH with data at address in Z+1
-	subi	XL,	0xb3	// 1 			Trim servo pulse
-	sbci 	XH,	0x00	// 1
+	subi	XL,	0x4d	// 1 			Trim servo pulse
+	sbci 	XH,	0x03	// 1
 	push	XL 			// 2			Save trimmed value to the stack
 	push	XH 			// 2
 	andi	XL,	0x07	// 1			And all but first 3 bits
@@ -78,8 +80,8 @@ output_servo_ppm_asm:
 // M2
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x9a
-	sbci 	XH,	0x00
+	subi	XL,	0xd5
+	sbci 	XH,	0x02
 	push	XL 		
 	push	XH 		
 	andi	XL,	0x07
@@ -87,8 +89,8 @@ output_servo_ppm_asm:
 // M3
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x81
-	sbci 	XH,	0x00
+	subi	XL,	0x5d
+	sbci 	XH,	0x02
 	push	XL 		
 	push	XH 		
 	andi	XL,	0x07
@@ -96,8 +98,8 @@ output_servo_ppm_asm:
 // M4
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x68
-	sbci 	XH,	0x00
+	subi	XL,	0xe5
+	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -105,8 +107,8 @@ output_servo_ppm_asm:
 // M5
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x4f
-	sbci 	XH,	0x00
+	subi	XL,	0x6d
+	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -114,7 +116,7 @@ output_servo_ppm_asm:
 // M6
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x36
+	subi	XL,	0xf4
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 	
@@ -123,7 +125,7 @@ output_servo_ppm_asm:
 // M7
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x1d
+	subi	XL,	0x7c
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 
@@ -148,7 +150,7 @@ output_servo_ppm_asm:
 	call	DelayHigh	// 10 (where r25 = 7)
 	sbi 	M1			// 1
 	call	DelayLow	// 7 + 140 (where r25 = 0)
-	call    pwm_delay   // 1281 (64.05us)
+	call    pwm_delay   // 316 (15.8us)
 
 // M2
 	mov		r25,r22
@@ -156,6 +158,7 @@ output_servo_ppm_asm:
 	sbi 	M2
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
 
 // M3
 	mov		r25,r21
@@ -163,6 +166,7 @@ output_servo_ppm_asm:
 	sbi 	M3
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
 
 // M4
 	mov		r25,r20
@@ -170,6 +174,7 @@ output_servo_ppm_asm:
 	sbi 	M4
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
 
 // M5
 	mov		r25,r19
@@ -177,6 +182,11 @@ output_servo_ppm_asm:
 	sbi 	M5
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
 
 // M6
 	mov		r25,r18
@@ -184,6 +194,7 @@ output_servo_ppm_asm:
 	sbi 	M6
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
 
 // M7
 	mov		r25,r17
@@ -191,12 +202,23 @@ output_servo_ppm_asm:
 	sbi 	M7
 	call	DelayLow
 	call    pwm_delay   // 316 (15.8us)
+	rjmp 	.+0
 
 // M8
 	mov		r25,r16
 	call	DelayHigh
 	sbi 	M8
 	call	DelayLow
+	rjmp 	.+0			// Tweak onto an exact 1.0us boundary
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
+	rjmp 	.+0
 
 // Copy trimmed array data into regs
 // This now represents steps of 8us chunks
@@ -234,9 +256,6 @@ output_servo_ppm_asm:
 	mov		r23,XL
 
 // Loop prep
-	push	YL			// 2
-	push	YH			// 2
-
 	ldi 	YL,0x13		// 1			Set loop count to 113h or 275 (275 * 8us = 2200us)
 	ldi		YH,0x01		// 1
 	clr		0			// 1 (7)
@@ -317,9 +336,7 @@ jj8:
 	jmp		nloop		// 3			Can't reach nloop with a brne alone
 
 skiploop:
-	pop		YH			//		2		Restore regs
-	pop		YL			//		2
-	pop		25			// 		2
+	pop		25			// 		2		Restore regs
 	pop		24			// 		2
 	pop		23			//		2
 	pop		22			//		2
@@ -329,6 +346,8 @@ skiploop:
 	pop		18			//		2
 	pop		17			//		2
 	pop		16			//		2
+	pop		YH			//		2
+	pop		YL			//		2
 	pop		XH			//		2
 	pop		XL			//		2
 	pop		ZH			// 		2
@@ -348,10 +367,6 @@ output_servo_ppm_asm3:
 	push	16			// Save regs
 	push	17
 	push	18
-
-	ldi 	16,0x34		// 1			Set loop count to 834h or 2100
-	ldi		17,0x08	
-	clr		0
 
 jump_table:
 	cpi		r24,0x00	; 0				
@@ -397,22 +412,18 @@ loopin:
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
+	rjmp .+0			// 2
 	rjmp .+0			// 2			16 cycles
 
 	subi	r22,1		// 1 			Time servo pulse
 	sbc 	r23,0		// 1
-	brne	loopout		// 2	1
+	brne	loopin		// 2	1
 
 // Clear outputs if done
 	ldi		r18,0x00	 // 1
 	out 	SERVO_OUT,r18// 1			Boom.
 
-// Exit
-loopout:
-	subi 	16,1		// 1			+4 cycles = total 20 cycles
-	sbc 	17,0		// 1
-	brne	loopin		// 2	1		Loop until zero
-
+exit:
 	pop		18
 	pop		17			// Restore regs
 	pop		16
@@ -430,27 +441,25 @@ glcd_delay:
 	ret					// 4 (5 cycles)
 	.endfunc
 
-
 ;*************************************************************************	
-; void pwm_delay(void) 64us output spacing delay (1280 cycles)
-; 4 cycles to call so we need 1276 burnt here
+; void pwm_delay(void) 128us output spacing delay 
 ;*************************************************************************
 
 pwm_delay:
-	push	16			// 2			Save regs
-//	ldi 	16,0x8C		// 1			Set loop count to 8Ch or 140
-	ldi 	16,0x23		// 1			Set loop count to 23h or 35
+	push	16
+	push 	17
+	ldi 	16,0xf7
 
-pwm_loop:				//				9 cycles, 8 on last
-	rjmp .+0			// 2
-	rjmp .+0			// 2			140 x 9 + 8 = 305
-	rjmp .+0			// 2
+pwm_loop:
+	rjmp .+0
+	rjmp .+0
+	rjmp .+0
+	subi	r16,1
+	brne	pwm_loop
 
-	subi 	16,1		// 1
-	brne	pwm_loop	// 2	1		Loop until zero	
-
-	pop		16			// 		2		Restore regs
-	ret					// 		4		(1277)
+	pop		17
+	pop		16
+	ret
 
 ;*************************************************************************	
 ; pad_100_delay 98 cycle padding delay
@@ -503,11 +512,15 @@ shuffle_8: // (10 cycles)
 
 ;*************************************************************************	
 ; Lowest 8us timing IN - 10 cycles minimum and 20 for each 1us in r25
+; 
+; This part of the code delays the turn-on of the PWM pulse from between
+; 10 and 150 cycles at 1us intervals per value in r26
+; 
 ;*************************************************************************
 
 DelayHigh:				// (0)	(1)	(2+) each extra is +20
-	push	YL				
 	ldi		YL,0x07		// 1	1	1
+	andi	r25,0x07	
 	eor		YL,r25		// 1 	1	1
 	breq	LoopHighOut1// 2	1	1
 LoopHigh:
@@ -519,16 +532,20 @@ LoopHighOut2:
 	rjmp .+0			// 		2	2
 LoopHighOut1:
 	nop					// 1	1	1
-	pop		YL
     ret					// 4	4	4
 
 ;*************************************************************************	
 ; Lowest 8us timing OUT - 7 cycles minimum and 20 for each 1us in r25
+;
+; This part of the code simply provides a delay inversely proportionate
+; to the IN delay so that the IN + SBI + OUT is always exactly the same
+; regardless of the value of r25
+;
 ;*************************************************************************
 
 DelayLow:				// (0)	(1)	(2+) each extra is +20
-	push	YL
-    mov		YL, r25		// 1	1	1
+	mov		YL,r25		// 1	1	
+	andi	YL,0x07	
 	breq	LoopLowOut1	// 2	1	1
 LoopLow:
 	call    us_delay	//		16	16
@@ -538,5 +555,4 @@ LoopLow:
 LoopLowOut2:
 	rjmp .+0			// 		2	2
 LoopLowOut1:
-	pop		YL	
     ret					// 4	4	4
