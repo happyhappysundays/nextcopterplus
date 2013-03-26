@@ -364,9 +364,7 @@ skiploop:
 	.global output_servo_ppm_asm3
 	.func   output_servo_ppm_asm3
 output_servo_ppm_asm3:
-	push	16			// Save regs
-	push	17
-	push	18
+	push	18			// Save regs
 
 jump_table:
 	cpi		r24,0x00	; 0				
@@ -424,9 +422,7 @@ loopin:
 	out 	SERVO_OUT,r18// 1			Boom.
 
 exit:
-	pop		18
-	pop		17			// Restore regs
-	pop		16
+	pop		18			// Restore regs
 	ret	
 	.endfunc	
 
@@ -447,7 +443,6 @@ glcd_delay:
 
 pwm_delay:
 	push	16
-	push 	17
 	ldi 	16,0xf7
 
 pwm_loop:
@@ -457,7 +452,7 @@ pwm_loop:
 	subi	r16,1
 	brne	pwm_loop
 
-	pop		17
+pwm_exit:
 	pop		16
 	ret
 
