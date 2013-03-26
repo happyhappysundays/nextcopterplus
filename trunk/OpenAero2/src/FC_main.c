@@ -158,6 +158,7 @@
 //			Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
 //			Now use -mcall-prologues in linker to save space but required mods to prevent stack overflow etc. 
 //			Increased inter-PWM spacing to 128us and recalibrated all PWM routines.
+//			Fixed lack of throw in Flying Wing mode.
 //
 //***********************************************************
 //* To do
