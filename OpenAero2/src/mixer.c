@@ -445,7 +445,7 @@ void ProcessMixer(void)
 	if (Failsafe && (Config.CamStab == OFF))
 	{
 		// Simple failsafe. Replace outputs with user-set values
-		if (Config.FailsafeType == 0) 
+		if (Config.FailsafeType == SIMPLE) 
 		{
 			for (i = 0; i < MAX_OUTPUTS; i++)
 			{
@@ -454,7 +454,7 @@ void ProcessMixer(void)
 		}
 
 		// Advanced failsafe. Autolevel ON, use failsafe trims to adjust autolevel.
-		if (Config.FailsafeType == 1)
+		if (Config.FailsafeType == ADVANCED)
 		{
 			for (i = 0; i < MAX_OUTPUTS; i++)
 			{
@@ -474,7 +474,6 @@ void ProcessMixer(void)
 				}
 			}
 		}
-
 	} // Failsafe
 }
 

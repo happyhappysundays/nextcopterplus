@@ -40,7 +40,7 @@ void idle_screen(void);
 //
 const char PText1[]  PROGMEM = "Reset";						// Init
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:  V1.1b11";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2a01";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Status";
 const char StatusText4[]  PROGMEM = ".";
@@ -79,6 +79,9 @@ const char MainMenuItem5[]  PROGMEM = "17. Battery monitor";
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
+const char RXMode1[]  PROGMEM = "Xtreme";
+const char RXMode2[]  PROGMEM = "S-Bus";
+const char RXMode3[]  PROGMEM = "Spektrum";
 const char RXMode4[]  PROGMEM = "Aero"; 
 const char RXMode5[]  PROGMEM = "F.Wing";
 //
@@ -131,6 +134,7 @@ const char RCMenuItem12[] PROGMEM = "2nd Ail. pol.:";
 const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
 const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char RCMenuItem11[] PROGMEM = "Differential:";
+const char RCMenuItem13[] PROGMEM = "Satellite";
 //
 const char StabMenuItem2[]  PROGMEM = "Roll I:";    		// Stability text
 const char StabMenuItem3[]  PROGMEM = "Roll D:";
@@ -239,7 +243,7 @@ const char *text_menu[] PROGMEM =
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17 Menu frame text
 		MenuFrame6, MenuFrame7, MenuFrame8, 
 		//
-		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, 									// 18 to 21 RX mode
+		Dummy0, Dummy0, Dummy0, Dummy0,														// 18 to 21
 		//
 		RXMode4, RXMode5, MainMenuItem6, Dummy0,											// 22 to 25 Mix presets for Aero, F.Wing, Camstab
 		//
@@ -289,9 +293,7 @@ const char *text_menu[] PROGMEM =
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
 		Dummy0, Dummy0, 
 		//
-		RCMenuItem6, RCMenuItem7,															// 116 to 117 JR/Futaba was 93
-		//		
-		Dummy0,																				//118 Spare
+		RCMenuItem6, RCMenuItem7, RCMenuItem13,												// 116 to 118 JR/Futaba/Sat
 		//
 		GeneralText4, GeneralText5,															// 119, 120 LOW, HIGH
 		//
@@ -343,7 +345,11 @@ const char *text_menu[] PROGMEM =
 		MixerItem18, MixerItem15, MixerItem2, 												// Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
 		//
-		
+		Dummy0,Dummy0,Dummy0, 																// 230 - 232
+		//
+		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode1, RXMode2, RXMode3,			// 233 to 239 RX mode
+		//
+		Dummy0,
 	}; 
 
 //************************************************************

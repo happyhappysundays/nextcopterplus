@@ -7,4 +7,4 @@
 //***********************************************************
 
 extern void init(void);
-
+extern void init_int(void);

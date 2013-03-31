@@ -53,6 +53,7 @@ void RxGetChannels(void)
 	int16_t	RxSumDiff;
 	int16_t	RxSum, i;
 
+	// Remove zero offsets
 	for (i=0;i<MAX_RC_CHANNELS;i++)
 	{
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];

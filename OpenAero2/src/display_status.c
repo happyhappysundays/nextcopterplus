@@ -54,7 +54,7 @@ void Display_status(void)
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (18 + Config.RxMode), 50, 22);
+	print_menu_text(0, 1, (233 + Config.RxMode), 45, 22);
 	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
 	print_menu_text(0, 1, (101 + Stability), 50, 44);
 	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
