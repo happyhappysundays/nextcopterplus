@@ -22,6 +22,7 @@
 #include "..\inc\eeprom.h"
 #include "..\inc\mixer.h"
 #include "..\inc\imu.h"
+#include "..\inc\uart.h"
 
 //************************************************************
 // Prototypes
@@ -37,7 +38,7 @@ void menu_rc_setup(uint8_t i);
 #define RCSTART 149 	// Start of Menu text items
 #define RCOFFSET 79		// LCD offsets
 
-#define RCTEXT 18 		// Start of value text items
+#define RCTEXT 233 		// Start of value text items
 #define FSTEXT 103
 #define AUTOTEXT 38 
 #define STABTEXT 38
@@ -68,8 +69,8 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 {
 	{
 		// RC setup (10)
-		{CPPM_MODE,PWM3,1,1,PWM1},		// Min, Max, Increment, Style, Default
-		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
+		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Min, Max, Increment, Style, Default
+		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Autochan
 		{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
@@ -148,7 +149,7 @@ void menu_rc_setup(uint8_t section)
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i = 0;
-	uint8_t temp_type = 0;
+	uint8_t temp_type, rc_type;
 
 	uint8_t offset;			// Index into channel structure
 	uint8_t	items;			// Items in group
@@ -199,6 +200,7 @@ void menu_rc_setup(uint8_t section)
 
 		// Save pre-edited value for mixer mode
 		temp_type = Config.MixMode;
+		rc_type = Config.RxMode;
 
 		// Print menu
 		print_menu_items(rc_top + offset, RCSTART + offset, &values[0], items, (prog_uchar*)rc_menu_ranges[section - 1], RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
@@ -243,6 +245,13 @@ void menu_rc_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
+			// If RC type has changed, reinitialise UART
+			if ((section == 1) && (rc_type != values[0])) 
+			{
+				init_int();
+				init_uart();
+			}
+
 			// If model type has changed, reload preset
 			if ((section == 5) && (temp_type != values[0])) 
 			{
@@ -275,6 +284,10 @@ void menu_rc_setup(uint8_t section)
 				else if (Config.TxSeq == FUTABASEQ)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
+				}
+				else if (Config.TxSeq == SATSEQ)
+				{
+					Config.ChannelOrder[i] = pgm_read_byte(&SATELLITE[i]);
 				}
 			}
 

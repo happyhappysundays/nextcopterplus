@@ -117,9 +117,9 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 // Enumeration
 //***********************************************************
-enum RPYArrayIndex {ROLL = 0, PITCH, YAW, NO_GYRO};
-enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3};
-enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
+enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
+enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
+enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
 enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, UNUSED};
@@ -134,5 +134,6 @@ enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOU
 enum Servo_rate		{LOW = 0, HIGH};
 enum I_term_type	{STD = 0, AUTO, FIXED};
 enum Flight_mode	{RETRO = 0, FLYBYWIRE};
+enum Failsafes		{SIMPLE = 0, ADVANCED};
 
 #endif //IO_CFG_H

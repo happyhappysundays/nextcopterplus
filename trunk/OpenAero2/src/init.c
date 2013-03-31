@@ -29,7 +29,7 @@
 #include "..\inc\pid.h"
 #include "..\inc\menu_ext.h"
 #include "..\inc\imu.h"
-
+#include "..\inc\uart.h"
 
 extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
 
@@ -44,6 +44,7 @@ extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".
 //************************************************************
 
 void init(void);
+void init_int(void);
 
 //************************************************************
 // Code
@@ -53,6 +54,8 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
+	char temp = 0;
+
 	//***********************************************************
 	// I/O setup
 	//***********************************************************
@@ -105,17 +108,12 @@ void init(void)
 	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
 	PCICR  = 0x0A;						// PCINT8  to PCINT15 (PCINT1 group - AUX)
 										// PCINT24 to PCINT31 (PCINT3 group - THR)
-	PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
-	PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
 	PCIFR  = 0x0F;						// Clear PCIF0 interrupt flag 
 										// Clear PCIF1 interrupt flag 
 										// Clear PCIF2 interrupt flag 
 										// Clear PCIF3 interrupt flag 
 
 	// External interrupts INT0 (Elevator) and INT1 (Aileron) and INT2 (Rudder)
-	EIMSK = 0x07;						// Enable INT0 (Elevator input)
-										// Enable INT1 (Aileron input)
-										// Enable INT2 (Rudder/CPPM input)
 	EICRA = 0x15;						// Any change INT0
 										// Any change INT1
 										// Any change INT2
@@ -123,21 +121,18 @@ void init(void)
 										// Clear INT1 interrupt flag (Aileron)
 										// Clear INT2 interrupt flag (Rudder/CPPM)
 
-	//***********************************************************
-
 	RC_Lock = false;						// Preset important flags
 	Failsafe = false;
 	AutoLevel = false;
 	Stability = false;
 	FirstTimeIMU = true;
 
-	// Button acceleration
-	//button_multiplier = 1;
-
 	Initial_EEPROM_Config_Load();			// Loads config at start-up 
 	UpdateLimits();							// Update travel limts	
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
+
+	init_int();								// Iitialise interrupts based on RC input mode
 
 	// Flash LED
 	LED1 = 1;
@@ -164,6 +159,11 @@ void init(void)
 	// Calibrate gyros, hopefully after motion minimised
 	CalibrateGyros();			
 
+	// UART
+	init_uart();
+
+	// Make sure there is nothing in the RX reg
+	temp = UDR0;
 
 	//***********************************************************
 	//* Reload eeprom settings if all buttons are pressed 
@@ -209,3 +209,45 @@ void init(void)
 	menu_beep(1);
 
 } // init()
+
+
+void init_int(void)
+{
+	switch (Config.RxMode)
+	{
+		case CPPM_MODE:
+			PCMSK1 = 0;							// Disable AUX
+			PCMSK3 = 0;							// Disable THR
+			EIMSK = 0x04;						// Enable INT2 (Rudder/CPPM input)
+			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
+			break;
+
+		case PWM1:
+		case PWM2:
+		case PWM3:
+			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
+			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
+			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
+			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
+			break;
+
+		case XTREME:
+		case SBUS:
+		case SPEKTRUM:
+			// Disable PWM input interrupts
+			PCMSK1 = 0;							// Disable AUX
+			PCMSK3 = 0;							// Disable THR
+			EIMSK  = 0;							// Disable INT0, 1 and 2 
+
+			// Enable serial interrupt
+			UCSR0B |= (1 << RXCIE0);
+			break;
+
+		default:
+			// Disable interrupts? debug
+			break;	
+	}	
+
+
+
+} // init_int

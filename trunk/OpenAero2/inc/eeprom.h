@@ -12,3 +12,4 @@ extern void Set_EEPROM_Default_Config(void);
 
 extern uint8_t JR[];
 extern uint8_t FUTABA[];
+extern uint8_t SATELLITE[];

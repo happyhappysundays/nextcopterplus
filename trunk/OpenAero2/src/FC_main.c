@@ -4,6 +4,7 @@
 // Version 1.1 Beta 11 - March 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
+// Some receiver format decoding code from Jim Drew of XPS and the Papperazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
@@ -158,7 +159,9 @@
 //			Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
 //			Now use -mcall-prologues in linker to save space but required mods to prevent stack overflow etc. 
 //			Increased inter-PWM spacing to 128us and recalibrated all PWM routines.
-//			Fixed lack of throw in Flying Wing mode.
+// V1.2		Based on OpenAero2 V1.1 Beta 11 code
+// Alpha 1	Added support for XPS Xtreme serial protocol
+//			Added support for Spektrum serial protocol
 //
 //***********************************************************
 //* To do
@@ -196,6 +199,7 @@
 #include "..\inc\imu.h"
 #include "..\inc\eeprom.h"
 #include <avr/interrupt.h> // debug
+#include "..\inc\uart.h" // debug
 
 //***********************************************************
 //* Fonts
@@ -219,8 +223,6 @@
 #define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
 #define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
 
-
-
 // Servo driver
 void output_servo_ppm_asm3(int16_t servo_number, int16_t value); // debug
 
@@ -236,7 +238,10 @@ bool AutoLevel;						// AutoLevel = 1
 bool Stability;						// Stability = 1
 bool Failsafe;
 bool Refresh_safe;
-char pBuffer[16];					// Print buffer
+char pBuffer[PBUFFER_SIZE];			// Print buffer
+
+//Debug
+char sBuffer[SBUFFER_SIZE];			// Serial buffer
 
 //************************************************************
 //* Main loop
@@ -266,6 +271,7 @@ int main(void)
 	uint32_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
+
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
@@ -283,6 +289,159 @@ int main(void)
 	uint8_t i = 0;
 
 	init();							// Do all init tasks
+
+	//************************************************************
+	//* Serial data test loop
+	//************************************************************
+
+	Config.RxMode = SPEKTRUM;
+	//Config.RxMode = SBUS; // ok
+	//Config.RxMode = XTREME; // ok if you restart X-CTU
+	init_uart();
+	uint16_t temp16 = 0;
+	uint8_t sindex = 0;
+	uint8_t x_offset = 0;
+	uint8_t y_offset = 0;
+
+	// Disable PWM input interrupts
+	PCMSK1 = 0;							// Disable AUX
+	PCMSK3 = 0;							// Disable THR
+	EIMSK  = 0;							// Disable INT0, 1 and 2 
+
+	// Enable serial interrupt
+	UCSR0B |=	(1 << RXCIE0);
+	
+	while (1)
+	{
+		// Extreme
+		if (Config.RxMode == XTREME)
+		{
+	
+			// The first channel data will be from the 3rd byte
+			sindex = 0;
+			mugui_lcd_puts("Xtreme",(prog_uchar*)Verdana8,0,0);
+
+			if (Interrupted)
+			{
+				clear_buffer(buffer);
+				Interrupted = false;
+
+				// Extract mask bytes
+				temp16 = (sBuffer[2] << 8) + sBuffer[3];
+				mugui_lcd_puts("Chan:",(prog_uchar*)Verdana8,0,10);
+				mugui_lcd_puts("Csum:",(prog_uchar*)Verdana8,0,20);
+				mugui_lcd_puts("dBm:",(prog_uchar*)Verdana8,0,30);
+				mugui_lcd_puts("Mask:",(prog_uchar*)Verdana8,0,40);
+
+
+				mugui_lcd_puts(itoa(ch_num,pBuffer,10),(prog_uchar*)Verdana8,35,10);
+				mugui_lcd_puts(itoa(checksum,pBuffer,10),(prog_uchar*)Verdana8,35,20);
+				mugui_lcd_puts(itoa(sBuffer[1],pBuffer,10),(prog_uchar*)Verdana8,35,30);
+				mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,35,40);
+
+				// Ignore excess channels
+				if (ch_num > 8) ch_num = 8;
+	
+				// Print out channel values
+				for (i = 0; i < 8; i++)
+				{
+					if (i <= 3) x_offset = 65;
+					else x_offset = 95;
+
+					if (i <= 3) y_offset = (10 + (i * 10));
+					else y_offset = (10 + ((i - 4) * 10));
+
+					if (sindex < SBUFFER_SIZE)
+					{
+						temp16 = RxChannel[sindex];
+						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
+					}
+					sindex ++;
+				}
+			}
+		}
+		// SBUS
+		else if (Config.RxMode == SBUS)
+		{
+	
+			// The first channel data will be from the 3rd byte
+			sindex = 0;
+			mugui_lcd_puts("Sbus",(prog_uchar*)Verdana8,0,0);
+
+			if (Interrupted)
+			{
+				clear_buffer(buffer);
+				Interrupted = false;
+
+				// Print out channel values
+				for (i = 0; i < 8; i++)
+				{
+					if (i <= 3) x_offset = 65;
+					else x_offset = 95;
+
+					if (i <= 3) y_offset = (10 + (i * 10));
+					else y_offset = (10 + ((i - 4) * 10));
+
+					if (sindex < SBUFFER_SIZE)
+					{
+						//temp16 = (sBuffer[sindex] << 8) + sBuffer[sindex + 1];
+						////temp16 &= 0x3fff; // Mask chan and data
+						//temp16 &= 0x03ff; // Mask only data
+						temp16 = RxChannel[sindex];
+						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
+					}
+					sindex ++;
+				}
+			}
+		}
+		// SPEKTRUM
+		else if (Config.RxMode == SPEKTRUM)
+		{
+			sindex = 0;
+			mugui_lcd_puts("Spektrum",(prog_uchar*)Verdana8,0,0);
+
+			if (Interrupted)
+			{
+				clear_buffer(buffer);
+				Interrupted = false;
+
+				// Print out channel values
+				for (i = 0; i < 8; i++)
+				{
+					if (i <= 3) x_offset = 65;
+					else x_offset = 95;
+
+					if (i <= 3) y_offset = (10 + (i * 10));
+					else y_offset = (10 + ((i - 4) * 10));
+
+					if (sindex < SBUFFER_SIZE) // 25
+					{
+						if (0) // Buffer
+						{
+							temp16 = (sBuffer[sindex] << 8);
+							sindex++;
+							temp16 += sBuffer[sindex];
+							sindex++;
+							temp16 &= 0x03ff; // Mask only data
+						}
+						else // Channel values
+						{
+							temp16 = RxChannel[sindex];
+							sindex++;
+							//temp16 &= 0x03ff; // Mask only data
+						}
+						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
+					}
+				}
+			}
+		}
+
+		// Clear RX buffer
+		memset(sBuffer, 0, SBUFFER_SIZE);
+
+		// Update buffer
+		write_buffer(buffer,1);
+	}
 
 	// Servo test loop
 	while (0)
@@ -446,19 +605,7 @@ int main(void)
 		//* Reconfigure interrupts if menu changed
 		//************************************************************
 
-		// Reconfigure interrupts for PWM/CPPM modes
-		if (Config.RxMode != CPPM_MODE)
-		{
-			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
-			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
-			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
-		}
-		else // CPPM mode
-		{
-			PCMSK1 = 0;							// Disable AUX
-			PCMSK3 = 0;							// Disable THR
-			EIMSK = 0x04;						// Enable INT2 (Rudder/CPPM input)
-		}
+		init_int();
 
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)
@@ -786,14 +933,19 @@ int main(void)
 		{
 			Interrupted = false;			// Reset interrupted flag
 			Refresh_safe = true;			// Safe to try and refresh status screen
-			Failsafe = false;				// Cancel failsafe
+
+			if (Config.RxMode != SBUS)		// SBUS can report its own failsafe
+			{
+				Failsafe = false;			// Cancel failsafe unless failsafe source is receiver
+			}
+
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
 			Overdue = false;				// And no longer overdue...
 
 			output_servo_ppm();				// Output servo signal
 		}
 
-		// If in failsafe, or when doing independant camstab, just output unsynchronised
+		// If in "no-RC" failsafe, or when doing independant camstab, just output unsynchronised
 		else if ((Overdue && ServoTick) && (Failsafe || (Config.CamStab == ON)))
 		{
 			ServoTick = false;				// Reset servo update ticker
