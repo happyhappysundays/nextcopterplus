@@ -22,7 +22,7 @@ void init_uart(void);
 //************************************************************
 // Code
 // Baud = 20000000 / (16 * (UBRRn + 1))	Where U2X0 = 0
-// Baud = 20000000 / (8 * (UBRRn + 1)) 	Where U2X0 = 1
+// Baud = 20000000 / ( 8 * (UBRRn + 1))	Where U2X0 = 1
 //************************************************************
 
 // Work out best divisor for baudrate generator
@@ -77,8 +77,9 @@ void init_uart(void)
 		case PWM1:
 		case PWM2:
 		case PWM3:
+			UCSR0B &= 	~(1 << RXEN0);					// Disable receiver in PWM modes
+
 		default:
-			UCSR0B &= 	~(1 << RXEN0);					// Disable receiver
 			break;
 	}
 

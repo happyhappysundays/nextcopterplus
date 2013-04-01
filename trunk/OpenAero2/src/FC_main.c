@@ -162,6 +162,8 @@
 // V1.2		Based on OpenAero2 V1.1 Beta 11 code
 // Alpha 1	Added support for XPS Xtreme serial protocol
 //			Added support for Spektrum serial protocol
+//			Added support for Futaba S-bus serial protocol
+//
 //
 //***********************************************************
 //* To do
@@ -293,10 +295,10 @@ int main(void)
 	//************************************************************
 	//* Serial data test loop
 	//************************************************************
-
+/*
 	Config.RxMode = SPEKTRUM;
 	//Config.RxMode = SBUS; // ok
-	//Config.RxMode = XTREME; // ok if you restart X-CTU
+//	Config.RxMode = XTREME; // ok if you restart X-CTU
 	init_uart();
 	uint16_t temp16 = 0;
 	uint8_t sindex = 0;
@@ -440,9 +442,9 @@ int main(void)
 		memset(sBuffer, 0, SBUFFER_SIZE);
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 	}
-
+*/
 	// Servo test loop
 	while (0)
 	{

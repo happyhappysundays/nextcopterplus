@@ -38,7 +38,9 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //
-const char PText1[]  PROGMEM = "Reset";						// Init
+const char PText0[]  PROGMEM = "OpenAero2";					// Init
+const char PText1[]  PROGMEM = "Reset";	
+const char PText2[]  PROGMEM = "Hold steady";
 //															// Status menu
 const char StatusText0[]  PROGMEM = "Version: V1.2a01";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
@@ -235,8 +237,8 @@ const char IMU0[] PROGMEM = "Adv. IMU";
 
 const char *text_menu[] PROGMEM = 
 	{
-		Dummy0,																				// 0 Dummy
-		PText1, Dummy0, 																	// 1 to 2 Reset
+		PText0,																				// 0 Logo
+		PText1, PText2, 																	// 1 to 2 Reset
 		//
 		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 3 to 8 Status menu
 		//
@@ -374,5 +376,5 @@ void idle_screen(void)
 	clear_buffer(buffer);
 	LCD_Display_Text(121,(prog_uchar*)Verdana14,40,12); // "Press"
 	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,32); // "for status"
-	write_buffer(buffer,1);
+	write_buffer(buffer);
 };

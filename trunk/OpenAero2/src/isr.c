@@ -496,6 +496,9 @@ ISR(USART0_RX_vect)
 			Interrupted = true;	
 			RC_Lock = true;						// RC sync established
 
+			// Ahem... ah... just stick the last byte into the buffer manually...(hides)
+			sBuffer[15] = temp;
+
 			// Set start of channel data per format
 			sindex = 2; // Channel data from byte 3
 
@@ -514,16 +517,14 @@ ISR(USART0_RX_vect)
 			}
 
 			// Work out which channel the data is intended for from the channel number data
-			// Channels can also be in the second packet
-			for (j = 0; j < MAX_RC_CHANNELS; j++)
+			// Channels can also be in the second packet. Spektrum has 7 channels per packet.
+			for (j = 0; j < 7; j++)
 			{
 				// Extract channel number
 				ch_num = (sBuffer[sindex] & chan_mask) >> chan_shift;
 
 				// Reconstruct channel data
 				temp16 = ((sBuffer[sindex] & data_mask) << 8) + sBuffer[sindex + 1];
-				//temp16 = (sBuffer[sindex] << 8) + sBuffer[sindex + 1];
-				//temp16 = sindex;
 
 				// Expand to OpenAero2 units if a valid channel
 				// Blank channels have the channel number of 16
@@ -549,9 +550,7 @@ ISR(USART0_RX_vect)
 
 					itemp16 += 3750;										// Add back in OpenAero2 offset
 
-
-					RxChannel[Config.ChannelOrder[ch_num]] = itemp16; // debug
-					//RxChannel[j] = itemp16; // debug
+					RxChannel[Config.ChannelOrder[ch_num]] = itemp16;
 				}
 
 				sindex += 2;

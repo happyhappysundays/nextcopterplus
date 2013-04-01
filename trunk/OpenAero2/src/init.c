@@ -127,29 +127,37 @@ void init(void)
 	Stability = false;
 	FirstTimeIMU = true;
 
+	// Initialise the GLCD
+	st7565_init();
+	st7565_command(CMD_DISPLAY_ON); 		// Check (AF)
+	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
+	st7565_set_brightness(0x26);
+	st7565_command(CMD_SET_COM_NORMAL); 	// For text
+	clear_buffer(buffer);
+	write_buffer(buffer);
+
+	//***********************************************************
+	//* Display "Hold steady" message
+	//***********************************************************
+		
+	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
+	_delay_ms(300);
+	write_buffer(buffer);
+	clear_buffer(buffer);
+		
+	//***********************************************************
+
+
 	Initial_EEPROM_Config_Load();			// Loads config at start-up 
 	UpdateLimits();							// Update travel limts	
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
-
 	init_int();								// Iitialise interrupts based on RC input mode
 
 	// Flash LED
 	LED1 = 1;
 	_delay_ms(150);
 	LED1 = 0;
-
-	// Initialise the GLCD
-	st7565_init();
-	st7565_command(CMD_DISPLAY_ON); 		// Check (AF)
-	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
-	st7565_set_brightness(0x26);
-	write_buffer(buffer,0);					// Display logo
-	_delay_ms(1000);
-	clear_buffer(buffer);					// Clear
-	write_buffer(buffer,1);
-	st7565_command(CMD_SET_COM_NORMAL); 	// For text
-	clear_buffer(buffer);					// Clear
 
 	// Reset I-terms
 	IntegralGyro[ROLL] = 0;	
@@ -165,6 +173,8 @@ void init(void)
 	// Make sure there is nothing in the RX reg
 	temp = UDR0;
 
+	_delay_ms(1000);
+
 	//***********************************************************
 	//* Reload eeprom settings if all buttons are pressed 
 	//***********************************************************
@@ -173,15 +183,13 @@ void init(void)
 	{
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
 
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);				// Clear
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
 	}
 
 	//***********************************************************
-
-	sei();									// Enable global Interrupts 
 
 	// Check to see that gyros are stable
 	ReadGyros();
@@ -213,6 +221,8 @@ void init(void)
 
 void init_int(void)
 {
+	cli();	// Disable interrupts
+
 	switch (Config.RxMode)
 	{
 		case CPPM_MODE:
@@ -248,6 +258,6 @@ void init_int(void)
 			break;	
 	}	
 
-
+	sei(); // Re-enable interrupts
 
 } // init_int
