@@ -126,7 +126,7 @@ void Display_sticks(void)
 		}
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		_delay_ms(100);
 	}
 
@@ -135,7 +135,7 @@ void Display_sticks(void)
 	{
 		LCD_Display_Text(137,(prog_uchar*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		Save_Config_to_EEPROM();
 		_delay_ms(500);
@@ -334,7 +334,7 @@ void Display_sticks(void)
 		}
 
 		// Update display
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		_delay_ms(100);
 
 
@@ -350,14 +350,14 @@ void Display_sticks(void)
 		_delay_ms(500);
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		Save_Config_to_EEPROM();
 
 		//debug
 		//mugui_lcd_puts(itoa(MinAileron,pBuffer,10),(prog_uchar*)Verdana14,10,40);
 		//mugui_lcd_puts(itoa(MaxAileron,pBuffer,10),(prog_uchar*)Verdana14,70,40);
-		//write_buffer(buffer,1);
+		//write_buffer(buffer);
 		//_delay_ms(3000);
 
  	}

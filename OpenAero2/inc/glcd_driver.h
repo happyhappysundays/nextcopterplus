@@ -86,7 +86,7 @@ void st7565_command(uint8_t c) ;
 void st7565_data(uint8_t c);
 void st7565_init(void);
 void st7565_set_brightness(uint8_t val);
-void write_buffer(uint8_t *buffer, uint8_t type);
+void write_buffer(uint8_t *buffer);
 void clear_buffer(uint8_t *buff);
 void write_logo_buffer(uint8_t *buffer);
 

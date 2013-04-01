@@ -245,13 +245,6 @@ void menu_rc_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			// If RC type has changed, reinitialise UART
-			if ((section == 1) && (rc_type != values[0])) 
-			{
-				init_int();
-				init_uart();
-			}
-
 			// If model type has changed, reload preset
 			if ((section == 5) && (temp_type != values[0])) 
 			{
@@ -271,8 +264,11 @@ void menu_rc_setup(uint8_t section)
 				}
 			}
 
-			UpdateIMUvalues();		 // Update IMU variables
-			UpdateLimits();			 // Update I-term limits and triggers based on percentages
+			init_int();				// In case RC type has changed, reinitialise interrupts
+			init_uart();			// and UART
+
+			UpdateIMUvalues();		// Update IMU variables
+			UpdateLimits();			// Update I-term limits and triggers based on percentages
 
 			// Update channel sequence
 			for (i = 0; i < MAX_RC_CHANNELS; i++)

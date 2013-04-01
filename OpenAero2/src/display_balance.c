@@ -70,7 +70,7 @@ void Display_balance(void)
 		drawline(buffer, 32, 32, 96, 32, 1); 
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		_delay_ms(20);
 	}
