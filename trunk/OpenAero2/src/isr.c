@@ -196,24 +196,24 @@ ISR(INT2_vect)
 //* Serial receive interrupt
 //************************************************************
 
+// Interrupts from both UART0 and UART1 RX will come here
+ISR(USART1_RX_vect, ISR_ALIASOF(USART0_RX_vect));
+
 ISR(USART0_RX_vect)
 {
-	// Setup temporary variables
 	char temp = 0;			// RX characters
-	uint16_t temp16 = 0;	// Mask
+	uint16_t temp16 = 0;	// Unsigned temp reg for mask etc
+	int16_t itemp16 = 0;	// Signed temp regemp 
 	uint8_t sindex = 0;		// Serial buffer index
-	uint8_t j = 0;			// Mask index
-	int16_t itemp16 = 0;	// Temp 
+	uint8_t j = 0;			// GP counter and mask index
 
-	// S-Bus
-	uint8_t bit_in_sbus = 0;
-	uint8_t ch = 0;
-	uint8_t bit_in_channel = 0;
+	uint8_t chan_mask = 0;	// Common variables
+	uint8_t chan_shift = 0;
+	uint8_t data_mask = 0;
 
-	// Spektrum
-	uint8_t chan_mask;
-	uint8_t data_mask;
-	uint8_t chan_shift;
+	//************************************************************
+	//* Common entry code
+	//************************************************************
 
 	// Read byte first
 	temp = UDR0;
@@ -231,6 +231,12 @@ ISR(USART0_RX_vect)
 
 	// Timestamp this interrupt
 	PPMSyncStart = TCNT1;
+	
+	// Put received byte in buffer if space available
+	if (rcindex < SBUFFER_SIZE)
+	{
+		sBuffer[rcindex++] = temp;			
+	}
 
 	//************************************************************
 	//* XPS Xtreme format (8-N-1/250Kbps)
@@ -275,7 +281,7 @@ ISR(USART0_RX_vect)
 		if (bytecount == 3)
 		{
 			chanmask16 += (uint16_t)temp;	// Low byte of Mask
-			temp16 = chanmask16;
+			temp16 = chanmask16;			// Need to keep a copy od chanmask16
 
 			// Count bits set (number of active channels)				 
 			for (ch_num = 0; temp16; ch_num++)
@@ -391,36 +397,42 @@ ISR(USART0_RX_vect)
 				// Start from scond byte
 				sindex = 1;
 
-                // 8 channels * 11 bits = 88 bits
+                // Deconstruct S-Bus data
+				// 8 channels * 11 bits = 88 bits
                 for (j=0; j<88; j++)
                 {
-                    if (sBuffer[sindex] & (1<<bit_in_sbus))
+                    if (sBuffer[sindex] & (1<<chan_mask))
                     {
-                        RxChannel[ch] |= (1<<bit_in_channel);
+                        RxChannel[chan_shift] |= (1<<data_mask);
                     }
 
-                    bit_in_sbus++;
-                    bit_in_channel++;
+                    chan_mask++;
+                    data_mask++;
 
-                    if (bit_in_sbus == 8)
+                    if (chan_mask == 8)
                     {
-                        bit_in_sbus =0;
+                        chan_mask =0;
                         sindex++;
                     }
 
-                    if (bit_in_channel == 11)
+                    if (data_mask == 11)
                     {
-                        bit_in_channel =0;
-                        ch++;
+                        data_mask =0;
+                        chan_shift++;
                     }
                 }
 
 				// Convert to  OpenAero2 values (0~2047 -> 2500~4999)
 				for (j = 0; j < MAX_RC_CHANNELS; j++)
 				{
-					itemp16= RxChannel[j] - 992;									// Subtract weird-ass Futaba offset
+					// Subtract weird-ass Futaba offset
+					itemp16= RxChannel[j] - 992;		
+					
+					// Expand into OpenAero2 units							
 					itemp16 += (itemp16 >> 1) + (itemp16 >> 4) + (itemp16 >> 8); 	// Quick multiply by 1.56 :)
-					RxChannel[Config.ChannelOrder[j]] = itemp16 + 3750;				// Add back in OpenAero2 offset
+
+					// Add back in OpenAero2 offset
+					RxChannel[Config.ChannelOrder[j]] = itemp16 + 3750;				
 				} 	
 			} // Frame lost check
 		} // Packet ended flag
@@ -494,7 +506,7 @@ ISR(USART0_RX_vect)
 		if (bytecount >= 15)
 		{
 			Interrupted = true;	
-			RC_Lock = true;						// RC sync established
+			RC_Lock = true;			// RC sync established
 
 			// Ahem... ah... just stick the last byte into the buffer manually...(hides)
 			sBuffer[15] = temp;
@@ -503,7 +515,7 @@ ISR(USART0_RX_vect)
 			sindex = 2; // Channel data from byte 3
 
 			// Work out if this is 10 or 11 bit data
-			if (sBuffer[1] & 0x10) // 0 for 10 bit resolution 1 for 11 bit resolution
+			if (sBuffer[1] & 0x10) 	// 0 for 10 bit resolution 1 for 11 bit resolution
 			{
 				chan_mask = 0x78;	// 11 bit (2048)
 				data_mask = 0x07;
@@ -530,25 +542,27 @@ ISR(USART0_RX_vect)
 				// Blank channels have the channel number of 16
 				if (ch_num < MAX_RC_CHANNELS)
 				{
+					// Subtract Spektrum center offset
 					if (chan_shift == 0x03) // 11-bit
 					{
-						itemp16 = temp16 - 1024;							// Subtract Spektrum offset
+						itemp16 = temp16 - 1024;
 					}
 					else
 					{
-						itemp16 = temp16 - 512;								// Subtract Spektrum offset
+						itemp16 = temp16 - 512;	
 					}					
 
 					// Quick multiply by 3.666 :)
 					itemp16 += ((itemp16 << 1) + (itemp16 >> 1) + (itemp16 >> 3) + (itemp16 >> 5) + (itemp16 >> 6)); 
 
-
 					if (chan_shift == 0x03) // 11-bit
 					{
-						itemp16 = itemp16 >> 1;								// Divide in case of 11-bit value
+						// Divide in case of 11-bit value
+						itemp16 = itemp16 >> 1;								
 					}
 
-					itemp16 += 3750;										// Add back in OpenAero2 offset
+					// Add back in OpenAero2 offset
+					itemp16 += 3750;										
 
 					RxChannel[Config.ChannelOrder[ch_num]] = itemp16;
 				}
@@ -560,16 +574,10 @@ ISR(USART0_RX_vect)
 	} // (Config.RxMode == SPEKTRUM)
 
 	//************************************************************
-	//* Common code
+	//* Common exit code
 	//************************************************************
 
 	// Increment byte count
 	bytecount++;
-	
-	// Put received byte in buffer if space available
-	if (rcindex < SBUFFER_SIZE)
-	{
-		sBuffer[rcindex++] = temp;			
-	}
 }
 

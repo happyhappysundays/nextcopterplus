@@ -58,56 +58,23 @@ const uint8_t ServoMenuText[5][SERVOITEMS] PROGMEM =
 	{0,0,0,0,0,0,0,0},
 };
 
-const menu_range_t servo_menu_ranges[5][SERVOITEMS] PROGMEM = 
+// As all of these are the same, a new range cloning menu option is used
+// to save a lot of PROGMEM sapce
+const menu_range_t servo_menu_ranges[5][1] PROGMEM = 
 {
 	{
 		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
-		{OFF, ON,1,1,OFF},				// Reverse
 	},
 	{
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
-		{-125,125,1,0,0}, 				// Offset
 		{-125,125,1,0,0}, 				// Offset
 	},
 	{
 		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
-		{-125,0,5,0,-100}, 				// Min travel
 	},
 	{
 		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
-		{0,125,5,0,100}, 				// Max travel
 	},
 	{
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
-		{-125,125,5,0,0}, 				// Failsafe
 		{-125,125,5,0,0}, 				// Failsafe
 	}
 };
@@ -174,11 +141,14 @@ void menu_servo_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(servo_top, SERVOSTART, &values[0], SERVOITEMS, (prog_uchar*)servo_menu_ranges[section - 1], SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
+		print_menu_items(servo_top, SERVOSTART, &values[0], SERVOITEMS, (prog_uchar*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
+		//print_menu_items(servo_top, SERVOSTART, &values[0], SERVOITEMS, (prog_uchar*)servo_menu_ranges[section - 1], SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &servo_top, &menu_temp);
-		range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], menu_temp - SERVOSTART);
+
+		//range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], menu_temp - SERVOSTART);
+		range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], 0);
 
 		if (button == ENTER)
 		{

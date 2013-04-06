@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.1 Beta 11 - March 2013
+// Version 1.2 Alpha 3 - April 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papperazzi project
@@ -163,12 +163,17 @@
 // Alpha 1	Added support for XPS Xtreme serial protocol
 //			Added support for Spektrum serial protocol
 //			Added support for Futaba S-bus serial protocol
-//
+//			Switching between all receiver modes now works without the need for a reboot.
+//			Much easier to do a factory reset. Reduced RAM/ROM usage.
+//			RC inputs display now shows all eight RC channels.
+//			Removed logo, added new faster startup messages.
+//			Added master/slave binding for Spektrum Satellite RXs at power-up
+// Alpha 2	Three configurable flight modes with PID etc.
 //
 //***********************************************************
 //* To do
 //***********************************************************
-//
+// 
 // 
 //
 //***********************************************************
@@ -207,7 +212,7 @@
 //* Fonts
 //***********************************************************
 
-#include "..\inc\Font_Verdana.h" 		// 8 (text), 14 (titles), and 22 (numbers to edit) points
+#include "..\inc\Font_Verdana.h" 		// 8 (text) and 14 (titles) points
 #include "..\inc\Font_WingdingsOE2.h"	// Cursor and markers
 
 //***********************************************************
@@ -235,11 +240,13 @@ void output_servo_ppm_asm3(int16_t servo_number, int16_t value); // debug
 // Flight variables
 uint32_t ticker_32;					// Incrementing system ticker
 
-// Misc
-bool AutoLevel;						// AutoLevel = 1
-bool Stability;						// Stability = 1
-bool Failsafe;
-bool Refresh_safe;
+// Flags
+uint8_t	General_error = 0;
+uint8_t	Flight_flags = 0;
+uint8_t	Main_flags = 0;
+uint8_t	Alarm_flags = 0;
+
+// Global buffers
 char pBuffer[PBUFFER_SIZE];			// Print buffer
 
 //Debug
@@ -255,15 +262,6 @@ int main(void)
 
 	bool Overdue = false;
 	bool ServoTick = false;
-	// Alarms
-	bool BUZZER_ON = false;
-	bool Model_lost = false;		// Model lost flag
-	bool LVA_Alarm = false;			// Low voltage alarm active
-	bool SIG_Alarm = false;			// No signal alarm active
-
-	// Launch mode
-	bool Launch_Mode = false;		// Launch mode ON flag
-	bool Launch_Block = false;		// Launch mode autolevel block flag
 
 	// Timers
 	uint32_t Status_timeout = 0;
@@ -287,197 +285,9 @@ int main(void)
 	uint8_t Status_seconds = 0;
 
 	uint8_t Menu_mode = STATUS_TIMEOUT;
-
 	uint8_t i = 0;
 
 	init();							// Do all init tasks
-
-	//************************************************************
-	//* Serial data test loop
-	//************************************************************
-/*
-	Config.RxMode = SPEKTRUM;
-	//Config.RxMode = SBUS; // ok
-//	Config.RxMode = XTREME; // ok if you restart X-CTU
-	init_uart();
-	uint16_t temp16 = 0;
-	uint8_t sindex = 0;
-	uint8_t x_offset = 0;
-	uint8_t y_offset = 0;
-
-	// Disable PWM input interrupts
-	PCMSK1 = 0;							// Disable AUX
-	PCMSK3 = 0;							// Disable THR
-	EIMSK  = 0;							// Disable INT0, 1 and 2 
-
-	// Enable serial interrupt
-	UCSR0B |=	(1 << RXCIE0);
-	
-	while (1)
-	{
-		// Extreme
-		if (Config.RxMode == XTREME)
-		{
-	
-			// The first channel data will be from the 3rd byte
-			sindex = 0;
-			mugui_lcd_puts("Xtreme",(prog_uchar*)Verdana8,0,0);
-
-			if (Interrupted)
-			{
-				clear_buffer(buffer);
-				Interrupted = false;
-
-				// Extract mask bytes
-				temp16 = (sBuffer[2] << 8) + sBuffer[3];
-				mugui_lcd_puts("Chan:",(prog_uchar*)Verdana8,0,10);
-				mugui_lcd_puts("Csum:",(prog_uchar*)Verdana8,0,20);
-				mugui_lcd_puts("dBm:",(prog_uchar*)Verdana8,0,30);
-				mugui_lcd_puts("Mask:",(prog_uchar*)Verdana8,0,40);
-
-
-				mugui_lcd_puts(itoa(ch_num,pBuffer,10),(prog_uchar*)Verdana8,35,10);
-				mugui_lcd_puts(itoa(checksum,pBuffer,10),(prog_uchar*)Verdana8,35,20);
-				mugui_lcd_puts(itoa(sBuffer[1],pBuffer,10),(prog_uchar*)Verdana8,35,30);
-				mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,35,40);
-
-				// Ignore excess channels
-				if (ch_num > 8) ch_num = 8;
-	
-				// Print out channel values
-				for (i = 0; i < 8; i++)
-				{
-					if (i <= 3) x_offset = 65;
-					else x_offset = 95;
-
-					if (i <= 3) y_offset = (10 + (i * 10));
-					else y_offset = (10 + ((i - 4) * 10));
-
-					if (sindex < SBUFFER_SIZE)
-					{
-						temp16 = RxChannel[sindex];
-						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
-					}
-					sindex ++;
-				}
-			}
-		}
-		// SBUS
-		else if (Config.RxMode == SBUS)
-		{
-	
-			// The first channel data will be from the 3rd byte
-			sindex = 0;
-			mugui_lcd_puts("Sbus",(prog_uchar*)Verdana8,0,0);
-
-			if (Interrupted)
-			{
-				clear_buffer(buffer);
-				Interrupted = false;
-
-				// Print out channel values
-				for (i = 0; i < 8; i++)
-				{
-					if (i <= 3) x_offset = 65;
-					else x_offset = 95;
-
-					if (i <= 3) y_offset = (10 + (i * 10));
-					else y_offset = (10 + ((i - 4) * 10));
-
-					if (sindex < SBUFFER_SIZE)
-					{
-						//temp16 = (sBuffer[sindex] << 8) + sBuffer[sindex + 1];
-						////temp16 &= 0x3fff; // Mask chan and data
-						//temp16 &= 0x03ff; // Mask only data
-						temp16 = RxChannel[sindex];
-						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
-					}
-					sindex ++;
-				}
-			}
-		}
-		// SPEKTRUM
-		else if (Config.RxMode == SPEKTRUM)
-		{
-			sindex = 0;
-			mugui_lcd_puts("Spektrum",(prog_uchar*)Verdana8,0,0);
-
-			if (Interrupted)
-			{
-				clear_buffer(buffer);
-				Interrupted = false;
-
-				// Print out channel values
-				for (i = 0; i < 8; i++)
-				{
-					if (i <= 3) x_offset = 65;
-					else x_offset = 95;
-
-					if (i <= 3) y_offset = (10 + (i * 10));
-					else y_offset = (10 + ((i - 4) * 10));
-
-					if (sindex < SBUFFER_SIZE) // 25
-					{
-						if (0) // Buffer
-						{
-							temp16 = (sBuffer[sindex] << 8);
-							sindex++;
-							temp16 += sBuffer[sindex];
-							sindex++;
-							temp16 &= 0x03ff; // Mask only data
-						}
-						else // Channel values
-						{
-							temp16 = RxChannel[sindex];
-							sindex++;
-							//temp16 &= 0x03ff; // Mask only data
-						}
-						mugui_lcd_puts(itoa(temp16,pBuffer,10),(prog_uchar*)Verdana8,x_offset,y_offset);	
-					}
-				}
-			}
-		}
-
-		// Clear RX buffer
-		memset(sBuffer, 0, SBUFFER_SIZE);
-
-		// Update buffer
-		write_buffer(buffer);
-	}
-*/
-	// Servo test loop
-	while (0)
-	{
-		uint16_t j = 0;
-		for (j = 0; j < 200; j++)
-		{
-
-			cli();
-			output_servo_ppm_asm3(0, 1500);
-			output_servo_ppm_asm3(1, 1980);
-			output_servo_ppm_asm3(2, 1000);
-			output_servo_ppm_asm3(3, 1500);
-			output_servo_ppm_asm3(4, 1500);
-			output_servo_ppm_asm3(5, 1500);
-			output_servo_ppm_asm3(6, 1500);
-			output_servo_ppm_asm3(7, 1500);
-			sei();
-/*
-			ServoOut[0] = 4950; // 1980us
-			ServoOut[1] = 4950;
-			ServoOut[2] = 4950;
-			ServoOut[3] = 4950;
-			ServoOut[4] = 4950;
-			ServoOut[5] = 4950;
-			ServoOut[6] = 4950;
-			ServoOut[7] = 4950;
-			
-			RC_Lock = true;
-			output_servo_ppm();
-*/
-			_delay_ms(500);
-		}
-	}
 
 	// Main loop
 	while (1)
@@ -503,7 +313,7 @@ int main(void)
 			// Request the status be updated when safe
 			case REQ_STATUS:
 				// Reset safe to refresh flag
-				Refresh_safe = false;
+				Main_flags &= ~(1 << Refresh_safe);
 				Menu_mode = WAITING_STATUS;
 				break;
 
@@ -621,11 +431,11 @@ int main(void)
 
 		if ((Ticker_Count >> 8) &8) 
 		{
-			BUZZER_ON = true; 	// 4.77Hz beep
+			Alarm_flags |= (1 << BUZZER_ON);	// 4.77Hz beep
 		}
 		else 
 		{
-			BUZZER_ON = false;
+			Alarm_flags &= ~(1 << BUZZER_ON);
 		}
 
 		//************************************************************
@@ -637,10 +447,10 @@ int main(void)
 		Lost_TCNT2 = TCNT2;
 
 		// Reset LMA count if any RX activity, LMA of, or CamStab (no RC used)
-		if (RxActivity || (Config.LMA_enable == 0) || (Config.CamStab == ON))
+		if ((Flight_flags & (1 << RxActivity)) || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
 			LostModel_timer = 0;
-			Model_lost = false;	
+			Flight_flags &= ~(1 << Model_lost);
 			LMA_minutes = 0;
 			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
 		}
@@ -654,24 +464,27 @@ int main(void)
 		// Trigger lost model alarm if enabled and due or failsafe
 		if ((LMA_minutes >= Config.LMA_enable) && (Config.LMA_enable != 0))	
 		{
-			Model_lost = true;
+			Flight_flags |= (1 << Model_lost);
 			General_error |= (1 << LOST_MODEL); // Set lost model bit
 		}
 
 		// Beep buzzer if Vbat lower than trigger
 		if (GetVbat() < Config.PowerTrigger)
 		{
-			LVA_Alarm = true;
+			Alarm_flags |= (1 << LVA_Alarm);	// Set LVA_Alarm flag
 			General_error |= (1 << LOW_BATT); 	// Set low battery bit
 		}
 		else 
 		{
-			LVA_Alarm = false;					// Otherwise turn off buzzer
+			Alarm_flags &= ~(1 << LVA_Alarm);	// Clear LVA_Alarm flag
 			General_error &= ~(1 << LOW_BATT); 	// Clear low battery bit
 		}
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
-		if ((LVA_Alarm || Model_lost || SIG_Alarm) && BUZZER_ON) 
+		if	(((Alarm_flags & (1 << LVA_Alarm)) ||
+			  (Flight_flags & (1 << Model_lost)) || 
+			  (Alarm_flags & (1 << SIG_Alarm))) &&
+			  (Alarm_flags & (1 << BUZZER_ON))) 
 		{
 			LVA = 1;
 		}
@@ -685,7 +498,7 @@ int main(void)
 		//************************************************************
 
 		// Only pass through here if launch block timer running
-		if ((Config.LaunchMode == ON) && (Launch_Mode == true) && (Launch_Block == true))
+		if ((Config.LaunchMode == ON) && (Flight_flags & (1 << Launch_Mode)) && (Flight_flags & (1 << Launch_Block)))
 		{
 			// Increment timer only if Launch mode on to save cycles
 			Launch_timer += (uint8_t) (TCNT2 - Launch_TCNT2);
@@ -695,27 +508,27 @@ int main(void)
 			if (RxChannel[THROTTLE] < LAUNCH_TIMER_RESET)	
 			{
 				Launch_timer = 0;
-				Launch_Mode = false;			// Reset state machine
-				Launch_Block = false;			// Enable autolevel
-				menu_beep(2);					// Signal launch mode timer restart
+				Flight_flags &= ~(1 << Launch_Mode);	// Reset state machine
+				Flight_flags &= ~(1 << Launch_Block);	// Enable autolevel
+				menu_beep(2);							// Signal launch mode timer restart
 			}
 		
 			// Re-enable autolevel when timer expires while autolevel blocked
-			if ((Launch_Block) && (Launch_timer > ((uint32_t)LAUNCH_TIMER * (uint32_t)Config.LaunchDelay)))
+			if ((Flight_flags & (1 << Launch_Block)) && (Launch_timer > ((uint32_t)LAUNCH_TIMER * (uint32_t)Config.LaunchDelay)))
 			{
-				Launch_Block = false;
-				Launch_Mode = true;	
+				Flight_flags &= ~(1 << Launch_Block);
+				Flight_flags |= (1 << Launch_Mode);
 			}
 		}
 
 		// If first time into Launch mode
-		if ((Config.LaunchMode == ON) && (Launch_Mode == false))
+		if ((Config.LaunchMode == ON) && !(Flight_flags & (1 << Launch_Mode)))
 		{
 			// Launch mode throttle position exceeded
 			if (RxChannel[THROTTLE] > Config.Launchtrigger)	
 			{
-				Launch_Mode = true;				// Start 10 second countdown
-				Launch_Block = true;			// Disable autolevel
+				Flight_flags |= (1 << Launch_Mode);// Start 10 second countdown
+				Flight_flags |= (1 << Launch_Block);// Disable autolevel
 				menu_beep(1);					// Signal launch mode timer start
 			}
 		}
@@ -728,7 +541,7 @@ int main(void)
 		RxGetChannels();
 
 		// Zero RC when in Failsafe
-		if (Failsafe)
+		if (Flight_flags & (1 << Failsafe))
 		{
 			for (i = 0; i < MAX_RC_CHANNELS; i++)
 			{
@@ -743,64 +556,63 @@ int main(void)
 		}
 
 		//************************************************************
+		//* Flight mode selection
+		//************************************************************
+
+		if (RxChannel[Config.FlightChan] > Config.Autotrigger3)
+		{
+			Config.Flight = 2;			// Flight mode 2
+		}	
+		else if (RxChannel[Config.FlightChan] > Config.Autotrigger2)
+		{
+			Config.Flight = 1;			// Flight mode 1
+		}
+		else
+		{
+			Config.Flight = 0;			// Flight mode 0
+		}
+
+		//************************************************************
 		//* Autolevel mode selection
 		//************************************************************
 		//* Primary override:
 		//*		Autolevel always OFF if Config.AutoMode = OFF (default)
 		//*		Autolevel disabled if Launch_Block = true
 		//*		Autolevel ON if in Advanced failsafe condition
-		//*
-		//* Five switchable modes:
-		//*		1. Disabled by Config.AutoMode = OFF
-		//*		2. Enabled by "AutoChan" channel number
-		//*		3. Enabled by user-set triggers of "ThreePos" channel number
-		//*		4. Enabled if HandsFree and Config.AutoMode = HANDSFREE
-		//*		5. Enabled by Config.AutoMode = ON
 		//************************************************************
 
-		switch(Config.AutoMode)
+		switch(Config.FlightMode[Config.Flight].AutoMode)
 		{
 			case DISABLED:
-				AutoLevel = false;				// De-activate autolevel mode
-				break;
-			case AUTOCHAN:
-			case THREEPOS:
-				if (RxChannel[Config.AutoChan] > Config.Autotrigger)
-				{
-					AutoLevel = true;			// Activate autolevel mode
-				}	
-				else
-				{
-					AutoLevel = false;			// De-activate autolevel mode
-				}	
+				Flight_flags &= ~(1 << AutoLevel);	// De-activate autolevel mode
 				break;
 			case HANDSFREE:
-				if (HandsFree)					// If hands free
+				if (Flight_flags & (1 << HandsFree))	// If hands free
 				{
-					AutoLevel = true;			// Activate autolevel mode
+					Flight_flags |= (1 << AutoLevel);// Activate autolevel mode
 				}	
 				else
 				{
-					AutoLevel = false;			// De-activate autolevel mode
+					Flight_flags &= ~(1 << AutoLevel); // De-activate autolevel mode
 				}
 				break;
 			case ALWAYSON:
-				AutoLevel = true;				// Activate autolevel mode
+				Flight_flags |= (1 << AutoLevel);// Activate autolevel mode
 				break;
 			default:							// Disable by default
 				break;
 		}
 
 		// Check for Launch blocking
-		if (Launch_Block)
+		if (Flight_flags & (1 << Launch_Block))
 		{
-			AutoLevel = false;					// De-activate autolevel mode
+			Flight_flags &= ~(1 << AutoLevel);	// De-activate autolevel mode
 		}
 
 		// Check for advanced Failsafe
-		if ((Config.FailsafeType == 1) && Failsafe && (Config.CamStab == OFF))
+		if ((Config.FailsafeType == 1) && (Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
 		{
-			AutoLevel = true;
+			Flight_flags |= (1 << AutoLevel);
 		}
 
 		//************************************************************
@@ -809,38 +621,21 @@ int main(void)
 		//* Primary override:
 		//*		Stability enabled if Config.StabMode = ON
 		//*		Stability always OFF if Config.StabMode = OFF (default)
-		//*
-		//* Four switchable modes:
-		//*		1. Disabled by Config.StabMode = OFF
-		//*		2. Enabled by "StabChan" channel number
-		//*		3. Enabled by user-set triggers of "ThreePos" channel number
-		//*		4. Always ON
 		//************************************************************
 
-		switch(Config.StabMode)
+		switch(Config.FlightMode[Config.Flight].StabMode)
 		{
 			case DISABLED:
-				Stability = false;				// De-activate autolevel mode
-				break;
-			case STABCHAN:
-			case THREEPOS:
-				if (RxChannel[Config.StabChan] > Config.Stabtrigger)
-				{
-					Stability = true;			// Activate autolevel mode
-				}	
-				else
-				{
-					Stability = false;			// De-activate autolevel mode
-				}	
+				Flight_flags &= ~(1 << Stability);// De-activate autolevel mode
 				break;
 			case ALWAYSON:
-				Stability = true;			// Activate autolevel mode
+				Flight_flags |= (1 << Stability);// Activate autolevel mode
 				break;
 			default:							// Disable by default
 				break;
 		}
 
-		if (!Stability)
+		if (!(Flight_flags & (1 << Stability)))
 		{
 			// Reset I-terms when stabilise is off
 			IntegralGyro[ROLL] = 0;	
@@ -849,13 +644,13 @@ int main(void)
 		}
 
 		// Read gyros when required
-		if (Stability || AutoLevel)
+		if ((Flight_flags & (1 << Stability)) || (Flight_flags & (1 << AutoLevel)))
 		{
 			ReadGyros();		// Read sensors
 		}
 
 		// Autolevel mode ON
-		if (AutoLevel) 
+		if (Flight_flags & (1 << AutoLevel))
 		{
 			ReadAcc();			// Only read Accs if in AutoLevel mode
 			getEstimatedAttitude();
@@ -863,7 +658,7 @@ int main(void)
         else
         {
             // Reset IMU each time autolevel restarted
-            FirstTimeIMU = true;
+            Main_flags |= (1 << FirstTimeIMU);
         }
 
 		// Remove RC noise and detect when sticks centered
@@ -915,18 +710,18 @@ int main(void)
 		if (Overdue && (Config.CamStab == OFF))
 		{
 			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
-			SIG_Alarm = true;
+			Alarm_flags |= (1 << SIG_Alarm);	// Set SIG_Alarm flag
 		}
 		else
 		{
 			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
-			SIG_Alarm = false;
+			Alarm_flags &= ~(1 << SIG_Alarm);	// Clear SIG_Alarm flag
 		}
 
 		// Check for failsafe condition (Had RC lock but now overdue)
 		if (Overdue && RC_Lock)
 		{
-			Failsafe = true;
+			Flight_flags |= (1 << Failsafe);
 			RC_Lock = false;
 		}
 
@@ -934,11 +729,11 @@ int main(void)
 		if (Interrupted)
 		{
 			Interrupted = false;			// Reset interrupted flag
-			Refresh_safe = true;			// Safe to try and refresh status screen
+			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 
 			if (Config.RxMode != SBUS)		// SBUS can report its own failsafe
 			{
-				Failsafe = false;			// Cancel failsafe unless failsafe source is receiver
+				Flight_flags &= ~(1 << Failsafe);// Cancel failsafe unless failsafe source is receiver
 			}
 
 			Servo_Timeout = 0;				// Reset servo failsafe timeout
@@ -948,24 +743,23 @@ int main(void)
 		}
 
 		// If in "no-RC" failsafe, or when doing independant camstab, just output unsynchronised
-		else if ((Overdue && ServoTick) && (Failsafe || (Config.CamStab == ON)))
+		else if ((Overdue && ServoTick) && ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON)))
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
-			Refresh_safe = true;			// Safe to try and refresh status screen
+			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 			output_servo_ppm();				// Output servo signal
 		}
 
 		if (Overdue && ServoTick)
 		{
-			Refresh_safe = true;			// Safe to try and refresh status screen
+			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 		}
 
 		// Measure the current loop rate
 		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
 		ticker_32 += cycletime;
-
 
 	} // main loop
 } // main()

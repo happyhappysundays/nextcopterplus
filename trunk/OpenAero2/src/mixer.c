@@ -200,7 +200,7 @@ void ProcessMixer(void)
 	//************************************************************ 
 
 	// Use PID gyro values
-	if (Stability)
+	if (Flight_flags & (1 << Stability))
 	{
 		for (i = 0; i < outputs; i++)
 		{
@@ -261,10 +261,10 @@ void ProcessMixer(void)
 	//************************************************************ 
 
 	// Add PID acc values including trim
-	if (AutoLevel)
+	if (Flight_flags & (1 << AutoLevel))
 	{
 		// Offset Autolevel trims in failsafe mode
-		if ((Config.FailsafeType == 1) && Failsafe && (Config.CamStab == OFF))
+		if ((Config.FailsafeType == 1) && (Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
 		{
 			roll_trim += Config.FailsafeAileron;
 			roll_trim = roll_trim << 2;
@@ -273,8 +273,8 @@ void ProcessMixer(void)
 		}
 
 		// Add autolevel trims * 4		
-		roll_trim += (Config.AccRollZeroTrim << 2);
-		pitch_trim += (Config.AccPitchZeroTrim << 2);
+		roll_trim += (Config.FlightMode[Config.Flight].AccRollZeroTrim << 2);
+		pitch_trim += (Config.FlightMode[Config.Flight].AccPitchZeroTrim << 2);
 
 		// Mix in accelerometers
 		for (i = 0; i < outputs; i++)
@@ -442,7 +442,7 @@ void ProcessMixer(void)
 	// Handle Failsafe condition
 	//************************************************************ 
 
-	if (Failsafe && (Config.CamStab == OFF))
+	if ((Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
 	{
 		// Simple failsafe. Replace outputs with user-set values
 		if (Config.FailsafeType == SIMPLE) 
@@ -491,18 +491,19 @@ void UpdateLimits(void)
 	uint8_t i;
 	int8_t temp8;
 	int32_t temp32, gain32;
-	int8_t gains[3] = {Config.Roll.I_mult, Config.Pitch.I_mult, Config.Yaw.I_mult};
+	int8_t gains[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
 
 	// Update triggers
-	Config.HandsFreetrigger = Config.Autolimit * 5;
-	Config.Stabtrigger = scale_percent(Config.Stablimit);
-	Config.Autotrigger = scale_percent(Config.Autolimit);
+	Config.HandsFreetrigger = Config.FlightMode[Config.Flight].Autolimit * 5;
+	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Autolimit);
+	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Autolimit);
+	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Autolimit);
 	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
 
 	// Update I_term limits
 	for (i = 0; i < 3; i++)
 	{
-		temp8 	= Config.I_Limits[i];			// 0 to 125%
+		temp8 	= Config.FlightMode[Config.Flight].I_Limits[i];			// 0 to 125%
 		temp32 	= temp8; 						// Promote
 
 		// I-term output (throw)
@@ -622,3 +623,4 @@ int16_t scale_percent(int8_t value)
 
 	return temp16_2;
 }
+

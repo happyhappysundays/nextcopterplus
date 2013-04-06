@@ -14,7 +14,4 @@ extern void SetFailsafe(void);
 
 // RC input values
 extern int16_t RCinputs[MAX_RC_CHANNELS];
-extern bool	RxActivity;		// RX activity flag
-extern bool	HandsFree;
-
 

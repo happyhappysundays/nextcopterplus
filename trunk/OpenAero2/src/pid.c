@@ -74,10 +74,10 @@ void Calculate_PID(void)
 	int16_t	RCinputsAxis[3] = {RCinputs[AILERON], -RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values. Cludgy fix to reduce code space
-	int8_t 	P_gain[3] = {Config.Roll.P_mult, Config.Pitch.P_mult, Config.Yaw.P_mult};
-	int8_t 	I_gain[3] = {Config.Roll.I_mult, Config.Pitch.I_mult, Config.Yaw.I_mult};
-	int8_t 	D_gain[3] = {Config.Roll.D_mult, Config.Pitch.D_mult, Config.Yaw.D_mult};
-	int8_t 	L_gain[2] = {Config.A_Roll_P_mult, Config.A_Pitch_P_mult};
+	int8_t 	P_gain[3] = {Config.FlightMode[Config.Flight].Roll.P_mult, Config.FlightMode[Config.Flight].Pitch.P_mult, Config.FlightMode[Config.Flight].Yaw.P_mult};
+	int8_t 	I_gain[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
+	int8_t 	D_gain[3] = {Config.FlightMode[Config.Flight].Roll.D_mult, Config.FlightMode[Config.Flight].Pitch.D_mult, Config.FlightMode[Config.Flight].Yaw.D_mult};
+	int8_t 	L_gain[2] = {Config.FlightMode[Config.Flight].A_Roll_P_mult, Config.FlightMode[Config.Flight].A_Pitch_P_mult};
 
 	int16_t	roll_actual = 0;
 	int16_t temp16 = 0;
@@ -133,10 +133,10 @@ void Calculate_PID(void)
 		// Increment and limit gyro I-terms, handle heading hold modes
 		//************************************************************
 
-		if (Stability)
+		if (Flight_flags & (1 << Stability))
 		{
 			// For 3D mode, change neutral with sticks
-			if (Config.AutoCenter == FIXED)
+			if (Config.FlightMode[Config.Flight].AutoCenter == FIXED)
 			{
 				// Reset the I-terms when you need to adjust the I-term with RC
 				// Note that the I-term is not constrained when no RC input is present.
@@ -152,7 +152,7 @@ void Calculate_PID(void)
 					}
 
 					// Adjust I-term with RC input (scaled down by Config.Stick_3D_rate)
-					IntegralGyro[axis] -= (RCinputsAxis[axis] >> Config.Stick_3D_rate); 
+					IntegralGyro[axis] -= (RCinputsAxis[axis] >> Config.FlightMode[Config.Flight].Stick_3D_rate); 
 				}
 			}	
 
@@ -164,7 +164,7 @@ void Calculate_PID(void)
 
 			// Handle auto-centering of I-terms in Auto mode
 			// If no significant gyro input and IntegralGyro[axis] is non-zero, pull it back slowly.
-			else if (Config.AutoCenter == AUTO)
+			else if (Config.FlightMode[Config.Flight].AutoCenter == AUTO)
 			{
 				if (IntegralGyro[axis] > 0)
 				{
@@ -259,7 +259,7 @@ void Calculate_PID(void)
 		//************************************************************
 
 		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
-		if (AutoLevel && (axis < YAW)) 
+		if ((Flight_flags & (1 << AutoLevel)) && (axis < YAW)) 
 		{
 			PID_acc_temp = angle[axis];
 

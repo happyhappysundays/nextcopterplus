@@ -19,12 +19,6 @@
 extern CONFIG_STRUCT Config;
 
 //***********************************************************
-//* Project defines
-//***********************************************************
-
-#define MENUITEMS 34
-
-//***********************************************************
 //* Pin definitions - KK2.0
 //***********************************************************
 
@@ -124,16 +118,24 @@ enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, UNUSED};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX2, NOCHAN};
-enum SwitchModes	{DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE};
+enum SwitchModes	{DISABLED = 0, ALWAYSON, HANDSFREE};
 enum Availability	{OFF = 0, ON};
 enum BatteryType	{LIPO = 0, NIMH};
 enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
-enum GlobalError	{NO_ERROR, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
 enum I_term_type	{STD = 0, AUTO, FIXED};
-enum Flight_mode	{RETRO = 0, FLYBYWIRE};
 enum Failsafes		{SIMPLE = 0, ADVANCED};
+
+//***********************************************************
+// Flags
+//***********************************************************
+
+enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL};
+enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block, Model_lost};
+enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
+enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
+
 
 #endif //IO_CFG_H

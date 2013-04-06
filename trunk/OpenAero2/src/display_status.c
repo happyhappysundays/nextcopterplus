@@ -30,8 +30,6 @@ void Display_status(void);
 // Code
 //************************************************************
 
-volatile int8_t	General_error;	// Global error flag
-
 void Display_status(void)
 {
 	int16_t temp, min, max, range, scale;
@@ -45,23 +43,21 @@ void Display_status(void)
 	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
-	LCD_Display_Text(46,(prog_uchar*)Verdana8,0,33); 	// Stability
-	LCD_Display_Text(47,(prog_uchar*)Verdana8,0,44); 	// Autolevel
-	LCD_Display_Text(133,(prog_uchar*)Verdana8,45,55); 	// Free
+	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,33); 	// Profile
+	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM:
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (233 + Config.RxMode), 45, 22);
 	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
-	print_menu_text(0, 1, (101 + Stability), 50, 44);
-	print_menu_text(0, 1, (101 + AutoLevel), 50, 33);
+	print_menu_text(0, 1, (233 + Config.RxMode), 45, 22);
+	mugui_lcd_puts(itoa((Config.Flight + 1),pBuffer,10),(prog_uchar*)Verdana8,45,33);
 
 	// Display unused RAM
 	free_ram = StackCount();
-	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,70,55);
+	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,52,44);
 
 	// Draw battery
 	drawrect(buffer, 100,4, 28, 50, 1);					// Battery body

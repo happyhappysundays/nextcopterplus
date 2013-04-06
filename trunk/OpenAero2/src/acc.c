@@ -9,12 +9,14 @@
 //* Includes
 //***********************************************************
 
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\adc.h"
 #include "..\inc\eeprom.h"
+#include "..\inc\main.h"
 
 //************************************************************
 // Prototypes
@@ -29,15 +31,13 @@ void get_raw_accs(void);
 //************************************************************
 
 int16_t accADC[3];				// Holds Acc ADC values
-bool	inv_cal_done;
-bool	normal_cal_done;
-int16_t tempaccZero = 0;
+int16_t tempaccZero = 0;		// Holds Z acc in between normal and inverted cals
 
 // Uncalibrated default values of Z middle per orientation
-int16_t UncalDef[5] = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
+int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
 
 // Polarity handling table
-int8_t Acc_Pol[5][3] =  // ROLL, PITCH, YAW
+int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 {
 	{1,1,1},		// Forward
 	{1,-1,-1},		// Vertical
@@ -58,13 +58,13 @@ void ReadAcc()					// At rest range is approx 300 - 700
 		accADC[i] -= Config.AccZero[i];
 
 		// Change polarity as per orientation mode
-		accADC[i] *= Acc_Pol[Config.Orientation][i];
+		accADC[i] *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][i]);
 	}
 
 	// Use default inverse calibration value if not done yet
-	if (!inv_cal_done)
+	if (!(Main_flags & (1 << inv_cal_done)))
 	{
-		Config.AccZero[YAW] = UncalDef[Config.Orientation];
+	//	Config.AccZero[YAW] = (int16_t)pgm_read_word(&UncalDef[Config.Orientation]);
 	}
 }
 
@@ -97,8 +97,8 @@ void CalibrateAcc(int8_t type)
 
 		tempaccZero = Config.AccZero[YAW];
 
-		normal_cal_done = true;
-		inv_cal_done = false;
+		Main_flags |= (1 << normal_cal_done);
+		Main_flags &= ~(1 << inv_cal_done);
 
 		Save_Config_to_EEPROM();
 	}
@@ -107,7 +107,7 @@ void CalibrateAcc(int8_t type)
 	// Calibrate inverted acc
 	{
 		// Only update the cal value if preceeded by a normal calibration
-		if (normal_cal_done)
+		if (Main_flags & (1 << normal_cal_done))
 		{
 			// Get average zero value (over 32 readings)
 			for (i=0;i<32;i++)
@@ -120,15 +120,15 @@ void CalibrateAcc(int8_t type)
 			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
 
 			// Test if board is actually inverted
-			if (((Acc_Pol[Config.Orientation][YAW] == 1) && (accZeroYaw < UncalDef[Config.Orientation])) || // Horizontal and 
-			    ((Acc_Pol[Config.Orientation][YAW] == -1) && (accZeroYaw > UncalDef[Config.Orientation])))  // Vertical and Upside down
+			if (((pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == 1) && (accZeroYaw < pgm_read_word(&UncalDef[Config.Orientation]))) || // Horizontal and 
+			    ((pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == -1) && (accZeroYaw > pgm_read_word(&UncalDef[Config.Orientation]))))  // Vertical and Upside down
 			{
 				// Reset zero to halfway between min and max Z
 				temp = ((tempaccZero - accZeroYaw) >> 1);
 				Config.AccZero[YAW] = tempaccZero - temp;
 
-				inv_cal_done = true;
-				normal_cal_done = false;
+				Main_flags |= (1 << inv_cal_done);
+				Main_flags &= ~(1 << normal_cal_done);
 
 				Save_Config_to_EEPROM();
 			}

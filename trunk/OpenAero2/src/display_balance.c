@@ -40,19 +40,18 @@ void Display_balance(void)
 		// HORIZONTAL: 	Pitch = X, Roll = Y
 		// UPSIDEDOWN:	Pitch = X, Roll = Y
 		// AFT:			Pitch = X, Roll = Y
-
 		// VERTICAL:	Pitch = Y, Roll = X
 		// SIDEWAYS:	Pitch = Y, Roll = X
 
 		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
 		{
-			x_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 32;
-			y_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 64;	
+			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 32;
+			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 64;	
 		}
 		else
 		{
-			x_pos = (Acc_Pol[Config.Orientation][PITCH] * accADC[PITCH]) + 32;
-			y_pos = (Acc_Pol[Config.Orientation][ROLL] * accADC[ROLL]) + 64;
+			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 32;
+			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 64;
 		}
 
 		if (x_pos < 0) x_pos = 0;

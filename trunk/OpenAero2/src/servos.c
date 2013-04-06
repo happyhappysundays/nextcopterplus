@@ -46,7 +46,7 @@ void output_servo_ppm(void)
 		{
 			output_servo_ppm_asm(&ServoOut[0]);
 		}
-		else if (Failsafe || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
+		else if ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
 		{
 			cli();
 			output_servo_ppm_asm(&ServoOut[0]);

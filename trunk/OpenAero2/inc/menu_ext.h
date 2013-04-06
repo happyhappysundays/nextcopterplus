@@ -21,13 +21,13 @@ extern void menu_rc_setup(uint8_t i);
 extern void menu_mixer(uint8_t i);
 extern void	menu_camstab(void);
 extern void menu_servo_setup(uint8_t section);
+extern void menu_flight(uint8_t i);
 extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
-extern void print_menu_items_16(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
-extern void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+extern void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc subroutines
 extern uint8_t poll_buttons(bool acceleration);

@@ -14,15 +14,17 @@
 //* Externals
 //***********************************************************
 
-extern bool	AutoLevel;
-extern bool	Stability;
 extern char pBuffer[PBUFFER_SIZE];
-extern bool	Failsafe;
 extern uint8_t	buffer[];
 extern bool	RefreshStatus;
-extern volatile int8_t General_error;
 extern uint32_t ticker_32;	
 extern uint16_t StackCount(void);	
+
+// Flags
+extern uint8_t	General_error;
+extern uint8_t	Flight_flags;
+extern uint8_t	Main_flags;
+extern uint8_t	Alarm_flags;
 
 // Debug
 extern char sBuffer[SBUFFER_SIZE];

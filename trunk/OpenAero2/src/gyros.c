@@ -11,6 +11,7 @@
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\adc.h"
+#include <avr/pgmspace.h>
 
 //************************************************************
 // Prototypes
@@ -28,7 +29,7 @@ int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
 // Polarity handling table
-int8_t Gyro_Pol[5][3] = // ROLL, PITCH, YAW
+int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW
 {
 	{1,1,-1},		// Horizontal
 	{1,1,-1},		// Vertical
@@ -49,7 +50,7 @@ void ReadGyros(void)					// Conventional orientation
 		gyroADC[i] -= gyroZero[i];
 
 		// Change polarity as per orientation mode
-		gyroADC[i] *= Gyro_Pol[Config.Orientation][i];
+		gyroADC[i] *= (int8_t)pgm_read_byte(&Gyro_Pol[Config.Orientation][i]);
 	}
 }
 

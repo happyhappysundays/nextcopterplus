@@ -77,6 +77,26 @@ typedef struct
 	int8_t	D_mult;
 } PID_mult_t;
 
+// Flight_control type (21)
+typedef struct
+{
+	int8_t		AutoMode;				// Autolevel on/off
+	int8_t		StabMode;				// Stability on/off
+	int8_t		Autolimit;				// Flight mode switch point (-125% to 125%)
+	int8_t		AutoCenter;				// Yaw heading hold auto centering
+	int8_t		Stick_3D_rate;			// 3D mode stick rate
+
+	PID_mult_t	Roll;					// Gyro PID settings [P,I,D]
+	PID_mult_t	Pitch;
+	PID_mult_t	Yaw;
+	int8_t		I_Limits[3];			// I-term limits for all axis (0 to 125%)
+
+	int8_t		A_Roll_P_mult;			// Acc gain settings
+	int8_t		A_Pitch_P_mult;
+	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
+	int8_t		AccPitchZeroTrim;
+} flight_control_t;
+
 // Settings structure
 typedef struct
 {
@@ -97,9 +117,10 @@ typedef struct
 	// RC items
 	int8_t		RxMode;					// PWM or CPPM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
-	int8_t		StabChan;				// Channel number to select stability mode
-	int8_t		AutoChan;				// Channel number for Autolevel switch input
+	int8_t		FlightChan;				// Channel number to select flight mode
 	int8_t		FlapChan;				// Channel number for second aileron input
+	int8_t		DynGainSrc;				// Dynamic gain source channel
+	int8_t		DynGain;				// Dynamic gain attenuation (0% to 100%)
 	int8_t		AileronPol;				// Aileron RC input polarity
 	int8_t		SecAileronPol;			// Second aileron RC input polarity
 	int8_t		ElevatorPol;			// Elevator RC input polarity
@@ -113,34 +134,18 @@ typedef struct
 	int8_t		FailsafeAileron;		// Aileron trim in failsafe
 	int8_t		FailsafeRudder;			// Rudder trim in failsafe
 	
-	// Autolevel settings
-	int8_t		AutoMode;
-	int8_t		Autolimit;				// Autolevel switch point (-125% to 125%)
-	int8_t		A_Roll_P_mult;			// Acc gain settings
-	int8_t		A_Pitch_P_mult;
-	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
-	int8_t		AccPitchZeroTrim;
-	int8_t		LaunchMode;				// Launch mode on/off
-	int8_t		LaunchThrPos;			// Launch mode throttle position
-	int8_t		LaunchDelay;			// Launch mode delay time
+	// Flight mode settings
 
-	// Stability PID settings
-	int8_t		StabMode;				// Stability switch mode
-	int8_t		Stablimit;				// Stability switch point (-125% to 125%)
-	int8_t		DynGainSrc;				// Dynamic gain source channel
-	int8_t		DynGain;				// Dynamic gain attenuation (0% to 100%)
-	PID_mult_t	Roll;					// Gyro PID settings
-	PID_mult_t	Pitch;
-	PID_mult_t	Yaw;
-	int8_t		I_Limits[3];			// I-term limits for all axis (0 to 125%)
+	flight_control_t FlightMode[3];		// Flight control settings (3)
 
 	// Servo travel limts
 	int32_t		Raw_I_Limits[3];		// Actual, unspanned I-term out limits to save recalculation each loop
 	int32_t		Raw_I_Constrain[3];		// Actual, unspanned I-term in limits to save recalculation each loop
 
 	// Triggers
-	int16_t		Stabtrigger;			// Actual, unspanned stability trigger to save recalculation each loop
-	int16_t		Autotrigger;			// Actual, unspanned autolevel trigger to save recalculation each loop
+	int16_t		Autotrigger1;			// Actual, unspanned flight mode 0 trigger to save recalculation each loop
+	int16_t		Autotrigger2;			// Actual, unspanned flight mode 1 
+	int16_t		Autotrigger3;			// Actual, unspanned flight mode 2
 	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
 
@@ -164,10 +169,11 @@ typedef struct
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	int8_t		AutoCenter;				// Yaw heading hold auto centering
-	int8_t		Stick_3D_rate;			// 3D mode stick rate
 	int8_t		IMUType;				// IMU style (old/new)
-			
+	int8_t		LaunchMode;				// Launch mode on/off
+	int8_t		LaunchThrPos;			// Launch mode throttle position
+	int8_t		LaunchDelay;			// Launch mode delay time
+
 	// Non-menu items 
 	// Input channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// RC channel mixing data	
@@ -180,6 +186,9 @@ typedef struct
 	
 	// Menu channel number
 	int8_t		MenuChannel;			// Current M1 to M8 channel
+
+	// Flight mode
+	int8_t		Flight;					// Flight mode in use
 
 } CONFIG_STRUCT;
 

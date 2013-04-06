@@ -54,12 +54,9 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
-	char temp = 0;
-
 	//***********************************************************
 	// I/O setup
 	//***********************************************************
-
 	// Set port directions
 	DDRA		= 0x00;		// Port A
 	DDRB		= 0x0A;		// Port B
@@ -71,61 +68,92 @@ void init(void)
 	// Preset I/O pins
 	LED1 		= 0;		// LED1 off
 	LVA 		= 0; 		// LVA alarm OFF
-	LCD_CSI		= 1;
+	LCD_CSI		= 1;		// GLCD control bits
 	LCD_SCL		= 1;
 	LCD_RES		= 1;
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PINB		= 0xF5;		// Set PB pull-ups
 	PIND		= 0x0D;		// Set PD pull-ups
+	// PIND		= 0x0C;		// Set PD pull-ups (Don't pull up RX yet)
+
+	//***********************************************************
+	// Spektrum receiver binding
+	//***********************************************************
+
+	_delay_ms(73);				// Pause while satellite wakes up	
+								// and pull-ups have time to rise
+
+	// Bind as slave if button 1 pressed
+	if ((PINB & 0x80) == 0x00)
+	{
+		DDRD		= 0xF3;		// Switch PD0 to output
+		bind_slave();
+	}
+
+	// Bind as master if button 4 pressed
+	if ((PINB & 0x10) == 0x00)
+	{
+		DDRD		= 0xF3;		// Switch PD0 to output
+		bind_master();
+	}
+
+	DDRD		= 0xF2;			// Reset Port D directions
+
+	// Set/clear pull-ups (1 = set, 0 = clear)
+	// PIND		= 0x0D;			// Set PD pull-ups (now pull up RX as well)
 
 	//***********************************************************
 	// Timers
 	//***********************************************************
 	// Timer0 (8bit) - run @ 20MHz (50ns) - max 12.8us
 	// Fast timer for small, precise interval timing
-	TCCR0A = 0;							// Normal operation
-	TCCR0B = (1 << CS00);				// Clk / 1 = 20MHz = 50ns
-	TIMSK0 = 0; 						// No interrupts
+	TCCR0A = 0;								// Normal operation
+	TCCR0B = (1 << CS00);					// Clk / 1 = 20MHz = 50ns
+	TIMSK0 = 0; 							// No interrupts
 
 	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	// Used to measure Rx Signals & control ESC/servo output rate
 	TCCR1A = 0;
-	TCCR1B = (1 << CS11);				// Clk/8 = 2.5MHz
+	TCCR1B = (1 << CS11);					// Clk/8 = 2.5MHz
 
 	// Timer2 8bit - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
 	// Used to time arm/disarm intervals
 	TCCR2A = 0;	
-	TCCR2B = 0x07;						// Clk/1024 = 19.531kHz
+	TCCR2B = 0x07;							// Clk/1024 = 19.531kHz
 	TIMSK2 = 0;
 	TIFR2 = 0;
-	TCNT2 = 0;							// Reset counter
+	TCNT2 = 0;								// Reset counter
 
 	//***********************************************************
 	// Interrupts and pin function setup
 	//***********************************************************
 
 	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
-	PCICR  = 0x0A;						// PCINT8  to PCINT15 (PCINT1 group - AUX)
-										// PCINT24 to PCINT31 (PCINT3 group - THR)
-	PCIFR  = 0x0F;						// Clear PCIF0 interrupt flag 
-										// Clear PCIF1 interrupt flag 
-										// Clear PCIF2 interrupt flag 
-										// Clear PCIF3 interrupt flag 
+	PCICR  = 0x0A;							// PCINT8  to PCINT15 (PCINT1 group - AUX)
+											// PCINT24 to PCINT31 (PCINT3 group - THR)
+	PCIFR  = 0x0F;							// Clear PCIF0 interrupt flag 
+											// Clear PCIF1 interrupt flag 
+											// Clear PCIF2 interrupt flag 
+											// Clear PCIF3 interrupt flag 
 
 	// External interrupts INT0 (Elevator) and INT1 (Aileron) and INT2 (Rudder)
-	EICRA = 0x15;						// Any change INT0
-										// Any change INT1
-										// Any change INT2
-	EIFR  = 0x07; 						// Clear INT0 interrupt flag (Elevator)
-										// Clear INT1 interrupt flag (Aileron)
-										// Clear INT2 interrupt flag (Rudder/CPPM)
+	EICRA = 0x15;							// Any change INT0
+											// Any change INT1
+											// Any change INT2
+	EIFR  = 0x07; 							// Clear INT0 interrupt flag (Elevator)
+											// Clear INT1 interrupt flag (Aileron)
+											// Clear INT2 interrupt flag (Rudder/CPPM)
+
+	//***********************************************************
+	// Start up
+	//***********************************************************
 
 	RC_Lock = false;						// Preset important flags
-	Failsafe = false;
-	AutoLevel = false;
-	Stability = false;
-	FirstTimeIMU = true;
+	Flight_flags &= ~(1 << Failsafe);
+	Flight_flags &= ~(1 << AutoLevel);
+	Flight_flags &= ~(1 << Stability);
+	Main_flags |= (1 << FirstTimeIMU);
 
 	// Initialise the GLCD
 	st7565_init();
@@ -136,49 +164,7 @@ void init(void)
 	clear_buffer(buffer);
 	write_buffer(buffer);
 
-	//***********************************************************
-	//* Display "Hold steady" message
-	//***********************************************************
-		
-	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
-	_delay_ms(300);
-	write_buffer(buffer);
-	clear_buffer(buffer);
-		
-	//***********************************************************
-
-
-	Initial_EEPROM_Config_Load();			// Loads config at start-up 
-	UpdateLimits();							// Update travel limts	
-	UpdateIMUvalues();						// Update IMU factors
-	Init_ADC();
-	init_int();								// Iitialise interrupts based on RC input mode
-
-	// Flash LED
-	LED1 = 1;
-	_delay_ms(150);
-	LED1 = 0;
-
-	// Reset I-terms
-	IntegralGyro[ROLL] = 0;	
-	IntegralGyro[PITCH] = 0;
-	IntegralGyro[YAW] = 0;
-
-	// Calibrate gyros, hopefully after motion minimised
-	CalibrateGyros();			
-
-	// UART
-	init_uart();
-
-	// Make sure there is nothing in the RX reg
-	temp = UDR0;
-
-	_delay_ms(1000);
-
-	//***********************************************************
-	//* Reload eeprom settings if all buttons are pressed 
-	//***********************************************************
-
+	// Reload eeprom settings if all buttons are pressed 
 	if ((PINB & 0xf0) == 0)
 	{
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
@@ -189,7 +175,37 @@ void init(void)
 		Save_Config_to_EEPROM();
 	}
 
-	//***********************************************************
+	// Display "Hold steady" message
+	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
+	_delay_ms(300);							// This delay prevents the GLCD flashing up a ghost image of old data
+	write_buffer(buffer);
+	clear_buffer(buffer);
+		
+	// Do startup tasks
+	Initial_EEPROM_Config_Load();			// Loads config at start-up "Config" global data structure loaded
+	UpdateLimits();							// Update travel limts	
+	UpdateIMUvalues();						// Update IMU factors
+	Init_ADC();
+	init_int();								// Iitialise interrupts based on RC input mode
+
+	// Flash LED
+	LED1 = 1;
+	_delay_ms(150);
+	LED1 = 0;
+
+	// Reset I-terms (possibly unnecessary)
+	IntegralGyro[ROLL] = 0;	
+	IntegralGyro[PITCH] = 0;
+	IntegralGyro[YAW] = 0;
+
+	// Initialise UART
+	init_uart();
+
+	// Pause to allow model to become stable
+	_delay_ms(1000);
+
+	// Calibrate gyros, hopefully after motion minimised
+	CalibrateGyros();	
 
 	// Check to see that gyros are stable
 	ReadGyros();
