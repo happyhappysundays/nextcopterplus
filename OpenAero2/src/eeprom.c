@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x0D		// eePROM signature - change for each eePROM structure change 0x0C = V1.1b11
+#define MAGIC_NUMBER 0x0E		// eePROM signature - change for each eePROM structure change 0x0C = V1.2a
 								// to force factory reset
 
 //************************************************************
@@ -63,29 +63,46 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
 	//
-	Config.Roll.P_mult = 80;			// PID defaults			
-	Config.Pitch.P_mult = 80;
-	Config.Yaw.P_mult = 80;
-	Config.A_Roll_P_mult = 60;
-	Config.A_Pitch_P_mult = 60;
+	// Flight modes
+	//
+	Config.FlightMode[0].Autolimit = -100;				// Trigger setting
+	Config.FlightMode[0].StabMode = DISABLED;			// DISABLED = 0, ALWAYSON
+	Config.FlightMode[0].AutoMode = DISABLED;			// DISABLED = 0, ALWAYSON, HANDSFREE
+	Config.FlightMode[1].Autolimit = -50;	
+	Config.FlightMode[1].StabMode = ALWAYSON;
+	Config.FlightMode[1].AutoMode = DISABLED;
+	Config.FlightMode[2].Autolimit = 50;	
+	Config.FlightMode[2].StabMode = ALWAYSON;
+	Config.FlightMode[2].AutoMode = ALWAYSON;
+
+	for (i = 0; i < 3; i++)
+	{
+		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults			
+		Config.FlightMode[i].Pitch.P_mult = 80;
+		Config.FlightMode[i].Yaw.P_mult = 80;
+		Config.FlightMode[i].A_Roll_P_mult = 60;
+		Config.FlightMode[i].A_Pitch_P_mult = 60;
+		Config.FlightMode[i].AutoCenter = STD;			// Heading hold mode
+		Config.FlightMode[i].Stick_3D_rate = 2;			// 3D mode stick rate
+	}
+	//
+	Config.Flight = 0; // Flight profile
+	//
+
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
-	Config.Stick_3D_rate = 2;
 	Config.IMUType = 1;					// Advanced IMU ON
 
-	Config.StabMode = STABCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON
-	Config.AutoMode = AUTOCHAN;			// DISABLED = 0, AUTOCHAN, STABCHAN, THREEPOS, ALWAYSON, HANDSFREE
+
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 330;
 	Config.MaxVoltage = 420;
 
-	Config.StabChan = GEAR;				// Channel GEAR switches stability by default
-	Config.AutoChan = GEAR;				// Channel AUX2 switches autolevel by default
+	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
 
-	Config.Autolimit = 10;				// Autolevel trigger setting
-	Config.Stablimit = -30;				// Stability trigger setting
+
 	Config.LaunchDelay = 10;
 
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical

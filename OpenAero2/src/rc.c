@@ -40,10 +40,7 @@ void SetFailsafe(void);
 // Code
 //************************************************************
 
-int16_t 	RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
-bool		RxActivity;
-bool		HandsFree;
-
+int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
 
 // Get raw flight channel data and remove zero offset
 // Use channel mapping for configurability
@@ -90,8 +87,15 @@ void RxGetChannels(void)
 	RxSumDiff = RxSum - OldRxSum;
 
 	// Set RX activity flag
-	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) RxActivity = true;
-	else RxActivity = false;
+	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) 
+	{
+		Flight_flags |= (1 << RxActivity);
+	}
+	else 
+	{
+		Flight_flags &= ~(1 << RxActivity);
+	}
+	
 	OldRxSum = RxSum;
 }
 
@@ -132,11 +136,11 @@ void RC_Deadband(void)
 	if (((aileron_actual < Config.HandsFreetrigger) && (aileron_actual > -Config.HandsFreetrigger))
 	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
 	{
-		HandsFree = true;
+		Flight_flags |= (1 << HandsFree);
 	}
 	else
 	{
-		HandsFree = false;
+		Flight_flags &= ~(1 << HandsFree);
 	}
 }
 

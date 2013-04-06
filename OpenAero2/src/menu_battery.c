@@ -75,7 +75,7 @@ void menu_battery(void)
 		temp_minvoltage = Config.MinVoltage;
 
 		// Print menu
-		print_menu_items_16(batt_top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
+		print_menu_items_core(batt_top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, 0, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, 0, button, &cursor, &batt_top, &menu_temp);

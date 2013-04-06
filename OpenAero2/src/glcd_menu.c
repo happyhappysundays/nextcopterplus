@@ -44,10 +44,10 @@ const char PText2[]  PROGMEM = "Hold steady";
 //															// Status menu
 const char StatusText0[]  PROGMEM = "Version: V1.2a01";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
-const char StatusText3[]  PROGMEM = "Status";
+const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
 const char StatusText5[]  PROGMEM = "0";	
-const char StatusText6[]  PROGMEM = "RAM:";
+const char StatusText6[]  PROGMEM = "Free RAM:";
 //
 const char MenuFrame0[] PROGMEM = "A"; 						// Down marker
 const char MenuFrame2[] PROGMEM = "B";						// Right
@@ -64,19 +64,20 @@ const char MainMenuItem0[]  PROGMEM = "1. General"; 		// Main menu list text
 const char MainMenuItem1[]  PROGMEM = "2. Receiver setup"; 
 const char MainMenuItem7[]  PROGMEM = "3. Stick polarity"; 
 const char MainMenuItem9[]  PROGMEM = "4. Receiver inputs";
-const char MainMenuItem2[]  PROGMEM = "5. Stability setup";
-const char MainMenuItem3[]  PROGMEM = "6. Autolevel setup";
-const char MainMenuItem8[]  PROGMEM = "7. Sensor calibration";
-const char MainMenuItem10[] PROGMEM = "8. Level meter";
-const char MainMenuItem12[] PROGMEM = "9. Channel mixing";
-const char MainMenuItem13[] PROGMEM = "10. Output mixing";
-const char MainMenuItem20[] PROGMEM = "11. Servo direction";
-const char MainMenuItem21[] PROGMEM = "12. Servo trim (%)";
-const char MainMenuItem22[] PROGMEM = "13. Neg. Servo trvl. (%)";
-const char MainMenuItem23[] PROGMEM = "14. Pos. Servo trvl. (%)";
-const char MainMenuItem4[]  PROGMEM = "15. Failsafe settings";
-const char MainMenuItem24[] PROGMEM = "16. Failsafe positions";
-const char MainMenuItem5[]  PROGMEM = "17. Battery monitor";
+const char MainMenuItem2[]  PROGMEM = "5. Flight profile 1";
+const char MainMenuItem3[]  PROGMEM = "6. Flight profile 2";
+const char MainMenuItem11[] PROGMEM = "7. Flight profile 3";
+const char MainMenuItem8[]  PROGMEM = "8. Sensor calibration";
+const char MainMenuItem10[] PROGMEM = "9. Level meter";
+const char MainMenuItem12[] PROGMEM = "10. Channel mixing";
+const char MainMenuItem13[] PROGMEM = "11. Output mixing";
+const char MainMenuItem20[] PROGMEM = "12. Servo direction";
+const char MainMenuItem21[] PROGMEM = "13. Servo trim (%)";
+const char MainMenuItem22[] PROGMEM = "14. Neg. Servo trvl. (%)";
+const char MainMenuItem23[] PROGMEM = "15. Pos. Servo trvl. (%)";
+const char MainMenuItem4[]  PROGMEM = "16. Failsafe settings";
+const char MainMenuItem24[] PROGMEM = "17. Failsafe positions";
+const char MainMenuItem5[]  PROGMEM = "18. Battery monitor";
 //
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
 //
@@ -96,8 +97,8 @@ const char PText19[] PROGMEM = "Acc";
 const char PText26[] PROGMEM = "Trim";
 //
 const char AutoMenuItem2[]  PROGMEM = "Launch delay:";		// Autolevel text
-const char AutoMenuItem1[]  PROGMEM = "Roll P:";
-const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
+const char AutoMenuItem20[]  PROGMEM = "Acc Roll P:";
+const char AutoMenuItem21[]  PROGMEM = "Acc Pitch P:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char AutoMenuItem9[]  PROGMEM = "Autolevel:";
@@ -126,8 +127,8 @@ const char SensorMenuItem3[]  PROGMEM = "Failsafe";
 //
 const char RCMenuItem0[]  PROGMEM = "CPPM order:"; 			// RC setup text
 const char RCMenuItem1[]  PROGMEM = "RX sync:"; 
-const char RCMenuItem2[]  PROGMEM = "Stability Ch.:";
-const char RCMenuItem3[]  PROGMEM = "Autolevel Ch.:";
+const char RCMenuItem2[]  PROGMEM = "Flightmode:";
+//const char RCMenuItem3[]  PROGMEM = "Autolevel Ch.:";
 const char RCMenuItem4[]  PROGMEM = "2nd Ail. Ch.:";
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
@@ -138,8 +139,10 @@ const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char RCMenuItem11[] PROGMEM = "Differential:";
 const char RCMenuItem13[] PROGMEM = "Satellite";
 //
+const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:";    		// Stability text
 const char StabMenuItem3[]  PROGMEM = "Roll D:";
+const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char StabMenuItem5[]  PROGMEM = "Pitch I:";
 const char StabMenuItem6[]  PROGMEM = "Pitch D:"; 
 const char StabMenuItem7[]  PROGMEM = "Yaw P:"; 
@@ -200,6 +203,8 @@ const char ChannelRef5[] PROGMEM = "Flap";
 const char ChannelRef6[] PROGMEM = "Aux1"; 
 const char ChannelRef7[] PROGMEM = "Aux2"; 
 const char ChannelRef8[] PROGMEM = "None";
+const char ChannelRef10[] PROGMEM = "Throt.";					// RC channel text (Abbr.)
+const char ChannelRef12[] PROGMEM = "Elev."; 
 //
 const char ErrorText0[] PROGMEM = "Sensor"; 				// Error text
 const char ErrorText3[] PROGMEM = "No";
@@ -255,8 +260,9 @@ const char *text_menu[] PROGMEM =
 		//
 		SensorMenuItem2,																	// Inv.Cal. 37
 		//
-		AutoMenuItem11, AutoMenuItem12, AutoMenuItem13, AutoMenuItem14, 					// 38 to 43  Flight modes 
-		AutoMenuItem15, AutoMenuItem17, 
+		AutoMenuItem11,AutoMenuItem15, AutoMenuItem17, 										// 38 to 40  Flight modes 
+		Dummy0, Dummy0, Dummy0, 				
+		
 		//
 		SensorMenuItem3, PText26, 															// 44 F/S 45 Trim
 		//
@@ -278,12 +284,12 @@ const char *text_menu[] PROGMEM =
 		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem7, MainMenuItem9, MainMenuItem2, 
-		MainMenuItem3, 																		// 77 to 94 Main menu
+		MainMenuItem3, MainMenuItem11,														// 77 to 94 Main menu
 		MainMenuItem8, MainMenuItem10, MainMenuItem12,MainMenuItem13, 
 		MainMenuItem20,MainMenuItem21,MainMenuItem22, MainMenuItem23, MainMenuItem4, 
-		MainMenuItem24, MainMenuItem5,
+		MainMenuItem24,MainMenuItem5,
 		//
-		Dummy0, Dummy0, Dummy0,	Dummy0,														// Dummy 95 to 97
+		Dummy0, Dummy0,	Dummy0,																// Dummy 95 to 97
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 Error, lost, model
 		//
@@ -319,24 +325,30 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, RCMenuItem3, 								// 149 to 158 rc menu
-		RCMenuItem4, RCMenuItem8, RCMenuItem12, RCMenuItem9, RCMenuItem10, 
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	RCMenuItem4, 								// 149 to 159 rc menu
+		StabMenuItem14, StabMenuItem15,
+		RCMenuItem8, RCMenuItem12, RCMenuItem9, RCMenuItem10, 
 		RCMenuItem11,
 		//
-		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 159 to 163 Failsafe
+		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 160 to 164 Failsafe
 		//
-		StatusText1, StabMenuItem13, AutoMenuItem1,											// 164 to 172 Autolevel menu
-		AutoMenuItem4, AutoMenuItem7, AutoMenuItem8, 
-		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19,											
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 165 to 177 general
+		GeneralText2,MainMenuItem6, GeneralText3, 
+		GeneralText6,GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
+		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19,	
 		//
-		StatusText1,StabMenuItem13, StabMenuItem14, StabMenuItem15, AutoMenuItem1, 			// 173 to 188 Stability menu
-		StabMenuItem2, StabMenuItem3,  
-		AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem7, StabMenuItem8, 
-		StabMenuItem9, StabMenuItem10,StabMenuItem11,StabMenuItem12,
+
+		AutoMenuItem10, AutoMenuItem9, StabMenuItem13, 										// 178 to 198 Flight menu
+		GeneralText8, GeneralText9,
+		AutoMenuItem1, StabMenuItem2, StabMenuItem3, 										// Roll gyro
+		AutoMenuItem4, StabMenuItem5, StabMenuItem6, 										// Pitch gyro
+		StabMenuItem7, StabMenuItem8, StabMenuItem9, 										// Yaw gyro
+		StabMenuItem10,StabMenuItem11,StabMenuItem12,										// I-limits
+		AutoMenuItem20, AutoMenuItem21, 													// Roll acc, Pitch acc
+		AutoMenuItem7, AutoMenuItem8, 														// Trims
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 189 to 200 general
-		GeneralText2,MainMenuItem6, GeneralText3, GeneralText6,GeneralText7, 				// Don't forget to change the CONTRAST define in menu_driver.c
-		GeneralText8, GeneralText9, IMU0,
+		Dummy0,Dummy0,																		// 199 to 200
+
 		//
 		MixerItem18, MixerItem19, MixerItem16, MixerItem8, MixerItem9, MixerItem10,			// 201 to 206 Servo (29)
 		//
@@ -351,7 +363,10 @@ const char *text_menu[] PROGMEM =
 		//
 		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode1, RXMode2, RXMode3,			// 233 to 239 RX mode
 		//
-		Dummy0,
+		Dummy0,																				// 240
+		//
+		ChannelRef10, ChannelRef12, 														// 241 - 242
+		//
 	}; 
 
 //************************************************************

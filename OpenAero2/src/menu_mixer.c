@@ -129,7 +129,7 @@ void menu_mixer(uint8_t section)
 		memcpy(&values[INPUTITEMS + 1],&Config.Channel[Config.MenuChannel].output_b,sizeof(int8_t) * (OUTPUTITEMS - 1));
 
 		// Print menu
-		print_menu_items(mix_top + offset, MIXERSTART, &values[0], MIXERITEMS,(prog_uchar*)mixer_menu_ranges, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
+		print_menu_items(mix_top + offset, MIXERSTART, &values[0], MIXERITEMS,(prog_uchar*)mixer_menu_ranges, 0, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(items, MIXERSTART, offset, button, &cursor, &mix_top, &menu_temp);

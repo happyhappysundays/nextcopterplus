@@ -85,10 +85,8 @@ void UpdateIMUvalues(void);
 // Code
 //************************************************************
 
-int8_t	ACC_LPF_FACTOR;		// User-set Acc low-pass filter
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
-bool 	FirstTimeIMU;
 
 int16_t	angle[2]; 			// Attitude
 
@@ -107,10 +105,10 @@ void getEstimatedAttitude(void)
 
 	// Get global timestamp
 	// The first calculation has no PreviousTime to measure from, so zero and move on.
-	if (FirstTimeIMU)
+	if (Main_flags & (1 << FirstTimeIMU))
 	{
 		deltaTime = 0.0f;
-		FirstTimeIMU = false;
+		Main_flags &= ~(1 << FirstTimeIMU);
 		PreviousTime = ticker_32;
 		
 		// Reset accumulating variables if Autolevel has been off.
@@ -131,10 +129,10 @@ void getEstimatedAttitude(void)
 	// Initialization
 	for (axis = 0; axis < 3; axis++) 
 	{
-		if (ACC_LPF_FACTOR > 0)
+		if (Config.Acc_LPF > 0)
 		{
 			// LPF for ACC values
-			accSmooth[axis] = ((accSmooth[axis] * (ACC_LPF_FACTOR - 1)) + accADC[axis]) / ACC_LPF_FACTOR;
+			accSmooth[axis] = ((accSmooth[axis] * (Config.Acc_LPF - 1)) + accADC[axis]) / Config.Acc_LPF;
 		}
 		else
 		{
@@ -221,7 +219,6 @@ void getEstimatedAttitude(void)
 
 void UpdateIMUvalues(void)
 {
-	ACC_LPF_FACTOR = Config.Acc_LPF;
 	GYR_CMPF_FACTOR = Config.CF_factor * 10;
 	INV_GYR_CMPF_FACTOR = (1.0f / (GYR_CMPF_FACTOR + 1.0f));
 }

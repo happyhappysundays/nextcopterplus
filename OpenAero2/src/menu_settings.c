@@ -40,40 +40,35 @@ void menu_rc_setup(uint8_t i);
 
 #define RCTEXT 233 		// Start of value text items
 #define FSTEXT 103
-#define AUTOTEXT 38 
-#define STABTEXT 38
 #define GENERALTEXT	22
 
-#define RCITEMS 10 		// Number of menu items
+#define RCITEMS 11 		// Number of menu items
 #define FSITEMS 5 
-#define AUTOITEMS 9 
-#define STABITEMS 16 
-#define GENERALITEMS 12 
+#define GENERALITEMS 13 
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[5][STABITEMS] PROGMEM = 
+const uint8_t RCMenuText[3][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 105, 141, 141, 141, 141, 0},		// RC setup
+	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0},		// RC setup
 	{FSTEXT, 0, 0, 0, 0},										// Failsafe
-	{AUTOTEXT, 0, 0, 0, 0, 0, 101, 0, 0},						// Autolevel
-	{STABTEXT, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	// Stability
-	{GENERALTEXT, 124, 101, 0, 0, 101, 119, 0, 0, 48, 0, 101},	// General
+	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 0, 0, 101, 101, 0, 0},// General
 };
 
 
-// Have to size each element to STABITEMS even though they are  smaller... fix this later
-const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM = 
+// Have to size each element to GENERALITEMS even though they are  smaller... fix this later
+const menu_range_t rc_menu_ranges[3][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (10)
+		// RC setup (11)
 		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Min, Max, Increment, Style, Default
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Stabchan
-		{THROTTLE,NOCHAN,1,1,GEAR},		// Autochan
 		{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
+		{THROTTLE,NOCHAN,1,1,AUX1},		// DynGainSrc
+		{0,100,5,0,0},					// Dynamic gain
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Second aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
@@ -89,41 +84,9 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{-125,125,1,0,0},
 	},
 	{
-		// Autolevel (9)
-		{DISABLED,HANDSFREE,1,1,AUTOCHAN},
-		{-125,125,10,0,10},
-		{0,127,1,0,60},
-		{0,127,1,0,60},
-		{-127,127,1,0,0}, 
-		{-127,127,1,0,0},
-		{OFF,ON,1,1,OFF},				// Launch mode
-		{-55,125,10,0,0},				// Launch trigger
-		{1,60,1,0,10},					// Launch delay
-		{0,60,1,0,10},					// Launch delay
-	},
-	{
-		// Stability (16)
-		{DISABLED,ALWAYSON,1,1,STABCHAN},// Min, Max, Increment, Style, Default
-		{-125,125,10,0,-30},
-		{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Dynamic P gain channel
-		{0,100,5,0,0},					// Dynamic gain amount
-		{0,127,1,0,80},
-		{0,127,1,0,0},
-		{0,127,1,0,0},
-		{0,127,1,0,80},
-		{0,127,1,0,0}, 
-		{0,127,1,0,0},
-		{0,127,1,0,80},
-		{0,127,1,0,0},
-		{0,127,1,0,0},
-		{0,125,5,0,0},
-		{0,125,5,0,0},
-		{0,125,5,0,0},
-	},
-	{
-		// General (12)
-		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	
-		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL},
+		// General (13)
+		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode 165
+		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{1,60,1,0,10},					// Status menu timeout
 		{0,30,1,0,3},					// LMA enable
@@ -131,9 +94,10 @@ const menu_range_t rc_menu_ranges[5][STABITEMS] PROGMEM =
 		{LOW,HIGH,1,1,LOW},				// Camstab servo rate
 		{1,64,1,0,8},					// Acc. LPF
 		{10,100,5,0,30},				// CF factor
-		{STD,FIXED,1,1,STD},			// HH mode
-		{0,5,1,0,4},					// 3D rate (0 is fastest, 5 slowest)
 		{OFF,ON,1,1,ON},				// Advanced IMUType
+		{OFF,ON,1,1,ON},				// Launch mode on/off
+		{-55,125,10,0,0},				// Launch mode throttle position
+		{0,60,1,0,10},					// Launch mode delay time
 	}
 };
 //************************************************************
@@ -145,7 +109,7 @@ void menu_rc_setup(uint8_t section)
 	static	uint8_t rc_top = RCSTART;
 	static	uint8_t old_section;
 
-	int8_t values[STABITEMS]; // This has to be large enough to hold the largest number of menu items (currently STABITEMS)
+	int8_t values[GENERALITEMS]; // This has to be large enough to hold the largest number of menu items (currently STABITEMS)
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i = 0;
@@ -164,7 +128,7 @@ void menu_rc_setup(uint8_t section)
 	while(button != BACK)
 	{
 		// Get menu offsets and load values from eeprom
-		// 1 = RC, 2 = Failsafe, 3 = Autolevel, 4 = Stability, 5 = General
+		// 1 = RC, 2 = Failsafe, 3 = General
 		switch(section)
 		{
 			case 1:				// RC setup menu
@@ -177,18 +141,8 @@ void menu_rc_setup(uint8_t section)
 				items = FSITEMS;
 				memcpy(&values[0],&Config.FailsafeType,sizeof(int8_t) * FSITEMS);
 				break;
-			case 3:				// Autolevel menu
+			case 3:				// General menu
 				offset = RCITEMS + FSITEMS;
-				items = AUTOITEMS;
-				memcpy(&values[0],&Config.AutoMode,sizeof(int8_t) * AUTOITEMS);
-				break;
-			case 4:				// Stability menu
-				offset = RCITEMS + FSITEMS + AUTOITEMS;
-				items = STABITEMS;
-				memcpy(&values[0],&Config.StabMode,sizeof(int8_t) * STABITEMS);
-				break;
-			case 5:				// General menu
-				offset = RCITEMS + FSITEMS + AUTOITEMS + STABITEMS;
 				items = GENERALITEMS;
 				memcpy(&values[0],&Config.MixMode,sizeof(int8_t) * GENERALITEMS);
 				break;
@@ -203,7 +157,7 @@ void menu_rc_setup(uint8_t section)
 		rc_type = Config.RxMode;
 
 		// Print menu
-		print_menu_items(rc_top + offset, RCSTART + offset, &values[0], items, (prog_uchar*)rc_menu_ranges[section - 1], RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
+		print_menu_items(rc_top + offset, RCSTART + offset, &values[0], items, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &rc_top, &menu_temp);
@@ -224,13 +178,7 @@ void menu_rc_setup(uint8_t section)
 			case 2:				// Failsafe menu
 				memcpy(&Config.FailsafeType,&values[0],sizeof(int8_t) * FSITEMS);
 				break;
-			case 3:				// Autolevel menu
-				memcpy(&Config.AutoMode,&values[0],sizeof(int8_t) * AUTOITEMS);
-				break;
-			case 4:				// Stability menu
-				memcpy(&Config.StabMode,&values[0],sizeof(int8_t) * STABITEMS);
-				break;
-			case 5:				// General menu
+			case 3:				// General menu
 				memcpy(&Config.MixMode,&values[0],sizeof(int8_t) * GENERALITEMS);
 				break;
 			default:

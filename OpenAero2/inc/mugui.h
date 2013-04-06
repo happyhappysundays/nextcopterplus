@@ -16,5 +16,4 @@ extern void pgm_mugui_scopy(const char *s);
 
 extern const unsigned char Verdana8[] PROGMEM;
 extern const unsigned char Verdana14[] PROGMEM;
-extern const unsigned char Verdana22[] PROGMEM;
 extern const unsigned char Wingdings[] PROGMEM;
