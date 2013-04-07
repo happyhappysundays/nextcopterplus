@@ -44,7 +44,7 @@ void menu_rc_setup(uint8_t i);
 
 #define RCITEMS 11 		// Number of menu items
 #define FSITEMS 5 
-#define GENERALITEMS 13 
+#define GENERALITEMS 15 
 
 //************************************************************
 // RC menu items
@@ -54,7 +54,7 @@ const uint8_t RCMenuText[3][GENERALITEMS] PROGMEM =
 {
 	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0},		// RC setup
 	{FSTEXT, 0, 0, 0, 0},										// Failsafe
-	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 0, 0, 101, 101, 0, 0},// General
+	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0, 0},// General
 };
 
 
@@ -84,7 +84,7 @@ const menu_range_t rc_menu_ranges[3][GENERALITEMS] PROGMEM =
 		{-125,125,1,0,0},
 	},
 	{
-		// General (13)
+		// General (15)
 		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode 165
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
@@ -92,12 +92,14 @@ const menu_range_t rc_menu_ranges[3][GENERALITEMS] PROGMEM =
 		{0,30,1,0,3},					// LMA enable
 		{OFF,ON,1,1,OFF},				// Camstab enable
 		{LOW,HIGH,1,1,LOW},				// Camstab servo rate
+		{OFF,ON,1,1,OFF},				// Auto-center
 		{1,64,1,0,8},					// Acc. LPF
 		{10,100,5,0,30},				// CF factor
 		{OFF,ON,1,1,ON},				// Advanced IMUType
 		{OFF,ON,1,1,ON},				// Launch mode on/off
 		{-55,125,10,0,0},				// Launch mode throttle position
 		{0,60,1,0,10},					// Launch mode delay time
+		{0,5,1,0,4},					// 3D rate (0 is fastest, 5 slowest)
 	}
 };
 //************************************************************
@@ -106,25 +108,17 @@ const menu_range_t rc_menu_ranges[3][GENERALITEMS] PROGMEM =
 
 void menu_rc_setup(uint8_t section)
 {
-	static	uint8_t rc_top = RCSTART;
-	static	uint8_t old_section;
+	uint8_t rc_top = RCSTART;
 
 	int8_t values[GENERALITEMS]; // This has to be large enough to hold the largest number of menu items (currently STABITEMS)
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i = 0;
-	uint8_t temp_type, rc_type;
+	uint8_t temp_type;
 
 	uint8_t offset;			// Index into channel structure
 	uint8_t	items;			// Items in group
 
-	// If submenu item has changed, reset submenu positions
-	if (section != old_section)
-	{
-		rc_top = RCSTART;
-		old_section = section;
-	}
-		
 	while(button != BACK)
 	{
 		// Get menu offsets and load values from eeprom
@@ -154,7 +148,6 @@ void menu_rc_setup(uint8_t section)
 
 		// Save pre-edited value for mixer mode
 		temp_type = Config.MixMode;
-		rc_type = Config.RxMode;
 
 		// Print menu
 		print_menu_items(rc_top + offset, RCSTART + offset, &values[0], items, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);

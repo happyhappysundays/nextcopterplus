@@ -77,24 +77,29 @@ typedef struct
 	int8_t	D_mult;
 } PID_mult_t;
 
-// Flight_control type (21)
+// Flight_control type (22)
 typedef struct
 {
-	int8_t		AutoMode;				// Autolevel on/off
 	int8_t		StabMode;				// Stability on/off
-	int8_t		Autolimit;				// Flight mode switch point (-125% to 125%)
-	int8_t		AutoCenter;				// Yaw heading hold auto centering
-	int8_t		Stick_3D_rate;			// 3D mode stick rate
+	int8_t		AutoMode;				// Autolevel on/off
+	int8_t		Profilelimit;			// Flight mode switch point (-125% to 125%)
 
+	int8_t		Roll_type;				// Gyro type (rate mode, axis lock, AVCS simulate)
 	PID_mult_t	Roll;					// Gyro PID settings [P,I,D]
-	PID_mult_t	Pitch;
-	PID_mult_t	Yaw;
-	int8_t		I_Limits[3];			// I-term limits for all axis (0 to 125%)
-
+	int8_t		Roll_limit;				// I-term limits (0 to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
-	int8_t		A_Pitch_P_mult;
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
+
+	int8_t		Pitch_type;
+	PID_mult_t	Pitch;
+	int8_t		Pitch_limit;
+	int8_t		A_Pitch_P_mult;
 	int8_t		AccPitchZeroTrim;
+
+	int8_t		Yaw_type;
+	PID_mult_t	Yaw;
+	int8_t		Yaw_limit;
+
 } flight_control_t;
 
 // Settings structure
@@ -135,7 +140,6 @@ typedef struct
 	int8_t		FailsafeRudder;			// Rudder trim in failsafe
 	
 	// Flight mode settings
-
 	flight_control_t FlightMode[3];		// Flight control settings (3)
 
 	// Servo travel limts
@@ -159,7 +163,7 @@ typedef struct
 	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
 	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	// General items
+	// General items (15)
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
 	int8_t		Orientation;			// Horizontal / vertical / upside-down
 	int8_t		Contrast;				// Contrast setting
@@ -167,12 +171,14 @@ typedef struct
 	int8_t		LMA_enable;				// LMA setting
 	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
+	int8_t		AutoCenter;				// Yaw heading hold auto centering ***
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		IMUType;				// IMU style (old/new)
 	int8_t		LaunchMode;				// Launch mode on/off
 	int8_t		LaunchThrPos;			// Launch mode throttle position
 	int8_t		LaunchDelay;			// Launch mode delay time
+	int8_t		Stick_3D_rate;			// 3D mode stick rate
 
 	// Non-menu items 
 	// Input channel configuration

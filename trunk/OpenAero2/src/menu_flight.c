@@ -34,52 +34,54 @@ void menu_flight(uint8_t i);
 // Defines
 //************************************************************
 
-#define FLIGHTSTART 178 // Start of Menu text items
+#define FLIGHTSTART 180 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
-#define FLIGHTITEMS 21 	// Number of menu items
+#define FLIGHTITEMS 22 	// Number of menu items
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {FLIGHTTEXT, FLIGHTTEXT, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {FLIGHTTEXT, FLIGHTTEXT, 0, 48, 0, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0};
 
 // Have to size each element to STABITEMS even though they are  smaller... fix this later
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
-	// Flight (21)
+	// Flight (22)
 	{DISABLED,ALWAYSON,1,1,DISABLED},// Min, Max, Increment, Style, Default
 	{DISABLED,HANDSFREE,1,1,DISABLED},
 	{-125,125,5,0,0},				// Trigger
-	{STD,FIXED,1,1,STD},			// HH mode
-	{0,5,1,0,4},					// 3D rate (0 is fastest, 5 slowest)
+	{RATE,SP_LOCK, 1, 1, RATE},		// Gyro type
 	{0,127,1,0,80},					// Roll PID
 	{0,127,1,0,0},
 	{0,127,1,0,0},
+	{0,125,5,0,0},					// I-limits
+	{0,127,1,0,60},					// Acc gain
+	{-127,127,1,0,0}, 				// Acc trim
+	{RATE,SP_LOCK, 1, 1, RATE},		// Gyro type
 	{0,127,1,0,80},					// Pitch PID
 	{0,127,1,0,0}, 
 	{0,127,1,0,0},
+	{0,125,5,0,0},					// I-limits
+	{0,127,1,0,60},
+	{-127,127,1,0,0},
+	{RATE,SP_LOCK, 1, 1, RATE},		// Gyro type
 	{0,127,1,0,80},					// Yaw PID
 	{0,127,1,0,0},	
 	{0,127,1,0,0},
 	{0,125,5,0,0},					// I-limits
-	{0,125,5,0,0},
-	{0,125,5,0,0},
-	{0,127,1,0,60},					// Acc gain
-	{0,127,1,0,60},
-	{-127,127,1,0,0}, 				// Acc trim
-	{-127,127,1,0,0},
 };
+
 //************************************************************
 // Main menu-specific setup
 //************************************************************
 
 void menu_flight(uint8_t mode)
 {
-	static	uint8_t flight_top = FLIGHTSTART;
+	static uint8_t flight_top = FLIGHTSTART;
 
-	int8_t values[FLIGHTITEMS]; // This has to be large enough to hold the largest number of menu items (currently STABITEMS)
+	int8_t values[FLIGHTITEMS];
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t temp_type = 0;
@@ -87,7 +89,7 @@ void menu_flight(uint8_t mode)
 	while(button != BACK)
 	{
 		// Get values from eeprom
-		memcpy(&values[0],&Config.FlightMode[mode - 1].AutoMode,sizeof(int8_t) * FLIGHTITEMS);
+		memcpy(&values[0],&Config.FlightMode[mode - 1].StabMode,sizeof(int8_t) * FLIGHTITEMS);
 
 
 		// Save pre-edited value for mixer mode
@@ -107,7 +109,7 @@ void menu_flight(uint8_t mode)
 		}
 
 		// Update value in config structure
-		memcpy(&Config.FlightMode[mode - 1].AutoMode,&values[0],sizeof(int8_t) * FLIGHTITEMS);
+		memcpy(&Config.FlightMode[mode - 1].StabMode,&values[0],sizeof(int8_t) * FLIGHTITEMS);
 
 		if (button == ENTER)
 		{

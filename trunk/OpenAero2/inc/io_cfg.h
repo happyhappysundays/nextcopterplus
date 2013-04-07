@@ -125,7 +125,7 @@ enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
-enum I_term_type	{STD = 0, AUTO, FIXED};
+enum Gyro_type		{RATE = 0, LOCK, SP_LOCK};
 enum Failsafes		{SIMPLE = 0, ADVANCED};
 
 //***********************************************************

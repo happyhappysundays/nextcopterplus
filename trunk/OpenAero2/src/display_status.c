@@ -42,7 +42,7 @@ void Display_status(void)
 	// Display text
 	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
-	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// Input
+	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// RX sync
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,33); 	// Profile
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM:
 

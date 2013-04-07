@@ -32,7 +32,7 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 23 	// Number of menu items
+#define MIXERITEMS 23 	// Number of menu items (INPUTITEMS + OUTPUTITEMS)
 #define INPUTITEMS 16
 #define OUTPUTITEMS 7
 
@@ -85,8 +85,7 @@ const menu_range_t mixer_menu_ranges[] PROGMEM =
 
 void menu_mixer(uint8_t section)
 {
-	static	uint8_t mix_top = MIXERSTART;
-	static	uint8_t old_section;
+	uint8_t mix_top = MIXERSTART;
 
 	int8_t values[MIXERITEMS];
 	menu_range_t range;
@@ -111,13 +110,6 @@ void menu_mixer(uint8_t section)
 			offset = 0;
 			items = INPUTITEMS;
 			break;
-	}
-
-	// If submenu item has changed, reset submenu positions
-	if (section != old_section)
-	{
-		mix_top = MIXERSTART;
-		old_section = section;
 	}
 
 	while(button != BACK)

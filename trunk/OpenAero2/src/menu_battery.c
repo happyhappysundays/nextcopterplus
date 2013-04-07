@@ -57,7 +57,7 @@ const menu_range_t batt_menu_ranges[] PROGMEM =
 
 void menu_battery(void)
 {
-	static uint8_t batt_top = BATTSTART;
+	uint8_t batt_top = BATTSTART;
 	int16_t values[BATTITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;

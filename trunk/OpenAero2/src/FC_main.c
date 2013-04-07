@@ -169,6 +169,7 @@
 //			Removed logo, added new faster startup messages.
 //			Added master/slave binding for Spektrum Satellite RXs at power-up
 // Alpha 2	Three configurable flight modes with PID etc.
+// Alpha 3	Rearranged menus and added axis-specific gyro modes
 //
 //***********************************************************
 //* To do
@@ -247,10 +248,10 @@ uint8_t	Main_flags = 0;
 uint8_t	Alarm_flags = 0;
 
 // Global buffers
-char pBuffer[PBUFFER_SIZE];			// Print buffer
+char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
 
 //Debug
-char sBuffer[SBUFFER_SIZE];			// Serial buffer
+char sBuffer[SBUFFER_SIZE];			// Serial buffer (25 bytes)
 
 //************************************************************
 //* Main loop
