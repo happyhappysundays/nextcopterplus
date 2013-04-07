@@ -42,7 +42,7 @@ const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
 const char PText2[]  PROGMEM = "Hold steady";
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2a01";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2a03";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -151,7 +151,7 @@ const char StabMenuItem9[]  PROGMEM = "Yaw D:";
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
 const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
-const char StabMenuItem13[]  PROGMEM = "Trigger:";
+const char StabMenuItem13[]  PROGMEM = "Profile switch:";
 const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch.:";
 const char StabMenuItem15[]  PROGMEM = "Dyn.Gain:";
 //
@@ -172,6 +172,7 @@ const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char GeneralText8[] PROGMEM =  "Head. hold:";
 const char GeneralText9[] PROGMEM =  "3D rate:";
+const char GeneralText10[] PROGMEM =  "Auto-center:";
 //
 const char MixerItem0[] PROGMEM = "Source A:";					// Mixer menu items
 const char MixerItem13[] PROGMEM = "Source B:";
@@ -230,8 +231,12 @@ const char MOUT6[] PROGMEM = "OUT6";
 const char MOUT7[] PROGMEM = "OUT7";	
 const char MOUT8[] PROGMEM = "OUT8";	
 //
-const char HeadingHold1[] PROGMEM = "Auto";	
-const char HeadingHold2[] PROGMEM = "3D";
+const char HeadingHold1[] PROGMEM = "Rate";	
+const char HeadingHold2[] PROGMEM = "Axis lock";
+const char HeadingHold3[] PROGMEM = "AVCS";
+const char GyroType1[] PROGMEM = "Roll gyro:";	
+const char GyroType2[] PROGMEM = "Pitch gyro:";
+const char GyroType3[] PROGMEM = "Yaw gyro:";
 const char FSmode0[]  PROGMEM = "Fixed";
 const char FSmode1[]  PROGMEM = "Adv.";
 //
@@ -268,7 +273,7 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem9, AutoMenuItem10,														// 46 to 47 Autolevel, stability													// 
 		// 
-		MixerItem11, HeadingHold1, HeadingHold2, Dummy0, 									// 48 to 52 HH modes (Normal, Auto, 3D)
+		HeadingHold1, HeadingHold2, HeadingHold3, Dummy0, 									// 48 to 52 HH modes (Rate, Hold, Special Hold)
 		Dummy0, 
 		//
 		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 53 to 59 ******
@@ -332,25 +337,21 @@ const char *text_menu[] PROGMEM =
 		//
 		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 160 to 164 Failsafe
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 165 to 177 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 165 to 179 general
 		GeneralText2,MainMenuItem6, GeneralText3, 
+		GeneralText10,
 		GeneralText6,GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
 		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19,	
+		GeneralText9, 
 		//
-
-		AutoMenuItem10, AutoMenuItem9, StabMenuItem13, 										// 178 to 198 Flight menu
-		GeneralText8, GeneralText9,
-		AutoMenuItem1, StabMenuItem2, StabMenuItem3, 										// Roll gyro
-		AutoMenuItem4, StabMenuItem5, StabMenuItem6, 										// Pitch gyro
-		StabMenuItem7, StabMenuItem8, StabMenuItem9, 										// Yaw gyro
-		StabMenuItem10,StabMenuItem11,StabMenuItem12,										// I-limits
-		AutoMenuItem20, AutoMenuItem21, 													// Roll acc, Pitch acc
-		AutoMenuItem7, AutoMenuItem8, 														// Trims
+		AutoMenuItem10, AutoMenuItem9, StabMenuItem13, 										// 180 to 201 Flight menu
+		GyroType1, AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,	// Roll gyro
+		GyroType2, AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem11, AutoMenuItem21, AutoMenuItem8, // Pitch gyro
+		GyroType3, StabMenuItem7, StabMenuItem8, StabMenuItem9, StabMenuItem12,	 							// Yaw gyro
 		//
-		Dummy0,Dummy0,																		// 199 to 200
-
 		//
-		MixerItem18, MixerItem19, MixerItem16, MixerItem8, MixerItem9, MixerItem10,			// 201 to 206 Servo (29)
+		Dummy0,Dummy0,Dummy0, Dummy0,Dummy0,
+		//MixerItem18, MixerItem19, MixerItem16, MixerItem8, MixerItem9, MixerItem10,
 		//
 		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 207 Input mixers
 		MixerItem17, MixerItem4, MixerItem1, MixerItem5, MixerItem1, 

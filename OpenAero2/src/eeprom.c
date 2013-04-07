@@ -62,16 +62,15 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
-	//
+	
 	// Flight modes
-	//
-	Config.FlightMode[0].Autolimit = -100;				// Trigger setting
-	Config.FlightMode[0].StabMode = DISABLED;			// DISABLED = 0, ALWAYSON
-	Config.FlightMode[0].AutoMode = DISABLED;			// DISABLED = 0, ALWAYSON, HANDSFREE
-	Config.FlightMode[1].Autolimit = -50;	
+	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
+	Config.FlightMode[0].StabMode = 0;
+	Config.FlightMode[0].AutoMode = 0;
+	Config.FlightMode[1].Profilelimit = -50;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
-	Config.FlightMode[1].AutoMode = DISABLED;
-	Config.FlightMode[2].Autolimit = 50;	
+	Config.FlightMode[1].AutoMode = 0;
+	Config.FlightMode[2].Profilelimit = 50;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
 
@@ -82,11 +81,10 @@ void Set_EEPROM_Default_Config(void)
 		Config.FlightMode[i].Yaw.P_mult = 80;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
-		Config.FlightMode[i].AutoCenter = STD;			// Heading hold mode
-		Config.FlightMode[i].Stick_3D_rate = 2;			// 3D mode stick rate
+		//Config.FlightMode[i].Roll_type = RATE;
 	}
 	//
-	Config.Flight = 0; // Flight profile
+	//Config.Flight = 0; // Flight profile
 	//
 
 	Config.Acc_LPF = 8;
@@ -111,6 +109,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.LMA_enable = 3;				// Default to 3 minutes
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
+	Config.Stick_3D_rate = 2;
 
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
 }

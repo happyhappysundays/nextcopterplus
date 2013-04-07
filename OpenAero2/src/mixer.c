@@ -489,22 +489,21 @@ void get_preset_mix(channel_t* preset)
 void UpdateLimits(void)
 {
 	uint8_t i;
-	int8_t temp8;
+	int8_t temp8[3] = {Config.FlightMode[Config.Flight].Roll_limit, Config.FlightMode[Config.Flight].Pitch_limit, Config.FlightMode[Config.Flight].Yaw_limit};
 	int32_t temp32, gain32;
 	int8_t gains[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
 
 	// Update triggers
-	Config.HandsFreetrigger = Config.FlightMode[Config.Flight].Autolimit * 5;
-	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Autolimit);
-	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Autolimit);
-	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Autolimit);
+	Config.HandsFreetrigger = Config.FlightMode[Config.Flight].Profilelimit * 5;
+	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Profilelimit);
+	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Profilelimit);
+	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Profilelimit);
 	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
 
 	// Update I_term limits
 	for (i = 0; i < 3; i++)
 	{
-		temp8 	= Config.FlightMode[Config.Flight].I_Limits[i];			// 0 to 125%
-		temp32 	= temp8; 						// Promote
+		temp32 	= temp8[i]; 						// Promote
 
 		// I-term output (throw)
 		// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
