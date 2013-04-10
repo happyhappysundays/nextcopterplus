@@ -40,18 +40,18 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	// Aileron -= Roll; (normal)
 	// Elevator += Pitch; (normal)
 
-	// Value, Servo_reverse, Offset, min_travel, max_travel, Failsafe,
+	// Value, 
 	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,NORMAL,0,-100,100,-100,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,NORMAL,0,-100,100, 0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
-	{0,NORMAL,0,-100,100, 0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
-	{0,NORMAL,0,-100,100,   0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
+	{0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,NOCHAN,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 
 }; 
 
@@ -61,14 +61,18 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	// L.Elevon + Roll (reversed) - Pitch (normal)
 	// R.Elevon + Roll (reversed) + Pitch (reversed)
 
-	{0,NORMAL,0,-100,100,-100,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NORMAL,0,-100,100,   0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,NORMAL,0,-100,100, 	0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5
-	{0,NORMAL,0,-100,100, 	0,ELEVATOR,-100,AILERON,-100,OFF,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut6 (Left elevon)
-	{0,NORMAL,0,-100,100,   0,AILERON,100,ELEVATOR,-100,OFF,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut7 (Left elevon)
-	{0,NORMAL,0,-100,100,   0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	// Value, 
+	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
+	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
+
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5
+	{0,ELEVATOR,-100,AILERON,-100,OFF,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut6 (Left elevon)
+	{0,AILERON,100,ELEVATOR,-100,OFF,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut7 (Left elevon)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 }; 
 
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -82,25 +86,29 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	// M6 Pitch (Tilt) + Pitch gyro;
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
-	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,NORMAL,0,-100,100,0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
-	{0,NORMAL,0,-100,100,0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
-	{0,NORMAL,0,-100,100,0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
-	{0,NORMAL,0,-100,100,0,AILERON,100,NOCHAN,0,OFF,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
 };
 
 //************************************************************
 
 void ProcessMixer(void)
 {
+	static	int16_t flap = 0;
+	static	int16_t slowFlaps = 0;
+	static	uint8_t flapskip;
+	static	int16_t roll = 0;
+
 	uint8_t i, outputs;
+	int8_t	speed;
 	int16_t temp = 0;
 	int16_t temp2 = 0;
-	static	int16_t flap = 0;
-	static	int16_t roll = 0;
 	int16_t	pitch_trim = 0;
 	int16_t	roll_trim = 0;
 	bool	TwoAilerons = false;
@@ -371,6 +379,38 @@ void ProcessMixer(void)
 	// The flap part of the signal has been removed so we have to reinsert it here.
 	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
 	{
+		// If flapspeed is set to anything other than zero (normal)
+		if (Config.flapspeed) 
+		{
+			// Do flap speed control
+			if (((slowFlaps - flap) >= 1) || ((slowFlaps - flap) <= -1))	// Difference larger than one step, so ok
+			{
+				speed = Config.flapspeed;				// Need to manipulate speed as target approaches										
+			}
+			else
+			{
+				speed = 1;								// Otherwise this will oscillate
+			}
+
+			if ((slowFlaps < flap) && (flapskip == Config.flapspeed))
+			{
+				slowFlaps += speed;
+			} 
+			else if ((slowFlaps > flap) && (flapskip == Config.flapspeed)) 
+			{
+				slowFlaps -= speed;
+			}
+			
+		} 
+		// No speed control requested so copy flaps
+		else
+		{
+		 	slowFlaps = flap;
+		}
+
+		flapskip++;
+		if (flapskip > Config.flapspeed) flapskip = 0;
+
 		for (i = 0; i < outputs; i++)
 		{
 			// Get solution
@@ -379,11 +419,11 @@ void ProcessMixer(void)
 			// Restore flaps
 			if (Config.Channel[i].source_a == AILERON)
 			{
-				temp += flap;
+				temp += slowFlaps;
 			}
 			if (Config.Channel[i].source_a == Config.FlapChan)
 			{
-				temp -= flap;
+				temp -= slowFlaps;
 			}
 
 			// Update channel data solution
@@ -401,7 +441,7 @@ void ProcessMixer(void)
 		// Get primary value
 		temp = Config.Channel[i].value;
 		
-		if (Config.Channel[i].Servo_reverse == ON) // Reverse this channel's primary
+		if (Config.Servo_reverse[i] == ON) // Reverse this channel's primary
 		{	
 			temp = -temp;
 		}
@@ -531,10 +571,10 @@ void UpdateLimits(void)
 	// Update travel limits
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Limits[i].minimum = scale_percent(Config.Channel[i].min_travel);
-		Config.Limits[i].maximum = scale_percent(Config.Channel[i].max_travel);
-		Config.Limits[i].failsafe = scale_percent(Config.Channel[i].Failsafe);
-		Config.Limits[i].trim = scale_percent(Config.Channel[i].Offset);
+		Config.Limits[i].minimum = scale_percent(Config.min_travel[i]);
+		Config.Limits[i].maximum = scale_percent(Config.max_travel[i]);
+		Config.Limits[i].failsafe = scale_percent(Config.Failsafe[i]);
+		Config.Limits[i].trim = scale_percent(Config.Offset[i]);
 	}
 
 	// Update dynamic gain divisor

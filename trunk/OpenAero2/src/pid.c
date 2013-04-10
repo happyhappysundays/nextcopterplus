@@ -78,7 +78,6 @@ void Calculate_PID(void)
 	int8_t 	I_gain[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
 	int8_t 	D_gain[3] = {Config.FlightMode[Config.Flight].Roll.D_mult, Config.FlightMode[Config.Flight].Pitch.D_mult, Config.FlightMode[Config.Flight].Yaw.D_mult};
 	int8_t 	L_gain[2] = {Config.FlightMode[Config.Flight].A_Roll_P_mult, Config.FlightMode[Config.Flight].A_Pitch_P_mult};
-	int8_t 	GyroType[3] = {Config.FlightMode[Config.Flight].Roll_type, Config.FlightMode[Config.Flight].Pitch_type, Config.FlightMode[Config.Flight].Yaw_type};
 
 	int16_t	roll_actual = 0;
 	int16_t temp16 = 0;
@@ -86,10 +85,8 @@ void Calculate_PID(void)
 
 	//************************************************************
 	// Set up dynamic gain variable once per loop
-	//************************************************************
-	//
 	// N.B. Config.DynGainDiv = 2500 / Config.DynGain;
-	//
+	//************************************************************
 
 	// Channel controlling the dynamic gain
 	temp16 = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
@@ -129,60 +126,56 @@ void Calculate_PID(void)
 
 	for (axis = 0; axis <= YAW; axis ++)
 	{
-
 		//************************************************************
-		// Increment and limit gyro I-terms, handle heading hold modes
+		// Filter and calculate gyro error
 		//************************************************************
 
-		if (Flight_flags & (1 << Stability))
+		// Reduce Gyro drift noise before adding into I-term
+		if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
 		{
-			// For 3D mode, change neutral with sticks
-			if (GyroType[axis] == SP_LOCK)
-			{
-				// Reset the I-terms when you need to adjust the I-term with RC
-				// Note that the I-term is not constrained when no RC input is present.
-				if (RCinputsAxis[axis] != 0)
-				{
-					if (IntegralGyro[axis] > Config.Raw_I_Constrain[axis])
-					{
-						IntegralGyro[axis] = Config.Raw_I_Constrain[axis];
-					}
-					if (IntegralGyro[axis] < -Config.Raw_I_Constrain[axis])
-					{
-						IntegralGyro[axis] = -Config.Raw_I_Constrain[axis];
-					}
+			gyroADC[axis] = 0;
+		}
 
-					// Adjust I-term with RC input (scaled down by Config.Stick_3D_rate)
-					IntegralGyro[axis] -= (RCinputsAxis[axis] >> Config.Stick_3D_rate); 
-				}
-			}	
+		// Calculate gyro error from gyro and stick data (scaled down by Config.Stick_Lock_rate)
+		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> Config.Stick_Lock_rate);
 
-			// Reduce Gyro drift noise before adding into I-term
-			if ((gyroADC[axis] > GYRO_DEADBAND) || (gyroADC[axis] < -GYRO_DEADBAND)) 
+		//************************************************************
+		// Increment and limit gyro I-terms, handle heading hold nicely
+		//************************************************************
+
+		IntegralGyro[axis] += currentError[axis]; 
+
+		// Reset the I-terms when you need to adjust the I-term with RC
+		// Note that the I-term is not constrained when no RC input is present.
+		if (RCinputsAxis[axis] != 0)
+		{
+			if (IntegralGyro[axis] > Config.Raw_I_Constrain[axis])
 			{
-				IntegralGyro[axis] += gyroADC[axis]; 
+				IntegralGyro[axis] = Config.Raw_I_Constrain[axis];
 			}
-
-			// Handle auto-centering of I-terms in Auto mode
-			// If no significant gyro input and IntegralGyro[axis] is non-zero, pull it back slowly.
-			else if ((Config.AutoCenter == ON) && (Config.CamStab == ON))
+			if (IntegralGyro[axis] < -Config.Raw_I_Constrain[axis])
 			{
-				if (IntegralGyro[axis] > 0)
-				{
-					IntegralGyro[axis] --;
-				}
-				else if (IntegralGyro[axis] < 0)
-				{	
-					IntegralGyro[axis] ++;
-				}
-			}		
-		} // Stability
+				IntegralGyro[axis] = -Config.Raw_I_Constrain[axis];
+			}
+		}
 
 		//************************************************************
-		// Calculate gyro error from gyro and stick data
+		// Handle auto-centering of I-terms in Camstab autocenter mode
+		// If no significant gyro input and IntegralGyro[axis] is non-zero, 
+		// pull it back slowly.
 		//************************************************************
-		
-		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> 2);	// Reduce RC weight to counter P-gain increase
+
+		if ((Config.AutoCenter == ON) && (Config.CamStab == ON))
+		{
+			if (IntegralGyro[axis] > 0)
+			{
+				IntegralGyro[axis] --;
+			}
+			else if (IntegralGyro[axis] < 0)
+			{	
+				IntegralGyro[axis] ++;
+			}
+		}		
 
 		//************************************************************
 		// Calculate PID gains

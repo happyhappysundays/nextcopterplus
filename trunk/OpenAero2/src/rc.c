@@ -188,7 +188,7 @@ void SetFailsafe(void)
 
 		// Rescale and set noob-friendly mixer failsafe percentages
 		failsafe = (ServoOut[i] - 3750) / 12;
-		Config.Channel[i].Failsafe = failsafe;
+		Config.Failsafe[i] = failsafe;
 	}
 
 	Save_Config_to_EEPROM();

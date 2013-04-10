@@ -149,7 +149,7 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_servo_setup(5); 	// 17.Failsafe positions
 			break;
 		case MAINSTART+17:
-			menu_battery(); 		// 18.Battery monitor
+			menu_rc_setup(4); 		// 18.Battery monitor
 			break;
 		default:
 			break;

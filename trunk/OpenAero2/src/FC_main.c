@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Alpha 3 - April 2013
+// Version 1.2 Alpha 5 - April 2013
 //
 // Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papperazzi project
@@ -170,12 +170,18 @@
 //			Added master/slave binding for Spektrum Satellite RXs at power-up
 // Alpha 2	Three configurable flight modes with PID etc.
 // Alpha 3	Rearranged menus and added axis-specific gyro modes
+// Alpha 4	Rearranged menus and added auto-presets when changing gyro modes
+//			Completely reworked/simplified PID gyro input code for I-terms 
+//			Added flap deployment speed (0 = normal, 20 = super slow)
+// Alpha 5	Reduced menu memory usage. Fixed axis lock bug.
+//
 //
 //***********************************************************
 //* To do
 //***********************************************************
 // 
-// 
+// Clean up menu hacks
+// Menu positions not remembered correctly
 //
 //***********************************************************
 //* Includes
@@ -287,6 +293,7 @@ int main(void)
 
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 	uint8_t i = 0;
+	int8_t	old_flight = 0;			// Curret/old flight profile
 
 	init();							// Do all init tasks
 
@@ -571,6 +578,13 @@ int main(void)
 		else
 		{
 			Config.Flight = 0;			// Flight mode 0
+		}
+
+		// Refresh limts when changed
+		if (Config.Flight != old_flight)
+		{
+			UpdateLimits(); // debug
+			old_flight = Config.Flight;
 		}
 
 		//************************************************************

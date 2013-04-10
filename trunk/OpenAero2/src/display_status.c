@@ -65,8 +65,8 @@ void Display_status(void)
 
 	vbat_temp = GetVbat();
 
-	min = Config.MinVoltage * Config.BatteryCells;		// Calculate battery voltage limits
-	max = Config.MaxVoltage * Config.BatteryCells;
+	min = Config.MinVoltage * Config.BatteryCells * 4;	// Calculate battery voltage limits
+	max = Config.MaxVoltage * Config.BatteryCells * 4;
 	range = max - min;
 	scale = range / 50;
 

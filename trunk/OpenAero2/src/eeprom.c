@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x0E		// eePROM signature - change for each eePROM structure change 0x0C = V1.2a
+#define MAGIC_NUMBER 0x0F		// eePROM signature - change for each eePROM structure change 0x0C = V1.2a4
 								// to force factory reset
 
 //************************************************************
@@ -54,6 +54,18 @@ void Set_EEPROM_Default_Config(void)
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
 	}
+	// Servo defaults
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		//Config.Servo_reverse[i] = NORMAL;
+		//Config.Offset[i] = 0;
+		Config.min_travel[i] = -100;
+		Config.max_travel[i] = 100;
+		//Config.Failsafe[i] = 0;
+	}
+	Config.Failsafe[0] = -100;			// Throttle should failsafe to minimum
+
+
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
 	//
@@ -65,27 +77,33 @@ void Set_EEPROM_Default_Config(void)
 	
 	// Flight modes
 	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
-	Config.FlightMode[0].StabMode = 0;
-	Config.FlightMode[0].AutoMode = 0;
+
 	Config.FlightMode[1].Profilelimit = -50;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
-	Config.FlightMode[1].AutoMode = 0;
+	Config.FlightMode[1].Yaw_type = LOCK; // debug
+	Config.FlightMode[1].Yaw_limit = 125; // debug
+
 	Config.FlightMode[2].Profilelimit = 50;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
+	Config.FlightMode[2].Yaw_type = LOCK; // debug
+	Config.FlightMode[2].Yaw_limit = 125; // debug
 
 	for (i = 0; i < 3; i++)
 	{
-		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults			
+		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults		
+		Config.FlightMode[i].Roll.I_mult = 50;	
 		Config.FlightMode[i].Pitch.P_mult = 80;
+		Config.FlightMode[i].Pitch.I_mult = 50;
 		Config.FlightMode[i].Yaw.P_mult = 80;
+		Config.FlightMode[i].Yaw.I_mult = 80;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
-		//Config.FlightMode[i].Roll_type = RATE;
 	}
 	//
 	//Config.Flight = 0; // Flight profile
 	//
+	//Config.CamStab = ON; // Debug
 
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
@@ -94,8 +112,8 @@ void Set_EEPROM_Default_Config(void)
 
 
 	Config.BatteryType = LIPO;
-	Config.MinVoltage = 330;
-	Config.MaxVoltage = 420;
+	Config.MinVoltage = 83;				// 83 * 4 = 332
+	Config.MaxVoltage = 105;			// 105 * 4 = 420
 
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
@@ -109,7 +127,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.LMA_enable = 3;				// Default to 3 minutes
 
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
-	Config.Stick_3D_rate = 2;
+	Config.Stick_Lock_rate = 2;
 
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
 }

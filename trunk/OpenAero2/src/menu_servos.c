@@ -86,8 +86,8 @@ const menu_range_t servo_menu_ranges[5][1] PROGMEM =
 void menu_servo_setup(uint8_t section)
 {
 	uint8_t servo_top = SERVOSTART;
+	int8_t *value_ptr;
 
-	int8_t values[SERVOITEMS];
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i = 0;
@@ -104,41 +104,38 @@ void menu_servo_setup(uint8_t section)
 			switch(section)
 			{
 				case 1:
-					memcpy(&values[i],&Config.Channel[i].Servo_reverse,sizeof(int8_t));
+					value_ptr = &Config.Servo_reverse[0];
 					break;
 				case 2:
-					memcpy(&values[i],&Config.Channel[i].Offset,sizeof(int8_t));
+					value_ptr = &Config.Offset[0];
 					servo_enable = true;
 					break;
 				case 3:
-					memcpy(&values[i],&Config.Channel[i].min_travel,sizeof(int8_t));
+					value_ptr = &Config.min_travel[0];
 					servo_enable = true;
 					zero_setting = true;
 					break;
 				case 4:
-					memcpy(&values[i],&Config.Channel[i].max_travel,sizeof(int8_t));
+					value_ptr = &Config.max_travel[0];
 					servo_enable = true;
 					zero_setting = true;
 					break;
 				case 5:
-					memcpy(&values[i],&Config.Channel[i].Failsafe,sizeof(int8_t));
+					value_ptr = &Config.Failsafe[0];
 					servo_enable = true;
 					zero_setting = true;
 					break;
 				default:
-					memcpy(&values[i],&Config.Channel[i].Servo_reverse,sizeof(int8_t));
+					value_ptr = &Config.Servo_reverse[0];
 					break;
 			}
 		}
 
 		// Print menu
-		print_menu_items(servo_top, SERVOSTART, &values[0], SERVOITEMS, (prog_uchar*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
-		//print_menu_items(servo_top, SERVOSTART, &values[0], SERVOITEMS, (prog_uchar*)servo_menu_ranges[section - 1], SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
+		print_menu_items(servo_top, SERVOSTART, value_ptr, 1, (prog_uchar*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &servo_top, &menu_temp);
-
-		//range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], menu_temp - SERVOSTART);
 		range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], 0);
 
 		if (button == ENTER)
@@ -147,7 +144,7 @@ void menu_servo_setup(uint8_t section)
 			// Zero limits if adjusting
 			if (zero_setting)
 			{
-				values[menu_temp - SERVOSTART] = 0;
+				value_ptr[menu_temp - SERVOSTART] = 0;
 			}
 
 			// Do not allow servo enable for throttle if in CPPM mode
@@ -156,43 +153,18 @@ void menu_servo_setup(uint8_t section)
 				servo_enable = false;
 			}
 
-			values[menu_temp - SERVOSTART] = do_menu_item(menu_temp, values[menu_temp - SERVOSTART], range, 0, text_link, servo_enable, (menu_temp - SERVOSTART));
+			do_menu_item(menu_temp, value_ptr + (menu_temp - SERVOSTART), 1, range, 0, text_link, servo_enable, (menu_temp - SERVOSTART));
 		}
 
 		// Disable servos
 		servo_enable = false;
-
-		// Update value in config structure
-		for (i = 0; i < SERVOITEMS; i++)
-		{
-			switch(section)
-			{
-				case 1:
-					memcpy(&Config.Channel[i].Servo_reverse,&values[i],sizeof(int8_t));
-					break;
-				case 2:
-					memcpy(&Config.Channel[i].Offset,&values[i],sizeof(int8_t));
-					break;
-				case 3:
-					memcpy(&Config.Channel[i].min_travel,&values[i],sizeof(int8_t));
-					break;
-				case 4:
-					memcpy(&Config.Channel[i].max_travel,&values[i],sizeof(int8_t));
-					break;
-				case 5:
-					memcpy(&Config.Channel[i].Failsafe,&values[i],sizeof(int8_t));
-					break;
-				default:
-					memcpy(&Config.Channel[i].Servo_reverse,&values[i],sizeof(int8_t));
-					break;
-			}
-		}
 
 		if (button == ENTER)
 		{
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
+
 	UpdateLimits();					// Update actual servo trims
 	_delay_ms(200);
 }
