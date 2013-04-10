@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "..\inc\mixer.h"
 
-#define CONTRAST 167 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 169 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -32,9 +32,8 @@ void print_menu_frame(uint8_t style);
 
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
-uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
-void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -86,26 +85,23 @@ void print_menu_frame(uint8_t style)
 
 //**********************************************************************
 // Print menu items primary subroutine
-// Why are there two? 8-bit menu structures take up much less space
-// but are obviously limited to +/-127.
-// We need a 16-bit version for things like the battery menu.
-// GCC doesn't allow over-driving functions like C++ so...
-// print_menu_items() is an 8-bit wrapper for 16-bit print_menu_items_core().
 //
 // Usage:
 // top = position in submenu list
 // start = start of submenu text list. (top - start) gives the offset into the list.
 // values = pointer to array of values to change
+// multiplier = display/actual if type = 2, otherwise defaults to 1
 // menu_ranges = pointer to array of min/max/inc/style/defaults
 // rangetype = unique (0) all values are different, copied (1) all values are the same
 // MenuOffsets = originally an array, now just a fixed horizontal offset for the value text
 // text_link = pointer to the text list for the values if not numeric
 // cursor = cursor position
 //**********************************************************************
-void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
 {
 	menu_range_t	range1;
-	
+	uint8_t multiplier;
+		
 	// Clear buffer before each update
 	clear_buffer(buffer);
 	print_menu_frame(0);
@@ -126,28 +122,22 @@ void print_menu_items_core(uint8_t top, uint8_t start, int16_t values[], prog_uc
 			// Use just the first entry in array for all 
 			memcpy_P(&range1, &menu_ranges[0], sizeof(range1));
 		}
-		print_menu_text(values[top+i - start], range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, (uint8_t)pgm_read_byte(&lines[i]));
+	
+		if (range1.style == 2)
+		{
+			multiplier = mult;
+		}
+		else
+		{
+			multiplier = 1;
+		}
+
+		print_menu_text((values[top+i - start] * multiplier), range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, (uint8_t)pgm_read_byte(&lines[i]));
 	}
 
 	print_cursor(cursor);	// Cursor
 	write_buffer(buffer);
 	poll_buttons(true);
-}
-
-//*******************************************************************
-// Print menu items (int8_t) for handling signed 8-bit +/-127 values
-//*******************************************************************
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], int8_t size, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
-{
-	int16_t big_values[size];
-	int8_t	i = 0;
-
-	for (i = 0; i < size; i++)	// Promote 8-bit structure to 16-bit ones
-	{
-		big_values[i] = values[i];
-	}
-
-	print_menu_items_core(top, start, &big_values[0], (prog_uchar*)menu_ranges, rangetype, MenuOffsets, (prog_uchar*)text_link, cursor);
 }
 
 //************************************************************
@@ -164,7 +154,8 @@ menu_range_t get_menu_range(prog_uchar* menu_ranges, uint8_t menuitem)
 //************************************************************
 // Edit curent value according to limits and increment
 // menuitem = Item reference
-// value	= Value of item
+// values = pointer to value to change
+// multiplier = display/actual
 // range 	= Limits of item
 // offset	= Horizontal offset on screen
 // text_link = Start of text list for the values if not numeric
@@ -172,11 +163,19 @@ menu_range_t get_menu_range(prog_uchar* menu_ranges, uint8_t menuitem)
 // servo_number = Servo number to update
 //************************************************************
 
-uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
+void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
 {
 	mugui_size16_t size;
 	int16_t temp16;
 	int8_t i;
+	int16_t value = (int8_t)*values;
+
+	// Multiply value for display only if style is 2
+	if (range.style == 2)
+	{
+		value = value * mult;
+	}
+	else mult = 1;
 
 	button = NONE;
 
@@ -205,13 +204,13 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 		gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (prog_uchar*)Verdana14, 0, 0);
 
 		// Print value
-		if (range.style == 0) // numeric
+		if ((range.style == 0) || (range.style == 2)) // numeric and numeric * 4
 		{
 			// Write numeric value, centered on screen
 			mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana14, &size);
 			mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana14,((128-size.x)/2)+offset,25);
 		}
-		else // Text
+		else // text
 		{
 			// Write text, centered on screen
 			pgm_mugui_scopy((char*)pgm_read_word(&text_menu[text_link + value])); // Copy string to pBuffer
@@ -253,18 +252,18 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 		if (button == BACK)	// Clear value
 		{
-			value = range.default_value;
+			value = (range.default_value * mult);
 		}
 
 		// Limit values to set ranges
-		if (value < range.lower) 
+		if (value < (range.lower * mult)) 
 		{
-			value = range.lower;
+			value = range.lower * mult;
 		}
 		
-		if (value > range.upper) 
+		if (value > (range.upper * mult)) 
 		{
-			value = range.upper;
+			value = range.upper * mult;
 		}
 
 		// Update contrast setting
@@ -310,7 +309,14 @@ uint16_t do_menu_item(uint8_t menuitem, int16_t value, menu_range_t range, int8_
 
 	// Exit
 	button = ENTER;
-	return value;
+
+	// Divide value from that displayed if style = 2
+	if (range.style == 2)
+	{
+		value = value / mult;
+	}
+
+	*values = (int8_t)value;
 }
 
 //************************************************************
@@ -430,11 +436,11 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 
 void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y)
 {
-	if (style == 0) // Numeral
+	if ((style == 0) || (style == 2)) // Numeral
 	{
 		mugui_lcd_puts(itoa(values,pBuffer,10),(prog_uchar*)Verdana8,x,y);
 	}
-	else 			// Text
+	else if (style == 1) // Text
 	{
 		LCD_Display_Text(text_link, (prog_uchar*)Verdana8,x,y);
 	}

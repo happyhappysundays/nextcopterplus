@@ -45,10 +45,10 @@ const uint8_t BattMenuText[BATTITEMS] PROGMEM = {BATTTEXT, 0, 0, 0, 0};
 const menu_range_t batt_menu_ranges[] PROGMEM = 
 {
 	{0,1,1,1,LIPO}, 	// Min, Max, Increment, Style, Default
-	{0,12,1,0,0},
-	{0,2000,1,0,1080},
-	{120,430,1,0,420},
-	{80,400,1,0,360}
+	{0,12,1,0,0},		// Cells
+	{0,127,1,0,27},		// Trigger
+	{30,108,1,0,105},	// Max
+	{20,100,1,0,83}		// Min
 };
 
 //************************************************************
@@ -58,24 +58,23 @@ const menu_range_t batt_menu_ranges[] PROGMEM =
 void menu_battery(void)
 {
 	uint8_t batt_top = BATTSTART;
-	int16_t values[BATTITEMS];
+	int8_t *value_ptr;
 	menu_range_t range;
 	uint8_t text_link = 0;
+	int8_t temp_cells = 0;
+	int8_t temp_minvoltage = 0;
 
-	int16_t temp_cells = 0;
-	int16_t temp_minvoltage = 0;
 	
 	while(button != BACK)
 	{
-		// Load values from eeprom
-		memcpy(&values[0],&Config.BatteryType,sizeof(int16_t) * BATTITEMS);
-
 		// Save pre-edited values
 		temp_cells = Config.BatteryCells;
 		temp_minvoltage = Config.MinVoltage;
 
+		value_ptr = (int8_t*)&Config.BatteryType;
+
 		// Print menu
-		print_menu_items_core(batt_top, BATTSTART, &values[0], (prog_uchar*)batt_menu_ranges, 0, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
+		print_menu_items(batt_top, BATTSTART, &Config.BatteryType, 4, (prog_uchar*)batt_menu_ranges, 0, BATTOFFSET, (prog_uchar*)BattMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(BATTITEMS, BATTSTART, 0, button, &cursor, &batt_top, &menu_temp);
@@ -84,18 +83,15 @@ void menu_battery(void)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&BattMenuText[menu_temp - BATTSTART]);
-			values[menu_temp - BATTSTART] = do_menu_item(menu_temp, values[menu_temp - BATTSTART], range, 0, text_link, false, 0);
+			do_menu_item(menu_temp, value_ptr + (menu_temp - BATTSTART), 4, range, 0, text_link, false, 0);
 		}
 
 		// See if cell number or min_volts has changed
-		if ((temp_cells != values[1]) || (temp_minvoltage != values[4]))
+		if ((temp_cells != Config.BatteryCells) || (temp_minvoltage != Config.MinVoltage))
 		{
 			// Recalculate if more cells
-			values[2] = values[1] * values[4];
+			Config.PowerTrigger = Config.BatteryCells * Config.MinVoltage;
 		}
-
-		// Update value in config structure
-		memcpy(&Config.BatteryType,&values[0],sizeof(int16_t) * BATTITEMS);
 
 		if (button == ENTER)
 		{

@@ -36,14 +36,7 @@ typedef struct
 {
 	int16_t		value;					// Current value of this channel
 
-	// Servo menu
-	int8_t		Servo_reverse;			// Reversal of output channel
-	int8_t		Offset;					// Trim/neutral position (-125 to 125)
-	int8_t		min_travel;				// Minimum output value (-125 to 125)
-	int8_t		max_travel;				// Maximum output value (-125 to 125)
-	int8_t		Failsafe;				// Failsafe position (-125 to 125)
-
-	// Input mix menu
+	// Input mix menu (15)
 	int8_t		source_a;				// Source A RC input for calculation
 	int8_t		source_a_volume;		// Percentage of source to pass on
 	int8_t		source_b;				// Optional source B RC input for calculation
@@ -60,7 +53,7 @@ typedef struct
 	int8_t		pitch_acc;				// Use pitch acc
 	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
 
-	// Ouput mix menu
+	// Ouput mix menu (6)
 	int8_t		output_b;				// Channel B for calculation
 	int8_t		output_b_volume;		// Percentage of output to use
 	int8_t		output_c;				// Channel C for calculation
@@ -80,9 +73,9 @@ typedef struct
 // Flight_control type (22)
 typedef struct
 {
+	int8_t		Profilelimit;			// Flight mode switch point (-125% to 125%)
 	int8_t		StabMode;				// Stability on/off
 	int8_t		AutoMode;				// Autolevel on/off
-	int8_t		Profilelimit;			// Flight mode switch point (-125% to 125%)
 
 	int8_t		Roll_type;				// Gyro type (rate mode, axis lock, AVCS simulate)
 	PID_mult_t	Roll;					// Gyro PID settings [P,I,D]
@@ -119,7 +112,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items
+	// RC items (13)
 	int8_t		RxMode;					// PWM or CPPM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
@@ -131,8 +124,10 @@ typedef struct
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		Differential;			// Aileron differential
+	int8_t		flapspeed;				// Flap deploy speed
+	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 
-	// Failsafe items
+	// Failsafe items (5)
 	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
 	int8_t		FailsafeThrottle;		// Throttle position in failsafe
 	int8_t		FailsafeElevator;		// Elevator trim in failsafe
@@ -156,16 +151,16 @@ typedef struct
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
-	// Battery settings
-	int16_t		BatteryType;			// LiPo, NiMh
-	int16_t		BatteryCells;			// Number of cells (0~12)	
-	int16_t		PowerTrigger;			// Trip voltage
-	int16_t		MaxVoltage;				// Maximum cell voltage in charged state
-	int16_t		MinVoltage;				// Minimum cell voltage in discharge state
+	// Battery settings (5)
+	int8_t		BatteryType;			// LiPo, NiMh
+	int8_t		BatteryCells;			// Number of cells (0~12)	
+	int8_t		PowerTrigger;			// Trip voltage (0 to 127 = 0 to 25.4V)
+	int8_t		MaxVoltage;				// Maximum cell voltage in charged state (0 to 127 = 0 to 508mV)
+	int8_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	// General items (15)
+	// General items (14)
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
-	int8_t		Orientation;			// Horizontal / vertical / upside-down
+	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		Status_timer;			// Status screen timer
 	int8_t		LMA_enable;				// LMA setting
@@ -178,11 +173,17 @@ typedef struct
 	int8_t		LaunchMode;				// Launch mode on/off
 	int8_t		LaunchThrPos;			// Launch mode throttle position
 	int8_t		LaunchDelay;			// Launch mode delay time
-	int8_t		Stick_3D_rate;			// 3D mode stick rate
 
 	// Non-menu items 
 	// Input channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// RC channel mixing data	
+
+	// Servo menu
+	int8_t		Servo_reverse[MAX_OUTPUTS];	// Reversal of output channel
+	int8_t		Offset[MAX_OUTPUTS];		// Trim/neutral position (-125 to 125)
+	int8_t		min_travel[MAX_OUTPUTS];	// Minimum output value (-125 to 125)
+	int8_t		max_travel[MAX_OUTPUTS];	// Maximum output value (-125 to 125)
+	int8_t		Failsafe[MAX_OUTPUTS];		// Failsafe position (-125 to 125)
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
@@ -203,7 +204,7 @@ typedef struct
 	int16_t lower;						// Lower limit for menu item
 	int16_t upper;						// Upper limit for menu item
 	uint8_t increment;					// Increment for menu item
-	uint8_t style;						// 0 = numeral, 1 = text
+	uint8_t style;						// 0 = numeral, 1 = text, 2 = numeric * 4
 	int16_t default_value;				// Default value for this item
 } menu_range_t; 
 
