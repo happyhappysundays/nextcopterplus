@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include <string.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
@@ -70,8 +71,8 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
-	{0,ELEVATOR,-100,AILERON,-100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
-	{0,AILERON,100,ELEVATOR,-100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
+	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
+	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
 	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
@@ -120,11 +121,11 @@ void ProcessMixer(void)
 
 	if (Config.CamStab == ON)
 	{
-		outputs = MIN_OUTPUTS;
+		outputs = MIN_OUTPUTS;		// 4 Channels
 	}
 	else
 	{
-		outputs = MAX_OUTPUTS;
+		outputs = PSUEDO_OUTPUTS;	// 12 Channels
 	}
 
 	//************************************************************
@@ -223,19 +224,38 @@ void ProcessMixer(void)
 			}
 
 			// Mix in gyros
-			if (Config.Channel[i].roll_gyro == ON)
+			switch (Config.Channel[i].roll_gyro)
 			{
-				temp = temp - PID_Gyros[ROLL];
+				case ON:
+					temp = temp - PID_Gyros[ROLL];
+					break;
+				case REV:
+					temp = temp + PID_Gyros[ROLL];
+					break;	
+				default:
+					break;
 			}
-
-			if (Config.Channel[i].pitch_gyro == ON)
+			switch (Config.Channel[i].pitch_gyro)
 			{
-				temp = temp + PID_Gyros[PITCH];
+				case ON:
+					temp = temp + PID_Gyros[PITCH];
+					break;
+				case REV:
+					temp = temp - PID_Gyros[PITCH];
+					break;	
+				default:
+					break;
 			}
-
-			if (Config.Channel[i].yaw_gyro == ON)
+			switch (Config.Channel[i].yaw_gyro)
 			{
-				temp = temp - PID_Gyros[YAW];
+				case ON:
+					temp = temp - PID_Gyros[YAW];
+					break;
+				case REV:
+					temp = temp + PID_Gyros[YAW];
+					break;	
+				default:
+					break;
 			}
 
 			// Save solution for now
@@ -269,18 +289,36 @@ void ProcessMixer(void)
 			// Get solution
 			temp = Config.Channel[i].value;
 
-			if (Config.Channel[i].roll_acc == ON)
+			switch (Config.Channel[i].roll_acc)
 			{
-				// Add in Roll trim
-				temp += roll_trim;
-				temp = temp - PID_ACCs[ROLL];
+				case ON:
+					// Add in Roll trim
+					temp += roll_trim;
+					temp = temp - PID_ACCs[ROLL];
+					break;
+				case REV:
+					// Add in Roll trim
+					temp -= roll_trim;
+					temp = temp + PID_ACCs[ROLL];
+					break;	
+				default:
+					break;
 			}
 
-			if (Config.Channel[i].pitch_acc == ON)
+			switch (Config.Channel[i].pitch_acc)
 			{
-				// Add in Pitch trim
-				temp += pitch_trim;
-				temp = temp + PID_ACCs[PITCH];
+				case ON:
+					// Add in Pitch trim
+					temp += pitch_trim;
+					temp = temp + PID_ACCs[PITCH];
+					break;
+				case REV:
+					// Add in Pitch trim
+					temp -= pitch_trim;
+					temp = temp - PID_ACCs[PITCH];
+					break;	
+				default:
+					break;
 			}
 
 			// Save solution for now
@@ -484,6 +522,8 @@ void ProcessMixer(void)
 // Get preset mix from Program memory
 void get_preset_mix(channel_t* preset)
 {
+	// Clear all channels first
+	memset(&Config.Channel[0].value,0,(sizeof(channel_t) * PSUEDO_OUTPUTS));
 	memcpy_P(&Config.Channel[0].value,&preset[0].value,(sizeof(channel_t) * MAX_OUTPUTS));
 }
 

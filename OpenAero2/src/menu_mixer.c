@@ -44,29 +44,29 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{62,105,0,105,0,143,143,143,143,143,143},
-	{62,62,0,62,0,62,0}
+	{227,105,0,105,0,143,143,143,143,143,143},
+	{227,227,0,227,0,227,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 
 {
 	{
 		// Input mixer ranges (11)
-		{CH1,CH8,1,1,CH1},				// Ch. number
+		{CH1,CH12,1,1,CH1},				// Ch. number
 		{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
 		{-125,125,5,0,100},				// Source A volume (%)
 		{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Source B
 		{-125,125,5,0,0},				// Source B volume (%)
 		{OFF, ON,1,1,OFF},				// Source mix enable
-		{OFF, ON,1,1,OFF},				// roll_gyro
-		{OFF, ON,1,1,OFF},				// pitch_gyro
-		{OFF, ON,1,1,OFF},				// yaw_gyro
-		{OFF, REVERSED,1,1,OFF},		// roll_acc
-		{OFF, REVERSED,1,1,OFF},		// pitch_acc
+		{OFF, REV,1,1,OFF},				// roll_gyro
+		{OFF, REV,1,1,OFF},				// pitch_gyro
+		{OFF, REV,1,1,OFF},				// yaw_gyro
+		{OFF, REV,1,1,OFF},				// roll_acc
+		{OFF, REV,1,1,OFF},				// pitch_acc
 	},
 	{
 		// Output mixer ranges (7)
-		{CH1,CH8,1,1,CH1},				// Ch. number
+		{CH1,CH12,1,1,CH1},				// Ch. number
 		{CH1,UNUSED,1,1,UNUSED},		// Output B
 		{-125,125,5,0,0},				// Output B volume
 		{CH1,UNUSED,1,1,UNUSED},		// Output C

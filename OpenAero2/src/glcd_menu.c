@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2a04";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2a07";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -230,6 +230,10 @@ const char MOUT5[] PROGMEM = "OUT5";
 const char MOUT6[] PROGMEM = "OUT6";	
 const char MOUT7[] PROGMEM = "OUT7";	
 const char MOUT8[] PROGMEM = "OUT8";	
+const char MOUT9[] PROGMEM = "PSU9";
+const char MOUT10[] PROGMEM = "PSU10";
+const char MOUT11[] PROGMEM = "PSU11";
+const char MOUT12[] PROGMEM = "PSU12";
 //
 const char HeadingHold1[] PROGMEM = "Rate";					// Gyro modes
 const char HeadingHold2[] PROGMEM = "Axis lock";
@@ -283,15 +287,18 @@ const char *text_menu[] PROGMEM =
 		HeadingHold1, HeadingHold2, Dummy0, Dummy0, 										// 48 to 52 HH modes (Rate, Hold)
 		Dummy0, 
 		//
-		Dummy0, Dummy0, Dummy0,  Dummy0, Dummy0, 											// 53 to 59 Battery menu
+		FSmode0, FSmode1, 																	// 53 and 54 wasa Fixed, Adv.
+
+		Dummy0,  Dummy0, Dummy0, 															// 55 to 57
 		BattMenuItem5, BattMenuItem6, 														// LiPo, NiMh
 		//
 		SensorMenuItem1,																	// 60 calibrate
 		//
-		IMU0, 																				// 61 was 74 IMU
+		IMU0, 																				// 61 IMU
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 62 to 71 M1-8 + NONE
-		MOUT6, MOUT7, MOUT8, ChannelRef8, Dummy0, 
+		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode1, RXMode2, RXMode3,			// 62 to 68 RX mode
+		//
+		Dummy0, Dummy0, Dummy0,																// 69 to 71 Spare 
 		//
 		ErrorText0, GeneralText4, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
@@ -305,9 +312,9 @@ const char *text_menu[] PROGMEM =
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 Error, lost, model
 		//
-		AutoMenuItem11, AutoMenuItem15,														// 101 to 102 OFF/ON
+		AutoMenuItem11, AutoMenuItem15, MixerItem12,											// 101 to 103 OFF/ON/REV
 		//
-		FSmode0, FSmode1, 																	// 103 to 104 Fixed, Adv.
+		Dummy0, // 104
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
@@ -362,11 +369,10 @@ const char *text_menu[] PROGMEM =
 
 		MixerItem18, MixerItem15, MixerItem2, 												// 220 Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
-		Dummy0,Dummy0,Dummy0,Dummy0,
 		//
-		Dummy0,Dummy0, 																		// 231 - 232
-		//
-		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode1, RXMode2, RXMode3,			// 233 to 239 RX mode
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 227 to 239 M1-12 + NONE
+		MOUT6, MOUT7, MOUT8, MOUT9, MOUT10,
+		MOUT11,MOUT12,ChannelRef8, 
 		//
 		Dummy0,																				// 240
 		//

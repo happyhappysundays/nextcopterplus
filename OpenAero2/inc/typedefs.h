@@ -13,6 +13,7 @@
 #define OUTPUT 	1
 #define MAX_RC_SOURCES 9				// Maximum input channels including non-RX channels
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
+#define PSUEDO_OUTPUTS 12				// Total number of mixer channels
 #define MAX_OUTPUTS 8					// Maximum output channels
 #define MIN_OUTPUTS 4					// Minimum output channels
 #define NUM_MIXERS 2
@@ -175,7 +176,7 @@ typedef struct
 
 	// Non-menu items 
 	// Input channel configuration
-	channel_t	Channel[MAX_OUTPUTS];	// RC channel mixing data	
+	channel_t	Channel[PSUEDO_OUTPUTS];	// Channel mixing data	
 
 	// Servo menu
 	int8_t		Servo_reverse[MAX_OUTPUTS];	// Reversal of output channel
