@@ -86,6 +86,7 @@ const menu_range_t servo_menu_ranges[5][1] PROGMEM =
 void menu_servo_setup(uint8_t section)
 {
 	static uint8_t servo_top = SERVOSTART;
+	static	uint8_t old_section;
 	int8_t *value_ptr;
 
 	menu_range_t range;
@@ -93,6 +94,13 @@ void menu_servo_setup(uint8_t section)
 	uint8_t i = 0;
 	bool	servo_enable = false;
 	bool	zero_setting = false;
+
+	// If submenu item has changed, reset submenu positions
+	if (section != old_section)
+	{
+		servo_top = SERVOSTART;
+		old_section = section;
+	}
 
 	// Get menu offsets
 	// 1 = Reverse, 2 = Offset, 3 = Min, 4 = Max, 5 = Failsafe

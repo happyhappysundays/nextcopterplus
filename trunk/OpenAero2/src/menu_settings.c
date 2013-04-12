@@ -38,8 +38,8 @@ void menu_rc_setup(uint8_t i);
 #define RCSTART 149 	// Start of Menu text items
 #define RCOFFSET 79		// LCD offsets
 
-#define RCTEXT 233 		// Start of value text items
-#define FSTEXT 103
+#define RCTEXT 62 		// Start of value text items
+#define FSTEXT 53
 #define GENERALTEXT	22
 #define BATTTEXT 58 
 
@@ -214,7 +214,7 @@ void menu_rc_setup(uint8_t section)
 			}
 
 			// If model type has changed, reload preset
-			if ((section == 5) && (temp_type != Config.MixMode)) 
+			if ((section == 3) && (temp_type != Config.MixMode)) 
 			{
 				switch(Config.MixMode)  // Load selected mix
 				{

@@ -52,7 +52,7 @@ void Display_status(void)
 
 	// Display values
 	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
-	print_menu_text(0, 1, (233 + Config.RxMode), 45, 22);
+	print_menu_text(0, 1, (62 + Config.RxMode), 45, 22);
 	mugui_lcd_puts(itoa((Config.Flight + 1),pBuffer,10),(prog_uchar*)Verdana8,45,33);
 
 	// Display unused RAM

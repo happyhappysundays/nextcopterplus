@@ -177,7 +177,8 @@
 // Alpha 6	Menus position-holding fixed. Added RC deadband adjustment.
 //			Reset I-terms when changing between profiles.
 //			Fixed order of EEPROM handling at start-up.
-//			Removed all sensor reversing.
+// Alpha 7	Sensors now have three states - OFF/ON/REV
+// 			Added four phantom channels (PSU9 to PSU12) for mixing tricks
 //
 //
 //***********************************************************
@@ -186,7 +187,7 @@
 // 
 // Clean up menu hacks
 // Try and make transistions between profiles
-// Check that sensor polarity is always correct
+// Add some phantom channels for mixing tricks
 //
 //***********************************************************
 //* Includes
