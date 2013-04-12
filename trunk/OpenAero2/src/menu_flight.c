@@ -34,7 +34,7 @@ void menu_flight(uint8_t i);
 // Defines
 //************************************************************
 
-#define FLIGHTSTART 186 // Start of Menu text items
+#define FLIGHTSTART 187 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
 #define FLIGHTITEMS 22 	// Number of menu items
@@ -80,6 +80,7 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 void menu_flight(uint8_t mode)
 {
 	static uint8_t flight_top = FLIGHTSTART;
+	static	uint8_t old_mode;
 	int8_t *value_ptr;
 
 	menu_range_t range;
@@ -87,6 +88,13 @@ void menu_flight(uint8_t mode)
 	int8_t temp_gyro_roll = 0;
 	int8_t temp_gyro_pitch = 0;
 	int8_t temp_gyro_yaw = 0;
+
+	// If submenu item has changed, reset submenu positions
+	if (mode != old_mode)
+	{
+		flight_top = FLIGHTSTART;
+		old_mode = mode;
+	}
 
 	while(button != BACK)
 	{

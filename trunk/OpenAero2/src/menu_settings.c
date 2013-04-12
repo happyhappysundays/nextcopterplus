@@ -43,7 +43,7 @@ void menu_rc_setup(uint8_t i);
 #define GENERALTEXT	22
 #define BATTTEXT 58 
 
-#define RCITEMS 13 		// Number of menu items
+#define RCITEMS 14 		// Number of menu items
 #define FSITEMS 5 
 #define GENERALITEMS 14 
 #define BATTITEMS 5 
@@ -54,7 +54,7 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[4][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0},		// RC setup
+	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0},	// RC setup
 	{FSTEXT, 0, 0, 0, 0},												// Failsafe
 	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0},	// General
 	{BATTTEXT, 0, 0, 0, 0}												// Battery
@@ -64,7 +64,7 @@ const uint8_t RCMenuText[4][GENERALITEMS] PROGMEM =
 const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (13)
+		// RC setup (14)
 		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Min, Max, Increment, Style, Default
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
@@ -78,6 +78,7 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 		{0,100,5,0,0},					// Differential
 		{0,20,1,0,0},					// Flap speed (0 is fastest, 20 slowest)	
 		{0,5,1,0,2},					// Axis lock stick rate(0 is fastest, 5 slowest)
+		{0,5,1,0,1},					// RC deadband (%)
 	},
 	{
 		// Failsafe (5)
@@ -119,7 +120,9 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 
 void menu_rc_setup(uint8_t section)
 {
-	uint8_t rc_top = RCSTART;
+	static uint8_t rc_top = RCSTART;
+	static	uint8_t old_section;
+
 	int8_t *value_ptr;
 
 	menu_range_t range;
@@ -129,6 +132,13 @@ void menu_rc_setup(uint8_t section)
 	uint8_t offset;			// Index into channel structure
 	uint8_t	items;			// Items in group
 	uint16_t temp16_1;
+
+	// If submenu item has changed, reset submenu positions
+	if (section != old_section)
+	{
+		rc_top = RCSTART;
+		old_section = section;
+	}
 
 	while(button != BACK)
 	{

@@ -174,6 +174,10 @@
 //			Completely reworked/simplified PID gyro input code for I-terms 
 //			Added flap deployment speed (0 = normal, 20 = super slow)
 // Alpha 5	Reduced menu memory usage. Fixed axis lock bug.
+// Alpha 6	Menus position-holding fixed. Added RC deadband adjustment.
+//			Reset I-terms when changing between profiles.
+//			Fixed order of EEPROM handling at start-up.
+//			Removed all sensor reversing.
 //
 //
 //***********************************************************
@@ -181,7 +185,8 @@
 //***********************************************************
 // 
 // Clean up menu hacks
-// Menu positions not remembered correctly
+// Try and make transistions between profiles
+// Check that sensor polarity is always correct
 //
 //***********************************************************
 //* Includes
@@ -580,10 +585,17 @@ int main(void)
 			Config.Flight = 0;			// Flight mode 0
 		}
 
-		// Refresh limts when changed
+		// When changing flight modes...
 		if (Config.Flight != old_flight)
 		{
-			UpdateLimits(); // debug
+			// Update travel limits
+			UpdateLimits();
+	
+			// Reset I-terms so that neutral is reset
+			IntegralGyro[ROLL] = 0;	
+			IntegralGyro[PITCH] = 0;
+			IntegralGyro[YAW] = 0;
+
 			old_flight = Config.Flight;
 		}
 
@@ -650,10 +662,10 @@ int main(void)
 				break;
 		}
 
+		// Reset I-terms when stabilise is off
 		if (!(Flight_flags & (1 << Stability)))
 		{
-			// Reset I-terms when stabilise is off
-			IntegralGyro[ROLL] = 0;	
+			IntegralGyro[ROLL] = 0;	// Debug - may no longer be needed
 			IntegralGyro[PITCH] = 0;
 			IntegralGyro[YAW] = 0;
 		}

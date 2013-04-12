@@ -36,22 +36,17 @@ typedef struct
 {
 	int16_t		value;					// Current value of this channel
 
-	// Input mix menu (15)
+	// Input mix menu (10)
 	int8_t		source_a;				// Source A RC input for calculation
 	int8_t		source_a_volume;		// Percentage of source to pass on
 	int8_t		source_b;				// Optional source B RC input for calculation
 	int8_t		source_b_volume;		// Percentage of source to pass on
 	int8_t		source_mix;				// Source RC included in stabilised modes
 	int8_t		roll_gyro;				// Use roll gyro
-	int8_t		roll_gyro_polarity;		// Roll gyro normal/reverse
 	int8_t		pitch_gyro;				// Use pitch gyro
-	int8_t		pitch_gyro_polarity;	// Pitch gyro normal/reverse
 	int8_t		yaw_gyro;				// Use yaw gyro
-	int8_t		yaw_gyro_polarity;		// Yaw gyro normal/reverse
 	int8_t		roll_acc;				// Use roll acc
-	int8_t		roll_acc_polarity;		// Roll acc normal/reverse
 	int8_t		pitch_acc;				// Use pitch acc
-	int8_t		pitch_acc_polarity;		// Pitch acc normal/reverse
 
 	// Ouput mix menu (6)
 	int8_t		output_b;				// Channel B for calculation
@@ -112,7 +107,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (13)
+	// RC items (14)
 	int8_t		RxMode;					// PWM or CPPM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
@@ -126,6 +121,7 @@ typedef struct
 	int8_t		Differential;			// Aileron differential
 	int8_t		flapspeed;				// Flap deploy speed
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
+	int8_t		Deadband;				// RC deadband (%)
 
 	// Failsafe items (5)
 	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
@@ -147,6 +143,9 @@ typedef struct
 	int16_t		Autotrigger3;			// Actual, unspanned flight mode 2
 	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
+	
+	// Limits
+	int16_t		DeadbandLimit;			// Actual deadband limit
 
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable

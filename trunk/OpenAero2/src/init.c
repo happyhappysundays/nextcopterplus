@@ -164,15 +164,21 @@ void init(void)
 	clear_buffer(buffer);
 	write_buffer(buffer);
 
-	// Reload eeprom settings if all buttons are pressed 
+	// Reload default eeprom settings if all buttons are pressed 
 	if ((PINB & 0xf0) == 0)
 	{
+		// Display reset message
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
 
 		write_buffer(buffer);
-		clear_buffer(buffer);				// Clear
+		clear_buffer(buffer);
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
+	}
+	// Load "Config" global data structure
+	else
+	{
+		Initial_EEPROM_Config_Load();			
 	}
 
 	// Display "Hold steady" message
@@ -182,16 +188,10 @@ void init(void)
 	clear_buffer(buffer);
 		
 	// Do startup tasks
-	Initial_EEPROM_Config_Load();			// Loads config at start-up "Config" global data structure loaded
 	UpdateLimits();							// Update travel limts	
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 	init_int();								// Iitialise interrupts based on RC input mode
-
-	// Flash LED
-	LED1 = 1;
-	_delay_ms(150);
-	LED1 = 0;
 
 	// Reset I-terms (possibly unnecessary)
 	IntegralGyro[ROLL] = 0;	
@@ -228,6 +228,11 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
+
+	// Flash LED
+	LED1 = 1;
+	_delay_ms(150);
+	LED1 = 0;
 
 	// Beep that all sensors have been handled
 	menu_beep(1);
