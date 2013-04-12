@@ -33,7 +33,6 @@ void SetFailsafe(void);
 //************************************************************
 // Defines
 //************************************************************
-#define DEAD_BAND		10			// Centre region of RC input where no activity is processed
 #define	NOISE_THRESH	20			// Max RX noise threshold. Increase if lost alarm keeps being reset.
 
 //************************************************************
@@ -105,15 +104,15 @@ void RC_Deadband(void)
 	int16_t	aileron_actual = 0;
 
 	// Deadband culling
-	if ((RCinputs[AILERON] < DEAD_BAND) && (RCinputs[AILERON] > -DEAD_BAND))
+	if ((RCinputs[AILERON] < Config.DeadbandLimit) && (RCinputs[AILERON] > -Config.DeadbandLimit))
 	{
 		RCinputs[AILERON] = 0;
 	}
-	if ((RCinputs[ELEVATOR] < DEAD_BAND) && (RCinputs[ELEVATOR] > -DEAD_BAND)) 
+	if ((RCinputs[ELEVATOR] < Config.DeadbandLimit) && (RCinputs[ELEVATOR] > -Config.DeadbandLimit)) 
 	{
 		RCinputs[ELEVATOR] = 0;
 	}
-	if ((RCinputs[RUDDER] < DEAD_BAND) && (RCinputs[RUDDER] > -DEAD_BAND))
+	if ((RCinputs[RUDDER] < Config.DeadbandLimit) && (RCinputs[RUDDER] > -Config.DeadbandLimit))
 	{
 		RCinputs[RUDDER] = 0;
 	}

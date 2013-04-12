@@ -64,8 +64,6 @@ void Set_EEPROM_Default_Config(void)
 		//Config.Failsafe[i] = 0;
 	}
 	Config.Failsafe[0] = -100;			// Throttle should failsafe to minimum
-
-
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
 	//
@@ -100,35 +98,24 @@ void Set_EEPROM_Default_Config(void)
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
-	//
-	//Config.Flight = 0; // Flight profile
-	//
-	//Config.CamStab = ON; // Debug
 
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
 	Config.IMUType = 1;					// Advanced IMU ON
-
-
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 83;				// 83 * 4 = 332
 	Config.MaxVoltage = 105;			// 105 * 4 = 420
-
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
-
-
 	Config.LaunchDelay = 10;
-
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout
 	Config.LMA_enable = 3;				// Default to 3 minutes
-
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
-
+	Config.Deadband = 2;				// RC deadband = 2%
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
 }
 

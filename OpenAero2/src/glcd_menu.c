@@ -141,6 +141,7 @@ const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
 const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char RCMenuItem11[] PROGMEM = "Differential:";
 const char RCMenuItem20[] PROGMEM = "Flap speed:";
+const char RCMenuItem21[] PROGMEM = "Deadband:";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "Xtreme";
@@ -336,32 +337,32 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	RCMenuItem4, 								// 149 to 161 rc menu
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	RCMenuItem4, 								// 149 to 162 rc menu
 		StabMenuItem14, StabMenuItem15,
 		RCMenuItem8, RCMenuItem12, RCMenuItem9, RCMenuItem10, 
-		RCMenuItem11,RCMenuItem20, GeneralText9,
+		RCMenuItem11,RCMenuItem20, GeneralText9, RCMenuItem21,
 		//
-		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 162 to 166 Failsafe
+		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 163 to 167 Failsafe
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 167 to 180 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 168 to 181 general
 		GeneralText2,MainMenuItem6, GeneralText3, 
 		GeneralText10,
 		GeneralText6,GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
 		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19,	
 		//
-		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 181 to 185 Battery menu
+		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 182 to 186 Battery menu
 		//
-		StabMenuItem13, AutoMenuItem10, AutoMenuItem9,										// 186 to 207 Flight menu
+		StabMenuItem13, AutoMenuItem10, AutoMenuItem9,										// 187 to 208 Flight menu
 		GyroType1, AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,	// Roll gyro
 		GyroType2, AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem11, AutoMenuItem21, AutoMenuItem8, 	// Pitch gyro
 		GyroType3, StabMenuItem7, StabMenuItem8, StabMenuItem9, StabMenuItem12,	 								// Yaw gyro
 		//
-		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 208 Input mixers
-		MixerItem17, MixerItem4, MixerItem1, MixerItem5, MixerItem1, 
-		MixerItem6, MixerItem1, MixerItem7, MixerItem1, MixerItem3, 
-		MixerItem1,
-		MixerItem18, MixerItem15, MixerItem2, 												// 224 Output mixers
+		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 209 Input mixers
+		MixerItem17, MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, 
+
+		MixerItem18, MixerItem15, MixerItem2, 												// 220 Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
+		Dummy0,Dummy0,Dummy0,Dummy0,
 		//
 		Dummy0,Dummy0, 																		// 231 - 232
 		//

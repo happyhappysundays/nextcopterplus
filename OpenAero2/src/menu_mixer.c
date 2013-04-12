@@ -32,10 +32,10 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define INPUTITEMS 15
+#define INPUTITEMS 10
 #define OUTPUTITEMS 6
 
-#define MIXERSTART 208 	// Start of Menu text items
+#define MIXERSTART 209 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************
@@ -44,14 +44,14 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{62,105,0,105,0,143,143,141,143,141,143,141,143,141,143,141},
+	{62,105,0,105,0,143,143,143,143,143,143},
 	{62,62,0,62,0,62,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 
 {
 	{
-		// Input mixer ranges (16)
+		// Input mixer ranges (11)
 		{CH1,CH8,1,1,CH1},				// Ch. number
 		{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
 		{-125,125,5,0,100},				// Source A volume (%)
@@ -59,19 +59,14 @@ const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM =
 		{-125,125,5,0,0},				// Source B volume (%)
 		{OFF, ON,1,1,OFF},				// Source mix enable
 		{OFF, ON,1,1,OFF},				// roll_gyro
-		{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 		{OFF, ON,1,1,OFF},				// pitch_gyro
-		{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 		{OFF, ON,1,1,OFF},				// yaw_gyro
-		{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 		{OFF, REVERSED,1,1,OFF},		// roll_acc
-		{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 		{OFF, REVERSED,1,1,OFF},		// pitch_acc
-		{NORMAL, REVERSED,1,1,NORMAL},	// polarity
 	},
 	{
 		// Output mixer ranges (7)
-		{CH1,CH8,1,1,CH1},				// Ch. number 62
+		{CH1,CH8,1,1,CH1},				// Ch. number
 		{CH1,UNUSED,1,1,UNUSED},		// Output B
 		{-125,125,5,0,0},				// Output B volume
 		{CH1,UNUSED,1,1,UNUSED},		// Output C
@@ -87,7 +82,8 @@ const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM =
 
 void menu_mixer(uint8_t section)
 {
-	uint8_t mix_top = MIXERSTART;
+	static uint8_t mix_top = MIXERSTART;
+	static	uint8_t old_section;
 	int8_t *value_ptr;
 
 	int8_t values[INPUTITEMS+1];
@@ -95,6 +91,13 @@ void menu_mixer(uint8_t section)
 	uint8_t text_link = 0;
 	uint8_t offset;			// Index into channel structure
 	uint8_t	items;			// Items in group
+
+	// If submenu item has changed, reset submenu positions
+	if (section != old_section)
+	{
+		mix_top = MIXERSTART;
+		old_section = section;
+	}
 
 	// Get mixer menu offsets
 	// 1 = input mixer data, 2 = output mixer data

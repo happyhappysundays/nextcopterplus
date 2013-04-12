@@ -41,17 +41,17 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	// Elevator += Pitch; (normal)
 
 	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
+	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
-	{0,AILERON,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
+	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 
 }; 
 
@@ -62,17 +62,17 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	// R.Elevon + Roll (reversed) + Pitch (reversed)
 
 	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,gyro_pol,pitch_gyro,pol,yaw_gyro,pol,roll_acc,pol,pitch_acc,pol
+	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5
-	{0,ELEVATOR,-100,AILERON,-100,OFF,ON, REVERSED,ON,REVERSED,OFF,NORMAL,ON,REVERSED,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut6 (Left elevon)
-	{0,AILERON,100,ELEVATOR,-100,OFF,ON,NORMAL,ON,REVERSED,OFF,NORMAL,ON,NORMAL,ON,REVERSED,UNUSED,0,UNUSED,0,UNUSED,0},// ServoOut7 (Left elevon)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
+	{0,ELEVATOR,-100,AILERON,-100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
+	{0,AILERON,100,ELEVATOR,-100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -86,14 +86,14 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	// M6 Pitch (Tilt) + Pitch gyro;
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 (Elevator)
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,NORMAL,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Right aileron)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,NORMAL,OFF,NORMAL,OFF,NORMAL,ON, NORMAL,OFF,NORMAL,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut8 (Rudder)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 };
 
 //************************************************************
@@ -225,38 +225,17 @@ void ProcessMixer(void)
 			// Mix in gyros
 			if (Config.Channel[i].roll_gyro == ON)
 			{
-				if (Config.Channel[i].roll_gyro_polarity == REVERSED)
-				{
-					temp = temp + PID_Gyros[ROLL];
-				}
-				else
-				{
-					temp = temp - PID_Gyros[ROLL];
-				}
+				temp = temp - PID_Gyros[ROLL];
 			}
 
 			if (Config.Channel[i].pitch_gyro == ON)
 			{
-				if (Config.Channel[i].pitch_gyro_polarity == REVERSED)
-				{
-					temp = temp - PID_Gyros[PITCH];
-				}
-				else
-				{
-					temp = temp + PID_Gyros[PITCH];
-				}
+				temp = temp + PID_Gyros[PITCH];
 			}
 
 			if (Config.Channel[i].yaw_gyro == ON)
 			{
-				if (Config.Channel[i].yaw_gyro_polarity == REVERSED)
-				{
-					temp = temp + PID_Gyros[YAW];
-				}
-				else
-				{
-					temp = temp - PID_Gyros[YAW];
-				}
+				temp = temp - PID_Gyros[YAW];
 			}
 
 			// Save solution for now
@@ -294,30 +273,14 @@ void ProcessMixer(void)
 			{
 				// Add in Roll trim
 				temp += roll_trim;
-
-				if (Config.Channel[i].roll_acc_polarity == REVERSED)
-				{
-					temp = temp + PID_ACCs[ROLL];
-				}
-				else
-				{
-					temp = temp - PID_ACCs[ROLL];
-				}
+				temp = temp - PID_ACCs[ROLL];
 			}
 
 			if (Config.Channel[i].pitch_acc == ON)
 			{
 				// Add in Pitch trim
 				temp += pitch_trim;
-
-				if (Config.Channel[i].pitch_acc_polarity == REVERSED)
-				{
-					temp = temp - PID_ACCs[PITCH];
-				}
-				else
-				{
-					temp = temp + PID_ACCs[PITCH];
-				}
+				temp = temp + PID_ACCs[PITCH];
 			}
 
 			// Save solution for now
@@ -586,6 +549,9 @@ void UpdateLimits(void)
 	{
 		Config.DynGainDiv = 2500;
 	}
+
+	// Update RC deadband amount
+	 Config.DeadbandLimit = (Config.Deadband * 12); // 0 to 5% scaled to 0 to 60
 }
 
 // Update servos from the mixer Config.Channel[i].value data and enforce travel limits

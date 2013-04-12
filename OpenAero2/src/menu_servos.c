@@ -85,7 +85,7 @@ const menu_range_t servo_menu_ranges[5][1] PROGMEM =
 
 void menu_servo_setup(uint8_t section)
 {
-	uint8_t servo_top = SERVOSTART;
+	static uint8_t servo_top = SERVOSTART;
 	int8_t *value_ptr;
 
 	menu_range_t range;
