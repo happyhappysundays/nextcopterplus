@@ -364,7 +364,13 @@ skiploop:
 	.global output_servo_ppm_asm3
 	.func   output_servo_ppm_asm3
 output_servo_ppm_asm3:
-	push	18			// Save regs
+	push	16			// Save regs
+	push	17
+	push	18
+
+	ldi 	16,0x34		// 1			Set loop count to 834h or 2100
+	ldi		17,0x08	
+	clr		0
 
 jump_table:
 	cpi		r24,0x00	; 0				
@@ -410,19 +416,24 @@ loopin:
 	rjmp .+0			// 2
 	rjmp .+0			// 2
 	rjmp .+0			// 2
-	rjmp .+0			// 2
-	rjmp .+0			// 2			16 cycles
 
 	subi	r22,1		// 1 			Time servo pulse
 	sbc 	r23,0		// 1
-	brne	loopin		// 2	1
+	brne	loopout		// 2	1
 
 // Clear outputs if done
 	ldi		r18,0x00	 // 1
 	out 	SERVO_OUT,r18// 1			Boom.
 
-exit:
-	pop		18			// Restore regs
+// Exit
+loopout:
+	subi 	16,1		// 1			+4 cycles = total 20 cycles
+	sbc 	17,0		// 1
+	brne	loopin		// 2	1		Loop until zero
+
+	pop		18
+	pop		17			// Restore regs
+	pop		16
 	ret	
 	.endfunc	
 
