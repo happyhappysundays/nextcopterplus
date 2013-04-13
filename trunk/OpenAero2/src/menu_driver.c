@@ -168,6 +168,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 	mugui_size16_t size;
 	int16_t temp16;
 	int8_t i;
+	int8_t servo_duration = 0;
 	int16_t value = (int8_t)*values;
 
 	// Multiply value for display only if style is 2
@@ -186,13 +187,13 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		temp16 = ((temp16 << 2) / 10); 		// Span back to what the output wants
 
 		// Give servos time to settle
-		for (i = 0; i < 10; i++)
+		for (i = 0; i < 25; i++)
 		{
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);
 			sei();
 
-			_delay_ms(20);
+			_delay_ms(10);
 		}
 	}
 
@@ -241,18 +242,21 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		if (button == DOWN)	
 		{
 			value = value - (range.increment * button_multiplier);
+			servo_duration = 5;
 			_delay_ms(50);
 		}
 
 		if (button == UP)	
 		{
 			value = value + (range.increment * button_multiplier);
+			servo_duration = 5;
 			_delay_ms(50);
 		}
 
 		if (button == BACK)	// Clear value
 		{
 			value = (range.default_value * mult);
+			servo_duration = 20; 
 		}
 
 		// Limit values to set ranges
@@ -279,31 +283,14 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			temp16 = ((temp16 << 2) / 10); 	// Span back to what the output wants
 
 			// Give servos time to settle
-			for (i = 0; i < 3; i++)
+			for (i = 0; i < servo_duration; i++)
 			{
 				cli();
 				output_servo_ppm_asm3(servo_number, temp16);
 				sei();
 
-				_delay_ms(20);
+				_delay_ms(10);
 			}
-		}
-	}
-
-	// Reset servo to neutral unles it is for the throttle channel in CPPM mode
-	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
-	{
-		temp16 = Config.Limits[servo_number].trim;
-		temp16 = ((temp16 << 2) / 10); 		// Span back to what the output wants
-
-		// Give servos time to settle
-		for (i = 0; i < 10; i++)
-		{
-			cli();
-			output_servo_ppm_asm3(servo_number, temp16);
-			sei();
-
-			_delay_ms(20);
 		}
 	}
 

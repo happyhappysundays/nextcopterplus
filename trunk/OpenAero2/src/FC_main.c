@@ -179,7 +179,7 @@
 //			Fixed order of EEPROM handling at start-up.
 // Alpha 7	Sensors now have three states - OFF/ON/REV
 // 			Added four phantom channels (PSU9 to PSU12) for mixing tricks
-//
+// Alpha 8	Fixed servo adjustment code.	
 //
 //***********************************************************
 //* To do
