@@ -1,10 +1,10 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Alpha 5 - April 2013
+// Version 1.2 Beta 1 - May 2013
 //
-// Contains trace elements of old KK assembly code by Rolf R Bakke, and C code by Mike Barton
-// Some receiver format decoding code from Jim Drew of XPS and the Papperazzi project
+// May contain trace elements of old C code by Mike Barton
+// Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
@@ -179,15 +179,16 @@
 //			Fixed order of EEPROM handling at start-up.
 // Alpha 7	Sensors now have three states - OFF/ON/REV
 // 			Added four phantom channels (PSU9 to PSU12) for mixing tricks
-// Alpha 8	Fixed servo adjustment code.	
+// Alpha 8	Fixed servo adjustment code.
+// Beta 1	Fixed S-Bus channel order code. Tested and calibrated all serial protocols.
+//			Fixed case where doing a factory reset also re-bound the Satellite RX.
+//			Flap speed fixed.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 // 
-// Clean up menu hacks
-// Try and make transistions between profiles
-// Add some phantom channels for mixing tricks
+// 
 //
 //***********************************************************
 //* Includes
@@ -218,8 +219,6 @@
 #include "..\inc\main.h"
 #include "..\inc\imu.h"
 #include "..\inc\eeprom.h"
-#include <avr/interrupt.h> // debug
-#include "..\inc\uart.h" // debug
 
 //***********************************************************
 //* Fonts
@@ -243,9 +242,6 @@
 #define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
 #define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
 
-// Servo driver
-void output_servo_ppm_asm3(int16_t servo_number, int16_t value); // debug
-
 //***********************************************************
 //* Code and Data variables
 //***********************************************************
@@ -262,7 +258,7 @@ uint8_t	Alarm_flags = 0;
 // Global buffers
 char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
 
-//Debug
+// Serial buffer
 char sBuffer[SBUFFER_SIZE];			// Serial buffer (25 bytes)
 
 //************************************************************
@@ -426,12 +422,6 @@ int main(void)
 		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (1s)
 		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
-
-		//************************************************************
-		//* Reconfigure interrupts if menu changed
-		//************************************************************
-
-		init_int();
 
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)

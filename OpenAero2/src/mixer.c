@@ -87,14 +87,16 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	// M6 Pitch (Tilt) + Pitch gyro;
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
+
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Pitch axis)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
+
 };
 
 //************************************************************
@@ -386,11 +388,11 @@ void ProcessMixer(void)
 			// Do flap speed control
 			if (((slowFlaps - flap) >= 1) || ((slowFlaps - flap) <= -1))	// Difference larger than one step, so ok
 			{
-				speed = Config.flapspeed;				// Need to manipulate speed as target approaches										
+				speed = 5;					// Need to manipulate speed as target approaches									
 			}
 			else
 			{
-				speed = 1;								// Otherwise this will oscillate
+				speed = 1;					// Otherwise this will oscillate
 			}
 
 			if ((slowFlaps < flap) && (flapskip == Config.flapspeed))

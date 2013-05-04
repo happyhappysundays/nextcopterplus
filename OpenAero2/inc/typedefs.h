@@ -104,7 +104,6 @@ typedef struct
 										// AILERON will always return the correct data for the assigned aileron channel
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
-										// AUX1 to AUX4 are fixed
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 

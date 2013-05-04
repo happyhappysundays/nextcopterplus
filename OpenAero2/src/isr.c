@@ -394,7 +394,7 @@ ISR(USART0_RX_vect)
 					RxChannel[j] = 0;
 				}
 
-				// Start from scond byte
+				// Start from second byte
 				sindex = 1;
 
                 // Deconstruct S-Bus data
@@ -403,19 +403,23 @@ ISR(USART0_RX_vect)
                 {
                     if (sBuffer[sindex] & (1<<chan_mask))
                     {
-                        RxChannel[chan_shift] |= (1<<data_mask);
+						// Place the RC data into the correct channel order for the tranmitted system
+						RxChannel[Config.ChannelOrder[chan_shift]] |= (1<<data_mask);
                     }
 
                     chan_mask++;
                     data_mask++;
 
-                    if (chan_mask == 8)
+                    // If we have done 8 bits, move to next byte in buffer
+					if (chan_mask == 8)
                     {
                         chan_mask =0;
                         sindex++;
                     }
 
-                    if (data_mask == 11)
+                    // If we have reconstructed all 11 bits of one channel's data (2047)
+					// increment the channel number
+					if (data_mask == 11)
                     {
                         data_mask =0;
                         chan_shift++;
@@ -426,13 +430,14 @@ ISR(USART0_RX_vect)
 				for (j = 0; j < MAX_RC_CHANNELS; j++)
 				{
 					// Subtract weird-ass Futaba offset
-					itemp16= RxChannel[j] - 992;		
+					itemp16= RxChannel[j] - 1024;	
 					
 					// Expand into OpenAero2 units							
-					itemp16 += (itemp16 >> 1) + (itemp16 >> 4) + (itemp16 >> 8); 	// Quick multiply by 1.56 :)
+					//itemp16 = itemp16 + (itemp16 >> 2) + (itemp16 >> 3) + (itemp16 >> 4) + (itemp16 >> 5); 	// Quick multiply by 1.469 :)
+					itemp16 = itemp16 + (itemp16 >> 1); // Quicker mulitply by 1.5
 
 					// Add back in OpenAero2 offset
-					RxChannel[Config.ChannelOrder[j]] = itemp16 + 3750;				
+					RxChannel[j] = itemp16 + 3750;				
 				} 	
 			} // Frame lost check
 		} // Packet ended flag
@@ -552,8 +557,8 @@ ISR(USART0_RX_vect)
 						itemp16 = temp16 - 512;	
 					}					
 
-					// Quick multiply by 3.666 :)
-					itemp16 += ((itemp16 << 1) + (itemp16 >> 1) + (itemp16 >> 3) + (itemp16 >> 5) + (itemp16 >> 6)); 
+					// Quick multiply by 2.93
+					itemp16 = (itemp16 << 1) + (itemp16 >> 1) + (itemp16 >> 2) + (itemp16 >> 3) + (itemp16 >> 4); 
 
 					if (chan_shift == 0x03) // 11-bit
 					{

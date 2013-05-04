@@ -90,7 +90,7 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 	},
 	{
 		// General (14)
-		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode 165
+		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{1,60,1,0,10},					// Status menu timeout
