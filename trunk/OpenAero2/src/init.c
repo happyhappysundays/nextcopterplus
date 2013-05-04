@@ -84,15 +84,15 @@ void init(void)
 	_delay_ms(73);				// Pause while satellite wakes up	
 								// and pull-ups have time to rise
 
-	// Bind as slave if button 1 pressed
-	if ((PINB & 0x80) == 0x00)
+	// Bind as slave if ONLY button 1 pressed
+	if ((PINB & 0xf0) == 0x70)
 	{
 		DDRD		= 0xF3;		// Switch PD0 to output
 		bind_slave();
 	}
 
-	// Bind as master if button 4 pressed
-	if ((PINB & 0x10) == 0x00)
+	// Bind as master if ONLY button 4 pressed
+	if ((PINB & 0xf0) == 0xE0)
 	{
 		DDRD		= 0xF3;		// Switch PD0 to output
 		bind_master();
@@ -191,7 +191,7 @@ void init(void)
 	UpdateLimits();							// Update travel limts	
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
-	init_int();								// Iitialise interrupts based on RC input mode
+	init_int();								// Intialise interrupts based on RC input mode
 
 	// Reset I-terms (possibly unnecessary)
 	IntegralGyro[ROLL] = 0;	
@@ -275,7 +275,6 @@ void init_int(void)
 			break;
 
 		default:
-			// Disable interrupts? debug
 			break;	
 	}	
 

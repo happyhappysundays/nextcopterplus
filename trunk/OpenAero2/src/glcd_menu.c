@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2a08";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2b01";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -130,7 +130,7 @@ const char BattMenuItem6[]  PROGMEM = "NiMh";
 //
 //
 const char RCMenuItem1[]  PROGMEM = "RX sync:";				// RC setup text
-const char RCMenuItem0[]  PROGMEM = "CPPM order:"; 	
+const char RCMenuItem0[]  PROGMEM = "Ch. order:"; 	
 const char RCMenuItem2[]  PROGMEM = "Profile Chan.:";
 const char RCMenuItem4[]  PROGMEM = "2nd Ail. Chan.:";
 const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch.:";
