@@ -58,7 +58,7 @@ void Calculate_PID(void)
 	static 	int32_t currentError[4];		// Used with lastError to keep track of D-Terms in PID calculations
 	static	int32_t lastError[4];
 
-	int16_t DifferentialGyro;				// Holds difference between last two errors (angular acceleration)
+	int32_t DifferentialGyro;				// Holds difference between last two errors (angular acceleration)
 	int32_t PID_gyro_temp;
 	int32_t PID_acc_temp;
 	int32_t PID_Gyro_I_temp = 0;			// Temporary i-terms bound to max throw
@@ -136,14 +136,15 @@ void Calculate_PID(void)
 			gyroADC[axis] = 0;
 		}
 
-		// Calculate gyro error from gyro and stick data (scaled down by Config.Stick_Lock_rate)
-		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> Config.Stick_Lock_rate);
+		// Calculate gyro error from gyro and stick data
+		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> 2);
 
 		//************************************************************
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 
-		IntegralGyro[axis] += currentError[axis]; 
+		// Calculate I-term from gyro and stick data (scaled down by Config.Stick_Lock_rate)
+		IntegralGyro[axis] += (gyroADC[axis] - (RCinputsAxis[axis] >> Config.Stick_Lock_rate));
 
 		// Reset the I-terms when you need to adjust the I-term with RC
 		// Note that the I-term is not constrained when no RC input is present.

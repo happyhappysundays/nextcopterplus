@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 1 - May 2013
+// Version 1.2 Beta 2 - May 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -183,6 +183,9 @@
 // Beta 1	Fixed S-Bus channel order code. Tested and calibrated all serial protocols.
 //			Fixed case where doing a factory reset also re-bound the Satellite RX.
 //			Flap speed fixed.
+// Beta 2	Stick rate changed to "Lock rate" and only affects Axis lock mode.
+//			RC stick rate now always zero. Fixed bug where M8 could not go to 125%. 
+//			Output code now covers -135% to 135%.
 //
 //***********************************************************
 //* To do
@@ -203,7 +206,7 @@
 #include <string.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\rc.h"
-#include "..\inc\Servos.h"
+#include "..\inc\servos.h"
 #include "..\inc\vbat.h"
 #include "..\inc\gyros.h"
 #include "..\inc\init.h"
@@ -219,6 +222,8 @@
 #include "..\inc\main.h"
 #include "..\inc\imu.h"
 #include "..\inc\eeprom.h"
+
+#include <avr/interrupt.h> // debug
 
 //***********************************************************
 //* Fonts
@@ -308,7 +313,7 @@ int main(void)
 
 		switch(Menu_mode) 
 		{
-			// In IDLE mode, the text "Press any button for status" is displayed ONCE.
+			// In IDLE mode, the text "Press for status" is displayed ONCE.
 			// If a button is pressed the mode changes to REQ_STATUS
 			case IDLE:
 				if((PINB & 0xf0) != 0xf0)

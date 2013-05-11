@@ -5,7 +5,8 @@
  * Author: David Thompson - Originally based on code example from Cesco
  * Updated: 14/03/2013 - Added 16us staggered output concept borrowed from Jim Drew of Xtreme Power Systems
  * Updated: 25/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
- *
+ * Updated: 11/05/2013 - Discovered that M1 incapable of <900us and M8 of >2.04ms due to 128us stagger limitations.
+ *						 Reduced stagger to 100us and recalibrated all offsets.
  */
 
 #include <avr/io.h>
@@ -35,6 +36,8 @@
 ;
 ; Servo inputs are 16-bit, 1000 to 2000. 1000 bits cover 1ms or 1us per step
 ; Lower 3 bits are encoded using them as an offset into a jump table of 1us steps
+; Pulses can be generated from below 900us to at least 2100us but unpredictable results
+; can and will occur beyond this upper limit.
 ;
 ;*************************************************************************
 
@@ -71,7 +74,7 @@ output_servo_ppm_asm:
 // M1
 	ld		XL, Z+ 		// 2			Load XL with data at address in Z
 	ld		XH, Z+		// 2			Load XH with data at address in Z+1
-	subi	XL,	0x4d	// 1 			Trim servo pulse
+	subi	XL,	0x4a	// 1 			Trim servo pulse
 	sbci 	XH,	0x03	// 1
 	push	XL 			// 2			Save trimmed value to the stack
 	push	XH 			// 2
@@ -80,7 +83,7 @@ output_servo_ppm_asm:
 // M2
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xd5
+	subi	XL,	0xe6
 	sbci 	XH,	0x02
 	push	XL 		
 	push	XH 		
@@ -89,7 +92,7 @@ output_servo_ppm_asm:
 // M3
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x5d
+	subi	XL,	0x82
 	sbci 	XH,	0x02
 	push	XL 		
 	push	XH 		
@@ -98,8 +101,8 @@ output_servo_ppm_asm:
 // M4
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xe5
-	sbci 	XH,	0x01
+	subi	XL,	0x1e
+	sbci 	XH,	0x02
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -107,7 +110,7 @@ output_servo_ppm_asm:
 // M5
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x6d
+	subi	XL,	0xb9
 	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
@@ -116,8 +119,8 @@ output_servo_ppm_asm:
 // M6
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xf4
-	sbci 	XH,	0x00
+	subi	XL,	0x55
+	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -125,7 +128,7 @@ output_servo_ppm_asm:
 // M7
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x7c
+	subi	XL,	0xf1
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 
@@ -134,7 +137,7 @@ output_servo_ppm_asm:
 // M8
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x04
+	subi	XL,	0x8d
 	sbci 	XH,	0x00
 	push	XL
 	push	XH 
@@ -150,107 +153,103 @@ output_servo_ppm_asm:
 	call	DelayHigh	// 10 (where r25 = 7)
 	sbi 	M1			// 1
 	call	DelayLow	// 7 + 140 (where r25 = 0)
-	call    pwm_delay   // 316 (15.8us)
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M2
 	mov		r25,r22
 	call	DelayHigh
 	sbi 	M2
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M3
 	mov		r25,r21
 	call	DelayHigh
 	sbi 	M3
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M4
 	mov		r25,r20
 	call	DelayHigh
 	sbi 	M4
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M5
 	mov		r25,r19
 	call	DelayHigh
 	sbi 	M5
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M6
 	mov		r25,r18
 	call	DelayHigh
 	sbi 	M6
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M7
 	mov		r25,r17
 	call	DelayHigh
 	sbi 	M7
 	call	DelayLow
-	call    pwm_delay   // 316 (15.8us)
-	rjmp 	.+0
+	call    pwm_delay   // 100us
+	call    pwm_delay
 
 // M8
 	mov		r25,r16
 	call	DelayHigh
 	sbi 	M8
 	call	DelayLow
-	rjmp 	.+0			// Tweak onto an exact 1.0us boundary
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
-	rjmp 	.+0
+
+// At this point, the largest pulse that we can generate is 256 * 8 = 2.048ms
+// However we would like to be able to generate up to 2.100ms (125%) - an extra 52us
+// So we can fluff it out another 200us so that we can subtract enough to keep r16 under 0xff or 256 :)
+// With this setup, M1 can go down to 850 (-135%) and M8 can go up to 2150 (135%)
+
+	call    pwm_delay   // 150us
+	call    pwm_delay
+	call    pwm_delay
 
 // Copy trimmed array data into regs
 // This now represents steps of 8us chunks
-	pop		XH			// 2
-	pop		XL			// 2
-	call	shuffle_8	// 10
+	pop		XH			// M8
+	pop		XL
+	call	shuffle_8
 	mov		r16,XL
-	pop		XH
+	pop		XH			// M7
 	pop		XL
 	call	shuffle_8
 	mov		r17,XL
-	pop		XH
+	pop		XH			// M6
 	pop		XL
 	call	shuffle_8
 	mov		r18,XL
-	pop		XH
+	pop		XH			// M5
 	pop		XL
 	call	shuffle_8
 	mov		r19,XL
-	pop		XH
+	pop		XH			// M4
 	pop		XL
 	call	shuffle_8
 	mov		r20,XL
-	pop		XH
+	pop		XH			// M3
 	pop		XL
 	call	shuffle_8
 	mov		r21,XL
-	pop		XH
+	pop		XH			// M2
 	pop		XL
 	call	shuffle_8
 	mov		r22,XL
-	pop		XH
+	pop		XH			// M1
 	pop		XL
 	call	shuffle_8
 	mov		r23,XL
@@ -320,7 +319,7 @@ j7:
 	rjmp 	.+0
 	rjmp 	.+0
 jj7:
-	subi 	r16,1
+	subi 	r16,1		// ServoOut 8
 	brne	j8
 	cbi 	M8
 	jmp		jj8
@@ -332,7 +331,7 @@ jj8:
 
 	subi 	YL,1		// 1
 	sbc 	YH,0		// 1
-	breq	skiploop	// 1	2		Loop until zero 1 false 2 true
+	breq	skiploop	// 1	2		Loop until zero - 1 false 2 true
 	jmp		nloop		// 3			Can't reach nloop with a brne alone
 
 skiploop:
@@ -438,23 +437,23 @@ loopout:
 	.endfunc	
 
 ;*************************************************************************	
-; void pwm_delay(void) 128us output spacing delay 
+; void pwm_delay(void) 50us output spacing delay (8 cycle loop - 400ns)
 ;*************************************************************************
 
-pwm_delay:
-	push	16
-	ldi 	16,0xf7
+pwm_delay:				// 4 to call
+	push	16			// 1
+	ldi 	16,0x65		// 1
 
 pwm_loop:
-	rjmp .+0
-	rjmp .+0
-	rjmp .+0
-	subi	r16,1
-	brne	pwm_loop
+	rjmp .+0			// 2
+	rjmp .+0			// 2
+	rjmp .+0			// 2
+	subi	r16,1		// 1
+	brne	pwm_loop	// 2  1
 
 pwm_exit:
-	pop		16
-	ret
+	pop		16			//    1
+	ret					//    4 to return
 
 ;*************************************************************************	
 ; pad_100_delay 98 cycle padding delay

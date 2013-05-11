@@ -103,6 +103,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Acc_LPF = 8;
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
+	Config.DynGain = 100;
 	Config.IMUType = 1;					// Advanced IMU ON
 	Config.BatteryType = LIPO;
 	Config.MinVoltage = 83;				// 83 * 4 = 332
