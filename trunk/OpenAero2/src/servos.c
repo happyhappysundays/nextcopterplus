@@ -18,24 +18,25 @@
 //************************************************************
 
 void output_servo_ppm(void);
-void output_servo_ppm_asm(volatile int16_t	*ServoOut);
+void output_servo_ppm_asm(volatile uint16_t	*ServoOut);
 
 //************************************************************
 // Code
 //************************************************************
 
-volatile int16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
+volatile uint16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
 
 void output_servo_ppm(void)
 {
-	int32_t temp;
+	uint32_t temp;
 	uint8_t i;
 
 	// Scale servo from 2500~5000 to 1000~2000
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		temp = ((ServoOut[i] << 2) / 10); 
-		ServoOut[i] = temp;
+		temp = ServoOut[i];					// Promote to 32 bits
+		temp = ((temp << 2) / 10); 
+		ServoOut[i] = (uint16_t)temp;
 	}
 
 	// Suppress outputs during throttle high error
