@@ -168,8 +168,12 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 	mugui_size16_t size;
 	int16_t temp16;
 	int8_t i;
-	int8_t servo_duration = 0;
 	int16_t value = (int8_t)*values;
+	uint8_t display_update = 0;
+	uint8_t servo_update = 0;
+	uint8_t button_update = 0;
+	uint8_t button_inc = 0;
+	bool	button_lock = false;
 
 	// Multiply value for display only if style is 2
 	if (range.style == 2)
@@ -180,7 +184,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 
 	button = NONE;
 
-	// Reset servo to neutral unles it is for the throttle channel in CPPM mode
+	// Reset servo to neutral unless it is for the throttle channel in CPPM mode
 	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
 	{
 		temp16 = Config.Limits[servo_number].trim;
@@ -197,41 +201,84 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		}
 	}
 
+	// This is a loop that cycles until Button 4 is pressed (Save)
+	// The GLCD updating slows servo updates down too much so only update the GLCD periodically
+	// When not updating the GLCD the servo should be updated at 50Hz (20ms)
 	while (button != ENTER)
 	{
-		clear_buffer(buffer);
+		// Increment loopcount so that we can time various things
+		display_update++;
+		servo_update++;
 
-		// Print title
-		gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (prog_uchar*)Verdana14, 0, 0);
-
-		// Print value
-		if ((range.style == 0) || (range.style == 2)) // numeric and numeric * 4
+		// Vary the button increment delay depending on the function
+		if (servo_enable)
 		{
-			// Write numeric value, centered on screen
-			mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana14, &size);
-			mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana14,((128-size.x)/2)+offset,25);
+			button_inc = 20; // For servos
 		}
-		else // text
+		else
 		{
-			// Write text, centered on screen
-			pgm_mugui_scopy((char*)pgm_read_word(&text_menu[text_link + value])); // Copy string to pBuffer
-
-			mugui_text_sizestring((char*)pBuffer, (prog_uchar*)Verdana14, &size);
-			LCD_Display_Text(text_link + value, (prog_uchar*)Verdana14,((128-size.x)/2),25);
+			button_inc = 1;	// For everything else
 		}
 
-		// Print bottom markers
-		print_menu_frame(1);
+		// Increment button timer when pressed
+		if (button != NONE)
+		{
+			button_update++;
 
-		// Write from buffer
-		write_buffer(buffer);
+			// Release button lock after button_inc loops
+			if (button_update > button_inc)
+			{
+				button_lock = false;
+				button_update = 0;
+			} 
+		}
+		// Remove lock when not pressed
+		else 
+		{
+			button_update = 0;
+			button_lock = false;
+		}
 
+		// Update display every 32 loops but don't interrupt when setting default
+		// Update every loop when not in servo mode
+		if (!servo_enable ||(display_update == 32))
+		{
+			display_update = 0;
+
+			clear_buffer(buffer);
+
+			// Print title
+			gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (prog_uchar*)Verdana14, 0, 0);
+
+			// Print value
+			if ((range.style == 0) || (range.style == 2)) // numeric and numeric * 4
+			{
+				// Write numeric value, centered on screen
+				mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana14, &size);
+				mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana14,((128-size.x)/2)+offset,25);
+			}
+			else // text
+			{
+				// Write text, centered on screen
+				pgm_mugui_scopy((char*)pgm_read_word(&text_menu[text_link + value])); // Copy string to pBuffer
+
+				mugui_text_sizestring((char*)pBuffer, (prog_uchar*)Verdana14, &size);
+				LCD_Display_Text(text_link + value, (prog_uchar*)Verdana14,((128-size.x)/2),25);
+			}
+
+			// Print bottom markers
+			print_menu_frame(1);
+
+			// Write from buffer
+			write_buffer(buffer);
+		}
 
 		// Poll buttons when idle
 		// Don't use button acceleration when moving servos
+		// And don't block the code with poll_buttons()
 		if (servo_enable)
 		{
-			poll_buttons(false);
+			button = (PINB & 0xf0);	
 		}
 		else
 		{
@@ -239,24 +286,29 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		}
 
 		// Handle cursor Up/Down limits
-		if (button == DOWN)	
+		if (button == DOWN)
 		{
-			value = value - (range.increment * button_multiplier);
-			servo_duration = 5;
-			_delay_ms(50);
+			if (button_lock == false)
+			{
+				button_lock = true;
+				value = value - (range.increment * button_multiplier);
+				button_update = 0;
+			}
 		}
 
-		if (button == UP)	
+		if (button == UP)
 		{
-			value = value + (range.increment * button_multiplier);
-			servo_duration = 5;
-			_delay_ms(50);
+			if (button_lock == false)
+			{
+				button_lock = true;
+				value = value + (range.increment * button_multiplier);
+				button_update = 0;
+			}
 		}
 
-		if (button == BACK)	// Clear value
+		if (button == BACK)	
 		{
 			value = (range.default_value * mult);
-			servo_duration = 20; 
 		}
 
 		// Limit values to set ranges
@@ -273,26 +325,27 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		// Update contrast setting
 		if (menuitem == CONTRAST)
 		{
-			st7565_set_brightness(value);
+			st7565_set_brightness(value); // debug
 		}
 
-		// Set servo position if required
-		if (servo_enable)
+		// Set servo position if required and update every 4 * 5ms = 20ms
+		if ((servo_enable) && (servo_update >= 4))
 		{
+			servo_update = 0;
+
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
 			temp16 = ((temp16 << 2) / 10); 	// Span back to what the output wants
 
-			// Give servos time to settle
-			for (i = 0; i < servo_duration; i++)
-			{
-				cli();
-				output_servo_ppm_asm3(servo_number, temp16);
-				sei();
-
-				_delay_ms(10);
-			}
+			cli();
+			output_servo_ppm_asm3(servo_number, temp16);
+			sei();
 		}
-	}
+
+		// Loop rate = 5ms (200Hz)
+		_delay_ms(5);
+
+	} // while (button != ENTER)
+
 
 	// Exit
 	button = ENTER;
