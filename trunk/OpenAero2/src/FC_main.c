@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 2 - May 2013
+// Version 1.2 Beta 3 - May 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -184,8 +184,10 @@
 //			Fixed case where doing a factory reset also re-bound the Satellite RX.
 //			Flap speed fixed.
 // Beta 2	Stick rate changed to "Lock rate" and only affects Axis lock mode.
-//			RC stick rate now always zero. Fixed bug where M8 could not go to 125%. 
+//			RC stick rate now always 2. Fixed bug where M8 could not go to 125%. 
 //			Output code now covers -135% to 135%.
+// Beta 3	Completely changed the value editing menu code so that servos are (almost)
+//			continually updated.
 //
 //***********************************************************
 //* To do
