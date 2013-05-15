@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 3 - May 2013
+// Version 1.2 Beta 4 - May 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -188,6 +188,7 @@
 //			Output code now covers -135% to 135%.
 // Beta 3	Completely changed the value editing menu code so that servos are (almost)
 //			continually updated.
+// Beta 4	Servos are continually updated when no button pressed.
 //
 //***********************************************************
 //* To do
