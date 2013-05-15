@@ -174,6 +174,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 	uint8_t button_update = 0;
 	uint8_t button_inc = 0;
 	bool	button_lock = false;
+	bool	first_time = true;
 
 	// Multiply value for display only if style is 2
 	if (range.style == 2)
@@ -214,6 +215,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		if (servo_enable)
 		{
 			button_inc = 20; // For servos
+
 		}
 		else
 		{
@@ -239,11 +241,13 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			button_lock = false;
 		}
 
-		// Update display every 32 loops but don't interrupt when setting default
-		// Update every loop when not in servo mode
-		if (!servo_enable ||(display_update == 32))
+		// Display update
+		if 	(!servo_enable || 									// Non-servo value or
+			((display_update >= 32) && (button != NONE)) || 	// Servo value and 32 cycles passed but only with a button pressed or...
+			 (first_time))										// First time into routine
 		{
 			display_update = 0;
+			first_time = false;
 
 			clear_buffer(buffer);
 
@@ -279,6 +283,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		if (servo_enable)
 		{
 			button = (PINB & 0xf0);	
+			button_multiplier = 1;
 		}
 		else
 		{
