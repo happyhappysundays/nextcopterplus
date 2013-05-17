@@ -7,7 +7,7 @@
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
 
  # Hold down all four buttons while powering up the KK2 board,
- # A "*Reset*" message will briefly appear on the screen after the OpenAero2 logo is displayed,
+ # A "*Reset*" message will briefly appear on the screen
  # Release all buttons once the red LED has blinked,
  # OpenAero will continue to display the idle screen.
 
@@ -19,16 +19,16 @@ http://i.imgur.com/966nbo0.jpg
 ===Status Screen===
 The status screen allows OpenAero2 to provide current status information.
 
-http://i.imgur.com/TW36X8l.jpg
+http://i.imgur.com/0iC9FrK.jpg
 
  * Mode - *1. General* - Selected *Model Type*.
  * Version - The version of OpenAero2 running on the board.
  * RX sync - *2. Receiver setup* - Selected receiver type.
- * Autolevel - *6. Autolevel Setup* - Status of autolevel mode.
- * Stability - *5. Stability Setup* - Status of stability mode.
- * Battery icon - *17. Battery Monitor* - Graphical representation of the flight pack voltage.
- * Battery voltage - *17. Battery Monitor* - Numerical representation of the flight pack voltage.
- * RAM: *Advanced feature* - Displays available processor memory after loading selected menus.
+ * Profile - *5. Current flight Profile* - Replaces older stability/autolevel.
+ * Free RAM: *Advanced feature* - Displays available processor memory after loading selected menus.
+ * Battery icon - *18. Battery Monitor* - Graphical representation of the flight pack voltage.
+ * Battery voltage - *18. Battery Monitor* - Numerical representation of the flight pack voltage.
+
 
 ===Main Menu===
 Select the 'Menu', button 1 on the left, to display the main menu.
@@ -59,7 +59,7 @@ OpenAero2 supports the following four mounting orientations.
 
 ==2. Receiver setup==
 
-http://i.imgur.com/syjSafK.jpg
+http://i.imgur.com/tBNJ5eO.jpg
 
 ===Receiver Sync===
 While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, OpenAero2 can support 8 CPPM channels from a single-wire receiver.
@@ -67,37 +67,31 @@ While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, Op
  * Rudder - Default for most multi-wire PWM receivers.
  * CPPM - Listens for a compatible multi-channel stream on the *rudder* input only.
  
-===CPPM order===
+===Ch. order===
 With a compatible CPPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order. 
 
 The order of the channels will be define by the brand of your transmitter.
 
-===Stability input===
-OpenAero2 allows any input channel to remotely enable or disable gyro stability.
-
-By default, both PWM & CPPM setups commonly use the '*gear*' channel.
-
-===Autolevel input===
-Similar to stability mode, OpenAero2 allows any input channel to remotely enable or disable auto-leveling.
-
- * *Gear* - Typically used by PWM receivers on the same 2 or 3 position flight switch.
- * *AUX1* - Commonly used by CPPM receivers on a second individual flight switch.
-
-If the '*gear*' channel is used for both '*Stab input*' and '*Autolev input*', both stabilization and autoleveling will be switch on and off together.
+===Profile channel===
 
 ===2nd Aileron===
 In addition to an aileron on output 6, OpenAero2 can control a second aileron on output 7. Three methods are supported.
 
-http://i.imgur.com/dLFoASW.jpg
-
  * *None* - M7 remains unassigned and will *not* operate a second aileron 
  * *Aileron* - Commonly used with PWM receivers to control a second aileron on output 7.
 
-====Flaperon====
-Allows both ailerons to be used as flaperons, where the flaps and ailerons are pre-mixed within the transmitter, prior to OpenAero2.
+http://i.imgur.com/tBNJ5eO.jpg
 
- * *Throttle* - PWM receivers only.
- * *AUX1* - CPPM receivers only.
+====Dynamic gain channel===
+====Dynamic gain===
+
+http://i.imgur.com/5DkP2Oy.jpg
+
+===Differential===
+===Flap speed===
+===Lock rate===
+===Deadband===
+
 
 ==3. Stick Polarity==
 OpenAero2 has been designed to unify the polarity of stick inputs for all flight modes.
@@ -113,7 +107,7 @@ Once the 'Stick polarity' menu has been entered, promptly complete the following
 ==4. Receiver Inputs==
 The 'Receiver Inputs' screen shows the current receiver values of the first five channels from a PWM or CPPM receiver.
 
-http://i.imgur.com/0TWX9qA.jpg
+http://i.imgur.com/X5DNnm7.jpg
 
 ===Stick Calibration===
 Center stick calibration allows OpenAero2 to center both PWM & CPPM receivers input, to ensure correct roll rate and selection of flight modes.
@@ -131,10 +125,10 @@ Prior to setting up the flight modes, complete the following checks, ensuring *p
 
 Once the above has been completed, all positive values should be displayed when both sticks are pushed forwards / away and to the right.
 
-==5. Stability Setup==
+==5. Profile 1 Setup==
 OpenAero2 supports the remote activation of gyro stabilization either via a two or three position switch.
 
-http://i.imgur.com/fsmrG41.jpg
+http://i.imgur.com/8x9OsUR.jpg
 
 By default, '*StabChan*' allows a 2-position switch to activate gyro stabilization via the '*gear*' channel. 
 
@@ -146,24 +140,7 @@ Alternatively, selecting '*3-pos*' allows a 3-position switch to alternate betwe
 
 Ensure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
-==6. Autolevel Setup==
-Similar to stability mode, OpenAero2 supports the remote activation of autoleveling either via a two or three position switch.
-
-http://i.imgur.com/gPbXhIr.jpg
-
-By default, the '*AutoChan*' option allows a 2-position switch to activate autoleveling via the '*gear*' channel. A 2-position flight switch will be limited to autoleveling *on* or *off*.
-
-Ensure your 2-position stabilization switch is set to -100% & +100% for correct mode selection.
-
-If the '*gear*' channel is used for both '*Stab input*' and '*Autolev input*', both stabilization and autoleveling will be switch on and off together.
-
-Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information on 'Hands Free' mode.
-
-Alternatively, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single channel. 
-
-Make sure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
-
-==7. Sensor Calibration==
+==8. Sensor Calibration==
 OpenAero2 uses both gyro's and accelerometers to determine the angle of the aeroplane and add corrections.
 
 http://i.imgur.com/wC6ORmU.jpg
@@ -194,7 +171,8 @@ http://i.imgur.com/Or0D6Uy.jpg
 ==9. Channel Mixing==
 For advanced users, OpenAero2 has the flexibility to mix multiple receiver and sensor inputs, to produce the desired outs.
 
-http://i.imgur.com/pHJhhlr.jpg
+http://i.imgur.com/NlCjbtF.jpg
+http://i.imgur.com/bOwVkr0.jpg
 
 For typical single and dual aileron aeroplane's, the default settings will work successfully.
 
