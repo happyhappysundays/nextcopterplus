@@ -18,9 +18,8 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAe
 
  # Where can I download OpenAero from?
 
-[OpenAero2_Getting_Started#Where_can_I_download_OpenAero2_from?]
+[#Where_can_I_download_OpenAero2_from?]
 
-[OpenAero2_Getting_Started#Where can I download OpenAero from?]
 
  # How do I load OpenAero2 onto a KK2 board?
  # How do I mount the KK2 board in my aeroplane?
