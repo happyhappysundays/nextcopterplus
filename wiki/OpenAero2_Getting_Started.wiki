@@ -14,9 +14,9 @@ Please ensure you read the manuals in the following order.
 Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
 
 =Getting Started Guide=
-Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAero2 on to a KK2 board.
+Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading !OpenAero2 on to a KK2 board.
 
- # Where can I download OpenAero from?
+ # Where can I download OpenAero2 from?
 
 [#Where_can_I_download_OpenAero2_from?]
 
@@ -36,7 +36,7 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading OpenAe
   * Aeroplane Mode
   * Flying-Wing Mode
 
-==Where can I download OpenAero2 from?==
+==Where can I download !OpenAero2 from?==
 
  * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.1.zip Version 1.1 - Final release]
  * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.0.zip Version 1.0 - Final release]
