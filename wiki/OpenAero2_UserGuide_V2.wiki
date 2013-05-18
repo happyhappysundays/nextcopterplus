@@ -1,5 +1,4 @@
 #summary OpenAero2 - Aeroplane - Quick Setup guide V1.2
-#sidebar Index
 
 =Aeroplane - Quick Setup guide=
 
@@ -12,7 +11,7 @@ This guide presumes all values have been reset to their factory default values, 
  # OpenAero will continue to display the idle screen.
 
 ===Idle Screen===
-After the default 10 seconds, the status screen will time-out, to display the idle screen.
+After the default 10 seconds, the status screen will time-out to display the idle screen.
 
 http://i.imgur.com/966nbo0.jpg
 
@@ -24,7 +23,7 @@ http://i.imgur.com/0iC9FrK.jpg
  * Mode - *1. General* - Selected *Model Type*.
  * Version - The version of OpenAero2 running on the board.
  * RX sync - *2. Receiver setup* - Selected receiver type.
- * Profile - *5. Current flight Profile* - Replaces older stability/autolevel.
+ * Profile - *5. Current flight Profile* - Replaces older stability/autolevel displays.
  * Free RAM: *Advanced feature* - Displays available processor memory after loading selected menus.
  * Battery icon - *18. Battery Monitor* - Graphical representation of the flight pack voltage.
  * Battery voltage - *18. Battery Monitor* - Numerical representation of the flight pack voltage.
@@ -39,58 +38,90 @@ http://i.imgur.com/cM9dmLt.jpg
 http://i.imgur.com/CbIhAew.jpg
 
 ===Model Type===
-OpenAero2 has been designed with selectable model presets, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
+OpenAero2 has been designed with selectable model presets, for easy setup to control both single and dual aileron aeroplanes or flying-wings.
 
- * Aero - Default preset for both *single* and *dual aileron* aeroplane's.
- * F.Wing - Selectable preset for *flying-wing*'s.
+ * Aero - Default preset for both *single* and *dual aileron* aeroplanes.
+ * F.Wing - Selectable preset for *flying-wings*.
  * CamStab - For standalone [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_1 camera stabilization] & with  [https://code.google.com/p/nextcopterplus/wiki/OpenAero2_CamStab_Setup_Part_2  RC control] only.
 
 Unlike other solutions, OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos. 
 
-Please refer to the [OpenAero2_Adv_UserGuide_V1 'Advanced User Guide'] for more information on how to customize the mixers
+Please refer to the [OpenAero2_Adv_UserGuide_V2 'Advanced User Guide'] for more information on how to customize the mixers
 
 ===Board Orientation===
-OpenAero2 supports the following four mounting orientations.
+OpenAero2 supports the following five mounting orientations.
 
  * Forward - Default horizontal orientation, buttons facing *aft* with screen to the *front*.
  * Aft - Horizontal, buttons facing *front* with screen to the *aft*.
  * Inverted - *Inverted* horizontal, buttons facing *aft* with screen to the *front*.
  * Vertical - *Upright*, buttons *down* with the screen on *top*.
+ * Sideways - Horizontal, buttons to the right.
 
 ==2. Receiver setup==
 
 http://i.imgur.com/tBNJ5eO.jpg
 
 ===Receiver Sync===
-While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, OpenAero2 can support 8 CPPM channels from a single-wire receiver.
+While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, OpenAero2 can support 8 CPPM channels from a single-wire receiver or via serial protocols such as S.Bus, Spektrum Satellite and XPS Xtreme. 
 
  * Rudder - Default for most multi-wire PWM receivers.
  * CPPM - Listens for a compatible multi-channel stream on the *rudder* input only.
+ * S.Bus - Serial input on the *Throttle* input via an S.Bus adapter cable.
+ * Satellite - Serial input on the *Throttle* input via a Satellite adapter cable.
+ * Xtreme - Serial input on the *Throttle* input
  
 ===Ch. order===
-With a compatible CPPM receiver attached to the rudder input only, OpenAero2 supports either *JR/Spk* or *Futaba* channel order. 
+With a compatible CPPM receiver attached to the rudder or serial RX on the throttle input, OpenAero2 supports either *JR/Spk*, *Futaba* or *Spektrum* channel order. 
 
-The order of the channels will be define by the brand of your transmitter.
+The order of the channels will be defined by the brand of your transmitter.
 
 ===Profile channel===
+Selection of stability and autolevel is now managed by flight "Profiles". This gives far more flexibility than the older mode settings.
+
+You must select which channel you are using to select the flight profile here.
 
 ===2nd Aileron===
 In addition to an aileron on output 6, OpenAero2 can control a second aileron on output 7. Three methods are supported.
 
  * *None* - M7 remains unassigned and will *not* operate a second aileron 
- * *Aileron* - Commonly used with PWM receivers to control a second aileron on output 7.
+ * *Aileron* - Commonly used with PWM receivers to control a second aileron on output 7 as a copy of the single aileron channel.
+ * *(Your channel)* - If you have a second aileron signal from your TX and connected to the KK2 board, selecting it here will allow OpenAero2 to use it.
 
 http://i.imgur.com/tBNJ5eO.jpg
 
 ====Dynamic gain channel===
+Dynamic gain allows you to modify the gyro gains from the TX while flying or at the field by associating it with a TX channel
+Set the channel number here.
+
 ====Dynamic gain===
+The amount of dynamic gain attenuation is determined here. 
+Setting dynamic gain to 100 allows you to completely dampen all gyro gain - which is the same as pass-through mode.
+Setting dynamic gain to 0 gives you no dynamic gain adjustment at all and the model will use the maximum amount of gyro gain set in the flight profile. 
+Setting dynamic gain to 50 will allow you to reduce the gyro gain to half at the highest setting of the dynamic gain channel.
+
 
 http://i.imgur.com/5DkP2Oy.jpg
 
 ===Differential===
+If you have independently-controllable ailerons, you can set the amount of differential here.
+Differential will cause the ailerons to move farther "UP" than "DOWN".
+Setting differential to zero will cause the ailerons to behave as normal.
+Setting differential to 50% will cause the ailerons to move upwards twice as much as downwards.
+Setting differential to 100% will cause the ailerons to not move downwards at all.
+
 ===Flap speed===
+OpenAero2 now allows you to set the deployment speed of flaperons.
+It will not affect separate flap channels that you may route through OpenAero2.
+Setting flap speed to zero will result in normal full-speed movement.
+Setting flap speed to 20 will result in very slow flap deployment.
+
 ===Lock rate===
+When a profile that includes axis-locked gyros is selected, the stick input rate that will affect the gyros is set here.
+Setting the number lower increases the stick input and higher reduces it.
+
 ===Deadband===
+When using axis-locked gyros, small errors or drift in the RC input will cause the servos to quickly swing to one side of the other.
+Increase the deadband to reduce this. The deadband is the RC input value below which will be ignored.
 
 
 ==3. Stick Polarity==
@@ -100,12 +131,12 @@ http://i.imgur.com/OF6LTkQ.jpg
 
 Once the 'Stick polarity' menu has been entered, promptly complete the following actions.
 
- # Move both sticks forward and into top right corners,
+ # Move both sticks forward (away from you) and into top right corners,
  # Wait till 'done' is displayed and the red light blinks,
  # The main menu will be displayed upon completion.
 
 ==4. Receiver Inputs==
-The 'Receiver Inputs' screen shows the current receiver values of the first five channels from a PWM or CPPM receiver.
+The 'Receiver Inputs' screen shows the current receiver values of the eight channels from a PWM or CPPM receiver.
 
 http://i.imgur.com/X5DNnm7.jpg
 
