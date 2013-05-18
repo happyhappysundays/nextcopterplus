@@ -63,8 +63,8 @@ It is recommended that you read the manuals in the following order.
  * [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
  
 *Your Support*
-OpenAero2 is a open-source project and is free, however it is also the result of many hundreds of hours of hard work.
-If you feel motivated to donate to the project please feel free. I'm often happy to make special versions for people.
+
+!OpenAero2 is a open-source project and is free, however if you feel motivated to donate to the project it is much appreciated.
 
 [https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
 
