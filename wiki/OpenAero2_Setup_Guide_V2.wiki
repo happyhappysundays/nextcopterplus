@@ -1,6 +1,6 @@
 #summary OpenAero2  - Setup Guide V1.2
 
-=OpenAero2 Setup Procedure=
+=Setup Procedure=
 ==A word about Stability and Autolevel switching==
 Stability and autolevel modes are now selected via the Flight Profiles. There are three profiles to choose from. The default settings are as follows:
 
@@ -14,7 +14,7 @@ While any type of input is possible, a three-position switch is typically used t
 The way it works is this: For the switch position between -100% and the Profile 2 trigger, Profile 1 is selected. For the switch position between the Profile 2 trigger and the Profile 3 trigger, Profile 2 is selected. For the switch position above the Profile 3 trigger, Profile 3 is selected.
 
 ==Initial setup and calibration==
-The first time you set up OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
+The first time you set up !OpenAero2 you will have to adjust a few things to suit your radio gear and particular usage. 
 
 ===Step 1: Model type===
  * *Mode:* Go into the General menu and change the Mode to that which suits your model. The default is Aeroplane. Note that if you choose instead "Flying Wing" you must disable flying wing mixing in your transmitter.
@@ -27,7 +27,7 @@ The first time you set up OpenAero2 you will have to adjust a few things to suit
  * *2nd Ail. Chan.:* If your radio carries a second, unique aileron channel set that here too.
 
 ===Step 3: Stick polarity===
- * Follow the on-screen instructions to have OpenAero2 automatically adjust the RC input polarity to suit.
+ * Follow the on-screen instructions to have !OpenAero2 automatically adjust the RC input polarity to suit.
 
 ===Step 4: RC check===
  * Go to the Receiver inputs screen and switch on your transmitter and receiver. If set up correctly, you should immediately see values appearing in both columns next to each connected channel.
@@ -82,8 +82,8 @@ If they are negative, then you have failed to use the "Stick polarity" screen to
  * Tilt the model in pitch and roll while watching the respective surfaces. They should move slightly to compensate and remain in that position.
  * The completes the basic setup process.
 
-==Every time you power up OpenAero2==
-There are some important things to note when starting OpenAero2.
+==Every time you power up==
+There are some important things to note when starting !OpenAero2.
 
 ===Gyro calibration===
 The gyros are calibrated automatically when the model is powered up.
