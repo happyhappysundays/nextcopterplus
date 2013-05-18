@@ -1,5 +1,5 @@
 #summary OpenAero2 - Basic setup guide V1.2
-=Basic setup guide=
+=Basic User Guide=
 ==Factory reset==
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
 
