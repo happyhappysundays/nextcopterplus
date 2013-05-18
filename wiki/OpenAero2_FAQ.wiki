@@ -48,6 +48,13 @@ The KK2 board supports common multi-wire PWM receivers, single-wire CCPM receive
 S.Bus and Satellite receivers require an inexpensive interface cable.
 Binding of Satellite receivers is also supported natively.
 
+Spektrum Satellite setup
+http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5751562-10-003.jpg
+
+Futaba S.bus setup
+http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5750100-134-OpenAero2_SBUS_setup.jpg
+
+
 ===Which CPPM receivers are available?===
 While there are many brands available, the following have been tested.
 
