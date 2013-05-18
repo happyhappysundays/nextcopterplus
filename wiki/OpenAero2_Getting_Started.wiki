@@ -15,8 +15,8 @@ A link to the latest beta version of OpenAero2 can be found on [http://www.rcgro
  # Download the latest version of [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 OpenAero2].
  # Extract the 'OpenAero2.hex' file an 'OpenAero2' folder on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
- # Extract the contains of the zip file to a 'flash tool' folder on your desktop.
- # Connect the 6 pin head of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to the ISP programming head labeled JP1, in the lower left of the KK2 board, with the ribbon facing towards the screen.
+ # Extract the contents of the zip file to a 'flash tool' folder on your desktop.
+ # Connect the 6 pin plug of the [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] to the ISP programming header labeled JP1, in the lower left of the KK2 board, with pin 1 towards the edge of the board.
  # Connect the USBasp to a free port on your computer. A green light on the USBasp should now be lit and the screen of KK2 board should now display text. If the screen is lit without any text, follow the [http://www.rcgroups.com/forums/showpost.php?p=23511469&postcount=8334 designers tips], else you can [http://www.hobbyking.com/hobbyking/store/supportform.asp return] the board to your nearest HobbyKing warehouse.
  # Run 'kkMulticopterFlashTool.cmd' from the 'flash tool' folder on your desktop,
  # Select 'USBasp' from the programmer drop-down menu,
@@ -36,25 +36,25 @@ As shown in the following diagram, the two piezo buzzer output pins indicate the
 
 http://i.imgur.com/S2xRY.jpg
 
+OpenAero2 now supports five different board orientations. See the [OpenAero2_UserGuide_V2 Basic User Guide] for more info.
+
 ==How do I connect the KK2 board in my model?==
-The KK2 board should be installed within your aircraft, between your receiver and servos, to stabilize an aeroplane or a camera gimbal. 
+The KK2 board should be installed within your aircraft between your receiver and servos, to stabilize an aeroplane or a camera gimbal. 
 
 ==How do I power the KK2 board?==
 Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, one to prevent receiver brown-outs and a second to power the servos.
 
-*Do not connect the 5V supply from M1, or the receiver to the servos on M2-M8, else the electrical noise from the servos in flight will cause the KK2 board to reboot and crash your aircraft*
+*Do not connect the 5V supply from M1, or the receiver to the servos on M2-M8, else the electrical noise from the servos in flight will cause the KK2 board to reboot and crash your aircraft.*
 
 ===KK2 Board===
 A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this will be the 5 volt supply from the ESC's internal BEC.
-
 This will provide power to both the KK2 board and the receiver.
 
 ===Servos===
 A second BEC must be connected to any of the pins marked M2-M8, to power the servos. 
-
 Depending on the specification of your servos, typically a 5 to 6 volt external BEC will be used.
 
-We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
+We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBECs from Hobbyking.
 
 ==How do I connect my receiver==
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
@@ -76,26 +76,18 @@ Since V1.1 Beta 6, the throttle input channel can be used for the following purp
 
 ===CPPM Receivers===
 Single-wire receivers can be connected to the *rudder* input for both signal and power.
-OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
+OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
 
-*JR/Spektrum*
- * CH1: Throttle
- * CH2: Aileron #1
- * CH3: Elevator
- * CH4: Rudder
- * CH5: Gear switch
- * CH6: Aux 1
- * CH7: Aux 2
- * CH8: Aux 3 
-*Futaba*
- * CH1: Aileron #1
- * CH2: Elevator
- * CH3: Throttle
- * CH4: Rudder
- * CH5: Gear switch
- * CH6: Aileron #2
- * CH7: Aux 1
- * CH8: Aux 2 
+||*JR/Spektrum* || *Futaba*|| *Satellite* ||
+||CH1: Throttle ||CH1: Aileron #1|| CH1: Flap ||
+||CH2: Aileron #1 ||CH2: Elevator|| CH2: Aileron ||
+||CH3: Elevator ||CH3: Throttle|| CH3: Elevator ||
+||CH4: Rudder ||CH4: Rudder|| CH4: Rudder ||
+||CH5: Gear switch ||CH5: Gear switch|| CH5: Gear ||
+||CH6: Aux 1 ||CH6: Aileron #2|| CH6: Throttle ||
+||CH7: Aux 2 ||CH7: Aux 1|| CH7: AUX1 ||
+||CH8: Aux 3  ||CH8: Aux 2 || CH8: AUX2 ||
+
 
 *'CPPM mode' must be selected with the 'RC Setup' menu.*
 
