@@ -1,18 +1,5 @@
 #summary OpenAero2  - Aeroplane - Advanced User guide V1.2
 
-[https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
-
-Please ensure you read the manuals in the following order.
-
- # [OpenAero2_FAQ Frequently Ask Questions]
- # [OpenAero2_Getting_Started Getting Started Guide]
- # [OpenAero2_UserGuide_V1 Aeroplane - Quick Setup Guide]
- # [OpenAero2_Adv_UserGuide_V1 Aeroplane - Advanced User Guide]
- # [OpenAero2_CamStab_Setup_Part_1 Camera - Standalone Guide]
- # [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
- 
-Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
-
 =Aeroplane - Advanced User guide=
 
 ==The LCD Menu System==
@@ -28,11 +15,10 @@ http://i.imgur.com/TW36X8l.jpg
  * *Mode:* The current mixer preset (Aero, F.Wing or Camstab)
  * *Version:* The version number of the loaded firmware
  * *RX sync:* The receiver sync mode (CPPM, Rudder, Throttle or Gear)
- * *Autolevel:* The current autolevel status (ON/OFF)
- * *Stability:* The current stability status (ON/OFF)
+ * *Profile:* The current flight profile selected (1 to 3)
  * *Battery icon:* The battery icon shows the remaining battery capacity. The limits of the capacity meter are calculated from the battery settings menu. For example, if a 3S LiPo is used and the minimum cell voltage is set to 3.7V (370) the graphic will show empty at a total battery voltage of 11.1V. If the maximum cell voltage is set to 4.2V (420) the graphic will show full at a total cell voltage of 12.6V.
  * *Battery voltage:* The battery voltage is displayed under the battery icon
- * *RAM:* The number of bytes of never-used RAM is shown to help debug potential stack overflow conditions. If this number ever reaches zero, a stack overflow has occured.
+ * *Free RAM:* The number of bytes of never-used RAM is shown to help debug potential stack overflow conditions. If this number ever reaches zero, a stack overflow has occurred.
 
 Pressing button 1 goes to the main menu.
 
