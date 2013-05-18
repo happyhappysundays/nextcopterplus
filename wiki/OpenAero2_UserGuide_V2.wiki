@@ -1,7 +1,5 @@
 #summary OpenAero2 - Aeroplane - Quick Setup guide V1.2
-
 =Aeroplane - Quick Setup guide=
-
 ==Factory reset==
 This guide presumes all values have been reset to their factory default values, for a quick and easy setup, from a 'factory reset' to 'ready to fly'.
 
@@ -20,14 +18,13 @@ The status screen allows !OpenAero2 to provide current status information.
 
 http://i.imgur.com/0iC9FrK.jpg
 
- * Mode - *1. General* - Selected *Model Type*.
+ * Mode - Selected *Model Type*.
  * Version - The version of !OpenAero2 running on the board.
- * RX sync - *2. Receiver setup* - Selected receiver type.
- * Profile - *5. Current flight Profile* - Replaces older stability/autolevel displays.
- * Free RAM: *Advanced feature* - Displays available processor memory after loading selected menus.
- * Battery icon - *18. Battery Monitor* - Graphical representation of the flight pack voltage.
- * Battery voltage - *18. Battery Monitor* - Numerical representation of the flight pack voltage.
-
+ * RX sync - Selected receiver type.
+ * Profile - Current flight *Profile* - Replaces older stability/autolevel displays.
+ * Free RAM - Displays lowest amount of processor memory ever measured.
+ * Battery icon - Graphical representation of the flight pack voltage.
+ * Battery voltage - Numerical representation of the flight pack voltage.
 
 ==Main Menu==
 Select the 'Menu', button 1 on the left, to display the main menu.
@@ -71,7 +68,7 @@ While the KK2 board is limited to 5 PWM channels from a multi-wire receivers, !O
  * Xtreme - Serial input on the *Throttle* input
  
 ===Ch. order===
-With a compatible CPPM receiver attached to the rudder or serial RX on the throttle input, !OpenAero2 supports either *JR/Spk*, *Futaba* or *Spektrum* channel order. 
+With a compatible CPPM receiver attached to the rudder or serial RX on the throttle input, !OpenAero2 supports either *JR/Spk*, *Futaba* or *Satellite* channel order. 
 
 The order of the channels will be defined by the brand of your transmitter.
 
@@ -79,6 +76,8 @@ The order of the channels will be defined by the brand of your transmitter.
 Selection of stability and autolevel is now managed by flight "Profiles". This gives far more flexibility than the older mode settings.
 
 You must select which channel you are using to select the flight profile here.
+
+You can then set up each of the three flight profiles to your liking.
 
 ===2nd Aileron===
 In addition to an aileron on output 6, !OpenAero2 can control a second aileron on output 7. Three methods are supported.
@@ -99,14 +98,13 @@ Setting dynamic gain to 100 allows you to completely dampen all gyro gain - whic
 Setting dynamic gain to 0 gives you no dynamic gain adjustment at all and the model will use the maximum amount of gyro gain set in the flight profile. 
 Setting dynamic gain to 50 will allow you to reduce the gyro gain to half at the highest setting of the dynamic gain channel.
 
-
 http://i.imgur.com/5DkP2Oy.jpg
 
 ===Differential===
 If you have independently-controllable ailerons, you can set the amount of differential here.
 Differential will cause the ailerons to move farther "UP" than "DOWN".
 Setting differential to zero will cause the ailerons to behave as normal.
-Setting differential to 50% will cause the ailerons to move upwards twice as much as downwards.
+Setting differential to 50% will cause the ailerons to move half as much downwards as upwards.
 Setting differential to 100% will cause the ailerons to not move downwards at all.
 
 ===Flap speed===
@@ -120,9 +118,8 @@ When a profile that includes axis-locked gyros is selected, the stick input rate
 Setting the number lower increases the stick input and higher reduces it.
 
 ===Deadband===
-When using axis-locked gyros, small errors or drift in the RC input will cause the servos to quickly swing to one side of the other.
+When using axis-locked gyros, small errors or drift in the RC input will cause the servos to quickly swing to one side or the other.
 Increase the deadband to reduce this. The deadband is the RC input value below which will be ignored.
-
 
 ==3. Stick Polarity==
 !OpenAero2 has been designed to unify the polarity of stick inputs for all flight modes.
@@ -136,14 +133,14 @@ Once the 'Stick polarity' menu has been entered, promptly complete the following
  # The main menu will be displayed upon completion.
 
 ==4. Receiver Inputs==
-The 'Receiver Inputs' screen shows the current receiver values of the eight channels from a PWM or CPPM receiver.
+The 'Receiver Inputs' screen shows the current receiver values of up to eight channels. Note that a conventional multi-wire PWM receiver is only cable of connecting five channels. A CPPM or serial receiver can use up to eight.
 
 http://i.imgur.com/X5DNnm7.jpg
 
 ===Stick Calibration===
-Center stick calibration allows !OpenAero2 to center both PWM & CPPM receivers input, to ensure correct roll rate and selection of flight modes.
+Center stick calibration allows !OpenAero2 to center the receiver's input, to ensure correct roll rate and selection of flight modes.
 
-When selecting 'cal', ensure both throttle stick and any 3-position flight switch are centered.
+Before pressing 'cal', ensure both throttle stick and any 3-position switches are centered. Set any two-position switches to the lowest position.
 
 ===Stick Polarity Check===
 Prior to setting up the flight modes, complete the following checks, ensuring *positive* values are displayed.
@@ -157,17 +154,29 @@ Prior to setting up the flight modes, complete the following checks, ensuring *p
 Once the above has been completed, all positive values should be displayed when both sticks are pushed forwards / away and to the right.
 
 ==5 to 7. Profile Setup==
-!OpenAero2 supports the remote activation of gyro stabilization either via a two or three position switch.
+!OpenAero2 supports the remote activation of gyro stabilization modes via an RC channel. Either two or three position switches, or a rotary dial can be used.
 
 http://i.imgur.com/8x9OsUR.jpg
 
-By default, '*StabChan*' allows a 2-position switch to activate gyro stabilization via the '*gear*' channel. 
+===Profile Trigger===
+This setting will define at what position this profile will activate.
 
-A 2-position flight switch will be limited to gyro stabilization *on* or *off*.
+Profile 1 will be selected if neither of the triggers for Profiles 2 and 3 are exceeded. As such, normally this is set to -100% (lowest position).
 
-Ensure your 2-position stability switch is set to -100% & +100% for correct mode selection.
+For profile 2, this percentage will dictate the *lower* limit of the control input. For example, if this is set to 0% (mid position) then Profile 2 will activate from this point.
 
-Alternatively, selecting '*3-pos*' allows a 3-position switch to alternate between all three flight modes upon the single channel. 
+Similarly, the trigger for profile 3 is set higher still (say, 90%) so that it can be activated by the highest position of a 3-position switch.
+
+===Stability===
+Selecting Stability *ON* will enable gyro stability in this Profile.
+Note that unless PID values are set, the gyros will have no effect. The default values will however initially give the desired result.
+
+
+===Autolevel===
+Selecting Stability *ON* will enable gyro stability in this Profile.
+Note that unless PID values are set, the gyros will have no effect. The default values will however initially give the desired result.
+
+
 
 Ensure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
 
