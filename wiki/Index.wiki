@@ -1,4 +1,4 @@
-*!OpenAero2 User Guides*
+*!OpenAero2 V1.2 User Guides*
 
 It is recommended that you read the manuals in the following order.
 
@@ -86,6 +86,7 @@ It is recommended that you read the manuals in the following order.
  * [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
 
 *Older User Guides*
+
  * [OpenAero2_UserGuide_V1 OpenAero2 V1.1 Basic User guide]
  * [OpenAero2_Adv_UserGuide_V1  OpenAero2 V1.1 Advanced User guide]
  * [OpenAero2_User_Guide OpenAero2 V1.0 User Guide]
