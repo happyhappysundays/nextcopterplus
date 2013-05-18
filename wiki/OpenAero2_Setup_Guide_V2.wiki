@@ -5,7 +5,7 @@
 Stability and autolevel modes are now selected via the Flight Profiles. There are three profiles to choose from. The default settings are as follows:
 
  * Profile 1: Pass-through. No stability or autolevel
- * Profile 2: Stability ON and Autolevel OFF
+ * Profile 2: Stability ON and autolevel OFF
  * Profile 3: Both stability and autolevel ON
 
 Note that instead of the above, you could have three profiles, all with stability on, but with different PID values. Or you could have one profile with axis-locked gyros so that these can be switched mid-flight for 3D applications.
