@@ -50,7 +50,7 @@ http://i.imgur.com/zCdGA.jpg?1
 
 ==Receivers==
 
-===Which receivers does !OpenAero2 support?===
+===Which receivers does OpenAero2 support?===
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
 ===Which CPPM receivers does !OpenAero2 support?===
