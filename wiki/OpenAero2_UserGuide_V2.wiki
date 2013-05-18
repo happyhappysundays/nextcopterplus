@@ -88,11 +88,11 @@ In addition to an aileron on output 6, !OpenAero2 can control a second aileron o
 
 http://i.imgur.com/tBNJ5eO.jpg
 
-====Dynamic gain channel===
+===Dynamic gain channel===
 Dynamic gain allows you to modify the gyro gains from the TX while flying or at the field by associating it with a TX channel
 Set the channel number here.
 
-====Dynamic gain===
+===Dynamic gain===
 The amount of dynamic gain attenuation is determined here. 
 Setting dynamic gain to 100 allows you to completely dampen all gyro gain - which is the same as pass-through mode.
 Setting dynamic gain to 0 gives you no dynamic gain adjustment at all and the model will use the maximum amount of gyro gain set in the flight profile. 
@@ -171,37 +171,36 @@ Similarly, the trigger for profile 3 is set higher still (say, 90%) so that it c
 Selecting Stability *ON* will enable gyro stability in this Profile.
 Note that unless PID values are set, the gyros will have no effect. The default values will however initially give the desired result.
 
-
 ===Autolevel===
-Selecting Stability *ON* will enable gyro stability in this Profile.
-Note that unless PID values are set, the gyros will have no effect. The default values will however initially give the desired result.
+Selecting Autolevel *ON* will enable accelerometer-based stability in this Profile.
+Note that unless PID values are set, the accelerometers will have no effect. The default values will however initially give the desired result.
 
-
-
-Ensure your 3-position switch is set to -100%, 0%, +100% and the switch was centered when 'stick calibration' was ran.
+===Gyro types===
+Each of the axis gyros (roll/pitch/yaw) can be set to rate mode or axis-lock mode.
+In rate mode, the gyro simply provides a signal indicating rotation in the axis in question.
+In axis lock mode, the gyro will continually signal any change from the position, or heading that it was in when initially activated.
+You can use stick input to reset the "neutral" heading position at any time.
 
 ==8. Sensor Calibration==
-!OpenAero2 uses both gyro's and accelerometers to determine the angle of the aeroplane and add corrections.
+!OpenAero2 uses both gyros and accelerometers to determine the angle of the aeroplane and add corrections.
 
 http://i.imgur.com/wC6ORmU.jpg
 
-Once the board has been securely mounted within the aeroplane, the sensors can be calibrating.
+Once the board has been securely mounted within the aeroplane, the sensors can be calibrated.
 
 ===Calibrate===
-This option calibrates the accelerometers only, so !OpenAero2 can determine the angle horizontal to the ground.
+This option calibrates the accelerometers only, so !OpenAero2 can determine the angle parallel to the ground.
 
-Prior selecting 'Cal', available on button 4, ensure the model is perfectly horizontal in the upright position.
+Prior selecting 'Cal', available on button 4, ensure the model is perfectly horizontal and in the upright position.
 
-For best results, firmly prop up the model on a hard surface and use a spirt level to ensure the model is perfectly level.
+For best results, firmly prop up the model on a hard surface and use a spirit level to ensure the model is perfectly level.
 
 ===Inverted calibrate===
 Once calibrated successfully, !OpenAero2 will be able to upright the aircraft from an inverted position.
+To more accurately determine the inverted orientation, a second calibration is required.
+Prior to selecting 'Inv', available on button 3, ensure the model is perfectly horizontal and in the inverted position. 
 
-This option will only become active once the above calibration has successfully been completed.
-
-Prior selecting 'Inv', available on button 3, ensure the model is perfectly horizontal in the inverted position. 
-
-For best results, firmly prop up the model on a hard surface and use a spirt level to ensure the model is perfectly level.
+For best results, firmly prop up the model on a hard surface and use a spirit level to ensure the model is perfectly level.
 
 ==9. Level Meter==
 This is a visual representation of what !OpenAero2 believes to be level, based on the successful calibration of the accelerometers.
@@ -209,7 +208,7 @@ This is a visual representation of what !OpenAero2 believes to be level, based o
 http://i.imgur.com/Or0D6Uy.jpg
 
 ==10. Channel Mixing==
-For advanced users, !OpenAero2 has the flexibility to mix multiple receiver and sensor inputs, to produce the desired outs.
+For advanced users, !OpenAero2 has the flexibility to mix multiple receiver and sensor inputs, to produce the desired outputs.
 
 http://i.imgur.com/NlCjbtF.jpg
 http://i.imgur.com/bOwVkr0.jpg
@@ -254,7 +253,7 @@ http://i.imgur.com/yE5a75i.jpg
 Again, this feature is particularly useful when stability and autoleveling is used with flaperons.
 
 ==16. Failsafe Settings==
-!OpenAero2 has been designed with built-in failsafe's, which have the potential to allow the pilot to regain control and save your aircraft.
+!OpenAero2 has been designed with built-in failsafes, which have the potential to allow the pilot to regain control and save your aircraft.
 
 http://i.imgur.com/qbFeiNm.jpg
 
