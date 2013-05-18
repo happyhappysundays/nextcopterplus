@@ -7,8 +7,8 @@ Please ensure you read the manuals in the following order.
  * [OpenAero2_FAQ Frequently Asked Questions]
  * [OpenAero2_Getting_Started  Getting Started Guide]
   * [OpenAero2_Getting_Started#Where_can_I_download_OpenAero2_from? Where can I download OpenAero2 from?]
- * [OpenAero2_UserGuide_V1 Aeroplane - Quick Setup Guide]
- * [OpenAero2_Adv_UserGuide_V1 Aeroplane - Advanced User Guide]
+ * [OpenAero2_UserGuide_V2 Aeroplane - Quick Setup Guide]
+ * [OpenAero2_Adv_UserGuide_V2 Aeroplane - Advanced User Guide]
  * [OpenAero2_CamStab_Setup_Part_1 Camera - Standalone Guide]
  * [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
  
