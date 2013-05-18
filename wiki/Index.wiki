@@ -15,7 +15,7 @@ Please ensure you read the manuals in the following order.
     * [OpenAero2_FAQ#Custom_Mixers Custom Mixers]
    * [OpenAero2_FAQ#What_flight_modes_does_!OpenAero2_support? Flight modes]
   * [OpenAero2_FAQ#Receivers Receivers]
-   * [OpenAero2_FAQ#Which_receivers_does_!OpenAero2_support? Receiver support]
+   * [OpenAero2_FAQ#Which_receivers_does_OpenAero2_support? Receiver support]
    * [OpenAero2_FAQ#Which_CPPM_receivers_does_!OpenAero2_support? CPPM receiver list]
   * [OpenAero2_FAQ#Camera_Stabilization Camera Stabilization]
    * [OpenAero2_FAQ#What_camera_gimbals_can_!OpenAero2_stabilize? Gimbal support]
