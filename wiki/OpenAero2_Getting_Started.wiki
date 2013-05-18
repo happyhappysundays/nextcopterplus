@@ -1,51 +1,17 @@
 #summary OpenAero2 - Getting Started Guide V1.1
 
-[https://sites.google.com/site/openaerowiki/home http://i.imgur.com/uaRIu.png]
-
-Please ensure you read the manuals in the following order.
-
- # [OpenAero2_FAQ Frequently Ask Questions]
- # [OpenAero2_Getting_Started Getting Started Guide]
- # [OpenAero2_UserGuide_V1 Aeroplane - Quick Setup Guide]
- # [OpenAero2_Adv_UserGuide_V1 Aeroplane - Advanced User Guide]
- # [OpenAero2_CamStab_Setup_Part_1 Camera - Standalone Guide]
- # [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
- 
-Please post any questions and tips on [http://www.rcgroups.com/forums/showthread.php?t=1708175 RC Groups].
-
 =Getting Started Guide=
-Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading !OpenAero2 on to a KK2 board.
+Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading !OpenAero2 onto a KK2 board.
 
- # Where can I download OpenAero2 from?
-
-[#Where_can_I_download_OpenAero2_from?]
-
-[#How_do_I_mount_the_KK2_board_in_my_aeroplane?]
-
-
- # How do I load OpenAero2 onto a KK2 board?
- # How do I mount the KK2 board in my aeroplane?
- # How do I connect the KK2 board in my model?
- # How do I power the KK2 board?
-  * KK2 board
-  * Servos
- # How do I connect my receiver?
-  * PWM Receivers
-  * CPPM Receivers
- # How do I connect my servos?
-  * Aeroplane Mode
-  * Flying-Wing Mode
-
-==Where can I download !OpenAero2 from?==
-
+==Where can I find OpenAero2 firmware?==
+The latest files are always listed at the bottom of the first post in the RCGroups OpenAero2 thread.
+ * [http://www.rcgroups.com/forums/showthread.php?t=1708175 RCGroups primary source]
  * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.1.zip Version 1.1 - Final release]
  * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.0.zip Version 1.0 - Final release]
 
 A link to the latest beta version of OpenAero2 can be found on [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 RC Groups.com]
 
-
-==How do I flash my KK2 board with OpenAero2?==
-
+==How do I reflash my KK2 board?==
  # Download the latest version of [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 OpenAero2].
  # Extract the 'OpenAero2.hex' file an 'OpenAero2' folder on your desktop,
  # Download the latest [http://lazyzero.de/en/modellbau/kkmulticopterflashtool#download KKMulticopter Flashtool].
@@ -64,7 +30,6 @@ A link to the latest beta version of OpenAero2 can be found on [http://www.rcgro
  # Close the 'KKMulticopter Flashtool' and remove the USBasp from the computer.
 
 ==How do I mount the KK2 board in my aeroplane?==
-
 For best results, the KK2 board should be securely mounted with [http://www.hobbyking.com/hobbyking/store/RC_PRODUCT_SEARCH.asp?searchType=10&strSearch=M3+Nylon+Threaded+Spacer&location=HK&idCategory=&sortBy=Price1&NumPerPage=20&currentPage= M3 nylon spacers] and [http://www.hobbyking.com/hobbyking/store/__17847__M3x8_Nylon_Screws_10pcs_bag_.html nylon screws].
 
 As shown in the following diagram, the two piezo buzzer output pins indicate the front of the KK2 board, while the four buttons indicate the rear of the board.
@@ -72,23 +37,19 @@ As shown in the following diagram, the two piezo buzzer output pins indicate the
 http://i.imgur.com/S2xRY.jpg
 
 ==How do I connect the KK2 board in my model?==
-
 The KK2 board should be installed within your aircraft, between your receiver and servos, to stabilize an aeroplane or a camera gimbal. 
 
 ==How do I power the KK2 board?==
-
 Unlike other boards, the KK2 board benefits from the stability of two regulated power supplies, one to prevent receiver brown-outs and a second to power the servos.
 
 *Do not connect the 5V supply from M1, or the receiver to the servos on M2-M8, else the electrical noise from the servos in flight will cause the KK2 board to reboot and crash your aircraft*
 
 ===KK2 Board===
-
 A 5 volt regulated power supply must be connected to the pin marked M1. Typically, this will be the 5 volt supply from the ESC's internal BEC.
 
 This will provide power to both the KK2 board and the receiver.
 
 ===Servos===
-
 A second BEC must be connected to any of the pins marked M2-M8, to power the servos. 
 
 Depending on the specification of your servos, typically a 5 to 6 volt external BEC will be used.
@@ -96,15 +57,12 @@ Depending on the specification of your servos, typically a 5 to 6 volt external 
 We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBEC's from Hobbyking.
 
 ==How do I connect my receiver==
-
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
 Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
 
 ===PWM Receivers===
-
 The KK2 board limits common multi-wire PWM receivers to the following inputs.
-
  * Aileron - Required
  * Elevator - Required
  * Throttle - Optional
@@ -112,16 +70,12 @@ The KK2 board limits common multi-wire PWM receivers to the following inputs.
  * Auxiliary - Flight mode switch (required)
 
 Since V1.1 Beta 6, the throttle input channel can be used for the following purposes.
-
  * *Throttle* - Pass-through to M1 with receivers failsafe,
-
  * *Throttle* - Pass-through to M1 with OpenAero2's internal failsafe. Orange [http://www.hobbyking.com/hobbyking/store/__11965__OrangeRx_R610_Spektrum_DSM2_6Ch_2_4Ghz_Receiver_w_Sat_Port_.html R610] receiver only.
  * *Second Aileron* - For use with pre-mixed flaperons from transmitter.
 
 ===CPPM Receivers===
-
 Single-wire receivers can be connected to the *rudder* input for both signal and power.
-
 OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
 
 *JR/Spektrum*
@@ -130,9 +84,9 @@ OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
  * CH3: Elevator
  * CH4: Rudder
  * CH5: Gear switch
- * CH6: Aileron #2
- * CH7: Aux 1
- * CH8: Aux 2 
+ * CH6: Aux 1
+ * CH7: Aux 2
+ * CH8: Aux 3 
 *Futaba*
  * CH1: Aileron #1
  * CH2: Elevator
@@ -145,17 +99,32 @@ OpenAero2 supports either the JR/Spektrum or Fubata channel allocation.
 
 *'CPPM mode' must be selected with the 'RC Setup' menu.*
 
-==How do I connect my servos?==
+===Serial receivers===
+Serial receivers connect to the KK2 board via the Throttle input. Some of these require a cable adapter to function.
 
+For the Spektrum Satellite, please use the following cable available from HobbyKing.
+[http://www.hobbyking.com/hobbyking/store/__24524__ZYX_S_DSM2_DSMJ_Satellite_Receiver_Cable.html ZYX-S DSM2/DSMJ Satellite Receiver Cable]
+
+http://www.hobbyking.com/hobbyking/store/catalog/24524-main.jpg
+
+Spektrum Satellite setup
+http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5751562-10-003.jpg
+
+For the Futaba/OrangeRx S.Bus, please use the following cable available from HobbyKing.
+[http://www.hobbyking.com/hobbyking/store/__24523__ZYX_S_S_BUS_Connection_Cable.html ZYX-S S.BUS Connection Cable]
+
+Futaba S.bus setup
+http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5750100-134-OpenAero2_SBUS_setup.jpg
+
+==How do I connect my servos?==
 The OpenAero2 mixer presets support either conventional 'aeroplane mode' or 'flying-wing mode'.
 
 All unassigned channels, designated as 'none' by the mixer presets, can be manually customized for other purposes.
 
 ===Aeroplane Mode===
-
 The following channel assignment will apply to most conventional aeroplanes.
 
-  * M1: Throttle - PWM pass-through or CPPM
+  * M1: Throttle - for CPPM users
   * M2: None
   * M3: None
   * M4: None
@@ -167,8 +136,7 @@ The following channel assignment will apply to most conventional aeroplanes.
 Where a single aileron servo is required, M6 will become the master and M7 will remain unassigned as 'none'.
 
 ===Flying-Wing Mode===
-
-  * M1: Throttle - PWM pass-through or CPPM
+  * M1: Throttle - for CPPM users
   * M2: None
   * M3: None
   * M4: None
