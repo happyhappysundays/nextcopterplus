@@ -56,7 +56,7 @@ Depending on the specification of your servos, typically a 5 to 6 volt external 
 
 We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBECs from Hobbyking.
 
-==How do I connect my receiver==
+==How do I connect my receiver?==
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
 Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
