@@ -4,7 +4,7 @@ The [OpenAero2_Getting_Started Getting Started Guide] describes the process of h
 
 ==Basics==
 
-===What is OpenAero2?===
+===What is !OpenAero2?===
 OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturers original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
 While OpenAero2 is an open-source project and is free, it's also the result of many hundreds of hours of hard work.
