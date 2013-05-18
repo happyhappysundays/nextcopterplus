@@ -1,10 +1,10 @@
-#summary OpenAero2 - Frequently Ask Questions V1.2
+#summary OpenAero2 - Frequently Asked Questions V1.2
 =Frequently asked Questions=
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load !OpenAero2 and connect the KK2 board between your receiver and servos.
 
 ==Basics==
 
-===What is !OpenAero2?===
+===What is OpenAero2?===
 !OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturers original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
 While !OpenAero2 is an open-source project and is free, it's also the result of many hundreds of hours of hard work.
@@ -18,9 +18,9 @@ The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK
 
 Additionally, a [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 USBasp] from [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=21321 Hobbyking] is required to load the !OpenAero2 software onto the KK2 board.
 
-==!OpenAero2 Features==
+==Features==
 
-===What models can !OpenAero2 stabilize?===
+===What models can I stabilize?===
 !OpenAero2 has been designed with two selectable model types, for easy setup to control both single and dual aileron aeroplane's or flying-wing's.
 
 Unlike other solutions, !OpenAero2's on-board mixers are completely flexible to allow control of up to 8 individual channels or directly connected servos.
@@ -39,7 +39,7 @@ Each of the eight output channels can have any or all sensors mixed together. Al
 
 http://i.imgur.com/zCdGA.jpg?1
 
-===What flight modes does !OpenAero2 support?===
+===What flight modes are supported?===
 !OpenAero2 offers three unique flight modes for aeroplanes, interchangeable remotely from the transmitter during flight, through a designated receiver channel.
 
 1 - *Manual mode* - Deactivates all assistance from !OpenAero2, passing all servo control signals from the receiver to the servos.
@@ -50,10 +50,10 @@ http://i.imgur.com/zCdGA.jpg?1
 
 ==Receivers==
 
-===Which receivers does OpenAero2 support?===
+===Which receivers are supported?===
 The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
 
-===Which CPPM receivers does !OpenAero2 support?===
+===Which CPPM receivers are available?===
 While there are many brands available, the following have been tested.
 
  * [http://www.frsky-rc.com/ShowProducts.asp?id=48 FrSky V8R7-SP]
@@ -62,7 +62,7 @@ While there are many brands available, the following have been tested.
 
 ==Camera Stabilization==
 
-===What camera gimbals can !OpenAero2 stabilize?===
+===What camera gimbals can I stabilize?===
 In Camera stability mode, both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
 
 *The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load !OpenAero2 and connect the KK2 board between your receiver and servos.
