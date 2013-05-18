@@ -5,8 +5,8 @@ Please read the [OpenAero2_FAQ 'Frequently Ask Questions'] before loading !OpenA
 
 ==Where can I find OpenAero2 firmware?==
 The latest files are always listed at the bottom of the first post in the RCGroups OpenAero2 thread.
- * [http://www.rcgroups.com/forums/showthread.php?t=1708175 RCGroups primary source]
- * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.1.zip Version 1.1 - Final release]
+ * [http://nextcopterplus.googlecode.com/files/OpenAero2%20V1.2%20Beta%203.zip Version 1.2 beta 3 - test release]
+ * [http://nextcopterplus.googlecode.com/files/OpenAero2%20V1.1.1.zip Version 1.1.1 - Final release]
  * [https://nextcopterplus.googlecode.com/files/OpenAero2%20V1.0.zip Version 1.0 - Final release]
 
 A link to the latest beta version of OpenAero2 can be found on [http://www.rcgroups.com/forums/showpost.php?p=22394780&postcount=1 RC Groups.com]
