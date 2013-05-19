@@ -76,6 +76,13 @@ Since V1.1 Beta 6, the throttle input channel can be used for the following purp
 
 ===CPPM Receivers===
 Single-wire receivers can be connected to the *rudder* input for both signal and power.
+While there are many brands available, the following have been tested.
+
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=48 FrSky V8R7-SP]
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=119 FrSky D4R-II]
+ * [http://www.frsky-rc.com/ShowProducts.asp?id=126 FrSky D8R-XP]
+
+===Channel Order===
 OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
 
 ||*JR/Spektrum* || *Futaba*|| *Satellite* ||
@@ -87,9 +94,6 @@ OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel alloca
 ||CH6: Aux 1 ||CH6: Aileron #2|| CH6: Throttle ||
 ||CH7: Aux 2 ||CH7: Aux 1|| CH7: AUX1 ||
 ||CH8: Aux 3  ||CH8: Aux 2 || CH8: AUX2 ||
-
-
-*'CPPM mode' must be selected with the 'RC Setup' menu.*
 
 ===Serial receivers===
 Serial receivers connect to the KK2 board via the Throttle input. Some of these require a cable adapter to function.
