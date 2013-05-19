@@ -29,8 +29,6 @@ Mixing for flying-wings is now supported by the on-board mixers, allowing !OpenA
 Each of the eight output channels can have any or all sensors mixed together. Each of the output channels can mix any two RC inputs together. Additionally, each of the eight output channels can cross-mix up to three of the other channels.
 There are also four fully-functional pseudo channels (PSU9 to PSU12) which can be used for even more complex mixing.
 
-http://i.imgur.com/zCdGA.jpg?1
-
 ===What flight modes are supported?===
 !OpenAero2 offers multiple unique flight modes for aeroplanes, interchangeable remotely from the transmitter during flight, through a designated receiver channel.
 
@@ -51,5 +49,9 @@ Binding of Satellite receivers is also supported natively.
 ==Camera Stabilization==
 ===What camera gimbals can I stabilize?===
 In Camera stability mode, both gyros and accelerometers are enabled to stabilise 3-axis camera mounts. See the separate guides for setting up camera stability.
+
+==Problems==
+===Why don't my servos move?===
+You have failed to supply a second source of power to the M2-M8 outputs. See a detailed explanation in the following section.
 
 The [OpenAero2_Getting_Started Getting Started Guide] describes the process of how to load !OpenAero2 and connect the KK2 board between your receiver and servos.
