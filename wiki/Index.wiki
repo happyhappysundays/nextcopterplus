@@ -16,6 +16,8 @@ It is recommended that you read the manuals in the following order.
    * [OpenAero2_FAQ#Which_receivers_are_supported? Receiver support]
   * [OpenAero2_FAQ#Camera_Stabilization Camera Stabilization]
    * [OpenAero2_FAQ#What_camera_gimbals_can_I_stabilize? Gimbal support]
+  * [OpenAero2_FAQ#Problems Problems]
+   * [OpenAero2_FAQ#Why_don't_my_servos_move? Why don't my servos move?]
  * [OpenAero2_Getting_Started  Getting Started Guide]
   * [OpenAero2_Getting_Started#Where_can_I_find_OpenAero2_firmware? OpenAero2 Firmware]
   * [OpenAero2_Getting_Started#How_do_I_reflash_my_KK2_board? Flashing the KK2]
