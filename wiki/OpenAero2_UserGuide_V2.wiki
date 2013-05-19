@@ -86,7 +86,7 @@ In addition to an aileron on output 6, !OpenAero2 can control a second aileron o
  * *Aileron* - Commonly used with PWM receivers to control a second aileron on output 7 as a copy of the single aileron channel.
  * *(Your channel)* - If you have a second aileron signal from your TX and connected to the KK2 board, selecting it here will allow !OpenAero2 to use it.
 
-http://i.imgur.com/tBNJ5eO.jpg
+http://i.imgur.com/GPxEIGz.jpg
 
 ===Dynamic gain channel===
 Dynamic gain allows you to modify the gyro gains from the TX while flying or at the field by associating it with a TX channel
