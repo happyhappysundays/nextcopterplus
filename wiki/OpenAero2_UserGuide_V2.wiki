@@ -181,6 +181,23 @@ In rate mode, the gyro simply provides a signal indicating rotation in the axis 
 In axis lock mode, the gyro will continually signal any change from the position, or heading that it was in when initially activated.
 You can use stick input to reset the "neutral" heading position at any time.
 
+http://i.imgur.com/EonnxbE.jpg
+Roll PID, I limit
+
+http://i.imgur.com/D1JctAH.jpg
+Acc roll P, Roll trim. Pitch gyro, P
+
+http://i.imgur.com/s3m3rKP.jpg
+Pitch ID, I limit Acc Pitch P
+
+http://i.imgur.com/2Od3sPl.jpg
+Pitch trim Yaw gyro
+
+http://i.imgur.com/9uMMSyL.jpg
+Yaw PID
+
+
+
 ==8. Sensor Calibration==
 !OpenAero2 uses both gyros and accelerometers to determine the angle of the aeroplane and add corrections.
 
