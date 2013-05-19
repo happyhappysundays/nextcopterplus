@@ -90,13 +90,15 @@ For the Spektrum Satellite, please use the following cable available from HobbyK
 
 http://www.hobbyking.com/hobbyking/store/catalog/24524-main.jpg
 
-Spektrum Satellite setup
+*Spektrum Satellite setup*
+
 http://i.imgur.com/At2S8zS.jpg
 
 For the Futaba/OrangeRx S.Bus, please use the following cable available from HobbyKing.
 [http://www.hobbyking.com/hobbyking/store/__24523__ZYX_S_S_BUS_Connection_Cable.html ZYX-S S.BUS Connection Cable]
 
-Futaba S.bus setup
+*Futaba S.bus setup*
+
 http://i.imgur.com/BMlI60q.jpg
 
 ===Channel Order===
