@@ -34,7 +34,7 @@ For best results, the KK2 board should be securely mounted with [http://www.hobb
 
 As shown in the following diagram, the two piezo buzzer output pins indicate the front of the KK2 board, while the four buttons indicate the rear of the board.
 
-http://i.imgur.com/S2xRY.jpg
+http://i.imgur.com/tIzoUNQ.jpg
 
 OpenAero2 now supports five different board orientations. See the [OpenAero2_UserGuide_V2 Basic User Guide] for more info.
 
@@ -57,7 +57,7 @@ Depending on the specification of your servos, typically a 5 to 6 volt external 
 We recommend the [http://www.hobbyking.com/hobbyking/store/__4319__TURNIGY_3A_UBEC_w_Noise_Reduction.html Turnigy 3A 5V/6V] & [http://www.hobbyking.com/hobbyking/store/__16663__HobbyKing_HKU5_5V_5A_UBEC.html HobbyKing HKU5 5A 5V] external UBECs from Hobbyking.
 
 ==How do I connect my receiver?==
-The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM receivers.
+The KK2 board supports either common multi-wire PWM receivers or single-wire CCPM or Serial receivers (S.Bus, Satellite, Xtreme).
 
 Simple wiring can be achieved when the ESC is connected to the pins marked M1 and throttle pass-through is selected. This allows the ESC's internal 5 volt BEC to power the KK2 board and receiver while OpenAero2 can control the ESC's throttle.
 
@@ -83,7 +83,7 @@ While there are many brands available, the following have been tested.
  * [http://www.frsky-rc.com/ShowProducts.asp?id=126 FrSky D8R-XP]
 
 ===Serial receivers===
-Serial receivers connect to the KK2 board via the Throttle input. Some of these require a cable adapter to function.
+Serial receivers connect to the KK2 board via the *Throttle* input. Some of these require a cable adapter to function.
 
 For the Spektrum Satellite, please use the following cable available from HobbyKing.
 [http://www.hobbyking.com/hobbyking/store/__24524__ZYX_S_DSM2_DSMJ_Satellite_Receiver_Cable.html ZYX-S DSM2/DSMJ Satellite Receiver Cable]
@@ -91,13 +91,13 @@ For the Spektrum Satellite, please use the following cable available from HobbyK
 http://www.hobbyking.com/hobbyking/store/catalog/24524-main.jpg
 
 Spektrum Satellite setup
-http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5751562-10-003.jpg
+http://i.imgur.com/At2S8zS.jpg
 
 For the Futaba/OrangeRx S.Bus, please use the following cable available from HobbyKing.
 [http://www.hobbyking.com/hobbyking/store/__24523__ZYX_S_S_BUS_Connection_Cable.html ZYX-S S.BUS Connection Cable]
 
 Futaba S.bus setup
-http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5750100-134-OpenAero2_SBUS_setup.jpg
+http://i.imgur.com/BMlI60q.jpg
 
 ===Channel Order===
 OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
