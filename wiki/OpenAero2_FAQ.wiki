@@ -6,6 +6,10 @@ The [OpenAero2_Getting_Started Getting Started Guide] describes the process of h
 ===What is OpenAero2?===
 !OpenAero2 is a fully-featured aeroplane and camera stabilization software for [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 Hobbyking's KK2 multi-rotor board], replacing the manufacturer's original [http://www.rcgroups.com/forums/showthread.php?t=1675613 multi-rotor firmware].
 
+OpenAero can take up to eight RC input channels and mix them into any of 12 mixer channels. Each of these mixer channels can take input from any or all sensors, then be cross-mixed with up to three other outputs.
+
+http://i.imgur.com/icW16LJ.jpg
+
 ===Where can I purchase a KK2 board from?===
 The [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 KK2 multi-rotor board] is manufactured and sold only by [http://www.hobbyking.com/hobbyking/store/uh_viewitem.asp?idproduct=24723 HobbyKing].
 
