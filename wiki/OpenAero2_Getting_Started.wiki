@@ -82,19 +82,6 @@ While there are many brands available, the following have been tested.
  * [http://www.frsky-rc.com/ShowProducts.asp?id=119 FrSky D4R-II]
  * [http://www.frsky-rc.com/ShowProducts.asp?id=126 FrSky D8R-XP]
 
-===Channel Order===
-OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
-
-||*JR/Spektrum* || *Futaba*|| *Satellite* ||
-||CH1: Throttle ||CH1: Aileron #1|| CH1: Flap ||
-||CH2: Aileron #1 ||CH2: Elevator|| CH2: Aileron ||
-||CH3: Elevator ||CH3: Throttle|| CH3: Elevator ||
-||CH4: Rudder ||CH4: Rudder|| CH4: Rudder ||
-||CH5: Gear switch ||CH5: Gear switch|| CH5: Gear ||
-||CH6: Aux 1 ||CH6: Aileron #2|| CH6: Throttle ||
-||CH7: Aux 2 ||CH7: Aux 1|| CH7: AUX1 ||
-||CH8: Aux 3  ||CH8: Aux 2 || CH8: AUX2 ||
-
 ===Serial receivers===
 Serial receivers connect to the KK2 board via the Throttle input. Some of these require a cable adapter to function.
 
@@ -111,6 +98,19 @@ For the Futaba/OrangeRx S.Bus, please use the following cable available from Hob
 
 Futaba S.bus setup
 http://static.rcgroups.net/forums/attachments/3/4/9/3/0/1/a5750100-134-OpenAero2_SBUS_setup.jpg
+
+===Channel Order===
+OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
+
+||*JR/Spektrum* || *Futaba*|| *Satellite* ||
+||CH1: Throttle ||CH1: Aileron #1|| CH1: Flap ||
+||CH2: Aileron #1 ||CH2: Elevator|| CH2: Aileron ||
+||CH3: Elevator ||CH3: Throttle|| CH3: Elevator ||
+||CH4: Rudder ||CH4: Rudder|| CH4: Rudder ||
+||CH5: Gear switch ||CH5: Gear switch|| CH5: Gear ||
+||CH6: Aux 1 ||CH6: Aileron #2|| CH6: Throttle ||
+||CH7: Aux 2 ||CH7: Aux 1|| CH7: AUX1 ||
+||CH8: Aux 3  ||CH8: Aux 2 || CH8: AUX2 ||
 
 ==How do I connect my servos?==
 The OpenAero2 mixer presets support either conventional 'aeroplane mode' or 'flying-wing mode'.
