@@ -102,7 +102,7 @@ It is recommended that you read the manuals in the following order.
    * [OpenAero2_Mixer_Guide#Mix_volumes Mix volumes]
    * [OpenAero2_Mixer_Guide#Source_mix Source mix]
    * [OpenAero2_Mixer_Guide#Mixing_sensors Mixing sensors]
-   * [OpenAero2_Mixer_Guide#Psuedo_channels Psuedo channels]
+   * [OpenAero2_Mixer_Guide#Pseudo_channels Psuedo channels]
   * [OpenAero2_Mixer_Guide#Output_Mixers Output Mixers]
    * [OpenAero2_Mixer_Guide#Cross-mixing Cross-mixing]
    * [OpenAero2_Mixer_Guide#Mix_volumes Mix volumes]
