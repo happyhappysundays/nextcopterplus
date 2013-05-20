@@ -96,6 +96,8 @@ It is recommended that you read the manuals in the following order.
   * [OpenAero2_UserGuide_V2#16._Failsafe_Settings 16. Failsafe Settings]
   * [OpenAero2_UserGuide_V2#17._Failsafe_Positions 17. Failsafe Positions]
   * [OpenAero2_UserGuide_V2#18._Battery_Monitor 18. Battery Monitor]
+
+ * [OpenAero2_Mixer_Guide Mixer User Guide]
  * [OpenAero2_Adv_UserGuide_V2 Advanced User Guide]
 
 *Older User Guides*
