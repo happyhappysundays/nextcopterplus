@@ -1,5 +1,12 @@
 #summary OpenAero2 - Mixer guide V1.2
 =Mixer User Guide=
 ==Channel Mixers==
+===Mixing RC channels===
+===Mix volumes===
+===Mixing sensors===
+===Psuedo channels===
 
 ==Output Mixers==
+===Cross-mixing===
+===Mix volumes===
+===Example: CROW mixing===
