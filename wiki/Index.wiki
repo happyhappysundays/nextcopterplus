@@ -97,13 +97,13 @@ It is recommended that you read the manuals in the following order.
   * [OpenAero2_UserGuide_V2#17._Failsafe_Positions 17. Failsafe Positions]
   * [OpenAero2_UserGuide_V2#18._Battery_Monitor 18. Battery Monitor]
  * [OpenAero2_Adv_UserGuide_V2 Advanced User Guide]
- * [OpenAero2_CamStab_Setup_Part_1 Camera - Standalone Guide]
- * [OpenAero2_CamStab_Setup_Part_2 Camera - Receiver Control Guide]
 
 *Older User Guides*
- * [OpenAero2_UserGuide_V1 OpenAero2 V1.1 Basic User guide]
- * [OpenAero2_Adv_UserGuide_V1  OpenAero2 V1.1 Advanced User guide]
- * [OpenAero2_User_Guide OpenAero2 V1.0 User Guide]
+ * [OpenAero2_User_Guide V1.0 User Guide]
+ * [OpenAero2_UserGuide_V1 V1.1 Basic User guide]
+ * [OpenAero2_Adv_UserGuide_V1 V1.1 Advanced User guide]
+ * [OpenAero2_CamStab_Setup_Part_1 V1.0 Standalone Camstab Guide]
+ * [OpenAero2_CamStab_Setup_Part_2 V1.0 Controllable Camstab Guide]
 
 *Your Support*
 
