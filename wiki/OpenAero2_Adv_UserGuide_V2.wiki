@@ -105,7 +105,7 @@ If you only plan to use one servo, or two servos with a Y-cable, leave this as "
 
 http://i.imgur.com/QLIgrrE.jpg
 
- * *Differential:* If you wish to use aileron differential, do not set it up in the transmitter, use this setting. Setting 0% is no differential, 50% will limit the upward throw of ailerons to 50% and 100% will result in split ailerons (no upward travel).
+ * *Differential:* If you wish to use aileron differential, do not set it up in the transmitter, use this setting. Setting 0% is no differential, 50% will limit the downward throw of ailerons to 50% and 100% will result in split ailerons (no downward travel).
 
 ===Stick polarity screen===
 http://i.imgur.com/OF6LTkQ.jpg
