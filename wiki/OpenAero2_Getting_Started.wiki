@@ -101,6 +101,16 @@ For the Futaba/OrangeRx S.Bus, please use the following cable available from Hob
 
 http://i.imgur.com/BMlI60q.jpg
 
+===Binding satellite receivers===
+OpenAero2 makes it easy to bind Satellite receivers without the need for a separate host receiver.
+ # Ensure that the Satellite receiver is connected via the adapter cable.
+ # Hold down button 4 of the KK2 board.
+ # While holding down button 4, apply power to the KK2 board. The attached Satellite receiver should start to blink rapidly. Release button 4. 
+ # Switch on the TX in binding mode. The is usually done by holding down the Bind button on the TX module. The TX module should flash.
+ # After a few seconds the Satellite will complete the binding process and will show a solid lit LED. 
+
+<wiki:video url="http://www.youtube.com/watch?v=c_x0GtdCm6o"/>
+
 ===Channel Order===
 OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
 
