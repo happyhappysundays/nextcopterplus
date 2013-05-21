@@ -67,9 +67,9 @@ void Display_rcinput(void)
 		mugui_lcd_puts(itoa(RCinputs[RUDDER],pBuffer,10),(prog_uchar*)Verdana8,37,30);
 
 		mugui_lcd_puts(itoa(RCinputs[GEAR],pBuffer,10),(prog_uchar*)Verdana8,100,0);
-		mugui_lcd_puts(itoa(RCinputs[FLAP],pBuffer,10),(prog_uchar*)Verdana8,100,10);
-		mugui_lcd_puts(itoa(RCinputs[AUX1],pBuffer,10),(prog_uchar*)Verdana8,100,20);
-		mugui_lcd_puts(itoa(RCinputs[AUX2],pBuffer,10),(prog_uchar*)Verdana8,100,30);
+		mugui_lcd_puts(itoa(RCinputs[AUX1],pBuffer,10),(prog_uchar*)Verdana8,100,10);
+		mugui_lcd_puts(itoa(RCinputs[AUX2],pBuffer,10),(prog_uchar*)Verdana8,100,20);
+		mugui_lcd_puts(itoa(RCinputs[AUX3],pBuffer,10),(prog_uchar*)Verdana8,100,30);
 
 
 		// Print bottom text and markers

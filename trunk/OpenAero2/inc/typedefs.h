@@ -98,8 +98,8 @@ typedef struct
 
 	// Menu adjustable items
 	// RC settings
-	uint8_t		ChannelOrder[MAX_RC_CHANNELS];	// Assign channel numbers to hard-coded channel order
-										// OpenAero2 uses Thr, Ail, Ele, Rud, Gear, Flap, Aux1, Aux2
+	uint8_t		ChannelOrder[MAX_RC_CHANNELS+1];	// Assign channel numbers to hard-coded channel order
+										// OpenAero2 uses Thr, Ail, Ele, Rud, Gear, Aux1, Aux2, Aux3
 										// THROTTLE will always return the correct data for the assigned throttle channel
 										// AILERON will always return the correct data for the assigned aileron channel
 										// ELEVATOR will always return the correct data for the assigned elevator channel
@@ -185,7 +185,7 @@ typedef struct
 	int8_t		Failsafe[MAX_OUTPUTS];		// Failsafe position (-125 to 125)
 
 	// RC inputs
-	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
+	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS+1];	// RC channel offsets for actual radio channels
 
 	// Acc
 	uint16_t	AccZero[3];				// Acc calibration results

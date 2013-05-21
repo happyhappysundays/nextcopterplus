@@ -101,7 +101,7 @@ ISR(PCINT1_vect)
 // INT2 is shared between RUDDER in PWM mode or CPPM in CPPM mode
 // NB: Raw CPPM channel order (0,1,2,3,4,5,6,7) is 
 // mapped via Config.ChannelOrder[]. Actual channel values are always
-// in the sequence THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, FLAP, AUX1, AUX2
+// in the sequence THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3
 //************************************************************
 
 ISR(INT2_vect)
