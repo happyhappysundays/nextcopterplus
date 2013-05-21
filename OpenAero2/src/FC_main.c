@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 4 - May 2013
+// Version 1.2 Beta 5 - May 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -189,12 +189,16 @@
 // Beta 3	Completely changed the value editing menu code so that servos are (almost)
 //			continually updated.
 // Beta 4	Servos are continually updated when no button pressed.
+//			RC channel names changed to suit JR/Spektrum.
+// Beta 5	Fixed potential bug with arrays trying to access Something[NONE].
 //
 //***********************************************************
 //* To do
 //***********************************************************
 // 
-// 
+// Tweak Satellite binding to exactly replicate the real thing.
+// Currently the time from power-up to the binding pulses is 80-120ms 
+// where the real one is about 68ms.
 //
 //***********************************************************
 //* Includes

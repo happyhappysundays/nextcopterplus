@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2b04";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2b05";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -196,9 +196,9 @@ const char ChannelRef1[] PROGMEM = "Aileron";
 const char ChannelRef2[] PROGMEM = "Elevator"; 
 const char ChannelRef3[] PROGMEM = "Rudder"; 
 const char ChannelRef4[] PROGMEM = "Gear"; 
-const char ChannelRef5[] PROGMEM = "Flap"; 
-const char ChannelRef6[] PROGMEM = "Aux1"; 
-const char ChannelRef7[] PROGMEM = "Aux2"; 
+const char ChannelRef5[] PROGMEM = "AUX1"; 
+const char ChannelRef6[] PROGMEM = "AUX2"; 
+const char ChannelRef7[] PROGMEM = "AUX3"; 
 const char ChannelRef8[] PROGMEM = "None";
 const char ChannelRef10[] PROGMEM = "Throt.";				// RC channel text (Abbr.)
 const char ChannelRef12[] PROGMEM = "Elev."; 

@@ -31,16 +31,16 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x0F		// eePROM signature - change for each eePROM structure change 0x0C = V1.2a4
+#define MAGIC_NUMBER 0x10		// eePROM signature - change for each eePROM structure change 0x10 = V1.2b5
 								// to force factory reset
 
 //************************************************************
 // Code
 //************************************************************
 
-uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERGF34)
-uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETR1234)
-uint8_t	SATELLITE[MAX_RC_CHANNELS] PROGMEM = {5,1,2,3,4,0,6,7}; // Spektrum satellite channel sequence (FAERGT88)
+uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
+uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
+uint8_t	SATELLITE[MAX_RC_CHANNELS] PROGMEM = {5,1,2,3,4,0,6,7}; // Spektrum satellite channel sequence (FAERGT12)
 
 void Set_EEPROM_Default_Config(void)
 {

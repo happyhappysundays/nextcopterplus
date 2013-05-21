@@ -39,7 +39,7 @@ void SetFailsafe(void);
 // Code
 //************************************************************
 
-int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
+int16_t RCinputs[MAX_RC_CHANNELS+1];	// Normalised RC inputs
 
 // Get raw flight channel data and remove zero offset
 // Use channel mapping for configurability
@@ -82,7 +82,7 @@ void RxGetChannels(void)
 	}
 
 	// Calculate RX activity
-	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[FLAP];
+	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[AUX1];
 	RxSumDiff = RxSum - OldRxSum;
 
 	// Set RX activity flag

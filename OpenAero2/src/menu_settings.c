@@ -255,6 +255,8 @@ void menu_rc_setup(uint8_t section)
 				}
 			}
 
+			Config.ChannelOrder[NOCHAN] = 0;
+
 			Save_Config_to_EEPROM(); // Save value and return
 		}
 	}
