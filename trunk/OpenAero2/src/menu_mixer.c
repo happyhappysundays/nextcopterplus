@@ -33,7 +33,7 @@ void menu_mixer(uint8_t i);
 //************************************************************
 
 #define INPUTITEMS 10
-#define OUTPUTITEMS 6
+#define OUTPUTITEMS 7
 
 #define MIXERSTART 209 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
@@ -44,8 +44,8 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{227,105,0,105,0,143,143,143,143,143,143},
-	{227,227,0,227,0,227,0}
+	{228,105,0,105,0,143,143,143,143,143,143},
+	{228,105,228,0,228,0,228,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 
@@ -65,8 +65,9 @@ const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM =
 		{OFF, REV,1,1,OFF},				// pitch_acc
 	},
 	{
-		// Output mixer ranges (7)
+		// Output mixer ranges (8)
 		{CH1,CH12,1,1,CH1},				// Ch. number
+		{THROTTLE,NOCHAN,1,1,CH1},		// Switch input to activate this mixer
 		{CH1,UNUSED,1,1,UNUSED},		// Output B
 		{-125,125,5,0,0},				// Output B volume
 		{CH1,UNUSED,1,1,UNUSED},		// Output C
@@ -130,7 +131,7 @@ void menu_mixer(uint8_t section)
 		}
 		else
 		{
-			memcpy(&values[1],&Config.Channel[Config.MenuChannel].output_b,(sizeof(int8_t) * OUTPUTITEMS));
+			memcpy(&values[1],&Config.Channel[Config.MenuChannel].switcher,(sizeof(int8_t) * OUTPUTITEMS));
 		}
 
 		// Print menu
@@ -155,7 +156,7 @@ void menu_mixer(uint8_t section)
 				Config.MenuChannel = values[0];
 				break;
 			case 2:
-				memcpy(&Config.Channel[Config.MenuChannel].output_b,&values[1],(sizeof(int8_t) * OUTPUTITEMS));
+				memcpy(&Config.Channel[Config.MenuChannel].switcher,&values[1],(sizeof(int8_t) * OUTPUTITEMS));
 				Config.MenuChannel = values[0];
 				break;
 			default:

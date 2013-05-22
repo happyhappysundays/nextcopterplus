@@ -49,7 +49,8 @@ typedef struct
 	int8_t		roll_acc;				// Use roll acc
 	int8_t		pitch_acc;				// Use pitch acc
 
-	// Ouput mix menu (6)
+	// Ouput mix menu (7)
+	int8_t		switcher;				// Switch input to activate this mixer
 	int8_t		output_b;				// Channel B for calculation
 	int8_t		output_b_volume;		// Percentage of output to use
 	int8_t		output_c;				// Channel C for calculation
