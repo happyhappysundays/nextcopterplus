@@ -189,6 +189,7 @@ const char MixerItem16[] PROGMEM = "Trim(%):";
 const char MixerItem17[] PROGMEM = "Source mix:";
 const char MixerItem18[] PROGMEM = "Setting for:";
 const char MixerItem19[] PROGMEM = "Reverse:";
+const char MixerItem20[] PROGMEM = "Switch:";
 
 //
 const char ChannelRef0[] PROGMEM = "Throttle";				// RC channel text
@@ -312,9 +313,9 @@ const char *text_menu[] PROGMEM =
 		//
 		ErrorText5,	ErrorText6, ErrorText7,													// 98 to 100 Error, lost, model
 		//
-		AutoMenuItem11, AutoMenuItem15, MixerItem12,											// 101 to 103 OFF/ON/REV
+		AutoMenuItem11, AutoMenuItem15, MixerItem12,										// 101 to 103 OFF/ON/REV
 		//
-		Dummy0, // 104
+		Dummy0, 																			// 104
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
@@ -367,14 +368,13 @@ const char *text_menu[] PROGMEM =
 		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 209 Input mixers
 		MixerItem17, MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, 
 
-		MixerItem18, MixerItem15, MixerItem2, 												// 220 Output mixers
+		MixerItem18, MixerItem20, MixerItem15, MixerItem2, 									// 220 Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 227 to 239 M1-12 + NONE
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 228 to 240 M1-12 + NONE
 		MOUT6, MOUT7, MOUT8, MOUT9, MOUT10,
 		MOUT11,MOUT12,ChannelRef8, 
 		//
-		Dummy0,																				// 240
 		//
 		ChannelRef10, ChannelRef12, 														// 241 - 242
 		//

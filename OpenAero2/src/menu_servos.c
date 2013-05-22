@@ -34,7 +34,7 @@ void menu_servo_setup(uint8_t section);
 // Defines
 //************************************************************
 
-#define SERVOSTART 227 	// Start of OUT1-OUT8 Menu text items
+#define SERVOSTART 228 	// Start of OUT1-OUT8 Menu text items
 #define SERVOOFFSET 80	// LCD horizontal offsets
 
 #define SERVOTEXT1 93 	// Start of value text items

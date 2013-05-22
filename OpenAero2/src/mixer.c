@@ -43,16 +43,16 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 
 	// Value, 
 	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
-	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
+	// switcher, source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
+	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 
 }; 
 
@@ -64,16 +64,16 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 
 	// Value, 
 	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
-	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
+	// switcher, source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
-	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
-	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
+	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left elevon)
+	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
 channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -88,14 +88,14 @@ channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
 
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Pitch axis)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Pitch axis)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
 
 };
 
@@ -449,26 +449,33 @@ void ProcessMixer(void)
 			temp = -temp;
 		}
 
-		// Mix in other outputs here
-		if ((Config.Channel[i].output_b_volume !=0) && (Config.Channel[i].output_b != UNUSED)) // Mix in first extra output
+		// If output mixer switch channel is UNUSED or
+		// if tied to a channel and that channel is > 0, do mix, otherwise skip.
+		if ((Config.Channel[i].switcher == UNUSED) ||
+			(RCinputs[Config.Channel[i].switcher] >= 0))
 		{
-			temp2 = Config.Channel[Config.Channel[i].output_b].value;
-			temp2 = scale32(temp2, Config.Channel[i].output_b_volume);
-			temp = temp + temp2;
-		}
-		if ((Config.Channel[i].output_c_volume !=0) && (Config.Channel[i].output_c != UNUSED)) // Mix in second extra output
-		{
-			temp2 = Config.Channel[Config.Channel[i].output_c].value;
-			temp2 = scale32(temp2, Config.Channel[i].output_c_volume);
-			temp = temp + temp2;
-		}
-		if ((Config.Channel[i].output_d_volume !=0) && (Config.Channel[i].output_d != UNUSED)) // Mix in third extra output
-		{
-			temp2 = Config.Channel[Config.Channel[i].output_d].value;
-			temp2 = scale32(temp2, Config.Channel[i].output_d_volume);
-			temp = temp + temp2;
+			// Mix in other outputs here
+			if ((Config.Channel[i].output_b_volume !=0) && (Config.Channel[i].output_b != UNUSED)) // Mix in first extra output
+			{
+				temp2 = Config.Channel[Config.Channel[i].output_b].value;
+				temp2 = scale32(temp2, Config.Channel[i].output_b_volume);
+				temp = temp + temp2;
+			}
+			if ((Config.Channel[i].output_c_volume !=0) && (Config.Channel[i].output_c != UNUSED)) // Mix in second extra output
+			{
+				temp2 = Config.Channel[Config.Channel[i].output_c].value;
+				temp2 = scale32(temp2, Config.Channel[i].output_c_volume);
+				temp = temp + temp2;
+			}
+			if ((Config.Channel[i].output_d_volume !=0) && (Config.Channel[i].output_d != UNUSED)) // Mix in third extra output
+			{
+				temp2 = Config.Channel[Config.Channel[i].output_d].value;
+				temp2 = scale32(temp2, Config.Channel[i].output_d_volume);
+				temp = temp + temp2;
+			}
 		}
 
+		// Update channel data solution
 		Config.Channel[i].value = temp;
 	}
 

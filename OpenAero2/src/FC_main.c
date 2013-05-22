@@ -191,12 +191,13 @@
 // Beta 4	Servos are continually updated when no button pressed.
 //			RC channel names changed to suit JR/Spektrum.
 // Beta 5	Fixed potential bug with arrays trying to access Something[NONE].
+//			Added switchable output mixers.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 // 
-// Tweak Satellite binding to exactly replicate the real thing.
+// - Tweak Satellite binding to exactly replicate the real thing.
 // Currently the time from power-up to the binding pulses is 80-120ms 
 // where the real one is about 68ms.
 //
@@ -732,8 +733,12 @@ int main(void)
 		}
 		else if (Servo_Rate > SERVO_RATE_LOW)
 		{
-				ServoTick = true;
+			ServoTick = true;
 		}
+//		else
+//		{
+//			ServoTick = false;
+//		}
 
 		// If simply overdue, signal RX error message
 		// If in independant camstab mode, don't bother
@@ -756,9 +761,13 @@ int main(void)
 		}
 
 		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
+		//if (Interrupted && ServoTick)
 		if (Interrupted)
 		{
 			Interrupted = false;			// Reset interrupted flag
+		//	ServoTick = false;
+		//	Servo_Rate = 0;
+
 			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 
 			if (Config.RxMode != SBUS)		// SBUS can report its own failsafe
