@@ -192,6 +192,9 @@
 //			RC channel names changed to suit JR/Spektrum.
 // Beta 5	Fixed potential bug with arrays trying to access Something[NONE].
 //			Added switchable output mixers.
+// Beta 6	Added intelligent RC sync speed algorithm.
+//			For RC rates slower than 60Hz, PWM output is after each input pulse/packet
+//			For RC rates higher than this, the PWM output is limited to 50Hz
 //
 //***********************************************************
 //* To do
@@ -245,6 +248,7 @@
 //***********************************************************
 
 #define	SERVO_OVERDUE 9765			// Number of T2 cycles before servo will be overdue = 9765 * 1/19531 = 500ms
+#define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 41667
 #define	SERVO_RATE_LOW 390			// Requested servo rate when in failsafe/Camstab LOW mode. 19531 / 50(Hz) = 390
 #define	SERVO_RATE_HIGH 65			// Requested servo rate when in Camstab HIGH mode 300(Hz) = 65
 #define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
@@ -284,6 +288,7 @@ int main(void)
 
 	bool Overdue = false;
 	bool ServoTick = false;
+	bool SlowRC = false;
 
 	// Timers
 	uint32_t Status_timeout = 0;
@@ -291,9 +296,11 @@ int main(void)
 	uint32_t LostModel_timer = 0;
 	uint32_t Launch_timer = 0;
 	uint32_t Ticker_Count = 0;
+	uint32_t RC_Rate_Timer = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
 
+	uint16_t RC_Rate_TCNT1 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
@@ -708,6 +715,15 @@ int main(void)
 		//* Process servos, failsafe mode
 		//************************************************************
 
+		// Work out the current RC rate
+		RC_Rate_Timer += (uint16_t) (TCNT1 - RC_Rate_TCNT1);
+		RC_Rate_TCNT1 = TCNT1;
+
+		// Assures even without synchronous RX, something will come out at SERVO_RATE (50Hz)
+		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
+		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
+		ServoRate_TCNT2 = TCNT2;
+		
 		// Signal servo overdue after SERVO_OVERDUE time (500ms)
 		// Servo_Timeout increments at 19.531 kHz, in loop cycle chunks
 		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
@@ -717,10 +733,25 @@ int main(void)
 			Overdue = true;
 		}
 
-		// Assures even without synchronous RX, something will come out at SERVO_RATE (50Hz)
-		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
-		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
-		ServoRate_TCNT2 = TCNT2;
+		// Always clear overdue state is an input received.
+		if (Interrupted)
+		{
+			Servo_Timeout = 0;				// Reset servo failsafe timeout
+			Overdue = false;				// And no longer overdue...
+
+			// Check to see if RC rate slower than 60Hz.
+			// Slow RC rates are synched on every pulse, faster ones are limited to 50Hz
+			if (RC_Rate_Timer > SLOW_RC_RATE)
+			{
+				SlowRC = true;
+			}
+			else
+			{
+				SlowRC = false;
+			}
+
+			RC_Rate_Timer = 0;
+		}
 
 
 		// If in CabStab mode (no RC to synch) AND the Servo Rate is set to HIGH run at full speed
@@ -729,16 +760,22 @@ int main(void)
 			if (Servo_Rate > SERVO_RATE_HIGH)
 			{
 				ServoTick = true;
+				Servo_Rate = 0;
 			}
 		}
+
+		// Otherwise, run at the appropriate rate as per measured RC rate
 		else if (Servo_Rate > SERVO_RATE_LOW)
 		{
 			ServoTick = true;
+			Servo_Rate = 0;
+
+			// Force a sync to the next packet for fast RC
+			if (SlowRC == false)
+			{
+				Interrupted = false; 	// Plan B (fast RC)
+			}
 		}
-//		else
-//		{
-//			ServoTick = false;
-//		}
 
 		// If simply overdue, signal RX error message
 		// If in independant camstab mode, don't bother
@@ -760,13 +797,17 @@ int main(void)
 			RC_Lock = false;
 		}
 
+
 		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
-		//if (Interrupted && ServoTick)
-		if (Interrupted)
+		//if (Interrupted) 					// Plan A
+		//if (Interrupted && ServoTick) 	// Plan B
+
+		if ((Interrupted && SlowRC) || 					// Plan A (slow RC)
+			(Interrupted && ServoTick && !SlowRC))		// Plan B (fast RC)
 		{
 			Interrupted = false;			// Reset interrupted flag
-		//	ServoTick = false;
-		//	Servo_Rate = 0;
+			ServoTick = false;
+			Servo_Rate = 0;
 
 			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 
@@ -774,9 +815,6 @@ int main(void)
 			{
 				Flight_flags &= ~(1 << Failsafe);// Cancel failsafe unless failsafe source is receiver
 			}
-
-			Servo_Timeout = 0;				// Reset servo failsafe timeout
-			Overdue = false;				// And no longer overdue...
 
 			output_servo_ppm();				// Output servo signal
 		}
