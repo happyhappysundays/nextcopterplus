@@ -34,6 +34,7 @@ It is recommended that you read the manuals in the following order.
   * [OpenAero2_Getting_Started#How_do_I_connect_my_servos? Connecting servos]
    * [OpenAero2_Getting_Started#Aeroplane_Mode Aeroplane Mode]
    * [OpenAero2_Getting_Started#Flying-Wing_Mode Flying-Wing Mode]
+   * [OpenAero2_Getting_Started#Servo_Rate Servo Rate]
  * [OpenAero2_Setup_Guide_V2 Setup Procedure]
   * [OpenAero2_Setup_Guide_V2#A_word_about_Stability_and_Autolevel_switching Flight Profiles]
   * [OpenAero2_Setup_Guide_V2#Initial_setup_and_calibration Setup Checklist]
