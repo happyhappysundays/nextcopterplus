@@ -194,7 +194,9 @@
 //			Added switchable output mixers.
 // Beta 6	Added intelligent RC sync speed algorithm.
 //			For RC rates slower than 60Hz, PWM output is after each input pulse/packet
-//			For RC rates higher than this, the PWM output is limited to 50Hz
+//			For RC rates higher than this, the PWM output is limited to 50Hz if "Servo rate" is LOW
+//			RC rate now also tied to "Servo rate" seting so that if "Servo rate" is HIGH, 
+//			higher rates can be used.
 //
 //***********************************************************
 //* To do
@@ -755,7 +757,8 @@ int main(void)
 
 
 		// If in CabStab mode (no RC to synch) AND the Servo Rate is set to HIGH run at full speed
-		if ((Config.CamStab == ON) && (Config.Servo_rate == HIGH))
+		if (Config.Servo_rate == HIGH)
+		//if ((Config.CamStab == ON) && (Config.Servo_rate == HIGH))
 		{
 			if (Servo_Rate > SERVO_RATE_HIGH)
 			{
@@ -770,8 +773,8 @@ int main(void)
 			ServoTick = true;
 			Servo_Rate = 0;
 
-			// Force a sync to the next packet for fast RC
-			if (SlowRC == false)
+			// Force a sync to the next packet for fast RC unless the user has requested it faster
+			if ((SlowRC == false) && (Config.Servo_rate == LOW))
 			{
 				Interrupted = false; 	// Plan B (fast RC)
 			}
@@ -803,7 +806,8 @@ int main(void)
 		//if (Interrupted && ServoTick) 	// Plan B
 
 		if ((Interrupted && SlowRC) || 					// Plan A (slow RC)
-			(Interrupted && ServoTick && !SlowRC))		// Plan B (fast RC)
+			(Interrupted && ServoTick && !SlowRC) ||	// Plan B (fast RC)
+			(Interrupted && (Config.Servo_rate == HIGH))) // Plan C (any RC with servo rate = HIGH)
 		{
 			Interrupted = false;			// Reset interrupted flag
 			ServoTick = false;
@@ -820,6 +824,7 @@ int main(void)
 		}
 
 		// If in "no-RC" failsafe, or when doing independant camstab, just output unsynchronised
+		// Note that if RC connected, Camstab will run at the RC rate
 		else if ((Overdue && ServoTick) && ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON)))
 		{
 			ServoTick = false;				// Reset servo update ticker
