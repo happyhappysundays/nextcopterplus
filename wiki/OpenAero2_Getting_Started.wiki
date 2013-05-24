@@ -114,7 +114,7 @@ OpenAero2 makes it easy to bind Satellite receivers without the need for a separ
 ===Channel Order===
 OpenAero2 supports the JR/Spektrum, Fubata and Spektrum Satellite channel allocations.
 
-||*JR/Spektrum* || *Futaba*|| *Satellite* ||
+|| *JR/Spektrum* || *Futaba*|| *Satellite* ||
 ||CH1: Throttle ||CH1: Aileron #1|| CH1: Flap ||
 ||CH2: Aileron #1 ||CH2: Elevator|| CH2: Aileron ||
 ||CH3: Elevator ||CH3: Throttle|| CH3: Elevator ||
@@ -152,3 +152,25 @@ Where a single aileron servo is required, M6 will become the master and M7 will 
   * M6: Left elevon
   * M7: Right elevon
   * M8: Rudder
+
+===Servo Rate===
+Depending on the servo rate selected in the General Menu, the type of receiver you have, and whether Camstab mode is activated, the servo output rate varies. The various rates are illustrated in the table below.
+The rate varies from as low as your receiver sends, to up to 300Hz.
+
+Do not select a servo rate of "HIGH" unless you are sure that your servos are rated for it. Typically, analog servos should always be used with the servo rate set to "Low'.
+
+|| *Receiver type* || *Servo rate setting*|| *Actual servo rate* ||
+|| None (Camstab ON)|| HIGH || ~300Hz *||
+|| Satellite (11ms) || HIGH || 90Hz *||
+|| S.Bus (11ms) || HIGH || 90Hz *||
+|| 50Hz PWM || N/A || 50Hz ||
+|| None (Camstab ON)|| LOW || 50Hz ||
+|| Satellite (Any)|| LOW|| 45Hz ||
+|| S.Bus (Any) || LOW|| 45Hz ||
+|| 27Hz CPPM || N/A || 27Hz ||
+
+*Warning: Do not use these rates with analog servos.*
+
+
+
+
