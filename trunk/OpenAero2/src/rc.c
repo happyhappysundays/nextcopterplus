@@ -39,7 +39,7 @@ void SetFailsafe(void);
 // Code
 //************************************************************
 
-int16_t RCinputs[MAX_RC_CHANNELS+1];	// Normalised RC inputs
+int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
 
 // Get raw flight channel data and remove zero offset
 // Use channel mapping for configurability

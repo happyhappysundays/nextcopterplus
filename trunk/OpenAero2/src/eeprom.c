@@ -76,12 +76,12 @@ void Set_EEPROM_Default_Config(void)
 	// Flight modes
 	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
 
-	Config.FlightMode[1].Profilelimit = -50;	
+	Config.FlightMode[1].Profilelimit = 0;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
 //	Config.FlightMode[1].Yaw_type = LOCK; // debug for axis lock testing
 //	Config.FlightMode[1].Yaw_limit = 125; // debug
 
-	Config.FlightMode[2].Profilelimit = 50;	
+	Config.FlightMode[2].Profilelimit = 80;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
 //	Config.FlightMode[2].Yaw_type = LOCK; // debug

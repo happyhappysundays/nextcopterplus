@@ -444,7 +444,8 @@ void ProcessMixer(void)
 		// Get primary value
 		temp = Config.Channel[i].value;
 		
-		if (Config.Servo_reverse[i] == ON) // Reverse this channel's primary
+		// Reverse this channel's primary for the eight physical outputs
+		if ((i <= MAX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
 		{	
 			temp = -temp;
 		}
@@ -483,7 +484,7 @@ void ProcessMixer(void)
 	// Add offset value to restore to system compatible value
 	//************************************************************ 
 
-	for (i = 0; i < outputs; i++)
+	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		Config.Channel[i].value += Config.Limits[i].trim;
 	}

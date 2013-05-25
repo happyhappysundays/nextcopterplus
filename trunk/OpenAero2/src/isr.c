@@ -32,7 +32,6 @@ volatile uint8_t bytecount;
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms long
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
-#define FAST_RC_TIMER 41667			// Maximum servo rate before switching sync method 2500000 / 60(Hz) = 41667
 
 //************************************************************
 //* Standard PWM mode
