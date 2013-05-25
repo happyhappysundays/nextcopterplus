@@ -74,15 +74,15 @@ void init(void)
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PINB		= 0xF5;		// Set PB pull-ups
-	PIND		= 0x0D;		// Set PD pull-ups
-	// PIND		= 0x0C;		// Set PD pull-ups (Don't pull up RX yet)
+	PIND		= 0x0C;		// Set PD pull-ups (Don't pull up RX yet)
 
 	//***********************************************************
 	// Spektrum receiver binding
 	//***********************************************************
 
-	_delay_ms(73);				// Pause while satellite wakes up	
-								// and pull-ups have time to rise
+	_delay_ms(63);				// Pause while satellite wakes up	
+								// and pull-ups have time to rise.
+								// Tweak until bind pulses about 68ms after power-up
 
 	// Bind as slave if ONLY button 1 pressed
 	if ((PINB & 0xf0) == 0x70)
@@ -101,7 +101,7 @@ void init(void)
 	DDRD		= 0xF2;			// Reset Port D directions
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
-	// PIND		= 0x0D;			// Set PD pull-ups (now pull up RX as well)
+	PIND		= 0x0D;			// Set PD pull-ups (now pull up RX as well)
 
 	//***********************************************************
 	// Timers

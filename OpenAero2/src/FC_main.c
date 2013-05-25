@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 5 - May 2013
+// Version 1.2 Beta 6 - May 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -197,14 +197,14 @@
 //			For RC rates higher than this, the PWM output is limited to 50Hz if "Servo rate" is LOW
 //			RC rate now also tied to "Servo rate" seting so that if "Servo rate" is HIGH, 
 //			higher rates can be used.
+//			Tweaked Satellite bind timing to be exactly like the real thing.
+//			Shrunk memory requirements a bit.
 //
 //***********************************************************
 //* To do
 //***********************************************************
+//
 // 
-// - Tweak Satellite binding to exactly replicate the real thing.
-// Currently the time from power-up to the binding pulses is 80-120ms 
-// where the real one is about 68ms.
 //
 //***********************************************************
 //* Includes
@@ -254,11 +254,9 @@
 #define	SERVO_RATE_LOW 390			// Requested servo rate when in failsafe/Camstab LOW mode. 19531 / 50(Hz) = 390
 #define	SERVO_RATE_HIGH 65			// Requested servo rate when in Camstab HIGH mode 300(Hz) = 65
 #define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
-#define FS_TIMEOUT 19531			// Number or T2 cycles before Failsafe setting engages (1 second)
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
-#define STATUS_TIMER 19531			// Unit of timing for showing the status screen (seconds)
-#define LAUNCH_TIMER 19531			// Hand-launch timer (1 second)
+#define SECOND_TIMER 19531			// Unit of timing for seconds
 #define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
 
 //***********************************************************
@@ -292,16 +290,20 @@ int main(void)
 	bool ServoTick = false;
 	bool SlowRC = false;
 
-	// Timers
-	uint32_t Status_timeout = 0;
-	uint32_t UpdateStatus_timer = 0;
+	// 32-bit timers
 	uint32_t LostModel_timer = 0;
 	uint32_t Launch_timer = 0;
-	uint32_t Ticker_Count = 0;
 	uint32_t RC_Rate_Timer = 0;
+
+	// 16-bit timers
+	uint16_t Status_timeout = 0;
+	uint16_t UpdateStatus_timer = 0;
+	uint16_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
 
+	// Timer incrementers
+	uint16_t LoopStartTCNT1 = 0;
 	uint16_t RC_Rate_TCNT1 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
@@ -311,13 +313,12 @@ int main(void)
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
 
-	uint16_t LoopStartTCNT1 = 0;
+	// Locals
 	uint8_t	LMA_minutes = 0;
 	uint8_t Status_seconds = 0;
-
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 	uint8_t i = 0;
-	int8_t	old_flight = 0;			// Curret/old flight profile
+	uint8_t	old_flight = 0;			// Current/old flight profile
 
 	init();							// Do all init tasks
 
@@ -391,7 +392,7 @@ int main(void)
 				}
 
 				// Update status screen while waiting to time out
-				else if (UpdateStatus_timer > STATUS_TIMER)
+				else if (UpdateStatus_timer > SECOND_TIMER)
 				{
 					Menu_mode = REQ_STATUS;
 				}
@@ -435,7 +436,7 @@ int main(void)
 		Status_TCNT2 = TCNT2;
 
 		// Count elapsed seconds
-		if (Status_timeout > STATUS_TIMER)
+		if (Status_timeout > SECOND_TIMER)
 		{
 			Status_seconds++;
 			Status_timeout = 0;
@@ -540,7 +541,7 @@ int main(void)
 			}
 		
 			// Re-enable autolevel when timer expires while autolevel blocked
-			if ((Flight_flags & (1 << Launch_Block)) && (Launch_timer > ((uint32_t)LAUNCH_TIMER * (uint32_t)Config.LaunchDelay)))
+			if ((Flight_flags & (1 << Launch_Block)) && (Launch_timer > ((uint32_t)SECOND_TIMER * (uint32_t)Config.LaunchDelay)))
 			{
 				Flight_flags &= ~(1 << Launch_Block);
 				Flight_flags |= (1 << Launch_Mode);
