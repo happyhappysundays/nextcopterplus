@@ -149,7 +149,8 @@ void init(void)
 	// Start up
 	//***********************************************************
 
-	RC_Lock = false;						// Preset important flags
+	// Preset important flags
+	RC_Lock = false;						
 	Flight_flags &= ~(1 << Failsafe);
 	Flight_flags &= ~(1 << AutoLevel);
 	Flight_flags &= ~(1 << Stability);
@@ -157,21 +158,24 @@ void init(void)
 
 	// Initialise the GLCD
 	st7565_init();
-	st7565_command(CMD_DISPLAY_ON); 		// Check (AF)
-	st7565_command(CMD_SET_ALLPTS_NORMAL);	// Check (A4)
+	st7565_command(CMD_DISPLAY_ON);
+	st7565_command(CMD_SET_ALLPTS_NORMAL);
 	st7565_set_brightness(0x26);
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text
 	clear_buffer(buffer);
 	write_buffer(buffer);
+
+	// This delay prevents the GLCD flashing up a ghost image of old data
+	_delay_ms(300);	
 
 	// Reload default eeprom settings if all buttons are pressed 
 	if ((PINB & 0xf0) == 0)
 	{
 		// Display reset message
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
-
 		write_buffer(buffer);
 		clear_buffer(buffer);
+
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
 	}
@@ -183,7 +187,6 @@ void init(void)
 
 	// Display "Hold steady" message
 	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
-	_delay_ms(300);							// This delay prevents the GLCD flashing up a ghost image of old data
 	write_buffer(buffer);
 	clear_buffer(buffer);
 		
