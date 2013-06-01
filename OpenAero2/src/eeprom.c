@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x10		// eePROM signature - change for each eePROM structure change 0x10 = V1.2b5
+#define MAGIC_NUMBER 0x11		// eePROM signature - change for each eePROM structure change 0x11 = V1.2b7
 								// to force factory reset
 
 //************************************************************
@@ -46,8 +46,11 @@ void Set_EEPROM_Default_Config(void)
 {
 	uint8_t i;
 	
-	// Clear entire Config space first but don't clobber the setup byte
-	memset(&Config.ChannelOrder[0],0,(sizeof(Config) - 1));
+	// Clear entire Config space first
+	memset(&Config.setup,0,(sizeof(Config)));
+
+	// Set magic number / setup byte
+	Config.setup = MAGIC_NUMBER;
 
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
