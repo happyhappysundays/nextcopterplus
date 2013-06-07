@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 7 - June 2013
+// Version 1.2 Beta 8 - June 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -200,6 +200,7 @@
 //			Tweaked Satellite bind timing to be exactly like the real thing.
 //			Shrunk memory requirements a bit.
 // Beta 7	Fixed bug where settings were lost before repowering after a reset
+// Beta 8	Fixed bug where autolevel calibration wrong unless inverted calibration also done.
 //
 //***********************************************************
 //* To do
