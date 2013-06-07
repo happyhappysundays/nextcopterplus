@@ -64,7 +64,7 @@ void ReadAcc()					// At rest range is approx 300 - 700
 	// Use default inverse calibration value if not done yet
 	if (!(Main_flags & (1 << inv_cal_done)))
 	{
-	//	Config.AccZero[YAW] = (int16_t)pgm_read_word(&UncalDef[Config.Orientation]);
+		Config.AccZero[YAW] = (int16_t)pgm_read_word(&UncalDef[Config.Orientation]);
 	}
 }
 
