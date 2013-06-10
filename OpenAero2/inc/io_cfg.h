@@ -114,9 +114,10 @@ extern CONFIG_STRUCT Config;
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
-enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB};
+enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB, TRANSITION};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, CH9, CH10, CH11, CH12, UNUSED};
+enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, PSU9, PSU10, PSU11, PSU12};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
 enum SwitchModes	{DISABLED = 0, ALWAYSON, HANDSFREE};
 enum Availability	{OFF = 0, ON, REV};
@@ -127,6 +128,7 @@ enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOU
 enum Servo_rate		{LOW = 0, HIGH};
 enum Gyro_type		{RATE = 0, LOCK};
 enum Failsafes		{SIMPLE = 0, ADVANCED};
+enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_start, TRANS_1};
 
 //***********************************************************
 // Flags

@@ -43,28 +43,28 @@ void menu_rc_setup(uint8_t i);
 #define GENERALTEXT	22
 #define BATTTEXT 58 
 
-#define RCITEMS 14 		// Number of menu items
+#define RCITEMS 15 		// Number of menu items
 #define FSITEMS 5 
-#define GENERALITEMS 14 
+#define GENERALITEMS 15 
 #define BATTITEMS 5 
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[4][GENERALITEMS] PROGMEM = 
+const uint8_t RCMenuText[4][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0},	// RC setup
+	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0, 0},	// RC setup
 	{FSTEXT, 0, 0, 0, 0},												// Failsafe
-	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0},	// General
+	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0, 0},// General
 	{BATTTEXT, 0, 0, 0, 0}												// Battery
 };
 
-// Have to size each element to GENERALITEMS even though they are  smaller... fix this later
-const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM = 
+// Have to size each element to RCITEMS even though they are  smaller... fix this later
+const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM = 
 {
 	{
-		// RC setup (14)
+		// RC setup (15)
 		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Min, Max, Increment, Style, Default
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
@@ -79,6 +79,7 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 		{0,20,1,0,0},					// Flap speed (0 is fastest, 20 slowest)	
 		{0,5,1,0,2},					// Axis lock stick rate(0 is fastest, 5 slowest)
 		{0,5,1,0,1},					// RC deadband (%)
+		{0,5,1,0,1},					// TransitionSpeed 0 to 5
 	},
 	{
 		// Failsafe (5)
@@ -89,8 +90,8 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 		{-125,125,1,0,0},
 	},
 	{
-		// General (14)
-		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode
+		// General (15)
+		{AEROPLANE,TRANSITION,1,1,AEROPLANE}, 	// Mixer mode
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{1,60,1,0,10},					// Status menu timeout
@@ -104,6 +105,7 @@ const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM =
 		{OFF,ON,1,1,ON},				// Launch mode on/off
 		{-55,125,10,0,0},				// Launch mode throttle position
 		{0,60,1,0,10},					// Launch mode delay time
+		{0,100,1,0,0},					// Height dampening amount
 	},
 	{
 		// Battery (5)
@@ -227,6 +229,7 @@ void menu_rc_setup(uint8_t section)
 					case CAMSTAB:
 						get_preset_mix(CAM_STAB);
 						break;
+					case TRANSITION:	// No need to reload anything for transtion as the setup will be manual
 					default:
 						break;
 				}
