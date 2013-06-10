@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2b08";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.3a01";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -167,9 +167,11 @@ const char AutoMenuItem2[]  PROGMEM = "Launch delay:";
 const char AutoMenuItem16[] PROGMEM = "THR.pos %:"; 
 const char AutoMenuItem19[]  PROGMEM = "Delay time:";
 const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-term in Axis-lock mode
+const char GeneralText11[] PROGMEM =  "Height damp:";
 //
 const char RXMode4[]  PROGMEM = "Aero"; 
 const char RXMode5[]  PROGMEM = "F.Wing";
+const char Transition[] PROGMEM = "Transition";
 //
 //
 const char MixerItem0[] PROGMEM = "Source A:";				// Mixer menu items
@@ -238,7 +240,6 @@ const char MOUT12[] PROGMEM = "PSU12";
 //
 const char HeadingHold1[] PROGMEM = "Rate";					// Gyro modes
 const char HeadingHold2[] PROGMEM = "Axis lock";
-//const char HeadingHold3[] PROGMEM = "AVCS";
 const char FSmode0[]  PROGMEM = "Fixed";
 const char FSmode1[]  PROGMEM = "Adv.";
 //
@@ -269,7 +270,7 @@ const char *text_menu[] PROGMEM =
 		//
 		Dummy0, Dummy0, Dummy0, Dummy0,														// 18 to 21
 		//
-		RXMode4, RXMode5, MainMenuItem6, Dummy0,											// 22 to 25 Mix presets for Aero, F.Wing, Camstab
+		RXMode4, RXMode5, MainMenuItem6, Transition,											// 22 to 25 Mix presets for Aero, F.Wing, Camstab, Transition
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
@@ -345,38 +346,38 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	RCMenuItem4, 								// 149 to 162 rc menu
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	RCMenuItem4, 								// 149 to 163 rc menu
 		StabMenuItem14, StabMenuItem15,
 		RCMenuItem8, RCMenuItem12, RCMenuItem9, RCMenuItem10, 
-		RCMenuItem11,RCMenuItem20, GeneralText9, RCMenuItem21,
+		RCMenuItem11,RCMenuItem20, GeneralText9, RCMenuItem21, Transition,
 		//
-		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 163 to 167 Failsafe
+		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 164 to 168 Failsafe
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 168 to 181 general
+		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 169 to 183 general
 		GeneralText2,MainMenuItem6, GeneralText3, 
 		GeneralText10,
 		GeneralText6,GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
-		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19,	
+		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19, GeneralText11,	
 		//
-		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 182 to 186 Battery menu
+		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 184 to 188 Battery menu
 		//
-		StabMenuItem13, AutoMenuItem10, AutoMenuItem9,										// 187 to 208 Flight menu
+		StabMenuItem13, AutoMenuItem10, AutoMenuItem9,										// 189 to 210 Flight menu
 		GyroType1, AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,	// Roll gyro
 		GyroType2, AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem11, AutoMenuItem21, AutoMenuItem8, 	// Pitch gyro
 		GyroType3, StabMenuItem7, StabMenuItem8, StabMenuItem9, StabMenuItem12,	 								// Yaw gyro
 		//
-		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 209 Input mixers
+		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 211 Input mixers
 		MixerItem17, MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, 
 
-		MixerItem18, MixerItem20, MixerItem15, MixerItem2, 									// 220 Output mixers
+		MixerItem18, MixerItem20, MixerItem15, MixerItem2, 									// 222 Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 228 to 240 M1-12 + NONE
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 230 to 242 M1-12 + NONE
 		MOUT6, MOUT7, MOUT8, MOUT9, MOUT10,
 		MOUT11,MOUT12,ChannelRef8, 
 		//
 		//
-		ChannelRef10, ChannelRef12, 														// 241 - 242
+		ChannelRef10, ChannelRef12, 														// 243 - 244
 		//
 	}; 
 

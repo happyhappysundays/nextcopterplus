@@ -107,13 +107,13 @@ void ProcessMixer(void)
 	static	int16_t slowFlaps = 0;
 	static	uint8_t flapskip;
 	static	int16_t roll = 0;
+	static	int16_t	old_z = 0;
 
 	uint8_t i, outputs;
 	int8_t	speed;
-	int16_t temp = 0;
+	int16_t temp1 = 0;
 	int16_t temp2 = 0;
-	int16_t	pitch_trim = 0;
-	int16_t	roll_trim = 0;
+	int16_t	temp3 = 0;
 	bool	TwoAilerons = false;
 	bool	FlapLock = false;
 
@@ -189,8 +189,8 @@ void ProcessMixer(void)
 	for (i = 0; i < outputs; i++)
 	{
 		// Get requested volume of Source A
-		temp = RCinputs[Config.Channel[i].source_a];
-		temp = scale32(temp, Config.Channel[i].source_a_volume);
+		temp1 = RCinputs[Config.Channel[i].source_a];
+		temp1 = scale32(temp1, Config.Channel[i].source_a_volume);
 
 		// Skip Source B if no RC mixing required for this channel
 		if (Config.Channel[i].source_b_volume != 0)
@@ -199,11 +199,39 @@ void ProcessMixer(void)
 			temp2 = scale32(temp2, Config.Channel[i].source_b_volume);
 
 			// Sum the mixers
-			temp = temp + temp2;
+			temp1 = temp1 + temp2;
 		}
 
 		// Save solution for now
-		Config.Channel[i].value = temp;
+		Config.Channel[i].value = temp1;
+	}
+
+	//************************************************************
+	// Add in some height damping if required
+	//************************************************************
+
+	if (Config.Dampen != 0)
+	{
+		// Work change in Z value
+		temp1 = old_z - PID_ACCs[YAW];
+		temp1 *= Config.Dampen;
+
+		if (temp1 > MAX_ZGAIN)
+		{
+			temp1 = MAX_ZGAIN;
+		}
+
+		// Add dampening value to throttle values
+		for (i = 0; i < outputs; i++)
+		{
+			if (Config.Channel[i].source_a == THROTTLE)
+			{
+				Config.Channel[i].value += temp1;
+			}
+		}
+
+		// Update old acc value
+		old_z = PID_ACCs[YAW];
 	}
 
 	//************************************************************
@@ -218,21 +246,21 @@ void ProcessMixer(void)
 			// Clear RC source if not needed in mix with sensors
 			if (Config.Channel[i].source_mix == ON)
 			{
-				temp = Config.Channel[i].value;
+				temp1 = Config.Channel[i].value;
 			}
 			else
 			{
-				temp = 0;
+				temp1 = 0;
 			}
 
 			// Mix in gyros
 			switch (Config.Channel[i].roll_gyro)
 			{
 				case ON:
-					temp = temp - PID_Gyros[ROLL];
+					temp1 = temp1 - PID_Gyros[ROLL];
 					break;
 				case REV:
-					temp = temp + PID_Gyros[ROLL];
+					temp1 = temp1 + PID_Gyros[ROLL];
 					break;	
 				default:
 					break;
@@ -240,10 +268,10 @@ void ProcessMixer(void)
 			switch (Config.Channel[i].pitch_gyro)
 			{
 				case ON:
-					temp = temp + PID_Gyros[PITCH];
+					temp1 = temp1 + PID_Gyros[PITCH];
 					break;
 				case REV:
-					temp = temp - PID_Gyros[PITCH];
+					temp1 = temp1 - PID_Gyros[PITCH];
 					break;	
 				default:
 					break;
@@ -251,17 +279,17 @@ void ProcessMixer(void)
 			switch (Config.Channel[i].yaw_gyro)
 			{
 				case ON:
-					temp = temp - PID_Gyros[YAW];
+					temp1 = temp1 - PID_Gyros[YAW];
 					break;
 				case REV:
-					temp = temp + PID_Gyros[YAW];
+					temp1 = temp1 + PID_Gyros[YAW];
 					break;	
 				default:
 					break;
 			}
 
 			// Save solution for now
-			Config.Channel[i].value = temp;
+			Config.Channel[i].value = temp1;
 		}
 	} // Stability
 
@@ -275,33 +303,31 @@ void ProcessMixer(void)
 		// Offset Autolevel trims in failsafe mode
 		if ((Config.FailsafeType == 1) && (Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
 		{
-			roll_trim += Config.FailsafeAileron;
-			roll_trim = roll_trim << 2;
-			pitch_trim += Config.FailsafeElevator;
-			pitch_trim = pitch_trim << 2;
+			temp1 += Config.FailsafeAileron;
+			temp1 = temp1 << 2;
+			temp2 += Config.FailsafeElevator;
+			temp2 = temp2 << 2;
 		}
 
 		// Add autolevel trims * 4		
-		roll_trim += (Config.FlightMode[Config.Flight].AccRollZeroTrim << 2);
-		pitch_trim += (Config.FlightMode[Config.Flight].AccPitchZeroTrim << 2);
+		temp1 += (Config.FlightMode[Config.Flight].AccRollZeroTrim << 2); // Roll trim
+		temp2 += (Config.FlightMode[Config.Flight].AccPitchZeroTrim << 2);// Pitch trim
 
 		// Mix in accelerometers
 		for (i = 0; i < outputs; i++)
 		{
 			// Get solution
-			temp = Config.Channel[i].value;
+			temp3 = Config.Channel[i].value;
 
 			switch (Config.Channel[i].roll_acc)
 			{
 				case ON:
 					// Add in Roll trim
-					temp += roll_trim;
-					temp = temp - PID_ACCs[ROLL];
+					temp3 = temp3 - PID_ACCs[ROLL] + temp1;
 					break;
 				case REV:
 					// Add in Roll trim
-					temp -= roll_trim;
-					temp = temp + PID_ACCs[ROLL];
+					temp3 = temp3 + PID_ACCs[ROLL] - temp1;
 					break;	
 				default:
 					break;
@@ -311,20 +337,18 @@ void ProcessMixer(void)
 			{
 				case ON:
 					// Add in Pitch trim
-					temp += pitch_trim;
-					temp = temp + PID_ACCs[PITCH];
+					temp3 = temp3 + PID_ACCs[PITCH] + temp2;
 					break;
 				case REV:
 					// Add in Pitch trim
-					temp -= pitch_trim;
-					temp = temp - PID_ACCs[PITCH];
+					temp3 = temp3 - PID_ACCs[PITCH] - temp2;
 					break;	
 				default:
 					break;
 			}
 
 			// Save solution for now
-			Config.Channel[i].value = temp;
+			Config.Channel[i].value = temp3;
 		}
 	} // Autolevel
 
@@ -338,7 +362,7 @@ void ProcessMixer(void)
 		for (i = 0; i < outputs; i++)
 		{
 			// Get current channel value
-			temp = Config.Channel[i].value;
+			temp1 = Config.Channel[i].value;
 
 			// If some kind of aileron channel
 			if ((Config.Channel[i].source_a == AILERON) || (Config.Channel[i].source_a == Config.FlapChan))
@@ -347,19 +371,19 @@ void ProcessMixer(void)
 				if (TwoAilerons)			
 				{
 					// Limit negative-going values
-					if (temp < 0)
+					if (temp1 < 0)
 					{
-						temp = scale32(temp, (100 - Config.Differential));
-						Config.Channel[i].value = temp;
+						temp1 = scale32(temp1, (100 - Config.Differential));
+						Config.Channel[i].value = temp1;
 					}
 				}
 
 				// For the first aileron (LHS) 
 				// Limit positive-going values
-				else if (temp > 0)			
+				else if (temp1 > 0)			
 				{
-					temp = scale32(temp, (100 - Config.Differential));
-					Config.Channel[i].value = temp;
+					temp1 = scale32(temp1, (100 - Config.Differential));
+					Config.Channel[i].value = temp1;
 					TwoAilerons = true; // Found an aileron
 				}
 
@@ -417,20 +441,20 @@ void ProcessMixer(void)
 		for (i = 0; i < outputs; i++)
 		{
 			// Get solution
-			temp = Config.Channel[i].value;
+			temp1 = Config.Channel[i].value;
 
 			// Restore flaps
 			if (Config.Channel[i].source_a == AILERON)
 			{
-				temp += slowFlaps;
+				temp1 += slowFlaps;
 			}
 			if (Config.Channel[i].source_a == Config.FlapChan)
 			{
-				temp -= slowFlaps;
+				temp1 -= slowFlaps;
 			}
 
 			// Update channel data solution
-			Config.Channel[i].value = temp;
+			Config.Channel[i].value = temp1;
 		} // Flaps
 	}
 		
@@ -442,12 +466,12 @@ void ProcessMixer(void)
 	{
 
 		// Get primary value
-		temp = Config.Channel[i].value;
+		temp1 = Config.Channel[i].value;
 		
 		// Reverse this channel's primary for the eight physical outputs
 		if ((i <= MAX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
 		{	
-			temp = -temp;
+			temp1 = -temp1;
 		}
 
 		// If output mixer switch channel is UNUSED or
@@ -460,24 +484,64 @@ void ProcessMixer(void)
 			{
 				temp2 = Config.Channel[Config.Channel[i].output_b].value;
 				temp2 = scale32(temp2, Config.Channel[i].output_b_volume);
-				temp = temp + temp2;
+				temp1 = temp1 + temp2;
 			}
 			if ((Config.Channel[i].output_c_volume !=0) && (Config.Channel[i].output_c != UNUSED)) // Mix in second extra output
 			{
 				temp2 = Config.Channel[Config.Channel[i].output_c].value;
 				temp2 = scale32(temp2, Config.Channel[i].output_c_volume);
-				temp = temp + temp2;
+				temp1 = temp1 + temp2;
 			}
 			if ((Config.Channel[i].output_d_volume !=0) && (Config.Channel[i].output_d != UNUSED)) // Mix in third extra output
 			{
 				temp2 = Config.Channel[Config.Channel[i].output_d].value;
 				temp2 = scale32(temp2, Config.Channel[i].output_d_volume);
-				temp = temp + temp2;
+				temp1 = temp1 + temp2;
 			}
 		}
 
 		// Update channel data solution
-		Config.Channel[i].value = temp;
+		Config.Channel[i].value = temp1;
+	}
+
+	//************************************************************
+	// Mixer transition code
+	//************************************************************ 
+
+	if (Config.MixMode == TRANSITION)
+	{
+		// For the overlapping channels
+		for (i = OUT5; i < PSU9; i++)
+		{
+			// Convert number to percentage
+			if (Config.TransitionSpeed == 0) 
+			{
+				temp3 = transition_value_16;
+			}
+			else 
+			{
+				temp3 = transition_counter;
+			}
+
+			// 0-16 -> 0-100
+			temp3 = ((temp3 << 6) / 10); 
+			if (temp3 > 100) temp3 = 100;
+			if (temp3 < 0) temp3 = 0;
+
+			// Get requested volume of source channel
+			temp1 = Config.Channel[i].value;
+			temp1 = scale32(temp1, (100 - temp3));
+
+			// Get complementary volume of transition channel 
+			temp2 = Config.Channel[i+4].value;
+			temp2 = scale32(temp2, temp3);
+
+			// Sum the mixers
+			temp1 = temp1 + temp2;
+
+			// Save transitioned solution
+			Config.Channel[i].value = temp1;
+		} 
 	}
 
 	//************************************************************
@@ -519,9 +583,9 @@ void ProcessMixer(void)
 				// Tweak rudder channel						
 				if (Config.Channel[i].source_a == RUDDER)
 				{
-					temp = Config.FailsafeRudder;
-					temp = temp << 4;
-					Config.Channel[i].value += temp;
+					temp1 = Config.FailsafeRudder;
+					temp1 = temp1 << 4;
+					Config.Channel[i].value += temp1;
 				}
 			}
 		}

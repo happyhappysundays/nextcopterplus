@@ -16,7 +16,7 @@
 #define PSUEDO_OUTPUTS 12				// Total number of mixer channels
 #define MAX_OUTPUTS 8					// Maximum output channels
 #define MIN_OUTPUTS 4					// Minimum output channels
-#define NUM_MIXERS 2
+#define MAX_ZGAIN 200					// Maximum amount of Z-based height dampening
 
 typedef struct
 {
@@ -74,7 +74,7 @@ typedef struct
 	int8_t		StabMode;				// Stability on/off
 	int8_t		AutoMode;				// Autolevel on/off
 
-	int8_t		Roll_type;				// Gyro type (rate mode, axis lock, AVCS simulate)
+	int8_t		Roll_type;				// Gyro type (rate mode, axis lock)
 	PID_mult_t	Roll;					// Gyro PID settings [P,I,D]
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
@@ -108,7 +108,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (14)
+	// RC items (15)
 	int8_t		RxMode;					// PWM or CPPM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
@@ -123,7 +123,8 @@ typedef struct
 	int8_t		flapspeed;				// Flap deploy speed
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 	int8_t		Deadband;				// RC deadband (%)
-
+	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 5 seconds.
+										// Tied transition start/end comes from Flight[].Profilelimit of src/dst.
 	// Failsafe items (5)
 	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
 	int8_t		FailsafeThrottle;		// Throttle position in failsafe
@@ -132,7 +133,11 @@ typedef struct
 	int8_t		FailsafeRudder;			// Rudder trim in failsafe
 	
 	// Flight mode settings
-	flight_control_t FlightMode[3];		// Flight control settings (3)
+	union 
+	{
+		flight_control_t FlightMode[3];	// Flight control settings (3)
+		int8_t	FlightModeByte[3][sizeof(flight_control_t)]; // Union of same to enable byte-wise addressing	
+	};
 
 	// Servo travel limts
 	int32_t		Raw_I_Limits[3];		// Actual, unspanned I-term out limits to save recalculation each loop
@@ -158,7 +163,7 @@ typedef struct
 	int8_t		MaxVoltage;				// Maximum cell voltage in charged state (0 to 127 = 0 to 508mV)
 	int8_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	// General items (14)
+	// General items (15)
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
@@ -173,6 +178,7 @@ typedef struct
 	int8_t		LaunchMode;				// Launch mode on/off
 	int8_t		LaunchThrPos;			// Launch mode throttle position
 	int8_t		LaunchDelay;			// Launch mode delay time
+	int8_t		Dampen;					// Height dampening amount
 
 	// Non-menu items 
 	// Input channel configuration
@@ -195,7 +201,8 @@ typedef struct
 	int8_t		MenuChannel;			// Current M1 to M8 channel
 
 	// Flight mode
-	int8_t		Flight;					// Flight mode in use
+	int8_t		FlightSel;				// User set flight mode
+	int8_t		Flight;					// Actual flight mode 
 
 } CONFIG_STRUCT;
 

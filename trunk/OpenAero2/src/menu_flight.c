@@ -34,7 +34,7 @@ void menu_flight(uint8_t i);
 // Defines
 //************************************************************
 
-#define FLIGHTSTART 187 // Start of Menu text items
+#define FLIGHTSTART 189 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
 #define FLIGHTITEMS 22 	// Number of menu items

@@ -35,7 +35,7 @@ void menu_mixer(uint8_t i);
 #define INPUTITEMS 10
 #define OUTPUTITEMS 7
 
-#define MIXERSTART 209 	// Start of Menu text items
+#define MIXERSTART 211 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************
@@ -44,8 +44,8 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{228,105,0,105,0,143,143,143,143,143,143},
-	{228,105,228,0,228,0,228,0}
+	{230,105,0,105,0,143,143,143,143,143,143},
+	{230,105,230,0,230,0,230,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 

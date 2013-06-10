@@ -52,14 +52,11 @@ void Set_EEPROM_Default_Config(void)
 	// Set magic number / setup byte
 	Config.setup = MAGIC_NUMBER;
 
+	// Servo defaults
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
-	}
-	// Servo defaults
-	for (i = 0; i < MAX_RC_CHANNELS; i++)
-	{
 		//Config.Servo_reverse[i] = NORMAL;
 		//Config.Offset[i] = 0;
 		Config.min_travel[i] = -100;
@@ -69,6 +66,18 @@ void Set_EEPROM_Default_Config(void)
 	Config.Failsafe[0] = -100;			// Throttle should failsafe to minimum
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
+
+	// Preset Psuedo Output mixers to safe values
+	for (i = 8; i < PSUEDO_OUTPUTS; i++)
+	{
+		Config.Channel[i].source_a = NOCHAN;
+		Config.Channel[i].source_b = NOCHAN;
+		Config.Channel[i].switcher = NOCHAN;
+		Config.Channel[i].output_b = UNUSED;
+		Config.Channel[i].output_c = UNUSED;
+		Config.Channel[i].output_d = UNUSED;
+	}
+
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
