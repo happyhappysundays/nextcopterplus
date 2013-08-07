@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.3 Alpha 1 - June 2013
+// Version 1.3 Alpha 2 - August 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -201,14 +201,19 @@
 //			Shrunk memory requirements a bit.
 // Beta 7	Fixed bug where settings were lost before repowering after a reset
 // Beta 8	Fixed bug where autolevel calibration wrong unless inverted calibration also done.
+// Beta 9	Bugfix. Hands-free now takes its trigger from the RC deadband setting.
+//
 // V1.3		Based on OpenAero2 V1.2 Beta 8 code
 // Alpha 1	Added transition code
 //			Added basic height dampening code (untested)
+// Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
+// Add stick rate to profiles
+// Link axis-lock rate to stick rates
 //
 //***********************************************************
 //* Includes
