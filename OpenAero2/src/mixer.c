@@ -474,9 +474,9 @@ void ProcessMixer(void)
 			temp1 = -temp1;
 		}
 
-		// If output mixer switch channel is UNUSED or
+		// If output mixer switch channel is NOCHAN or
 		// if tied to a channel and that channel is > 0, do mix, otherwise skip.
-		if ((Config.Channel[i].switcher == UNUSED) ||
+		if ((Config.Channel[i].switcher == NOCHAN) ||
 			(RCinputs[Config.Channel[i].switcher] >= 0))
 		{
 			// Mix in other outputs here
@@ -611,7 +611,6 @@ void UpdateLimits(void)
 	int8_t gains[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
 
 	// Update triggers
-	Config.HandsFreetrigger = Config.FlightMode[Config.Flight].Profilelimit * 5;
 	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Profilelimit);
 	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Profilelimit);
 	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Profilelimit);
@@ -666,6 +665,9 @@ void UpdateLimits(void)
 
 	// Update RC deadband amount
 	 Config.DeadbandLimit = (Config.Deadband * 12); // 0 to 5% scaled to 0 to 60
+
+	// Update Hands-free trigger based on deadband setting
+	Config.HandsFreetrigger = Config.DeadbandLimit;
 }
 
 // Update servos from the mixer Config.Channel[i].value data and enforce travel limits

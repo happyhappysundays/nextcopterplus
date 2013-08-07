@@ -183,6 +183,7 @@ void menu_rc_setup(uint8_t section)
 		int8_t temp_type = Config.MixMode;
 		int8_t temp_cells = Config.BatteryCells;
 		int8_t temp_minvoltage = Config.MinVoltage;
+		int8_t temp_flapchan = Config.FlapChan;
 
 		// Print menu
 		print_menu_items(rc_top + offset, RCSTART + offset, value_ptr, mult, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
@@ -197,14 +198,14 @@ void menu_rc_setup(uint8_t section)
 			do_menu_item(menu_temp, value_ptr + (menu_temp - RCSTART - offset), mult, range, 0, text_link, false, 0);
 		}
 
-		// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode
-		if (Config.MixMode == AEROPLANE)
-		{
-			Config.Channel[CH7].source_a = Config.FlapChan;
-		}
-
 		if (button == ENTER)
 		{
+			// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode and source changed
+			if ((Config.MixMode == AEROPLANE) && (Config.FlapChan != temp_flapchan))
+			{
+				Config.Channel[CH7].source_a = Config.FlapChan;
+			}
+
 			// See if cell number or min_volts has changed
 			if ((temp_cells != Config.BatteryCells) || (temp_minvoltage != Config.MinVoltage))
 			{

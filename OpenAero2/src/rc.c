@@ -103,20 +103,6 @@ void RC_Deadband(void)
 {
 	int16_t	aileron_actual = 0;
 
-	// Deadband culling
-	if ((RCinputs[AILERON] < Config.DeadbandLimit) && (RCinputs[AILERON] > -Config.DeadbandLimit))
-	{
-		RCinputs[AILERON] = 0;
-	}
-	if ((RCinputs[ELEVATOR] < Config.DeadbandLimit) && (RCinputs[ELEVATOR] > -Config.DeadbandLimit)) 
-	{
-		RCinputs[ELEVATOR] = 0;
-	}
-	if ((RCinputs[RUDDER] < Config.DeadbandLimit) && (RCinputs[RUDDER] > -Config.DeadbandLimit))
-	{
-		RCinputs[RUDDER] = 0;
-	}
-
 	// If flaperons set up 
 	if (Config.FlapChan != NOCHAN)
 	{
@@ -130,8 +116,7 @@ void RC_Deadband(void)
 		aileron_actual  = RCinputs[AILERON];
 	}
 
-
-	// Hands-free detection
+	// Hands-free detection (prior to deadband culling)
 	if (((aileron_actual < Config.HandsFreetrigger) && (aileron_actual > -Config.HandsFreetrigger))
 	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
 	{
@@ -140,6 +125,20 @@ void RC_Deadband(void)
 	else
 	{
 		Flight_flags &= ~(1 << HandsFree);
+	}
+
+	// Deadband culling
+	if ((RCinputs[AILERON] < Config.DeadbandLimit) && (RCinputs[AILERON] > -Config.DeadbandLimit))
+	{
+		RCinputs[AILERON] = 0;
+	}
+	if ((RCinputs[ELEVATOR] < Config.DeadbandLimit) && (RCinputs[ELEVATOR] > -Config.DeadbandLimit)) 
+	{
+		RCinputs[ELEVATOR] = 0;
+	}
+	if ((RCinputs[RUDDER] < Config.DeadbandLimit) && (RCinputs[RUDDER] > -Config.DeadbandLimit))
+	{
+		RCinputs[RUDDER] = 0;
 	}
 }
 
