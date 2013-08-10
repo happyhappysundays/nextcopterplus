@@ -38,9 +38,9 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 // Code
 //************************************************************
 
-uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
-uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
-uint8_t	SATELLITE[MAX_RC_CHANNELS] PROGMEM = {5,1,2,3,4,0,6,7}; // Spektrum satellite channel sequence (FAERGT12)
+const uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
+const uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
+const uint8_t	SATELLITE[MAX_RC_CHANNELS] PROGMEM = {5,1,2,3,4,0,6,7}; // Spektrum satellite channel sequence (FAERGT12)
 
 void Set_EEPROM_Default_Config(void)
 {

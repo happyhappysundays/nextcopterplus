@@ -26,8 +26,8 @@ void read_adc(uint8_t channel);
 //	 Vcc			Roll		Yaw			Vbat	Pitch		PitchA		RollA		ZA
 //{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal/UD definition
 
-int8_t ADCseqVert[8] PROGMEM = {AIN_VCC, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
-int8_t ADCseqSide[8] PROGMEM = {AIN_VCC, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_Y_GYRO, AIN_Y_ACC, AIN_X_ACC, AIN_Z_ACC}; // Sideways
+const int8_t ADCseqVert[8] PROGMEM = {AIN_VCC, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
+const int8_t ADCseqSide[8] PROGMEM = {AIN_VCC, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_Y_GYRO, AIN_Y_ACC, AIN_X_ACC, AIN_Z_ACC}; // Sideways
 
 void Init_ADC(void)
 {

@@ -49,7 +49,7 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 void output_servo_ppm_asm3(int16_t servo_number, int16_t value);
 
 // Hard-coded line positions
-uint8_t lines[4] PROGMEM = {LINE0, LINE1, LINE2, LINE3};
+const uint8_t lines[4] PROGMEM = {LINE0, LINE1, LINE2, LINE3};
 
 // Menu globals
 uint8_t button_multiplier;

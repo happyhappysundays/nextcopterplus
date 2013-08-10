@@ -62,6 +62,6 @@ extern const char *text_menu[];
 // Global menu variables
 extern uint8_t cursor;
 extern uint8_t menu_temp;
-extern uint8_t lines[4];
+extern const uint8_t lines[4];
 
 

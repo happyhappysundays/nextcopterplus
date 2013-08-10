@@ -1,9 +1,8 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.3 Alpha 2 - August 2013
+// Version 1.3 Alpha 3 - August 2013
 //
-// May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
@@ -207,6 +206,7 @@
 // Alpha 1	Added transition code
 //			Added basic height dampening code (untested)
 // Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
+// Alpha 3	Fixed all the missing "const" that annoy some compilers. 
 //
 //***********************************************************
 //* To do
