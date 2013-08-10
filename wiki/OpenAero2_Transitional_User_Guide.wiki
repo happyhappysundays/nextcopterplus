@@ -1,4 +1,3 @@
-OpenAero2_Transitional_User_Guide
 =Transitional mixing in OpenAero2 V1.3=
 
 ==Part 1==
