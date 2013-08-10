@@ -34,10 +34,10 @@ int16_t accADC[3];				// Holds Acc ADC values
 int16_t tempaccZero = 0;		// Holds Z acc in between normal and inverted cals
 
 // Uncalibrated default values of Z middle per orientation
-int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
+const int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
 
 // Polarity handling table
-int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
+const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 {
 	{1,1,1},		// Forward
 	{1,-1,-1},		// Vertical

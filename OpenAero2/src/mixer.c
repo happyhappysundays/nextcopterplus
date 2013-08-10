@@ -26,7 +26,7 @@
 void ProcessMixer(void);
 void UpdateServos(void);
 void UpdateLimits(void);
-void get_preset_mix (channel_t*);
+void get_preset_mix (const channel_t*);
 int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
 
@@ -35,7 +35,7 @@ int16_t scale_percent(int8_t value);
 //************************************************************
 
 // Aeroplane mixer defaults
-channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM = 
+const channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM = 
 {
 	// Rudder -= Yaw; (normal)
 	// Aileron -= Roll; (normal)
@@ -56,7 +56,7 @@ channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 
 }; 
 
-channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
+const channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
 {
 	// Rudder -= Yaw (normal)
 	// L.Elevon + Roll (reversed) - Pitch (normal)
@@ -76,7 +76,7 @@ channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
-channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
+const channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
 {
  	// For non-controlled, use
 	// M2 Pitch (Tilt) + Pitch gyro;
@@ -594,7 +594,7 @@ void ProcessMixer(void)
 
 
 // Get preset mix from Program memory
-void get_preset_mix(channel_t* preset)
+void get_preset_mix(const channel_t* preset)
 {
 	// Clear all channels first
 	memset(&Config.Channel[0].value,0,(sizeof(channel_t) * PSUEDO_OUTPUTS));
