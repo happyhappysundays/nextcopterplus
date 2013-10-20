@@ -516,7 +516,14 @@ void ProcessMixer(void)
 			// Convert number to percentage
 			if (Config.TransitionSpeed == 0) 
 			{
+				// transition_value_16 is the RCinput / 128 so can range +/- 10
 				temp3 = transition_value_16;
+
+				// Limit extent of transition value
+				if (temp3 < -8) temp3 = -8;
+				if (temp3 > 8) temp3 = 8;
+				temp3 += 8;
+
 			}
 			else 
 			{
@@ -528,11 +535,11 @@ void ProcessMixer(void)
 			if (temp3 > 100) temp3 = 100;
 			if (temp3 < 0) temp3 = 0;
 
-			// Get requested volume of source channel
+			// Get source channel value
 			temp1 = Config.Channel[i].value;
 			temp1 = scale32(temp1, (100 - temp3));
 
-			// Get complementary volume of transition channel 
+			// Get destination channel value
 			temp2 = Config.Channel[i+4].value;
 			temp2 = scale32(temp2, temp3);
 
