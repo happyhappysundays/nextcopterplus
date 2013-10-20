@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.3 Alpha 3 - August 2013
+// Version 1.3 Alpha 4 - October 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -207,6 +207,7 @@
 //			Added basic height dampening code (untested)
 // Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
 // Alpha 3	Fixed all the missing "const" that annoy some compilers. 
+// Alpha 4	Fixed partial transition and offset bugs. Also fixed case where power up state is wrong. 
 //
 //***********************************************************
 //* To do
@@ -615,7 +616,8 @@ int main(void)
 		//* setting.
 		//************************************************************
 
-		if (RxChannel[Config.FlightChan] > Config.Autotrigger3)
+		// Manually only allow Flight mode 2 if not in transition mode
+		if ((RxChannel[Config.FlightChan] > Config.Autotrigger3) && (Config.MixMode != TRANSITION))
 		{
 			Config.FlightSel = 2;			// Flight mode 2
 		}	
@@ -645,8 +647,9 @@ int main(void)
 						break;
 					case 1:
 					case 2:
-						Transition_state = TRANS_1;
-						memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
+						Transition_state = TRANS_0_to_1_start; // Debug - fix case where board is powered up in Flight mode 2
+					//	Transition_state = TRANS_1;
+					//	memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
 						break;
 					default:
 						break;
@@ -680,7 +683,8 @@ int main(void)
 		// If so, set TransitionUpdated flag to trigger an update
 		if ((Config.MixMode == TRANSITION) && (Config.TransitionSpeed == 0))
 		{
-			if (transition_value_16 != ((RCinputs[Config.FlightChan] >> 7) + 11))
+			// 
+			if (transition_value_16 != (RCinputs[Config.FlightChan] >> 7))
 			{
 				TransitionUpdated = true;
 			}
@@ -695,8 +699,8 @@ int main(void)
 			Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
 			Transition_TCNT2 = TCNT2;
 
-			// Update transition value. -1250 to 1250 --> 0 to 19 steps
-			transition_value_16 = (RCinputs[Config.FlightChan] >> 7) + 11;
+			// Update transition value. -1250 to 1250 --> -9 to 9 steps
+			transition_value_16 = (RCinputs[Config.FlightChan] >> 7);
 
 			// Update transition state change
 			if (TransitionUpdated)
@@ -775,11 +779,12 @@ int main(void)
 
 							// Process the transition values. temp_value_16_1 is either from the channel value
 							// (transition_value_16) or driven by the transition_counter.
-							// RC input is nominally +/- 1250. /128 = +/- 10 (span of 20). Limit this to 0 to 16.
+							// RC input is nominally +/- 1250. /128 = +/- 9.77 (span of 19.53). Limit this to 0 to 15.
 							// This corresponds to values from -1280 to 768 (988us to 1.8ms) (0 extends to 1.04ms)
 							if (Config.TransitionSpeed == 0)
 							{
 								temp_value_16_1 = transition_value_16;
+								temp_value_16_1 = temp_value_16_1 + 7;
 							}
 							else 
 							{
@@ -800,7 +805,7 @@ int main(void)
 							// Scale back to 8-bit value and re-cast
 							temp_value_16_1 = (temp_value_16_1 >> 8);
 
-							// Update Profile 2 with merged value
+							// Update Profile 3 with merged value
 							Config.FlightModeByte[2][i] = (int8_t) temp_value_16_1;
 
 						} // Transition value update loop
@@ -819,13 +824,13 @@ int main(void)
 								Transition_state = TRANS_0;
 							}
 						}
-						// Profile 0 to 1, so counter increments to 15
+						// Profile 0 to 1, so counter increments to 16
 						else
 						{
 							transition_counter++;
-							if (transition_counter >= 15)
+							if (transition_counter >= 16)
 							{
-								transition_counter = 15;
+								transition_counter = 16;
 								Transition_state = TRANS_1;
 							}
 						}
