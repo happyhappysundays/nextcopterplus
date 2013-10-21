@@ -106,14 +106,6 @@ void Calculate_PID(void)
 		RCinputsAxis[ROLL] = roll_actual >> 1;
 	}
 
-	// In in Flying Wing mode RCinputsAxis comes directly from RCinputs
-	// Pitch has to be reversed (again)
-	else if (Config.MixMode == FWING)
-	{
-		RCinputsAxis[ROLL] = RCinputs[AILERON];
-		RCinputsAxis[PITCH] = -RCinputs[ELEVATOR];
-	}
-
 	// Otherwise roll is just roll...
 	else
 	{
