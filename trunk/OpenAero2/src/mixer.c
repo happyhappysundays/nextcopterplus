@@ -69,10 +69,10 @@ const channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
-	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left elevon)
-	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
+	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Raw stabilised aileron)
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Raw stabilised elevator)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,OUT4,50,OUT5,50,UNUSED,0},		// ServoOut6 (Left elevon)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,OUT4,-50,OUT5,50,UNUSED,0},		// ServoOut7 (Right elevon)
 	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
@@ -254,38 +254,17 @@ void ProcessMixer(void)
 			}
 
 			// Mix in gyros
-			switch (Config.Channel[i].roll_gyro)
+			if (Config.Channel[i].roll_gyro == ON)
 			{
-				case ON:
-					temp1 = temp1 - PID_Gyros[ROLL];
-					break;
-				case REV:
-					temp1 = temp1 + PID_Gyros[ROLL];
-					break;	
-				default:
-					break;
+				temp1 = temp1 - PID_Gyros[ROLL];
 			}
-			switch (Config.Channel[i].pitch_gyro)
+			if (Config.Channel[i].pitch_gyro == ON)
 			{
-				case ON:
-					temp1 = temp1 + PID_Gyros[PITCH];
-					break;
-				case REV:
-					temp1 = temp1 - PID_Gyros[PITCH];
-					break;	
-				default:
-					break;
+				temp1 = temp1 + PID_Gyros[PITCH];
 			}
-			switch (Config.Channel[i].yaw_gyro)
+			if (Config.Channel[i].yaw_gyro == ON)
 			{
-				case ON:
-					temp1 = temp1 - PID_Gyros[YAW];
-					break;
-				case REV:
-					temp1 = temp1 + PID_Gyros[YAW];
-					break;	
-				default:
-					break;
+				temp1 = temp1 - PID_Gyros[YAW];
 			}
 
 			// Save solution for now
@@ -319,32 +298,14 @@ void ProcessMixer(void)
 			// Get solution
 			temp3 = Config.Channel[i].value;
 
-			switch (Config.Channel[i].roll_acc)
+			if (Config.Channel[i].roll_acc == ON)
 			{
-				case ON:
-					// Add in Roll trim
-					temp3 = temp3 - PID_ACCs[ROLL] + temp1;
-					break;
-				case REV:
-					// Add in Roll trim
-					temp3 = temp3 + PID_ACCs[ROLL] - temp1;
-					break;	
-				default:
-					break;
+				temp3 = temp3 - PID_ACCs[ROLL] + temp1;
 			}
 
-			switch (Config.Channel[i].pitch_acc)
+			if (Config.Channel[i].pitch_acc == ON)
 			{
-				case ON:
-					// Add in Pitch trim
-					temp3 = temp3 + PID_ACCs[PITCH] + temp2;
-					break;
-				case REV:
-					// Add in Pitch trim
-					temp3 = temp3 - PID_ACCs[PITCH] - temp2;
-					break;	
-				default:
-					break;
+				temp3 = temp3 + PID_ACCs[PITCH] + temp2;
 			}
 
 			// Save solution for now

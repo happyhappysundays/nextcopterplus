@@ -58,11 +58,11 @@ const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM =
 		{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Source B
 		{-125,125,5,0,0},				// Source B volume (%)
 		{OFF, ON,1,1,OFF},				// Source mix enable
-		{OFF, REV,1,1,OFF},				// roll_gyro
-		{OFF, REV,1,1,OFF},				// pitch_gyro
-		{OFF, REV,1,1,OFF},				// yaw_gyro
-		{OFF, REV,1,1,OFF},				// roll_acc
-		{OFF, REV,1,1,OFF},				// pitch_acc
+		{OFF, ON,1,1,OFF},				// roll_gyro
+		{OFF, ON,1,1,OFF},				// pitch_gyro
+		{OFF, ON,1,1,OFF},				// yaw_gyro
+		{OFF, ON,1,1,OFF},				// roll_acc
+		{OFF, ON,1,1,OFF},				// pitch_acc
 	},
 	{
 		// Output mixer ranges (8)
