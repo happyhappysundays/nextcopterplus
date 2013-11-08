@@ -174,8 +174,7 @@ const char RXMode5[]  PROGMEM = "F.Wing";
 const char Transition[] PROGMEM = "Transition";
 //
 //
-const char MixerItem0[] PROGMEM = "Source A:";				// Mixer menu items
-const char MixerItem13[] PROGMEM = "Source B:";
+const char MixerItem0[] PROGMEM = "Source:";				// Mixer menu items
 const char MixerItem1[] PROGMEM = "Direction:";
 const char MixerItem2[] PROGMEM = "Volume(%):";
 const char MixerItem4[] PROGMEM = "Roll gyro:";
@@ -188,10 +187,9 @@ const char MixerItem8[] PROGMEM = "Trvl Min(%):";
 const char MixerItem9[] PROGMEM = "Trvl Max(%):";
 const char MixerItem10[] PROGMEM = "Failsafe(%):";
 const char MixerItem16[] PROGMEM = "Trim(%):";
-const char MixerItem17[] PROGMEM = "Source mix:";
 const char MixerItem18[] PROGMEM = "Setting for:";
 const char MixerItem19[] PROGMEM = "Reverse:";
-const char MixerItem20[] PROGMEM = "Switch:";
+const char MixerItem20[] PROGMEM = "Offset:";
 
 //
 const char ChannelRef0[] PROGMEM = "Throttle";				// RC channel text
@@ -366,18 +364,21 @@ const char *text_menu[] PROGMEM =
 		GyroType2, AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem11, AutoMenuItem21, AutoMenuItem8, 	// Pitch gyro
 		GyroType3, StabMenuItem7, StabMenuItem8, StabMenuItem9, StabMenuItem12,	 								// Yaw gyro
 		//
-		MixerItem18, MixerItem0, MixerItem2, MixerItem13, MixerItem2,						// 211 Input mixers
-		MixerItem17, MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, 
+		MixerItem18, MixerItem0, MixerItem2, 												// 211 Input mixers
+		MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, 
 
 		MixerItem18, MixerItem20, MixerItem15, MixerItem2, 									// 222 Output mixers
 		MixerItem15, MixerItem2, MixerItem15, MixerItem2,
+		Dummy0, Dummy0, Dummy0,
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, 													// 230 to 242 M1-12 + NONE
-		MOUT6, MOUT7, MOUT8, MOUT9, MOUT10,
-		MOUT11,MOUT12,ChannelRef8, 
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 230 to 250 Sources M1- M8, PSU - PSU12
+		MOUT9, MOUT10,MOUT11,MOUT12,
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,  								// RC1 to 8 + NONE
+		ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,
+		ChannelRef8, 
 		//
 		//
-		ChannelRef10, ChannelRef12, 														// 243 - 244
+		ChannelRef10, ChannelRef12, 														// 251 -252
 		//
 	}; 
 

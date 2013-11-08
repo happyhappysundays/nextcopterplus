@@ -208,14 +208,20 @@
 // Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
 // Alpha 3	Fixed all the missing "const" that annoy some compilers. 
 // Alpha 4	Fixed partial transition and offset bugs. Also fixed case where power up state is wrong. 
-// Beta 1	Removed sensor reversing. Changed flying wing mixing to the output mixers.
+// Beta 1	Changed flying wing mixing to the output mixers.
+//			Removed Source Mix setting that confused everyone. Also removed RC input Source B mixing
+//			as this is best done in the output mixers now. Dynamic gain effect reversed. Now max input
+//			is maximum stability. Decoupled stick and gyro for P gain.
+//			Factory reset now enterable by pressing just the middle two buttons. 
+//			Removed output switcher and added per-output offset.
+//			Added the ability to mix any RC source into the outputs.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Add stick rate to profiles
-// Link axis-lock rate to stick rates
+// 
+//
 //
 //***********************************************************
 //* Includes
@@ -773,7 +779,7 @@ int main(void)
 						{
 							// Get start/end values
 							temp_value_16_1 = Config.FlightModeByte[0][i];	// Promote to 16 bits
-							temp_value_16_1 = temp_value_16_1 << 8;				// Multiply by 256
+							temp_value_16_1 = temp_value_16_1 << 8;			// Multiply by 256
 							temp_value_16_2 = Config.FlightModeByte[1][i];	// Promote to 16 bits
 							temp_value_16_2 = temp_value_16_2 << 8;
 							temp_value_16_2 = (temp_value_16_2 - temp_value_16_1) >> 4;	// Divide difference into 16ths

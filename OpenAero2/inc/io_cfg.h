@@ -111,6 +111,7 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 // Enumeration
 //***********************************************************
+
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
@@ -129,6 +130,7 @@ enum Servo_rate		{LOW = 0, HIGH};
 enum Gyro_type		{RATE = 0, LOCK};
 enum Failsafes		{SIMPLE = 0, ADVANCED};
 enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_start, TRANS_1};
+enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, SRC13, SRC14, SRC15, SRC16, SRC17, SRC18, SRC19, SRC20, NOMIX};
 
 //***********************************************************
 // Flags
@@ -138,6 +140,5 @@ enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR
 enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block, Model_lost};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
 enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
-
 
 #endif //IO_CFG_H

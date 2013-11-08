@@ -69,7 +69,7 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
 		{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
-		{THROTTLE,NOCHAN,1,1,AUX1},		// DynGainSrc
+		{THROTTLE,NOCHAN,1,1,NOCHAN},	// DynGainSrc
 		{0,100,5,0,0},					// Dynamic gain
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Second aileron reverse
