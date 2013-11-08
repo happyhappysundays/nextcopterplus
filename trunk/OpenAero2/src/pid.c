@@ -66,7 +66,6 @@ void Calculate_PID(void)
 	int8_t	axis;
 	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
 	int32_t mult32 = 0;
-	int32_t RC_Input_32;
 	int32_t PID_Gyros_32;
 
 	// Cross-ref for actual RCinput elements
@@ -129,7 +128,8 @@ void Calculate_PID(void)
 		}
 
 		// Calculate gyro error from gyro and stick data
-		currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> 2);
+		 //currentError[axis] = gyroADC[axis] - (RCinputsAxis[axis] >> 2);
+		currentError[axis] = gyroADC[axis];
 
 		//************************************************************
 		// Increment and limit gyro I-terms, handle heading hold nicely
@@ -213,9 +213,10 @@ void Calculate_PID(void)
 		PID_Gyros[axis] = (int16_t)((PID_gyro_temp + PID_Gyro_I_temp + DifferentialGyro) >> 6);
 
 		//************************************************************
-		// Modify gains dynamically as required
-		// Do this by mixing between raw RC(no PID) and PID
-		// PID gains are not changed but the effect is the same
+		// Modify gains dynamically as required.
+		// Do this by scaling PID based on the current percentage of 
+		// the user-set maximum Dynamic Gain.
+		// PID gains themselves are not changed but the effect is the same
 		//************************************************************
 
 		// If dynamic gain set up 
@@ -226,16 +227,12 @@ void Calculate_PID(void)
 
 			// Promote to 32 bits and multiply
 			temp32 = PID_Gyros[axis];
-			mult32 = 100 - temp16;				// Max (100%) - Current setting (0 to Config.DynGain)
-			PID_Gyros_32 = temp32 * mult32;		// Scale to Config.DynGain (100% down to 0%)
+			mult32 = temp16;					// Max (100%). temp16 = 0 to Config.DynGain (Max. 100)
+			PID_Gyros_32 = temp32 * mult32;		// Scale to Config.DynGain (100% down to 0%) = 0x up to 100x
 
-			// Promote to 32 bits and multiply
-			temp32 = RCinputsAxis[axis];
-			mult32 = temp16;
-			RC_Input_32 = temp32 * mult32;		// Scale to current setting (0% up to 100%)
-
-			// Combine and normalise the PID vs. RC
-			temp32 = ((PID_Gyros_32 - RC_Input_32) / (int32_t)Config.DynGain);
+			// Scale back to 0% to 100% gyro 
+			// If Config.DynGain is 50(%) the gyro gain is reduced by 50%
+			temp32 = PID_Gyros_32 / 100;
 
 			// Cast back to native size
 			PID_Gyros[axis] = (int16_t)temp32;

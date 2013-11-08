@@ -58,7 +58,7 @@ void Set_EEPROM_Default_Config(void)
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
 		//Config.Servo_reverse[i] = NORMAL;
-		//Config.Offset[i] = 0;
+		Config.Offset[i] = 0;
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
 		//Config.Failsafe[i] = 0;
@@ -70,12 +70,11 @@ void Set_EEPROM_Default_Config(void)
 	// Preset Psuedo Output mixers to safe values
 	for (i = 8; i < PSUEDO_OUTPUTS; i++)
 	{
-		Config.Channel[i].source_a = NOCHAN;
-		Config.Channel[i].source_b = NOCHAN;
-		Config.Channel[i].switcher = NOCHAN;
-		Config.Channel[i].output_b = UNUSED;
-		Config.Channel[i].output_c = UNUSED;
-		Config.Channel[i].output_d = UNUSED;
+		Config.Channel[i].source_a 	= NOCHAN;
+		Config.Channel[i].offset 	= 0;
+		Config.Channel[i].output_b 	= NOMIX;
+		Config.Channel[i].output_c 	= NOMIX;
+		Config.Channel[i].output_d 	= NOMIX;
 	}
 
 	//
@@ -90,14 +89,9 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.FlightMode[1].Profilelimit = 0;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
-//	Config.FlightMode[1].Yaw_type = LOCK; // debug for axis lock testing
-//	Config.FlightMode[1].Yaw_limit = 125; // debug
-
 	Config.FlightMode[2].Profilelimit = 80;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
-//	Config.FlightMode[2].Yaw_type = LOCK; // debug
-//	Config.FlightMode[2].Yaw_limit = 125; // debug
 
 	// Set up all three profiles the same initially
 	for (i = 0; i < 3; i++)

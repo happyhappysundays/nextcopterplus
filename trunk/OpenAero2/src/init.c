@@ -168,8 +168,8 @@ void init(void)
 	// This delay prevents the GLCD flashing up a ghost image of old data
 	_delay_ms(300);	
 
-	// Reload default eeprom settings if all buttons are pressed 
-	if ((PINB & 0xf0) == 0)
+	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users) 
+	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
 	{
 		// Display reset message
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);

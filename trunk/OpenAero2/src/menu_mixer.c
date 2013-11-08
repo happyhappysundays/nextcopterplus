@@ -32,7 +32,7 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define INPUTITEMS 10
+#define INPUTITEMS 7
 #define OUTPUTITEMS 7
 
 #define MIXERSTART 211 	// Start of Menu text items
@@ -44,35 +44,32 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{230,105,0,105,0,143,143,143,143,143,143},
-	{230,105,230,0,230,0,230,0}
+	{230,105,0,143,143,143,143,143},
+	{230,0,230,0,230,0,230,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 
 {
 	{
-		// Input mixer ranges (11)
+		// Input mixer ranges (8)
 		{CH1,CH12,1,1,CH1},				// Ch. number
-		{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
-		{-125,125,5,0,100},				// Source A volume (%)
-		{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Source B
-		{-125,125,5,0,0},				// Source B volume (%)
-		{OFF, ON,1,1,OFF},				// Source mix enable
-		{OFF, ON,1,1,OFF},				// roll_gyro
-		{OFF, ON,1,1,OFF},				// pitch_gyro
-		{OFF, ON,1,1,OFF},				// yaw_gyro
-		{OFF, ON,1,1,OFF},				// roll_acc
-		{OFF, ON,1,1,OFF},				// pitch_acc
+		{THROTTLE,NOCHAN,1,1,NOCHAN},	// Source
+		{-125,125,5,0,100},				// Source volume (%)
+		{OFF, REV,1,1,OFF},				// roll_gyro
+		{OFF, REV,1,1,OFF},				// pitch_gyro
+		{OFF, REV,1,1,OFF},				// yaw_gyro
+		{OFF, REV,1,1,OFF},				// roll_acc
+		{OFF, REV,1,1,OFF},				// pitch_acc
 	},
 	{
 		// Output mixer ranges (8)
 		{CH1,CH12,1,1,CH1},				// Ch. number
-		{THROTTLE,NOCHAN,1,1,CH1},		// Switch input to activate this mixer
-		{CH1,UNUSED,1,1,UNUSED},		// Output B
+		{-125,125,5,0,0},				// Offset (%)
+		{SRC1,NOMIX,1,1,NOMIX},			// Output B
 		{-125,125,5,0,0},				// Output B volume
-		{CH1,UNUSED,1,1,UNUSED},		// Output C
+		{SRC1,NOMIX,1,1,NOMIX},			// Output C
 		{-125,125,5,0,0},				// Output C volume
-		{CH1,UNUSED,1,1,UNUSED},		// Output D
+		{SRC1,NOMIX,1,1,NOMIX},			// Output D
 		{-125,125,5,0,0},				// Output D volume
 	}
 };
@@ -131,7 +128,7 @@ void menu_mixer(uint8_t section)
 		}
 		else
 		{
-			memcpy(&values[1],&Config.Channel[Config.MenuChannel].switcher,(sizeof(int8_t) * OUTPUTITEMS));
+			memcpy(&values[1],&Config.Channel[Config.MenuChannel].offset,(sizeof(int8_t) * OUTPUTITEMS));
 		}
 
 		// Print menu
@@ -156,7 +153,7 @@ void menu_mixer(uint8_t section)
 				Config.MenuChannel = values[0];
 				break;
 			case 2:
-				memcpy(&Config.Channel[Config.MenuChannel].switcher,&values[1],(sizeof(int8_t) * OUTPUTITEMS));
+				memcpy(&Config.Channel[Config.MenuChannel].offset,&values[1],(sizeof(int8_t) * OUTPUTITEMS));
 				Config.MenuChannel = values[0];
 				break;
 			default:

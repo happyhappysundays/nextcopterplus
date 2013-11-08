@@ -37,12 +37,9 @@ typedef struct
 {
 	int16_t		value;					// Current value of this channel
 
-	// Input mix menu (10)
+	// Input mix menu (7)
 	int8_t		source_a;				// Source A RC input for calculation
 	int8_t		source_a_volume;		// Percentage of source to pass on
-	int8_t		source_b;				// Optional source B RC input for calculation
-	int8_t		source_b_volume;		// Percentage of source to pass on
-	int8_t		source_mix;				// Source RC included in stabilised modes
 	int8_t		roll_gyro;				// Use roll gyro
 	int8_t		pitch_gyro;				// Use pitch gyro
 	int8_t		yaw_gyro;				// Use yaw gyro
@@ -50,7 +47,7 @@ typedef struct
 	int8_t		pitch_acc;				// Use pitch acc
 
 	// Ouput mix menu (7)
-	int8_t		switcher;				// Switch input to activate this mixer
+	int8_t		offset;					// Offset for this output
 	int8_t		output_b;				// Channel B for calculation
 	int8_t		output_b_volume;		// Percentage of output to use
 	int8_t		output_c;				// Channel C for calculation
@@ -106,7 +103,8 @@ typedef struct
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
 	// Servo travel limts
-	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
+	servo_limits_t	Limits[MAX_OUTPUTS];		// Actual, respanned travel limits to save recalculation each loop
+	int16_t			PerOffset[PSUEDO_OUTPUTS]; 	// Actual, respanned offset for each channel
 
 	// RC items (15)
 	int8_t		RxMode;					// PWM or CPPM mode
