@@ -215,12 +215,13 @@
 //			Factory reset now enterable by pressing just the middle two buttons. 
 //			Removed output switcher and added per-output offset.
 //			Added the ability to mix any RC source into the outputs.
+// Beta 1.1 Added arming
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// 
+// Add arming/disarming
 //
 //
 //***********************************************************
@@ -274,8 +275,9 @@
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
+#define ARM_TIMER_RESET 1000		// RC position to reset timer
 #define TRANSITION_TIMER 1953		// Transition timer units (100ms * 16) (1 to 5 = 1.6s to 8s)
+#define ARM_TIMER 97655				// Amount of time the sticks must be held to trigger arm/disarm. Currently five seconds.
 
 //***********************************************************
 //* Code and Data variables
@@ -313,7 +315,7 @@ int main(void)
 
 	// 32-bit timers
 	uint32_t LostModel_timer = 0;
-	uint32_t Launch_timer = 0;
+	uint32_t Arm_timer = 0;
 	uint32_t RC_Rate_Timer = 0;
 
 	// 16-bit timers
@@ -331,7 +333,7 @@ int main(void)
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
-	uint8_t Launch_TCNT2 = 0;
+	uint8_t Arm_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
@@ -551,43 +553,55 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Hand-launch mode handling
+		//* Arm/disarm handling
 		//************************************************************
 
-		// Only pass through here if launch block timer running
-		if ((Config.LaunchMode == ON) && (Flight_flags & (1 << Launch_Mode)) && (Flight_flags & (1 << Launch_Block)))
+		if (Config.ArmMode == ON)
 		{
 			// Increment timer only if Launch mode on to save cycles
-			Launch_timer += (uint8_t) (TCNT2 - Launch_TCNT2);
-			Launch_TCNT2 = TCNT2;
+			Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); // TCNT2 runs at 19.531kHz. SECOND_TIMER amount of TCNT2 is 1 second
+			Arm_TCNT2 = TCNT2;
 
-			// If throttle position cut, reset timer
-			if (RxChannel[THROTTLE] < LAUNCH_TIMER_RESET)	
+			// If sticks not at extremes, reset timer
+			// Sticks down and centered = armed. Down and outside = disarmed
+			if (
+				((-ARM_TIMER_RESET < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET)) ||
+				((-ARM_TIMER_RESET < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET)) ||
+				((-ARM_TIMER_RESET < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET)) ||
+				((-ARM_TIMER_RESET < RCinputs[THROTTLE]) && (RCinputs[THROTTLE] < ARM_TIMER_RESET))
+			   )
+
 			{
-				Launch_timer = 0;
-				Flight_flags &= ~(1 << Launch_Mode);	// Reset state machine
-				Flight_flags &= ~(1 << Launch_Block);	// Enable autolevel
-				menu_beep(2);							// Signal launch mode timer restart
+				Arm_timer = 0;
 			}
-		
-			// Re-enable autolevel when timer expires while autolevel blocked
-			if ((Flight_flags & (1 << Launch_Block)) && (Launch_timer > ((uint32_t)SECOND_TIMER * (uint32_t)Config.LaunchDelay)))
+
+			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER/SECOND_TIMER seconds
+			if (Arm_timer > ARM_TIMER)
 			{
-				Flight_flags &= ~(1 << Launch_Block);
-				Flight_flags |= (1 << Launch_Mode);
+				// If aileron is at max, arm the FC
+				if (RCinputs[AILERON] > ARM_TIMER_RESET)
+				{
+					Arm_timer = 0;
+					General_error &= ~(1 << DISARMED);		// Set flags to armed
+					menu_beep(20);							// Signal that FC is now armed
+				}
+
+				// Else, disarm the FC
+				else
+				{
+					Arm_timer = 0;
+					General_error |= (1 << DISARMED);		// Set flags to disarmed
+					menu_beep(1);							// Signal that FC is now disarmed
+				}
+
+				// Force update of status screen
+				Menu_mode = STATUS_TIMEOUT;
 			}
 		}
-
-		// If first time into Launch mode
-		if ((Config.LaunchMode == ON) && !(Flight_flags & (1 << Launch_Mode)))
+		// Arm when ArmMode is OFF
+		else 
 		{
-			// Launch mode throttle position exceeded
-			if (RxChannel[THROTTLE] > Config.Launchtrigger)	
-			{
-				Flight_flags |= (1 << Launch_Mode);// Start 10 second countdown
-				Flight_flags |= (1 << Launch_Block);// Disable autolevel
-				menu_beep(1);					// Signal launch mode timer start
-			}
+			General_error &= ~(1 << DISARMED);		// Set flags to armed
 		}
 
 		//************************************************************
@@ -899,12 +913,6 @@ int main(void)
 
 			default:							// Disable by default
 				break;
-		}
-
-		// Check for Launch blocking
-		if (Flight_flags & (1 << Launch_Block))
-		{
-			Flight_flags &= ~(1 << AutoLevel);	// De-activate autolevel mode
 		}
 
 		// Check for advanced Failsafe

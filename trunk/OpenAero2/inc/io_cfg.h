@@ -136,8 +136,8 @@ enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10,
 // Flags
 //***********************************************************
 
-enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL};
-enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block, Model_lost};
+enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, DISARMED};
+enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Model_lost};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
 enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
 

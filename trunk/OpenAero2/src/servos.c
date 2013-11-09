@@ -39,8 +39,10 @@ void output_servo_ppm(void)
 		ServoOut[i] = (uint16_t)temp;
 	}
 
-	// Suppress outputs during throttle high error
-	if((General_error & (1 << THROTTLE_HIGH)) == 0)
+	// Suppress outputs during throttle high error or when disarmed
+	if( (General_error & (1 << THROTTLE_HIGH)) ||
+		(General_error & (1 << DISARMED))
+		== 0)
 	{
 		// Create the output pulses if in sync with RC inputs
 		if (RC_Lock) 

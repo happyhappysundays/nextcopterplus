@@ -116,7 +116,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.MaxVoltage = 105;			// 105 * 4 = 420
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
-	Config.LaunchDelay = 10;
+	Config.ArmMode = OFF;
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout
