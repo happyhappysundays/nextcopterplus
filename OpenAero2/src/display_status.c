@@ -152,6 +152,10 @@ void Display_status(void)
 			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
 			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
 		}
+		else if((General_error & (1 << DISARMED)) != 0)
+		{
+			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); // Disarmed
+		}
 	}
 
 	// Write buffer to complete

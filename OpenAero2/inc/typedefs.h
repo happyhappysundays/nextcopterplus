@@ -145,7 +145,7 @@ typedef struct
 	int16_t		Autotrigger1;			// Actual, unspanned flight mode 0 trigger to save recalculation each loop
 	int16_t		Autotrigger2;			// Actual, unspanned flight mode 1 
 	int16_t		Autotrigger3;			// Actual, unspanned flight mode 2
-	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
+//	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
 	
 	// Limits
@@ -161,7 +161,7 @@ typedef struct
 	int8_t		MaxVoltage;				// Maximum cell voltage in charged state (0 to 127 = 0 to 508mV)
 	int8_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	// General items (15)
+	// General items (13)
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
@@ -173,9 +173,7 @@ typedef struct
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	int8_t		IMUType;				// IMU style (old/new)
-	int8_t		LaunchMode;				// Launch mode on/off
-	int8_t		LaunchThrPos;			// Launch mode throttle position
-	int8_t		LaunchDelay;			// Launch mode delay time
+	int8_t		ArmMode;				// Arming mode on/off
 	int8_t		Dampen;					// Height dampening amount
 
 	// Non-menu items 

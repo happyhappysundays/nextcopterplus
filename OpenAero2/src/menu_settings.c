@@ -45,7 +45,7 @@ void menu_rc_setup(uint8_t i);
 
 #define RCITEMS 15 		// Number of menu items
 #define FSITEMS 5 
-#define GENERALITEMS 15 
+#define GENERALITEMS 13 
 #define BATTITEMS 5 
 
 //************************************************************
@@ -56,7 +56,7 @@ const uint8_t RCMenuText[4][RCITEMS] PROGMEM =
 {
 	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0, 0},	// RC setup
 	{FSTEXT, 0, 0, 0, 0},												// Failsafe
-	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0, 0},// General
+	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0},// General
 	{BATTTEXT, 0, 0, 0, 0}												// Battery
 };
 
@@ -102,9 +102,7 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{1,64,1,0,8},					// Acc. LPF
 		{10,100,5,0,30},				// CF factor
 		{OFF,ON,1,1,ON},				// Advanced IMUType
-		{OFF,ON,1,1,ON},				// Launch mode on/off
-		{-55,125,10,0,0},				// Launch mode throttle position
-		{0,60,1,0,10},					// Launch mode delay time
+		{OFF,ON,1,1,ON},				// Arming mode on/off
 		{0,100,1,0,0},					// Height dampening amount
 	},
 	{
@@ -183,7 +181,7 @@ void menu_rc_setup(uint8_t section)
 		int8_t temp_type = Config.MixMode;
 		int8_t temp_cells = Config.BatteryCells;
 		int8_t temp_minvoltage = Config.MinVoltage;
-		int8_t temp_flapchan = Config.FlapChan;
+		int8_t temp_arm = Config.ArmMode;
 
 		// Print menu
 		print_menu_items(rc_top + offset, RCSTART + offset, value_ptr, mult, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
@@ -200,10 +198,10 @@ void menu_rc_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode and source changed
-			if ((Config.MixMode == AEROPLANE) && (Config.FlapChan != temp_flapchan))
+			// See if arming mode has changed to ON
+			if ((temp_arm == OFF) && (Config.ArmMode == ON))
 			{
-				Config.Channel[CH7].source_a = Config.FlapChan;
+				General_error |= (1 << DISARMED);		// Set flags to disarmed
 			}
 
 			// See if cell number or min_volts has changed

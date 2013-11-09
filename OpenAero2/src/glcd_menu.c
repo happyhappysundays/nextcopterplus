@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.3b01";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.3b01.1";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -154,7 +154,7 @@ const char RCMenuItem13[] PROGMEM = "Satellite";
 //
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
-const char GeneralText0[]  PROGMEM = "Contrast:";
+const char Contrast[]  PROGMEM = "Contrast:";
 const char GeneralText1[]  PROGMEM = "Status time:";
 const char GeneralText2[]  PROGMEM = "LMA time:";
 const char MainMenuItem6[]  PROGMEM = "Camstab.";
@@ -163,7 +163,7 @@ const char GeneralText10[] PROGMEM =  "Cam. center:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char IMU0[] PROGMEM = "Adv. IMU:";
-const char AutoMenuItem2[]  PROGMEM = "Launch delay:";
+const char AutoMenuItem2[]  PROGMEM = "Arming:";
 const char AutoMenuItem16[] PROGMEM = "THR.pos %:"; 
 const char AutoMenuItem19[]  PROGMEM = "Delay time:";
 const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-term in Axis-lock mode
@@ -211,6 +211,8 @@ const char ErrorText5[] PROGMEM = "Error";
 const char ErrorText6[] PROGMEM = "Lost";
 const char ErrorText7[] PROGMEM = "Model";
 const char Status3[] 	PROGMEM = "Battery";
+const char Disarmed[]	PROGMEM = "Disarmed";
+
 //
 const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
@@ -221,7 +223,9 @@ const char WizardText1[] PROGMEM = "Hold as shown";
 const char WizardText2[] PROGMEM = "Done!";
 //
 const char Status0[] PROGMEM = "Press";						// Idle text
-const char Status2[] PROGMEM = "for status";
+const char Status2[] PROGMEM = "for status.";
+const char Status4[] PROGMEM = "(Armed)";
+const char Status5[] PROGMEM = "(Disarmed)";
 //
 const char MOUT1[] PROGMEM = "OUT1";						// Outputs
 const char MOUT2[] PROGMEM = "OUT2";	
@@ -266,9 +270,9 @@ const char *text_menu[] PROGMEM =
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17 Menu frame text
 		MenuFrame6, MenuFrame7, MenuFrame8, 
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0,														// 18 to 21
+		Disarmed, Dummy0, Dummy0, Dummy0,													// 18 to 21
 		//
-		RXMode4, RXMode5, MainMenuItem6, Transition,											// 22 to 25 Mix presets for Aero, F.Wing, Camstab, Transition
+		RXMode4, RXMode5, MainMenuItem6, Transition,										// 22 to 25 Mix presets for Aero, F.Wing, Camstab, Transition
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
@@ -336,7 +340,7 @@ const char *text_menu[] PROGMEM =
 		//
 		WizardText0,WizardText1,WizardText2,												// 135 to 137
 		//
-		Dummy0,Dummy0,Dummy0,																// 138 to 140
+		Status4,Status5,Dummy0,																// 138 to 140
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
@@ -351,13 +355,15 @@ const char *text_menu[] PROGMEM =
 		//
 		StatusText1, AutoMenuItem16, ChannelRef2, ChannelRef1, ChannelRef3,					// 164 to 168 Failsafe
 		//
-		StatusText1, MixerMenuItem0, GeneralText0, GeneralText1,							// 169 to 183 general
+		StatusText1, MixerMenuItem0, Contrast, GeneralText1,								// 169 to 181 general
 		GeneralText2,MainMenuItem6, GeneralText3, 
 		GeneralText10,
-		GeneralText6,GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
-		AutoMenuItem2, AutoMenuItem16, AutoMenuItem19, GeneralText11,	
+		GeneralText6, GeneralText7, IMU0,													// Don't forget to change the CONTRAST define in menu_driver.c
+		AutoMenuItem2, GeneralText11,	
 		//
-		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 184 to 188 Battery menu
+		BattMenuItem0, BattMenuItem1, BattMenuItem2, BattMenuItem3, BattMenuItem4, 			// 182 to 186 Battery menu
+		//
+		Dummy0,Dummy0,
 		//
 		StabMenuItem13, AutoMenuItem10, AutoMenuItem9,										// 189 to 210 Flight menu
 		GyroType1, AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,	// Roll gyro
@@ -402,7 +408,20 @@ void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y)
 void idle_screen(void)
 {
 	clear_buffer(buffer);
-	LCD_Display_Text(121,(prog_uchar*)Verdana14,40,12); // "Press"
-	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,32); // "for status"
+
+	// Change Status screen depending on arm mode
+	if ((General_error & (1 << DISARMED)) != 0) // Disarmed
+	{
+		LCD_Display_Text(121,(prog_uchar*)Verdana14,40,3); 	// "Press"
+		LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
+		LCD_Display_Text(139,(prog_uchar*)Verdana14,20,43); // "(Disarmed)"
+	}
+	else
+	{
+		LCD_Display_Text(121,(prog_uchar*)Verdana14,40,3); 	// "Press"
+		LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
+		LCD_Display_Text(138,(prog_uchar*)Verdana14,30,43); // "Armed"
+	}
+	
 	write_buffer(buffer);
 };

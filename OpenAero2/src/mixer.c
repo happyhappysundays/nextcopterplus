@@ -647,7 +647,7 @@ void UpdateLimits(void)
 	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Profilelimit);
 	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Profilelimit);
 	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Profilelimit);
-	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
+//	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
 
 	// Update I_term limits
 	for (i = 0; i < 3; i++)

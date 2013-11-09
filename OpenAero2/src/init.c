@@ -220,6 +220,12 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
+	// Disarm on start-up if Armed setting is ON
+	if (Config.ArmMode == ON)
+	{
+		General_error |= (1 << DISARMED); 	// Set disarmed bit
+	}
+
 	// Check to see that throttle is low if in CPPM mode if RC detected
 	// Don't bother if in CamStab mode
 	_delay_ms(100);
