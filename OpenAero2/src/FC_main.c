@@ -216,6 +216,7 @@
 //			Removed output switcher and added per-output offset.
 //			Added the ability to mix any RC source into the outputs.
 // Beta 1.1 Added arming
+// Beta 1.2	Reversed arming and reduced the stick extremes required.
 //
 //***********************************************************
 //* To do
@@ -275,7 +276,7 @@
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define ARM_TIMER_RESET 1000		// RC position to reset timer
+#define ARM_TIMER_RESET 900			// RC position to reset timer
 #define TRANSITION_TIMER 1953		// Transition timer units (100ms * 16) (1 to 5 = 1.6s to 8s)
 #define ARM_TIMER 97655				// Amount of time the sticks must be held to trigger arm/disarm. Currently five seconds.
 
@@ -578,8 +579,8 @@ int main(void)
 			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER/SECOND_TIMER seconds
 			if (Arm_timer > ARM_TIMER)
 			{
-				// If aileron is at max, arm the FC
-				if (RCinputs[AILERON] > ARM_TIMER_RESET)
+				// If aileron is at min, arm the FC
+				if (RCinputs[AILERON] < ARM_TIMER_RESET)
 				{
 					Arm_timer = 0;
 					General_error &= ~(1 << DISARMED);		// Set flags to armed
