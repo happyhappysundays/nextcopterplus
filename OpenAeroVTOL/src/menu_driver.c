@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "..\inc\mixer.h"
 
-#define CONTRAST 171 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 161 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -167,7 +167,6 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 {
 	mugui_size16_t size;
 	int16_t temp16;
-	int8_t i;
 	int16_t value = (int8_t)*values;
 	uint8_t display_update = 0;
 	uint8_t servo_update = 0;
@@ -184,23 +183,6 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 	else mult = 1;
 
 	button = NONE;
-
-	// Reset servo to neutral unless it is for the throttle channel in CPPM mode
-	if (servo_enable && !((Config.Channel[servo_number].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE)))
-	{
-		temp16 = Config.Limits[servo_number].trim;
-		temp16 = ((temp16 << 2) / 10); 		// Span back to what the output wants
-
-		// Give servos time to settle
-		for (i = 0; i < 25; i++)
-		{
-			cli();
-			output_servo_ppm_asm3(servo_number, temp16);
-			sei();
-
-			_delay_ms(10);
-		}
-	}
 
 	// This is a loop that cycles until Button 4 is pressed (Save)
 	// The GLCD updating slows servo updates down too much so only update the GLCD periodically
@@ -334,7 +316,9 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		}
 
 		// Set servo position if required and update every 4 * 5ms = 20ms
-		if ((servo_enable) && (servo_update >= 4))
+		// Ignore if the output is marked as a motor
+		if (((servo_enable) && (servo_update >= 4)) &&
+			((Config.Channel[servo_number].P1_sensors & (1 << MotorMarker)) == 0))
 		{
 			servo_update = 0;
 

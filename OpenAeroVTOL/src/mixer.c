@@ -29,191 +29,332 @@ void UpdateLimits(void);
 void get_preset_mix (const channel_t*);
 int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
-
-//************************************************************
-// Mix tables (both RC inputs and servo/ESC outputs)
-//************************************************************
-
-// Aeroplane mixer defaults
-const channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	// Rudder -= Yaw; (normal)
-	// Aileron -= Roll; (normal)
-	// Elevator += Pitch; (normal)
-
-	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
-	// switcher, source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
-
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
-
-}; 
-
-const channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM = 
-{
-	// Rudder -= Yaw (normal)
-	// L.Elevon + Roll (reversed) - Pitch (normal)
-	// R.Elevon + Roll (reversed) + Pitch (reversed)
-
-	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
-	// switcher, source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
-
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Raw stabilised aileron)
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Raw stabilised elevator)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,OUT4,50,OUT5,50,UNUSED,0},		// ServoOut6 (Left elevon)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,OUT4,-50,OUT5,50,UNUSED,0},		// ServoOut7 (Right elevon)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
-}; 
-
-const channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
-{
- 	// For non-controlled, use
-	// M2 Pitch (Tilt) + Pitch gyro;
- 	// M3 Yaw	(Pan) + Yaw;
- 	// M4 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
-
- 	// For controlled axis, use
-	// M6 Pitch (Tilt) + Pitch gyro;
- 	// M7 Yaw	(Pan) + Yaw;
- 	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
-
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Pitch axis)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,NOCHAN,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
-
-};
+int16_t scale_percent_nooffset(int8_t value);
 
 //************************************************************
 
 void ProcessMixer(void)
 {
-	static	int16_t flap = 0;
-	static	int16_t slowFlaps = 0;
-	static	uint8_t flapskip;
-	static	int16_t roll = 0;
-	static	int16_t	old_z = 0;
+	static	int16_t	old_z = 0; // Historical Z-axis acc value
 
-	uint8_t i, outputs;
-	int8_t	speed;
+	uint8_t i;
+	uint8_t j;
+	int16_t P1_solution = 0;
+	int16_t P2_solution = 0;
+
 	int16_t temp1 = 0;
 	int16_t temp2 = 0;
 	int16_t	temp3 = 0;
-	bool	TwoAilerons = false;
-	bool	FlapLock = false;
+	int16_t	transition = 0;
+	int16_t	Step1 = 0;
+	int16_t	Step2 = 0;
+	int16_t	rolltrim = 0;
+	int16_t	pitchtrim = 0;
 
 	//************************************************************
-	// Limit output mixing as needed to save processing power
+	// Main mix loop
 	//************************************************************
 
-	if (Config.CamStab == ON)
+	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		outputs = MIN_OUTPUTS;		// 4 Channels
-	}
-	else
-	{
-		outputs = PSUEDO_OUTPUTS;	// 12 Channels
-	}
+		//************************************************************
+		// Zero each channel value to start
+		//************************************************************
+
+		P1_solution = 0;
+		P2_solution = 0;
+
+		//************************************************************
+		// Mix in gyros
+		//************************************************************ 
+
+		if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) // P1
+		{
+			P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+		}
+		if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
+		{
+			P1_solution = P1_solution + PID_Gyros[P1][PITCH];
+		}
+		if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
+		{
+			P1_solution = P1_solution - PID_Gyros[P1][YAW];
+		}
+
+		if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) // P2
+		{
+			P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+		}
+		if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
+		{
+			P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+		}
+		if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
+		{
+			P2_solution = P2_solution - PID_Gyros[P2][YAW];
+		}
+
+
+		//************************************************************
+		// Autolevel trims
+		//************************************************************
+	
+		rolltrim = (Config.FlightMode[2].AccRollZeroTrim << 2); // Roll trim
+		pitchtrim = (Config.FlightMode[2].AccPitchZeroTrim << 2);// Pitch trim
+
+		//************************************************************
+		// Mix in accelerometers
+		//************************************************************ 
+
+		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) // P1
+		{
+			P1_solution += rolltrim;
+			P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+		}
+		if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
+		{
+			P1_solution += pitchtrim;
+			P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+		}
+
+		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) // P2
+		{
+			P1_solution += rolltrim;
+			P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+		}
+		if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
+		{
+			P1_solution += pitchtrim;
+			P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+		}
+
+		//************************************************************
+		// Process mixers
+		//************************************************************ 
+
+		// Mix in other outputs here (P1)
+		if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
+		{
+			// Is the source an RC input?
+			if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
+			{
+				// Yes, calculate RC channel number from source number and return RC value
+				temp2 = RCinputs[Config.Channel[i].P1_source_a - MAX_OUTPUTS];
+			}
+			else
+			{
+				// No, just use the selected output's old data
+				temp2 = Config.Channel[Config.Channel[i].P1_source_a].P1_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P1_source_a_volume);
+			P1_solution = P1_solution + temp2;
+		}
+		if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
+		{
+			if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P1_source_b - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P1_source_b].P1_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P1_source_b_volume);
+			P1_solution = P1_solution + temp2;
+		}
+		if ((Config.Channel[i].P1_source_c_volume !=0) && (Config.Channel[i].P1_source_c != NOMIX)) // Mix in third extra source
+		{
+			if (Config.Channel[i].P1_source_c > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P1_source_c - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P1_source_c].P1_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P1_source_c_volume);
+			P1_solution = P1_solution + temp2;
+		}
+		if ((Config.Channel[i].P1_source_d_volume !=0) && (Config.Channel[i].P1_source_d != NOMIX)) // Mix in fourth extra source
+		{
+			if (Config.Channel[i].P1_source_d > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P1_source_d - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P1_source_d].P1_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P1_source_d_volume);
+			P1_solution = P1_solution + temp2;
+		}
+	
+		// Mix in other outputs here (P2)
+		if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
+		{
+			if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P2_source_a - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P2_source_a].P2_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P2_source_a_volume);
+			P2_solution = P2_solution + temp2;
+		}
+		if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
+		{
+			if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P2_source_b - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P2_source_b].P2_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P2_source_b_volume);
+			P2_solution = P2_solution + temp2;
+		}
+		if ((Config.Channel[i].P2_source_c_volume !=0) && (Config.Channel[i].P2_source_c != NOMIX)) // Mix in third extra source
+		{
+			if (Config.Channel[i].P2_source_c > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P2_source_c - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P2_source_c].P2_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P2_source_c_volume);
+			P2_solution = P2_solution + temp2;
+		}
+		if ((Config.Channel[i].P2_source_d_volume !=0) && (Config.Channel[i].P2_source_d != NOMIX)) // Mix in fourth extra source
+		{
+			if (Config.Channel[i].P2_source_d > (MAX_OUTPUTS - 1))
+			{
+				temp2 = RCinputs[Config.Channel[i].P2_source_d - MAX_OUTPUTS];
+			}
+			else
+			{
+				temp2 = Config.Channel[Config.Channel[i].P2_source_d].P2_value;
+			}
+
+			temp2 = scale32(temp2, Config.Channel[i].P2_source_d_volume);
+			P2_solution = P2_solution + temp2;
+		}
+				
+		// Save solution for this channel. Note that this contains cross-mixed data from the *last* cycle
+		Config.Channel[i].P1_value = P1_solution;
+		Config.Channel[i].P2_value = P2_solution;
+
+	} // Mixer loop: for (i = 0; i < MAX_OUTPUTS; i++)
 
 	//************************************************************
-	// Zero all channel values to start
-	//************************************************************
-
-	for (i = 0; i < outputs; i++)
-	{
-		Config.Channel[i].value = 0;
-	}
-
-	//************************************************************
-	// Un-mix flaps from flaperons as required
+	// Mixer transition code
 	//************************************************************ 
 
-	if (Config.FlapChan != NOCHAN)
+	// Convert number to percentage
+	if (Config.TransitionSpeed == 0) 
 	{
-		// Update flap only if ailerons are within measureable positions
-		if ((RCinputs[AILERON] > -1200) && 
-			(RCinputs[AILERON] < 1200) &&
-			(RCinputs[Config.FlapChan] > -1200) && 
-			(RCinputs[Config.FlapChan] < 1200))
-		{
-			flap = RCinputs[AILERON] - RCinputs[Config.FlapChan]; 	
-			flap = flap >> 1; 	
-			FlapLock = false;
-		}
-		else
-		{
-			FlapLock = true;
-		}
+		// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
+		// Trim that value down to +/-50 for just over +/-1000
+		transition  = (transition_value_16 >> 1); // 62/2 = 31+
+		transition += (transition_value_16 >> 3); // 62/4 = 15+
+		transition += (transition_value_16 >> 3); // 62/16 = 3 = 49
+
+		// Limit extent of transition value
+		if (transition < -50) transition = -50;
+		if (transition > 50) transition = 50;
+		transition += 50;
 	}
-	else
+	else 
 	{
-		flap = 0;
+		transition = transition_counter;
 	}
 
-	//************************************************************
-	// Un-mix ailerons from flaperons as required in all modes
-	//************************************************************
-
-	// If in AEROPLANE mixer mode and flaperons set up
-	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
+	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Remove flap signal from flaperons, leaving ailerons only
-		roll = RCinputs[AILERON] + RCinputs[Config.FlapChan];
+		// Get source channel value
+		temp1 = Config.Channel[i].P1_value;
+		temp1 = scale32(temp1, (100 - transition));
 
-		// Otherwise throw is 50% of both signals
-		RCinputs[AILERON] = roll >> 1;
+		// Get destination channel value
+		temp2 = Config.Channel[i].P2_value;
+		temp2 = scale32(temp2, transition);
+
+		// Sum the mixers
+		temp1 = temp1 + temp2;
+
+		// Save transitioned solution into P1
+		Config.Channel[i].P1_value = temp1;
+	} 
+
+	//************************************************************
+	// Per-channel 3-point offset needs to be post transition loop 
+	// as it is non-linear
+	//************************************************************ 
+
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		// Work out distance to cover over stage 1 (P1 to P1.n)
+		temp1 = Config.Channel[i].P1n_offset - Config.Channel[i].P1_offset;
+		temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable setp values
+
+		// Divide distance into steps
+		temp2 = Config.Channel[i].P1n_position; 
+		Step1 = temp1 / temp2;
 		
-		// Copy to second aileron channel
-		RCinputs[Config.FlapChan] = RCinputs[AILERON];
-	}
+		// Work out distance to cover over stage 2 (P1.n to P2)
+		temp2 = Config.Channel[i].P2_offset - Config.Channel[i].P1n_offset;
+		temp2 = temp2 << 7;
 
-	//************************************************************
-	// Process RC mixing and source volume calculation
-	//************************************************************
+		// Divide distance into steps
+		temp1 = (100 - Config.Channel[i].P1n_position); 
+		Step2 = temp2 / temp1; 	
 
-	for (i = 0; i < outputs; i++)
-	{
-		// Get requested volume of Source A
-		temp1 = RCinputs[Config.Channel[i].source_a];
-		temp1 = scale32(temp1, Config.Channel[i].source_a_volume);
+		// Set start (P1) point
+		temp3 = Config.Channel[i].P1_offset; // Promote to 16bits
+		temp3 = temp3 << 7;
 
-		// Skip Source B if no RC mixing required for this channel
-		if (Config.Channel[i].source_b_volume != 0)
+		// Count up transition steps of the appropriate step size
+		for (j = 0; j < transition; j++)
 		{
-			temp2 = RCinputs[Config.Channel[i].source_b];
-			temp2 = scale32(temp2, Config.Channel[i].source_b_volume);
-
-			// Sum the mixers
-			temp1 = temp1 + temp2;
+			// If in stage 1 use Step1 size
+			if (j < Config.Channel[i].P1n_position)
+			{
+				temp3 += Step1;
+			}
+			// If in stage 2 use Step2 size
+			else
+			{
+				temp3 += Step2;
+			}
 		}
 
-		// Save solution for now
-		Config.Channel[i].value = temp1;
+		// Reformat directly into a system-compatible value (+/-1250)
+		P1_solution = (temp3 >> 4) + (temp3 >> 5); 							// Divide by 128 then * 12 lol
+
+		// Add offset to channel value
+		Config.Channel[i].P1_value += P1_solution;
 	}
 
 	//************************************************************
 	// Add in some height damping if required
+	// Note that it is assumed that P1 is used in hover
 	//************************************************************
 
 	if (Config.Dampen != 0)
 	{
-		// Work change in Z value
-		temp1 = old_z - PID_ACCs[YAW];
+		// Work change in Z value from P1 profile
+		temp1 = old_z - PID_ACCs[P1][YAW];
 		temp1 *= Config.Dampen;
 
 		if (temp1 > MAX_ZGAIN)
@@ -221,394 +362,73 @@ void ProcessMixer(void)
 			temp1 = MAX_ZGAIN;
 		}
 
-		// Add dampening value to throttle values
-		for (i = 0; i < outputs; i++)
+		// Add dampening value to marked motor values
+		for (i = 0; i < MAX_OUTPUTS; i++)
 		{
-			if (Config.Channel[i].source_a == THROTTLE)
+			if 	((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
 			{
-				Config.Channel[i].value += temp1;
+				Config.Channel[i].P1_value += temp1;
 			}
 		}
 
 		// Update old acc value
-		old_z = PID_ACCs[YAW];
+		old_z = PID_ACCs[P1][YAW];
 	}
 
-	//************************************************************
-	// Mix in gyros
-	//************************************************************ 
-
-	// Use PID gyro values
-	if (Flight_flags & (1 << Stability))
-	{
-		for (i = 0; i < outputs; i++)
-		{
-			// Clear RC source if not needed in mix with sensors
-			if (Config.Channel[i].source_mix == ON)
-			{
-				temp1 = Config.Channel[i].value;
-			}
-			else
-			{
-				temp1 = 0;
-			}
-
-			// Mix in gyros
-			if (Config.Channel[i].roll_gyro == ON)
-			{
-				temp1 = temp1 - PID_Gyros[ROLL];
-			}
-			if (Config.Channel[i].pitch_gyro == ON)
-			{
-				temp1 = temp1 + PID_Gyros[PITCH];
-			}
-			if (Config.Channel[i].yaw_gyro == ON)
-			{
-				temp1 = temp1 - PID_Gyros[YAW];
-			}
-
-			// Save solution for now
-			Config.Channel[i].value = temp1;
-		}
-	} // Stability
-
-	//************************************************************
-	// Mix in accelerometers
-	//************************************************************ 
-
-	// Add PID acc values including trim
-	if (Flight_flags & (1 << AutoLevel))
-	{
-		// Offset Autolevel trims in failsafe mode
-		if ((Config.FailsafeType == 1) && (Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
-		{
-			temp1 += Config.FailsafeAileron;
-			temp1 = temp1 << 2;
-			temp2 += Config.FailsafeElevator;
-			temp2 = temp2 << 2;
-		}
-
-		// Add autolevel trims * 4		
-		temp1 += (Config.FlightMode[Config.Flight].AccRollZeroTrim << 2); // Roll trim
-		temp2 += (Config.FlightMode[Config.Flight].AccPitchZeroTrim << 2);// Pitch trim
-
-		// Mix in accelerometers
-		for (i = 0; i < outputs; i++)
-		{
-			// Get solution
-			temp3 = Config.Channel[i].value;
-
-			if (Config.Channel[i].roll_acc == ON)
-			{
-				temp3 = temp3 - PID_ACCs[ROLL] + temp1;
-			}
-
-			if (Config.Channel[i].pitch_acc == ON)
-			{
-				temp3 = temp3 + PID_ACCs[PITCH] + temp2;
-			}
-
-			// Save solution for now
-			Config.Channel[i].value = temp3;
-		}
-	} // Autolevel
-
-	//************************************************************
-	// Process differential if set up and two ailerons used
-	//************************************************************
-
-	if ((Config.FlapChan != NOCHAN) && (Config.Differential != 0))
-	{
-		// Search through outputs for aileron channels
-		for (i = 0; i < outputs; i++)
-		{
-			// Get current channel value
-			temp1 = Config.Channel[i].value;
-
-			// If some kind of aileron channel
-			if ((Config.Channel[i].source_a == AILERON) || (Config.Channel[i].source_a == Config.FlapChan))
-			{
-				// For the second aileron (RHS)
-				if (TwoAilerons)			
-				{
-					// Limit negative-going values
-					if (temp1 < 0)
-					{
-						temp1 = scale32(temp1, (100 - Config.Differential));
-						Config.Channel[i].value = temp1;
-					}
-				}
-
-				// For the first aileron (LHS) 
-				// Limit positive-going values
-				else if (temp1 > 0)			
-				{
-					temp1 = scale32(temp1, (100 - Config.Differential));
-					Config.Channel[i].value = temp1;
-					TwoAilerons = true; // Found an aileron
-				}
-
-				// Else was the normal side of the first aileron
-				else
-				{
-					TwoAilerons = true; // Found an aileron
-				}
-			}
-
-		}
-		// Reset after all outputs done
-		TwoAilerons = false;
-	}
-
-	//************************************************************
-	// Re-mix flaps from flaperons as required
-	//************************************************************ 
-
-	// The flap part of the signal has been removed so we have to reinsert it here.
-	if ((Config.FlapChan != NOCHAN) && (Config.MixMode == AEROPLANE))
-	{
-		// If flapspeed is set to anything other than zero (normal)
-		if (Config.flapspeed) 
-		{
-			// Do flap speed control
-			if (((slowFlaps - flap) >= 1) || ((slowFlaps - flap) <= -1))	// Difference larger than one step, so ok
-			{
-				speed = 5;					// Need to manipulate speed as target approaches									
-			}
-			else
-			{
-				speed = 1;					// Otherwise this will oscillate
-			}
-
-			if ((slowFlaps < flap) && (flapskip == Config.flapspeed))
-			{
-				slowFlaps += speed;
-			} 
-			else if ((slowFlaps > flap) && (flapskip == Config.flapspeed)) 
-			{
-				slowFlaps -= speed;
-			}
-			
-		} 
-		// No speed control requested so copy flaps
-		else
-		{
-		 	slowFlaps = flap;
-		}
-
-		flapskip++;
-		if (flapskip > Config.flapspeed) flapskip = 0;
-
-		for (i = 0; i < outputs; i++)
-		{
-			// Get solution
-			temp1 = Config.Channel[i].value;
-
-			// Restore flaps
-			if (Config.Channel[i].source_a == AILERON)
-			{
-				temp1 += slowFlaps;
-			}
-			if (Config.Channel[i].source_a == Config.FlapChan)
-			{
-				temp1 -= slowFlaps;
-			}
-
-			// Update channel data solution
-			Config.Channel[i].value = temp1;
-		} // Flaps
-	}
-		
-	//************************************************************
-	// Process output mixers
-	//************************************************************ 
-
-	for (i = 0; i < outputs; i++)
-	{
-
-		// Get primary value
-		temp1 = Config.Channel[i].value;
-		
-		// Reverse this channel's primary for the eight physical outputs
-		if ((i <= MAX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
-		{	
-			temp1 = -temp1;
-		}
-
-		// If output mixer switch channel is NOCHAN or
-		// if tied to a channel and that channel is > 0, do mix, otherwise skip.
-		if ((Config.Channel[i].switcher == NOCHAN) ||
-			(RCinputs[Config.Channel[i].switcher] >= 0))
-		{
-			// Mix in other outputs here
-			if ((Config.Channel[i].output_b_volume !=0) && (Config.Channel[i].output_b != UNUSED)) // Mix in first extra output
-			{
-				temp2 = Config.Channel[Config.Channel[i].output_b].value;
-				temp2 = scale32(temp2, Config.Channel[i].output_b_volume);
-				temp1 = temp1 + temp2;
-			}
-			if ((Config.Channel[i].output_c_volume !=0) && (Config.Channel[i].output_c != UNUSED)) // Mix in second extra output
-			{
-				temp2 = Config.Channel[Config.Channel[i].output_c].value;
-				temp2 = scale32(temp2, Config.Channel[i].output_c_volume);
-				temp1 = temp1 + temp2;
-			}
-			if ((Config.Channel[i].output_d_volume !=0) && (Config.Channel[i].output_d != UNUSED)) // Mix in third extra output
-			{
-				temp2 = Config.Channel[Config.Channel[i].output_d].value;
-				temp2 = scale32(temp2, Config.Channel[i].output_d_volume);
-				temp1 = temp1 + temp2;
-			}
-		}
-
-		// Update channel data solution
-		Config.Channel[i].value = temp1;
-	}
-
-	//************************************************************
-	// Mixer transition code
-	//************************************************************ 
-
-	if (Config.MixMode == TRANSITION)
-	{
-		// For the overlapping channels
-		for (i = OUT5; i < PSU9; i++)
-		{
-			// Convert number to percentage
-			if (Config.TransitionSpeed == 0) 
-			{
-				// transition_value_16 is the RCinput / 128 so can range +/- 10
-				temp3 = transition_value_16;
-
-				// Limit extent of transition value
-				if (temp3 < -8) temp3 = -8;
-				if (temp3 > 8) temp3 = 8;
-				temp3 += 8;
-
-			}
-			else 
-			{
-				temp3 = transition_counter;
-			}
-
-			// 0-16 -> 0-100
-			temp3 = ((temp3 << 6) / 10); 
-			if (temp3 > 100) temp3 = 100;
-			if (temp3 < 0) temp3 = 0;
-
-			// Get source channel value
-			temp1 = Config.Channel[i].value;
-			temp1 = scale32(temp1, (100 - temp3));
-
-			// Get destination channel value
-			temp2 = Config.Channel[i+4].value;
-			temp2 = scale32(temp2, temp3);
-
-			// Sum the mixers
-			temp1 = temp1 + temp2;
-
-			// Save transitioned solution
-			Config.Channel[i].value = temp1;
-		} 
-	}
-
-	//************************************************************
-	// Add offset value to restore to system compatible value
-	//************************************************************ 
-
-	for (i = 0; i < MAX_OUTPUTS; i++)
-	{
-		Config.Channel[i].value += Config.Limits[i].trim;
-	}
-
-	//************************************************************
-	// Handle Failsafe condition
-	//************************************************************ 
-
-	if ((Flight_flags & (1 << Failsafe)) && (Config.CamStab == OFF))
-	{
-		// Simple failsafe. Replace outputs with user-set values
-		if (Config.FailsafeType == SIMPLE) 
-		{
-			for (i = 0; i < MAX_OUTPUTS; i++)
-			{
-				Config.Channel[i].value = Config.Limits[i].failsafe;
-			}
-		}
-
-		// Advanced failsafe. Autolevel ON, use failsafe trims to adjust autolevel.
-		if (Config.FailsafeType == ADVANCED)
-		{
-			for (i = 0; i < MAX_OUTPUTS; i++)
-			{
-				// Over-ride throttle if in CPPM mode
-				if ((Config.Channel[i].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE))
-				{
-					// Convert throttle setting to servo value
-					Config.Channel[i].value = scale_percent(Config.FailsafeThrottle);				
-				}
-
-				// Tweak rudder channel						
-				if (Config.Channel[i].source_a == RUDDER)
-				{
-					temp1 = Config.FailsafeRudder;
-					temp1 = temp1 << 4;
-					Config.Channel[i].value += temp1;
-				}
-			}
-		}
-	} // Failsafe
-}
-
-
-// Get preset mix from Program memory
-void get_preset_mix(const channel_t* preset)
-{
-	// Clear all channels first
-	memset(&Config.Channel[0].value,0,(sizeof(channel_t) * PSUEDO_OUTPUTS));
-	memcpy_P(&Config.Channel[0].value,&preset[0].value,(sizeof(channel_t) * MAX_OUTPUTS));
-}
+} // ProcessMixer()
 
 // Update actual limits value with that from the mix setting percentages
 // This is only done at start-up and whenever the values are changed
 void UpdateLimits(void)
 {
-	uint8_t i;
-	int8_t temp8[3] = {Config.FlightMode[Config.Flight].Roll_limit, Config.FlightMode[Config.Flight].Pitch_limit, Config.FlightMode[Config.Flight].Yaw_limit};
+	uint8_t i,j;
 	int32_t temp32, gain32;
-	int8_t gains[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
+
+	int8_t temp8[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].Roll_limit, Config.FlightMode[P1].Pitch_limit, Config.FlightMode[P1].Yaw_limit},
+			{Config.FlightMode[P2].Roll_limit, Config.FlightMode[P2].Pitch_limit, Config.FlightMode[P2].Yaw_limit}
+		};
+
+	int8_t gains[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult},
+			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult}
+		};
 
 	// Update triggers
-	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Profilelimit);
-	Config.Autotrigger2 = scale_percent(Config.FlightMode[1].Profilelimit);
-	Config.Autotrigger3 = scale_percent(Config.FlightMode[2].Profilelimit);
-	Config.Launchtrigger = scale_percent(Config.LaunchThrPos);
+	Config.Autotrigger1 = scale_percent(Config.FlightMode[P1].Profilelimit);
+	Config.Autotrigger2 = scale_percent(Config.FlightMode[P2].Profilelimit);
+	Config.PowerTriggerActual = Config.PowerTrigger * 10;
 
-	// Update I_term limits
-	for (i = 0; i < 3; i++)
+	// Update I_term input constraints for all profiles
+	for (j = 0; j < FLIGHT_MODES; j++)
 	{
-		temp32 	= temp8[i]; 						// Promote
-
-		// I-term output (throw)
-		// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
-		Config.Raw_I_Limits[i] = temp32 * (int32_t)640;	// 125% * 640 = 80,000
-
-		// I-term source limits. These have to be different due to the I-term gain setting
-		// For a gain of 32 and 125%, Constrain = 80,000
-		// For a gain of 100 and 125%, Constrain = 32,768
-		// For a gain of 10 and 25%, Constrain = 51,200
-		// For a gain of 1 and 100%, Constrain = 2,048,000
-		// For a gain of 127 and 125%, Constrain = 20,157
-		if (gains[i] != 0)
+		for (i = 0; i < NUMBEROFAXIS; i++)
 		{
-			gain32 = (int32_t)gains[i];
-			gain32 = gain32 << 7;				// Multiply divisor by 128
-			Config.Raw_I_Constrain[i] = Config.Raw_I_Limits[i] / (gain32 / (int32_t)32);
-			Config.Raw_I_Constrain[i] = Config.Raw_I_Constrain[i] << 7; // Restore by multiplying total by 128
-		}
-		else 
-		{
-			Config.Raw_I_Constrain[i] = 0;
+			temp32 	= temp8[j][i]; 						// Promote
+
+			// I-term output (throw)
+			// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
+			Config.Raw_I_Limits[j][i] = temp32 * (int32_t)640;	// 125% * 640 = 80,000
+
+			// I-term source limits. These have to be different due to the I-term gain setting
+			// For a gain of 32 and 125%, Constrain = 80,000
+			// For a gain of 100 and 125%, Constrain = 32,768
+			// For a gain of 10 and 25%, Constrain = 51,200
+			// For a gain of 1 and 100%, Constrain = 2,048,000
+			// For a gain of 127 and 125%, Constrain = 20,157
+			if (gains[j][i] != 0)
+			{
+				gain32 = (int32_t)gains[j][i];
+				gain32 = gain32 << 7;				// Multiply divisor by 128
+				Config.Raw_I_Constrain[j][i] = Config.Raw_I_Limits[j][i] / (gain32 / (int32_t)32);
+				Config.Raw_I_Constrain[j][i] = Config.Raw_I_Constrain[j][i] << 7; // Restore by multiplying total by 128
+			}
+			else 
+			{
+				Config.Raw_I_Constrain[j][i] = 0;
+			}
 		}
 	}
 
@@ -617,8 +437,6 @@ void UpdateLimits(void)
 	{
 		Config.Limits[i].minimum = scale_percent(Config.min_travel[i]);
 		Config.Limits[i].maximum = scale_percent(Config.max_travel[i]);
-		Config.Limits[i].failsafe = scale_percent(Config.Failsafe[i]);
-		Config.Limits[i].trim = scale_percent(Config.Offset[i]);
 	}
 
 	// Update dynamic gain divisor
@@ -632,31 +450,47 @@ void UpdateLimits(void)
 	}
 
 	// Update RC deadband amount
-	 Config.DeadbandLimit = (Config.Deadband * 12); // 0 to 5% scaled to 0 to 60
+	Config.DeadbandLimit = (Config.Deadband * 12); // 0 to 5% scaled to 0 to 60
 
 	// Update Hands-free trigger based on deadband setting
 	Config.HandsFreetrigger = Config.DeadbandLimit;
 }
 
-// Update servos from the mixer Config.Channel[i].value data and enforce travel limits
+// Update servos from the mixer Config.Channel[i].value data, add offsets and enforce travel limits
 void UpdateServos(void)
 {
 	uint8_t i;
+	int16_t temp1 = 0; // Output value
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		if (Config.Channel[i].value > Config.Limits[i].maximum)
+		// Servo reverse and trim for the eight physical outputs
+		temp1 = Config.Channel[i].P1_value;
+
+		// Reverse this channel for the eight physical outputs
+		if ((i <= MAX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
+		{	
+			temp1 = -temp1;
+		}
+
+		// Add offset value to restore to system compatible value
+//		temp1 += Config.Limits[i].trim;
+		temp1 += 3750;
+
+		// Enforce min, max travel limits
+		if (temp1 > Config.Limits[i].maximum)
 		{
 			ServoOut[i] = Config.Limits[i].maximum;
 		}
 
-		else if (Config.Channel[i].value < Config.Limits[i].minimum)
+		else if (temp1 < Config.Limits[i].minimum)
 		{
 			ServoOut[i] = Config.Limits[i].minimum;
 		}
+		// Transfer value to servo
 		else
 		{
-			ServoOut[i] = Config.Channel[i].value;
+			ServoOut[i] = temp1;
 		}
 	}
 }
@@ -713,3 +547,14 @@ int16_t scale_percent(int8_t value)
 	return temp16_2;
 }
 
+
+// Scale percentages to relative position
+int16_t scale_percent_nooffset(int8_t value)
+{
+	int16_t temp16_1, temp16_2;
+
+	temp16_1 = value; // Promote
+	temp16_2 = (temp16_1 * (int16_t)12);
+
+	return temp16_2;
+}

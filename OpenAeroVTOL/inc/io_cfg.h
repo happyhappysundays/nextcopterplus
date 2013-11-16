@@ -111,33 +111,34 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 // Enumeration
 //***********************************************************
+
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
-enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB, TRANSITION};
+enum MIX_Modes		{TRANSITION = 0};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, CH9, CH10, CH11, CH12, UNUSED};
-enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, PSU9, PSU10, PSU11, PSU12};
+enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
 enum SwitchModes	{DISABLED = 0, ALWAYSON, HANDSFREE};
 enum Availability	{OFF = 0, ON, REV};
-enum BatteryType	{LIPO = 0, NIMH};
 enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
-enum Gyro_type		{RATE = 0, LOCK};
-enum Failsafes		{SIMPLE = 0, ADVANCED};
 enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_start, TRANS_1};
+//					OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NONE
+enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, SRC13, SRC14, SRC15, SRC16, NOMIX};
+enum Profiles		{P1 = 0, P2};
 
 //***********************************************************
 // Flags
 //***********************************************************
 
-enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL};
-enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block, Model_lost};
+enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, DISARMED};
+enum FlightFlags	{RxActivity = 0, HandsFree, Model_lost};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
 enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
-
+enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, MotorMarker};
 
 #endif //IO_CFG_H

@@ -12,6 +12,7 @@
 #include "..\inc\io_cfg.h"
 #include "..\inc\main.h"
 #include "..\inc\isr.h"
+#include "..\inc\rc.h"
 
 //************************************************************
 // Prototypes
@@ -19,6 +20,12 @@
 
 void output_servo_ppm(void);
 void output_servo_ppm_asm(volatile uint16_t	*ServoOut);
+
+//***********************************************************
+//* Defines
+//***********************************************************
+
+#define	MOTORMIN 1000
 
 //************************************************************
 // Code
@@ -29,7 +36,10 @@ volatile uint16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
 void output_servo_ppm(void)
 {
 	uint32_t temp;
-	uint8_t i;
+	uint8_t i, stop;
+
+	// Clear motor stop flag;
+	stop = 0;
 
 	// Scale servo from 2500~5000 to 1000~2000
 	for (i = 0; i < MAX_OUTPUTS; i++)
@@ -39,15 +49,37 @@ void output_servo_ppm(void)
 		ServoOut[i] = (uint16_t)temp;
 	}
 
-	// Suppress outputs during throttle high error
-	if((General_error & (1 << THROTTLE_HIGH)) == 0)
+	// Re-sample throttle value
+	RCinputs[THROTTLE] = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
+
+	// Check for motor flags if throttle is below arming minimum
+	// and set all motors to minimum throttle if so
+	if (RCinputs[THROTTLE] < -960)
+	{
+		// For each output
+		for (i = 0; i < MAX_OUTPUTS; i++)
+		{
+			// Check for motor marker
+			if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
+			{
+				// Set output to minimum pulse width
+				ServoOut[i] = MOTORMIN;
+			}
+		}
+	}
+
+	// Suppress outputs during throttle high error or when disarmed,
+	// or when at min throttle AND marked as a motor output
+	if( (General_error & (1 << THROTTLE_HIGH)) ||
+		(General_error & (1 << DISARMED))
+		== 0)
 	{
 		// Create the output pulses if in sync with RC inputs
 		if (RC_Lock) 
 		{
 			output_servo_ppm_asm(&ServoOut[0]);
 		}
-		else if ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
+		else // Unsynchronised so need to disable interrupts
 		{
 			cli();
 			output_servo_ppm_asm(&ServoOut[0]);

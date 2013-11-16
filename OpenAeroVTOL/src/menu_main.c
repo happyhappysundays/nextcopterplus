@@ -30,12 +30,14 @@ void do_main_menu_item(uint8_t menuitem);
 // Defines
 //************************************************************
 
-#define MAINITEMS 18	// Number of menu items
+#define MAINITEMS 19	// Number of menu items
 #define MAINSTART 77	// Start of Menu text items
 
 //************************************************************
 // Main menu-specific setup
 //************************************************************
+
+uint8_t menu_flag;
 
 void menu_main(void)
 {
@@ -75,11 +77,13 @@ void menu_main(void)
 		update_menu(MAINITEMS, MAINSTART, 0, button, &main_cursor, &main_top, &main_temp);
 
 		// If main menu item has changed, reset submenu positions
+		// and flag to submenus that positions need to be reset
 		if (main_temp != old_menu)
 		{
 			cursor = LINE0;
 			menu_temp = 0;
 			old_menu = main_temp;
+			menu_flag = 1;
 		}
 
 		// If ENTER pressed, jump to menu 
@@ -98,7 +102,7 @@ void do_main_menu_item(uint8_t menuitem)
 	switch(menuitem) 
 	{
 		case MAINSTART:
-			menu_rc_setup(3); 		// 1.General
+			menu_rc_setup(2); 		// 1.General
 			break;
 		case MAINSTART+1:
 			menu_rc_setup(1); 		// 2.RX setup	
@@ -110,46 +114,49 @@ void do_main_menu_item(uint8_t menuitem)
 			Display_rcinput();		// 4.RX inputs
 			break;
 		case MAINSTART+4:
-			menu_flight(1);			// 5.Flight profile 1
+			menu_flight(0);			// 5.Flight profile 1
 			break;
 		case MAINSTART+5:
-			menu_flight(2); 		// 6.Flight profile 2
+			menu_flight(1); 		// 6.Flight profile 2
 			break;
 		case MAINSTART+6:
-			menu_flight(3); 		// 7.Flight profile 3
+			Display_sensors();		// 7.Sensor calibration
 			break;
 		case MAINSTART+7:
-			Display_sensors();		// 8.Sensor calibration
+			Display_balance();		// 8.Level meter
 			break;
 		case MAINSTART+8:
-			Display_balance();		// 9.Level meter
+			menu_mixer(0);			// 9.OUT1 Mixer
 			break;
 		case MAINSTART+9:
-			menu_mixer(1);			// 10.Channel mixing
+			menu_mixer(1);			// 10.OUT2 Mixer
 			break;
 		case MAINSTART+10:
-			menu_mixer(2);			// 11.Output mixing
+			menu_mixer(2);			// 11.OUT3 Mixer
 			break;
 		case MAINSTART+11:
-			menu_servo_setup(1);	// 12.Servo direction
+			menu_mixer(3);			// 12.OUT4 Mixer
 			break;
-		case MAINSTART+12: 
-			menu_servo_setup(2); 	// 13.Servo trim (%)
+		case MAINSTART+12:
+			menu_mixer(4);			// 13.OUT5 Mixer
 			break;
 		case MAINSTART+13:
-			menu_servo_setup(3); 	// 14.Neg. Servo trvl. (%)
+			menu_mixer(5);			// 14.OUT6 Mixer
 			break;
 		case MAINSTART+14:
-			menu_servo_setup(4); 	// 15.Pos. Servo trvl. (%)
+			menu_mixer(6);			// 15.OUT7 Mixer
 			break;
 		case MAINSTART+15:
-			menu_rc_setup(2); 		// 16.Failsafe settings
+			menu_mixer(7);			// 16.OUT8 Mixer
 			break;
 		case MAINSTART+16:
-			menu_servo_setup(5); 	// 17.Failsafe positions
+			menu_servo_setup(1);	// 17.Servo direction
 			break;
 		case MAINSTART+17:
-			menu_rc_setup(4); 		// 18.Battery monitor
+			menu_servo_setup(2); 	// 19.Neg. Servo trvl. (%)
+			break;
+		case MAINSTART+18:
+			menu_servo_setup(3); 	// 20.Pos. Servo trvl. (%)
 			break;
 		default:
 			break;

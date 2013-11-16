@@ -9,14 +9,14 @@
  * Type definitions
  ********************************************************************/
 
-#define INPUT 	0
-#define OUTPUT 	1
 #define MAX_RC_SOURCES 9				// Maximum input channels including non-RX channels
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
-#define PSUEDO_OUTPUTS 12				// Total number of mixer channels
+#define PSUEDO_OUTPUTS 16				// Total number of mixer channels
 #define MAX_OUTPUTS 8					// Maximum output channels
-#define MIN_OUTPUTS 4					// Minimum output channels
 #define MAX_ZGAIN 200					// Maximum amount of Z-based height dampening
+
+#define	FLIGHT_MODES 2
+#define NUMBEROFAXIS 3
 
 typedef struct
 {
@@ -28,35 +28,39 @@ typedef struct
 {
 	int16_t	minimum;
 	int16_t	maximum;
-	int16_t	failsafe;
-	int16_t	trim;
 } servo_limits_t;
 
 // Channel mixer definition
 typedef struct
 {
-	int16_t		value;					// Current value of this channel
+	int16_t		P1_value;				// Current value of this channel at P1
+	int16_t		P2_value;				// Current value of this channel at P2
 
-	// Input mix menu (10)
-	int8_t		source_a;				// Source A RC input for calculation
-	int8_t		source_a_volume;		// Percentage of source to pass on
-	int8_t		source_b;				// Optional source B RC input for calculation
-	int8_t		source_b_volume;		// Percentage of source to pass on
-	int8_t		source_mix;				// Source RC included in stabilised modes
-	int8_t		roll_gyro;				// Use roll gyro
-	int8_t		pitch_gyro;				// Use pitch gyro
-	int8_t		yaw_gyro;				// Use yaw gyro
-	int8_t		roll_acc;				// Use roll acc
-	int8_t		pitch_acc;				// Use pitch acc
-
-	// Ouput mix menu (7)
-	int8_t		switcher;				// Switch input to activate this mixer
-	int8_t		output_b;				// Channel B for calculation
-	int8_t		output_b_volume;		// Percentage of output to use
-	int8_t		output_c;				// Channel C for calculation
-	int8_t		output_c_volume;		// Percentage of output to use
-	int8_t		output_d;				// Channel D for calculation
-	int8_t		output_d_volume;		// Percentage of output to use
+	// Mixer menu (21 bytes, 30 items)
+	int8_t		P1_offset;				// P1 Offset for this output
+	int8_t		P1n_offset;				// P1.n Offset for this output
+	int8_t		P1n_position;			// Position of P1.n offset for this output
+	int8_t		P2_offset;				// P2 Offset for this output
+//
+	int8_t		P1_sensors;				// Sensor switches (5), motor marker (1)
+	int8_t		P1_source_a;			// Source A for calculation
+	int8_t		P1_source_a_volume;		// Percentage of source to use
+	int8_t		P1_source_b;			// Source B for calculation
+	int8_t		P1_source_b_volume;		// Percentage of source to use
+	int8_t		P1_source_c;			// Source C for calculation
+	int8_t		P1_source_c_volume;		// Percentage of source to use
+	int8_t		P1_source_d;			// Source D for calculation
+	int8_t		P1_source_d_volume;		// Percentage of output to use
+//
+	int8_t		P2_sensors;				// Sensor switches (5)
+	int8_t		P2_source_a;			// Source A for calculation
+	int8_t		P2_source_a_volume;		// Percentage of source to use
+	int8_t		P2_source_b;			// Source B for calculation
+	int8_t		P2_source_b_volume;		// Percentage of source to use
+	int8_t		P2_source_c;			// Source C for calculation
+	int8_t		P2_source_c_volume;		// Percentage of source to use
+	int8_t		P2_source_d;			// Source D for calculation
+	int8_t		P2_source_d_volume;		// Percentage of output to use
 } channel_t;
 
 // PID type
@@ -64,29 +68,20 @@ typedef struct
 {
 	int8_t	P_mult;
 	int8_t	I_mult;
-	int8_t	D_mult;
 } PID_mult_t;
 
-// Flight_control type (22)
+// Flight_control type (17)
 typedef struct
 {
 	int8_t		Profilelimit;			// Flight mode switch point (-125% to 125%)
-	int8_t		StabMode;				// Stability on/off
-	int8_t		AutoMode;				// Autolevel on/off
-
-	int8_t		Roll_type;				// Gyro type (rate mode, axis lock)
-	PID_mult_t	Roll;					// Gyro PID settings [P,I,D]
+	PID_mult_t	Roll;					// Gyro PI
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
-
-	int8_t		Pitch_type;
 	PID_mult_t	Pitch;
 	int8_t		Pitch_limit;
 	int8_t		A_Pitch_P_mult;
 	int8_t		AccPitchZeroTrim;
-
-	int8_t		Yaw_type;
 	PID_mult_t	Yaw;
 	int8_t		Yaw_limit;
 
@@ -106,49 +101,38 @@ typedef struct
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
 	// Servo travel limts
-	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
+	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (15)
-	int8_t		RxMode;					// PWM or CPPM mode
+	// RC items (11)
+	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
-	int8_t		FlapChan;				// Channel number for second aileron input
 	int8_t		DynGainSrc;				// Dynamic gain source channel
 	int8_t		DynGain;				// Dynamic gain attenuation (0% to 100%)
 	int8_t		AileronPol;				// Aileron RC input polarity
-	int8_t		SecAileronPol;			// Second aileron RC input polarity
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
-	int8_t		Differential;			// Aileron differential
-	int8_t		flapspeed;				// Flap deploy speed
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 	int8_t		Deadband;				// RC deadband (%)
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 5 seconds.
 										// Tied transition start/end comes from Flight[].Profilelimit of src/dst.
-	// Failsafe items (5)
-	int8_t		FailsafeType;			// Simple or Advanced (Autolevel)
-	int8_t		FailsafeThrottle;		// Throttle position in failsafe
-	int8_t		FailsafeElevator;		// Elevator trim in failsafe
-	int8_t		FailsafeAileron;		// Aileron trim in failsafe
-	int8_t		FailsafeRudder;			// Rudder trim in failsafe
-	
+
 	// Flight mode settings
 	union 
 	{
-		flight_control_t FlightMode[3];	// Flight control settings (3)
-		int8_t	FlightModeByte[3][sizeof(flight_control_t)]; // Union of same to enable byte-wise addressing	
+		flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
+		int8_t	FlightModeByte[FLIGHT_MODES][sizeof(flight_control_t)]; // Union of same to enable byte-wise addressing	
 	};
 
 	// Servo travel limts
-	int32_t		Raw_I_Limits[3];		// Actual, unspanned I-term out limits to save recalculation each loop
-	int32_t		Raw_I_Constrain[3];		// Actual, unspanned I-term in limits to save recalculation each loop
+	int32_t		Raw_I_Limits[FLIGHT_MODES][NUMBEROFAXIS];		// Actual, unspanned I-term output limits to save recalculation each loop
+	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS];	// Actual, unspanned I-term input limits to save recalculation each loop
 
 	// Triggers
 	int16_t		Autotrigger1;			// Actual, unspanned flight mode 0 trigger to save recalculation each loop
-	int16_t		Autotrigger2;			// Actual, unspanned flight mode 1 
-	int16_t		Autotrigger3;			// Actual, unspanned flight mode 2
-	int16_t		Launchtrigger;			// Actual, unspanned launch trigger
+	int16_t		Autotrigger2;			// Actual, unspanned flight mode 1 "
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
+	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 	
 	// Limits
 	int16_t		DeadbandLimit;			// Actual deadband limit
@@ -156,53 +140,35 @@ typedef struct
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
-	// Battery settings (5)
-	int8_t		BatteryType;			// LiPo, NiMh
-	int8_t		BatteryCells;			// Number of cells (0~12)	
-	int8_t		PowerTrigger;			// Trip voltage (0 to 127 = 0 to 25.4V)
-	int8_t		MaxVoltage;				// Maximum cell voltage in charged state (0 to 127 = 0 to 508mV)
-	int8_t		MinVoltage;				// Minimum cell voltage in discharge state
-
-	// General items (15)
-	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
+	// General items (10)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		Status_timer;			// Status screen timer
 	int8_t		LMA_enable;				// LMA setting
-	int8_t		CamStab;				// Camstab. Removes dependence on RC input.
-	int8_t		Servo_rate;				// Servo rate for camstab (Low = 50Hz, High = 200Hz?)
-	int8_t		AutoCenter;				// Yaw heading hold auto centering ***
+	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	int8_t		IMUType;				// IMU style (old/new)
-	int8_t		LaunchMode;				// Launch mode on/off
-	int8_t		LaunchThrPos;			// Launch mode throttle position
-	int8_t		LaunchDelay;			// Launch mode delay time
+	int8_t		ArmMode;				// Arming mode on/off
 	int8_t		Dampen;					// Height dampening amount
+	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
 
 	// Non-menu items 
-	// Input channel configuration
-	channel_t	Channel[PSUEDO_OUTPUTS];	// Channel mixing data	
+	// Channel configuration
+	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
 
 	// Servo menu
 	int8_t		Servo_reverse[MAX_OUTPUTS];	// Reversal of output channel
-	int8_t		Offset[MAX_OUTPUTS];		// Trim/neutral position (-125 to 125)
 	int8_t		min_travel[MAX_OUTPUTS];	// Minimum output value (-125 to 125)
 	int8_t		max_travel[MAX_OUTPUTS];	// Maximum output value (-125 to 125)
-	int8_t		Failsafe[MAX_OUTPUTS];		// Failsafe position (-125 to 125)
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
 	// Acc
-	uint16_t	AccZero[3];				// Acc calibration results
-	
-	// Menu channel number
-	int8_t		MenuChannel;			// Current M1 to M8 channel
+	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode
-	int8_t		Flight;					// Actual flight mode 
 
 } CONFIG_STRUCT;
 

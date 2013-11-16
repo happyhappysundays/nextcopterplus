@@ -32,7 +32,7 @@ void Display_status(void);
 
 void Display_status(void)
 {
-	int16_t temp, min, max, range, scale;
+	int16_t temp;
 	uint16_t vbat_temp, free_ram;
 	int8_t	pos1, pos2, pos3;
 	mugui_size16_t size;
@@ -40,61 +40,71 @@ void Display_status(void)
 	clear_buffer(buffer);
 
 	// Display text
-	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
-	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
-	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// RX sync
-	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,33); 	// Profile
-	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM:
+	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,0); 		// Version text
+	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,11); 	// RX sync
+	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,22); 	// Profile
+	LCD_Display_Text(132,(prog_uchar*)Verdana8,0,33); 	// Battery
+	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM
+	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
 
-/*	mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,75,33); // transition_value_16
-	mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,75,44); // transition_counter
+	if (Config.TransitionSpeed == 0)
+	{
+		mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_value_16
+	}
+	else
+	{
+		mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_counter
+	}
 
-	mugui_lcd_puts(itoa(Config.FlightModeByte[0][4],pBuffer,10),(prog_uchar*)Verdana8,0,44); //Config.FlightModeByte[start][i]
-	mugui_lcd_puts(itoa(Config.FlightModeByte[1][4],pBuffer,10),(prog_uchar*)Verdana8,25,44);
-	mugui_lcd_puts(itoa(Config.FlightModeByte[2][4],pBuffer,10),(prog_uchar*)Verdana8,50,44);
-*/
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
-	print_menu_text(0, 1, (62 + Config.RxMode), 45, 22);
-	mugui_lcd_puts(itoa((Config.Flight + 1),pBuffer,10),(prog_uchar*)Verdana8,45,33);
+	print_menu_text(0, 1, (62 + Config.RxMode), 45, 11); // Rx mode
+
+	// Display transition point
+	if (Config.TransitionSpeed == 0)
+	{
+		if (transition_value_16 < -78)
+		{
+			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
+		}
+		else if (transition_value_16 > 78)
+		{
+			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
+		}
+		else
+		{
+			LCD_Display_Text(49,(prog_uchar*)Verdana8,42,22);
+		}
+	}
+	// Use actual transition state to display state
+	else
+	{
+		if (Transition_state == TRANS_0)
+		{
+			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
+		}
+		else if (Transition_state == TRANS_1)
+		{
+			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
+		}
+		else
+		{
+			LCD_Display_Text(49,(prog_uchar*)Verdana8,42,22);
+		}
+	}
 
 	// Display unused RAM
 	free_ram = StackCount();
-	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,52,44);
-
-	// Draw battery
-	drawrect(buffer, 100,4, 28, 50, 1);					// Battery body
-	drawrect(buffer, 110,0, 8, 4, 1);					// Battery terminal
-
-	vbat_temp = GetVbat();
-
-	min = Config.MinVoltage * Config.BatteryCells * 4;	// Calculate battery voltage limits
-	max = Config.MaxVoltage * Config.BatteryCells * 4;
-	range = max - min;
-	scale = range / 50;
-
-	// Look out for that divide-by-zero... :)
-	if ((vbat_temp >= min) && (scale > 0))
-	{
-		temp =(vbat_temp - min) / scale;
-	}
-	else
-	{
-		temp = 0;
-	}
-
-	if (temp > 50) temp = 50;
-
-	fillrect(buffer, 100,54-temp, 28, temp, 1);				// Battery filler (max is 60)
+	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,52,33);
 
 	// Display voltage
-	uint8_t x_loc = 102;	// X location of voltage display
-	uint8_t y_loc = 55;		// Y location of voltage display
+	uint8_t x_loc = 45;		// X location of voltage display
+	uint8_t y_loc = 44;		// Y location of voltage display
 
+	vbat_temp = GetVbat();
 	temp = vbat_temp/100;	// Display whole decimal part first
 	mugui_text_sizestring(itoa(temp,pBuffer,10), (prog_uchar*)Verdana8, &size);
 	mugui_lcd_puts(itoa(temp,pBuffer,10),(prog_uchar*)Verdana8,x_loc,y_loc);
@@ -129,7 +139,7 @@ void Display_status(void)
 		if((General_error & (1 << SENSOR_ERROR)) != 0)
 		{
 			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); // Sensor
-			LCD_Display_Text(98,(prog_uchar*)Verdana14,43,34); // Error
+			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
 		else if((General_error & (1 << LOW_BATT)) != 0)
@@ -144,13 +154,17 @@ void Display_status(void)
 		}
 		else if((General_error & (1 << LOST_MODEL)) != 0)
 		{
-			LCD_Display_Text(99,(prog_uchar*)Verdana14,45,14); // Lost
-			LCD_Display_Text(100,(prog_uchar*)Verdana14,40,34);// Model
+			LCD_Display_Text(20,(prog_uchar*)Verdana14,45,14); // Lost
+			LCD_Display_Text(21,(prog_uchar*)Verdana14,40,34); // Model
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{
 			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
 			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
+		}
+		else if((General_error & (1 << DISARMED)) != 0)
+		{
+			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); // Disarmed
 		}
 	}
 

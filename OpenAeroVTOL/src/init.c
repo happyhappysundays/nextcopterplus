@@ -151,9 +151,6 @@ void init(void)
 
 	// Preset important flags
 	RC_Lock = false;						
-	Flight_flags &= ~(1 << Failsafe);
-	Flight_flags &= ~(1 << AutoLevel);
-	Flight_flags &= ~(1 << Stability);
 	Main_flags |= (1 << FirstTimeIMU);
 
 	// Initialise the GLCD
@@ -168,8 +165,8 @@ void init(void)
 	// This delay prevents the GLCD flashing up a ghost image of old data
 	_delay_ms(300);	
 
-	// Reload default eeprom settings if all buttons are pressed 
-	if ((PINB & 0xf0) == 0)
+	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users) 
+	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
 	{
 		// Display reset message
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
@@ -197,9 +194,12 @@ void init(void)
 	init_int();								// Intialise interrupts based on RC input mode
 
 	// Reset I-terms (possibly unnecessary)
-	IntegralGyro[ROLL] = 0;	
-	IntegralGyro[PITCH] = 0;
-	IntegralGyro[YAW] = 0;
+	IntegralGyro[P1][ROLL] = 0;	
+	IntegralGyro[P1][PITCH] = 0;
+	IntegralGyro[P1][YAW] = 0;
+	IntegralGyro[P2][ROLL] = 0;	
+	IntegralGyro[P2][PITCH] = 0;
+	IntegralGyro[P2][YAW] = 0;
 
 	// Initialise UART
 	init_uart();
@@ -220,13 +220,19 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
-	// Check to see that throttle is low if in CPPM mode if RC detected
-	// Don't bother if in CamStab mode
+	// Disarm on start-up if Armed setting is ON
+	if (Config.ArmMode == ON)
+	{
+		General_error |= (1 << DISARMED); 	// Set disarmed bit
+	}
+
 	_delay_ms(100);
-	if ((Config.RxMode == CPPM_MODE) && RC_Lock && (Config.CamStab == OFF))
+
+	// Check to see that throttle is low if RC detected
+	if (RC_Lock)
 	{
 		RxGetChannels();
-		if (RCinputs[THROTTLE] > 300)
+		if (RCinputs[THROTTLE] > -900)
 		{
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}

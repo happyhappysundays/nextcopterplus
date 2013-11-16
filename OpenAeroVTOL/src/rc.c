@@ -28,7 +28,6 @@
 void RxGetChannels(void);
 void RC_Deadband(void);
 void CenterSticks(void);
-void SetFailsafe(void);
 
 //************************************************************
 // Defines
@@ -63,14 +62,6 @@ void RxGetChannels(void)
 		RCinputs[AILERON] = -(RxChannel[AILERON] - Config.RxChannelZeroOffset[AILERON]);
 	}
 
-	// Only reverse second aileron if set up
-	if ((Config.SecAileronPol == REVERSED) && (Config.FlapChan != NOCHAN))
-	{
-		// Note we have to reverse the source otherwise we get a double reverse if someone sets up
-		// the second aileron as AILERON
-		RCinputs[Config.FlapChan] = -(RxChannel[Config.FlapChan] - Config.RxChannelZeroOffset[Config.FlapChan]);
-	}
-
 	if (Config.ElevatorPol == REVERSED)
 	{
 		RCinputs[ELEVATOR] = -RCinputs[ELEVATOR];
@@ -101,23 +92,8 @@ void RxGetChannels(void)
  // Reduce RxIn noise and also detect the hands-off situation
 void RC_Deadband(void)
 {
-	int16_t	aileron_actual = 0;
-
-	// If flaperons set up 
-	if (Config.FlapChan != NOCHAN)
-	{
-		// Recreate actual roll signal from flaperons
-		aileron_actual  = RCinputs[AILERON] + RCinputs[Config.FlapChan];
-		aileron_actual  = aileron_actual >> 1;
-	}
-	// If flaperons not set up
-	else
-	{
-		aileron_actual  = RCinputs[AILERON];
-	}
-
 	// Hands-free detection (prior to deadband culling)
-	if (((aileron_actual < Config.HandsFreetrigger) && (aileron_actual > -Config.HandsFreetrigger))
+	if (((RCinputs[AILERON] < Config.HandsFreetrigger) && (RCinputs[AILERON] > -Config.HandsFreetrigger))
 	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
 	{
 		Flight_flags |= (1 << HandsFree);
@@ -165,30 +141,3 @@ void CenterSticks(void)
 
 	Save_Config_to_EEPROM();
 }
-
-// Set failsafe position
-void SetFailsafe(void)		
-{
-	uint8_t i;
-	int16_t failsafe;
-
-	// Update latest values of each channel
-	ProcessMixer();
-
-	// Transfer latest values of each channel to ServoOut[] and range limit
-	UpdateServos();
-
-	// Update Config settings based on servo position
-	for (i = 0; i < MAX_OUTPUTS; i++)
-	{
-		// Set primary failsafe point
-		Config.Limits[i].failsafe = ServoOut[i];
-
-		// Rescale and set noob-friendly mixer failsafe percentages
-		failsafe = (ServoOut[i] - 3750) / 12;
-		Config.Failsafe[i] = failsafe;
-	}
-
-	Save_Config_to_EEPROM();
-}
-
