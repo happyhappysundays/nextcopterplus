@@ -25,6 +25,7 @@ extern uint16_t StackCount(void);
 
 extern int16_t	transition_value_16;
 extern int16_t	transition_counter;	
+extern uint8_t	Transition_state;
 
 // Flags
 extern uint8_t	General_error;

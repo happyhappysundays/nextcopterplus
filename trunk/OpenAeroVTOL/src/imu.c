@@ -164,8 +164,8 @@ void getEstimatedAttitude(void)
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
 
 		// The CF algorithm will fail when inverted as acc moves opposite gyro
-		// When inverted, use acc only. In old IMU mode don't bother.
-		if ((accADC[YAW] > 0) || (Config.IMUType == 0))
+		// When inverted, use acc only.
+		if (accADC[YAW] > 0)
 		{
 			deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 		}
@@ -184,8 +184,8 @@ void getEstimatedAttitude(void)
 		G_is_Normal = false;
 	}
 
-	// If advanced IMU type and when under normal G
-	if ((Config.IMUType == 1) && (G_is_Normal == true))
+	// If under normal G
+	if (G_is_Normal == true)
 	{
 		// Calculate the roll and pitch angles properly
 		// then convert to degrees

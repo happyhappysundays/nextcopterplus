@@ -43,17 +43,11 @@ void Display_rcinput(void)
 			CenterSticks();
 		}
 
-		if (BUTTON3 == 0)
-		{
-			//_delay_ms(100);
-			SetFailsafe();
-		}
-
 		RxGetChannels();
 
-		LCD_Display_Text(243,(prog_uchar*)Verdana8,0,0);
+		LCD_Display_Text(41,(prog_uchar*)Verdana8,0,0);
 		LCD_Display_Text(32,(prog_uchar*)Verdana8,0,10);
-		LCD_Display_Text(244,(prog_uchar*)Verdana8,0,20);
+		LCD_Display_Text(42,(prog_uchar*)Verdana8,0,20);
 		LCD_Display_Text(35,(prog_uchar*)Verdana8,0,30);
 
 		LCD_Display_Text(109,(prog_uchar*)Verdana8,70,0);
@@ -74,8 +68,6 @@ void Display_rcinput(void)
 
 		// Print bottom text and markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(44, (prog_uchar*)Verdana8, 40, 55); 	// Failsafe
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 100, 55); 	// Cal.
 		LCD_Display_Text(9, (prog_uchar*)Wingdings, 119, 59); 	// Down
 

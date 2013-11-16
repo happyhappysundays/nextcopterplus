@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x11		// eePROM signature - change for each eePROM structure change 0x11 = V1.2b7
+#define MAGIC_NUMBER 0x15		// eePROM signature - change for each eePROM structure change 0x15 = V1.3b1.6
 								// to force factory reset
 
 //************************************************************
@@ -57,25 +57,25 @@ void Set_EEPROM_Default_Config(void)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
-		//Config.Servo_reverse[i] = NORMAL;
-		//Config.Offset[i] = 0;
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
-		//Config.Failsafe[i] = 0;
 	}
-	Config.Failsafe[0] = -100;			// Throttle should failsafe to minimum
-	//
-	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
 
-	// Preset Psuedo Output mixers to safe values
-	for (i = 8; i < PSUEDO_OUTPUTS; i++)
+	// Preset mixers to safe values
+	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].source_a = NOCHAN;
-		Config.Channel[i].source_b = NOCHAN;
-		Config.Channel[i].switcher = NOCHAN;
-		Config.Channel[i].output_b = UNUSED;
-		Config.Channel[i].output_c = UNUSED;
-		Config.Channel[i].output_d = UNUSED;
+		Config.Channel[i].P1_offset 	= 0;
+		Config.Channel[i].P2_offset 	= 0;
+		Config.Channel[i].P1n_offset	= 0;
+		Config.Channel[i].P1n_position	= 50;
+		Config.Channel[i].P1_source_a 	= NOMIX;
+		Config.Channel[i].P1_source_b 	= NOMIX;
+		Config.Channel[i].P1_source_c 	= NOMIX;
+		Config.Channel[i].P1_source_d 	= NOMIX;
+		Config.Channel[i].P2_source_a 	= NOMIX;
+		Config.Channel[i].P2_source_b 	= NOMIX;
+		Config.Channel[i].P2_source_c 	= NOMIX;
+		Config.Channel[i].P2_source_d 	= NOMIX;
 	}
 
 	//
@@ -87,27 +87,17 @@ void Set_EEPROM_Default_Config(void)
 	
 	// Flight modes
 	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
+	Config.FlightMode[1].Profilelimit = -10;	
 
-	Config.FlightMode[1].Profilelimit = 0;	
-	Config.FlightMode[1].StabMode = ALWAYSON;
-//	Config.FlightMode[1].Yaw_type = LOCK; // debug for axis lock testing
-//	Config.FlightMode[1].Yaw_limit = 125; // debug
-
-	Config.FlightMode[2].Profilelimit = 80;	
-	Config.FlightMode[2].StabMode = ALWAYSON;
-	Config.FlightMode[2].AutoMode = ALWAYSON;
-//	Config.FlightMode[2].Yaw_type = LOCK; // debug
-//	Config.FlightMode[2].Yaw_limit = 125; // debug
-
-	// Set up all three profiles the same initially
-	for (i = 0; i < 3; i++)
+	// Set up all profiles the same initially
+	for (i = 0; i < 2; i++)
 	{
 		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults		
 		Config.FlightMode[i].Roll.I_mult = 50;	
 		Config.FlightMode[i].Pitch.P_mult = 80;
 		Config.FlightMode[i].Pitch.I_mult = 50;
 		Config.FlightMode[i].Yaw.P_mult = 80;
-		Config.FlightMode[i].Yaw.I_mult = 80;
+		Config.FlightMode[i].Yaw.I_mult = 50;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
@@ -116,13 +106,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
 	Config.DynGain = 100;
-	Config.IMUType = 1;					// Advanced IMU ON
-	Config.BatteryType = LIPO;
-	Config.MinVoltage = 83;				// 83 * 4 = 332
-	Config.MaxVoltage = 105;			// 105 * 4 = 420
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
-	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
-	Config.LaunchDelay = 10;
+	Config.ArmMode = OFF;
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout
@@ -130,7 +115,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
 	Config.Deadband = 2;				// RC deadband = 2%
-	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
 }
 
 void Save_Config_to_EEPROM(void)

@@ -8,6 +8,6 @@
 
 extern void Calculate_PID(void);
 
-extern int16_t 	PID_Gyros[3];
-extern int16_t 	PID_ACCs[3];
-extern int32_t	IntegralGyro[3];
+extern int16_t 	PID_Gyros[2][3];
+extern int16_t 	PID_ACCs[2][3];
+extern int32_t	IntegralGyro[2][3];

@@ -37,18 +37,16 @@ void Display_sticks(void)
 {
 	int8_t	i;
 	int8_t	offset;
-	int8_t	temp_aileron, temp_2ndaileron, temp_elevator, temp_rudder;
+	int8_t	temp_aileron, temp_elevator, temp_rudder;
 	bool	CalibrateDone = false;
 
 	// Save original settings in case user aborts
 	temp_aileron = Config.AileronPol;
-	temp_2ndaileron = Config.SecAileronPol;
 	temp_elevator = Config.ElevatorPol;
 	temp_rudder = Config.RudderPol;
 
 	// Reset to defaults - not ideal, but it works
 	Config.AileronPol = NORMAL;
-	Config.SecAileronPol = NORMAL;
 	Config.ElevatorPol =  NORMAL;
 	Config.RudderPol = NORMAL;
 
@@ -101,12 +99,6 @@ void Display_sticks(void)
 					Config.AileronPol = REVERSED;
 				}
 
-				// Only reverse 2nd aileron if set up as one
-				if ((Config.FlapChan != NOCHAN) && (RCinputs[Config.FlapChan] < 0))
-				{
-					Config.SecAileronPol = REVERSED;
-				}
-
 				if (RCinputs[ELEVATOR] < 0)
 				{
 					Config.ElevatorPol = REVERSED;
@@ -144,7 +136,6 @@ void Display_sticks(void)
 	{
 		// Restore old settings if failed
 		Config.AileronPol = temp_aileron;
-		Config.SecAileronPol = temp_2ndaileron;
 		Config.ElevatorPol = temp_elevator;
 		Config.RudderPol = temp_rudder;
 	}
