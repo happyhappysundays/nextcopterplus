@@ -67,33 +67,74 @@ void ProcessMixer(void)
 		//************************************************************
 		// Mix in gyros
 		//************************************************************ 
-
+		// P1
 		if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) // P1
 		{
-			P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+			if ((Config.Channel[i].P1_RevFlags & (1 << RollRev)) != 0)
+			{
+				P1_solution = P1_solution + PID_Gyros[P1][ROLL];
+			}
+			else
+			{
+				P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+			}
 		}
 		if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
 		{
-			P1_solution = P1_solution + PID_Gyros[P1][PITCH];
+			if ((Config.Channel[i].P1_RevFlags & (1 << PitchRev)) != 0)
+			{
+				P1_solution = P1_solution + PID_Gyros[P1][PITCH];
+			}
+			else
+			{
+				P1_solution = P1_solution - PID_Gyros[P1][PITCH];
+			};
 		}
 		if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
 		{
-			P1_solution = P1_solution - PID_Gyros[P1][YAW];
+			if ((Config.Channel[i].P1_RevFlags & (1 << YawRev)) != 0)
+			{
+				P1_solution = P1_solution + PID_Gyros[P1][YAW];
+			}
+			else
+			{
+				P1_solution = P1_solution - PID_Gyros[P1][YAW];
+			};
 		}
-
+		// P2
 		if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) // P2
 		{
-			P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+			if ((Config.Channel[i].P2_RevFlags & (1 << RollRev)) != 0)
+			{
+				P2_solution = P2_solution + PID_Gyros[P2][ROLL];
+			}
+			else
+			{
+				P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+			}
 		}
 		if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
 		{
-			P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+			if ((Config.Channel[i].P2_RevFlags & (1 << PitchRev)) != 0)
+			{
+				P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+			}
+			else
+			{
+				P2_solution = P2_solution - PID_Gyros[P2][PITCH];
+			};
 		}
 		if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
 		{
-			P2_solution = P2_solution - PID_Gyros[P2][YAW];
+			if ((Config.Channel[i].P2_RevFlags & (1 << YawRev)) != 0)
+			{
+				P2_solution = P2_solution + PID_Gyros[P2][YAW];
+			}
+			else
+			{
+				P2_solution = P2_solution - PID_Gyros[P2][YAW];
+			};
 		}
-
 
 		//************************************************************
 		// Autolevel trims
@@ -105,27 +146,62 @@ void ProcessMixer(void)
 		//************************************************************
 		// Mix in accelerometers
 		//************************************************************ 
-
-		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) // P1
+		// P1
+		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
 		{
 			P1_solution += rolltrim;
-			P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+			
+			if ((Config.Channel[i].P1_RevFlags & (1 << AccRollRev)) != 0)
+			{
+				P1_solution = P1_solution + PID_ACCs[P1][ROLL];
+			}
+			else
+			{
+				P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+			}
 		}
+
 		if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
 		{
 			P1_solution += pitchtrim;
-			P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+			
+			if ((Config.Channel[i].P1_RevFlags & (1 << AccPitchRev)) != 0)
+			{
+				P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+			}
+			else
+			{
+				P1_solution = P1_solution - PID_ACCs[P1][PITCH];
+			}
 		}
 
-		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) // P2
+		// P2
+		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
 		{
-			P1_solution += rolltrim;
-			P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+			P2_solution += rolltrim;
+			
+			if ((Config.Channel[i].P2_RevFlags & (1 << AccRollRev)) != 0)
+			{
+				P2_solution = P2_solution + PID_ACCs[P2][ROLL];
+			}
+			else
+			{
+				P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+			}
 		}
+
 		if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
 		{
-			P1_solution += pitchtrim;
-			P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+			P2_solution += pitchtrim;
+			
+			if ((Config.Channel[i].P2_RevFlags & (1 << AccPitchRev)) != 0)
+			{
+				P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+			}
+			else
+			{
+				P2_solution = P2_solution - PID_ACCs[P2][PITCH];
+			}
 		}
 
 		//************************************************************

@@ -56,6 +56,16 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_counter
 	}
 
+	// Debug - Sensor reverse flags
+/*	mugui_lcd_puts(itoa(Config.Channel[OUT1].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,72,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT2].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,77,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT3].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,82,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT4].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,87,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT5].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,92,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT6].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,97,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT7].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,102,33); // transition_value_16
+	mugui_lcd_puts(itoa(Config.Channel[OUT8].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,107,33); // transition_value_16
+*/
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu

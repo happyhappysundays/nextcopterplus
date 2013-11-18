@@ -31,11 +31,11 @@ int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 // Polarity handling table
 const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW
 {
-	{1,1,-1},		// Horizontal
-	{1,1,-1},		// Vertical
-	{1,-1,1},		// Upside down
-	{-1,-1,-1},		// Aft
-	{1,-1,-1},		// Sideways
+	{1,-1,-1},		// Forward
+	{1,-1,-1},		// Vertical
+	{1,1,1},		// Upside down
+	{-1,1,-1},		// Aft
+	{1,1,-1},		// Sideways
 };
 
 void ReadGyros(void)					// Conventional orientation
