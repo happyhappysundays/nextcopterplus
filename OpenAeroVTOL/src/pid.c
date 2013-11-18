@@ -60,8 +60,8 @@ void Calculate_PID(void)
 	int32_t PID_acc_temp1;					// P1
 	int32_t PID_acc_temp2;					// P2
 	//
-	int32_t PID_Gyro_I_temp1 = 0;			// Temporary i-terms bound to max throw P1
-	int32_t PID_Gyro_I_temp2 = 0;			// Temporary i-terms bound to max throw P2
+//	int32_t PID_Gyro_I_temp1 = 0;			// Temporary i-terms bound to max throw P1
+//	int32_t PID_Gyro_I_temp2 = 0;			// Temporary i-terms bound to max throw P2
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
 	int8_t	axis;
@@ -70,7 +70,7 @@ void Calculate_PID(void)
 	int32_t PID_Gyros_32;
 
 	// Cross-ref for actual RCinput elements
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], -RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 

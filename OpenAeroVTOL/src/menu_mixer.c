@@ -54,11 +54,11 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,5,0,0},				// P2 Offset (%)
 
 		// Mixer ranges - P1
-		{OFF, ON,1,1,OFF},				// roll_gyro
-		{OFF, ON,1,1,OFF},				// pitch_gyro
-		{OFF, ON,1,1,OFF},				// yaw_gyro
-		{OFF, ON,1,1,OFF},				// roll_acc
-		{OFF, ON,1,1,OFF},				// pitch_acc
+		{OFF, REV,1,1,OFF},				// roll_gyro
+		{OFF, REV,1,1,OFF},				// pitch_gyro
+		{OFF, REV,1,1,OFF},				// yaw_gyro
+		{OFF, REV,1,1,OFF},				// roll_acc
+		{OFF, REV,1,1,OFF},				// pitch_acc
 		{SRC1,NOMIX,1,1,NOMIX},			// Source A
 		{-125,125,5,0,0},				// Source A volume (%)
 		{SRC1,NOMIX,1,1,NOMIX},			// Source B
@@ -93,6 +93,7 @@ void menu_mixer(uint8_t i)
 	static uint8_t mix_top = MIXERSTART;
 	int8_t *value_ptr;
 	int8_t temp_sensors;
+	int8_t temp_reverse;
 
 	int8_t values[MIXERITEMS];
 	menu_range_t range;
@@ -111,6 +112,7 @@ void menu_mixer(uint8_t i)
 
 		// Load values from eeprom
 		temp_sensors = Config.Channel[i].P1_sensors; // debug P1
+		temp_reverse = Config.Channel[i].P1_RevFlags;
 
 		// Expand sensor bit values into values array
 		if ((temp_sensors & (1 << MotorMarker)) != 0)
@@ -121,84 +123,178 @@ void menu_mixer(uint8_t i)
 		{
 			values[0] = OFF;
 		}
+
+		// P1 roll gyro
 		if ((temp_sensors & (1 << RollGyro)) != 0)
 		{
-			values[5] = ON;
+			if ((temp_reverse & (1 << RollRev)) != 0)
+			{	
+				values[5] = REV;
+			}
+			else
+			{
+				values[5] = ON;
+			}
 		}
 		else
 		{
 			values[5] = OFF;
 		}
+
+		// P1 pitch gyro
 		if ((temp_sensors & (1 << PitchGyro)) != 0)
 		{
-			values[6] = ON;
+			if ((temp_reverse & (1 << PitchRev)) != 0)
+			{	
+				values[6] = REV;
+			}
+			else
+			{
+				values[6] = ON;
+			}
 		}
 		else
 		{
 			values[6] = OFF;
 		}
+
+
+		// P1 yaw_gyro
 		if ((temp_sensors & (1 << YawGyro)) != 0)
 		{
-			values[7] = ON;
+			if ((temp_reverse & (1 << YawRev)) != 0)
+			{	
+				values[7] = REV;
+			}
+			else
+			{
+				values[7] = ON;
+			}
 		}
 		else
 		{
 			values[7] = OFF;
 		}
+
+
+		// P1 roll acc
 		if ((temp_sensors & (1 << RollAcc)) != 0)
 		{
-			values[8] = ON;
+			if ((temp_reverse & (1 << AccRollRev)) != 0)
+			{	
+				values[8] = REV;
+			}
+			else
+			{
+				values[8] = ON;
+			}
 		}
 		else
 		{
 			values[8] = OFF;
 		}
+
+
+		// P1 pitch acc
 		if ((temp_sensors & (1 << PitchAcc)) != 0)
 		{
-			values[9] = ON;
+			if ((temp_reverse & (1 << AccPitchRev)) != 0)
+			{	
+				values[9] = REV;
+			}
+			else
+			{
+				values[9] = ON;
+			}
 		}
 		else
 		{
 			values[9] = OFF;
 		}
 
+
+		// P2 roll gyro
 		temp_sensors = Config.Channel[i].P2_sensors; // debug P2
+		temp_reverse = Config.Channel[i].P2_RevFlags;
 
 		if ((temp_sensors & (1 << RollGyro)) != 0)
 		{
-			values[18] = ON;
+			if ((temp_reverse & (1 << RollRev)) != 0)
+			{	
+				values[18] = REV;
+			}
+			else
+			{
+				values[18] = ON;
+			}
 		}
 		else
 		{
 			values[18] = OFF;
 		}
+
+		// P2 pitch gyro
 		if ((temp_sensors & (1 << PitchGyro)) != 0)
 		{
-			values[19] = ON;
+			if ((temp_reverse & (1 << PitchRev)) != 0)
+			{	
+				values[19] = REV;
+			}
+			else
+			{
+				values[19] = ON;
+			}
 		}
 		else
 		{
 			values[19] = OFF;
 		}
+
+		// P2 yaw gyro
 		if ((temp_sensors & (1 << YawGyro)) != 0)
 		{
-			values[20] = ON;
+			if ((temp_reverse & (1 << YawRev)) != 0)
+			{	
+				values[20] = REV;
+			}
+			else
+			{
+				values[20] = ON;
+			}
 		}
 		else
 		{
 			values[20] = OFF;
 		}
+
+		// P2 roll acc
 		if ((temp_sensors & (1 << RollAcc)) != 0)
 		{
-			values[21] = ON;
+			if ((temp_reverse & (1 << AccRollRev)) != 0)
+			{	
+				values[21] = REV;
+			}
+			else
+			{
+				values[21] = ON;
+			}
 		}
 		else
 		{
 			values[21] = OFF;
 		}
+
+		// P2 pitch acc
 		if ((temp_sensors & (1 << PitchAcc)) != 0)
 		{
-			values[22] = ON;
+			if ((temp_reverse & (1 << AccPitchRev)) != 0)
+			{	
+				values[22] = REV;
+			}
+			else
+			{
+				values[22] = ON;
+			}
 		}
 		else
 		{
@@ -233,6 +329,7 @@ void menu_mixer(uint8_t i)
 		memcpy(&Config.Channel[i].P2_source_a,&values[23], 8);
 
 		temp_sensors = 0; // debug
+		temp_reverse = 0;
 
 		// Recompress byte data for servos back into bit values for the sensors byte
 		if (values[0] == ON)
@@ -243,93 +340,127 @@ void menu_mixer(uint8_t i)
 		{
 			temp_sensors &= ~(1 << MotorMarker);	
 		}
-		if (values[5] == ON)
+
+		// P1 roll gyro
+		switch (values[5])
 		{
-			temp_sensors |= (1 << RollGyro);
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << RollRev);
+			case ON:
+				temp_sensors |= (1 << RollGyro);
+				break;
 		}
-		else
+		// P1 pitch gyro
+		switch (values[6])
 		{
-			temp_sensors &= ~(1 << RollGyro);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << PitchRev);
+			case ON:
+				temp_sensors |= (1 << PitchGyro);
+				break;
 		}
-		if (values[6] == ON)
+		// P1 yaw gyro
+		switch (values[7])
 		{
-			temp_sensors |= (1 << PitchGyro);
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << YawRev);
+			case ON:
+				temp_sensors |= (1 << YawGyro);
+				break;
 		}
-		else
+		// P1 roll acc
+		switch (values[8])
 		{
-			temp_sensors &= ~(1 << PitchGyro);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccRollRev);
+			case ON:
+				temp_sensors |= (1 << RollAcc);
+				break;
 		}
-		if (values[7] == ON)
+		// P1 pitch acc
+		switch (values[9])
 		{
-			temp_sensors |= (1 << YawGyro);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << YawGyro);	
-		}
-		if (values[8] == ON)
-		{
-			temp_sensors |= (1 << RollAcc);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << RollAcc);	
-		}
-		if (values[9] == ON)
-		{
-			temp_sensors |= (1 << PitchAcc);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << PitchAcc);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccPitchRev);
+			case ON:
+				temp_sensors |= (1 << PitchAcc);
+				break;
 		}
 
-		Config.Channel[i].P1_sensors = temp_sensors; // debug
-		temp_sensors = 0; // debug
+		Config.Channel[i].P1_sensors = temp_sensors;
+		Config.Channel[i].P1_RevFlags = temp_reverse;
 
-		// Recompress byte data for servos back into bit values for the sensors byte
-		if (values[18] == ON)
+		temp_sensors = 0;
+		temp_reverse = 0;
+
+		// P2 roll gyro
+		switch (values[18])
 		{
-			temp_sensors |= (1 << RollGyro);
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << RollRev);
+			case ON:
+				temp_sensors |= (1 << RollGyro);
+				break;
 		}
-		else
+		// P2 pitch gyro
+		switch (values[19])
 		{
-			temp_sensors &= ~(1 << RollGyro);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << PitchRev);
+			case ON:
+				temp_sensors |= (1 << PitchGyro);
+				break;
 		}
-		if (values[19] == ON)
+		// P2 yaw gyro
+		switch (values[20])
 		{
-			temp_sensors |= (1 << PitchGyro);
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << YawRev);
+			case ON:
+				temp_sensors |= (1 << YawGyro);
+				break;
 		}
-		else
+		// P2 roll acc
+		switch (values[21])
 		{
-			temp_sensors &= ~(1 << PitchGyro);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccRollRev);
+			case ON:
+				temp_sensors |= (1 << RollAcc);
+				break;
 		}
-		if (values[20] == ON)
+		// P2 pitch acc
+		switch (values[22])
 		{
-			temp_sensors |= (1 << YawGyro);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << YawGyro);	
-		}
-		if (values[21] == ON)
-		{
-			temp_sensors |= (1 << RollAcc);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << RollAcc);	
-		}
-		if (values[22] == ON)
-		{
-			temp_sensors |= (1 << PitchAcc);
-		}
-		else
-		{
-			temp_sensors &= ~(1 << PitchAcc);	
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccPitchRev);
+			case ON:
+				temp_sensors |= (1 << PitchAcc);
+				break;
 		}
 
-		Config.Channel[i].P2_sensors = temp_sensors; // debug
+		Config.Channel[i].P2_sensors = temp_sensors;
+		Config.Channel[i].P2_RevFlags = temp_reverse;
 
 		// Save and exit
 		if (button == ENTER)

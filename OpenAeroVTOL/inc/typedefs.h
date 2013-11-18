@@ -35,8 +35,10 @@ typedef struct
 {
 	int16_t		P1_value;				// Current value of this channel at P1
 	int16_t		P2_value;				// Current value of this channel at P2
-
-	// Mixer menu (21 bytes, 30 items)
+	int8_t		P1_RevFlags;			// P1 sensor reverse flags (5)
+	int8_t		P2_RevFlags;			// P2 sensor reverse flags (5)
+	
+	// Mixer menu (22 bytes, 31 items)
 	int8_t		P1_offset;				// P1 Offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
 	int8_t		P1n_position;			// Position of P1.n offset for this output

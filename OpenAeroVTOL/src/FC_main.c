@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0
 // ================================
-// Version 1.3 Beta 1.6 - November 2013
+// Version 1.3 Beta 1.7 - November 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -61,6 +61,7 @@
 //			PID values for both profiles now calculated on the fly and only transitioned in the mixer.
 //			Increased transition steps to 100 and interval to 10ms. I-terms reset at throttle cut.
 //			Added experimental three-point offset handling. Removed redundant servo trim.
+//		1.7 Re-added sensor reversing. Very code-size inefficient.
 //			
 //
 //***********************************************************
@@ -69,9 +70,14 @@
 //
 // Todo:
 //	Calibration mode
+//	Better way to integrate auto-switching of sensors.
+//	Per-sensor, per output, per profile gain adjustment.
+//	Copy RC soures and .values to an array so that the mixer can do less work?
+//	Try doing the mixer menu without creating the [values] array. 
 //
 // Bugs: 
 //	I-term constraints not working for P2 when P1 constraint differs
+//	
 //
 //
 //***********************************************************
