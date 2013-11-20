@@ -1,8 +1,9 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.3 Beta 1 - October 2013
+// Version 1.2 Beta 9 - November 2013
 //
+// May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
@@ -200,30 +201,17 @@
 //			Shrunk memory requirements a bit.
 // Beta 7	Fixed bug where settings were lost before repowering after a reset
 // Beta 8	Fixed bug where autolevel calibration wrong unless inverted calibration also done.
-// Beta 9	Bugfix. Hands-free now takes its trigger from the RC deadband setting.
-//
-// V1.3		Based on OpenAero2 V1.2 Beta 8 code
-// Alpha 1	Added transition code
-//			Added basic height dampening code (untested)
-// Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
-// Alpha 3	Fixed all the missing "const" that annoy some compilers. 
-// Alpha 4	Fixed partial transition and offset bugs. Also fixed case where power up state is wrong. 
-// Beta 1	Changed flying wing mixing to the output mixers.
-//			Removed Source Mix setting that confused everyone. Also removed RC input Source B mixing
-//			as this is best done in the output mixers now. Dynamic gain effect reversed. Now max input
-//			is maximum stability. Decoupled stick and gyro for P gain.
-//			Factory reset now enterable by pressing just the middle two buttons. 
-//			Removed output switcher and added per-output offset.
-//			Added the ability to mix any RC source into the outputs.
-// Beta 1.1 Added arming
-// Beta 1.2	Reversed arming and reduced the stick extremes required.
+// Beta 9	Hands-free now takes its trigger from the RC deadband setting.
+//			Autoupdate of CH7 source now less annoying. Fixed LVA setting and display.
+//			Removed buggy output switcher. Fixed all the missing "const" that annoy some compilers. 
+//			Tweaked throttle high threshold on power-up.
+//			Factory reset now enterable by pressing just the middle two buttons.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Add arming/disarming
-//
+// Beta test, then release OpenAero2 V1.2
 //
 //***********************************************************
 //* Includes
@@ -276,9 +264,7 @@
 #define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define ARM_TIMER_RESET 900			// RC position to reset timer
-#define TRANSITION_TIMER 1953		// Transition timer units (100ms * 16) (1 to 5 = 1.6s to 8s)
-#define ARM_TIMER 97655				// Amount of time the sticks must be held to trigger arm/disarm. Currently five seconds.
+#define LAUNCH_TIMER_RESET 2670		// Throttle position to reset timer (-90%)
 
 //***********************************************************
 //* Code and Data variables
@@ -286,8 +272,6 @@
 
 // Flight variables
 uint32_t ticker_32;					// Incrementing system ticker
-int16_t	transition_value_16 = 0;
-int16_t transition_counter = 0;
 
 // Flags
 uint8_t	General_error = 0;
@@ -312,11 +296,10 @@ int main(void)
 	bool Overdue = false;
 	bool ServoTick = false;
 	bool SlowRC = false;
-	bool TransitionUpdated = false;
 
 	// 32-bit timers
 	uint32_t LostModel_timer = 0;
-	uint32_t Arm_timer = 0;
+	uint32_t Launch_timer = 0;
 	uint32_t RC_Rate_Timer = 0;
 
 	// 16-bit timers
@@ -325,16 +308,14 @@ int main(void)
 	uint16_t Ticker_Count = 0;
 	uint16_t Servo_Timeout = 0;
 	uint16_t Servo_Rate = 0;
-	uint16_t Transition_timeout = 0;
 
 	// Timer incrementers
 	uint16_t LoopStartTCNT1 = 0;
 	uint16_t RC_Rate_TCNT1 = 0;
-	uint8_t Transition_TCNT2 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
 	uint8_t Lost_TCNT2 = 0;
-	uint8_t Arm_TCNT2 = 0;
+	uint8_t Launch_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
@@ -344,14 +325,7 @@ int main(void)
 	uint8_t Status_seconds = 0;
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 	uint8_t i = 0;
-	uint8_t	old_flight = 3;			// Current/old flight profile
-
-	// Transition
-	uint8_t Transition_state = TRANS_0;
-	int16_t	temp_value_16_1 = 0;
-	int16_t	temp_value_16_2 = 0;
-	uint8_t start = 0;
-	uint8_t end = 1;
+	uint8_t	old_flight = 0;			// Current/old flight profile
 
 	init();							// Do all init tasks
 
@@ -529,7 +503,8 @@ int main(void)
 		}
 
 		// Beep buzzer if Vbat lower than trigger
-		if (GetVbat() < Config.PowerTrigger)
+		// Vbat is measured in units of 10mV, so a PowerTrigger of 127 equates to
+		if (GetVbat() < Config.PowerTriggerActual)
 		{
 			Alarm_flags |= (1 << LVA_Alarm);	// Set LVA_Alarm flag
 			General_error |= (1 << LOW_BATT); 	// Set low battery bit
@@ -554,55 +529,43 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Arm/disarm handling
+		//* Hand-launch mode handling
 		//************************************************************
 
-		if (Config.ArmMode == ON)
+		// Only pass through here if launch block timer running
+		if ((Config.LaunchMode == ON) && (Flight_flags & (1 << Launch_Mode)) && (Flight_flags & (1 << Launch_Block)))
 		{
 			// Increment timer only if Launch mode on to save cycles
-			Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); // TCNT2 runs at 19.531kHz. SECOND_TIMER amount of TCNT2 is 1 second
-			Arm_TCNT2 = TCNT2;
+			Launch_timer += (uint8_t) (TCNT2 - Launch_TCNT2);
+			Launch_TCNT2 = TCNT2;
 
-			// If sticks not at extremes, reset timer
-			// Sticks down and centered = armed. Down and outside = disarmed
-			if (
-				((-ARM_TIMER_RESET < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[THROTTLE]) && (RCinputs[THROTTLE] < ARM_TIMER_RESET))
-			   )
-
+			// If throttle position cut, reset timer
+			if (RxChannel[THROTTLE] < LAUNCH_TIMER_RESET)	
 			{
-				Arm_timer = 0;
+				Launch_timer = 0;
+				Flight_flags &= ~(1 << Launch_Mode);	// Reset state machine
+				Flight_flags &= ~(1 << Launch_Block);	// Enable autolevel
+				menu_beep(2);							// Signal launch mode timer restart
 			}
-
-			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER/SECOND_TIMER seconds
-			if (Arm_timer > ARM_TIMER)
+		
+			// Re-enable autolevel when timer expires while autolevel blocked
+			if ((Flight_flags & (1 << Launch_Block)) && (Launch_timer > ((uint32_t)SECOND_TIMER * (uint32_t)Config.LaunchDelay)))
 			{
-				// If aileron is at min, arm the FC
-				if (RCinputs[AILERON] < ARM_TIMER_RESET)
-				{
-					Arm_timer = 0;
-					General_error &= ~(1 << DISARMED);		// Set flags to armed
-					menu_beep(20);							// Signal that FC is now armed
-				}
-
-				// Else, disarm the FC
-				else
-				{
-					Arm_timer = 0;
-					General_error |= (1 << DISARMED);		// Set flags to disarmed
-					menu_beep(1);							// Signal that FC is now disarmed
-				}
-
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
+				Flight_flags &= ~(1 << Launch_Block);
+				Flight_flags |= (1 << Launch_Mode);
 			}
 		}
-		// Arm when ArmMode is OFF
-		else 
+
+		// If first time into Launch mode
+		if ((Config.LaunchMode == ON) && !(Flight_flags & (1 << Launch_Mode)))
 		{
-			General_error &= ~(1 << DISARMED);		// Set flags to armed
+			// Launch mode throttle position exceeded
+			if (RxChannel[THROTTLE] > Config.Launchtrigger)	
+			{
+				Flight_flags |= (1 << Launch_Mode);// Start 10 second countdown
+				Flight_flags |= (1 << Launch_Block);// Disable autolevel
+				menu_beep(1);					// Signal launch mode timer start
+			}
 		}
 
 		//************************************************************
@@ -622,265 +585,41 @@ int main(void)
 		}
 
 		// Clear Throttle High error once throtle reset
-		if (RCinputs[THROTTLE] < 250)
+		if (RCinputs[THROTTLE] < -900)
 		{
 			General_error &= ~(1 << THROTTLE_HIGH);	
 		}
 
 		//************************************************************
 		//* Flight mode selection
-		//*
-		//* Normally, there are three separate profiles, each with PID 
-		//* values, however in Transition mode, there is only one 
-		//* (Flight mode 2) which is a moving blend of Flight modes 0 to 1.
-		//*
-		//* The transition speed is controlled by the Config.TransitionSpeed 
-		//* setting.
 		//************************************************************
 
-		// Manually only allow Flight mode 2 if not in transition mode
-		if ((RxChannel[Config.FlightChan] > Config.Autotrigger3) && (Config.MixMode != TRANSITION))
+		if (RxChannel[Config.FlightChan] > Config.Autotrigger3)
 		{
-			Config.FlightSel = 2;			// Flight mode 2
+			Config.Flight = 2;			// Flight mode 2
 		}	
 		else if (RxChannel[Config.FlightChan] > Config.Autotrigger2)
 		{
-			Config.FlightSel = 1;			// Flight mode 1
+			Config.Flight = 1;			// Flight mode 1
 		}
 		else
 		{
-			Config.FlightSel = 0;			// Flight mode 0
+			Config.Flight = 0;			// Flight mode 0
 		}
 
-		// Reset update request each loop
-		TransitionUpdated = false;
-
-		// For the first startup, set up the right state for the current setup
-		if (Config.MixMode == TRANSITION) 
+		// When changing flight modes...
+		if (Config.Flight != old_flight)
 		{
-			// Check for initial startup
-			if (old_flight == 3)
-			{
-				switch(Config.FlightSel)
-				{
-					case 0:
-						Transition_state = TRANS_0;
-						memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[0][1], (sizeof(flight_control_t) - 1));
-						break;
-					case 1:
-					case 2:
-						Transition_state = TRANS_0_to_1_start; // Debug - fix case where board is powered up in Flight mode 2
-					//	Transition_state = TRANS_1;
-					//	memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
-						break;
-					default:
-						break;
-				}		 
-				old_flight = Config.FlightSel;
-			}
-		}
-
-		// Update when changing flight modes in transition mode
-		if (Config.FlightSel != old_flight)
-		{
-			// When in a timed transition mode
-			if ((Config.MixMode == TRANSITION) && (Config.TransitionSpeed != 0))
-			{
-				// Flag that update is required if mode changed
-				TransitionUpdated = true;
-			}
-
+			// Update travel limits
+			UpdateLimits();
+	
 			// Reset I-terms so that neutral is reset
-			// but not in Transition mode
-			if (Config.MixMode != TRANSITION)
-			{
-				IntegralGyro[ROLL] = 0;	
-				IntegralGyro[PITCH] = 0;
-				IntegralGyro[YAW] = 0;	
-			}
+			IntegralGyro[ROLL] = 0;	
+			IntegralGyro[PITCH] = 0;
+			IntegralGyro[YAW] = 0;
+
+			old_flight = Config.Flight;
 		}
-
-		// Check to see if the transition channel has changed when bound to an 
-		// input channel to control transition (Config.TransitionSpeed = 0)
-		// If so, set TransitionUpdated flag to trigger an update
-		if ((Config.MixMode == TRANSITION) && (Config.TransitionSpeed == 0))
-		{
-			// 
-			if (transition_value_16 != (RCinputs[Config.FlightChan] >> 7))
-			{
-				TransitionUpdated = true;
-			}
-		}
-
-		//************************************************************
-		//* Transition handling - Always reading from Profile 2
-		//************************************************************
-		
-		if (Config.MixMode == TRANSITION)
-		{
-			Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
-			Transition_TCNT2 = TCNT2;
-
-			// Update transition value. -1250 to 1250 --> -9 to 9 steps
-			transition_value_16 = (RCinputs[Config.FlightChan] >> 7);
-
-			// Update transition state change
-			if (TransitionUpdated)
-			{
-				// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
-				if (Config.TransitionSpeed == 0)
-				{
-					Transition_state = TRANSITIONING;
-				}
-				// For the change from 0 to 1
-				else if ((Config.FlightSel == 1) && (old_flight == 0))
-				{
-					Transition_state = TRANS_0_to_1_start;
-					old_flight = 1;
-				}
-				// For the change from 1 to 0
-				else if ((Config.FlightSel == 0) && (old_flight == 1))
-				{
-					Transition_state = TRANS_1_to_0_start;
-					old_flight = 0;
-				}
-				// For direct entry to the transition state
-				else if (Config.FlightSel == 2)
-				{
-					Transition_state = TRANS_1;
-					old_flight = 2;
-				}
-			}
-
-			// Update state, values and transition_counter every Config.TransitionSpeed if not zero. 1953 = 100ms
-			if (((Config.TransitionSpeed != 0) && (Transition_timeout > (TRANSITION_TIMER * Config.TransitionSpeed))) ||
-			// If bound to a channel update once
-				  TransitionUpdated)
-			{
-				Transition_timeout = 0;
-				TransitionUpdated = false;
-
-				switch(Transition_state)
-				{
-					case TRANS_0:
-						memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[0][1], (sizeof(flight_control_t) - 1));
-						break;
-
-					case TRANS_1:
-						memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
-						break;
-
-					case TRANS_0_to_1_start:
-					case TRANS_1_to_0_start:
-						// Set start and end profiles
-						if (Transition_state == TRANS_0_to_1_start)
-						{
-							start = 0;
-							end = 1;
-						}
-						else
-						{
-							start = 1;
-							end = 0;
-						}
-						
-						// Fall through to transition handling
-						Transition_state = TRANSITIONING;
-
-					case TRANSITIONING:
-						// Transition value update loop. Config.Flightcontrol has sizeof(flight_control_t) bytes
-						// but we don't wish to merge the trigger value in byte 0.
-						for (i = 1; i < (sizeof(flight_control_t) - 1) ; i++)
-						{
-							// Get start/end values
-							temp_value_16_1 = Config.FlightModeByte[0][i];	// Promote to 16 bits
-							temp_value_16_1 = temp_value_16_1 << 8;			// Multiply by 256
-							temp_value_16_2 = Config.FlightModeByte[1][i];	// Promote to 16 bits
-							temp_value_16_2 = temp_value_16_2 << 8;
-							temp_value_16_2 = (temp_value_16_2 - temp_value_16_1) >> 4;	// Divide difference into 16ths
-
-							// Process the transition values. temp_value_16_1 is either from the channel value
-							// (transition_value_16) or driven by the transition_counter.
-							// RC input is nominally +/- 1250. /128 = +/- 9.77 (span of 19.53). Limit this to 0 to 15.
-							// This corresponds to values from -1280 to 768 (988us to 1.8ms) (0 extends to 1.04ms)
-							if (Config.TransitionSpeed == 0)
-							{
-								temp_value_16_1 = transition_value_16;
-								temp_value_16_1 = temp_value_16_1 + 7;
-							}
-							else 
-							{
-								temp_value_16_1 = transition_counter;
-							}
-							
-							// Limit extent of transition value
-							if (temp_value_16_1 < 0) temp_value_16_1 = 0;
-							if (temp_value_16_1 > 16) temp_value_16_1 = 16;
-							temp_value_16_2 = (temp_value_16_2 * temp_value_16_1); // 0 to 16 * difference
-
-							// Get the start value and scale
-							temp_value_16_1 = Config.FlightModeByte[0][i] << 8;
-
-							// Add multiplied difference
-							temp_value_16_1 += temp_value_16_2;
-
-							// Scale back to 8-bit value and re-cast
-							temp_value_16_1 = (temp_value_16_1 >> 8);
-
-							// Update Profile 3 with merged value
-							Config.FlightModeByte[2][i] = (int8_t) temp_value_16_1;
-
-						} // Transition value update loop
-
-						// Update travel limits and triggers
-						UpdateLimits();
-
-						// Handle timed transition
-						// Profile 1 to 0, so counter decrements to zero
-						if (start)
-						{
-							transition_counter--;
-							if (transition_counter <= 0)
-							{
-								transition_counter = 0;
-								Transition_state = TRANS_0;
-							}
-						}
-						// Profile 0 to 1, so counter increments to 16
-						else
-						{
-							transition_counter++;
-							if (transition_counter >= 16)
-							{
-								transition_counter = 16;
-								Transition_state = TRANS_1;
-							}
-						}
-						break;
-
-					default:
-						break;
-
-				} // switch(Transition_state)
-
-			} // Increment transition_counter
-
-		} // if (Config.MixMode == TRANSITION)
-
-		//************************************************************
-		//* Set flight mode based on mixmode for transition
-		//************************************************************
-
-		if (Config.MixMode == TRANSITION)
-		{
-			Config.Flight = 2;
-		}
-		else
-		{
-			Config.Flight = Config.FlightSel;
-		}
-
-		old_flight = Config.FlightSel;
 
 		//************************************************************
 		//* Autolevel mode selection
@@ -896,7 +635,6 @@ int main(void)
 			case DISABLED:
 				Flight_flags &= ~(1 << AutoLevel);	// De-activate autolevel mode
 				break;
-
 			case HANDSFREE:
 				if (Flight_flags & (1 << HandsFree))	// If hands free
 				{
@@ -907,13 +645,17 @@ int main(void)
 					Flight_flags &= ~(1 << AutoLevel); // De-activate autolevel mode
 				}
 				break;
-
 			case ALWAYSON:
 				Flight_flags |= (1 << AutoLevel);// Activate autolevel mode
 				break;
-
 			default:							// Disable by default
 				break;
+		}
+
+		// Check for Launch blocking
+		if (Flight_flags & (1 << Launch_Block))
+		{
+			Flight_flags &= ~(1 << AutoLevel);	// De-activate autolevel mode
 		}
 
 		// Check for advanced Failsafe

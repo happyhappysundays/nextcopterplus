@@ -168,7 +168,7 @@ void init(void)
 	// This delay prevents the GLCD flashing up a ghost image of old data
 	_delay_ms(300);	
 
-	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users) 
+	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users)
 	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
 	{
 		// Display reset message
@@ -220,19 +220,22 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
-	// Disarm on start-up if Armed setting is ON
-	if (Config.ArmMode == ON)
-	{
-		General_error |= (1 << DISARMED); 	// Set disarmed bit
-	}
-
-	// Check to see that throttle is low if in CPPM mode if RC detected
+	// Check to see that throttle is low if in serial mode if RC detected
 	// Don't bother if in CamStab mode
 	_delay_ms(100);
-	if ((Config.RxMode == CPPM_MODE) && RC_Lock && (Config.CamStab == OFF))
+	if (
+		(
+		 (Config.RxMode == CPPM_MODE) ||
+		 (Config.RxMode == XTREME) ||
+		 (Config.RxMode == SBUS) ||
+		 (Config.RxMode == SPEKTRUM)
+		)
+		&& RC_Lock
+		&& (Config.CamStab == OFF)
+	   )
 	{
 		RxGetChannels();
-		if (RCinputs[THROTTLE] > 300)
+		if (RCinputs[THROTTLE] > -900)
 		{
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}

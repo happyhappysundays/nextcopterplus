@@ -43,33 +43,33 @@ void menu_rc_setup(uint8_t i);
 #define GENERALTEXT	22
 #define BATTTEXT 58 
 
-#define RCITEMS 15 		// Number of menu items
+#define RCITEMS 14 		// Number of menu items
 #define FSITEMS 5 
-#define GENERALITEMS 13 
+#define GENERALITEMS 14 
 #define BATTITEMS 5 
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[4][RCITEMS] PROGMEM = 
+const uint8_t RCMenuText[4][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0, 0},	// RC setup
+	{RCTEXT, 116, 105, 105, 105, 0, 141, 141, 141, 141, 0, 0, 0, 0},	// RC setup
 	{FSTEXT, 0, 0, 0, 0},												// Failsafe
-	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0},// General
+	{GENERALTEXT, 124, 0, 0, 0, 101, 119, 101, 0, 0, 101, 101, 0, 0},	// General
 	{BATTTEXT, 0, 0, 0, 0}												// Battery
 };
 
-// Have to size each element to RCITEMS even though they are  smaller... fix this later
-const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM = 
+// Have to size each element to GENERALITEMS even though they are  smaller... fix this later
+const menu_range_t rc_menu_ranges[4][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (15)
+		// RC setup (14)
 		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Min, Max, Increment, Style, Default
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
 		{THROTTLE,NOCHAN,1,1,NOCHAN},	// Second aileron
-		{THROTTLE,NOCHAN,1,1,NOCHAN},	// DynGainSrc
+		{THROTTLE,NOCHAN,1,1,AUX1},		// DynGainSrc
 		{0,100,5,0,0},					// Dynamic gain
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Second aileron reverse
@@ -79,7 +79,6 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{0,20,1,0,0},					// Flap speed (0 is fastest, 20 slowest)	
 		{0,5,1,0,2},					// Axis lock stick rate(0 is fastest, 5 slowest)
 		{0,5,1,0,1},					// RC deadband (%)
-		{0,5,1,0,1},					// TransitionSpeed 0 to 5
 	},
 	{
 		// Failsafe (5)
@@ -90,8 +89,8 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{-125,125,1,0,0},
 	},
 	{
-		// General (15)
-		{AEROPLANE,TRANSITION,1,1,AEROPLANE}, 	// Mixer mode
+		// General (14)
+		{AEROPLANE,CAMSTAB,1,1,AEROPLANE}, 	// Mixer mode
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{1,60,1,0,10},					// Status menu timeout
@@ -102,16 +101,17 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{1,64,1,0,8},					// Acc. LPF
 		{10,100,5,0,30},				// CF factor
 		{OFF,ON,1,1,ON},				// Advanced IMUType
-		{OFF,ON,1,1,ON},				// Arming mode on/off
-		{0,100,1,0,0},					// Height dampening amount
+		{OFF,ON,1,1,ON},				// Launch mode on/off
+		{-55,125,10,0,0},				// Launch mode throttle position
+		{0,60,1,0,10},					// Launch mode delay time
 	},
 	{
 		// Battery (5)
 		{0,1,1,1,LIPO}, 				// Min, Max, Increment, Style, Default
 		{0,12,1,0,0},					// Cells
-		{0,127,4,2,27},					// Trigger / Alarm voltage
-		{30,108,4,2,105},				// Max
-		{20,100,4,2,83},				// Min
+		{0,127,4,2,27},					// Trigger / Alarm voltage (Display multiplied by 4) (108, Range 0 to 508)
+		{30,108,4,2,105},				// Max (Display multiplied by 4) 4.2V (420, Range 120 to 432)
+		{20,100,4,2,83},				// Min (Display multiplied by 4) 3.3V (330, Range 80 to 400)
 	}
 };
 //************************************************************
@@ -181,7 +181,7 @@ void menu_rc_setup(uint8_t section)
 		int8_t temp_type = Config.MixMode;
 		int8_t temp_cells = Config.BatteryCells;
 		int8_t temp_minvoltage = Config.MinVoltage;
-		int8_t temp_arm = Config.ArmMode;
+		int8_t temp_flapchan = Config.FlapChan;
 
 		// Print menu
 		print_menu_items(rc_top + offset, RCSTART + offset, value_ptr, mult, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
@@ -198,10 +198,10 @@ void menu_rc_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			// See if arming mode has changed to ON
-			if ((temp_arm == OFF) && (Config.ArmMode == ON))
+			// Update Ch7. mixer with source from Config.FlapChan if in Aeroplane mode and source changed
+			if ((Config.MixMode == AEROPLANE) && (Config.FlapChan != temp_flapchan))
 			{
-				General_error |= (1 << DISARMED);		// Set flags to disarmed
+				Config.Channel[CH7].source_a = Config.FlapChan;
 			}
 
 			// See if cell number or min_volts has changed
@@ -228,7 +228,6 @@ void menu_rc_setup(uint8_t section)
 					case CAMSTAB:
 						get_preset_mix(CAM_STAB);
 						break;
-					case TRANSITION:	// No need to reload anything for transtion as the setup will be manual
 					default:
 						break;
 				}
