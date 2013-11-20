@@ -52,13 +52,16 @@ void Set_EEPROM_Default_Config(void)
 	// Set magic number / setup byte
 	Config.setup = MAGIC_NUMBER;
 
-	// Servo defaults
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
+	}
+	// Servo defaults
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
 		//Config.Servo_reverse[i] = NORMAL;
-		Config.Offset[i] = 0;
+		//Config.Offset[i] = 0;
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
 		//Config.Failsafe[i] = 0;
@@ -66,17 +69,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.Failsafe[0] = -100;			// Throttle should failsafe to minimum
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
-
-	// Preset Psuedo Output mixers to safe values
-	for (i = 8; i < PSUEDO_OUTPUTS; i++)
-	{
-		Config.Channel[i].source_a 	= NOCHAN;
-		Config.Channel[i].offset 	= 0;
-		Config.Channel[i].output_b 	= NOMIX;
-		Config.Channel[i].output_c 	= NOMIX;
-		Config.Channel[i].output_d 	= NOMIX;
-	}
-
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
@@ -89,9 +81,14 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.FlightMode[1].Profilelimit = 0;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
+//	Config.FlightMode[1].Yaw_type = LOCK; // debug for axis lock testing
+//	Config.FlightMode[1].Yaw_limit = 125; // debug
+
 	Config.FlightMode[2].Profilelimit = 80;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
+//	Config.FlightMode[2].Yaw_type = LOCK; // debug
+//	Config.FlightMode[2].Yaw_limit = 125; // debug
 
 	// Set up all three profiles the same initially
 	for (i = 0; i < 3; i++)
@@ -116,7 +113,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.MaxVoltage = 105;			// 105 * 4 = 420
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.FlapChan = NOCHAN;			// This is to make sure that flaperons are handled correctly when disabled
-	Config.ArmMode = OFF;
+	Config.LaunchDelay = 10;
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout

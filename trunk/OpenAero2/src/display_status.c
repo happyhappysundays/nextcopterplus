@@ -46,13 +46,6 @@ void Display_status(void)
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,33); 	// Profile
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM:
 
-/*	mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,75,33); // transition_value_16
-	mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,75,44); // transition_counter
-
-	mugui_lcd_puts(itoa(Config.FlightModeByte[0][4],pBuffer,10),(prog_uchar*)Verdana8,0,44); //Config.FlightModeByte[start][i]
-	mugui_lcd_puts(itoa(Config.FlightModeByte[1][4],pBuffer,10),(prog_uchar*)Verdana8,25,44);
-	mugui_lcd_puts(itoa(Config.FlightModeByte[2][4],pBuffer,10),(prog_uchar*)Verdana8,50,44);
-*/
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
@@ -151,10 +144,6 @@ void Display_status(void)
 		{
 			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
 			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
-		}
-		else if((General_error & (1 << DISARMED)) != 0)
-		{
-			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); // Disarmed
 		}
 	}
 
