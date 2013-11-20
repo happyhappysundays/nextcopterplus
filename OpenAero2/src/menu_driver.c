@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "..\inc\mixer.h"
 
-#define CONTRAST 171 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 170 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -330,7 +330,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		// Update contrast setting
 		if (menuitem == CONTRAST)
 		{
-			st7565_set_brightness(value);
+			st7565_set_brightness(value); // debug
 		}
 
 		// Set servo position if required and update every 4 * 5ms = 20ms

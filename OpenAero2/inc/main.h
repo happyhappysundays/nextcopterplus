@@ -23,9 +23,6 @@ extern bool	RefreshStatus;
 extern uint32_t ticker_32;	
 extern uint16_t StackCount(void);	
 
-extern int16_t	transition_value_16;
-extern int16_t	transition_counter;	
-
 // Flags
 extern uint8_t	General_error;
 extern uint8_t	Flight_flags;
