@@ -35,8 +35,6 @@ int16_t scale_percent_nooffset(int8_t value);
 
 void ProcessMixer(void)
 {
-	static	int16_t	old_z = 0; // Historical Z-axis acc value
-
 	uint8_t i;
 	uint8_t j;
 	int16_t P1_solution = 0;
@@ -67,73 +65,81 @@ void ProcessMixer(void)
 		//************************************************************
 		// Mix in gyros
 		//************************************************************ 
+
 		// P1
-		if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) // P1
+		if ((Transition_state == TRANS_0) || (TRANSITIONING))
 		{
-			if ((Config.Channel[i].P1_RevFlags & (1 << RollRev)) != 0)
+			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) // P1
 			{
-				P1_solution = P1_solution + PID_Gyros[P1][ROLL];
+				if ((Config.Channel[i].P1_RevFlags & (1 << RollRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_Gyros[P1][ROLL];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+				}
 			}
-			else
+			if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
 			{
-				P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+				if ((Config.Channel[i].P1_RevFlags & (1 << PitchRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_Gyros[P1][PITCH];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_Gyros[P1][PITCH];
+				};
+			}
+			if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
+			{
+				if ((Config.Channel[i].P1_RevFlags & (1 << YawRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_Gyros[P1][YAW];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_Gyros[P1][YAW];
+				};
 			}
 		}
-		if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
-		{
-			if ((Config.Channel[i].P1_RevFlags & (1 << PitchRev)) != 0)
-			{
-				P1_solution = P1_solution + PID_Gyros[P1][PITCH];
-			}
-			else
-			{
-				P1_solution = P1_solution - PID_Gyros[P1][PITCH];
-			};
-		}
-		if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
-		{
-			if ((Config.Channel[i].P1_RevFlags & (1 << YawRev)) != 0)
-			{
-				P1_solution = P1_solution + PID_Gyros[P1][YAW];
-			}
-			else
-			{
-				P1_solution = P1_solution - PID_Gyros[P1][YAW];
-			};
-		}
+
 		// P2
-		if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) // P2
+		if ((Transition_state == TRANS_1) || (TRANSITIONING))
 		{
-			if ((Config.Channel[i].P2_RevFlags & (1 << RollRev)) != 0)
+			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) // P2
 			{
-				P2_solution = P2_solution + PID_Gyros[P2][ROLL];
+				if ((Config.Channel[i].P2_RevFlags & (1 << RollRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_Gyros[P2][ROLL];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+				}
 			}
-			else
+			if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
 			{
-				P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+				if ((Config.Channel[i].P2_RevFlags & (1 << PitchRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_Gyros[P2][PITCH];
+				};
 			}
-		}
-		if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
-		{
-			if ((Config.Channel[i].P2_RevFlags & (1 << PitchRev)) != 0)
+			if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
 			{
-				P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+				if ((Config.Channel[i].P2_RevFlags & (1 << YawRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_Gyros[P2][YAW];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_Gyros[P2][YAW];
+				};
 			}
-			else
-			{
-				P2_solution = P2_solution - PID_Gyros[P2][PITCH];
-			};
-		}
-		if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
-		{
-			if ((Config.Channel[i].P2_RevFlags & (1 << YawRev)) != 0)
-			{
-				P2_solution = P2_solution + PID_Gyros[P2][YAW];
-			}
-			else
-			{
-				P2_solution = P2_solution - PID_Gyros[P2][YAW];
-			};
 		}
 
 		//************************************************************
@@ -147,60 +153,90 @@ void ProcessMixer(void)
 		// Mix in accelerometers
 		//************************************************************ 
 		// P1
-		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
+		if ((Transition_state == TRANS_0) || (TRANSITIONING))
 		{
-			P1_solution += rolltrim;
+			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
+			{
+				P1_solution += rolltrim;
 			
-			if ((Config.Channel[i].P1_RevFlags & (1 << AccRollRev)) != 0)
-			{
-				P1_solution = P1_solution + PID_ACCs[P1][ROLL];
+				if ((Config.Channel[i].P1_RevFlags & (1 << AccRollRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_ACCs[P1][ROLL];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+				}
 			}
-			else
-			{
-				P1_solution = P1_solution - PID_ACCs[P1][ROLL];
-			}
-		}
 
-		if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
-		{
-			P1_solution += pitchtrim;
+			if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
+			{
+				P1_solution += pitchtrim;
 			
-			if ((Config.Channel[i].P1_RevFlags & (1 << AccPitchRev)) != 0)
-			{
-				P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+				if ((Config.Channel[i].P1_RevFlags & (1 << AccPitchRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_ACCs[P1][PITCH];
+				}
 			}
-			else
+
+			if ((Config.Channel[i].P1_sensors & (1 << ZDeltaAcc)) != 0)
 			{
-				P1_solution = P1_solution - PID_ACCs[P1][PITCH];
+				if ((Config.Channel[i].P1_RevFlags & (1 << AccZRev)) != 0)
+				{
+					P1_solution = P1_solution + PID_ACCs[P1][YAW];
+				}
+				else
+				{
+					P1_solution = P1_solution - PID_ACCs[P1][YAW];
+				}
 			}
 		}
 
 		// P2
-		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
+		if ((Transition_state == TRANS_1) || (TRANSITIONING))
 		{
-			P2_solution += rolltrim;
+			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
+			{
+				P2_solution += rolltrim;
 			
-			if ((Config.Channel[i].P2_RevFlags & (1 << AccRollRev)) != 0)
-			{
-				P2_solution = P2_solution + PID_ACCs[P2][ROLL];
+				if ((Config.Channel[i].P2_RevFlags & (1 << AccRollRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_ACCs[P2][ROLL];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+				}
 			}
-			else
-			{
-				P2_solution = P2_solution - PID_ACCs[P2][ROLL];
-			}
-		}
 
-		if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
-		{
-			P2_solution += pitchtrim;
+			if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
+			{
+				P2_solution += pitchtrim;
 			
-			if ((Config.Channel[i].P2_RevFlags & (1 << AccPitchRev)) != 0)
-			{
-				P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+				if ((Config.Channel[i].P2_RevFlags & (1 << AccPitchRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_ACCs[P2][PITCH];
+				}
 			}
-			else
+
+			if ((Config.Channel[i].P2_sensors & (1 << ZDeltaAcc)) != 0)
 			{
-				P2_solution = P2_solution - PID_ACCs[P2][PITCH];
+				if ((Config.Channel[i].P2_RevFlags & (1 << AccZRev)) != 0)
+				{
+					P2_solution = P2_solution + PID_ACCs[P2][YAW];
+				}
+				else
+				{
+					P2_solution = P2_solution - PID_ACCs[P2][YAW];
+				}
 			}
 		}
 
@@ -209,122 +245,128 @@ void ProcessMixer(void)
 		//************************************************************ 
 
 		// Mix in other outputs here (P1)
-		if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
+		if ((Transition_state == TRANS_0) || (TRANSITIONING))
 		{
-			// Is the source an RC input?
-			if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
+			if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
 			{
-				// Yes, calculate RC channel number from source number and return RC value
-				temp2 = RCinputs[Config.Channel[i].P1_source_a - MAX_OUTPUTS];
-			}
-			else
-			{
-				// No, just use the selected output's old data
-				temp2 = Config.Channel[Config.Channel[i].P1_source_a].P1_value;
-			}
+				// Is the source an RC input?
+				if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
+				{
+					// Yes, calculate RC channel number from source number and return RC value
+					temp2 = RCinputs[Config.Channel[i].P1_source_a - MAX_OUTPUTS];
+				}
+				else
+				{
+					// No, just use the selected output's old data
+					temp2 = Config.Channel[Config.Channel[i].P1_source_a].P1_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P1_source_a_volume);
-			P1_solution = P1_solution + temp2;
-		}
-		if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
-		{
-			if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P1_source_b - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P1_source_a_volume);
+				P1_solution = P1_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P1_source_b].P1_value;
-			}
+				if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P1_source_b - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P1_source_b].P1_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P1_source_b_volume);
-			P1_solution = P1_solution + temp2;
-		}
-		if ((Config.Channel[i].P1_source_c_volume !=0) && (Config.Channel[i].P1_source_c != NOMIX)) // Mix in third extra source
-		{
-			if (Config.Channel[i].P1_source_c > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P1_source_c - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P1_source_b_volume);
+				P1_solution = P1_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P1_source_c_volume !=0) && (Config.Channel[i].P1_source_c != NOMIX)) // Mix in third extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P1_source_c].P1_value;
-			}
+				if (Config.Channel[i].P1_source_c > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P1_source_c - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P1_source_c].P1_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P1_source_c_volume);
-			P1_solution = P1_solution + temp2;
-		}
-		if ((Config.Channel[i].P1_source_d_volume !=0) && (Config.Channel[i].P1_source_d != NOMIX)) // Mix in fourth extra source
-		{
-			if (Config.Channel[i].P1_source_d > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P1_source_d - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P1_source_c_volume);
+				P1_solution = P1_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P1_source_d_volume !=0) && (Config.Channel[i].P1_source_d != NOMIX)) // Mix in fourth extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P1_source_d].P1_value;
-			}
+				if (Config.Channel[i].P1_source_d > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P1_source_d - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P1_source_d].P1_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P1_source_d_volume);
-			P1_solution = P1_solution + temp2;
+				temp2 = scale32(temp2, Config.Channel[i].P1_source_d_volume);
+				P1_solution = P1_solution + temp2;
+			}
 		}
-	
+
 		// Mix in other outputs here (P2)
-		if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
+		if ((Transition_state == TRANS_1) || (TRANSITIONING))	
 		{
-			if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
+			if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
 			{
-				temp2 = RCinputs[Config.Channel[i].P2_source_a - MAX_OUTPUTS];
-			}
-			else
-			{
-				temp2 = Config.Channel[Config.Channel[i].P2_source_a].P2_value;
-			}
+				if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P2_source_a - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P2_source_a].P2_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P2_source_a_volume);
-			P2_solution = P2_solution + temp2;
-		}
-		if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
-		{
-			if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P2_source_b - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P2_source_a_volume);
+				P2_solution = P2_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P2_source_b].P2_value;
-			}
+				if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P2_source_b - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P2_source_b].P2_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P2_source_b_volume);
-			P2_solution = P2_solution + temp2;
-		}
-		if ((Config.Channel[i].P2_source_c_volume !=0) && (Config.Channel[i].P2_source_c != NOMIX)) // Mix in third extra source
-		{
-			if (Config.Channel[i].P2_source_c > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P2_source_c - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P2_source_b_volume);
+				P2_solution = P2_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P2_source_c_volume !=0) && (Config.Channel[i].P2_source_c != NOMIX)) // Mix in third extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P2_source_c].P2_value;
-			}
+				if (Config.Channel[i].P2_source_c > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P2_source_c - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P2_source_c].P2_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P2_source_c_volume);
-			P2_solution = P2_solution + temp2;
-		}
-		if ((Config.Channel[i].P2_source_d_volume !=0) && (Config.Channel[i].P2_source_d != NOMIX)) // Mix in fourth extra source
-		{
-			if (Config.Channel[i].P2_source_d > (MAX_OUTPUTS - 1))
-			{
-				temp2 = RCinputs[Config.Channel[i].P2_source_d - MAX_OUTPUTS];
+				temp2 = scale32(temp2, Config.Channel[i].P2_source_c_volume);
+				P2_solution = P2_solution + temp2;
 			}
-			else
+			if ((Config.Channel[i].P2_source_d_volume !=0) && (Config.Channel[i].P2_source_d != NOMIX)) // Mix in fourth extra source
 			{
-				temp2 = Config.Channel[Config.Channel[i].P2_source_d].P2_value;
-			}
+				if (Config.Channel[i].P2_source_d > (MAX_OUTPUTS - 1))
+				{
+					temp2 = RCinputs[Config.Channel[i].P2_source_d - MAX_OUTPUTS];
+				}
+				else
+				{
+					temp2 = Config.Channel[Config.Channel[i].P2_source_d].P2_value;
+				}
 
-			temp2 = scale32(temp2, Config.Channel[i].P2_source_d_volume);
-			P2_solution = P2_solution + temp2;
+				temp2 = scale32(temp2, Config.Channel[i].P2_source_d_volume);
+				P2_solution = P2_solution + temp2;
+			}
 		}
 				
 		// Save solution for this channel. Note that this contains cross-mixed data from the *last* cycle
@@ -336,43 +378,62 @@ void ProcessMixer(void)
 	//************************************************************
 	// Mixer transition code
 	//************************************************************ 
-
-	// Convert number to percentage
-	if (Config.TransitionSpeed == 0) 
+/*
+	switch (Transition_state)
 	{
-		// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
-		// Trim that value down to +/-50 for just over +/-1000
-		transition  = (transition_value_16 >> 1); // 62/2 = 31+
-		transition += (transition_value_16 >> 3); // 62/4 = 15+
-		transition += (transition_value_16 >> 3); // 62/16 = 3 = 49
+		case 	TRANSITIONING:
+			// Convert number to percentage (0 to 100%)
+*/			if (Config.TransitionSpeed == 0) 
+			{
+			// RCinput range is 2500 for 1ms (+/-1250). Ran measured the +/-1000 to equate to +/-125% on his radio
+			// That would make +/-100% equate to +/-800 counts for RCinput.
+			// transition_value_16 is the RCinput / 16 so can range +/-50 for +/-800
+				//transition  = (transition_value_16 >> 4); // 
 
-		// Limit extent of transition value
-		if (transition < -50) transition = -50;
-		if (transition > 50) transition = 50;
-		transition += 50;
+				// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
+				// Trim that value down to +/-50 for just over +/-1000
+				transition  = (transition_value_16 >> 1); // 62/2 = 31+
+				transition += (transition_value_16 >> 3); // 62/4 = 15+
+				transition += (transition_value_16 >> 3); // 62/16 = 3 = 49
+
+				// Limit extent of transition value
+				if (transition < -50) transition = -50;
+				if (transition > 50) transition = 50;
+				transition += 50;
+			}
+			else 
+			{
+				transition = transition_counter;
+			}
+
+			for (i = 0; i < MAX_OUTPUTS; i++)
+			{
+				// Get source channel value
+				temp1 = Config.Channel[i].P1_value;
+				temp1 = scale32(temp1, (100 - transition));
+
+				// Get destination channel value
+				temp2 = Config.Channel[i].P2_value;
+				temp2 = scale32(temp2, transition);
+
+				// Sum the mixers
+				temp1 = temp1 + temp2;
+
+				// Save transitioned solution into P1
+				Config.Channel[i].P1_value = temp1;
+			} 
+/*			break;
+
+		case TRANS_0: // Do nothing as P1 values are correct
+			break;
+
+		case TRANS_1: // Do nothing as P2 values are correct
+			break;
+
+		default:
+			break;
 	}
-	else 
-	{
-		transition = transition_counter;
-	}
-
-	for (i = 0; i < MAX_OUTPUTS; i++)
-	{
-		// Get source channel value
-		temp1 = Config.Channel[i].P1_value;
-		temp1 = scale32(temp1, (100 - transition));
-
-		// Get destination channel value
-		temp2 = Config.Channel[i].P2_value;
-		temp2 = scale32(temp2, transition);
-
-		// Sum the mixers
-		temp1 = temp1 + temp2;
-
-		// Save transitioned solution into P1
-		Config.Channel[i].P1_value = temp1;
-	} 
-
+*/
 	//************************************************************
 	// Per-channel 3-point offset needs to be post transition loop 
 	// as it is non-linear
@@ -422,35 +483,6 @@ void ProcessMixer(void)
 		Config.Channel[i].P1_value += P1_solution;
 	}
 
-	//************************************************************
-	// Add in some height damping if required
-	// Note that it is assumed that P1 is used in hover
-	//************************************************************
-
-	if (Config.Dampen != 0)
-	{
-		// Work change in Z value from P1 profile
-		temp1 = old_z - PID_ACCs[P1][YAW];
-		temp1 *= Config.Dampen;
-
-		if (temp1 > MAX_ZGAIN)
-		{
-			temp1 = MAX_ZGAIN;
-		}
-
-		// Add dampening value to marked motor values
-		for (i = 0; i < MAX_OUTPUTS; i++)
-		{
-			if 	((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
-			{
-				Config.Channel[i].P1_value += temp1;
-			}
-		}
-
-		// Update old acc value
-		old_z = PID_ACCs[P1][YAW];
-	}
-
 } // ProcessMixer()
 
 // Update actual limits value with that from the mix setting percentages
@@ -473,8 +505,6 @@ void UpdateLimits(void)
 		};
 
 	// Update triggers
-	Config.Autotrigger1 = scale_percent(Config.FlightMode[P1].Profilelimit);
-	Config.Autotrigger2 = scale_percent(Config.FlightMode[P2].Profilelimit);
 	Config.PowerTriggerActual = Config.PowerTrigger * 10;
 
 	// Update I_term input constraints for all profiles

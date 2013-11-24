@@ -52,9 +52,12 @@ void output_servo_ppm(void)
 	// Re-sample throttle value
 	RCinputs[THROTTLE] = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
 
-	// Check for motor flags if throttle is below arming minimum
+	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so
-	if (RCinputs[THROTTLE] < -960)
+	if 	(
+			(RCinputs[THROTTLE] < -960) || 
+			((General_error & (1 << DISARMED)) != 0)
+		)
 	{
 		// For each output
 		for (i = 0; i < MAX_OUTPUTS; i++)
@@ -68,22 +71,10 @@ void output_servo_ppm(void)
 		}
 	}
 
-	// Suppress outputs during throttle high error or when disarmed,
-	// or when at min throttle AND marked as a motor output
-	if( (General_error & (1 << THROTTLE_HIGH)) ||
-		(General_error & (1 << DISARMED))
-		== 0)
+	// Suppress outputs during throttle high error
+	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{
-		// Create the output pulses if in sync with RC inputs
-		if (RC_Lock) 
-		{
-			output_servo_ppm_asm(&ServoOut[0]);
-		}
-		else // Unsynchronised so need to disable interrupts
-		{
-			cli();
-			output_servo_ppm_asm(&ServoOut[0]);
-			sei();
-		}
+		// Pass address of ServoOut array
+		output_servo_ppm_asm(&ServoOut[0]);
 	}
 }

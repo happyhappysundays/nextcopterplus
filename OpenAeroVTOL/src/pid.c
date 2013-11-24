@@ -55,10 +55,12 @@ int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each
 
 void Calculate_PID(void)
 {
+	static	int16_t	old_z = 0; 				// Historical Z-axis acc value
+
 	int32_t PID_gyro_temp1;					// P1
 	int32_t PID_gyro_temp2;					// P2
-	int32_t PID_acc_temp1;					// P1
-	int32_t PID_acc_temp2;					// P2
+	int32_t PID_acc_temp1 = 0;				// P1
+	int32_t PID_acc_temp2 = 0;				// P2
 	//
 //	int32_t PID_Gyro_I_temp1 = 0;			// Temporary i-terms bound to max throw P1
 //	int32_t PID_Gyro_I_temp2 = 0;			// Temporary i-terms bound to max throw P2
@@ -85,10 +87,10 @@ void Calculate_PID(void)
 			{Config.FlightMode[P2].Roll.I_mult, Config.FlightMode[P2].Pitch.I_mult, Config.FlightMode[P2].Yaw.I_mult}
 		};
 
-	int8_t 	L_gain[FLIGHT_MODES][2] = 
+	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
-			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult},
-			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult}
+			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
+			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
 		};
 
 	int16_t DynamicScale = 0;
@@ -267,4 +269,35 @@ void Calculate_PID(void)
 		}
 
 	} // PID loop
+
+	//************************************************************
+	// Calculate a delta-Z value 
+	//************************************************************
+
+	PID_acc_temp1 = old_z - accADC[YAW];
+	PID_acc_temp2 = PID_acc_temp1;
+
+
+	// P1
+	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)
+
+	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to a sensible value
+	{
+		PID_acc_temp1 = MAX_ZGAIN;
+	}
+
+	// P2
+	PID_acc_temp2 *= L_gain[P2][YAW];		// Multiply P-term (Max gain of 127)
+
+	if (PID_acc_temp2 > MAX_ZGAIN)			// Limit to a sensible value
+	{
+		PID_acc_temp2 = MAX_ZGAIN;
+	}
+
+	// Update values
+	PID_ACCs[P1][YAW] = (int16_t)PID_acc_temp1;	
+	PID_ACCs[P2][YAW] = (int16_t)PID_acc_temp2;	
+
+	// Save current acc Z value
+	old_z = accADC[YAW];
 }

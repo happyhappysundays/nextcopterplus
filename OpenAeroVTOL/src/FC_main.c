@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0
 // ================================
-// Version 1.3 Beta 1.7 - November 2013
+// Version: Beta 8 - November 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -29,7 +29,7 @@
 // **************************************************************************
 // Version History
 // ===============
-// V1.3		Based on OpenAero2 V1.2 Beta 8 code
+// VTOL 	Based on OpenAero2 V1.2 Beta 8 code
 // Alpha 1	Added transition code
 //			Added basic height dampening code (untested)
 // Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
@@ -42,27 +42,37 @@
 //			Factory reset now enterable by pressing just the middle two buttons. 
 //			Removed output switcher and added per-output offset.
 //			Added the ability to mix any RC source into the outputs.
-// Beta 1.1 Added arming
-// Beta 1.2	Reversed arming and reduced the stick extremes required.
+// Beta 1 	Added arming
+// Beta 2	Reversed arming and reduced the stick extremes required.
 //			Changed default to ARMED. Fixed up some defaults.
 //			Fixed OUT1 first input mixer bug.
-// Beta 1.3 Merged Channel and Output mixers. Removed presets.
+// Beta 3 	Merged Channel and Output mixers. Removed presets.
 //			Transition is default mode. Removed Profile 3 setting.
-//		1.4 Completely changed mixers, removed unwanted features.
+// Beta 4 	Completely changed mixers, removed unwanted features.
 //			Now customised for transitioning. 
-//		1.5	Memory reduction via sensor switches
+// Beta 5	Memory reduction via sensor switches
 //			Expanded transition to all eight channels.	
 //			Updated status display to show more transition info.
 //			Output mixer menus for OUT1 to OUT8 now contain both P1 and P2 configuration.
-//		1.6	Added motor marking and new safety features for arming, trims, limits and low-throttle.
+// Beta 6	Added motor marking and new safety features for arming, trims, limits and low-throttle.
 //			Fixed LVA setting and display. Removed failsafe functionality.
 //			Fixed menu position behaviour when moving about main and sub menus.
 //			Fixed flakey initial transition behaviour when changing transition settings
 //			PID values for both profiles now calculated on the fly and only transitioned in the mixer.
 //			Increased transition steps to 100 and interval to 10ms. I-terms reset at throttle cut.
 //			Added experimental three-point offset handling. Removed redundant servo trim.
-//		1.7 Re-added sensor reversing. Very code-size inefficient.
-//			
+// Beta 7 	Re-added sensor reversing. Very code-size inefficient.
+// Beta 8 	Changed display text for safety to "Armed", "Armable". Rearranged mixer items.
+//			Rationalised version number. Changed motor marker to "Motor/Servo".
+//			Changed servo rate to "Normal/fast". P1 to P2 transition point now hard-coded to 20% above center
+//			Changed manual transition range to +/-100% (was closer to +/-125%). LMA time now "Disarm time".
+//			LMA/Disarm timeout also switches to disarmed state if armable.
+//			Height damping removed, Z-axis delta now included in mixer list.
+//			Loop speed optimisations in the mixer. PWM sync logic simplified and hopefully debugged.
+// Beta 9	Disarm timer now functions in 0 to 127 seconds and will auto-disarm if armable and not set to zero.
+//			"No signal" state also disarms if set to "armable". Rearranged General menu. Fixed transition bug.
+//			Disarming state sets all outputs marked as "Motor" to minimum output.
+//			Acc Z Delta now working. Missing REV for P2 sensors restored.
 //
 //***********************************************************
 //* Notes
@@ -70,15 +80,15 @@
 //
 // Todo:
 //	Calibration mode
-//	Better way to integrate auto-switching of sensors.
-//	Per-sensor, per output, per profile gain adjustment.
+//	Better way to integrate switching of sensors.
 //	Copy RC soures and .values to an array so that the mixer can do less work?
 //	Try doing the mixer menu without creating the [values] array. 
 //
 // Bugs: 
 //	I-term constraints not working for P2 when P1 constraint differs
 //	
-//
+// Wish list:
+//	Per-sensor, per output, per profile gain adjustment.
 //
 //***********************************************************
 //* Includes
@@ -123,12 +133,10 @@
 //* Defines
 //***********************************************************
 
-#define	SERVO_OVERDUE 9765			// Number of T2 cycles before servo will be overdue = 9765 * 1/19531 = 500ms
+#define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 41667
-#define	SERVO_RATE_LOW 390			// Requested servo rate when in LOW mode. 19531 / 50(Hz) = 390
-#define	SERVO_RATE_HIGH 65			// Requested servo rate when in HIGH mode 300(Hz) = 65
-#define LMA_TIMEOUT 1171860			// Number or T2 cycles before Lost Model alarm sounds (1 minute)
-#define	PWM_DELAY 250				// Number of 8us blocks to wait between "Interrupted" and starting the PWM pulses 250 = 2ms
+#define	SERVO_RATE_LOW 390			// Requested servo rate when in Normal mode. 19531 / 50(Hz) = 390
+
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET 960			// RC position to reset timer
@@ -171,7 +179,6 @@ int main(void)
 	bool TransitionUpdated = false;
 
 	// 32-bit timers
-	uint32_t LostModel_timer = 0;
 	uint32_t Arm_timer = 0;
 	uint32_t RC_Rate_Timer = 0;
 
@@ -179,9 +186,10 @@ int main(void)
 	uint16_t Status_timeout = 0;
 	uint16_t UpdateStatus_timer = 0;
 	uint16_t Ticker_Count = 0;
-	uint16_t Servo_Timeout = 0;
+	uint16_t RC_Timeout = 0;
 	uint16_t Servo_Rate = 0;
 	uint16_t Transition_timeout = 0;
+	uint16_t Disarm_timer = 0;
 
 	// Timer incrementers
 	uint16_t LoopStartTCNT1 = 0;
@@ -189,14 +197,14 @@ int main(void)
 	uint8_t Transition_TCNT2 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
-	uint8_t Lost_TCNT2 = 0;
+	uint8_t Disarm_TCNT2 = 0;
 	uint8_t Arm_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
 
 	// Locals
-	uint8_t	LMA_minutes = 0;
+	uint8_t	Disarm_seconds = 0;
 	uint8_t Status_seconds = 0;
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 //	uint8_t i = 0;
@@ -204,9 +212,6 @@ int main(void)
 	int8_t	old_trans_mode = 0;		// Old transition mode
 	
 	// Transition
-//	uint8_t Transition_state = TRANS_0;
-//	int16_t	temp_value_16_1 = 0;
-//	int16_t	temp_value_16_2 = 0;
 	uint8_t start = 0;
 	uint8_t end = 1;
 
@@ -236,14 +241,15 @@ int main(void)
 			// Request the status be updated when safe
 			case REQ_STATUS:
 				// Reset safe to refresh flag
-				Main_flags &= ~(1 << Refresh_safe);
-				Menu_mode = WAITING_STATUS;
+//				Main_flags &= ~(1 << Refresh_safe);
+//				Menu_mode = WAITING_STATUS;
+				Menu_mode = STATUS;
 				break;
 
 			// Waiting for status screen to be updated
 			case WAITING_STATUS:
 				// Next time Refresh_safe is set, switch to status screen
-				if (Refresh_safe)
+				if ((Main_flags & (1 << Refresh_safe)) != 0)
 				{
 					Menu_mode = STATUS;
 				}
@@ -258,10 +264,12 @@ int main(void)
 				// Force resync on next RC packet
 				Interrupted = false;	
 				// Wait for timeout
-				Menu_mode = WAITING_TIMEOUT_BD;
+				Menu_mode = WAITING_TIMEOUT_BD; // Debug
 				break;
 
 			// Status screen up, but button still down ;)
+			// This is designed to stop the menu appearing instead of the status screen
+			// as it will stay here until the button is released
 			case WAITING_TIMEOUT_BD:
 				if(BUTTON1 == 0)
 				{
@@ -274,6 +282,7 @@ int main(void)
 				break;
 												
 			// Status screen up, waiting for timeout or action
+			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
 				if (Status_seconds >= Config.Status_timer)
@@ -281,17 +290,19 @@ int main(void)
 					Menu_mode = STATUS_TIMEOUT;
 				}
 
-				// Update status screen while waiting to time out
-				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
-				{
-					Menu_mode = REQ_STATUS;
-				}
-
 				// Jump to menu if button pressed
 				else if(BUTTON1 == 0)
 				{
 					Menu_mode = MENU;
 					menu_beep(1);
+					// Force resync on next RC packet
+					Interrupted = false;
+				}
+
+				// Update status screen while waiting to time out
+				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
+				{
+					Menu_mode = REQ_STATUS;
 				}
 				break;
 
@@ -299,6 +310,8 @@ int main(void)
 			case STATUS_TIMEOUT:
 				// Pop up the Idle screen
 				idle_screen();
+				// Force resync on next RC packet
+				Interrupted = false;
 				// Switch to IDLE mode
 				Menu_mode = IDLE;
 				break;
@@ -307,6 +320,8 @@ int main(void)
 			case MENU:
 				LVA = 0;	// Make sure buzzer is off :)
 				menu_main();
+				// Force resync on next RC packet
+				Interrupted = false;
 				// Switch back to status screen when leaving menu
 				Menu_mode = STATUS;
 				// Reset timeout once back in status screen
@@ -339,7 +354,7 @@ int main(void)
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)
 		//* 
-		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (LMA and LVA alarms)
+		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (Disarm and LVA alarms)
 		//************************************************************
 
 		// Ticker_Count increments at 19.531 kHz, in loop cycle chunks
@@ -359,30 +374,54 @@ int main(void)
 		//* Alarms
 		//************************************************************
 
-		// Lost model alarm
-		LostModel_timer += (uint8_t) (TCNT2 - Lost_TCNT2);
-		Lost_TCNT2 = TCNT2;
+		// Disarm timer alarm
+		Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
+		Disarm_TCNT2 = TCNT2;
 
-		// Reset LMA count if any RX activity, LMA off
-		if ((Flight_flags & (1 << RxActivity)) || (Config.LMA_enable == 0))
+		// Reset auto-disarm count if any RX activity or set to zero
+		if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0))
 		{														
-			LostModel_timer = 0;
-			Flight_flags &= ~(1 << Model_lost);
-			LMA_minutes = 0;
-			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
+			Disarm_timer = 0;
+			Disarm_seconds = 0;
 		}
 		
-		if (LostModel_timer > LMA_TIMEOUT)
+		// Increment disarm timer (seconds)
+		if (Disarm_timer > SECOND_TIMER)
 		{
-			LMA_minutes++;
-			LostModel_timer = 0;
+			Disarm_seconds++;
+			Disarm_timer = 0;
 		}
 
-		// Trigger lost model alarm if enabled and due
-		if ((LMA_minutes >= Config.LMA_enable) && (Config.LMA_enable != 0))	
+		// Disarm model if timeout enabled and due
+		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer != 0))	
 		{
-			Flight_flags |= (1 << Model_lost);	// Set lost model bit
-			General_error |= (1 << LOST_MODEL); // wtf?
+			// If FC is set to "armable" and is currently armed, disarm the FC
+			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
+			{
+				General_error |= (1 << DISARMED);	// Set flags to disarmed
+				// Force update of status screen
+				Menu_mode = STATUS_TIMEOUT;
+				menu_beep(1);							// Signal that FC is now disarmed
+			}
+		}
+
+		// If RC signals overdue, signal RX error message and disarm
+		if (Overdue)
+		{
+			General_error |= (1 << NO_SIGNAL);		// Set NO_SIGNAL bit
+			
+			// If FC is set to "armable" and is currently armed, disarm the FC
+			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
+			{
+				General_error |= (1 << DISARMED);	// Set flags to disarmed
+				// Force update of status screen
+				Menu_mode = STATUS_TIMEOUT;
+				menu_beep(1);						// Signal that FC is now disarmed
+			}
+		}
+		else
+		{
+			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
 		}
 
 		// Beep buzzer if Vbat lower than trigger
@@ -390,18 +429,15 @@ int main(void)
 		if (GetVbat() < Config.PowerTriggerActual)
 		{
 			Alarm_flags |= (1 << LVA_Alarm);	// Set LVA_Alarm flag
-			General_error |= (1 << LOW_BATT); 	// wtf?
 		}
 		else 
 		{
 			Alarm_flags &= ~(1 << LVA_Alarm);	// Clear LVA_Alarm flag
-			General_error &= ~(1 << LOW_BATT); 	// wtf?
 		}
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
 		if	(((Alarm_flags & (1 << LVA_Alarm)) ||
-			  (Flight_flags & (1 << Model_lost)) || 
-			  (Alarm_flags & (1 << SIG_Alarm))) &&
+			  (General_error & (1 << NO_SIGNAL))) && 
 			  (Alarm_flags & (1 << BUZZER_ON))) 
 		{
 			LVA = 1;
@@ -415,7 +451,7 @@ int main(void)
 		//* Arm/disarm handling
 		//************************************************************
 
-		if (Config.ArmMode == ON)
+		if (Config.ArmMode == ARMABLE)
 		{
 			// Increment timer only if Launch mode on to save cycles
 			Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); // TCNT2 runs at 19.531kHz. SECOND_TIMER amount of TCNT2 is 1 second
@@ -476,7 +512,7 @@ int main(void)
 			// Clear throttle high error
 			General_error &= ~(1 << THROTTLE_HIGH);	
 
-			// reset I-terms at throttle cut
+			// Reset I-terms at throttle cut
 			IntegralGyro[P1][ROLL] = 0;	
 			IntegralGyro[P1][PITCH] = 0;
 			IntegralGyro[P1][YAW] = 0;
@@ -494,7 +530,8 @@ int main(void)
 		//*
 		//************************************************************
 
-		if 	(RxChannel[Config.FlightChan] > Config.Autotrigger2)
+		// P1 to P2 transition point now hard-coded to 20% above center
+		if 	(RCinputs[Config.FlightChan] > 200)
 		{
 			Config.FlightSel = 1;			// Flight mode 1 (P2)
 		}
@@ -516,12 +553,10 @@ int main(void)
 			{
 				case 0:
 					Transition_state = TRANS_0;
-					//memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[0][1], (sizeof(flight_control_t) - 1));
 					transition_counter = 0;
 					break;
 				case 1:
 					Transition_state = TRANS_1;
-					//memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
 					transition_counter = 100;
 					break;
 				default:
@@ -551,7 +586,9 @@ int main(void)
 		// Check to see if the transition channel has changed when bound to an 
 		// input channel to control transition (Config.TransitionSpeed = 0)
 		// If so, set TransitionUpdated flag to trigger an update.
-		// Bote that by dividing the input value by 16 we reduce the steps from +/-1250 to about 156 steps 
+		// Note that by dividing the input value by 16 we reduce the steps from +/-1250 to about 156 steps 
+		// or +/-1000 to +/- 62, 124 steps 
+
 		if (Config.TransitionSpeed == 0)
 		{
 			if (transition_value_16 != (RCinputs[Config.FlightChan] >> 4))
@@ -570,7 +607,7 @@ int main(void)
 		Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
 		Transition_TCNT2 = TCNT2;
 
-		// Update transition value. -1250 to 1250 --> -78 to 78 steps
+		// Update transition value. +/-1250 --> +/-steps, +/-800 --> +/-50 steps
 		transition_value_16 = (RCinputs[Config.FlightChan] >> 4);
 
 		// Update transition state change when control value or flight mode changes
@@ -607,12 +644,10 @@ int main(void)
 			switch(Transition_state)
 			{
 				case TRANS_0:
-					//memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[0][1], (sizeof(flight_control_t) - 1));
 					transition_counter = 0;
 					break;
 
 				case TRANS_1:
-					//memcpy(&Config.FlightModeByte[2][1], &Config.FlightModeByte[1][1], (sizeof(flight_control_t) - 1));
 					transition_counter = 100;
 					break;
 
@@ -688,34 +723,44 @@ int main(void)
 		UpdateServos();
 
 		//************************************************************
-		//* Process servos
+		//* RC and servo timers
 		//************************************************************
 
-		// Work out the current RC rate
+		// Work out the current RC rate by measuring between incoming RC packets
 		RC_Rate_Timer += (uint16_t) (TCNT1 - RC_Rate_TCNT1);
 		RC_Rate_TCNT1 = TCNT1;
 
-		// Ensures that even without synchronous RX, something will come out at SERVO_RATE (50Hz)
+		// Sets the desired SERVO_RATE by flagging ServoTick when PWM due
 		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
 		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
 		ServoRate_TCNT2 = TCNT2;
 		
-		// Signal servo overdue after SERVO_OVERDUE time (500ms)
-		// Servo_Timeout increments at 19.531 kHz, in loop cycle chunks
-		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
+		// Signal RC overdue after RC_OVERDUE time (500ms)
+		// RC_Timeout increments at 19.531 kHz, in loop cycle chunks
+		RC_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
-		if (Servo_Timeout > SERVO_OVERDUE)
+
+		//************************************************************
+		//* Check for lack of RC
+		//************************************************************
+
+		// Check to see if the RC input is overdue (500ms)
+		if (RC_Timeout > RC_OVERDUE)
 		{
-			Overdue = true;
+			Overdue = true;	// This resukts in a "No Signal" error
 		}
 
-		// Always clear overdue state is an input received.
+		//************************************************************
+		//* Measure incoming RC rate
+		//************************************************************		
+
+		// RC input received
 		if (Interrupted)
 		{
-			Servo_Timeout = 0;				// Reset servo timeout
-			Overdue = false;				// And no longer overdue...
+			RC_Timeout = 0;					// Reset RC timeout
+			Overdue = false;				// And no longer overdue
 
-			// Check to see if RC rate slower than 60Hz.
+			// Measure incoming RC rate. Threshold is 60Hz.
 			// Slow RC rates are synched on every pulse, faster ones are limited to 50Hz
 			if (RC_Rate_Timer > SLOW_RC_RATE)
 			{
@@ -729,79 +774,58 @@ int main(void)
 			RC_Rate_Timer = 0;
 		}
 
-		// If the Servo Rate is set to HIGH run at full speed
-		if (Config.Servo_rate == HIGH)
-		{
-			if (Servo_Rate > SERVO_RATE_HIGH)
-			{
-				ServoTick = true;
-				Servo_Rate = 0;
-			}
-		}
+		//************************************************************
+		//* Manage desired output update rate when limited by
+		//* the PWM rate set to "Normal"
+		//************************************************************
 
-		// Otherwise, run at the appropriate rate as per measured RC rate
-		else if (Servo_Rate > SERVO_RATE_LOW)
+		// Flag update required based on SERVO_RATE_LOW
+		if (Servo_Rate > SERVO_RATE_LOW)
 		{
-			ServoTick = true;
+			ServoTick = true; // Slow device is ready for output generation
 			Servo_Rate = 0;
-
-			// Force a sync to the next packet for fast RC unless the user has requested it faster
-			if ((SlowRC == false) && (Config.Servo_rate == LOW))
-			{
-				Interrupted = false; 	// Plan B (fast RC)
-			}
 		}
 
-		// If simply overdue, signal RX error message
-		if (Overdue)
+		//************************************************************
+		//* Synchronise output update rate to the RC interrupts
+		//* based on a specific set of conditions
+		//************************************************************
+
+		// Cases where we are ready to output
+		if (Interrupted &&						// Only when interrupted (RC receive completed)
+				(
+				  (SlowRC) || 					// Plan A (Run as fast as the incoming RC if slow RC detected)
+				  (ServoTick && !SlowRC) ||		// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected)
+				  (Config.Servo_rate == HIGH) 	// Plan C (Run as fast as the incoming RC if in HIGH mode)
+				)
+			)
 		{
-			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
-			Alarm_flags |= (1 << SIG_Alarm);	// Set SIG_Alarm flag
+			Interrupted = false;				// Reset interrupted flag
+			ServoTick = false;					// Reset output requested flag
+			Servo_Rate = 0;						// Reset servo rate timer
+//			Main_flags |= (1 << Refresh_safe); 	// Flag that it is safe to try and refresh status screen
+			output_servo_ppm();					// Output servo signal
 		}
+
+		//************************************************************
+		//* Note: I can't recall what the deal with Refresh_safe is...
+		//* The interrupts is discarded when the status screen is updated
+		//* so that won't cuase sync issues. RC interrupts happening durin
+		//* status screen update shouldn't be an issue.
+		//* Experiment with this disabled to see what happens 
+		//************************************************************
+
+		// Not ready for output, so cancel the current interrupt and wait for the next one
 		else
 		{
-			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
-			Alarm_flags &= ~(1 << SIG_Alarm);	// Clear SIG_Alarm flag
+//			Main_flags |= (1 << Refresh_safe); 	// Flag that it is safe to try and refresh status screen - debug
+			Interrupted = false;				// Reset interrupted flag
 		}
 
-		// Check for no RC condition (Had RC lock but now overdue)
-		if (Overdue && RC_Lock)
-		{
-			RC_Lock = false;
-		}
+		//************************************************************
+		//* Measure loop rate
+		//************************************************************
 
-		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
-		//if (Interrupted) 					// Plan A
-		//if (Interrupted && ServoTick) 	// Plan B
-
-		if ((Interrupted && SlowRC) || 					// Plan A (slow RC)
-			(Interrupted && ServoTick && !SlowRC) ||	// Plan B (fast RC)
-			(Interrupted && (Config.Servo_rate == HIGH))) // Plan C (any RC with servo rate = HIGH)
-		{
-			Interrupted = false;			// Reset interrupted flag
-			ServoTick = false;
-			Servo_Rate = 0;
-
-			Main_flags |= (1 << Refresh_safe); 	// Safe to try and refresh status screen
-
-			output_servo_ppm();				// Output servo signal
-		}
-
-		// If in "no-RC" , just output unsynchronised
-		else if (Overdue && ServoTick)
-		{
-			ServoTick = false;				// Reset servo update ticker
-			Servo_Rate = 0;					// Reset servo rate timer
-			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
-			output_servo_ppm();				// Output servo signal
-		}
-
-		if (Overdue && ServoTick)
-		{
-			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
-		}
-
-		// Measure the current loop rate
 		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
 		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
 		ticker_32 += cycletime;

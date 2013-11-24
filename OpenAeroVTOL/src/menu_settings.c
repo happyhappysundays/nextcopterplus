@@ -42,7 +42,7 @@ void menu_rc_setup(uint8_t i);
 #define GENERALTEXT	124
 
 #define RCITEMS 11 		// Number of menu items
-#define GENERALITEMS 10 
+#define GENERALITEMS 9 
 
 //************************************************************
 // RC menu items
@@ -51,7 +51,7 @@ void menu_rc_setup(uint8_t i);
 const uint8_t RCMenuText[3][RCITEMS] PROGMEM = 
 {
 	{RCTEXT, 116, 105, 105, 0, 141, 141, 141, 0, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 0, 0, 119, 0, 0, 101, 0, 0},					// General
+	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0, 0},						// General
 };
 
 // Have to size each element to RCITEMS even though they are  smaller... fix this later
@@ -72,16 +72,15 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{0,10,1,0,0},					// TransitionSpeed 0 to 10
 	},
 	{
-		// General (10)
+		// General (9)
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
+		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
+		{0,127,1,0,30},					// Auto-disarm enable
 		{1,60,1,0,10},					// Status menu timeout
-		{0,30,1,0,3},					// LMA enable
 		{LOW,HIGH,1,1,LOW},				// Servo rate
 		{1,64,1,0,8},					// Acc. LPF
 		{10,100,5,0,30},				// CF factor
-		{OFF,ON,1,1,ON},				// Arming mode on/off
-		{0,100,1,0,0},					// Height dampening amount
 		{0,127,1,0,108},				// Trigger / Alarm voltage
 	}
 };
