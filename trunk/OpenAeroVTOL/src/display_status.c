@@ -76,11 +76,11 @@ void Display_status(void)
 	// Display transition point
 	if (Config.TransitionSpeed == 0)
 	{
-		if (transition_value_16 < -78)
+		if (transition_value_16 < -62)
 		{
 			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
 		}
-		else if (transition_value_16 > 78)
+		else if (transition_value_16 > 62)
 		{
 			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
 		}
@@ -152,20 +152,15 @@ void Display_status(void)
 			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
-		else if((General_error & (1 << LOW_BATT)) != 0)
+		else if((Alarm_flags & (1 << LVA_Alarm)) != 0)
 		{
 			LCD_Display_Text(134,(prog_uchar*)Verdana14,33,14); // Battery
-			LCD_Display_Text(119,(prog_uchar*)Verdana14,46,34); // Low
+			LCD_Display_Text(73,(prog_uchar*)Verdana14,46,34); 	// Low
 		}
 		else if((General_error & (1 << NO_SIGNAL)) != 0)
 		{
 			LCD_Display_Text(75,(prog_uchar*)Verdana14,51,13); 	// No
 			LCD_Display_Text(76,(prog_uchar*)Verdana14,39,33);  // Signal
-		}
-		else if((General_error & (1 << LOST_MODEL)) != 0)
-		{
-			LCD_Display_Text(20,(prog_uchar*)Verdana14,45,14); // Lost
-			LCD_Display_Text(21,(prog_uchar*)Verdana14,40,34); // Model
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{

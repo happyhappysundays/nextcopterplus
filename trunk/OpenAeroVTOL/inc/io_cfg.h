@@ -130,16 +130,19 @@ enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_
 //					OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NONE
 enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, SRC13, SRC14, SRC15, SRC16, NOMIX};
 enum Profiles		{P1 = 0, P2};
+enum Safety			{ARMED = 0, ARMABLE}; 
+enum Devices		{SERVO = 0, MOTOR}; 
 
 //***********************************************************
 // Flags
 //***********************************************************
 
-enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, DISARMED};
-enum FlightFlags	{RxActivity = 0, HandsFree, Model_lost};
+enum GlobalError	{NO_ERROR = 0, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, DISARMED};
+enum FlightFlags	{RxActivity = 0, HandsFree};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
-enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
-enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, MotorMarker};
+enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm};
+enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};
+enum ReverseFlags	{RollRev = 0, PitchRev, YawRev, AccRollRev, AccPitchRev, AccZRev};
 enum ReverseFlags	{RollRev = 0, PitchRev, YawRev, AccRollRev, AccPitchRev, AccZRev};
 
 #endif //IO_CFG_H

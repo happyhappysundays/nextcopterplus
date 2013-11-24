@@ -32,7 +32,7 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 31	// Number of mixer menu items
+#define MIXERITEMS 33	// Number of mixer menu items
 #define MIXERSTART 192 	// Start of Menu text items
 #define MIXOFFSET  85	// Value offsets
 
@@ -42,15 +42,15 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = 
 {
-	143,0,0,0,0,143,143,143,143,143,228,0,228,0,228,0,228,0,143,143,143,143,143,228,0,228,0,228,0,228,0
+	46,0,0,0,0,143,143,143,143,143,143,228,0,228,0,228,0,228,0,143,143,143,143,143,143,228,0,228,0,228,0,228,0
 };
 
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
 {
-		{OFF, ON,1,1,OFF},				// Motor marker
+		{SERVO,MOTOR,1,1,SERVO},		// Motor marker
+		{5,95,5,0,50},					// P1.n Position (%)
 		{-125,125,5,0,0},				// P1 Offset (%)
 		{-125,125,5,0,0},				// P1.n Offset (%)
-		{5,95,5,0,50},					// P1.n Position (%)
 		{-125,125,5,0,0},				// P2 Offset (%)
 
 		// Mixer ranges - P1
@@ -59,6 +59,7 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{OFF, REV,1,1,OFF},				// yaw_gyro
 		{OFF, REV,1,1,OFF},				// roll_acc
 		{OFF, REV,1,1,OFF},				// pitch_acc
+		{OFF, REV,1,1,OFF},				// Z_delta_acc
 		{SRC1,NOMIX,1,1,NOMIX},			// Source A
 		{-125,125,5,0,0},				// Source A volume (%)
 		{SRC1,NOMIX,1,1,NOMIX},			// Source B
@@ -69,11 +70,12 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,5,0,0},				// Source D volume
 
 		// Mixer ranges - P2
-		{OFF, ON,1,1,OFF},				// roll_gyro
-		{OFF, ON,1,1,OFF},				// pitch_gyro
-		{OFF, ON,1,1,OFF},				// yaw_gyro
-		{OFF, ON,1,1,OFF},				// roll_acc
-		{OFF, ON,1,1,OFF},				// pitch_acc
+		{OFF, REV,1,1,OFF},				// roll_gyro
+		{OFF, REV,1,1,OFF},				// pitch_gyro
+		{OFF, REV,1,1,OFF},				// yaw_gyro
+		{OFF, REV,1,1,OFF},				// roll_acc
+		{OFF, REV,1,1,OFF},				// pitch_acc
+		{OFF, REV,1,1,OFF},				// Z_delta_acc
 		{SRC1,NOMIX,1,1,NOMIX},			// Source A
 		{-125,125,5,0,0},				// Source A volume (%)
 		{SRC1,NOMIX,1,1,NOMIX},			// Source B
@@ -212,6 +214,22 @@ void menu_mixer(uint8_t i)
 			values[9] = OFF;
 		}
 
+		// P1 Z delta acc
+		if ((temp_sensors & (1 << ZDeltaAcc)) != 0)
+		{
+			if ((temp_reverse & (1 << AccZRev)) != 0)
+			{	
+				values[10] = REV;
+			}
+			else
+			{
+				values[10] = ON;
+			}
+		}
+		else
+		{
+			values[10] = OFF;
+		}
 
 		// P2 roll gyro
 		temp_sensors = Config.Channel[i].P2_sensors; // debug P2
@@ -220,23 +238,6 @@ void menu_mixer(uint8_t i)
 		if ((temp_sensors & (1 << RollGyro)) != 0)
 		{
 			if ((temp_reverse & (1 << RollRev)) != 0)
-			{	
-				values[18] = REV;
-			}
-			else
-			{
-				values[18] = ON;
-			}
-		}
-		else
-		{
-			values[18] = OFF;
-		}
-
-		// P2 pitch gyro
-		if ((temp_sensors & (1 << PitchGyro)) != 0)
-		{
-			if ((temp_reverse & (1 << PitchRev)) != 0)
 			{	
 				values[19] = REV;
 			}
@@ -250,10 +251,10 @@ void menu_mixer(uint8_t i)
 			values[19] = OFF;
 		}
 
-		// P2 yaw gyro
-		if ((temp_sensors & (1 << YawGyro)) != 0)
+		// P2 pitch gyro
+		if ((temp_sensors & (1 << PitchGyro)) != 0)
 		{
-			if ((temp_reverse & (1 << YawRev)) != 0)
+			if ((temp_reverse & (1 << PitchRev)) != 0)
 			{	
 				values[20] = REV;
 			}
@@ -267,10 +268,10 @@ void menu_mixer(uint8_t i)
 			values[20] = OFF;
 		}
 
-		// P2 roll acc
-		if ((temp_sensors & (1 << RollAcc)) != 0)
+		// P2 yaw gyro
+		if ((temp_sensors & (1 << YawGyro)) != 0)
 		{
-			if ((temp_reverse & (1 << AccRollRev)) != 0)
+			if ((temp_reverse & (1 << YawRev)) != 0)
 			{	
 				values[21] = REV;
 			}
@@ -284,10 +285,10 @@ void menu_mixer(uint8_t i)
 			values[21] = OFF;
 		}
 
-		// P2 pitch acc
-		if ((temp_sensors & (1 << PitchAcc)) != 0)
+		// P2 roll acc
+		if ((temp_sensors & (1 << RollAcc)) != 0)
 		{
-			if ((temp_reverse & (1 << AccPitchRev)) != 0)
+			if ((temp_reverse & (1 << AccRollRev)) != 0)
 			{	
 				values[22] = REV;
 			}
@@ -301,12 +302,46 @@ void menu_mixer(uint8_t i)
 			values[22] = OFF;
 		}
 
+		// P2 pitch acc
+		if ((temp_sensors & (1 << PitchAcc)) != 0)
+		{
+			if ((temp_reverse & (1 << AccPitchRev)) != 0)
+			{	
+				values[23] = REV;
+			}
+			else
+			{
+				values[23] = ON;
+			}
+		}
+		else
+		{
+			values[23] = OFF;
+		}
+
+		// P1 Z delta acc
+		if ((temp_sensors & (1 << ZDeltaAcc)) != 0)
+		{
+			if ((temp_reverse & (1 << AccZRev)) != 0)
+			{	
+				values[24] = REV;
+			}
+			else
+			{
+				values[24] = ON;
+			}
+		}
+		else
+		{
+			values[24] = OFF;
+		}
+
 		// Assemble remaining byte data for P1 offset to P2 Offset into array
-		memcpy(&values[1],&Config.Channel[i].P1_offset, 4);
+		memcpy(&values[1],&Config.Channel[i].P1n_position, 4);
 		// Assemble remaining byte data for P1_source_a to P1_source_d_volume into array
-		memcpy(&values[10],&Config.Channel[i].P1_source_a, 8);
+		memcpy(&values[11],&Config.Channel[i].P1_source_a, 8);
 		// Assemble remaining byte data for P2_source_a to P2_source_d_volume into array
-		memcpy(&values[23],&Config.Channel[i].P2_source_a, 8);
+		memcpy(&values[25],&Config.Channel[i].P2_source_a, 8);
 
 		// Print menu
 		print_menu_items(mix_top, MIXERSTART, value_ptr, 1, (prog_uchar*)mixer_menu_ranges, 0, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
@@ -322,11 +357,11 @@ void menu_mixer(uint8_t i)
 		}
 
 		// Save modified byte data for P1 offset to P2 Offset back to Config
-		memcpy(&Config.Channel[i].P1_offset,&values[1], 4);
+		memcpy(&Config.Channel[i].P1n_position,&values[1], 4);
 		// Save modified byte data for P1_source_a to P1_source_d_volume back to Config
-		memcpy(&Config.Channel[i].P1_source_a,&values[10], 8);
+		memcpy(&Config.Channel[i].P1_source_a,&values[11], 8);
 		// Save modified byte data for P2_source_a to P2_source_d_volume back to Config
-		memcpy(&Config.Channel[i].P2_source_a,&values[23], 8);
+		memcpy(&Config.Channel[i].P2_source_a,&values[25], 8);
 
 		temp_sensors = 0; // debug
 		temp_reverse = 0;
@@ -396,6 +431,17 @@ void menu_mixer(uint8_t i)
 				temp_sensors |= (1 << PitchAcc);
 				break;
 		}
+		// P1 Z delta acc
+		switch (values[10])
+		{
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccZRev);
+			case ON:
+				temp_sensors |= (1 << ZDeltaAcc);
+				break;
+		}
 
 		Config.Channel[i].P1_sensors = temp_sensors;
 		Config.Channel[i].P1_RevFlags = temp_reverse;
@@ -404,7 +450,7 @@ void menu_mixer(uint8_t i)
 		temp_reverse = 0;
 
 		// P2 roll gyro
-		switch (values[18])
+		switch (values[19])
 		{
 			case OFF:
 				break;
@@ -415,7 +461,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 pitch gyro
-		switch (values[19])
+		switch (values[20])
 		{
 			case OFF:
 				break;
@@ -426,7 +472,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 yaw gyro
-		switch (values[20])
+		switch (values[21])
 		{
 			case OFF:
 				break;
@@ -437,7 +483,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 roll acc
-		switch (values[21])
+		switch (values[22])
 		{
 			case OFF:
 				break;
@@ -448,7 +494,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 pitch acc
-		switch (values[22])
+		switch (values[23])
 		{
 			case OFF:
 				break;
@@ -456,6 +502,17 @@ void menu_mixer(uint8_t i)
 				temp_reverse |= (1 << AccPitchRev);
 			case ON:
 				temp_sensors |= (1 << PitchAcc);
+				break;
+		}
+		// P2 Z delta acc
+		switch (values[24])
+		{
+			case OFF:
+				break;
+			case REV:
+				temp_reverse |= (1 << AccZRev);
+			case ON:
+				temp_sensors |= (1 << ZDeltaAcc);
 				break;
 		}
 

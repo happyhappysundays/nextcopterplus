@@ -48,7 +48,6 @@ const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
 	// Flight (14)
-	{-125,125,5,0,0},				// Trigger
 	{0,127,1,0,80},					// Roll PID
 	{0,127,1,0,50},
 	{0,125,5,0,0},					// I-limits
@@ -62,6 +61,7 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 	{0,127,1,0,80},					// Yaw PID
 	{0,127,1,0,50},	
 	{0,125,5,0,0},					// I-limits
+	{0,127,1,0,0},					// Z Acc gain
 };
 
 //************************************************************
@@ -85,7 +85,7 @@ void menu_flight(uint8_t mode)
 
 	while(button != BACK)
 	{
-		value_ptr = &Config.FlightMode[mode].Profilelimit;
+		value_ptr = &Config.FlightMode[mode].Roll.P_mult;
 
 		// Print menu
 		print_menu_items(flight_top, FLIGHTSTART, value_ptr, 1, (prog_uchar*)flight_menu_ranges, 0, FLIGHTOFFSET, (prog_uchar*)FlightMenuText, cursor);

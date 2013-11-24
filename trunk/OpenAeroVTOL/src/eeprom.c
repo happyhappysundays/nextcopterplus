@@ -31,7 +31,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x17		// eePROM signature - change for each eePROM structure change 0x17 = V1.3b1.7
+#define MAGIC_NUMBER 0x19		// eePROM signature - change for each eePROM structure change 0x19 = Beta 9
 								// to force factory reset
 
 //************************************************************
@@ -84,10 +84,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
-	
-	// Flight modes
-	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
-	Config.FlightMode[1].Profilelimit = -10;	
 
 	// Set up all profiles the same initially
 	for (i = 0; i < 2; i++)
@@ -111,7 +107,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 38;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout
-	Config.LMA_enable = 3;				// Default to 3 minutes
+	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
 	Config.Deadband = 2;				// RC deadband = 2%

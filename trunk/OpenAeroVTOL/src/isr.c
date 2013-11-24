@@ -23,7 +23,6 @@ volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Current channel number
 volatile uint8_t max_chan;			// Target channel number
-volatile bool RC_Lock;				// RC sync found/lost flag
 
 volatile uint8_t rcindex;			// Serial data buffer pointer
 volatile uint16_t chanmask16;
@@ -74,7 +73,6 @@ ISR(PCINT3_vect)
 		if (Config.RxMode == PWM2) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
-			RC_Lock = true;							// RC sync established
 		}
 	}
 }
@@ -92,7 +90,6 @@ ISR(PCINT1_vect)
 		if (Config.RxMode == PWM3) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
-			RC_Lock = true;							// RC sync established
 		}
 	}
 }
@@ -118,7 +115,6 @@ ISR(INT2_vect)
 			if (Config.RxMode == PWM1) 
 			{
 				Interrupted = true;						// Signal that interrupt block has finished
-				RC_Lock = true;							// RC sync established
 			}
 		}
 	}
@@ -187,7 +183,6 @@ ISR(INT2_vect)
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished
-			RC_Lock = true;						// RC sync established
 		}
 	}
 } // ISR(INT2_vect)
@@ -313,7 +308,6 @@ ISR(USART0_RX_vect)
 			{
 				// RC sync established
 				Interrupted = true;	
-				RC_Lock = true;						
 
 				// Set start of channel data per format
 				sindex = 4; // Channel data from byte 5
@@ -386,7 +380,6 @@ ISR(USART0_RX_vect)
 			{
 				// RC sync established
 				Interrupted = true;	
-				RC_Lock = true;
 
 				// Clear channel data
 				for (j = 0; j < MAX_RC_CHANNELS; j++)
@@ -511,7 +504,6 @@ ISR(USART0_RX_vect)
 		if (bytecount >= 15)
 		{
 			Interrupted = true;	
-			RC_Lock = true;			// RC sync established
 
 			// Ahem... ah... just stick the last byte into the buffer manually...(hides)
 			sBuffer[15] = temp;

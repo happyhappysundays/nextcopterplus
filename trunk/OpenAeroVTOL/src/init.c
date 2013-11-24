@@ -150,7 +150,7 @@ void init(void)
 	//***********************************************************
 
 	// Preset important flags
-	RC_Lock = false;						
+	Interrupted = false;						
 	Main_flags |= (1 << FirstTimeIMU);
 
 	// Initialise the GLCD
@@ -220,8 +220,8 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
-	// Disarm on start-up if Armed setting is ON
-	if (Config.ArmMode == ON)
+	// Disarm on start-up if Armed setting is ARMABLE
+	if (Config.ArmMode == ARMABLE)
 	{
 		General_error |= (1 << DISARMED); 	// Set disarmed bit
 	}
@@ -229,7 +229,7 @@ void init(void)
 	_delay_ms(100);
 
 	// Check to see that throttle is low if RC detected
-	if (RC_Lock)
+	if (Interrupted)
 	{
 		RxGetChannels();
 		if (RCinputs[THROTTLE] > -900)

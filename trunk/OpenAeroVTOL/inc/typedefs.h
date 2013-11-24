@@ -38,13 +38,13 @@ typedef struct
 	int8_t		P1_RevFlags;			// P1 sensor reverse flags (5)
 	int8_t		P2_RevFlags;			// P2 sensor reverse flags (5)
 	
-	// Mixer menu (22 bytes, 31 items)
+	// Mixer menu (22 bytes, 33 items)
+	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1_offset;				// P1 Offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
-	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P2_offset;				// P2 Offset for this output
 //
-	int8_t		P1_sensors;				// Sensor switches (5), motor marker (1)
+	int8_t		P1_sensors;				// Sensor switches (6), motor marker (1)
 	int8_t		P1_source_a;			// Source A for calculation
 	int8_t		P1_source_a_volume;		// Percentage of source to use
 	int8_t		P1_source_b;			// Source B for calculation
@@ -54,7 +54,7 @@ typedef struct
 	int8_t		P1_source_d;			// Source D for calculation
 	int8_t		P1_source_d_volume;		// Percentage of output to use
 //
-	int8_t		P2_sensors;				// Sensor switches (5)
+	int8_t		P2_sensors;				// Sensor switches (6)
 	int8_t		P2_source_a;			// Source A for calculation
 	int8_t		P2_source_a_volume;		// Percentage of source to use
 	int8_t		P2_source_b;			// Source B for calculation
@@ -72,10 +72,9 @@ typedef struct
 	int8_t	I_mult;
 } PID_mult_t;
 
-// Flight_control type (17)
+// Flight_control type (14)
 typedef struct
 {
-	int8_t		Profilelimit;			// Flight mode switch point (-125% to 125%)
 	PID_mult_t	Roll;					// Gyro PI
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
@@ -86,7 +85,7 @@ typedef struct
 	int8_t		AccPitchZeroTrim;
 	PID_mult_t	Yaw;
 	int8_t		Yaw_limit;
-
+	int8_t		A_Zed_P_mult;
 } flight_control_t;
 
 // Settings structure
@@ -117,22 +116,15 @@ typedef struct
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 	int8_t		Deadband;				// RC deadband (%)
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 5 seconds.
-										// Tied transition start/end comes from Flight[].Profilelimit of src/dst.
 
 	// Flight mode settings
-	union 
-	{
-		flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
-		int8_t	FlightModeByte[FLIGHT_MODES][sizeof(flight_control_t)]; // Union of same to enable byte-wise addressing	
-	};
+	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
 
 	// Servo travel limts
 	int32_t		Raw_I_Limits[FLIGHT_MODES][NUMBEROFAXIS];		// Actual, unspanned I-term output limits to save recalculation each loop
 	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS];	// Actual, unspanned I-term input limits to save recalculation each loop
 
 	// Triggers
-	int16_t		Autotrigger1;			// Actual, unspanned flight mode 0 trigger to save recalculation each loop
-	int16_t		Autotrigger2;			// Actual, unspanned flight mode 1 "
 	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 	
@@ -142,19 +134,17 @@ typedef struct
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
-	// General items (10)
+	// General items (9)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
+	int8_t		ArmMode;				// Arming mode on/off
+	int8_t		Disarm_timer;			// Auto-disarm setting
 	int8_t		Status_timer;			// Status screen timer
-	int8_t		LMA_enable;				// LMA setting
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	int8_t		ArmMode;				// Arming mode on/off
-	int8_t		Dampen;					// Height dampening amount
 	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
 
-	// Non-menu items 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
 
@@ -166,7 +156,7 @@ typedef struct
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
-	// Acc
+	// Acc zeros
 	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results
 
 	// Flight mode
