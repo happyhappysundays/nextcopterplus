@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 9 - November 2013
+// Version 1.2 Beta 10 - November 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -204,19 +204,21 @@
 // Beta 9	Hands-free now takes its trigger from the RC deadband setting.
 //			Autoupdate of CH7 source now less annoying. Fixed LVA setting and display.
 //			Removed buggy output switcher. Fixed all the missing "const" that annoy some compilers. 
-//			Tweaked throttle high threshold on power-up.
+//			Tweaked throttle high threshold on power-up. Removed buggy output switcher.
 //			Factory reset now enterable by pressing just the middle two buttons.
+// Beta 10	Added support for KK2.1 board. Logo splash supported if board is a KK2.1
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Beta test, then release OpenAero2 V1.2
+// Retest Beta 10 against KK2.0 
 //
 //***********************************************************
 //* Includes
 //***********************************************************
 
+#include "..\inc\compiledefs.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h> 
 #include <stdio.h>

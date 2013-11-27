@@ -80,7 +80,7 @@ void print_menu_frame(uint8_t style)
 	}
 
 	// Write from buffer
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 }
 
 //**********************************************************************
@@ -136,7 +136,7 @@ void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult,
 	}
 
 	print_cursor(cursor);	// Cursor
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 	poll_buttons(true);
 }
 
@@ -274,7 +274,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			print_menu_frame(1);
 
 			// Write from buffer
-			write_buffer(buffer);
+			write_buffer(buffer,1);
 		}
 
 		// Poll buttons when idle

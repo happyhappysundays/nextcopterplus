@@ -9,6 +9,7 @@
 //* Includes
 //***********************************************************
 
+#include "..\inc\compiledefs.h"
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <stdbool.h>
@@ -17,6 +18,8 @@
 #include "..\inc\adc.h"
 #include "..\inc\eeprom.h"
 #include "..\inc\main.h"
+#include "..\inc\i2c.h"
+#include "..\inc\MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -34,9 +37,23 @@ int16_t accADC[3];				// Holds Acc ADC values
 int16_t tempaccZero = 0;		// Holds Z acc in between normal and inverted cals
 
 // Uncalibrated default values of Z middle per orientation
+#ifdef KK21
+const int16_t UncalDef[5] PROGMEM = {0, 0, 0, 0, 0}; // KK2.1 has zero offsets
+#else
 const int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
+#endif
 
 // Polarity handling table
+#ifdef KK21 
+const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW (Roll reversed on KK2.1)
+{
+	{1,-1,1},		// Forward
+	{1,1,-1},		// Vertical
+	{-1,-1,-1},		// Upside down
+	{-1,1,1},		// Aft
+	{1,1,1},		// Sideways
+};
+#else
 const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 {
 	{1,1,1},		// Forward
@@ -45,6 +62,7 @@ const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 	{-1,-1,1},		// Aft
 	{1,-1,1},		// Sideways
 };
+#endif
 
 void ReadAcc()					// At rest range is approx 300 - 700
 {
@@ -120,8 +138,7 @@ void CalibrateAcc(int8_t type)
 			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
 
 			// Test if board is actually inverted
-			if (((pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == 1) && (accZeroYaw < pgm_read_word(&UncalDef[Config.Orientation]))) || // Horizontal and 
-			    ((pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == -1) && (accZeroYaw > pgm_read_word(&UncalDef[Config.Orientation]))))  // Vertical and Upside down
+			if (accZeroYaw < 0) // Upside down
 			{
 				// Reset zero to halfway between min and max Z
 				temp = ((tempaccZero - accZeroYaw) >> 1);
@@ -138,6 +155,29 @@ void CalibrateAcc(int8_t type)
 
 void get_raw_accs(void)
 {
+// Get data from MPU6050 for KK2.1
+#ifdef KK21
+	uint8_t Accs[6];
+	int16_t temp1, temp2;
+
+	// For KK2.1 boards, use the i2c data from the MPU6050
+	// Check acc array axis order and change in io_cfg.h
+	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_ACCEL_XOUT_H,(uint8_t *)Accs,6);
+
+	// Reassemble data into accADC array and down sample to reduce resolution and noise
+	temp1 = Accs[0] << 8;
+	temp2 = Accs[1];
+	accADC[ROLL] = (temp1 + temp2) >> 7;
+
+	temp1 = Accs[2] << 8;
+	temp2 = Accs[3];
+	accADC[PITCH] = (temp1 + temp2) >> 7;
+
+	temp1 = Accs[4] << 8;
+	temp2 = Accs[5];
+	accADC[YAW] = (temp1 + temp2) >> 7;
+
+#else
 	read_adc(AIN_X_ACC);		// Read X acc ADC5 (Pitch)
 	accADC[PITCH] = ADCW;
 
@@ -146,4 +186,16 @@ void get_raw_accs(void)
 
 	read_adc(AIN_Z_ACC);		// Read Z acc ADC2 (inverted)
 	accADC[YAW] = ADCW;
+#endif
 }
+
+#ifdef KK21
+void init_i2c_accs(void)
+{
+	// Configure accs
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, 0x18); 
+
+	// Wake MPU6050
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
+}
+#endif

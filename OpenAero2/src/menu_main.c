@@ -66,7 +66,7 @@ void menu_main(void)
 		}
 
 		print_cursor(main_cursor);												// Cursor
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 
 		// Poll buttons when idle
 		poll_buttons(true);
