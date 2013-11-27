@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: V1.2b09";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: V1.2b10";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -402,5 +402,5 @@ void idle_screen(void)
 	clear_buffer(buffer);
 	LCD_Display_Text(121,(prog_uchar*)Verdana14,40,12); // "Press"
 	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,32); // "for status"
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 };

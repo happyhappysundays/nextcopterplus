@@ -126,7 +126,7 @@ void Display_sticks(void)
 		}
 
 		// Update buffer
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		_delay_ms(100);
 	}
 
@@ -135,7 +135,7 @@ void Display_sticks(void)
 	{
 		LCD_Display_Text(137,(prog_uchar*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		Save_Config_to_EEPROM();
 		_delay_ms(500);

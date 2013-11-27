@@ -39,13 +39,15 @@
 
 void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);
-void write_buffer(uint8_t *buffer);
+void write_buffer(uint8_t *buffer, uint8_t type);
+void clear_screen(void);
 
 //***********************************************************
 //* Low-level code
 //***********************************************************
 
 const uint8_t pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 
+const uint8_t pagemap_logo[] PROGMEM	= { 0, 1, 2, 3, 4, 5, 6, 7 };	// This works for the logo...
 const uint8_t lcd_commmands[] PROGMEM	= { 0xA2,0xA0,0x40,0xA6,0xEE,0xC8,0x2C,0x2E,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string
 
 // Software SPI write
@@ -119,13 +121,21 @@ void st7565_set_brightness(uint8_t val)
 	st7565_command(CMD_SET_VOLUME_SECOND | (val & 0x3f));
 }
 
-// Write LCD buffer
-void write_buffer(uint8_t *buffer) 
+// Write LCD buffer if type = 1 normal, 0 = logo
+void write_buffer(uint8_t *buffer, uint8_t type) 
 {
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 
 	{
-		st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));	// Page 7 to 0
+		if (type)
+		{
+			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));		// Page 7 to 0
+		}
+		else
+		{
+			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
+		}
+
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
 		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
 		st7565_command(CMD_RMW);									// Sets auto-increment
@@ -141,6 +151,23 @@ void write_buffer(uint8_t *buffer)
 void clear_buffer(uint8_t *buff) 
 {
 	memset(buff, 0, 1024);
+}
+
+// Clear screen (does not clear buffer)
+void clear_screen(void) 
+{
+	uint8_t p, c;
+
+	for(p = 0; p < 8; p++) 
+	{
+		st7565_command(CMD_SET_PAGE | p);								// Set page to p
+		for(c = 0; c < 128; c++) 										// Was 129, which I think is wrong...
+		{
+			st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
+			st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));	// Set column to c
+			st7565_data(0x00);											// Clear data
+		}     
+	}
 }
 
 //***********************************************************

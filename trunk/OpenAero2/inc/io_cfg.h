@@ -11,6 +11,7 @@
 //***********************************************************
 
 #include "typedefs.h"
+#include "..\inc\compiledefs.h"
 
 //***********************************************************
 //* Random externals
@@ -19,7 +20,7 @@
 extern CONFIG_STRUCT Config;
 
 //***********************************************************
-//* Pin definitions - KK2.0
+//* Pin definitions
 //***********************************************************
 
 // RX inputs
@@ -34,22 +35,6 @@ extern CONFIG_STRUCT Config;
 #define RX_YAW_DIR 		REGISTER_BIT(DDRB,2)
 #define RX_AUX_DIR 		REGISTER_BIT(DDRB,0)
 
-// Gyro inputs
-#define	GYRO_ROLL 		REGISTER_BIT(PINA,4)
-#define GYRO_PITCH 		REGISTER_BIT(PINA,1)
-#define GYRO_YAW 		REGISTER_BIT(PINA,2)
-#define	GYRO_ROLL_DIR 	REGISTER_BIT(DDRA,4)
-#define GYRO_PITCH_DIR 	REGISTER_BIT(DDRA,1)
-#define GYRO_YAW_DIR	REGISTER_BIT(DDRA,2)
-
-// ACC inputs
-#define	ACC_X 			REGISTER_BIT(PINA,5)
-#define ACC_Y 			REGISTER_BIT(PINA,6)
-#define ACC_Z 			REGISTER_BIT(PINA,7)
-#define	ACC_X_DIR 		REGISTER_BIT(DDRA,5)
-#define ACC_Y_DIR 		REGISTER_BIT(DDRA,6)
-#define ACC_Z_DIR		REGISTER_BIT(DDRA,7)
-
 // Misc analog inputs
 #define	VCC_PIN			REGISTER_BIT(PINA,0)
 #define VBAT_PIN		REGISTER_BIT(PINA,3)
@@ -61,20 +46,28 @@ extern CONFIG_STRUCT Config;
 #define M2				REGISTER_BIT(PORTC,4)
 #define M3				REGISTER_BIT(PORTC,2)
 #define M4				REGISTER_BIT(PORTC,3)
+
+// KK2.0 and KK2.1 have different pinouts for motors
+#ifdef KK21
+#define M5				REGISTER_BIT(PORTA,4)
+#define M6				REGISTER_BIT(PORTA,6)
+#define M5_DIR 			REGISTER_BIT(DDRA,4)
+#define M6_DIR 			REGISTER_BIT(DDRA,6)
+#else
 #define M5				REGISTER_BIT(PORTC,1)
 #define M6				REGISTER_BIT(PORTC,0)
+#define M5_DIR 			REGISTER_BIT(DDRC,1)
+#define M6_DIR 			REGISTER_BIT(DDRC,0)
+#endif
+
 #define M7				REGISTER_BIT(PORTC,5)
 #define M8				REGISTER_BIT(PORTC,7)
 #define M1_DIR 			REGISTER_BIT(DDRC,6)
 #define M2_DIR 			REGISTER_BIT(DDRC,4)
 #define M3_DIR 			REGISTER_BIT(DDRC,2)
 #define M4_DIR 			REGISTER_BIT(DDRC,3)
-#define M5_DIR 			REGISTER_BIT(DDRC,1)
-#define M6_DIR 			REGISTER_BIT(DDRC,0)
 #define M7_DIR 			REGISTER_BIT(DDRC,5)
 #define M8_DIR 			REGISTER_BIT(DDRC,7)
-#define MOTORS			PORTC
-#define MOTOR_DIR		DDRC
 
 // LCD module
 #define LCD_SI			REGISTER_BIT(PORTD,1)

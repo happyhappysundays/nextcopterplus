@@ -80,7 +80,7 @@ void Display_rcinput(void)
 		LCD_Display_Text(9, (prog_uchar*)Wingdings, 119, 59); 	// Down
 
 		// Update buffer
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(100);
 	}

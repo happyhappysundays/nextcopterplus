@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "..\inc\compiledefs.h"
 #include <string.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -72,9 +73,16 @@ void Set_EEPROM_Default_Config(void)
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
-	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
+
+#ifdef KK21
+	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
+	Config.AccZero[PITCH]	= 0;
+	Config.AccZero[YAW]		= 0;
+#else
+	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
-	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
+	Config.AccZero[YAW]		= 643; 		// 643 is the centre
+#endif
 	
 	// Flight modes
 	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting

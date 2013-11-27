@@ -6,12 +6,15 @@
 //* Includes
 //***********************************************************
 
+#include "..\inc\compiledefs.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include "..\inc\io_cfg.h"
 #include "..\inc\adc.h"
 #include <avr/pgmspace.h>
+#include "..\inc\i2c.h"
+#include "..\inc\MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -80,6 +83,29 @@ void CalibrateGyros(void)
 
 void get_raw_gyros(void)
 {
+// Get data from MPU6050 for KK2.1
+#ifdef KK21
+	uint8_t Gyros[6];
+	int16_t temp1, temp2;
+
+	// For KK2.1 boards, use the i2c data from the MPU6050
+	// Check gyro array axis order and change in io_cfg.h
+	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_GYRO_XOUT_H,(uint8_t *)Gyros,6);
+
+	// Reassemble data into gyroADC array and down sample to reduce resolution and noise
+	temp1 = Gyros[0] << 8;
+	temp2 = Gyros[1];
+	gyroADC[PITCH] = (temp1 + temp2) >> 7;
+
+	temp1 = Gyros[2] << 8;
+	temp2 = Gyros[3];
+	gyroADC[ROLL] = (temp1 + temp2) >> 7;
+
+	temp1 = Gyros[4] << 8;
+	temp2 = Gyros[5];
+	gyroADC[YAW] = (temp1 + temp2) >> 7;
+
+#else
 	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
 	gyroADC[ROLL] = ADCW;
 
@@ -88,4 +114,19 @@ void get_raw_gyros(void)
 
 	read_adc(AIN_Z_GYRO);				// Read yaw gyro ADC2 (Yaw)
 	gyroADC[YAW] = ADCW;
+#endif
 }
+
+
+#ifdef KK21
+void init_i2c_gyros(void)
+{
+	// First, configure the MPU6050
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x41); // Gyro X clock, sleep
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV, 0x02);	// Sample rate divder 1kHz / (2+1) = 333Hz
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, 0x06); 	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
+	
+	// Now configure gyros
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, 0x18); // 41
+}
+#endif
