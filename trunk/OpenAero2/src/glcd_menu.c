@@ -78,9 +78,9 @@ const char MainMenuItem5[]  PROGMEM = "18. Battery monitor";
 //
 //
 const char PText15[] PROGMEM = "Gyro";		 				// Sensors text
-const char PText16[] PROGMEM = "X";
-const char PText17[] PROGMEM = "Y";
-const char PText18[] PROGMEM = "Z";
+const char PText16[] PROGMEM = "Roll";
+const char PText17[] PROGMEM = "Pitch";
+const char PText18[] PROGMEM = "Yaw";
 const char PText19[] PROGMEM = "Acc";
 const char SensorMenuItem1[]  PROGMEM = "Cal.";	
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	

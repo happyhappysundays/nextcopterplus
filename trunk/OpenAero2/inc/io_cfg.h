@@ -49,12 +49,12 @@ extern CONFIG_STRUCT Config;
 
 // KK2.0 and KK2.1 have different pinouts for motors
 #ifdef KK21
-#define M5				REGISTER_BIT(PORTA,4)
-#define M6				REGISTER_BIT(PORTA,6)
+#define M5				REGISTER_BIT(PORTA,4) // KK2.1
+#define M6				REGISTER_BIT(PORTA,5)
 #define M5_DIR 			REGISTER_BIT(DDRA,4)
-#define M6_DIR 			REGISTER_BIT(DDRA,6)
+#define M6_DIR 			REGISTER_BIT(DDRA,5)
 #else
-#define M5				REGISTER_BIT(PORTC,1)
+#define M5				REGISTER_BIT(PORTC,1) // KK2.0
 #define M6				REGISTER_BIT(PORTC,0)
 #define M5_DIR 			REGISTER_BIT(DDRC,1)
 #define M6_DIR 			REGISTER_BIT(DDRC,0)

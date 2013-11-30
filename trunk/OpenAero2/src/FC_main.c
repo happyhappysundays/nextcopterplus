@@ -204,15 +204,18 @@
 // Beta 9	Hands-free now takes its trigger from the RC deadband setting.
 //			Autoupdate of CH7 source now less annoying. Fixed LVA setting and display.
 //			Removed buggy output switcher. Fixed all the missing "const" that annoy some compilers. 
-//			Tweaked throttle high threshold on power-up. Removed buggy output switcher.
+//			Tweaked throttle high threshold on power-up. 
 //			Factory reset now enterable by pressing just the middle two buttons.
 // Beta 10	Added support for KK2.1 board. Logo splash supported if board is a KK2.1
+//			Camstab freakout bug investigated and fixed. Switched to hardware TWI driver.
+//			Fixed all invert calibrate bugs and retested every board orientation.
+//			Camstab offset bug also fixed.
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// Retest Beta 10 against KK2.0 
+// 
 //
 //***********************************************************
 //* Includes
@@ -482,7 +485,7 @@ int main(void)
 		LostModel_timer += (uint8_t) (TCNT2 - Lost_TCNT2);
 		Lost_TCNT2 = TCNT2;
 
-		// Reset LMA count if any RX activity, LMA of, or CamStab (no RC used)
+		// Reset LMA count if any RX activity, LMA off, or CamStab (no RC used)
 		if ((Flight_flags & (1 << RxActivity)) || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
 			LostModel_timer = 0;
@@ -596,7 +599,8 @@ int main(void)
 		//* Flight mode selection
 		//************************************************************
 
-		if (RxChannel[Config.FlightChan] > Config.Autotrigger3)
+		// If CamStab ON, automatically select Profile 2
+		if ((RxChannel[Config.FlightChan] > Config.Autotrigger3) || (Config.CamStab == ON))
 		{
 			Config.Flight = 2;			// Flight mode 2
 		}	

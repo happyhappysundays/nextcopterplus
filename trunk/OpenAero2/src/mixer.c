@@ -71,7 +71,7 @@ const channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
-	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left elevon)
+	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
 	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
 	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
@@ -92,8 +92,8 @@ const channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
 	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
 	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Pitch axis)
+	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 
+	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Pitch axis)
 	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
 	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
 
@@ -123,7 +123,7 @@ void ProcessMixer(void)
 
 	if (Config.CamStab == ON)
 	{
-		outputs = MIN_OUTPUTS;		// 4 Channels
+		outputs = MIN_OUTPUTS;		// 4 Channels for high-speed camstab
 	}
 	else
 	{
@@ -478,8 +478,9 @@ void ProcessMixer(void)
 	// Add offset value to restore to system compatible value
 	//************************************************************ 
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < outputs; i++)
 	{
+	//	Config.Channel[i].value = 0;
 		Config.Channel[i].value += Config.Limits[i].trim;
 	}
 
@@ -492,7 +493,7 @@ void ProcessMixer(void)
 		// Simple failsafe. Replace outputs with user-set values
 		if (Config.FailsafeType == SIMPLE) 
 		{
-			for (i = 0; i < MAX_OUTPUTS; i++)
+			for (i = 0; i < outputs; i++)
 			{
 				Config.Channel[i].value = Config.Limits[i].failsafe;
 			}
@@ -501,7 +502,7 @@ void ProcessMixer(void)
 		// Advanced failsafe. Autolevel ON, use failsafe trims to adjust autolevel.
 		if (Config.FailsafeType == ADVANCED)
 		{
-			for (i = 0; i < MAX_OUTPUTS; i++)
+			for (i = 0; i < outputs; i++)
 			{
 				// Over-ride throttle if in CPPM mode
 				if ((Config.Channel[i].source_a == THROTTLE) && (Config.RxMode == CPPM_MODE))
@@ -520,6 +521,7 @@ void ProcessMixer(void)
 			}
 		}
 	} // Failsafe
+
 }
 
 

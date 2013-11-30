@@ -244,15 +244,15 @@ void menu_rc_setup(uint8_t section)
 			{
 				if (Config.TxSeq == JRSEQ) 
 				{
-					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
+					Config.ChannelOrder[i] = (uint8_t)pgm_read_byte(&JR[i]);
 				}
 				else if (Config.TxSeq == FUTABASEQ)
 				{
-					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
+					Config.ChannelOrder[i] = (uint8_t)pgm_read_byte(&FUTABA[i]);
 				}
 				else if (Config.TxSeq == SATSEQ)
 				{
-					Config.ChannelOrder[i] = pgm_read_byte(&SATELLITE[i]);
+					Config.ChannelOrder[i] = (uint8_t)pgm_read_byte(&SATELLITE[i]);
 				}
 			}
 

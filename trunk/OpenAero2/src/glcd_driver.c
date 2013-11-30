@@ -99,7 +99,7 @@ void st7565_init(void)
 	// Send command sequence
 	for (int i = 0; i < 7; i++)
 	{
-		st7565_command(pgm_read_byte(&lcd_commmands[i]));
+		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
 	}
 	_delay_ms(50);
 	st7565_command(0x2E);
@@ -109,7 +109,7 @@ void st7565_init(void)
 
 	for (int i = 9; i < 14; i++)
 	{
-		st7565_command(pgm_read_byte(&lcd_commmands[i]));
+		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
 	}
 }
 
@@ -129,11 +129,11 @@ void write_buffer(uint8_t *buffer, uint8_t type)
 	{
 		if (type)
 		{
-			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap[p]));		// Page 7 to 0
+			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap[p]));		// Page 7 to 0
 		}
 		else
 		{
-			st7565_command(CMD_SET_PAGE | pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
+			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
 		}
 
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
