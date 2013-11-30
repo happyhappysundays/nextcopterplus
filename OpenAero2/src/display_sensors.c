@@ -56,18 +56,25 @@ void Display_sensors(void)
 		ReadGyros();
 		ReadAcc();
 
-		LCD_Display_Text(26,(prog_uchar*)Verdana8,0,0); 	// Gyro
-		LCD_Display_Text(30,(prog_uchar*)Verdana8,70,0); 	// Acc
-		LCD_Display_Text(27,(prog_uchar*)Verdana8,10,15);	// X
-		LCD_Display_Text(28,(prog_uchar*)Verdana8,10,25);	// Y
-		LCD_Display_Text(29,(prog_uchar*)Verdana8,10,35);	// Z
+		LCD_Display_Text(26,(prog_uchar*)Verdana8,37,0); 	// Gyro
+		LCD_Display_Text(30,(prog_uchar*)Verdana8,77,0); 	// Acc
+		LCD_Display_Text(27,(prog_uchar*)Verdana8,5,15);	// Roll
+		LCD_Display_Text(28,(prog_uchar*)Verdana8,5,25);	// Pitch
+		LCD_Display_Text(29,(prog_uchar*)Verdana8,5,35);	// Yaw/Z
 
-		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,30,15);
-		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,30,25);
-		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,30,35);
-		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,15);
-		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,25);
+		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,40,15);
+		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,40,25);
+		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,40,35);
+
+		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,15);
+		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,25);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
+
+		// Debug
+//		mugui_lcd_puts(itoa(Config.Orientation,pBuffer,10),(prog_uchar*)Verdana8,0,0); // Orientation
+//		mugui_lcd_puts(itoa((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]),pBuffer,10),(prog_uchar*)Verdana8,10,0); // Yaw polarity
+//		mugui_lcd_puts(itoa(Config.AccZero[YAW],pBuffer,10),(prog_uchar*)Verdana8,100,15); // AccZero[YAW]
+		
 
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left

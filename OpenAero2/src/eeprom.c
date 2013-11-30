@@ -55,14 +55,14 @@ void Set_EEPROM_Default_Config(void)
 
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
-		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
+		Config.ChannelOrder[i] = (uint8_t)pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
 	}
 	// Servo defaults
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		//Config.Servo_reverse[i] = NORMAL;
-		//Config.Offset[i] = 0;
+		Config.Offset[i] = 0;
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
 		//Config.Failsafe[i] = 0;

@@ -31,8 +31,9 @@ void get_raw_gyros(void);
 int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
-// Polarity handling table
-const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW
+// Polarity handling 
+#ifdef KK21 
+const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
 {
 	{1,1,-1},		// Horizontal
 	{1,1,-1},		// Vertical
@@ -40,6 +41,16 @@ const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW
 	{-1,-1,-1},		// Aft
 	{1,-1,-1},		// Sideways
 };
+#else
+const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
+{
+	{1,1,-1},		// Horizontal
+	{1,1,-1},		// Vertical
+	{1,-1,1},		// Upside down
+	{-1,-1,-1},		// Aft
+	{1,-1,-1},		// Sideways
+};
+#endif
 
 void ReadGyros(void)					// Conventional orientation
 {
@@ -87,6 +98,7 @@ void get_raw_gyros(void)
 #ifdef KK21
 	uint8_t Gyros[6];
 	int16_t temp1, temp2;
+	int16_t RawADC[3];
 
 	// For KK2.1 boards, use the i2c data from the MPU6050
 	// Check gyro array axis order and change in io_cfg.h
@@ -95,15 +107,20 @@ void get_raw_gyros(void)
 	// Reassemble data into gyroADC array and down sample to reduce resolution and noise
 	temp1 = Gyros[0] << 8;
 	temp2 = Gyros[1];
-	gyroADC[PITCH] = (temp1 + temp2) >> 7;
+	RawADC[PITCH] = (temp1 + temp2) >> 7;
 
 	temp1 = Gyros[2] << 8;
 	temp2 = Gyros[3];
-	gyroADC[ROLL] = (temp1 + temp2) >> 7;
+	RawADC[ROLL] = (temp1 + temp2) >> 7;
 
 	temp1 = Gyros[4] << 8;
 	temp2 = Gyros[5];
-	gyroADC[YAW] = (temp1 + temp2) >> 7;
+	RawADC[YAW] = (temp1 + temp2) >> 7;
+
+	// Reorient the data as per the board orientation
+	gyroADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][ROLL])];
+	gyroADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][PITCH])];
+	gyroADC[YAW]	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][YAW])];
 
 #else
 	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)

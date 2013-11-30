@@ -120,6 +120,14 @@ void Calculate_PID(void)
 		RCinputsAxis[ROLL] = RCinputs[AILERON];
 	}
 
+	// Zero RC inputs in pure camstab mode
+	if ((Config.MixMode == CAMSTAB) && (Config.CamStab == ON))
+	{
+		RCinputsAxis[ROLL] = 0;
+		RCinputsAxis[PITCH] = 0;
+		RCinputsAxis[YAW] = 0;
+	}
+
 	//************************************************************
 	// PID loop
 	//************************************************************

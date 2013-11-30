@@ -147,7 +147,7 @@ void init(void)
 	// Interrupts and pin function setup
 	//***********************************************************
 
-	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
+	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, AUX and CPPM input)
 	PCICR  = 0x0A;							// PCINT8  to PCINT15 (PCINT1 group - AUX)
 											// PCINT24 to PCINT31 (PCINT3 group - THR)
 	PCIFR  = 0x0F;							// Clear PCIF0 interrupt flag 
