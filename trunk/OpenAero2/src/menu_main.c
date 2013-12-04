@@ -10,13 +10,13 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\init.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "init.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "glcd_driver.h"
+#include "main.h"
 
 //************************************************************
 // Prototypes

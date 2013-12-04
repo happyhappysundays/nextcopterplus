@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
+#include "io_cfg.h"
 
 //************************************************************
 // Prototypes

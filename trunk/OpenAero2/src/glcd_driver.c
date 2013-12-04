@@ -33,9 +33,9 @@
 #include <string.h>
 #include <util/delay.h>
 #include <avr/pgmspace.h> 
-#include "..\inc\glcd_driver.h"
-#include "..\inc\io_cfg.h"
-#include "..\inc\main.h"
+#include "glcd_driver.h"
+#include "io_cfg.h"
+#include "main.h"
 
 void glcd_delay(void);
 void glcd_spiwrite_asm(uint8_t byte);

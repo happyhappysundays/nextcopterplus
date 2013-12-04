@@ -8,15 +8,15 @@
 
 #include <avr/io.h>
 #include <stdlib.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
+#include "io_cfg.h"
+#include "glcd_driver.h"
+#include "mugui.h"
 #include <avr/pgmspace.h>
-#include "..\inc\glcd_menu.h"
-#include "..\inc\main.h"
-#include "..\inc\vbat.h"
+#include "glcd_menu.h"
+#include "main.h"
+#include "vbat.h"
 #include <util/delay.h>
-#include "..\inc\menu_ext.h"
+#include "menu_ext.h"
 
 extern uint16_t StackCount(void);	
 
