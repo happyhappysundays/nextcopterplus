@@ -12,16 +12,16 @@
 #include <string.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\init.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\main.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\mixer.h"
-#include "..\inc\imu.h"
+#include "io_cfg.h"
+#include "init.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "glcd_driver.h"
+#include "main.h"
+#include "eeprom.h"
+#include "mixer.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -48,20 +48,20 @@ const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
 	// Flight (14)
-	{0,127,1,0,80},					// Roll PID
-	{0,127,1,0,50},
-	{0,125,5,0,0},					// I-limits
-	{0,127,1,0,60},					// Acc gain
-	{-127,127,1,0,0}, 				// Acc trim
-	{0,127,1,0,80},					// Pitch PID
-	{0,127,1,0,50}, 
-	{0,125,5,0,0},					// I-limits
-	{0,127,1,0,60},
-	{-127,127,1,0,0},
-	{0,127,1,0,80},					// Yaw PID
-	{0,127,1,0,50},	
-	{0,125,5,0,0},					// I-limits
-	{0,127,1,0,0},					// Z Acc gain
+	{0,127,1,0,80},					// Roll gyro P
+	{0,127,1,0,50},					// Roll gyro I
+	{0,125,5,0,0},					// Roll gyro I-limits
+	{0,127,1,0,60},					// Roll Acc gain
+	{-127,127,1,0,0}, 				// Roll Acc trim
+	{0,127,1,0,80},					// Pitch gyro P
+	{0,127,1,0,50}, 				// Pitch gyro I
+	{0,125,5,0,0},					// Pitch gyro I-limits
+	{0,127,1,0,60},					// Pitch Acc gain			
+	{-127,127,1,0,0},				// Pitch Acc trim
+	{0,127,1,0,80},					// Yaw gyro P
+	{0,127,1,0,50},					// Yaw gyro I
+	{0,125,5,0,0},					// Yaw gyro I-limits
+	{0,127,1,0,0},					// Z Acc D gain
 };
 
 //************************************************************

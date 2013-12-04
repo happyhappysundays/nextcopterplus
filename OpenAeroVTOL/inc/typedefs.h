@@ -38,31 +38,31 @@ typedef struct
 	int8_t		P1_RevFlags;			// P1 sensor reverse flags (5)
 	int8_t		P2_RevFlags;			// P2 sensor reverse flags (5)
 	
-	// Mixer menu (22 bytes, 33 items)
+	// Mixer menu (21 bytes, 32 items)
 	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1_offset;				// P1 Offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
 	int8_t		P2_offset;				// P2 Offset for this output
-//
+	int8_t		P1_throttle_volume;		// Percentage of throttle to use in P1
+	int8_t		P2_throttle_volume;		// Percentage of throttle to use in P2
+	int8_t		Throttle_curve;			// Throttle transition curve (Linear, Sine)
+
 	int8_t		P1_sensors;				// Sensor switches (6), motor marker (1)
+	int8_t		P2_sensors;				// Sensor switches (6)
+
 	int8_t		P1_source_a;			// Source A for calculation
 	int8_t		P1_source_a_volume;		// Percentage of source to use
-	int8_t		P1_source_b;			// Source B for calculation
-	int8_t		P1_source_b_volume;		// Percentage of source to use
-	int8_t		P1_source_c;			// Source C for calculation
-	int8_t		P1_source_c_volume;		// Percentage of source to use
-	int8_t		P1_source_d;			// Source D for calculation
-	int8_t		P1_source_d_volume;		// Percentage of output to use
-//
-	int8_t		P2_sensors;				// Sensor switches (6)
 	int8_t		P2_source_a;			// Source A for calculation
 	int8_t		P2_source_a_volume;		// Percentage of source to use
+	int8_t		P1_source_b;			// Source B for calculation
+	int8_t		P1_source_b_volume;		// Percentage of source to use
 	int8_t		P2_source_b;			// Source B for calculation
 	int8_t		P2_source_b_volume;		// Percentage of source to use
+	int8_t		P1_source_c;			// Source C for calculation
+	int8_t		P1_source_c_volume;		// Percentage of source to use
 	int8_t		P2_source_c;			// Source C for calculation
 	int8_t		P2_source_c_volume;		// Percentage of source to use
-	int8_t		P2_source_d;			// Source D for calculation
-	int8_t		P2_source_d_volume;		// Percentage of output to use
+
 } channel_t;
 
 // PID type
@@ -155,6 +155,9 @@ typedef struct
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
+
+	// Throttle minimum offset
+	uint16_t 	ThrottleMinOffset;
 
 	// Acc zeros
 	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results

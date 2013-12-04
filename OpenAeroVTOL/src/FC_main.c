@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0
 // ================================
-// Version: Beta 8 - November 2013
+// Version: Beta 10 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -73,16 +73,22 @@
 //			"No signal" state also disarms if set to "armable". Rearranged General menu. Fixed transition bug.
 //			Disarming state sets all outputs marked as "Motor" to minimum output.
 //			Acc Z Delta now working. Missing REV for P2 sensors restored.
+// Beta 10	Added support for KK2.1 board. Logo displays for K2.1 boards.
+//			Most tunable items changed fom 5 to 1 increment.
+//			Added dedicated throttle sources to mixers with throttle curves.
+//			Throttle now referenced from zero and has its own Config.ThrottleMinOffset for referencing. 
+//			Rearranged mixer menus. Simplified includes.
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
 // Todo:
-//	Calibration mode
+//  Remove remaining uneeded menu items
+//	Z-axis P mode for testing?
+//	Calibration mode?
 //	Better way to integrate switching of sensors.
 //	Copy RC soures and .values to an array so that the mixer can do less work?
-//	Try doing the mixer menu without creating the [values] array. 
 //
 // Bugs: 
 //	I-term constraints not working for P2 when P1 constraint differs
@@ -101,24 +107,24 @@
 #include <stdbool.h>
 #include <util/delay.h>
 #include <string.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\rc.h"
-#include "..\inc\servos.h"
-#include "..\inc\vbat.h"
-#include "..\inc\gyros.h"
-#include "..\inc\init.h"
-#include "..\inc\acc.h"
-#include "..\inc\isr.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\pid.h"
-#include "..\inc\mixer.h"
-#include "..\inc\glcd_buffer.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\main.h"
-#include "..\inc\imu.h"
-#include "..\inc\eeprom.h"
+#include "io_cfg.h"
+#include "rc.h"
+#include "servos.h"
+#include "vbat.h"
+#include "gyros.h"
+#include "init.h"
+#include "acc.h"
+#include "isr.h"
+#include "glcd_driver.h"
+#include "pid.h"
+#include "mixer.h"
+#include "glcd_buffer.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "main.h"
+#include "imu.h"
+#include "eeprom.h"
 
 #include <avr/interrupt.h> // debug
 
@@ -126,8 +132,8 @@
 //* Fonts
 //***********************************************************
 
-#include "..\inc\Font_Verdana.h" 		// 8 (text) and 14 (titles) points
-#include "..\inc\Font_WingdingsOE2.h"	// Cursor and markers
+#include "Font_Verdana.h" 		// 8 (text) and 14 (titles) points
+#include "Font_WingdingsOE2.h"	// Cursor and markers
 
 //***********************************************************
 //* Defines
@@ -227,31 +233,14 @@ int main(void)
 		switch(Menu_mode) 
 		{
 			// In IDLE mode, the text "Press for status" is displayed ONCE.
-			// If a button is pressed the mode changes to REQ_STATUS
+			// If a button is pressed the mode changes to STATUS
 			case IDLE:
 				if((PINB & 0xf0) != 0xf0)
 				{
-					Menu_mode = REQ_STATUS;
+					Menu_mode = STATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
 					menu_beep(1);
-				}
-				break;
-
-			// Request the status be updated when safe
-			case REQ_STATUS:
-				// Reset safe to refresh flag
-//				Main_flags &= ~(1 << Refresh_safe);
-//				Menu_mode = WAITING_STATUS;
-				Menu_mode = STATUS;
-				break;
-
-			// Waiting for status screen to be updated
-			case WAITING_STATUS:
-				// Next time Refresh_safe is set, switch to status screen
-				if ((Main_flags & (1 << Refresh_safe)) != 0)
-				{
-					Menu_mode = STATUS;
 				}
 				break;
 
@@ -302,7 +291,7 @@ int main(void)
 				// Update status screen while waiting to time out
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
-					Menu_mode = REQ_STATUS;
+					Menu_mode = STATUS;
 				}
 				break;
 
@@ -527,7 +516,6 @@ int main(void)
 		//* When transitioning, the flight profile is a moving blend of 
 		//* Flight profiles 0 to 1. The transition speed is controlled 
 		//* by the Config.TransitionSpeed setting.
-		//*
 		//************************************************************
 
 		// P1 to P2 transition point now hard-coded to 20% above center
@@ -543,11 +531,15 @@ int main(void)
 		// Reset update request each loop
 		TransitionUpdated = false;
 
-		// For the first startup, set up the right state for the current setup
-		// Check for initial startup - the only time that old_flight should be "3".
-		// Also, re-initialise if the transition setting is changed
-		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
+		//************************************************************
+		//* Transition initial state setup/reset
+		//*
+		//* For the first startup, set up the right state for the current setup
+		//* Check for initial startup - the only time that old_flight should be "3".
+		//* Also, re-initialise if the transition setting is changed
+		//************************************************************
 
+		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
 		{
 			switch(Config.FlightSel)
 			{
@@ -569,7 +561,7 @@ int main(void)
 			UpdateLimits();
 		}
 
-		// Update timed transition when changing flight modes
+		// Update timed transition when changing flight modes // Debug
 		if (Config.FlightSel != old_flight)
 		{
 			// Debug
@@ -583,7 +575,7 @@ int main(void)
 			}
 		}
 
-		// Check to see if the transition channel has changed when bound to an 
+		// Check to see if the transition channel value has changed when bound to an 
 		// input channel to control transition (Config.TransitionSpeed = 0)
 		// If so, set TransitionUpdated flag to trigger an update.
 		// Note that by dividing the input value by 16 we reduce the steps from +/-1250 to about 156 steps 
@@ -635,6 +627,7 @@ int main(void)
 
 		// Update state, values and transition_counter every Config.TransitionSpeed if not zero. 195 = 10ms
 		if (((Config.TransitionSpeed != 0) && (Transition_timeout > (TRANSITION_TIMER * Config.TransitionSpeed))) ||
+
 		// If bound to a channel update once
 			  TransitionUpdated)
 		{
@@ -654,7 +647,7 @@ int main(void)
 				case TRANS_0_to_1_start:
 				case TRANS_1_to_0_start:
 					// Set start and end profiles
-					if (Transition_state == TRANS_0_to_1_start)
+					if (Transition_state == TRANS_0_to_1_start) // Hmm... yeap
 					{
 						start = 0;
 						end = 1;
@@ -670,7 +663,7 @@ int main(void)
 
 				case TRANSITIONING:
 					// Update travel limits and triggers each loop
-				//	UpdateLimits();
+					//UpdateLimits(); // Debug
 
 					// Handle timed transition
 					// Profile 1 to 0, so counter decrements to zero
@@ -687,9 +680,9 @@ int main(void)
 					else
 					{
 						transition_counter++;
-						if (transition_counter >= 100)
+						if (transition_counter >= 99)
 						{
-							transition_counter = 100;
+							transition_counter = 99;
 							Transition_state = TRANS_1;
 						}
 					}
@@ -704,6 +697,10 @@ int main(void)
 
 		// Save current flight mode
 		old_flight = Config.FlightSel;
+
+		//************************************************************
+		//* Remaining loop tasks
+		//************************************************************
 
 		// Read sensors
 		ReadGyros();
@@ -741,13 +738,13 @@ int main(void)
 		Servo_TCNT2 = TCNT2;
 
 		//************************************************************
-		//* Check for lack of RC
+		//* Check prescence of RC
 		//************************************************************
 
 		// Check to see if the RC input is overdue (500ms)
 		if (RC_Timeout > RC_OVERDUE)
 		{
-			Overdue = true;	// This resukts in a "No Signal" error
+			Overdue = true;	// This results in a "No Signal" error
 		}
 
 		//************************************************************
@@ -792,7 +789,7 @@ int main(void)
 		//************************************************************
 
 		// Cases where we are ready to output
-		if (Interrupted &&						// Only when interrupted (RC receive completed)
+		if	(Interrupted &&						// Only when interrupted (RC receive completed)
 				(
 				  (SlowRC) || 					// Plan A (Run as fast as the incoming RC if slow RC detected)
 				  (ServoTick && !SlowRC) ||		// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected)
@@ -803,22 +800,12 @@ int main(void)
 			Interrupted = false;				// Reset interrupted flag
 			ServoTick = false;					// Reset output requested flag
 			Servo_Rate = 0;						// Reset servo rate timer
-//			Main_flags |= (1 << Refresh_safe); 	// Flag that it is safe to try and refresh status screen
 			output_servo_ppm();					// Output servo signal
 		}
-
-		//************************************************************
-		//* Note: I can't recall what the deal with Refresh_safe is...
-		//* The interrupts is discarded when the status screen is updated
-		//* so that won't cuase sync issues. RC interrupts happening durin
-		//* status screen update shouldn't be an issue.
-		//* Experiment with this disabled to see what happens 
-		//************************************************************
 
 		// Not ready for output, so cancel the current interrupt and wait for the next one
 		else
 		{
-//			Main_flags |= (1 << Refresh_safe); 	// Flag that it is safe to try and refresh status screen - debug
 			Interrupted = false;				// Reset interrupted flag
 		}
 

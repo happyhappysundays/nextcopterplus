@@ -7,21 +7,31 @@
  * Updated: 25/03/2013 - Integrated ninja-level PWM code generation concept suggested by Jim Drew of Xtreme Power Systems
  * Updated: 11/05/2013 - Discovered that M1 incapable of <900us and M8 of >2.04ms due to 128us stagger limitations.
  *						 Reduced stagger to 100us and recalibrated all offsets.
+ * Updated: 30/11/2013 - Now compatible with KK2.1 board
  */
 
 #include <avr/io.h>
+#include "compiledefs.h"
 
 // Servo output pin assignments
-#define SERVO_OUT	_SFR_IO_ADDR(PORTC)
+#define SERVO_OUT_KK20	_SFR_IO_ADDR(PORTC)
+#define SERVO_OUT_KK21	_SFR_IO_ADDR(PORTA)
 
-#define M1 SERVO_OUT,6	// PORTC,6
-#define M2 SERVO_OUT,4	// PORTC,4
-#define M3 SERVO_OUT,2	// PORTC,2
-#define M4 SERVO_OUT,3	// PORTC,3
-#define M5 SERVO_OUT,1	// PORTC,1
-#define M6 SERVO_OUT,0	// PORTC,0
-#define M7 SERVO_OUT,5	// PORTC,5
-#define M8 SERVO_OUT,7	// PORTC,7
+#define M1 SERVO_OUT_KK20,6	// PORTC,6
+#define M2 SERVO_OUT_KK20,4	// PORTC,4
+#define M3 SERVO_OUT_KK20,2	// PORTC,2
+#define M4 SERVO_OUT_KK20,3	// PORTC,3
+
+#ifdef KK21
+#define M5 SERVO_OUT_KK21,4	// PORTA,4
+#define M6 SERVO_OUT_KK21,5	// PORTA,5
+#else
+#define M5 SERVO_OUT_KK20,1	// PORTC,1
+#define M6 SERVO_OUT_KK20,0	// PORTC,0
+#endif
+
+#define M7 SERVO_OUT_KK20,5	// PORTC,5
+#define M8 SERVO_OUT_KK20,7	// PORTC,7
 
 #ifndef __tmp_reg__
 #define __tmp_reg__ 0
@@ -422,7 +432,10 @@ loopin:
 
 // Clear outputs if done
 	ldi		r18,0x00	 // 1
-	out 	SERVO_OUT,r18// 1			Boom.
+	out 	SERVO_OUT_KK20,r18// 1			Boom.
+#ifdef KK21
+	out 	SERVO_OUT_KK21,r18// 1			KK2.1 has a couple of outputs on Port A also.
+#endif
 
 // Exit
 loopout:

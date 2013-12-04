@@ -12,14 +12,14 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h> 
 #include <util/delay.h>
-#include "..\inc\typedefs.h"
-#include "..\inc\isr.h"
-#include "..\inc\init.h"
-#include "..\inc\io_cfg.h"
-#include "..\inc\servos.h"
-#include "..\inc\main.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\mixer.h"
+#include "typedefs.h"
+#include "isr.h"
+#include "init.h"
+#include "io_cfg.h"
+#include "servos.h"
+#include "main.h"
+#include "eeprom.h"
+#include "mixer.h"
 
 //************************************************************
 // Prototypes
@@ -40,7 +40,7 @@ void CenterSticks(void);
 
 int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
 
-// Get raw flight channel data and remove zero offset
+// Get raw flight channel data (~2500 to 5000) and remove zero offset
 // Use channel mapping for configurability
 void RxGetChannels(void)
 {
@@ -57,9 +57,7 @@ void RxGetChannels(void)
 	// Reverse primary channels as requested
 	if (Config.AileronPol == REVERSED)
 	{
-		// Note we have to reverse the source otherwise we get a double reverse if someone sets up
-		// the second aileron as AILERON
-		RCinputs[AILERON] = -(RxChannel[AILERON] - Config.RxChannelZeroOffset[AILERON]);
+		RCinputs[AILERON] = -RCinputs[AILERON];
 	}
 
 	if (Config.ElevatorPol == REVERSED)
@@ -138,6 +136,9 @@ void CenterSticks(void)
 	{
 		Config.RxChannelZeroOffset[i] = RxChannelZeroOffset[i] >> 3; // Divide by 8
 	}
+	
+	// Calculate throttle minimum offset
+	Config.ThrottleMinOffset = (3750 - Config.RxChannelZeroOffset[THROTTLE]);
 
 	Save_Config_to_EEPROM();
 }

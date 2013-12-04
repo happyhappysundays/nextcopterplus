@@ -9,10 +9,10 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdbool.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\main.h"
-#include "..\inc\isr.h"
-#include "..\inc\rc.h"
+#include "io_cfg.h"
+#include "main.h"
+#include "isr.h"
+#include "rc.h"
 
 //************************************************************
 // Prototypes
