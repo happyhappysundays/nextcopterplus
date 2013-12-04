@@ -6,10 +6,10 @@
 //* Includes
 //***********************************************************
 
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "..\inc\io_cfg.h"
+#include "io_cfg.h"
 
 //************************************************************
 // Prototypes

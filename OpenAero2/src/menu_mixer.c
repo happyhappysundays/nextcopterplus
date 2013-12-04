@@ -11,15 +11,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\init.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\main.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\mixer.h"
+#include "io_cfg.h"
+#include "init.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "glcd_driver.h"
+#include "main.h"
+#include "eeprom.h"
+#include "mixer.h"
 
 //************************************************************
 // Prototypes

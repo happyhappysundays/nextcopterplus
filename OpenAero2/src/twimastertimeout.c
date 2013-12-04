@@ -13,9 +13,9 @@
 **************************************************************************/
 
 #include <avr/io.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\i2cmaster.h"
-#include "..\inc\compiledefs.h"
+#include "io_cfg.h"
+#include "i2cmaster.h"
+#include "compiledefs.h"
 #include <inttypes.h>
 #include <compat/twi.h>
 

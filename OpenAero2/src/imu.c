@@ -13,12 +13,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\acc.h"
-#include "..\inc\gyros.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "acc.h"
+#include "gyros.h"
+#include "main.h"
 #include <avr/pgmspace.h> 
-#include "..\inc\menu_ext.h"
+#include "menu_ext.h"
 
 //************************************************************
 // Prototypes

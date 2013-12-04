@@ -9,8 +9,8 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\adc.h"
+#include "io_cfg.h"
+#include "adc.h"
 
 //************************************************************
 // Prototypes

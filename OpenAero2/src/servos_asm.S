@@ -11,7 +11,7 @@
  */
 
 #include <avr/io.h>
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 
 // Servo output pin assignments
 #define SERVO_OUT_KK20	_SFR_IO_ADDR(PORTC)

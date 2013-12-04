@@ -6,16 +6,16 @@
 //* Includes
 //***********************************************************
 
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 #include <string.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 #include <stdbool.h>
-#include "..\inc\io_cfg.h"
+#include "io_cfg.h"
 #include <util/delay.h>
-#include "..\inc\mixer.h"
-#include "..\inc\menu_ext.h"
+#include "mixer.h"
+#include "menu_ext.h"
 
 //************************************************************
 // Prototypes

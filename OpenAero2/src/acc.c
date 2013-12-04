@@ -9,17 +9,17 @@
 //* Includes
 //***********************************************************
 
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\adc.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\main.h"
-#include "..\inc\i2c.h"
-#include "..\inc\MPU6050.h"
+#include "io_cfg.h"
+#include "adc.h"
+#include "eeprom.h"
+#include "main.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes

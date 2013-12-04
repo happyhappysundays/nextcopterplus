@@ -6,34 +6,34 @@
 //* Includes
 //***********************************************************
 
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/eeprom.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include "..\inc\eeprom.h"
-#include "..\inc\io_cfg.h"
-#include "..\inc\isr.h"
-#include "..\inc\rc.h"
-#include "..\inc\main.h"
-#include "..\inc\adc.h"
-#include "..\inc\vbat.h"
-#include "..\inc\servos.h"
-#include "..\inc\gyros.h"
-#include "..\inc\acc.h"
-#include "..\inc\mixer.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
+#include "eeprom.h"
+#include "io_cfg.h"
+#include "isr.h"
+#include "rc.h"
+#include "main.h"
+#include "adc.h"
+#include "vbat.h"
+#include "servos.h"
+#include "gyros.h"
+#include "acc.h"
+#include "mixer.h"
+#include "glcd_driver.h"
+#include "mugui.h"
 #include <avr/pgmspace.h>
-#include "..\inc\glcd_menu.h"
-#include "..\inc\pid.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\imu.h"
-#include "..\inc\uart.h"
-#include "..\inc\i2cmaster.h"
-#include "..\inc\i2c.h"
-#include "..\inc\MPU6050.h"
+#include "glcd_menu.h"
+#include "pid.h"
+#include "menu_ext.h"
+#include "imu.h"
+#include "uart.h"
+#include "i2cmaster.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
 

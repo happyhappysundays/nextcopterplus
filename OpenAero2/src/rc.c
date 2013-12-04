@@ -12,14 +12,14 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h> 
 #include <util/delay.h>
-#include "..\inc\typedefs.h"
-#include "..\inc\isr.h"
-#include "..\inc\init.h"
-#include "..\inc\io_cfg.h"
-#include "..\inc\servos.h"
-#include "..\inc\main.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\mixer.h"
+#include "typedefs.h"
+#include "isr.h"
+#include "init.h"
+#include "io_cfg.h"
+#include "servos.h"
+#include "main.h"
+#include "eeprom.h"
+#include "mixer.h"
 
 //************************************************************
 // Prototypes

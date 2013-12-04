@@ -11,7 +11,7 @@
 //***********************************************************
 
 #include "typedefs.h"
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 
 //***********************************************************
 //* Random externals

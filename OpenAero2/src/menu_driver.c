@@ -10,16 +10,16 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdlib.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\main.h"
-#include "..\inc\vbat.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\rc.h"
+#include "io_cfg.h"
+#include "glcd_driver.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "main.h"
+#include "vbat.h"
+#include "menu_ext.h"
+#include "rc.h"
 #include <avr/interrupt.h>
-#include "..\inc\mixer.h"
+#include "mixer.h"
 
 #define CONTRAST 170 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 10 - November 2013
+// Version 1.2 Beta 11 - December 2013
 //
 // May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
@@ -210,6 +210,7 @@
 //			Camstab freakout bug investigated and fixed. Switched to hardware TWI driver.
 //			Fixed all invert calibrate bugs and retested every board orientation.
 //			Camstab offset bug also fixed.
+// Beta 11	Compiler clean-up.
 //
 //***********************************************************
 //* To do
@@ -221,7 +222,7 @@
 //* Includes
 //***********************************************************
 
-#include "..\inc\compiledefs.h"
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h> 
 #include <stdio.h>
@@ -229,24 +230,24 @@
 #include <stdbool.h>
 #include <util/delay.h>
 #include <string.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\rc.h"
-#include "..\inc\servos.h"
-#include "..\inc\vbat.h"
-#include "..\inc\gyros.h"
-#include "..\inc\init.h"
-#include "..\inc\acc.h"
-#include "..\inc\isr.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\pid.h"
-#include "..\inc\mixer.h"
-#include "..\inc\glcd_buffer.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\main.h"
-#include "..\inc\imu.h"
-#include "..\inc\eeprom.h"
+#include "io_cfg.h"
+#include "rc.h"
+#include "servos.h"
+#include "vbat.h"
+#include "gyros.h"
+#include "init.h"
+#include "acc.h"
+#include "isr.h"
+#include "glcd_driver.h"
+#include "pid.h"
+#include "mixer.h"
+#include "glcd_buffer.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "main.h"
+#include "imu.h"
+#include "eeprom.h"
 
 #include <avr/interrupt.h> // debug
 
@@ -254,8 +255,8 @@
 //* Fonts
 //***********************************************************
 
-#include "..\inc\Font_Verdana.h" 		// 8 (text) and 14 (titles) points
-#include "..\inc\Font_WingdingsOE2.h"	// Cursor and markers
+#include "Font_Verdana.h" 		// 8 (text) and 14 (titles) points
+#include "Font_WingdingsOE2.h"	// Cursor and markers
 
 //***********************************************************
 //* Defines

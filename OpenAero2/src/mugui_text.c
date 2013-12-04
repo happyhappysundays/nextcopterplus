@@ -37,9 +37,9 @@
 #include <string.h>
 #include <avr/pgmspace.h>
 #include <stdbool.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\main.h"
-#include "..\inc\glcd_driver.h"
+#include "io_cfg.h"
+#include "main.h"
+#include "glcd_driver.h"
 
 /*************************************************************************/
 // Replacement for missing include files...

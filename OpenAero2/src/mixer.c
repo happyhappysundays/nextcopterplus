@@ -10,14 +10,14 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\rc.h"
-#include "..\inc\isr.h"
-#include "..\inc\servos.h"
-#include "..\inc\pid.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "rc.h"
+#include "isr.h"
+#include "servos.h"
+#include "pid.h"
+#include "main.h"
 #include <avr/pgmspace.h> 
-#include "..\inc\mixer.h"
+#include "mixer.h"
 
 //************************************************************
 // Prototypes
