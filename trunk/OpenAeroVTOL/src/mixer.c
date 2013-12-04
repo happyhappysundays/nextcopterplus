@@ -463,13 +463,13 @@ void ProcessMixer(void)
 				temp3 = 0;
 
 				// Calculate step difference
-				Step1 = (temp2 - temp1) / 100;	
+				Step1 = (temp2 - temp1) / (int16_t)100;	
 
 				// Linear vs. Sinusoidal calculation
 				if (Config.Channel[i].Throttle_curve == LINEAR)
 				{
 					// Multiply [transition] steps (0 to 100)
-					temp3 = Step1 * transition;
+					temp3 = temp1 + (Step1 * transition);
 				}
 				else
 				{
@@ -487,14 +487,14 @@ void ProcessMixer(void)
 						temp2 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
 					}
 
-					temp3 = Step1 * temp2;
+					temp3 = temp1 + (Step1 * temp2);
 				}
 
 				// Rescale to normal value
 				temp3 = temp3 >> 7;
 
 				// Calculate actual throttle value
-				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)(temp1 + temp3));
+				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)(temp3));
 			}
 			
 			// No curve
