@@ -6,30 +6,34 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/eeprom.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include "..\inc\eeprom.h"
-#include "..\inc\io_cfg.h"
-#include "..\inc\isr.h"
-#include "..\inc\rc.h"
-#include "..\inc\main.h"
-#include "..\inc\adc.h"
-#include "..\inc\vbat.h"
-#include "..\inc\servos.h"
-#include "..\inc\gyros.h"
-#include "..\inc\acc.h"
-#include "..\inc\mixer.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
+#include "eeprom.h"
+#include "io_cfg.h"
+#include "isr.h"
+#include "rc.h"
+#include "main.h"
+#include "adc.h"
+#include "vbat.h"
+#include "servos.h"
+#include "gyros.h"
+#include "acc.h"
+#include "mixer.h"
+#include "glcd_driver.h"
+#include "mugui.h"
 #include <avr/pgmspace.h>
-#include "..\inc\glcd_menu.h"
-#include "..\inc\pid.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\imu.h"
-#include "..\inc\uart.h"
+#include "glcd_menu.h"
+#include "pid.h"
+#include "menu_ext.h"
+#include "imu.h"
+#include "uart.h"
+#include "i2cmaster.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
 
@@ -58,12 +62,26 @@ void init(void)
 	// I/O setup
 	//***********************************************************
 	// Set port directions
+	// KK2.0 and KK2.1 are different
+#ifdef KK21
+	DDRA		= 0x30;		// Port A
+	DDRC		= 0xFC;		// Port C
+#else
 	DDRA		= 0x00;		// Port A
-	DDRB		= 0x0A;		// Port B
 	DDRC		= 0xFF;		// Port C
+#endif
+	DDRB		= 0x0A;		// Port B
 	DDRD		= 0xF2;		// Port D
 
-	MOTORS		= 0;		// Hold all PWM outputs low to stop glitches
+	// Hold all PWM outputs low to stop glitches
+	M1		= 0;
+	M2		= 0;
+	M3		= 0;
+	M4		= 0;
+	M5		= 0;
+	M6		= 0;
+	M7		= 0;
+	M8		= 0;	
 
 	// Preset I/O pins
 	LED1 		= 0;		// LED1 off
@@ -129,7 +147,7 @@ void init(void)
 	// Interrupts and pin function setup
 	//***********************************************************
 
-	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, Aux and CPPM input)
+	// Pin change interrupt enables PCINT1, PCINT2 and PCINT3 (Throttle, AUX and CPPM input)
 	PCICR  = 0x0A;							// PCINT8  to PCINT15 (PCINT1 group - AUX)
 											// PCINT24 to PCINT31 (PCINT3 group - THR)
 	PCIFR  = 0x0F;							// Clear PCIF0 interrupt flag 
@@ -146,6 +164,16 @@ void init(void)
 											// Clear INT2 interrupt flag (Rudder/CPPM)
 
 	//***********************************************************
+	// i2c init for KK2.1
+	//***********************************************************	
+
+#ifdef KK21
+	i2c_init();
+	init_i2c_gyros();
+	init_i2c_accs();
+#endif
+
+	//***********************************************************
 	// Start up
 	//***********************************************************
 
@@ -158,19 +186,22 @@ void init(void)
 	st7565_command(CMD_DISPLAY_ON);
 	st7565_command(CMD_SET_ALLPTS_NORMAL);
 	st7565_set_brightness(0x26);
-	st7565_command(CMD_SET_COM_NORMAL); 	// For text
-	clear_buffer(buffer);
-	write_buffer(buffer);
+	st7565_command(CMD_SET_COM_REVERSE); 	// For logo
+
+	// Make sure the LCD is blank
+	clear_screen();
 
 	// This delay prevents the GLCD flashing up a ghost image of old data
 	_delay_ms(300);	
 
-	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users) 
+	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users)
 	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
 	{
 		// Display reset message
+		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
+		clear_buffer(buffer);
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);
 
 		Set_EEPROM_Default_Config();
@@ -180,12 +211,21 @@ void init(void)
 	else
 	{
 		Initial_EEPROM_Config_Load();			
+		// Pause for logo if KK2.1
+#ifdef KK21
+		// Write logo from buffer
+		write_buffer(buffer,0);
+#endif
 	}
 
-	// Display "Hold steady" message
-	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
-	write_buffer(buffer);
+#ifndef KK21
+	// Display "Hold steady" message for KK2.0
+	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	clear_buffer(buffer);
+	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
+	write_buffer(buffer,1);
+	clear_buffer(buffer);
+#endif
 		
 	// Do startup tasks
 	UpdateLimits();							// Update travel limts	
@@ -245,6 +285,9 @@ void init(void)
 
 	// Beep that all sensors have been handled
 	menu_beep(1);
+
+	// Set text display mode back to normal
+	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 
 } // init()
 

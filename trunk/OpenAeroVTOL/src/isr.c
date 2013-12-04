@@ -8,8 +8,8 @@
 
 #include <stdbool.h>
 #include <avr/interrupt.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "main.h"
 #include <stdlib.h>
 #include <string.h>
 

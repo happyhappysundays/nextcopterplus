@@ -12,17 +12,17 @@
 #include <string.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\init.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_menu.h"
-#include "..\inc\menu_ext.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\main.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\mixer.h"
-#include "..\inc\imu.h"
-#include "..\inc\uart.h"
+#include "io_cfg.h"
+#include "init.h"
+#include "mugui.h"
+#include "glcd_menu.h"
+#include "menu_ext.h"
+#include "glcd_driver.h"
+#include "main.h"
+#include "eeprom.h"
+#include "mixer.h"
+#include "imu.h"
+#include "uart.h"
 
 //************************************************************
 // Prototypes
@@ -54,7 +54,6 @@ const uint8_t RCMenuText[3][RCITEMS] PROGMEM =
 	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0, 0},						// General
 };
 
-// Have to size each element to RCITEMS even though they are  smaller... fix this later
 const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM = 
 {
 	{
@@ -63,7 +62,7 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
 		{THROTTLE,NOCHAN,1,1,NOCHAN},	// DynGainSrc
-		{0,100,5,0,0},					// Dynamic gain
+		{0,100,1,0,0},					// Dynamic gain
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
@@ -80,7 +79,7 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{1,60,1,0,10},					// Status menu timeout
 		{LOW,HIGH,1,1,LOW},				// Servo rate
 		{1,64,1,0,8},					// Acc. LPF
-		{10,100,5,0,30},				// CF factor
+		{10,100,1,0,30},				// CF factor
 		{0,127,1,0,108},				// Trigger / Alarm voltage
 	}
 };

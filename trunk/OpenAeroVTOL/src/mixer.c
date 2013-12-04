@@ -10,14 +10,14 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\rc.h"
-#include "..\inc\isr.h"
-#include "..\inc\servos.h"
-#include "..\inc\pid.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "rc.h"
+#include "isr.h"
+#include "servos.h"
+#include "pid.h"
+#include "main.h"
 #include <avr/pgmspace.h> 
-#include "..\inc\mixer.h"
+#include "mixer.h"
 
 //************************************************************
 // Prototypes
@@ -31,6 +31,28 @@ int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
 int16_t scale_percent_nooffset(int8_t value);
 
+//************************************************************
+// Defines
+//************************************************************
+
+// Throttle volume curves
+// Why 101 steps? Well, both 0% and 100% transition values are valid
+
+const int8_t SIN[101] PROGMEM = 
+			{0,2,3,5,6,8,10,11,13,14,
+			16,17,19,20,22,24,25,27,28,30,
+			31,33,34,36,37,39,40,42,43,44,
+			46,47,49,50,51,53,54,55,57,58,
+			59,61,62,63,64,65,67,68,69,70,
+			71,72,73,75,76,77,78,79,80,81,
+			81,82,83,84,85,86,87,87,88,89,
+			90,90,91,92,92,93,93,94,94,95,
+			95,96,96,97,97,98,98,98,98,99,
+			99,99,99,100,100,100,100,100,100,100
+			,100};
+
+//************************************************************
+// Code
 //************************************************************
 
 void ProcessMixer(void)
@@ -292,20 +314,6 @@ void ProcessMixer(void)
 				temp2 = scale32(temp2, Config.Channel[i].P1_source_c_volume);
 				P1_solution = P1_solution + temp2;
 			}
-			if ((Config.Channel[i].P1_source_d_volume !=0) && (Config.Channel[i].P1_source_d != NOMIX)) // Mix in fourth extra source
-			{
-				if (Config.Channel[i].P1_source_d > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P1_source_d - MAX_OUTPUTS];
-				}
-				else
-				{
-					temp2 = Config.Channel[Config.Channel[i].P1_source_d].P1_value;
-				}
-
-				temp2 = scale32(temp2, Config.Channel[i].P1_source_d_volume);
-				P1_solution = P1_solution + temp2;
-			}
 		}
 
 		// Mix in other outputs here (P2)
@@ -353,20 +361,6 @@ void ProcessMixer(void)
 				temp2 = scale32(temp2, Config.Channel[i].P2_source_c_volume);
 				P2_solution = P2_solution + temp2;
 			}
-			if ((Config.Channel[i].P2_source_d_volume !=0) && (Config.Channel[i].P2_source_d != NOMIX)) // Mix in fourth extra source
-			{
-				if (Config.Channel[i].P2_source_d > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_d - MAX_OUTPUTS];
-				}
-				else
-				{
-					temp2 = Config.Channel[Config.Channel[i].P2_source_d].P2_value;
-				}
-
-				temp2 = scale32(temp2, Config.Channel[i].P2_source_d_volume);
-				P2_solution = P2_solution + temp2;
-			}
 		}
 				
 		// Save solution for this channel. Note that this contains cross-mixed data from the *last* cycle
@@ -393,10 +387,11 @@ void ProcessMixer(void)
 				// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
 				// Trim that value down to +/-50 for just over +/-1000
 				transition  = (transition_value_16 >> 1); // 62/2 = 31+
-				transition += (transition_value_16 >> 3); // 62/4 = 15+
-				transition += (transition_value_16 >> 3); // 62/16 = 3 = 49
+				transition += (transition_value_16 >> 2); // 62/4 = 15+
+				transition += (transition_value_16 >> 4); // 62/16 = 3 = 49
 
-				// Limit extent of transition value
+
+				// Limit extent of transition value 0 to 100 (101 steps)
 				if (transition < -50) transition = -50;
 				if (transition > 50) transition = 50;
 				transition += 50;
@@ -408,17 +403,28 @@ void ProcessMixer(void)
 
 			for (i = 0; i < MAX_OUTPUTS; i++)
 			{
-				// Get source channel value
-				temp1 = Config.Channel[i].P1_value;
-				temp1 = scale32(temp1, (100 - transition));
+				// Speed up the easy ones :)
+				if (transition == 0)
+				{
+					temp1 = Config.Channel[i].P1_value;
+				}
+				else if (transition >= 100)
+				{
+					temp1 = Config.Channel[i].P2_value;
+				}
+				else
+				{
+					// Get source channel value
+					temp1 = Config.Channel[i].P1_value;
+					temp1 = scale32(temp1, (100 - transition));
 
-				// Get destination channel value
-				temp2 = Config.Channel[i].P2_value;
-				temp2 = scale32(temp2, transition);
+					// Get destination channel value
+					temp2 = Config.Channel[i].P2_value;
+					temp2 = scale32(temp2, transition);
 
-				// Sum the mixers
-				temp1 = temp1 + temp2;
-
+					// Sum the mixers
+					temp1 = temp1 + temp2;
+				}
 				// Save transitioned solution into P1
 				Config.Channel[i].P1_value = temp1;
 			} 
@@ -435,6 +441,79 @@ void ProcessMixer(void)
 	}
 */
 	//************************************************************
+	// Groovy throttle curve handling.
+	// Uses the transition value, but is not part of the transition
+	// mixer. Linear or Sine curve. Reverse Sine done automatically
+	//************************************************************ 
+
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		// Ignore if both throttle volumes are 0% (no throttle)
+		if 	(!((Config.Channel[i].P1_throttle_volume == 0) && 
+			(Config.Channel[i].P2_throttle_volume == 0)))
+		{
+			// There is a curve
+			if (Config.Channel[i].P1_throttle_volume != Config.Channel[i].P2_throttle_volume)
+			{
+				// Work out distance to cover over stage 1 (P1 to P2)
+				temp1 = Config.Channel[i].P1_throttle_volume;
+				temp1 = temp1 << 7; 									// Multiply by 128 so divide gives reasonable step values
+				temp2 = Config.Channel[i].P2_throttle_volume;
+				temp2 = temp2 << 7; 
+				temp3 = 0;
+
+				// Calculate step difference
+				Step1 = (temp2 - temp1) / 100;	
+
+				// Linear vs. Sinusoidal calculation
+				if (Config.Channel[i].Throttle_curve == LINEAR)
+				{
+					// Multiply [transition] steps (0 to 100)
+					temp3 = Step1 * transition;
+				}
+				else
+				{
+					// Choose between SINE and COSINE
+					// If P2 less than P1, COSINE (reverses SINE) is the one we want
+					if (Step1 < 0)
+					{ 
+						// Multiply SIN[100 - transition] steps (0 to 100)
+						temp2 = (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
+					}
+					// If P2 greater than P1, SINE is the one we want
+					else
+					{
+						// Multiply SIN[transition] steps (0 to 100)
+						temp2 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
+					}
+
+					temp3 = Step1 * temp2;
+				}
+
+				// Rescale to normal value
+				temp3 = temp3 >> 7;
+
+				// Calculate actual throttle value
+				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)(temp1 + temp3));
+			}
+			
+			// No curve
+			else
+			{
+				// Calculate actual throttle value
+				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)Config.Channel[i].P1_throttle_volume);
+			}
+
+			// Re-scale throttle values back to system values (+/-1250) as throttle offset is actually at Config.ThrottleMinOffset
+			temp3 = temp3 - Config.ThrottleMinOffset;
+			
+			// Add offset to channel value
+			Config.Channel[i].P1_value += temp3;
+
+		} // No throttle
+	}
+
+	//************************************************************
 	// Per-channel 3-point offset needs to be post transition loop 
 	// as it is non-linear
 	//************************************************************ 
@@ -443,7 +522,7 @@ void ProcessMixer(void)
 	{
 		// Work out distance to cover over stage 1 (P1 to P1.n)
 		temp1 = Config.Channel[i].P1n_offset - Config.Channel[i].P1_offset;
-		temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable setp values
+		temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
 
 		// Divide distance into steps
 		temp2 = Config.Channel[i].P1n_position; 
@@ -580,7 +659,6 @@ void UpdateServos(void)
 		}
 
 		// Add offset value to restore to system compatible value
-//		temp1 += Config.Limits[i].trim;
 		temp1 += 3750;
 
 		// Enforce min, max travel limits

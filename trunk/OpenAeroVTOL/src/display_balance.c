@@ -8,16 +8,16 @@
 
 #include <avr/io.h>
 #include <stdlib.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
+#include "io_cfg.h"
+#include "glcd_driver.h"
+#include "mugui.h"
 #include <avr/pgmspace.h>
-#include "..\inc\glcd_menu.h"
-#include "..\inc\main.h"
-#include "..\inc\isr.h"
+#include "glcd_menu.h"
+#include "main.h"
+#include "isr.h"
 #include <util/delay.h>
-#include "..\inc\acc.h"
-#include "..\inc\menu_ext.h"
+#include "acc.h"
+#include "menu_ext.h"
 
 //************************************************************
 // Prototypes
@@ -43,16 +43,16 @@ void Display_balance(void)
 		// VERTICAL:	Pitch = Y, Roll = X
 		// SIDEWAYS:	Pitch = Y, Roll = X
 
-		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
+/*		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
 		{
 			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 32;
 			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 64;	
 		}
 		else
-		{
+		{*/
 			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 32;
 			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 64;
-		}
+//		}
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
@@ -69,7 +69,7 @@ void Display_balance(void)
 		drawline(buffer, 32, 32, 96, 32, 1); 
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
-		write_buffer(buffer);
+		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		_delay_ms(20);
 	}

@@ -10,16 +10,16 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\vbat.h"
-#include "..\inc\adc.h"
-#include "..\inc\init.h"
-#include "..\inc\eeprom.h"
-#include "..\inc\acc.h"
-#include "..\inc\rc.h"
-#include "..\inc\mugui.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\main.h"
+#include "io_cfg.h"
+#include "vbat.h"
+#include "adc.h"
+#include "init.h"
+#include "eeprom.h"
+#include "acc.h"
+#include "rc.h"
+#include "mugui.h"
+#include "glcd_driver.h"
+#include "main.h"
 
 //************************************************************
 // Prototypes
@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 9";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 10";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -81,9 +81,9 @@ const char MainMenuItem22[] PROGMEM = "18. Neg. Servo trvl. (%)";
 const char MainMenuItem23[] PROGMEM = "19. Pos. Servo trvl. (%)";
 //
 const char PText15[] PROGMEM = "Gyro";		 				// Sensors text
-const char PText16[] PROGMEM = "X";
-const char PText17[] PROGMEM = "Y";
-const char PText18[] PROGMEM = "Z";
+const char PText16[] PROGMEM = "Roll";
+const char PText17[] PROGMEM = "Pitch";
+const char PText18[] PROGMEM = "Yaw";
 const char PText19[] PROGMEM = "Acc";
 const char SensorMenuItem1[]  PROGMEM = "Cal.";	
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	
@@ -168,11 +168,13 @@ const char MixerItem6[] PROGMEM = "P1 Yaw gyro:";
 const char MixerItem7[] PROGMEM = "P1 Roll acc:";
 const char MixerItem3[] PROGMEM = "P1 Pitch acc:";
 const char MixerItem42[] PROGMEM = "P1 Z delta acc:";
+const char MixerItem23[] PROGMEM = "P1 THR vol.:";
+const char MixerItem33[] PROGMEM = "P2 THR vol.:";
+const char Mixeritem50[] PROGMEM = "Thottle curve";
 const char MixerItem0[] PROGMEM = "P1 Source A:";			
-const char MixerItem2[] PROGMEM = "P1 Volume(%):";
+const char MixerItem2[] PROGMEM = "P1 Volume:";
 const char MixerItem21[] PROGMEM = "P1 Source B:";
 const char MixerItem22[] PROGMEM = "P1 Source C:";
-const char MixerItem23[] PROGMEM = "P1 Source D:";
 //
 const char MixerItem24[] PROGMEM = "P2 Roll gyro:"; // P2
 const char MixerItem25[] PROGMEM = "P2 Pitch gyro:";
@@ -181,14 +183,16 @@ const char MixerItem27[] PROGMEM = "P2 Roll acc:";
 const char MixerItem28[] PROGMEM = "P2 Pitch acc:";
 const char MixerItem43[] PROGMEM = "P2 Z delta acc:";
 const char MixerItem29[] PROGMEM = "P2 Source A:";			
-const char MixerItem30[] PROGMEM = "P2 Volume(%):";
+const char MixerItem30[] PROGMEM = "P2 Volume:";
 const char MixerItem31[] PROGMEM = "P2 Source B:";
 const char MixerItem32[] PROGMEM = "P2 Source C:";
-const char MixerItem33[] PROGMEM = "P2 Source D:";
 //
 const char MixerItem40[] PROGMEM = "Servo";
 const char MixerItem41[] PROGMEM = "Motor";
 //
+const char MixerItem60[] PROGMEM = "Linear";
+const char MixerItem61[] PROGMEM = "Sine";
+
 const char MixerItem8[] PROGMEM = "Trvl Min(%):";
 const char MixerItem9[] PROGMEM = "Trvl Max(%):";
 const char MixerItem16[] PROGMEM = "Trim(%):";
@@ -288,9 +292,9 @@ const char *text_menu[] PROGMEM =
 		// 
 		P1text, P2text, P3text, 															// 48 to 50 P1, P1.n, P2
 		//
-		Dummy0, Dummy0, 																	// 51 to 52 Spare
+		MixerItem60, MixerItem61, 															// 51 to 52 Linear, Sine
 		//
-		FSmode0, FSmode1, 																	// 53 and 54 wasa Fixed, Adv.
+		FSmode0, FSmode1, 																	// 53 and 54 
 
 		Dummy0,  Dummy0, Dummy0, 															// 55 to 59
 		Dummy0, Dummy0, 
@@ -367,28 +371,28 @@ const char *text_menu[] PROGMEM =
 		//
 		Dummy0,Dummy0,Dummy0,
 		//
-		MixerItem1,																			// 192 Motor marker (30 mixer items in total)
+		MixerItem1,																			// 192 Motor marker (32 mixer items in total)
 		MixerItem36,																		// Position for P1.n	
 		MixerItem20, 																		// Offset for P1
 		MixerItem35,																		// Offset for P1.n
 		MixerItem34, 																		// Offset for P2
-
-																							// 197 to 210 mixers P1
-		MixerItem4, MixerItem5, MixerItem6, MixerItem7, MixerItem3, MixerItem42,			// Gyros and Acc
-		MixerItem0, MixerItem2, 															// Source A and Volume
-		MixerItem21, MixerItem2, 															// Source B and Volume
-		MixerItem22, MixerItem2,  															// Source C and Volume 	
-		MixerItem23, MixerItem2, 															// Source D and Volume
+		MixerItem23,  																		// P1 Throttle
+		MixerItem33, 																		// P2 Throttle
+		Mixeritem50,																		// Throttle curve
+		//	
+		MixerItem4, MixerItem24,MixerItem5, MixerItem25, MixerItem6, MixerItem26, 			// Gyros and Acc P1 + P2
+		MixerItem7, MixerItem27, MixerItem3,MixerItem28, MixerItem42,MixerItem43,
+		//																					// 200 to 223 mixers P1 + P2
+		MixerItem0, MixerItem2, 															// Source A and Volume P1
+		MixerItem29, MixerItem30, 															// Source A and Volume P2
+		MixerItem21, MixerItem2, 															// Source B and Volume P1
+		MixerItem31, MixerItem30, 															// Source B and Volume P2
+		MixerItem22, MixerItem2,  															// Source C and Volume P1	
+		MixerItem32, MixerItem30,  															// Source C and Volume P2
 		//
-																							// 211 to 224 mixers P2
-		MixerItem24, MixerItem25, MixerItem26, MixerItem27, MixerItem28,MixerItem43, 		// Gyros and Acc
-		MixerItem29, MixerItem30, 															// Source A and Volume
-		MixerItem31, MixerItem30, 															// Source B and Volume
-		MixerItem32, MixerItem30,  															// Source C and Volume 	
-		MixerItem33, MixerItem30, 															// Source D and Volume
-		//
-		Dummy0,																				// 225 to 227 Spare
+		Dummy0,																				// 224 to 227 Spare
 		Dummy0, Dummy0,	
+		Dummy0,
 		//
 		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 228 to 244 Sources OUT1- OUT8, 
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,  								// RC1 to 8 + NONE
@@ -432,5 +436,5 @@ void idle_screen(void)
 		LCD_Display_Text(138,(prog_uchar*)Verdana14,28,43); // "Armed"
 	}
 	
-	write_buffer(buffer);
+	write_buffer(buffer,1);
 };

@@ -9,15 +9,15 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\gyros.h"
-#include "..\inc\main.h"
-#include "..\inc\init.h"
-#include "..\inc\acc.h"
-#include "..\inc\imu.h"
-#include "..\inc\rc.h"
-#include "..\inc\mixer.h"
-#include "..\inc\isr.h"
+#include "io_cfg.h"
+#include "gyros.h"
+#include "main.h"
+#include "init.h"
+#include "acc.h"
+#include "imu.h"
+#include "rc.h"
+#include "mixer.h"
+#include "isr.h"
 
 //************************************************************
 // Defines

@@ -6,15 +6,16 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <string.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 #include <stdbool.h>
-#include "..\inc\io_cfg.h"
+#include "io_cfg.h"
 #include <util/delay.h>
-#include "..\inc\mixer.h"
-#include "..\inc\menu_ext.h"
+#include "mixer.h"
+#include "menu_ext.h"
 
 //************************************************************
 // Prototypes
@@ -31,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x19		// eePROM signature - change for each eePROM structure change 0x19 = Beta 9
+#define MAGIC_NUMBER 0x1a		// eePROM signature - change for each eePROM structure change 0x1a = Beta 10
 								// to force factory reset
 
 //************************************************************
@@ -60,6 +61,9 @@ void Set_EEPROM_Default_Config(void)
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
 	}
+	// Monopolar throttle is a special case
+	Config.RxChannelZeroOffset[THROTTLE] = 2500;
+	Config.ThrottleMinOffset = 1250;
 
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
@@ -71,19 +75,26 @@ void Set_EEPROM_Default_Config(void)
 		Config.Channel[i].P1_source_a 	= NOMIX;
 		Config.Channel[i].P1_source_b 	= NOMIX;
 		Config.Channel[i].P1_source_c 	= NOMIX;
-		Config.Channel[i].P1_source_d 	= NOMIX;
+		Config.Channel[i].P1_throttle_volume = 0;
 		Config.Channel[i].P2_source_a 	= NOMIX;
 		Config.Channel[i].P2_source_b 	= NOMIX;
 		Config.Channel[i].P2_source_c 	= NOMIX;
-		Config.Channel[i].P2_source_d 	= NOMIX;
+		Config.Channel[i].P2_throttle_volume = 0;
 	}
 
 	//
 	Config.RxMode = PWM1;				// Default to PWM1
 	Config.TxSeq = JRSEQ;
-	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults
+	//
+#ifdef KK21
+	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
+	Config.AccZero[PITCH]	= 0;
+	Config.AccZero[YAW]		= 0;
+#else
+	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
-	Config.AccZero[YAW]		= 643; 		// 643 is the centre, 520 is inverted
+	Config.AccZero[YAW]		= 643; 		// 643 is the centre
+#endif
 
 	// Set up all profiles the same initially
 	for (i = 0; i < 2; i++)
