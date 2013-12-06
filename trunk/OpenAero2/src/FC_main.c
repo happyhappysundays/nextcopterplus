@@ -210,7 +210,7 @@
 //			Camstab freakout bug investigated and fixed. Switched to hardware TWI driver.
 //			Fixed all invert calibrate bugs and retested every board orientation.
 //			Camstab offset bug also fixed.
-// Beta 11	Compiler clean-up.
+// Beta 11	Compiler clean-up. Contrast bug fixed.
 //
 //***********************************************************
 //* To do

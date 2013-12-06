@@ -241,6 +241,9 @@ void init(void)
 	IntegralGyro[PITCH] = 0;
 	IntegralGyro[YAW] = 0;
 
+	// Now set contrast to the previously saved value
+	st7565_set_brightness((uint8_t)Config.Contrast);
+
 	// Initialise UART
 	init_uart();
 
