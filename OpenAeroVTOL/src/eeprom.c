@@ -116,12 +116,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.ArmMode = OFF;
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
-	Config.Contrast = 38;				// Contrast
+	Config.Contrast = 0x26;				// Contrast
 	Config.Status_timer = 10;			// Refresh timeout
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
-	Config.Deadband = 2;				// RC deadband = 2%
 }
 
 void Save_Config_to_EEPROM(void)

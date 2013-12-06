@@ -87,35 +87,6 @@ void RxGetChannels(void)
 	OldRxSum = RxSum;
 }
 
- // Reduce RxIn noise and also detect the hands-off situation
-void RC_Deadband(void)
-{
-	// Hands-free detection (prior to deadband culling)
-	if (((RCinputs[AILERON] < Config.HandsFreetrigger) && (RCinputs[AILERON] > -Config.HandsFreetrigger))
-	 && ((RCinputs[ELEVATOR]  < Config.HandsFreetrigger) && (RCinputs[ELEVATOR]  > -Config.HandsFreetrigger)))
-	{
-		Flight_flags |= (1 << HandsFree);
-	}
-	else
-	{
-		Flight_flags &= ~(1 << HandsFree);
-	}
-
-	// Deadband culling
-	if ((RCinputs[AILERON] < Config.DeadbandLimit) && (RCinputs[AILERON] > -Config.DeadbandLimit))
-	{
-		RCinputs[AILERON] = 0;
-	}
-	if ((RCinputs[ELEVATOR] < Config.DeadbandLimit) && (RCinputs[ELEVATOR] > -Config.DeadbandLimit)) 
-	{
-		RCinputs[ELEVATOR] = 0;
-	}
-	if ((RCinputs[RUDDER] < Config.DeadbandLimit) && (RCinputs[RUDDER] > -Config.DeadbandLimit))
-	{
-		RCinputs[RUDDER] = 0;
-	}
-}
-
 // Center sticks on request from Menu
 void CenterSticks(void)		
 {

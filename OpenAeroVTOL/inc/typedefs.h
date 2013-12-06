@@ -104,7 +104,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (11)
+	// RC items (10)
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
@@ -114,7 +114,6 @@ typedef struct
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
-	int8_t		Deadband;				// RC deadband (%)
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 5 seconds.
 
 	// Flight mode settings
@@ -125,12 +124,8 @@ typedef struct
 	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS];	// Actual, unspanned I-term input limits to save recalculation each loop
 
 	// Triggers
-	uint8_t		HandsFreetrigger;		// Actual, unspanned hands-free trigger
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 	
-	// Limits
-	int16_t		DeadbandLimit;			// Actual deadband limit
-
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 

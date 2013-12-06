@@ -55,7 +55,7 @@ void output_servo_ppm(void)
 	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so
 	if 	(
-			(RCinputs[THROTTLE] < -960) || 
+			(RCinputs[THROTTLE] < 50) || 
 			((General_error & (1 << DISARMED)) != 0)
 		)
 	{

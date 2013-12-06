@@ -36,7 +36,7 @@ int16_t scale_percent_nooffset(int8_t value);
 //************************************************************
 
 // Throttle volume curves
-// Why 101 steps? Well, both 0% and 100% transition values are valid
+// Why 101 steps? Well, both 0% and 100% transition values are valid...
 
 const int8_t SIN[101] PROGMEM = 
 			{0,2,3,5,6,8,10,11,13,14,
@@ -72,7 +72,7 @@ void ProcessMixer(void)
 	int16_t	pitchtrim = 0;
 
 	//************************************************************
-	// Main mix loop
+	// Main mix loop - sensors, RC inputs and other channels
 	//************************************************************
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
@@ -91,7 +91,7 @@ void ProcessMixer(void)
 		// P1
 		if ((Transition_state == TRANS_0) || (TRANSITIONING))
 		{
-			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) // P1
+			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) 
 			{
 				if ((Config.Channel[i].P1_RevFlags & (1 << RollRev)) != 0)
 				{
@@ -129,7 +129,7 @@ void ProcessMixer(void)
 		// P2
 		if ((Transition_state == TRANS_1) || (TRANSITIONING))
 		{
-			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) // P2
+			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) 
 			{
 				if ((Config.Channel[i].P2_RevFlags & (1 << RollRev)) != 0)
 				{
@@ -168,8 +168,8 @@ void ProcessMixer(void)
 		// Autolevel trims
 		//************************************************************
 	
-		rolltrim = (Config.FlightMode[2].AccRollZeroTrim << 2); // Roll trim
-		pitchtrim = (Config.FlightMode[2].AccPitchZeroTrim << 2);// Pitch trim
+		rolltrim = (Config.FlightMode[2].AccRollZeroTrim << 2); 	// Roll trim
+		pitchtrim = (Config.FlightMode[2].AccPitchZeroTrim << 2);	// Pitch trim
 
 		//************************************************************
 		// Mix in accelerometers
@@ -372,74 +372,61 @@ void ProcessMixer(void)
 	//************************************************************
 	// Mixer transition code
 	//************************************************************ 
-/*
-	switch (Transition_state)
+
+	// Convert number to percentage (0 to 100%)
+	if (Config.TransitionSpeed == 0) 
 	{
-		case 	TRANSITIONING:
-			// Convert number to percentage (0 to 100%)
-*/			if (Config.TransitionSpeed == 0) 
-			{
-			// RCinput range is 2500 for 1ms (+/-1250). Ran measured the +/-1000 to equate to +/-125% on his radio
-			// That would make +/-100% equate to +/-800 counts for RCinput.
-			// transition_value_16 is the RCinput / 16 so can range +/-50 for +/-800
-				//transition  = (transition_value_16 >> 4); // 
+	// RCinput range is 2500 for 1ms (+/-1250). Ran measured the +/-1000 to equate to +/-125% on his radio
+	// That would make +/-100% equate to +/-800 counts for RCinput.
+	// transition_value_16 is the RCinput / 16 so can range +/-50 for +/-800
+		//transition  = (transition_value_16 >> 4); // 
 
-				// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
-				// Trim that value down to +/-50 for just over +/-1000
-				transition  = (transition_value_16 >> 1); // 62/2 = 31+
-				transition += (transition_value_16 >> 2); // 62/4 = 15+
-				transition += (transition_value_16 >> 4); // 62/16 = 3 = 49
+		// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
+		// Trim that value down to +/-50 for just over +/-1000
+		transition  = (transition_value_16 >> 1); // 62/2 = 31+
+		transition += (transition_value_16 >> 2); // 62/4 = 15+
+		transition += (transition_value_16 >> 4); // 62/16 = 3 = 49
 
 
-				// Limit extent of transition value 0 to 100 (101 steps)
-				if (transition < -50) transition = -50;
-				if (transition > 50) transition = 50;
-				transition += 50;
-			}
-			else 
-			{
-				transition = transition_counter;
-			}
-
-			for (i = 0; i < MAX_OUTPUTS; i++)
-			{
-				// Speed up the easy ones :)
-				if (transition == 0)
-				{
-					temp1 = Config.Channel[i].P1_value;
-				}
-				else if (transition >= 100)
-				{
-					temp1 = Config.Channel[i].P2_value;
-				}
-				else
-				{
-					// Get source channel value
-					temp1 = Config.Channel[i].P1_value;
-					temp1 = scale32(temp1, (100 - transition));
-
-					// Get destination channel value
-					temp2 = Config.Channel[i].P2_value;
-					temp2 = scale32(temp2, transition);
-
-					// Sum the mixers
-					temp1 = temp1 + temp2;
-				}
-				// Save transitioned solution into P1
-				Config.Channel[i].P1_value = temp1;
-			} 
-/*			break;
-
-		case TRANS_0: // Do nothing as P1 values are correct
-			break;
-
-		case TRANS_1: // Do nothing as P2 values are correct
-			break;
-
-		default:
-			break;
+		// Limit extent of transition value 0 to 100 (101 steps)
+		if (transition < -50) transition = -50;
+		if (transition > 50) transition = 50;
+		transition += 50;
 	}
-*/
+	else 
+	{
+		transition = transition_counter;
+	}
+
+	// Recalculate P1 values based on transition stage
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		// Speed up the easy ones :)
+		if (transition == 0)
+		{
+			temp1 = Config.Channel[i].P1_value;
+		}
+		else if (transition >= 100)
+		{
+			temp1 = Config.Channel[i].P2_value;
+		}
+		else
+		{
+			// Get source channel value
+			temp1 = Config.Channel[i].P1_value;
+			temp1 = scale32(temp1, (100 - transition));
+
+			// Get destination channel value
+			temp2 = Config.Channel[i].P2_value;
+			temp2 = scale32(temp2, transition);
+
+			// Sum the mixers
+			temp1 = temp1 + temp2;
+		}
+		// Save transitioned solution into P1
+		Config.Channel[i].P1_value = temp1;
+	} 
+
 	//************************************************************
 	// Groovy throttle curve handling.
 	// Uses the transition value, but is not part of the transition
@@ -452,7 +439,7 @@ void ProcessMixer(void)
 		if 	(!((Config.Channel[i].P1_throttle_volume == 0) && 
 			(Config.Channel[i].P2_throttle_volume == 0)))
 		{
-			// There is a curve
+			// Only process if there is a curve
 			if (Config.Channel[i].P1_throttle_volume != Config.Channel[i].P2_throttle_volume)
 			{
 				// Work out distance to cover over stage 1 (P1 to P2)
@@ -494,14 +481,15 @@ void ProcessMixer(void)
 				temp3 = temp3 >> 7;
 
 				// Calculate actual throttle value
-				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)(temp3));
+				temp3 = scale32(RCinputs[THROTTLE], temp3);
 			}
 			
 			// No curve
 			else
 			{
 				// Calculate actual throttle value
-				temp3 = scale32((int16_t)RCinputs[THROTTLE], (int16_t)Config.Channel[i].P1_throttle_volume);
+				temp1 = Config.Channel[i].P1_throttle_volume; // Promote
+				temp3 = scale32(RCinputs[THROTTLE], temp1);
 			}
 
 			// Re-scale throttle values back to system values (+/-1250) as throttle offset is actually at Config.ThrottleMinOffset
@@ -514,49 +502,59 @@ void ProcessMixer(void)
 	}
 
 	//************************************************************
-	// Per-channel 3-point offset needs to be post transition loop 
-	// as it is non-linear
+	// Per-channel 3-point offset needs to be after the transition  
+	// loop as it is non-linear
 	//************************************************************ 
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Work out distance to cover over stage 1 (P1 to P1.n)
-		temp1 = Config.Channel[i].P1n_offset - Config.Channel[i].P1_offset;
-		temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
-
-		// Divide distance into steps
-		temp2 = Config.Channel[i].P1n_position; 
-		Step1 = temp1 / temp2;
-		
-		// Work out distance to cover over stage 2 (P1.n to P2)
-		temp2 = Config.Channel[i].P2_offset - Config.Channel[i].P1n_offset;
-		temp2 = temp2 << 7;
-
-		// Divide distance into steps
-		temp1 = (100 - Config.Channel[i].P1n_position); 
-		Step2 = temp2 / temp1; 	
-
-		// Set start (P1) point
-		temp3 = Config.Channel[i].P1_offset; // Promote to 16bits
-		temp3 = temp3 << 7;
-
-		// Count up transition steps of the appropriate step size
-		for (j = 0; j < transition; j++)
+		// Simplify if all are the same
+		if (!((Config.Channel[i].P1_offset == Config.Channel[i].P1n_offset) &&
+		 	 (Config.Channel[i].P2_offset == Config.Channel[i].P1n_offset)))
 		{
-			// If in stage 1 use Step1 size
-			if (j < Config.Channel[i].P1n_position)
-			{
-				temp3 += Step1;
-			}
-			// If in stage 2 use Step2 size
-			else
-			{
-				temp3 += Step2;
-			}
-		}
+			// Work out distance to cover over stage 1 (P1 to P1.n)
+			temp1 = Config.Channel[i].P1n_offset - Config.Channel[i].P1_offset;
+			temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
 
-		// Reformat directly into a system-compatible value (+/-1250)
-		P1_solution = (temp3 >> 4) + (temp3 >> 5); 							// Divide by 128 then * 12 lol
+			// Divide distance into steps
+			temp2 = Config.Channel[i].P1n_position; 
+			Step1 = temp1 / temp2;
+		
+			// Work out distance to cover over stage 2 (P1.n to P2)
+			temp2 = Config.Channel[i].P2_offset - Config.Channel[i].P1n_offset;
+			temp2 = temp2 << 7;
+
+			// Divide distance into steps
+			temp1 = (100 - Config.Channel[i].P1n_position); 
+			Step2 = temp2 / temp1; 	
+
+			// Set start (P1) point
+			temp3 = Config.Channel[i].P1_offset; // Promote to 16bits
+			temp3 = temp3 << 7;
+
+			// Count up transition steps of the appropriate step size
+			for (j = 0; j < transition; j++)
+			{
+				// If in stage 1 use Step1 size
+				if (j < Config.Channel[i].P1n_position)
+				{
+					temp3 += Step1;
+				}
+				// If in stage 2 use Step2 size
+				else
+				{
+					temp3 += Step2;
+				}
+			}
+
+			// Reformat directly into a system-compatible value (+/-1250)
+			P1_solution = (temp3 >> 4) + (temp3 >> 5); 							// Divide by 128 then * 12 lol
+
+		} // No curve, so just use one point for offset
+		else
+		{
+			P1_solution = scale_percent_nooffset(Config.Channel[i].P1_offset);
+		}
 
 		// Add offset to channel value
 		Config.Channel[i].P1_value += P1_solution;
@@ -571,7 +569,7 @@ void UpdateLimits(void)
 	uint8_t i,j;
 	int32_t temp32, gain32;
 
-	int8_t temp8[FLIGHT_MODES][NUMBEROFAXIS] = 
+	int8_t limits[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
 			{Config.FlightMode[P1].Roll_limit, Config.FlightMode[P1].Pitch_limit, Config.FlightMode[P1].Yaw_limit},
 			{Config.FlightMode[P2].Roll_limit, Config.FlightMode[P2].Pitch_limit, Config.FlightMode[P2].Yaw_limit}
@@ -584,6 +582,7 @@ void UpdateLimits(void)
 		};
 
 	// Update triggers
+
 	Config.PowerTriggerActual = Config.PowerTrigger * 10;
 
 	// Update I_term input constraints for all profiles
@@ -591,24 +590,21 @@ void UpdateLimits(void)
 	{
 		for (i = 0; i < NUMBEROFAXIS; i++)
 		{
-			temp32 	= temp8[j][i]; 						// Promote
+			temp32 	= limits[j][i]; 						// Promote limit %
 
-			// I-term output (throw)
-			// A value of 80,000 results in +/- 1250 or full throw at the output stage when set to 125%
-			Config.Raw_I_Limits[j][i] = temp32 * (int32_t)640;	// 125% * 640 = 80,000
+			// I-term output (throw). Convert from % to actual count
+			// A value of 80,000 results in +/- 1250 or full throw at the output stage
+			// This is because the maximum signal value is +/-1250 after division by 64. 1250 * 64 = 80,000
+			Config.Raw_I_Limits[j][i] = temp32 * (int32_t)640;	// 80,000 / 125% = 640
 
 			// I-term source limits. These have to be different due to the I-term gain setting
-			// For a gain of 32 and 125%, Constrain = 80,000
-			// For a gain of 100 and 125%, Constrain = 32,768
-			// For a gain of 10 and 25%, Constrain = 51,200
-			// For a gain of 1 and 100%, Constrain = 2,048,000
-			// For a gain of 127 and 125%, Constrain = 20,157
+			// I-term = (gyro * gain) / 32, so the gyro count for a particular gain and limit are
+			// Gyro = (I-term * 32) / gain :) 
+
 			if (gains[j][i] != 0)
 			{
-				gain32 = (int32_t)gains[j][i];
-				gain32 = gain32 << 7;				// Multiply divisor by 128
-				Config.Raw_I_Constrain[j][i] = Config.Raw_I_Limits[j][i] / (gain32 / (int32_t)32);
-				Config.Raw_I_Constrain[j][i] = Config.Raw_I_Constrain[j][i] << 7; // Restore by multiplying total by 128
+				gain32 = gains[j][i];						// Promote gain value
+				Config.Raw_I_Constrain[j][i] = (Config.Raw_I_Limits[j][i] << 5) / gain32;
 			}
 			else 
 			{
@@ -633,15 +629,9 @@ void UpdateLimits(void)
 	{
 		Config.DynGainDiv = 2500;
 	}
-
-	// Update RC deadband amount
-	Config.DeadbandLimit = (Config.Deadband * 12); // 0 to 5% scaled to 0 to 60
-
-	// Update Hands-free trigger based on deadband setting
-	Config.HandsFreetrigger = Config.DeadbandLimit;
 }
 
-// Update servos from the mixer Config.Channel[i].value data, add offsets and enforce travel limits
+// Update servos from the mixer Config.Channel[i].P1_value data, add offsets and enforce travel limits
 void UpdateServos(void)
 {
 	uint8_t i;

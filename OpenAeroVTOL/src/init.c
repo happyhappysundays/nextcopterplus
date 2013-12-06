@@ -241,6 +241,9 @@ void init(void)
 	IntegralGyro[P2][PITCH] = 0;
 	IntegralGyro[P2][YAW] = 0;
 
+	// Now set contrast to the previously saved value
+	st7565_set_brightness((uint8_t)Config.Contrast);
+
 	// Initialise UART
 	init_uart();
 
@@ -272,7 +275,7 @@ void init(void)
 	if (Interrupted)
 	{
 		RxGetChannels();
-		if (RCinputs[THROTTLE] > -900)
+		if (RCinputs[THROTTLE] > 50)
 		{
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}

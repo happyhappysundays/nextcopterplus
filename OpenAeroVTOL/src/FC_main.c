@@ -1,7 +1,7 @@
 // **************************************************************************
-// OpenAero VTOL software for KK2.0
-// ================================
-// Version: Beta 10 - December 2013
+// OpenAero VTOL software for KK2.0 & KK2.1
+// ========================================
+// Version: Beta 11 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -24,7 +24,7 @@
 // * You should have received a copy of the GNU General Public License
 // * along with this program. If not, see <http://www.gnu.org/licenses/>.
 // * 
-// * NB: Summary - all derivative code MUST be released with the source code!
+// * tl;dr - all derivative code MUST be released with the source code!
 // *
 // **************************************************************************
 // Version History
@@ -68,7 +68,7 @@
 //			Changed manual transition range to +/-100% (was closer to +/-125%). LMA time now "Disarm time".
 //			LMA/Disarm timeout also switches to disarmed state if armable.
 //			Height damping removed, Z-axis delta now included in mixer list.
-//			Loop speed optimisations in the mixer. PWM sync logic simplified and hopefully debugged.
+//			Loop speed optimisations in the mixer. PWM sync logic simplified.
 // Beta 9	Disarm timer now functions in 0 to 127 seconds and will auto-disarm if armable and not set to zero.
 //			"No signal" state also disarms if set to "armable". Rearranged General menu. Fixed transition bug.
 //			Disarming state sets all outputs marked as "Motor" to minimum output.
@@ -78,20 +78,22 @@
 //			Added dedicated throttle sources to mixers with throttle curves.
 //			Throttle now referenced from zero and has its own Config.ThrottleMinOffset for referencing. 
 //			Rearranged mixer menus. Simplified includes.
+// Beta 11	Fixed throttle high bug. Axis lock stick rate now calibrated to 10, 20, 40, 80, 160, 320 and 640 deg/sec.
+//			Contrast recovered from saved setting correctly.
+//			
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
+// Bugs:
+//	I-term constrainst not working on KK2.0 but fine on KK2.1...
+//  Contrast value not loaded on power-up
+//
 // Todo:
 //  Remove remaining uneeded menu items
-//	Z-axis P mode for testing?
-//	Calibration mode?
 //	Better way to integrate switching of sensors.
 //	Copy RC soures and .values to an array so that the mixer can do less work?
-//
-// Bugs: 
-//	I-term constraints not working for P2 when P1 constraint differs
 //	
 // Wish list:
 //	Per-sensor, per output, per profile gain adjustment.
@@ -125,8 +127,6 @@
 #include "main.h"
 #include "imu.h"
 #include "eeprom.h"
-
-#include <avr/interrupt.h> // debug
 
 //***********************************************************
 //* Fonts
@@ -253,7 +253,7 @@ int main(void)
 				// Force resync on next RC packet
 				Interrupted = false;	
 				// Wait for timeout
-				Menu_mode = WAITING_TIMEOUT_BD; // Debug
+				Menu_mode = WAITING_TIMEOUT_BD;
 				break;
 
 			// Status screen up, but button still down ;)
@@ -496,7 +496,7 @@ int main(void)
 		RxGetChannels();
 
 		// Check for throttle reset
-		if (RCinputs[THROTTLE] < -960)
+		if (RCinputs[THROTTLE] < 50)
 		{
 			// Clear throttle high error
 			General_error &= ~(1 << THROTTLE_HIGH);	
@@ -508,6 +508,8 @@ int main(void)
 			IntegralGyro[P2][ROLL] = 0;	
 			IntegralGyro[P2][PITCH] = 0;
 			IntegralGyro[P2][YAW] = 0;
+
+			//UpdateLimits(); // debug
 		}
 
 		//************************************************************
@@ -556,17 +558,11 @@ int main(void)
 			}		 
 			old_flight = Config.FlightSel;
 			old_trans_mode = Config.TransitionSpeed;
-
-			// Update travel limits and triggers when profile changed
-			UpdateLimits();
 		}
 
-		// Update timed transition when changing flight modes // Debug
+		// Update timed transition when changing flight modes
 		if (Config.FlightSel != old_flight)
 		{
-			// Debug
-			UpdateLimits();
-
 			// When in a timed transition mode
 			if (Config.TransitionSpeed != 0)
 			{
@@ -586,8 +582,6 @@ int main(void)
 			if (transition_value_16 != (RCinputs[Config.FlightChan] >> 4))
 			{
 				TransitionUpdated = true;
-				// Debug
-				UpdateLimits();
 			}
 		}
 
@@ -662,9 +656,6 @@ int main(void)
 					Transition_state = TRANSITIONING;
 
 				case TRANSITIONING:
-					// Update travel limits and triggers each loop
-					//UpdateLimits(); // Debug
-
 					// Handle timed transition
 					// Profile 1 to 0, so counter decrements to zero
 					if (start)
@@ -706,9 +697,6 @@ int main(void)
 		ReadGyros();
 		ReadAcc();	
 		getEstimatedAttitude();
-
-		// Remove RC noise and detect when sticks centered
-		RC_Deadband();
 
 		// Calculate PID
 		Calculate_PID();
