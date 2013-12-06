@@ -149,7 +149,7 @@ void Display_status(void)
 			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
-		else if((Alarm_flags & (1 << LVA_Alarm)) != 0)
+		else if((General_error & (1 << LVA_ALARM)) != 0)
 		{
 			LCD_Display_Text(134,(prog_uchar*)Verdana14,33,14); // Battery
 			LCD_Display_Text(73,(prog_uchar*)Verdana14,46,34); 	// Low

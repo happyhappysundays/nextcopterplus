@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 11";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 12";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -139,7 +139,7 @@ const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
 const char Contrast[]  PROGMEM = "Contrast:";
 const char AutoMenuItem2[]  PROGMEM = "Safety:";
 const char GeneralText2[]  PROGMEM = "Disarm time:";
-const char GeneralText1[]  PROGMEM = "Status time:";
+//const char GeneralText1[]  PROGMEM = "Status time:";
 const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
@@ -360,11 +360,11 @@ const char *text_menu[] PROGMEM =
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		GeneralText9, Transition,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 167 General
-		GeneralText2, GeneralText1, GeneralText3, 
-		GeneralText6, GeneralText7, BattMenuItem2,	
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 166 General
+		GeneralText2, BattMenuItem2, GeneralText3, 
+		GeneralText6, GeneralText7, 	
 		//
-		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
 		//
 						 																	// 175 to 191 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,		// Roll gyro

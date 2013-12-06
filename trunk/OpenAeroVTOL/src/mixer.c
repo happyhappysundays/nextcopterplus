@@ -492,7 +492,8 @@ void ProcessMixer(void)
 				temp3 = scale32(RCinputs[THROTTLE], temp1);
 			}
 
-			// Re-scale throttle values back to system values (+/-1250) as throttle offset is actually at Config.ThrottleMinOffset
+			// Re-scale throttle values back to system values (+/-1250) 
+			// as throttle offset is actually at Config.ThrottleMinOffset
 			temp3 = temp3 - Config.ThrottleMinOffset;
 			
 			// Add offset to channel value
@@ -562,8 +563,13 @@ void ProcessMixer(void)
 
 } // ProcessMixer()
 
+//************************************************************
+// Misc mixer code
+//************************************************************
+
 // Update actual limits value with that from the mix setting percentages
 // This is only done at start-up and whenever the values are changed
+// so as to reduce CPU loop load
 void UpdateLimits(void)
 {
 	uint8_t i,j;
@@ -582,7 +588,6 @@ void UpdateLimits(void)
 		};
 
 	// Update triggers
-
 	Config.PowerTriggerActual = Config.PowerTrigger * 10;
 
 	// Update I_term input constraints for all profiles
