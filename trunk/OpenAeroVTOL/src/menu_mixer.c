@@ -96,9 +96,6 @@ void menu_mixer(uint8_t i)
 {
 	static uint8_t mix_top = MIXERSTART;
 	int8_t *value_ptr;
-	int8_t temp_sensors;
-	int8_t temp_reverse;
-
 	int8_t values[MIXERITEMS];
 	menu_range_t range;
 	uint8_t text_link = 0;
@@ -351,8 +348,11 @@ void menu_mixer(uint8_t i)
 		// Save modified byte data for P1_source_a to P2_source_c_volume back to Config
 		memcpy(&Config.Channel[i].P1_source_a,&values[20], 12);
 
-		temp_sensors = 0; // debug
-		temp_reverse = 0;
+		// Clear flags before reconstruction
+		Config.Channel[i].P1_RevFlags = 0;
+		Config.Channel[i].P2_RevFlags = 0;
+		Config.Channel[i].P1_RevFlags = 0;
+		Config.Channel[i].P2_RevFlags = 0;
 
 		// Clear flags before reconstruction
 		Config.Channel[i].P1_RevFlags = 0;

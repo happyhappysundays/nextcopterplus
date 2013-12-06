@@ -41,7 +41,7 @@ void menu_rc_setup(uint8_t i);
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
 
-#define RCITEMS 11 		// Number of menu items
+#define RCITEMS 10 		// Number of menu items
 #define GENERALITEMS 9 
 
 //************************************************************
@@ -50,7 +50,7 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[3][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 0, 141, 141, 141, 0, 0, 0},				// RC setup
+	{RCTEXT, 116, 105, 105, 0, 141, 141, 141, 0, 0},				// RC setup
 	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0, 0},						// General
 };
 
@@ -66,8 +66,7 @@ const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM =
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
-		{0,5,1,0,2},					// Axis lock stick rate(0 is fastest, 5 slowest)
-		{0,5,1,0,1},					// RC deadband (%)
+		{0,6,1,0,2},					// Axis lock stick rate(6 is fastest, 0 slowest)
 		{0,10,1,0,0},					// TransitionSpeed 0 to 10
 	},
 	{

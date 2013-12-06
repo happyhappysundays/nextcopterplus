@@ -37,6 +37,18 @@
 // However the I-term gain can be up to 127 which means the values are now limited to +/-20,157 for full scale authority.
 // For reference, a constant gyro value of 50 would go full scale in about 1 second at max gain of 127 if incremented at 400Hz.
 // This seems about right for heading hold usage.
+//
+// On the KK2.1 the gyros are configured to read +/-2000 deg/sec at full scale, or 16.4 deg/sec for each LSB value.  
+// I divide that by 128 to give 0.128 deg/sec for each digit the gyros show. So "50" is only 6.4 degrees per second.
+// 360 deg/sec would give a reading of 2809 on the sensor calibration screen. Full stick is about 1250 or so. 
+// So with no division of stick value by "Axis rate", full stick would equate to (1250/2809 * 360) = 160 deg/sec. 
+// With axis rate set to 2, the stick amount is quartered (312.5) or 40 deg/sec. A value of 3 would result in 20 deg/sec. 
+//
+// 90 to 720 deg/sec is a good range so to achieve this we need to both divide and multiply the stick.
+// Stick * 2 would give 320 deg/sec, *4 = 640 deg/sec
+//
+// Therefore, usable operations on the stick throw are *4 (640), *2 (320), *1 (160), /2 (80) 
+//
 
 //************************************************************
 // Prototypes
@@ -61,15 +73,13 @@ void Calculate_PID(void)
 	int32_t PID_gyro_temp2;					// P2
 	int32_t PID_acc_temp1 = 0;				// P1
 	int32_t PID_acc_temp2 = 0;				// P2
-	//
-//	int32_t PID_Gyro_I_temp1 = 0;			// Temporary i-terms bound to max throw P1
-//	int32_t PID_Gyro_I_temp2 = 0;			// Temporary i-terms bound to max throw P2
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
-	int8_t	axis;
 	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
 	int32_t mult32 = 0;
 	int32_t PID_Gyros_32;
+	int8_t	axis;
+	int16_t	stick;
 
 	// Cross-ref for actual RCinput elements
 	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
@@ -94,7 +104,6 @@ void Calculate_PID(void)
 		};
 
 	int16_t DynamicScale = 0;
-
 
 	//************************************************************
 	// Set up dynamic gain variable once per loop
@@ -127,15 +136,25 @@ void Calculate_PID(void)
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 
-		// Calculate I-term from gyro and stick data (scaled down by Config.Stick_Lock_rate)
-		IntegralGyro[P1][axis] += (gyroADC[axis] - (RCinputsAxis[axis] >> Config.Stick_Lock_rate));
-		// Copy to P2 for now
-		IntegralGyro[P2][axis] = IntegralGyro[P1][axis];
+		// Work out stick rate divider/multiplier
+		// /16 (10), /8 (20), /4 (40), /2 (80), *1 (160), *2 (320), *4 (640)
+		if (Config.Stick_Lock_rate <= 4)
+		{
+			stick = RCinputsAxis[axis] >> (4 - Config.Stick_Lock_rate);
+		}
+		else
+		{
+			stick = RCinputsAxis[axis] << (Config.Stick_Lock_rate - 4);
+		}
+
+		// Calculate I-term from gyro and stick data 
+		IntegralGyro[P1][axis] += (gyroADC[axis] - stick);
+		IntegralGyro[P2][axis] += (gyroADC[axis] - stick);
 
 		// Reset the I-terms when you need to adjust the I-term with RC
 		// Note that the I-term is not constrained when no RC input is present.
-//		if (RCinputsAxis[axis] != 0)
-//		{
+		if (RCinputsAxis[axis] != 0)
+		{
 			if (IntegralGyro[P1][axis] > Config.Raw_I_Constrain[P1][axis])
 			{
 				IntegralGyro[P1][axis] = Config.Raw_I_Constrain[P1][axis];
@@ -144,6 +163,7 @@ void Calculate_PID(void)
 			{
 				IntegralGyro[P1][axis] = -Config.Raw_I_Constrain[P1][axis];
 			}
+
 			if (IntegralGyro[P2][axis] > Config.Raw_I_Constrain[P2][axis])
 			{
 				IntegralGyro[P2][axis] = Config.Raw_I_Constrain[P2][axis];
@@ -152,7 +172,7 @@ void Calculate_PID(void)
 			{
 				IntegralGyro[P2][axis] = -Config.Raw_I_Constrain[P2][axis];
 			}
-//		}
+		}
 
 		//************************************************************
 		// Calculate PID gains
@@ -177,7 +197,7 @@ void Calculate_PID(void)
 		//************************************************************
 		// I-term output limits
 		//************************************************************
-/*
+
 		// P1 limits
 		if (PID_Gyro_I_actual1 > Config.Raw_I_Limits[P1][axis]) 
 		{
@@ -205,7 +225,7 @@ void Calculate_PID(void)
 		{
 			PID_Gyro_I_actual2 = PID_Gyro_I_actual2;
 		}
-*/
+
 		//************************************************************
 		// Sum Gyro P and I terms and rescale
 		//************************************************************

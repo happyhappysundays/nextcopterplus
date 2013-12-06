@@ -18,6 +18,8 @@
 #include <util/delay.h>
 #include "menu_ext.h"
 
+#include "pid.h" // dbug
+
 extern uint16_t StackCount(void);	
 
 //************************************************************
@@ -47,6 +49,11 @@ void Display_status(void)
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
 
+	//mugui_lcd_puts(itoa(Config.Raw_I_Constrain[P1][YAW],pBuffer,10),(prog_uchar*)Verdana8,90,33);
+	//mugui_lcd_puts(itoa(Config.Raw_I_Constrain[P2][YAW],pBuffer,10),(prog_uchar*)Verdana8,90,44);
+	//mugui_lcd_puts(itoa(IntegralGyro[P1][YAW],pBuffer,10),(prog_uchar*)Verdana8,60,55);
+	//mugui_lcd_puts(itoa(IntegralGyro[P2][YAW],pBuffer,10),(prog_uchar*)Verdana8,95,55);
+
 	if (Config.TransitionSpeed == 0)
 	{
 		mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_value_16
@@ -56,16 +63,6 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_counter
 	}
 
-	// Debug - Sensor reverse flags
-/*	mugui_lcd_puts(itoa(Config.Channel[OUT1].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,72,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT2].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,77,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT3].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,82,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT4].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,87,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT5].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,92,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT6].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,97,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT7].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,102,33); // transition_value_16
-	mugui_lcd_puts(itoa(Config.Channel[OUT8].RevFlags,pBuffer,10),(prog_uchar*)Verdana8,107,33); // transition_value_16
-*/
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
@@ -165,7 +162,7 @@ void Display_status(void)
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{
 			LCD_Display_Text(105,(prog_uchar*)Verdana14,28,14); // Throttle
-			LCD_Display_Text(120,(prog_uchar*)Verdana14,46,34);	// High
+			LCD_Display_Text(55,(prog_uchar*)Verdana14,46,34);	// High
 		}
 		else if((General_error & (1 << DISARMED)) != 0)
 		{

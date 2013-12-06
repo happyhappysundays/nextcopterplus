@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 10";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 11";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -258,6 +258,7 @@ const char GeneralText5[] PROGMEM =  "Fast";
 //
 const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
+const char Random1[] PROGMEM =  "High";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -296,7 +297,9 @@ const char *text_menu[] PROGMEM =
 		//
 		FSmode0, FSmode1, 																	// 53 and 54 
 
-		Dummy0,  Dummy0, Dummy0, 															// 55 to 59
+		Random1,  																			// 55 High
+		//
+		Dummy0, Dummy0, 																	// 56 to 59
 		Dummy0, Dummy0, 
 		//
 		SensorMenuItem1,																	// 60 calibrate
@@ -352,16 +355,16 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 159 RC menu
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 158 RC menu
 		StabMenuItem14, StabMenuItem15,
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
-		GeneralText9, RCMenuItem21, Transition,
+		GeneralText9, Transition,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 160 to 168 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 167 General
 		GeneralText2, GeneralText1, GeneralText3, 
-		GeneralText6, GeneralText7, BattMenuItem2,											// Don't forget to change the CONTRAST define in menu_driver.c
+		GeneralText6, GeneralText7, BattMenuItem2,	
 		//
-		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
 		//
 						 																	// 175 to 191 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,		// Roll gyro
