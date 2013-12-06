@@ -114,7 +114,7 @@ typedef struct
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
-	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 5 seconds.
+	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
 
 	// Flight mode settings
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
@@ -129,16 +129,16 @@ typedef struct
 	//Dynamic gain divisor
 	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
-	// General items (9)
+	// General items (8)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
 	int8_t		Disarm_timer;			// Auto-disarm setting
-	int8_t		Status_timer;			// Status screen timer
+	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
+
 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	

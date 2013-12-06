@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 11 - December 2013
+// Version: Beta 12 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -80,6 +80,7 @@
 //			Rearranged mixer menus. Simplified includes.
 // Beta 11	Fixed throttle high bug. Axis lock stick rate now calibrated to 10, 20, 40, 80, 160, 320 and 640 deg/sec.
 //			Contrast recovered from saved setting correctly.
+// Beta 12	Status menu timer fixed at 10 seconds. Fixed low battery visual message not showing.
 //			
 //
 //***********************************************************
@@ -87,8 +88,7 @@
 //***********************************************************
 //
 // Bugs:
-//	I-term constrainst not working on KK2.0 but fine on KK2.1...
-//  Contrast value not loaded on power-up
+//	
 //
 // Todo:
 //  Remove remaining uneeded menu items
@@ -274,7 +274,7 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				if (Status_seconds >= Config.Status_timer)
+				if (Status_seconds >= 10)
 				{
 					Menu_mode = STATUS_TIMEOUT;
 				}
@@ -414,18 +414,18 @@ int main(void)
 		}
 
 		// Beep buzzer if Vbat lower than trigger
-		// Vbat is measured in units of 10mV, so a PowerTrigger of 127 equates to 
+		// Vbat is measured in units of 10mV, so a PowerTrigger of 127 equates to 12.7V
 		if (GetVbat() < Config.PowerTriggerActual)
 		{
-			Alarm_flags |= (1 << LVA_Alarm);	// Set LVA_Alarm flag
+			General_error |= (1 << LVA_ALARM);	// Set LVA_Alarm flag
 		}
 		else 
 		{
-			Alarm_flags &= ~(1 << LVA_Alarm);	// Clear LVA_Alarm flag
+			General_error &= ~(1 << LVA_ALARM);	// Clear LVA_Alarm flag
 		}
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
-		if	(((Alarm_flags & (1 << LVA_Alarm)) ||
+		if	(((General_error & (1 << LVA_ALARM)) ||
 			  (General_error & (1 << NO_SIGNAL))) && 
 			  (Alarm_flags & (1 << BUZZER_ON))) 
 		{
@@ -508,8 +508,6 @@ int main(void)
 			IntegralGyro[P2][ROLL] = 0;	
 			IntegralGyro[P2][PITCH] = 0;
 			IntegralGyro[P2][YAW] = 0;
-
-			//UpdateLimits(); // debug
 		}
 
 		//************************************************************

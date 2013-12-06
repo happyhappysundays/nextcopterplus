@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x1a		// eePROM signature - change for each eePROM structure change 0x1a = Beta 10
+#define MAGIC_NUMBER 0x1b		// eePROM signature - change for each eePROM structure change 0x1a = Beta 12
 								// to force factory reset
 
 //************************************************************
@@ -117,7 +117,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.ArmMode = OFF;
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 0x26;				// Contrast
-	Config.Status_timer = 10;			// Refresh timeout
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
