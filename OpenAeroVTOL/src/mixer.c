@@ -461,11 +461,11 @@ void ProcessMixer(void)
 				else
 				{
 					// Choose between SINE and COSINE
-					// If P2 less than P1, COSINE (reverses SINE) is the one we want
+					// If P2 less than P1, COSINE (reverse SINE) is the one we want
 					if (Step1 < 0)
 					{ 
 						// Multiply SIN[100 - transition] steps (0 to 100)
-						temp2 = (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
+						temp2 = 100 - (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
 					}
 					// If P2 greater than P1, SINE is the one we want
 					else
