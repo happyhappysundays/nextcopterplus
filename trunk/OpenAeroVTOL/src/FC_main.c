@@ -81,6 +81,7 @@
 // Beta 11	Fixed throttle high bug. Axis lock stick rate now calibrated to 10, 20, 40, 80, 160, 320 and 640 deg/sec.
 //			Contrast recovered from saved setting correctly.
 // Beta 12	Status menu timer fixed at 10 seconds. Fixed low battery visual message not showing.
+//			Fixed SINE throttle curve reversed when P2 less than P1.
 //			
 //
 //***********************************************************
