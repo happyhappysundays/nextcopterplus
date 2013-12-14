@@ -74,21 +74,15 @@ void init(void)
 	DDRD		= 0xF2;		// Port D
 
 	// Hold all PWM outputs low to stop glitches
-	M1		= 0;
-	M2		= 0;
-	M3		= 0;
-	M4		= 0;
-	M5		= 0;
-	M6		= 0;
-	M7		= 0;
-	M8		= 0;	
+	// M5 and M6 are on PortA for KK2.1
+	MOTORS		= 0;
+	M5			= 0;
+	M6			= 0;
 
 	// Preset I/O pins
 	LED1 		= 0;		// LED1 off
 	LVA 		= 0; 		// LVA alarm OFF
-	LCD_CSI		= 1;		// GLCD control bits
-	LCD_SCL		= 1;
-	LCD_RES		= 1;
+	LCD_SCL		= 1;		// GLCD clock high
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PINB		= 0xF5;		// Set PB pull-ups
@@ -101,13 +95,6 @@ void init(void)
 	_delay_ms(63);				// Pause while satellite wakes up	
 								// and pull-ups have time to rise.
 								// Tweak until bind pulses about 68ms after power-up
-
-	// Bind as slave if ONLY button 1 pressed
-	if ((PINB & 0xf0) == 0x70)
-	{
-		DDRD		= 0xF3;		// Switch PD0 to output
-		bind_slave();
-	}
 
 	// Bind as master if ONLY button 4 pressed
 	if ((PINB & 0xf0) == 0xE0)
@@ -211,12 +198,15 @@ void init(void)
 	else
 	{
 		Initial_EEPROM_Config_Load();			
-		// Pause for logo if KK2.1
+		// Display logo if KK2.1
 #ifdef KK21
 		// Write logo from buffer
 		write_buffer(buffer,0);
 #endif
 	}
+
+	// Set contrast to the previously saved value
+	st7565_set_brightness((uint8_t)Config.Contrast);
 
 #ifndef KK21
 	// Display "Hold steady" message for KK2.0
@@ -232,17 +222,6 @@ void init(void)
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 	init_int();								// Intialise interrupts based on RC input mode
-
-	// Reset I-terms (possibly unnecessary)
-	IntegralGyro[P1][ROLL] = 0;	
-	IntegralGyro[P1][PITCH] = 0;
-	IntegralGyro[P1][YAW] = 0;
-	IntegralGyro[P2][ROLL] = 0;	
-	IntegralGyro[P2][PITCH] = 0;
-	IntegralGyro[P2][YAW] = 0;
-
-	// Now set contrast to the previously saved value
-	st7565_set_brightness((uint8_t)Config.Contrast);
 
 	// Initialise UART
 	init_uart();
@@ -286,7 +265,7 @@ void init(void)
 	_delay_ms(150);
 	LED1 = 0;
 
-	// Beep that all sensors have been handled
+	// Beep that init is complete
 	menu_beep(1);
 
 	// Set text display mode back to normal
@@ -294,6 +273,9 @@ void init(void)
 
 } // init()
 
+//***********************************************************
+// Reconfigure interrupts
+//***********************************************************
 
 void init_int(void)
 {

@@ -198,9 +198,9 @@ void get_raw_accs(void)
 	RawADC[YAW] = (temp1 + temp2) >> 7;
 
 	// Reorient the data as per the board orientation
-	accADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][ROLL])]; 	// 
-	accADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][PITCH])];	// 
-	accADC[YAW]		= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][YAW])]; 	// 
+	accADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][ROLL])];
+	accADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][PITCH])];
+	accADC[YAW]		= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][YAW])];
 
 #else
 	//	For the KK2.0, the order of the analog sensors is swapped in adc.c

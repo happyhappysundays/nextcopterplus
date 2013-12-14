@@ -47,12 +47,6 @@ void Display_sensors(void)
 			CalibrateAcc(REVERSED);
 		}
 
-		if (BUTTON2 == 0)
-		{
-			_delay_ms(500);
-			CalibrateGyros();
-		}
-
 		ReadGyros();
 		ReadAcc();
 
@@ -69,14 +63,9 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,15);
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,25);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
-
-//		mugui_lcd_puts(itoa(Config.Orientation,pBuffer,10),(prog_uchar*)Verdana8,0,0); // Orientation
-//		mugui_lcd_puts(itoa((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]),pBuffer,10),(prog_uchar*)Verdana8,10,0); // Yaw polarity
-//		mugui_lcd_puts(itoa(Config.AccZero[YAW],pBuffer,10),(prog_uchar*)Verdana8,100,15); // AccZero[YAW]
 		
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(26, (prog_uchar*)Verdana8, 32, 55); 	// Gyro
 		LCD_Display_Text(37, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 

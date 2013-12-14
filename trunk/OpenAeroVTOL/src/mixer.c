@@ -51,6 +51,8 @@ const int8_t SIN[101] PROGMEM =
 			99,99,99,100,100,100,100,100,100,100
 			,100};
 
+#define	EXT_RC 4 // Offset for indexing RC sources
+
 //************************************************************
 // Code
 //************************************************************
@@ -88,14 +90,18 @@ void ProcessMixer(void)
 		// Mix in gyros
 		//************************************************************ 
 
-		// P1
-		if ((Transition_state == TRANS_0) || (TRANSITIONING))
+		// P1 gyros
+		if (Transition_state < TRANS_1)
 		{
-			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) 
+			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) 		// Only add if gyro ON
 			{
-				if ((Config.Channel[i].P1_RevFlags & (1 << RollRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << RollScale)) != 0)	// Scale gyro
 				{
-					P1_solution = P1_solution + PID_Gyros[P1][ROLL];
+					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume); 
+				}
+				else if (Config.Channel[i].P1_aileron_volume < 0 )
+				{
+					P1_solution = P1_solution + PID_Gyros[P1][ROLL];		// Reverse if volume negative
 				}
 				else
 				{
@@ -104,36 +110,48 @@ void ProcessMixer(void)
 			}
 			if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
 			{
-				if ((Config.Channel[i].P1_RevFlags & (1 << PitchRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << PitchScale)) != 0)
+				{
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume); 
+				}
+				else if (Config.Channel[i].P1_elevator_volume < 0 )
+				{
+					P1_solution = P1_solution - PID_Gyros[P1][PITCH];		// Reverse if volume negative
+				}
+				else
 				{
 					P1_solution = P1_solution + PID_Gyros[P1][PITCH];
 				}
-				else
-				{
-					P1_solution = P1_solution - PID_Gyros[P1][PITCH];
-				};
 			}
 			if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
 			{
-				if ((Config.Channel[i].P1_RevFlags & (1 << YawRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << YawScale)) != 0)
 				{
-					P1_solution = P1_solution + PID_Gyros[P1][YAW];
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume); 
+				}
+				else if (Config.Channel[i].P1_rudder_volume < 0 )
+				{
+					P1_solution = P1_solution - PID_Gyros[P1][YAW];			// Reverse if volume negative
 				}
 				else
 				{
-					P1_solution = P1_solution - PID_Gyros[P1][YAW];
-				};
+					P1_solution = P1_solution + PID_Gyros[P1][YAW];
+				}
 			}
 		}
 
-		// P2
-		if ((Transition_state == TRANS_1) || (TRANSITIONING))
+		// P2 gyros
+		if (Transition_state > TRANS_0)
 		{
-			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) 
+			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) 		// Only add if gyro ON
 			{
-				if ((Config.Channel[i].P2_RevFlags & (1 << RollRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << RollScale)) != 0)	// Scale gyro
 				{
-					P2_solution = P2_solution + PID_Gyros[P2][ROLL];
+					P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume); 
+				}
+				else if (Config.Channel[i].P2_aileron_volume < 0 )
+				{
+					P2_solution = P2_solution + PID_Gyros[P2][ROLL];		// Reverse if volume negative
 				}
 				else
 				{
@@ -142,25 +160,33 @@ void ProcessMixer(void)
 			}
 			if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
 			{
-				if ((Config.Channel[i].P2_RevFlags & (1 << PitchRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << PitchScale)) != 0)
+				{
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume); 
+				}
+				else if (Config.Channel[i].P2_elevator_volume < 0 )
+				{
+					P2_solution = P2_solution - PID_Gyros[P2][PITCH];		// Reverse if volume negative
+				}
+				else
 				{
 					P2_solution = P2_solution + PID_Gyros[P2][PITCH];
 				}
-				else
-				{
-					P2_solution = P2_solution - PID_Gyros[P2][PITCH];
-				};
 			}
 			if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
 			{
-				if ((Config.Channel[i].P2_RevFlags & (1 << YawRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << YawScale)) != 0)
 				{
-					P2_solution = P2_solution + PID_Gyros[P2][YAW];
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume); 
+				}
+				else if (Config.Channel[i].P2_rudder_volume < 0 )
+				{
+					P2_solution = P2_solution - PID_Gyros[P2][YAW];			// Reverse if volume negative
 				}
 				else
 				{
-					P2_solution = P2_solution - PID_Gyros[P2][YAW];
-				};
+					P2_solution = P2_solution + PID_Gyros[P2][YAW];
+				}
 			}
 		}
 
@@ -175,19 +201,23 @@ void ProcessMixer(void)
 		// Mix in accelerometers
 		//************************************************************ 
 		// P1
-		if ((Transition_state == TRANS_0) || (TRANSITIONING))
+		if (Transition_state < TRANS_1)
 		{
-			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
+			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
 				P1_solution += rolltrim;
 			
-				if ((Config.Channel[i].P1_RevFlags & (1 << AccRollRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
-					P1_solution = P1_solution + PID_ACCs[P1][ROLL];
+					P1_solution = P1_solution -  scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume); 
+				}
+				else if (Config.Channel[i].P1_aileron_volume < 0 )
+				{
+					P1_solution = P1_solution + PID_ACCs[P1][ROLL];			// Reverse if volume negative
 				}
 				else
 				{
-					P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+					P1_solution = P1_solution - PID_ACCs[P1][ROLL];			// or simply add
 				}
 			}
 
@@ -195,21 +225,29 @@ void ProcessMixer(void)
 			{
 				P1_solution += pitchtrim;
 			
-				if ((Config.Channel[i].P1_RevFlags & (1 << AccPitchRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << AccPitchScale)) != 0)
 				{
-					P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume); 
+				}
+				else if (Config.Channel[i].P1_elevator_volume < 0 )
+				{
+					P1_solution = P1_solution - PID_ACCs[P1][PITCH];		// Reverse if volume negative
 				}
 				else
 				{
-					P1_solution = P1_solution - PID_ACCs[P1][PITCH];
+					P1_solution = P1_solution + PID_ACCs[P1][PITCH];
 				}
 			}
 
 			if ((Config.Channel[i].P1_sensors & (1 << ZDeltaAcc)) != 0)
 			{
-				if ((Config.Channel[i].P1_RevFlags & (1 << AccZRev)) != 0)
+				if ((Config.Channel[i].P1_scale & (1 << AccZScale)) != 0)
 				{
-					P1_solution = P1_solution + PID_ACCs[P1][YAW];
+					P1_solution = P1_solution - scale32(PID_ACCs[P1][YAW], Config.Channel[i].P1_throttle_volume); 
+				}
+				else if (Config.Channel[i].P1_throttle_volume < 0 )
+				{
+					P1_solution = P1_solution + PID_ACCs[P1][YAW];			// Reverse if volume negative
 				}
 				else
 				{
@@ -219,19 +257,23 @@ void ProcessMixer(void)
 		}
 
 		// P2
-		if ((Transition_state == TRANS_1) || (TRANSITIONING))
+		if (Transition_state > TRANS_0)
 		{
-			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
+			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
 				P2_solution += rolltrim;
 			
-				if ((Config.Channel[i].P2_RevFlags & (1 << AccRollRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
-					P2_solution = P2_solution + PID_ACCs[P2][ROLL];
+					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume); 
+				}
+				else if (Config.Channel[i].P2_aileron_volume < 0 )
+				{
+					P2_solution = P2_solution + PID_ACCs[P2][ROLL];			// Reverse if volume negative
 				}
 				else
 				{
-					P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+					P2_solution = P2_solution - PID_ACCs[P2][ROLL];			// or simply add
 				}
 			}
 
@@ -239,21 +281,30 @@ void ProcessMixer(void)
 			{
 				P2_solution += pitchtrim;
 			
-				if ((Config.Channel[i].P2_RevFlags & (1 << AccPitchRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << AccPitchScale)) != 0)
 				{
-					P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume); 
+				}
+				else if (Config.Channel[i].P2_elevator_volume < 0 )
+				{
+
+					P2_solution = P2_solution - PID_ACCs[P2][PITCH];		// Reverse if volume negative
 				}
 				else
 				{
-					P2_solution = P2_solution - PID_ACCs[P2][PITCH];
+					P2_solution = P2_solution + PID_ACCs[P2][PITCH];
 				}
 			}
 
 			if ((Config.Channel[i].P2_sensors & (1 << ZDeltaAcc)) != 0)
 			{
-				if ((Config.Channel[i].P2_RevFlags & (1 << AccZRev)) != 0)
+				if ((Config.Channel[i].P2_scale & (1 << AccZScale)) != 0)
 				{
-					P2_solution = P2_solution + PID_ACCs[P2][YAW];
+					P2_solution = P2_solution - scale32(PID_ACCs[P2][YAW], Config.Channel[i].P2_throttle_volume); 
+				}
+				else if (Config.Channel[i].P2_throttle_volume < 0 )
+				{
+					P2_solution = P2_solution + PID_ACCs[P2][YAW];			// Reverse if volume negative
 				}
 				else
 				{
@@ -267,15 +318,33 @@ void ProcessMixer(void)
 		//************************************************************ 
 
 		// Mix in other outputs here (P1)
-		if ((Transition_state == TRANS_0) || (TRANSITIONING))
+		if (Transition_state < TRANS_1)
 		{
+			// Mix in dedicated RC sources - aileron, elevator and rudder
+			if (Config.Channel[i].P1_aileron_volume !=0) 					// Mix in dedicated aileron
+			{
+				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P1_aileron_volume);
+				P1_solution = P1_solution + temp2;
+			}
+			if (Config.Channel[i].P1_elevator_volume !=0) 					// Mix in dedicated elevator
+			{
+				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P1_elevator_volume);
+				P1_solution = P1_solution + temp2;
+			}
+			if (Config.Channel[i].P1_rudder_volume !=0) 					// Mix in dedicated rudder
+			{
+				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P1_rudder_volume);
+				P1_solution = P1_solution + temp2;
+			}
+
+			// Other sources
 			if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
 			{
 				// Is the source an RC input?
 				if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
 				{
 					// Yes, calculate RC channel number from source number and return RC value
-					temp2 = RCinputs[Config.Channel[i].P1_source_a - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P1_source_a - EXT_RC];
 				}
 				else
 				{
@@ -290,7 +359,7 @@ void ProcessMixer(void)
 			{
 				if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
 				{
-					temp2 = RCinputs[Config.Channel[i].P1_source_b - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P1_source_b - EXT_RC];
 				}
 				else
 				{
@@ -304,7 +373,7 @@ void ProcessMixer(void)
 			{
 				if (Config.Channel[i].P1_source_c > (MAX_OUTPUTS - 1))
 				{
-					temp2 = RCinputs[Config.Channel[i].P1_source_c - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P1_source_c - EXT_RC];
 				}
 				else
 				{
@@ -317,13 +386,31 @@ void ProcessMixer(void)
 		}
 
 		// Mix in other outputs here (P2)
-		if ((Transition_state == TRANS_1) || (TRANSITIONING))	
+		if (Transition_state > TRANS_0)	
 		{
+			// Mix in dedicated RC sources - aileron, elevator and rudder
+			if (Config.Channel[i].P2_aileron_volume !=0) 					// Mix in dedicated aileron
+			{
+				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P2_aileron_volume);
+				P2_solution = P2_solution + temp2;
+			}
+			if (Config.Channel[i].P2_elevator_volume !=0) 					// Mix in dedicated elevator
+			{
+				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P2_elevator_volume);
+				P2_solution = P2_solution + temp2;
+			}
+			if (Config.Channel[i].P2_rudder_volume !=0) 					// Mix in dedicated rudder
+			{
+				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P2_rudder_volume);
+				P2_solution = P2_solution + temp2;
+			}
+
+			// Other sources
 			if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
 			{
 				if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
 				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_a - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P2_source_a - EXT_RC];
 				}
 				else
 				{
@@ -337,7 +424,7 @@ void ProcessMixer(void)
 			{
 				if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
 				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_b - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P2_source_b - EXT_RC];
 				}
 				else
 				{
@@ -351,7 +438,7 @@ void ProcessMixer(void)
 			{
 				if (Config.Channel[i].P2_source_c > (MAX_OUTPUTS - 1))
 				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_c - MAX_OUTPUTS];
+					temp2 = RCinputs[Config.Channel[i].P2_source_c - EXT_RC];
 				}
 				else
 				{
@@ -428,7 +515,7 @@ void ProcessMixer(void)
 	} 
 
 	//************************************************************
-	// Groovy throttle curve handling.
+	// Groovy throttle curve handling. Must be after the transition.
 	// Uses the transition value, but is not part of the transition
 	// mixer. Linear or Sine curve. Reverse Sine done automatically
 	//************************************************************ 
@@ -442,15 +529,15 @@ void ProcessMixer(void)
 			// Only process if there is a curve
 			if (Config.Channel[i].P1_throttle_volume != Config.Channel[i].P2_throttle_volume)
 			{
-				// Work out distance to cover over stage 1 (P1 to P2)
+				// Work out distance to cover (P1 to P2)
 				temp1 = Config.Channel[i].P1_throttle_volume;
 				temp1 = temp1 << 7; 									// Multiply by 128 so divide gives reasonable step values
 				temp2 = Config.Channel[i].P2_throttle_volume;
 				temp2 = temp2 << 7; 
 				temp3 = 0;
 
-				// Calculate step difference
-				Step1 = (temp2 - temp1) / (int16_t)100;	
+				// Calculate step difference and round
+				Step1 = ((temp2 - temp1) + (int16_t)50) / (int16_t)100;	
 
 				// Linear vs. Sinusoidal calculation
 				if (Config.Channel[i].Throttle_curve == LINEAR)
@@ -504,7 +591,7 @@ void ProcessMixer(void)
 
 	//************************************************************
 	// Per-channel 3-point offset needs to be after the transition  
-	// loop as it is non-linear
+	// loop as it is non-linear, unlike the transition.
 	//************************************************************ 
 
 	for (i = 0; i < MAX_OUTPUTS; i++)
@@ -519,7 +606,7 @@ void ProcessMixer(void)
 
 			// Divide distance into steps
 			temp2 = Config.Channel[i].P1n_position; 
-			Step1 = temp1 / temp2;
+			Step1 = ((temp1 + (int16_t)64) / temp2) ; // Divide and round result
 		
 			// Work out distance to cover over stage 2 (P1.n to P2)
 			temp2 = Config.Channel[i].P2_offset - Config.Channel[i].P1n_offset;
@@ -527,7 +614,7 @@ void ProcessMixer(void)
 
 			// Divide distance into steps
 			temp1 = (100 - Config.Channel[i].P1n_position); 
-			Step2 = temp2 / temp1; 	
+			Step2 = ((temp2 + (int16_t)64) / temp1) ; // Divide and round result	
 
 			// Set start (P1) point
 			temp3 = Config.Channel[i].P1_offset; // Promote to 16bits
@@ -548,8 +635,10 @@ void ProcessMixer(void)
 				}
 			}
 
-			// Reformat directly into a system-compatible value (+/-1250)
-			P1_solution = (temp3 >> 4) + (temp3 >> 5); 							// Divide by 128 then * 12 lol
+			// Reformat directly into a system-compatible value
+			temp3 = (temp3 >> 7);									// Divide by 128
+			P1_solution = scale_percent_nooffset((int8_t)temp3);	
+
 
 		} // No curve, so just use one point for offset
 		else
@@ -707,8 +796,8 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 		temp32 = value16;
 		temp32 = temp32 * mult32;
 
-		// Divide by 100 to get scaled value
-		temp32 = temp32 / (int32_t)100; // I shit you not...
+		// Divide by 100 and round to get scaled value
+		temp32 = (temp32 + 50) / (int32_t)100; // I shit you not...
 		value16 = (int16_t) temp32;
 	}
 
@@ -721,7 +810,7 @@ int16_t scale_percent(int8_t value)
 	int16_t temp16_1, temp16_2;
 
 	temp16_1 = value; // Promote
-	temp16_2 = ((temp16_1 * (int16_t)12) + 3750);
+	temp16_2 = ((temp16_1 * (int16_t)10) + 3750);
 
 	return temp16_2;
 }
@@ -733,7 +822,7 @@ int16_t scale_percent_nooffset(int8_t value)
 	int16_t temp16_1, temp16_2;
 
 	temp16_1 = value; // Promote
-	temp16_2 = (temp16_1 * (int16_t)12);
+	temp16_2 = (temp16_1 * (int16_t)10);
 
 	return temp16_2;
 }

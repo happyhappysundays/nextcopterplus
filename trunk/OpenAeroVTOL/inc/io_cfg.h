@@ -36,9 +36,7 @@ extern CONFIG_STRUCT Config;
 #define RX_AUX_DIR 		REGISTER_BIT(DDRB,0)
 
 // Misc analog inputs
-#define	VCC_PIN			REGISTER_BIT(PINA,0)
 #define VBAT_PIN		REGISTER_BIT(PINA,3)
-#define VCC_DIR 		REGISTER_BIT(DDRA,0)
 #define VBAT_DIR		REGISTER_BIT(DDRA,3)
 
 // KK2.0 and KK2.1 have different pinouts for motors
@@ -92,12 +90,11 @@ extern CONFIG_STRUCT Config;
 #define BUTTON3_DIR 	REGISTER_BIT(DDRB,5)
 #define BUTTON4			REGISTER_BIT(PINB,4)	// Button 4
 #define BUTTON4_DIR 	REGISTER_BIT(DDRB,4)
+#define MOTORS			PORTC
 
 // I/O clones
 #define CPPM			REGISTER_BIT(PINB,2)	// Same physical port as RUDDER input
 #define CPPM_DIR 		REGISTER_BIT(DDRB,2)
-#define TX 				REGISTER_BIT(PORTB,0)	// UART output (AUX input)
-#define TX_DIR			REGISTER_BIT(DDRB,0)
 
 //***********************************************************
 // Enumeration
@@ -106,20 +103,17 @@ extern CONFIG_STRUCT Config;
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
-enum MIX_Modes		{TRANSITION = 0};
 enum Polarity 		{NORMAL = 0, REVERSED};
-enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, CH9, CH10, CH11, CH12, UNUSED};
 enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
-enum SwitchModes	{DISABLED = 0, ALWAYSON, HANDSFREE};
-enum Availability	{OFF = 0, ON, REV};
+enum Availability	{OFF = 0, ON, SCALE};
 enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
 enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_start, TRANS_1};
-//					OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NONE
-enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, SRC13, SRC14, SRC15, SRC16, NOMIX};
+//					OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, GEAR, AUX1, AUX2, AUX3, NONE
+enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, NOMIX};
 enum Profiles		{P1 = 0, P2};
 enum Safety			{ARMED = 0, ARMABLE}; 
 enum Devices		{SERVO = 0, MOTOR}; 
@@ -130,9 +124,9 @@ enum Curve			{LINEAR = 0, SINE};
 //***********************************************************
 
 enum GlobalError	{NO_ERROR = 0, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, DISARMED, LVA_ALARM, BUZZER_ON};
-enum FlightFlags	{RxActivity = 0, HandsFree};
+enum FlightFlags	{RxActivity = 0};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, FirstTimeIMU, Overdue, ServoTick};
 enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};
-enum ReverseFlags	{RollRev = 0, PitchRev, YawRev, AccRollRev, AccPitchRev, AccZRev};
+enum ScaleFlags		{RollScale = 0, PitchScale, YawScale, AccRollScale, AccPitchScale, AccZScale};
 
 #endif //IO_CFG_H

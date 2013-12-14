@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x1b		// eePROM signature - change for each eePROM structure change 0x1a = Beta 12
+#define MAGIC_NUMBER 0x1c		// eePROM signature - change for each eePROM structure change 0x1c = Beta 13
 								// to force factory reset
 
 //************************************************************
@@ -68,24 +68,36 @@ void Set_EEPROM_Default_Config(void)
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].P1_offset 	= 0;
-		Config.Channel[i].P2_offset 	= 0;
-		Config.Channel[i].P1n_offset	= 0;
 		Config.Channel[i].P1n_position	= 50;
 		Config.Channel[i].P1_source_a 	= NOMIX;
 		Config.Channel[i].P1_source_b 	= NOMIX;
 		Config.Channel[i].P1_source_c 	= NOMIX;
-		Config.Channel[i].P1_throttle_volume = 0;
 		Config.Channel[i].P2_source_a 	= NOMIX;
 		Config.Channel[i].P2_source_b 	= NOMIX;
 		Config.Channel[i].P2_source_c 	= NOMIX;
-		Config.Channel[i].P2_throttle_volume = 0;
 	}
 
-	//
-	Config.RxMode = PWM1;				// Default to PWM1
+	// Preset simple mixing for primary channels
+	Config.Channel[OUT1].P1_throttle_volume = 100;
+	Config.Channel[OUT1].P2_throttle_volume = 100;
+	Config.Channel[OUT5].P1_elevator_volume = 100;
+	Config.Channel[OUT5].P2_elevator_volume = 100;
+	Config.Channel[OUT6].P1_aileron_volume = 100;
+	Config.Channel[OUT6].P2_aileron_volume = 100;
+	Config.Channel[OUT7].P1_aileron_volume = 100;
+	Config.Channel[OUT7].P2_aileron_volume = 100;
+	Config.Channel[OUT8].P1_rudder_volume = 100;	
+	Config.Channel[OUT8].P2_rudder_volume = 100;
+	// Preset basic axis gyros in P2
+	Config.Channel[OUT5].P2_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT6].P2_sensors |= (1 << RollGyro);
+	Config.Channel[OUT7].P2_sensors |= (1 << RollGyro);
+	Config.Channel[OUT8].P2_sensors |= (1 << YawGyro);
+
+	// Misc settings
+	Config.RxMode = PWM1;				// Default to PWM1 (Rudder)
 	Config.TxSeq = JRSEQ;
-	//
+
 #ifdef KK21
 	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
 	Config.AccZero[PITCH]	= 0;
@@ -97,7 +109,7 @@ void Set_EEPROM_Default_Config(void)
 #endif
 
 	// Set up all profiles the same initially
-	for (i = 0; i < 2; i++)
+	for (i = 0; i < FLIGHT_MODES; i++)
 	{
 		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults		
 		Config.FlightMode[i].Roll.I_mult = 50;	
@@ -109,12 +121,12 @@ void Set_EEPROM_Default_Config(void)
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
 
-	Config.Acc_LPF = 8;
+	Config.Acc_LPF = 8;					// IMU CF defaults
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
 	Config.DynGain = 100;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
-	Config.ArmMode = OFF;
+	Config.ArmMode = ARMED;				// Always armed
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 0x26;				// Contrast
 	Config.Disarm_timer = 30;			// Default to 30 seconds
