@@ -32,7 +32,7 @@ void CenterSticks(void);
 //************************************************************
 // Defines
 //************************************************************
-#define	NOISE_THRESH	20			// Max RX noise threshold. Increase if lost alarm keeps being reset.
+#define	NOISE_THRESH	20			// Max RX noise threshold. Reduce if unintentional disarms occur.
 
 //************************************************************
 // Code

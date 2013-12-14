@@ -18,7 +18,7 @@
 //************************************************************
 
 volatile bool Interrupted;			// Flag that RX packet completed
-volatile uint16_t RxChannel[MAX_RC_SOURCES]; // There are more sources than RC channels
+volatile uint16_t RxChannel[MAX_RC_CHANNELS];
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Current channel number
@@ -29,7 +29,8 @@ volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
 
-#define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms long
+#define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
+#define MINPULSEWIDTH 1250			// Minimum pulse is 500us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
 
 //************************************************************
@@ -125,6 +126,11 @@ ISR(INT2_vect)
 		// Check to see if previous period was a sync pulse
 		// If so, reset channel number
 		if ((TCNT1 - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
+
+		// Check to see if previous period was too small to be valid
+		// If so, reset channel number
+		if ((TCNT1 - PPMSyncStart) < MINPULSEWIDTH) ch_num = 0;
+
 		PPMSyncStart = TCNT1;
 		switch(ch_num)
 		{
@@ -176,10 +182,12 @@ ISR(INT2_vect)
 		} // Switch
 
 		// Work out the highest channel number automagically
-		if ((ch_num > max_chan || ch_num > MAX_RC_SOURCES))	
+		// Update the maximum channel seen so far
+		if (ch_num > max_chan)
 		{
 			max_chan = ch_num;					// Reset max channel number
 		}
+		// If the current channel is the highest channel, CPPM is complete
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished

@@ -49,11 +49,6 @@ void Display_status(void)
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
 
-	//mugui_lcd_puts(itoa(Config.Raw_I_Constrain[P1][YAW],pBuffer,10),(prog_uchar*)Verdana8,90,33);
-	//mugui_lcd_puts(itoa(Config.Raw_I_Constrain[P2][YAW],pBuffer,10),(prog_uchar*)Verdana8,90,44);
-	//mugui_lcd_puts(itoa(IntegralGyro[P1][YAW],pBuffer,10),(prog_uchar*)Verdana8,60,55);
-	//mugui_lcd_puts(itoa(IntegralGyro[P2][YAW],pBuffer,10),(prog_uchar*)Verdana8,95,55);
-
 	if (Config.TransitionSpeed == 0)
 	{
 		mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_value_16
@@ -145,8 +140,8 @@ void Display_status(void)
 		// Prioritise error from top to bottom
 		if((General_error & (1 << SENSOR_ERROR)) != 0)
 		{
-			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); // Sensor
-			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); // Error
+			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); 	// Sensor
+			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); 	// Error
 			menu_beep(9);
 		}
 		else if((General_error & (1 << LVA_ALARM)) != 0)
@@ -166,7 +161,7 @@ void Display_status(void)
 		}
 		else if((General_error & (1 << DISARMED)) != 0)
 		{
-			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); // Disarmed
+			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); 	// Disarmed
 		}
 	}
 

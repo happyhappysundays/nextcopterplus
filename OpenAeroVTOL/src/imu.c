@@ -171,7 +171,7 @@ void getEstimatedAttitude(void)
 		}
 		else
 		{
-			deltaGyroAngle[PITCH] = - accSmooth[PITCH];
+			deltaGyroAngle[PITCH] = -accSmooth[PITCH];
 		}	
 		
 		G_is_Normal = true;
@@ -199,6 +199,7 @@ void getEstimatedAttitude(void)
 		// Handle roll reversal when inverted
 		if (accADC[YAW] < 0)
 		{
+			// Roll
 			if (accADC[ROLL] < 0)
 			{
 				angle[ROLL] = (180 - angle[ROLL]);
@@ -206,6 +207,16 @@ void getEstimatedAttitude(void)
 			else
 			{
 				angle[ROLL] = (-180 - angle[ROLL]);
+			}
+
+			// Pitch
+			if (accADC[PITCH] < 0)
+			{
+				angle[PITCH] = (180 - angle[PITCH]);
+			}
+			else
+			{
+				angle[PITCH] = (-180 - angle[PITCH]);
 			}
 		}
 	}

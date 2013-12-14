@@ -15,8 +15,6 @@
 // Prototypes
 //************************************************************
 
-uint8_t checkI2CDeviceIsResponding(uint8_t addr);
-uint8_t readI2Cbyte(uint8_t address, uint8_t location);
 void writeI2Cbyte(uint8_t address, uint8_t location, uint8_t value);
 void readI2CbyteArray(uint8_t address, uint8_t location, uint8_t *array,uint8_t size);
 
@@ -24,24 +22,6 @@ void readI2CbyteArray(uint8_t address, uint8_t location, uint8_t *array,uint8_t 
 //************************************************************
 // KK2.1 gyro-specifc code
 //************************************************************
-
-uint8_t checkI2CDeviceIsResponding(uint8_t addr)
-{
-    uint8_t value = i2c_start(addr+I2C_WRITE); 		// Write to device
-    i2c_stop(); 									// Don't send byte to write
-    return (value==0);  							// if start command is successful, then a device has responded
-}
-
-uint8_t readI2Cbyte(uint8_t address, uint8_t location)
-{
-	uint8_t value;
-	i2c_start_wait(address+I2C_WRITE);				// Set up device address 
-    i2c_write(location);							// Set up register address 
-	i2c_rep_start(address+I2C_READ);
-    value = i2c_readNak(); 							// Read back one byte
-    i2c_stop();
-    return value;
-}
 
 void writeI2Cbyte(uint8_t address, uint8_t location, uint8_t value)
 {

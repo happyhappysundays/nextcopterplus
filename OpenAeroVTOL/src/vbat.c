@@ -28,9 +28,15 @@ uint16_t GetVbat(void)				// Get battery voltage (VBAT on ADC3)
 		
 	read_adc(AIN_VBAT);				// Multiplication factor = (Display volts / 1024) / (Vbat / 11 / Vref)
 
-	vBat = ((ADCW * 21) >> 3);		// For Vref = 2.45V, factor = 2.632 (21/8 = 2.625)
-									// An input voltage of 10V will results in a value of 997.
-									// This means that the number represents units of 10mV.
+	// For Vref = 2.45V, Multiplication factor = 2.632
+	// An input voltage of 10V will results in a value of 999.
+	// This means that the number represents units of 10mV.
+
+	// Multiply by 2.633
+	// 2 + 1/2 + 1/8 + 1/128 :)
+	vBat = ADCW;
+	vBat = (vBat << 1) + (vBat >> 1) + (vBat >> 3) + (vBat >> 7); // Multiply by 2.633
+
 	return vBat;
 }
 

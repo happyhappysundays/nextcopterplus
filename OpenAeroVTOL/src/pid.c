@@ -106,15 +106,18 @@ void Calculate_PID(void)
 	int16_t DynamicScale = 0;
 
 	//************************************************************
-	// Set up dynamic gain variable once per loop
+	// Set up dynamic gain variable once per loop if requested
 	// N.B. Config.DynGainDiv = 2500 / Config.DynGain;
 	//************************************************************
 
-	// Channel controlling the dynamic gain
-	DynamicScale = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
+	if (Config.DynGainSrc != NOCHAN)
+	{
+		// Channel controlling the dynamic gain
+		DynamicScale = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
 
-	// Scale 0 - 2500 down to 0 - Config.DynGain (%)
-	DynamicScale = DynamicScale / Config.DynGainDiv;
+		// Scale 0 - 2500 down to 0 - Config.DynGain (%)
+		DynamicScale = DynamicScale / Config.DynGainDiv;
+	}
 
 	//************************************************************
 	// PID loop

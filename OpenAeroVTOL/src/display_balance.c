@@ -32,6 +32,7 @@ void Display_balance(void);
 void Display_balance(void)
 {
 	int16_t	x_pos, y_pos;
+	int8_t	roll_axis, pitch_axis;
 
 	while(BUTTON1 != 0)
 	{
@@ -43,16 +44,25 @@ void Display_balance(void)
 		// VERTICAL:	Pitch = Y, Roll = X
 		// SIDEWAYS:	Pitch = Y, Roll = X
 
-/*		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
+		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
 		{
-			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 32;
-			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 64;	
+			roll_axis = PITCH;
+			pitch_axis = ROLL;
 		}
 		else
-		{*/
-			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 32;
-			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 64;
-//		}
+		{
+			roll_axis = ROLL;
+			pitch_axis = PITCH;
+		}
+
+//
+//#ifdef KK21
+//		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[pitch_axis]) + 32;
+//		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[roll_axis]) + 64;	
+//#else
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accADC[pitch_axis]) + 32;
+		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accADC[roll_axis]) + 64;	
+//#endif
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;

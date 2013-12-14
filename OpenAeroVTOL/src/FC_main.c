@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 12 - December 2013
+// Version: Beta 13 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -82,22 +82,46 @@
 //			Contrast recovered from saved setting correctly.
 // Beta 12	Status menu timer fixed at 10 seconds. Fixed low battery visual message not showing.
 //			Fixed SINE throttle curve reversed when P2 less than P1.
-//			
+// Beta 13	Servo limits corrected to accurately move to the stated position.
+//			Divides rounded correctly, not truncated. 3-point offset scale corrected.
+//			Added dedicated aileron, elevator, rudder inputs to all mixer channels.
+//			Sensor options changed to (OFF/ON/Scaled). Scaled sensors scale to their associated axis input volume.
+//			Normal sources no longer have aileron, elevator, rudder options. Tidied up CPPM code.
+//			Loop speed optimisations. Added basic mixer defaults for primary channels on OUT1, OUT5, OUT6, OUT7, OUT8 
+//			Fixed the balance meter display for all orientations. Battery voltage calculation faster and more accurate.
+//			Arm/disarm trigger readjusted to suite monopolar throttle and reduced to three seconds.
+//			Disarm timer will ignore values below 30 seconds. 
+//
+//			Beta 14 will be a release 1.0 candidate.
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
 // Bugs:
-//	
+//		Once I saw Acc Z dissipate and lose efectiveness but this could not be repeated.
+//		Not really a bug but when you cross-mix from another channel, that channel's throttle does not mix in. This is because the new throttle curve are calculated after each channel's solution is saved.
 //
 // Todo:
-//  Remove remaining uneeded menu items
-//	Better way to integrate switching of sensors.
-//	Copy RC soures and .values to an array so that the mixer can do less work?
-//	
+//		Recheck dedicated input polarity on KK2.1
+//		Add P1n point concept to transition based on 3-point switch
+//
+// Tested:
+//		Dedicated inputs OK on KK2.0
+//		Source inputs ok except throttle
+//		Scaled inputs (acc) OK
+//		Scaled inputs (gyro) OK
+//		Non-scaled inputs' sensors reverse with volume - OK
+//		3-point offsets OK
+//		Throttle curves OK
+//		Defaults OK
+//		Sensor polarities consistant on KK2.0 OK
+//		All orientations checked OK
+//		CPPM working OK
+//		Battery reading is excellent
+//
 // Wish list:
-//	Per-sensor, per output, per profile gain adjustment.
+//	
 //
 //***********************************************************
 //* Includes
@@ -146,9 +170,9 @@
 
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define ARM_TIMER_RESET 960			// RC position to reset timer
+#define ARM_TIMER_RESET 960			// RC position to reset timer for aileron, elevator and rudder
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
-#define ARM_TIMER 97655				// Amount of time the sticks must be held to trigger arm/disarm. Currently five seconds.
+#define ARM_TIMER 58593				// Amount of time the sticks must be held to trigger arm/disarm. Currently three seconds.
 
 //***********************************************************
 //* Code and Data variables
@@ -214,7 +238,6 @@ int main(void)
 	uint8_t	Disarm_seconds = 0;
 	uint8_t Status_seconds = 0;
 	uint8_t Menu_mode = STATUS_TIMEOUT;
-//	uint8_t i = 0;
 	int8_t	old_flight = 3;			// Old flight profile
 	int8_t	old_trans_mode = 0;		// Old transition mode
 	
@@ -383,7 +406,7 @@ int main(void)
 		}
 
 		// Disarm model if timeout enabled and due
-		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer != 0))	
+		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer > 30))	
 		{
 			// If FC is set to "armable" and is currently armed, disarm the FC
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
@@ -453,7 +476,7 @@ int main(void)
 				((-ARM_TIMER_RESET < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET)) ||
 				((-ARM_TIMER_RESET < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET)) ||
 				((-ARM_TIMER_RESET < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[THROTTLE]) && (RCinputs[THROTTLE] < ARM_TIMER_RESET))
+				((0 < RCinputs[THROTTLE]) && (RCinputs[THROTTLE] < ARM_TIMER_RESET))
 			   )
 
 			{
