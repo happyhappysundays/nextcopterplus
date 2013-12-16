@@ -108,7 +108,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (10)
+	// RC items (11)
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
@@ -119,6 +119,7 @@ typedef struct
 	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
+	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
 
 	// Flight mode settings
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings

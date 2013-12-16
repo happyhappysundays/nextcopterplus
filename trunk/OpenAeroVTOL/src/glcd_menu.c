@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 13";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 15";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -124,7 +124,6 @@ const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char RCMenuItem21[] PROGMEM = "Deadband:";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
-const char RXMode1[]  PROGMEM = "Xtreme";
 const char RXMode2[]  PROGMEM = "S-Bus";
 const char RXMode3[]  PROGMEM = "Spektrum";
 //
@@ -147,6 +146,7 @@ const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-te
 
 //
 const char Transition[] PROGMEM = "Transition";
+const char Transition_P1n[] PROGMEM = "Trans. P1n:";
 const char P1text[] PROGMEM = "P1";
 const char P2text[] PROGMEM = "P1.n";
 const char P3text[] PROGMEM = "P2";
@@ -308,9 +308,9 @@ const char *text_menu[] PROGMEM =
 		//
 		Dummy0, 																			// 61 
 		//
-		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode1, RXMode2, RXMode3,			// 62 to 68 RX mode
+		RXMode0, ChannelRef3, ChannelRef0, ChannelRef4, RXMode2, RXMode3,					// 62 to 67 RX mode
 		//
-		Dummy0, Dummy0, Dummy0,																// 69 to 71 Spare 
+		Dummy0, Dummy0, Dummy0, Dummy0,														// 68 to 71 Spare 
 		//
 		ErrorText0, ErrorText10, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
 		//
@@ -357,16 +357,16 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 158 RC menu
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 159 RC menu
 		StabMenuItem14, StabMenuItem15,
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
-		GeneralText9, Transition,
+		GeneralText9, Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 166 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 160 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 	
 		//
-		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
 		//
 						 																	// 175 to 191 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,		// Roll gyro

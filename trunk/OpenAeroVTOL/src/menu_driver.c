@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 161 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes

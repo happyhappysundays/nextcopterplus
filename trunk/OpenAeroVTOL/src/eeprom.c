@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x1c		// eePROM signature - change for each eePROM structure change 0x1c = Beta 13
+#define MAGIC_NUMBER 0x1d		// eePROM signature - change for each eePROM structure change 0x1d = Beta 14
 								// to force factory reset
 
 //************************************************************
@@ -79,20 +79,24 @@ void Set_EEPROM_Default_Config(void)
 
 	// Preset simple mixing for primary channels
 	Config.Channel[OUT1].P1_throttle_volume = 100;
-	Config.Channel[OUT1].P2_throttle_volume = 100;
 	Config.Channel[OUT5].P1_elevator_volume = 100;
-	Config.Channel[OUT5].P2_elevator_volume = 100;
 	Config.Channel[OUT6].P1_aileron_volume = 100;
-	Config.Channel[OUT6].P2_aileron_volume = 100;
 	Config.Channel[OUT7].P1_aileron_volume = 100;
-	Config.Channel[OUT7].P2_aileron_volume = 100;
 	Config.Channel[OUT8].P1_rudder_volume = 100;	
+
+#ifdef KK21
+	Config.Channel[OUT1].P2_throttle_volume = 100;
+	Config.Channel[OUT5].P2_elevator_volume = 100;
+	Config.Channel[OUT6].P2_aileron_volume = 100;
+	Config.Channel[OUT7].P2_aileron_volume = 100;
 	Config.Channel[OUT8].P2_rudder_volume = 100;
+
 	// Preset basic axis gyros in P2
 	Config.Channel[OUT5].P2_sensors |= (1 << PitchGyro);
 	Config.Channel[OUT6].P2_sensors |= (1 << RollGyro);
 	Config.Channel[OUT7].P2_sensors |= (1 << RollGyro);
 	Config.Channel[OUT8].P2_sensors |= (1 << YawGyro);
+#endif
 
 	// Misc settings
 	Config.RxMode = PWM1;				// Default to PWM1 (Rudder)
@@ -132,6 +136,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 2;
+	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 }
 
 void Save_Config_to_EEPROM(void)

@@ -91,7 +91,7 @@ void ProcessMixer(void)
 		//************************************************************ 
 
 		// P1 gyros
-		if (Transition_state < TRANS_1)
+		if (Transition_state < TRANS_P2)
 		{
 			if ((Config.Channel[i].P1_sensors & (1 << RollGyro)) != 0) 		// Only add if gyro ON
 			{
@@ -141,7 +141,7 @@ void ProcessMixer(void)
 		}
 
 		// P2 gyros
-		if (Transition_state > TRANS_0)
+		if (Transition_state > TRANS_P1)
 		{
 			if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0) 		// Only add if gyro ON
 			{
@@ -201,7 +201,7 @@ void ProcessMixer(void)
 		// Mix in accelerometers
 		//************************************************************ 
 		// P1
-		if (Transition_state < TRANS_1)
+		if (Transition_state < TRANS_P2)
 		{
 			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
@@ -257,7 +257,7 @@ void ProcessMixer(void)
 		}
 
 		// P2
-		if (Transition_state > TRANS_0)
+		if (Transition_state > TRANS_P1)
 		{
 			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
@@ -318,7 +318,7 @@ void ProcessMixer(void)
 		//************************************************************ 
 
 		// Mix in other outputs here (P1)
-		if (Transition_state < TRANS_1)
+		if (Transition_state < TRANS_P2)
 		{
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P1_aileron_volume !=0) 					// Mix in dedicated aileron
@@ -386,7 +386,7 @@ void ProcessMixer(void)
 		}
 
 		// Mix in other outputs here (P2)
-		if (Transition_state > TRANS_0)	
+		if (Transition_state > TRANS_P1)	
 		{
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P2_aileron_volume !=0) 					// Mix in dedicated aileron

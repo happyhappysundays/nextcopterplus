@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
 #include "io_cfg.h"
@@ -18,6 +19,7 @@
 #include <util/delay.h>
 #include "acc.h"
 #include "menu_ext.h"
+#include "adc.h"
 
 //************************************************************
 // Prototypes
@@ -55,14 +57,15 @@ void Display_balance(void)
 			pitch_axis = PITCH;
 		}
 
-//
-//#ifdef KK21
-//		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[pitch_axis]) + 32;
-//		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[roll_axis]) + 64;	
-//#else
+		// We need to reverse the polarity reversal so that the meter is once again
+		// related to the KK2.0, not the model.
+		// For some reason, pitch has to be reversed on he KK2.1
+#ifdef KK21
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * -accADC[pitch_axis]) + 32;
+#else
 		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accADC[pitch_axis]) + 32;
-		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accADC[roll_axis]) + 64;	
-//#endif
+#endif
+		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accADC[roll_axis]) + 64;
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;

@@ -196,7 +196,7 @@ void getEstimatedAttitude(void)
 		angle[ROLL]  = tempf * (180 / M_PI);
 
 		// And I think this solves the upside down issue...
-		// Handle roll reversal when inverted
+		// Handle axis reversal when inverted
 		if (accADC[YAW] < 0)
 		{
 			// Roll
