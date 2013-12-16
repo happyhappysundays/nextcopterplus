@@ -84,11 +84,11 @@ void Display_status(void)
 	// Use actual transition state to display state
 	else
 	{
-		if (Transition_state == TRANS_0)
+		if (Transition_state == TRANS_P1)
 		{
 			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
 		}
-		else if (Transition_state == TRANS_1)
+		else if (Transition_state == TRANS_P2)
 		{
 			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
 		}

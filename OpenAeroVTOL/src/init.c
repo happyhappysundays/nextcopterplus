@@ -299,7 +299,6 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
 			break;
 
-		case XTREME:
 		case SBUS:
 		case SPEKTRUM:
 			// Disable PWM input interrupts

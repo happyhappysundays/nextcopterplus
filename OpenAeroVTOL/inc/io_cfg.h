@@ -101,7 +101,7 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
-enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
+enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
@@ -111,7 +111,7 @@ enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS};
 enum ADCInputs 		{AIN_VCC = 0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, HIGH};
-enum TransitState	{TRANS_0 = 0, TRANS_0_to_1_start, TRANSITIONING, TRANS_1_to_0_start, TRANS_1};
+enum TransitState	{TRANS_P1 = 0, TRANS_P1_to_P1n_start, TRANS_P1n_to_P1_start, TRANS_P1_to_P2_start, TRANSITIONING_P1, TRANS_P1n, TRANSITIONING, TRANSITIONING_P2, TRANS_P2_to_P1_start, TRANS_P1n_to_P2_start, TRANS_P2_to_P1n_start, TRANS_P2};
 //					OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, GEAR, AUX1, AUX2, AUX3, NONE
 enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, NOMIX};
 enum Profiles		{P1 = 0, P2};

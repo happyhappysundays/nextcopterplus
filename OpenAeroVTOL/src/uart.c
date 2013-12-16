@@ -26,9 +26,6 @@ void init_uart(void);
 //************************************************************
 
 // Work out best divisor for baudrate generator
-#define USART_BAUDRATE_XTREME 250000
-#define BAUD_PRESCALE_XTREME ((F_CPU + USART_BAUDRATE_XTREME * 8L) / (USART_BAUDRATE_XTREME * 16L) - 1) // Default RX rate for Xtreme
-
 #define USART_BAUDRATE_SBUS 100000
 #define BAUD_PRESCALE_SBUS ((F_CPU + USART_BAUDRATE_SBUS * 4L) / (USART_BAUDRATE_SBUS * 8L) - 1) // Default RX rate for S-Bus
 
@@ -55,18 +52,6 @@ void init_uart(void)
 
 	switch (Config.RxMode)
 	{
-		// Xtreme 8N1 (8 data bits / No parity / 1 stop bit / 250Kbps)
-		case XTREME: 	
-			UCSR0A &= ~(1 << U2X0);						// Clear the 2x flag
-			UBRR0H  = (BAUD_PRESCALE_XTREME >> 8); 		// Actual = 250000, Error = 0%
-			UBRR0L  =  BAUD_PRESCALE_XTREME & 0xff;		// 0x04 
-			UCSR0B |=  (1 << RXEN0);					// Enable receiver
-			UCSR0C &= ~(1 << USBS0); 					// 1 stop bit
-			UCSR0C &= ~(1 << UPM00) | 					// No parity 
-					   (1 << UPM01); 
-			UCSR0B |=  (1 << RXCIE0);					// Enable serial interrupt
-			break;
-
 		// Futaba S-Bus 8E2 (8 data bits / Even parity / 2 stop bits / 100Kbps)
 		case SBUS: 		
 			UCSR0A |=  (1 << U2X0);						// Need to set the 2x flag
