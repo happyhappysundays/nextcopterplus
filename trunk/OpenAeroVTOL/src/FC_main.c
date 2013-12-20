@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 15 - December 2013
+// Version: Beta 16 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -96,6 +96,8 @@
 //			P1.n trigger point changed to -20%.
 // Beta 15	Fixed case where users can request invalid automated transition states.
 //			Removed XPS Xtreme RX support to save space. 
+// Beta 16	Fixed throttle trigger for arm/disarm. Fixed Config.Disarm_timer > 30 means "30" also ignored.
+//			Fix for incomplete transition. Fix for transition only 62 steps. 
 //
 //			Release 1.0 candidate.
 //
@@ -104,24 +106,9 @@
 //***********************************************************
 //
 // Bugs:
-//		Once I saw Acc Z dissipate and lose effectiveness but after a reboot this could not be repeated.
 //
 // Tested:
-//		Balance meter checked OK
-//		New P1.n transition checked OK
-//		Dedicated inputs OK on KK2.0
-//		Source inputs ok except throttle
-//		Scaled inputs (acc) OK
-//		Scaled inputs (gyro) OK
-//		Non-scaled inputs' sensors reverse with volume - OK
-//		3-point offsets OK
-//		Throttle curves OK
-//		Defaults OK
-//		Sensor polarities consistant on KK2.0 OK
-//		All orientations checked OK
-//		CPPM working OK
-//		Battery reading is excellent
-//		Dedicated input polarity rechecked on KK2.1
+//
 //
 //***********************************************************
 //* Includes
@@ -170,7 +157,8 @@
 
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define ARM_TIMER_RESET 960			// RC position to reset timer for aileron, elevator and rudder
+#define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
+#define ARM_TIMER_RESET_2 200		// RC position to reset timer for throttle
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
 #define ARM_TIMER 58593				// Amount of time the sticks must be held to trigger arm/disarm. Currently three seconds.
 
@@ -180,7 +168,6 @@
 
 // Flight variables
 uint32_t ticker_32;					// Incrementing system ticker
-int16_t	transition_value_16 = 0;
 int16_t transition_counter = 0;
 uint8_t Transition_state = TRANS_P1;
 
@@ -410,7 +397,7 @@ int main(void)
 		}
 
 		// Disarm model if timeout enabled and due
-		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer > 30))	
+		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))	
 		{
 			// If FC is set to "armable" and is currently armed, disarm the FC
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
@@ -477,10 +464,10 @@ int main(void)
 			// If sticks not at extremes, reset timer
 			// Sticks down and centered = armed. Down and outside = disarmed
 			if (
-				((-ARM_TIMER_RESET < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET)) ||
-				((-ARM_TIMER_RESET < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET)) ||
-				((0 < RCinputs[THROTTLE]) && (RCinputs[THROTTLE] < ARM_TIMER_RESET))
+				((-ARM_TIMER_RESET_1 < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET_1)) ||
+				((-ARM_TIMER_RESET_1 < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET_1)) ||
+				((-ARM_TIMER_RESET_1 < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET_1)) ||
+				(ARM_TIMER_RESET_2 > RCinputs[THROTTLE])
 			   )
 
 			{
@@ -491,7 +478,7 @@ int main(void)
 			if (Arm_timer > ARM_TIMER)
 			{
 				// If aileron is at min, arm the FC
-				if (RCinputs[AILERON] < ARM_TIMER_RESET)
+				if (RCinputs[AILERON] < ARM_TIMER_RESET_1)
 				{
 					Arm_timer = 0;
 					General_error &= ~(1 << DISARMED);		// Set flags to armed
@@ -531,14 +518,6 @@ int main(void)
 
 			// Reset I-terms at throttle cut. Using memset saves code space
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
-			/*
-			IntegralGyro[P1][ROLL] = 0;	
-			IntegralGyro[P1][PITCH] = 0;
-			IntegralGyro[P1][YAW] = 0;
-			IntegralGyro[P2][ROLL] = 0;	
-			IntegralGyro[P2][PITCH] = 0;
-			IntegralGyro[P2][YAW] = 0; 
-			*/
 		}
 
 		//************************************************************
@@ -570,7 +549,7 @@ int main(void)
 		TransitionUpdated = false;
 
 		//************************************************************
-		//* Transition initial state setup/reset
+		//* Transition state setup/reset
 		//*
 		//* For the first startup, set up the right state for the current setup
 		//* Check for initial startup - the only time that old_flight should be "3".
@@ -600,59 +579,38 @@ int main(void)
 			old_trans_mode = Config.TransitionSpeed;
 		}
 
-		// Update timed transition when changing flight modes
-		if (Config.FlightSel != old_flight)
-		{
-			// When in a timed transition mode
-			if (Config.TransitionSpeed != 0)
-			{
-				// Flag that update is required if mode changed
-				TransitionUpdated = true;
-			}
-		}
-
-		// Check to see if the transition channel value has changed when bound to an 
-		// input channel to control transition (Config.TransitionSpeed = 0)
-		// If so, set TransitionUpdated flag to trigger an update.
-		// Note that by dividing the input value by 16 we reduce the steps from +/-1250 to about 156 steps 
-		// or +/-1000 to +/- 62, 124 steps 
-
-		if (Config.TransitionSpeed == 0)
-		{
-			if (transition_value_16 != (RCinputs[Config.FlightChan] >> 4))
-			{
-				TransitionUpdated = true;
-			}
-		}
-
 		//************************************************************
 		//* Transition state handling
 		//************************************************************
+
+		// Update timed transition when changing flight modes
+		if (Config.FlightSel != old_flight)
+		{
+			// Flag that update is required if mode changed
+			TransitionUpdated = true;
+		}
+
+		// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
+		// This prevents state chanegs when controlled by a channel
+		if (Config.TransitionSpeed == 0)
+		{
+			Transition_state = TRANSITIONING;
+		}
 
 		// Update transition timer
 		Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
 		Transition_TCNT2 = TCNT2;
 
-		// Update transition value. +/-1250 --> +/-steps, +/-800 --> +/-50 steps
-		transition_value_16 = (RCinputs[Config.FlightChan] >> 4);
-
 		// Update transition state change when control value or flight mode changes
 		if (TransitionUpdated)
 		{
-			// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
-			// which means the transition is controlled by an RC channel 
-			if (Config.TransitionSpeed == 0)
-			{
-				Transition_state = TRANSITIONING;
-			}
-
 			// Update transition state from matrix
 			Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
 		}
 
 		// Update state, values and transition_counter every Config.TransitionSpeed if not zero. 195 = 10ms
 		if (((Config.TransitionSpeed != 0) && (Transition_timeout > (TRANSITION_TIMER * Config.TransitionSpeed))) ||
-			// If bound to a channel update once
+			// Update immediately
 			TransitionUpdated)
 		{
 			Transition_timeout = 0;
@@ -724,9 +682,9 @@ int main(void)
 			if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
 			{
 				transition_counter++;
-				if (transition_counter >= 99)
+				if (transition_counter >= 100)
 				{
-					transition_counter = 99; // Debug - why isn't this 100?
+					transition_counter = 100;
 					Transition_state = TRANS_P2;
 				}
 			}

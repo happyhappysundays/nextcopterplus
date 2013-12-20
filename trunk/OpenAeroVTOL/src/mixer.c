@@ -57,6 +57,8 @@ const int8_t SIN[101] PROGMEM =
 // Code
 //************************************************************
 
+int16_t	transition = 0; // Global for transition value
+
 void ProcessMixer(void)
 {
 	uint8_t i;
@@ -67,7 +69,6 @@ void ProcessMixer(void)
 	int16_t temp1 = 0;
 	int16_t temp2 = 0;
 	int16_t	temp3 = 0;
-	int16_t	transition = 0;
 	int16_t	Step1 = 0;
 	int16_t	Step2 = 0;
 	int16_t	rolltrim = 0;
@@ -463,25 +464,27 @@ void ProcessMixer(void)
 	// Convert number to percentage (0 to 100%)
 	if (Config.TransitionSpeed == 0) 
 	{
-	// RCinput range is 2500 for 1ms (+/-1250). Ran measured the +/-1000 to equate to +/-125% on his radio
-	// That would make +/-100% equate to +/-800 counts for RCinput.
-	// transition_value_16 is the RCinput / 16 so can range +/-50 for +/-800
-		//transition  = (transition_value_16 >> 4); // 
+		// Offset RC input to (approx) -250 to 2250
+		temp1 = RCinputs[Config.FlightChan] + 1000;
 
-		// transition_value_16 is the RCinput / 16 so can range +/-62 for +/-1000
-		// Trim that value down to +/-50 for just over +/-1000
-		transition  = (transition_value_16 >> 1); // 62/2 = 31+
-		transition += (transition_value_16 >> 2); // 62/4 = 15+
-		transition += (transition_value_16 >> 4); // 62/16 = 3 = 49
+		// Trim lower end to zero (0 to 2250)
+		if (temp1 < 0) temp1 = 0;
 
+		// Convert 0 to 2250 to 0 to 125. Divide by 20
+		// Round at every divide to avoid truncation errors
+/*		transition 	= ((temp1 + 16) >> 5); 	// 1/32 +
+		transition += ((temp1 + 32) >> 6); 	// 1/64 +
+		transition += ((temp1 + 128) >> 8); // 1/256 = 0.05078 or (1/19.69) */	
 
+		transition = (temp1 + 10) / 20;
+
+		// transition now has a range of 0 to 101 for 0 to 2000 input
 		// Limit extent of transition value 0 to 100 (101 steps)
-		if (transition < -50) transition = -50;
-		if (transition > 50) transition = 50;
-		transition += 50;
+		if (transition > 100) transition = 100;
 	}
 	else 
 	{
+		// transition_counter counts from 0 to 100 (101 steps)
 		transition = transition_counter;
 	}
 
@@ -764,7 +767,7 @@ void UpdateServos(void)
 }
 
 // 32 bit multiply/scale for broken GCC
-// Returns immediately if multiplier is 100
+// Returns immediately if multiplier is 100, 0 or -100
 int16_t scale32(int16_t value16, int16_t multiplier16)
 {
 	int32_t temp32 = 0;
@@ -779,25 +782,25 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 	// Reverse if -100%
 	else if (multiplier16 == -100)
 	{
-		value16 = -value16;	
+		return -value16;	
 	}
 
 	// Zero if 0%
 	else if (multiplier16 == 0)
 	{
-		value16 = 0;	
+		return 0;	
 	}
 
 	// Only do the scaling if necessary
 	else
 	{
-		// GCC broken bad regarding multiplying 32 bit numbers, hence all this crap...
+		// GCC is broken bad regarding multiplying 32 bit numbers, hence all this crap...
 		mult32 = multiplier16;
 		temp32 = value16;
 		temp32 = temp32 * mult32;
 
 		// Divide by 100 and round to get scaled value
-		temp32 = (temp32 + 50) / (int32_t)100; // I shit you not...
+		temp32 = (temp32 + (int32_t)50) / (int32_t)100; // Constants need to be cast up to 32 bits
 		value16 = (int16_t) temp32;
 	}
 
