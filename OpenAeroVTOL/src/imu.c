@@ -33,7 +33,7 @@ void UpdateIMUvalues(void);
 
 /* Set the Low Pass Filter factor for ACC */
 // Time constant T = 1/ (2*PI*f)
-// factor = T / (T + dt) where dt is the loop period or 1 / Looprate 2.5e-3
+// factor (filter coefficient) = T / (T + dt) where dt is the loop period or 1 / Looprate(Hz) = 2.5e-3(s)
 // 1Hz = 64, 5Hz = 13, 100Hz = 1.6,  Infinite = 1
 // Increasing ACC_LPF_FACTOR would reduce ACC noise, but would increase ACC lag time
 // Set to zero if you do not want filter at all, otherwise 8 is a typical number

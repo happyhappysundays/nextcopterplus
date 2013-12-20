@@ -17,8 +17,9 @@
 #include "vbat.h"
 #include <util/delay.h>
 #include "menu_ext.h"
+#include "mixer.h"
 
-#include "pid.h" // dbug
+#include "pid.h" // debug
 
 extern uint16_t StackCount(void);	
 
@@ -48,15 +49,7 @@ void Display_status(void)
 	LCD_Display_Text(132,(prog_uchar*)Verdana8,0,33); 	// Battery
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
-
-	if (Config.TransitionSpeed == 0)
-	{
-		mugui_lcd_puts(itoa(transition_value_16,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_value_16
-	}
-	else
-	{
-		mugui_lcd_puts(itoa(transition_counter,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition_counter
-	}
+	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition value
 
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
@@ -68,11 +61,11 @@ void Display_status(void)
 	// Display transition point
 	if (Config.TransitionSpeed == 0)
 	{
-		if (transition_value_16 < -62)
+		if (transition <= 0)
 		{
 			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
 		}
-		else if (transition_value_16 > 62)
+		else if (transition >= 100)
 		{
 			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
 		}
