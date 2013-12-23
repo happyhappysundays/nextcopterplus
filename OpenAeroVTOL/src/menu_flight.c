@@ -37,29 +37,32 @@ void menu_flight(uint8_t i);
 #define FLIGHTSTART 175 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
-#define FLIGHTITEMS 14 	// Number of menu items
+#define FLIGHTITEMS 17 	// Number of menu items
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
 	// Flight (14)
 	{0,127,1,0,80},					// Roll gyro P
 	{0,127,1,0,50},					// Roll gyro I
+	{0,127,1,0,0},					// Roll gyro D
 	{0,125,5,0,0},					// Roll gyro I-limits
 	{0,127,1,0,60},					// Roll Acc gain
 	{-127,127,1,0,0}, 				// Roll Acc trim
 	{0,127,1,0,80},					// Pitch gyro P
 	{0,127,1,0,50}, 				// Pitch gyro I
+	{0,127,1,0,0},					// Pitch gyro D
 	{0,125,5,0,0},					// Pitch gyro I-limits
 	{0,127,1,0,60},					// Pitch Acc gain			
 	{-127,127,1,0,0},				// Pitch Acc trim
 	{0,127,1,0,80},					// Yaw gyro P
 	{0,127,1,0,50},					// Yaw gyro I
+	{0,127,1,0,0},					// Yaw gyro D
 	{0,125,5,0,0},					// Yaw gyro I-limits
 	{0,127,1,0,0},					// Z Acc D gain
 };

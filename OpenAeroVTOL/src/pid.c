@@ -68,7 +68,12 @@ int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each
 void Calculate_PID(void)
 {
 	static	int16_t	old_z = 0; 				// Historical Z-axis acc value
+	static 	int32_t currentError[3];		// Used with lastError to keep track of D-Terms in PID calculations
+	static	int32_t lastError[3];
 
+	int16_t DifferentialGyro1;				// Holds difference between last two errors (angular acceleration)
+	int16_t DifferentialGyro2;
+	int16_t Differential;
 	int32_t PID_gyro_temp1;					// P1
 	int32_t PID_gyro_temp2;					// P2
 	int32_t PID_acc_temp1 = 0;				// P1
@@ -95,6 +100,12 @@ void Calculate_PID(void)
 		{
 			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult},
 			{Config.FlightMode[P2].Roll.I_mult, Config.FlightMode[P2].Pitch.I_mult, Config.FlightMode[P2].Yaw.I_mult}
+		};
+
+	int8_t 	D_gain[FLIGHT_MODES][NUMBEROFAXIS] =  
+		{
+			{Config.FlightMode[P1].Roll.D_mult, Config.FlightMode[P1].Pitch.D_mult, Config.FlightMode[P1].Yaw.D_mult},
+			{Config.FlightMode[P2].Roll.D_mult, Config.FlightMode[P2].Pitch.D_mult, Config.FlightMode[P2].Yaw.D_mult}
 		};
 
 	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -189,6 +200,12 @@ void Calculate_PID(void)
 		PID_Gyro_I_actual1 = IntegralGyro[P1][axis] * I_gain[P1][axis];	// Multiply I-term (Max gain of 127)
 		PID_Gyro_I_actual1 = PID_Gyro_I_actual1 >> 5;					// Divide by 32
 
+		// Gyro D-term
+		Differential = (int16_t)(currentError[axis] - lastError[axis]);
+		lastError[axis] = currentError[axis];
+		DifferentialGyro1 = Differential * D_gain[P1][axis];			// Multiply D-term by up to 127
+		DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
+
 		// Gyro P-term
 		PID_gyro_temp2 = gyroADC[axis] * P_gain[P2][axis];				// Profile P2
 		PID_gyro_temp2 = PID_gyro_temp2 * (int32_t)3;
@@ -196,6 +213,10 @@ void Calculate_PID(void)
 		// Gyro I-term
 		PID_Gyro_I_actual2 = IntegralGyro[P2][axis] * I_gain[P2][axis];
 		PID_Gyro_I_actual2 = PID_Gyro_I_actual2 >> 5;
+
+		// Gyro D-term
+		DifferentialGyro2 = Differential * D_gain[P2][axis];			// Multiply D-term by up to 127
+		DifferentialGyro2 = DifferentialGyro2 << 4;						// Multiply by 16
 
 		//************************************************************
 		// I-term output limits
@@ -230,11 +251,11 @@ void Calculate_PID(void)
 		}
 
 		//************************************************************
-		// Sum Gyro P and I terms and rescale
+		// Sum Gyro P, I and D terms and rescale
 		//************************************************************
 
-		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> 6);
-		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> 6);
+		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + DifferentialGyro1) >> 6);
+		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> 6);
 
 		//************************************************************
 		// Modify gains dynamically as required.

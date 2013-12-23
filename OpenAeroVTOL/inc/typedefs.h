@@ -6,7 +6,7 @@
 #define TYPE_DEFS_H_
 
 /*********************************************************************
- * Type definitions
+ * Defines
  ********************************************************************/
 
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
@@ -14,6 +14,11 @@
 #define MAX_ZGAIN 200					// Maximum amount of Z-based height dampening
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
+#define	THROTTLEIDLE 50					// Throttle value below which is considered idle
+
+/*********************************************************************
+ * Type definitions
+ ********************************************************************/
 
 typedef struct
 {
@@ -74,12 +79,13 @@ typedef struct
 {
 	int8_t	P_mult;
 	int8_t	I_mult;
+	int8_t	D_mult;
 } PID_mult_t;
 
-// Flight_control type (14)
+// Flight_control type (17)
 typedef struct
 {
-	PID_mult_t	Roll;					// Gyro PI
+	PID_mult_t	Roll;					// Gyro PID
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)

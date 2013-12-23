@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 16";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 17";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -89,19 +89,19 @@ const char SensorMenuItem2[]  PROGMEM = "Inv.";
 const char StabMenuItem13[]  PROGMEM = "Z delta P:";
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
-//const char StabMenuItem3[]  PROGMEM = "Roll D:";
+const char StabMenuItem3[]  PROGMEM = "Roll D:";
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
 const char AutoMenuItem20[]  PROGMEM = "Acc Roll P:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char StabMenuItem5[]  PROGMEM = "Pitch I:";
-//const char StabMenuItem6[]  PROGMEM = "Pitch D:"; 
+const char StabMenuItem6[]  PROGMEM = "Pitch D:"; 
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
 const char AutoMenuItem21[]  PROGMEM = "Acc Pitch P:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char StabMenuItem7[]  PROGMEM = "Yaw P:"; 
 const char StabMenuItem8[]  PROGMEM = "Yaw I:";
-//const char StabMenuItem9[]  PROGMEM = "Yaw D:";
+const char StabMenuItem9[]  PROGMEM = "Yaw D:";
 const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
 //
 const char AutoMenuItem11[] PROGMEM = "OFF";
@@ -369,12 +369,12 @@ const char *text_menu[] PROGMEM =
 		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,	
 		//
 						 																	// 175 to 191 Flight menu
-		AutoMenuItem1, StabMenuItem2, StabMenuItem10, AutoMenuItem20, AutoMenuItem7,		// Roll gyro
-		AutoMenuItem4, StabMenuItem5, StabMenuItem11, AutoMenuItem21, AutoMenuItem8, 		// Pitch gyro
-		StabMenuItem7, StabMenuItem8, StabMenuItem12,	 									// Yaw gyro
+		AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10,						// Roll gyro
+		AutoMenuItem20, AutoMenuItem7,														// Roll acc
+		AutoMenuItem4, StabMenuItem5, StabMenuItem6, StabMenuItem11, 						// Pitch gyro
+		AutoMenuItem21, AutoMenuItem8, 														// Pitch acc
+		StabMenuItem7, StabMenuItem8, StabMenuItem9, StabMenuItem12,	 					// Yaw gyro
 		StabMenuItem13,																		// Z-Acc
-		//
-		Dummy0,Dummy0,Dummy0,
 		//
 		MixerItem1,																			// 192 Motor marker (38 mixer items in total)
 		MixerItem36,																		// Position for P1.n	

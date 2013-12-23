@@ -9,6 +9,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdbool.h>
+#include "typedefs.h"
 #include "io_cfg.h"
 #include "main.h"
 #include "isr.h"
@@ -55,7 +56,7 @@ void output_servo_ppm(void)
 	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so
 	if 	(
-			(RCinputs[THROTTLE] < 50) || 
+			(RCinputs[THROTTLE] < THROTTLEIDLE) || 
 			((General_error & (1 << DISARMED)) != 0)
 		)
 	{

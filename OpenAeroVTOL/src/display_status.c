@@ -19,8 +19,6 @@
 #include "menu_ext.h"
 #include "mixer.h"
 
-#include "pid.h" // debug
-
 extern uint16_t StackCount(void);	
 
 //************************************************************
@@ -51,6 +49,8 @@ void Display_status(void)
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
 	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition value
 
+//	mugui_lcd_puts(itoa(sine_table,pBuffer,10),(prog_uchar*)Verdana8,90,33); // debug
+	
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
