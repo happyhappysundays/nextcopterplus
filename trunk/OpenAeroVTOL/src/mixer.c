@@ -50,6 +50,21 @@ const int8_t SIN[101] PROGMEM =
 			95,96,96,97,97,98,98,98,98,99,
 			99,99,99,100,100,100,100,100,100,100
 			,100};
+/*
+// Debug - Linear SINE table for debugging
+const int8_t SIN[101] PROGMEM = 
+			{0,1,2,3,4,5,6,7,8,9,
+			10,11,12,13,14,15,16,17,18,19,
+			20,21,22,23,24,25,26,27,28,29,
+			30,31,32,33,34,35,36,37,38,39,
+			40,41,42,43,44,45,46,47,48,49,
+			50,51,52,53,54,55,56,57,58,59,
+			60,61,62,63,64,65,66,67,68,69,
+			70,71,72,73,74,75,76,77,78,79,
+			80,81,82,83,84,85,86,87,88,89,
+			90,91,92,93,94,95,96,97,98,99,
+			100};
+*/
 
 #define	EXT_RC 4 // Offset for indexing RC sources
 
@@ -471,11 +486,7 @@ void ProcessMixer(void)
 		if (temp1 < 0) temp1 = 0;
 
 		// Convert 0 to 2250 to 0 to 125. Divide by 20
-		// Round at every divide to avoid truncation errors
-/*		transition 	= ((temp1 + 16) >> 5); 	// 1/32 +
-		transition += ((temp1 + 32) >> 6); 	// 1/64 +
-		transition += ((temp1 + 128) >> 8); // 1/256 = 0.05078 or (1/19.69) */	
-
+		// Round to avoid truncation errors
 		transition = (temp1 + 10) / 20;
 
 		// transition now has a range of 0 to 101 for 0 to 2000 input
@@ -532,21 +543,20 @@ void ProcessMixer(void)
 			// Only process if there is a curve
 			if (Config.Channel[i].P1_throttle_volume != Config.Channel[i].P2_throttle_volume)
 			{
-				// Work out distance to cover (P1 to P2)
-				temp1 = Config.Channel[i].P1_throttle_volume;
-				temp1 = temp1 << 7; 									// Multiply by 128 so divide gives reasonable step values
-				temp2 = Config.Channel[i].P2_throttle_volume;
-				temp2 = temp2 << 7; 
-				temp3 = 0;
+				// Calculate step difference in 1/100ths and round
+				temp1 = (Config.Channel[i].P2_throttle_volume - Config.Channel[i].P1_throttle_volume);
+				temp1 = temp1 << 7; 						// Multiply by 128 so divide gives reasonable step values
+				Step1 = (temp1 + 50) / 100;	
 
-				// Calculate step difference and round
-				Step1 = ((temp2 - temp1) + (int16_t)50) / (int16_t)100;	
+				// Set start (P1) point
+				temp2 = Config.Channel[i].P1_throttle_volume; // Promote to 16 bits
+				temp2 = temp2 << 7;
 
 				// Linear vs. Sinusoidal calculation
 				if (Config.Channel[i].Throttle_curve == LINEAR)
 				{
 					// Multiply [transition] steps (0 to 100)
-					temp3 = temp1 + (Step1 * transition);
+					temp3 = temp2 + (Step1 * transition);
 				}
 				else
 				{
@@ -555,19 +565,23 @@ void ProcessMixer(void)
 					if (Step1 < 0)
 					{ 
 						// Multiply SIN[100 - transition] steps (0 to 100)
-						temp2 = 100 - (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
+						temp3 = 100 - (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
 					}
 					// If P2 greater than P1, SINE is the one we want
 					else
 					{
 						// Multiply SIN[transition] steps (0 to 100)
-						temp2 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
+						temp3 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
 					}
 
-					temp3 = temp1 + (Step1 * temp2);
+					// Get SINE% (temp2) of difference in volumes (Step1)
+					// Step1 is already in 100ths of the difference * 128
+					// temp1 is the start volume * 128
+					temp3 = temp2 + (Step1 * temp3);
 				}
 
-				// Rescale to normal value
+				// Round, then rescale to normal value
+				//temp3 = temp3 + 64;
 				temp3 = temp3 >> 7;
 
 				// Calculate actual throttle value
@@ -582,10 +596,12 @@ void ProcessMixer(void)
 				temp3 = scale32(RCinputs[THROTTLE], temp1);
 			}
 
+			// At this point, the throttle values are 0 to 2500 (+/-125%)
 			// Re-scale throttle values back to system values (+/-1250) 
 			// as throttle offset is actually at Config.ThrottleMinOffset
+			// A throttle value of "0" needs to become -Config.ThrottleMinOffset.
 			temp3 = temp3 - Config.ThrottleMinOffset;
-			
+
 			// Add offset to channel value
 			Config.Channel[i].P1_value += temp3;
 
@@ -609,7 +625,7 @@ void ProcessMixer(void)
 
 			// Divide distance into steps
 			temp2 = Config.Channel[i].P1n_position; 
-			Step1 = ((temp1 + (int16_t)64) / temp2) ; // Divide and round result
+			Step1 = ((temp1 + (temp2 >> 1)) / temp2) ; // Divide and round result
 		
 			// Work out distance to cover over stage 2 (P1.n to P2)
 			temp2 = Config.Channel[i].P2_offset - Config.Channel[i].P1n_offset;
@@ -617,7 +633,7 @@ void ProcessMixer(void)
 
 			// Divide distance into steps
 			temp1 = (100 - Config.Channel[i].P1n_position); 
-			Step2 = ((temp2 + (int16_t)64) / temp1) ; // Divide and round result	
+			Step2 = ((temp2 + (temp1 >> 1)) / temp1) ; // Divide and round result	
 
 			// Set start (P1) point
 			temp3 = Config.Channel[i].P1_offset; // Promote to 16bits
@@ -638,8 +654,8 @@ void ProcessMixer(void)
 				}
 			}
 
-			// Reformat directly into a system-compatible value
-			temp3 = (temp3 >> 7);									// Divide by 128
+			// Reformat into a system-compatible value
+			temp3 = ((temp3 + 64) >> 7);							// Round then divide by 128
 			P1_solution = scale_percent_nooffset((int8_t)temp3);	
 
 

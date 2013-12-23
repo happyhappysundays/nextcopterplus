@@ -100,7 +100,7 @@ extern CONFIG_STRUCT Config;
 // Enumeration
 //***********************************************************
 
-enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
+enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW};
 enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
 enum Polarity 		{NORMAL = 0, REVERSED};

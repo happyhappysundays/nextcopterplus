@@ -32,7 +32,7 @@ void CenterSticks(void);
 //************************************************************
 // Defines
 //************************************************************
-#define	NOISE_THRESH	20			// Max RX noise threshold. Reduce if unintentional disarms occur.
+#define	NOISE_THRESH	5			// Max RX noise threshold. Reduce if unintentional disarms occur.
 
 //************************************************************
 // Code
@@ -74,8 +74,8 @@ void RxGetChannels(void)
 	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[AUX1];
 	RxSumDiff = RxSum - OldRxSum;
 
-	// Set RX activity flag
-	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH)) 
+	// Set RX activity flag if movement above noise floor or throttle above minimum
+	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH) || (RCinputs[THROTTLE] > THROTTLEIDLE)) 
 	{
 		Flight_flags |= (1 << RxActivity);
 	}
@@ -109,7 +109,7 @@ void CenterSticks(void)
 	}
 	
 	// Calculate throttle minimum offset
-	Config.ThrottleMinOffset = (3750 - Config.RxChannelZeroOffset[THROTTLE]);
+	Config.ThrottleMinOffset = (3750 - RxChannel[THROTTLE]);
 
 	Save_Config_to_EEPROM();
 }

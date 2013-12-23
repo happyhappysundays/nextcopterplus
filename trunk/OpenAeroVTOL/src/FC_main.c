@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 16 - December 2013
+// Version: Beta 17 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -97,7 +97,7 @@
 // Beta 15	Fixed case where users can request invalid automated transition states.
 //			Removed XPS Xtreme RX support to save space. 
 // Beta 16	Fixed throttle trigger for arm/disarm. Fixed Config.Disarm_timer > 30 means "30" also ignored.
-//			Fix for incomplete transition. Fix for transition only 62 steps. 
+// OpenAeroVTOL_B16_K20
 //
 //			Release 1.0 candidate.
 //
@@ -158,9 +158,10 @@
 #define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
-#define ARM_TIMER_RESET_2 200		// RC position to reset timer for throttle
+#define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
-#define ARM_TIMER 58593				// Amount of time the sticks must be held to trigger arm/disarm. Currently three seconds.
+#define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger disarm. Currently one second.
+#define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger arm. Currently three seconds.
 
 //***********************************************************
 //* Code and Data variables
@@ -289,7 +290,7 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				if (Status_seconds >= 10) // Debug
+				if (Status_seconds >= 10)
 				{
 					Menu_mode = STATUS_TIMEOUT;
 				}
@@ -378,37 +379,6 @@ int main(void)
 		//* Alarms
 		//************************************************************
 
-		// Disarm timer alarm
-		Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
-		Disarm_TCNT2 = TCNT2;
-
-		// Reset auto-disarm count if any RX activity or set to zero
-		if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0))
-		{														
-			Disarm_timer = 0;
-			Disarm_seconds = 0;
-		}
-		
-		// Increment disarm timer (seconds)
-		if (Disarm_timer > SECOND_TIMER)
-		{
-			Disarm_seconds++;
-			Disarm_timer = 0;
-		}
-
-		// Disarm model if timeout enabled and due
-		if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))	
-		{
-			// If FC is set to "armable" and is currently armed, disarm the FC
-			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
-			{
-				General_error |= (1 << DISARMED);	// Set flags to disarmed
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
-				menu_beep(1);							// Signal that FC is now disarmed
-			}
-		}
-
 		// If RC signals overdue, signal RX error message and disarm
 		if (Overdue)
 		{
@@ -457,50 +427,82 @@ int main(void)
 
 		if (Config.ArmMode == ARMABLE)
 		{
+			// Manual arm/disarm
+
 			// Increment timer only if Launch mode on to save cycles
 			Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); // TCNT2 runs at 19.531kHz. SECOND_TIMER amount of TCNT2 is 1 second
 			Arm_TCNT2 = TCNT2;
 
-			// If sticks not at extremes, reset timer
+			// If sticks not at extremes, reset manual arm/disarm timer
 			// Sticks down and centered = armed. Down and outside = disarmed
 			if (
 				((-ARM_TIMER_RESET_1 < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET_1)) ||
-				(ARM_TIMER_RESET_2 > RCinputs[THROTTLE])
+				(ARM_TIMER_RESET_2 < RCinputs[THROTTLE])
 			   )
 
 			{
 				Arm_timer = 0;
 			}
 
-			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER/SECOND_TIMER seconds
-			if (Arm_timer > ARM_TIMER)
+			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER seconds
+			// If aileron is at min, arm the FC
+			if ((Arm_timer > ARM_TIMER) && (RCinputs[AILERON] < -ARM_TIMER_RESET_1))
 			{
-				// If aileron is at min, arm the FC
-				if (RCinputs[AILERON] < ARM_TIMER_RESET_1)
-				{
-					Arm_timer = 0;
-					General_error &= ~(1 << DISARMED);		// Set flags to armed
-					menu_beep(20);							// Signal that FC is now armed
-				}
-
-				// Else, disarm the FC
-				else
-				{
-					Arm_timer = 0;
-					General_error |= (1 << DISARMED);		// Set flags to disarmed
-					menu_beep(1);							// Signal that FC is now disarmed
-				}
+				Arm_timer = 0;
+				General_error &= ~(1 << DISARMED);		// Set flags to armed
+				menu_beep(20);							// Signal that FC is now armed
 
 				// Force update of status screen
 				Menu_mode = STATUS_TIMEOUT;
+			}
+			// Else, disarm the FC after DISARM_TIMER seconds if aileron at max
+			else if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
+			{
+				Arm_timer = 0;
+				General_error |= (1 << DISARMED);		// Set flags to disarmed
+				menu_beep(1);							// Signal that FC is now disarmed
+
+				// Force update of status screen
+				Menu_mode = STATUS_TIMEOUT;
+			}
+
+			// Automatic disarm
+
+			// Auto-disarm timer
+			Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
+			Disarm_TCNT2 = TCNT2;
+
+			// Reset auto-disarm count if any RX activity or set to zero, or when curently armed
+			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
+			{														
+				Disarm_timer = 0;
+				Disarm_seconds = 0;
+			}
+		
+			// Increment disarm timer (seconds) if armed
+			if (Disarm_timer > SECOND_TIMER)
+			{
+				Disarm_seconds++;
+				Disarm_timer = 0;
+			}
+
+			// Auto-disarm model if timeout enabled and due
+			if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))	
+			{
+				// Disarm the FC
+				General_error |= (1 << DISARMED);		// Set flags to disarmed
+
+				// Force update of status screen
+				Menu_mode = STATUS_TIMEOUT;
+				menu_beep(1);							// Signal that FC is now disarmed
 			}
 		}
 		// Arm when ArmMode is OFF
 		else 
 		{
-			General_error &= ~(1 << DISARMED);		// Set flags to armed
+			General_error &= ~(1 << DISARMED);			// Set flags to armed
 		}
 
 		//************************************************************
@@ -511,7 +513,7 @@ int main(void)
 		RxGetChannels();
 
 		// Check for throttle reset
-		if (RCinputs[THROTTLE] < 50)
+		if (RCinputs[THROTTLE] < THROTTLEIDLE)
 		{
 			// Clear throttle high error
 			General_error &= ~(1 << THROTTLE_HIGH);	

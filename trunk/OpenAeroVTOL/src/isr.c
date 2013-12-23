@@ -327,8 +327,8 @@ ISR(USART0_RX_vect)
 					itemp16= RxChannel[j] - 1024;	
 					
 					// Expand into OpenAero2 units							
-					//itemp16 = itemp16 + (itemp16 >> 2) + (itemp16 >> 3) + (itemp16 >> 4) + (itemp16 >> 5); 	// Quick multiply by 1.469 :)
-					itemp16 = itemp16 + (itemp16 >> 1); // Quicker mulitply by 1.5
+					itemp16 = itemp16 + (itemp16 >> 2) + (itemp16 >> 3) + (itemp16 >> 4) + (itemp16 >> 5); 	// Quick multiply by 1.469 :)
+					//itemp16 = itemp16 + (itemp16 >> 1); // Quicker mulitply by 1.5
 
 					// Add back in OpenAero2 offset
 					RxChannel[j] = itemp16 + 3750;				
