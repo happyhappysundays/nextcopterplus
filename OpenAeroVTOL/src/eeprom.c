@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x1f		// eePROM signature - change for each eePROM structure change 0x1d = Beta 17
+#define MAGIC_NUMBER 0x20		// eePROM signature - change for each eePROM structure change 0x20 = Beta 18
 								// to force factory reset
 
 //************************************************************
@@ -61,9 +61,8 @@ void Set_EEPROM_Default_Config(void)
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
 	}
-	// Monopolar throttle is a special case
-	Config.RxChannelZeroOffset[THROTTLE] = 2500;
-	Config.ThrottleMinOffset = 1250;
+	// Monopolar throttle is a special case. Set to -100% or -1000
+	Config.RxChannelZeroOffset[THROTTLE] = 2750;
 
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
