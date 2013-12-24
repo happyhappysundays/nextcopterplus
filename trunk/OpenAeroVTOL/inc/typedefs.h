@@ -15,6 +15,7 @@
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
+#define	MOTORMIN 1000					// Minimum throttle value. 1000 or 1.1ms
 
 /*********************************************************************
  * Type definitions
@@ -160,9 +161,6 @@ typedef struct
 
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
-
-	// Throttle minimum offset
-	uint16_t 	ThrottleMinOffset;
 
 	// Acc zeros
 	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results

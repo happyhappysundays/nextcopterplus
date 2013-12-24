@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 17 - December 2013
+// Version: Beta 18 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -97,7 +97,11 @@
 // Beta 15	Fixed case where users can request invalid automated transition states.
 //			Removed XPS Xtreme RX support to save space. 
 // Beta 16	Fixed throttle trigger for arm/disarm. Fixed Config.Disarm_timer > 30 means "30" also ignored.
-// OpenAeroVTOL_B16_K20
+// Beta 17	Reinstated gyro D-terms. Changed arm time to 1 second, disarm still 3 seconds.
+//			RX activity detection is now only valid if throttle below idle. This should save in-flight auto disarms.
+//			Vbat now displays correctly for both KK2.0 and KK2.1. S.Bus timing tweaked.
+//			RC noise threshold changed from +/-20 to +/-5. Improved throttle curve response.
+// Beta 18	Fixed throttle minimum offset. Fixed slight rounding error when P2 throttle vol is 80% and P1 is 0%
 //
 //			Release 1.0 candidate.
 //

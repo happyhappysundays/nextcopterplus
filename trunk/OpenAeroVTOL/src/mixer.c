@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
+#include "typedefs.h"
 #include "io_cfg.h"
 #include "rc.h"
 #include "isr.h"
@@ -50,21 +51,6 @@ const int8_t SIN[101] PROGMEM =
 			95,96,96,97,97,98,98,98,98,99,
 			99,99,99,100,100,100,100,100,100,100
 			,100};
-/*
-// Debug - Linear SINE table for debugging
-const int8_t SIN[101] PROGMEM = 
-			{0,1,2,3,4,5,6,7,8,9,
-			10,11,12,13,14,15,16,17,18,19,
-			20,21,22,23,24,25,26,27,28,29,
-			30,31,32,33,34,35,36,37,38,39,
-			40,41,42,43,44,45,46,47,48,49,
-			50,51,52,53,54,55,56,57,58,59,
-			60,61,62,63,64,65,66,67,68,69,
-			70,71,72,73,74,75,76,77,78,79,
-			80,81,82,83,84,85,86,87,88,89,
-			90,91,92,93,94,95,96,97,98,99,
-			100};
-*/
 
 #define	EXT_RC 4 // Offset for indexing RC sources
 
@@ -546,7 +532,7 @@ void ProcessMixer(void)
 				// Calculate step difference in 1/100ths and round
 				temp1 = (Config.Channel[i].P2_throttle_volume - Config.Channel[i].P1_throttle_volume);
 				temp1 = temp1 << 7; 						// Multiply by 128 so divide gives reasonable step values
-				Step1 = (temp1 + 50) / 100;	
+				Step1 = temp1 / 100;	
 
 				// Set start (P1) point
 				temp2 = Config.Channel[i].P1_throttle_volume; // Promote to 16 bits
@@ -581,26 +567,25 @@ void ProcessMixer(void)
 				}
 
 				// Round, then rescale to normal value
-				//temp3 = temp3 + 64;
+				temp3 = temp3 + 64;
 				temp3 = temp3 >> 7;
-
-				// Calculate actual throttle value
-				temp3 = scale32(RCinputs[THROTTLE], temp3);
 			}
 			
 			// No curve
 			else
 			{
-				// Calculate actual throttle value
-				temp1 = Config.Channel[i].P1_throttle_volume; // Promote
-				temp3 = scale32(RCinputs[THROTTLE], temp1);
+				// Just use the vlue of P1 volume as there is no curve
+				temp3 = Config.Channel[i].P1_throttle_volume; // Promote to 16 bits
 			}
+
+			// Calculate actual throttle value
+			temp3 = scale32(RCinputs[THROTTLE], temp3);
 
 			// At this point, the throttle values are 0 to 2500 (+/-125%)
 			// Re-scale throttle values back to system values (+/-1250) 
-			// as throttle offset is actually at Config.ThrottleMinOffset
-			// A throttle value of "0" needs to become -Config.ThrottleMinOffset.
-			temp3 = temp3 - Config.ThrottleMinOffset;
+			// as throttle offset is actually at some variable value.
+			// Reset minimum throttle to 1.1ms or 3750 (1.5ms center)  - 2750 (1.1ms min throttle)
+			temp3 = temp3 - MOTORMIN;
 
 			// Add offset to channel value
 			Config.Channel[i].P1_value += temp3;

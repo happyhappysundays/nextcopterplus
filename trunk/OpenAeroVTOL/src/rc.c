@@ -107,9 +107,6 @@ void CenterSticks(void)
 	{
 		Config.RxChannelZeroOffset[i] = RxChannelZeroOffset[i] >> 3; // Divide by 8
 	}
-	
-	// Calculate throttle minimum offset
-	Config.ThrottleMinOffset = (3750 - RxChannel[THROTTLE]);
 
 	Save_Config_to_EEPROM();
 }
