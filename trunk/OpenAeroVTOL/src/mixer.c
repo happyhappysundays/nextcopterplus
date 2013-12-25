@@ -52,7 +52,7 @@ const int8_t SIN[101] PROGMEM =
 			99,99,99,100,100,100,100,100,100,100
 			,100};
 
-#define	EXT_RC 4 // Offset for indexing RC sources
+#define	EXT_RC 8 // Offset for indexing RC sources
 
 //************************************************************
 // Code
@@ -579,7 +579,7 @@ void ProcessMixer(void)
 			}
 
 			// Calculate actual throttle value
-			temp3 = scale32(RCinputs[THROTTLE], temp3);
+			temp3 = scale32(MonopolarThrottle, temp3);
 
 			// At this point, the throttle values are 0 to 2500 (+/-125%)
 			// Re-scale throttle values back to system values (+/-1250) 

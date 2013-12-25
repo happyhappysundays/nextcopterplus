@@ -39,6 +39,7 @@ void CenterSticks(void);
 //************************************************************
 
 int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
+int16_t MonopolarThrottle;			// Monopolar throttle
 
 // Get raw flight channel data (~2500 to 5000) and remove zero offset
 // Use channel mapping for configurability
@@ -53,6 +54,12 @@ void RxGetChannels(void)
 	{
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
+
+	// Special handling for monopolar throttle
+	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
+
+	// Bipolar throttle must use the nominal mid-point
+	RCinputs[THROTTLE] = RxChannel[THROTTLE] - 3750;
 
 	// Reverse primary channels as requested
 	if (Config.AileronPol == REVERSED)
@@ -75,7 +82,7 @@ void RxGetChannels(void)
 	RxSumDiff = RxSum - OldRxSum;
 
 	// Set RX activity flag if movement above noise floor or throttle above minimum
-	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH) || (RCinputs[THROTTLE] > THROTTLEIDLE)) 
+	if ((RxSumDiff > NOISE_THRESH) || (RxSumDiff < -NOISE_THRESH) || (MonopolarThrottle > THROTTLEIDLE)) 
 	{
 		Flight_flags |= (1 << RxActivity);
 	}

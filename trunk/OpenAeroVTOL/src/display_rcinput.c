@@ -55,7 +55,7 @@ void Display_rcinput(void)
 		LCD_Display_Text(111,(prog_uchar*)Verdana8,70,20);
 		LCD_Display_Text(112,(prog_uchar*)Verdana8,70,30);
 
-		mugui_lcd_puts(itoa(RCinputs[THROTTLE],pBuffer,10),(prog_uchar*)Verdana8,37,0);
+		mugui_lcd_puts(itoa(MonopolarThrottle,pBuffer,10),(prog_uchar*)Verdana8,37,0);
 		mugui_lcd_puts(itoa(RCinputs[AILERON],pBuffer,10),(prog_uchar*)Verdana8,37,10);
 		mugui_lcd_puts(itoa(RCinputs[ELEVATOR],pBuffer,10),(prog_uchar*)Verdana8,37,20);
 		mugui_lcd_puts(itoa(RCinputs[RUDDER],pBuffer,10),(prog_uchar*)Verdana8,37,30);

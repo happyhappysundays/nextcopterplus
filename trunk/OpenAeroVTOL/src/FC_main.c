@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 18 - December 2013
+// Version: Beta 19 - December 2013
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -102,6 +102,8 @@
 //			Vbat now displays correctly for both KK2.0 and KK2.1. S.Bus timing tweaked.
 //			RC noise threshold changed from +/-20 to +/-5. Improved throttle curve response.
 // Beta 18	Fixed throttle minimum offset. Fixed slight rounding error when P2 throttle vol is 80% and P1 is 0%
+// Beta 19	Throttle separated into Monopolar and Bipolar versions. Source list now includes Throttle, Aileron, 
+//			Elevator and Rudder again as a result
 //
 //			Release 1.0 candidate.
 //
@@ -202,8 +204,6 @@ const int8_t Trans_Matrix[3][3] PROGMEM =
 
 int main(void)
 {
-	uint16_t cycletime;				// Loop time
-
 	bool Overdue = false;
 	bool ServoTick = false;
 	bool SlowRC = false;
@@ -443,7 +443,7 @@ int main(void)
 				((-ARM_TIMER_RESET_1 < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET_1)) ||
-				(ARM_TIMER_RESET_2 < RCinputs[THROTTLE])
+				(ARM_TIMER_RESET_2 < MonopolarThrottle)
 			   )
 
 			{
@@ -517,7 +517,7 @@ int main(void)
 		RxGetChannels();
 
 		// Check for throttle reset
-		if (RCinputs[THROTTLE] < THROTTLEIDLE)
+		if (MonopolarThrottle < THROTTLEIDLE)
 		{
 			// Clear throttle high error
 			General_error &= ~(1 << THROTTLE_HIGH);	
@@ -809,12 +809,11 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Measure loop rate
+		//* Increment system time
 		//************************************************************
 
-		cycletime = TCNT1 - LoopStartTCNT1;	// Update cycle time
-		LoopStartTCNT1 = TCNT1;				// Measure period of loop from here
-		ticker_32 += cycletime;
+		ticker_32 += (TCNT1 - LoopStartTCNT1);	// Update system time
+		LoopStartTCNT1 = TCNT1;					// Measure system time from here
 
 	} // main loop
 } // main()
