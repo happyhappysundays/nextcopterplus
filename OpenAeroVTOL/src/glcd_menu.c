@@ -38,7 +38,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 18";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 19";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
@@ -399,7 +399,8 @@ const char *text_menu[] PROGMEM =
 		MixerItem22, MixerItem2,  															// Source C and Volume P1	
 		MixerItem32, MixerItem30,  															// Source C and Volume P2
 		//
-		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 230 to 242 Sources OUT1- OUT8, 
+		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 230 to 246 Sources OUT1- OUT8, 
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,									// THR to RUDDER, 
 		ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,									// GEAR to AUX3 + NONE
 		ChannelRef8, 
 		//

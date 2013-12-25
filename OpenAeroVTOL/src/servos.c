@@ -45,12 +45,12 @@ void output_servo_ppm(void)
 	}
 
 	// Re-sample throttle value
-	RCinputs[THROTTLE] = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
+	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
 
 	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so
 	if 	(
-			(RCinputs[THROTTLE] < THROTTLEIDLE) || 
+			(MonopolarThrottle < THROTTLEIDLE) || 
 			((General_error & (1 << DISARMED)) != 0)
 		)
 	{
