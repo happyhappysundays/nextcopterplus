@@ -103,7 +103,8 @@
 //			RC noise threshold changed from +/-20 to +/-5. Improved throttle curve response.
 // Beta 18	Fixed throttle minimum offset. Fixed slight rounding error when P2 throttle vol is 80% and P1 is 0%
 // Beta 19	Throttle separated into Monopolar and Bipolar versions. Source list now includes Throttle, Aileron, 
-//			Elevator and Rudder again as a result
+//			Elevator and Rudder again as a result. Changed Acc delta Z to an Acc P function.
+//			Fixed acc calibration issues. Removed Free RAM display to save space.
 //
 //			Release 1.0 candidate.
 //

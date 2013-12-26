@@ -39,7 +39,6 @@ void Display_rcinput(void)
 	{
 		if (BUTTON4 == 0)
 		{
-			//_delay_ms(100);
 			CenterSticks();
 		}
 

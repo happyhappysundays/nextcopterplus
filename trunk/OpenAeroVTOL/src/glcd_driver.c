@@ -47,7 +47,6 @@ void clear_screen(void);
 //***********************************************************
 
 const uint8_t pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 
-const uint8_t pagemap_logo[] PROGMEM	= { 0, 1, 2, 3, 4, 5, 6, 7 };	// This works for the logo...
 const uint8_t lcd_commmands[] PROGMEM	= { 0xA2,0xA0,0x40,0xA6,0xEE,0xC8,0x2C,0x2E,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string
 
 // Software SPI write
@@ -133,7 +132,7 @@ void write_buffer(uint8_t *buffer, uint8_t type)
 		}
 		else
 		{
-			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap_logo[p]));	// Page 0 to 7
+			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap[7-p]));	// Page 0 to 7
 		}
 
 		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0

@@ -33,13 +33,6 @@ void get_raw_accs(void);
 // Defines
 //************************************************************
 
-// Uncalibrated default values of Z middle per orientation
-#ifdef KK21
-const int16_t UncalDef[5] PROGMEM = {0, 0, 0, 0, 0}; // KK2.1 has zero offsets
-#else
-const int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
-#endif
-
 // Polarity handling 
 #ifdef KK21 
 const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
@@ -66,13 +59,24 @@ const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 //************************************************************
 
 int16_t accADC[3];				// Holds Acc ADC values - alwys in RPY order
-int16_t tempaccZero = 0;		// Holds Z acc in between normal and inverted cals
+int16_t NormalAccZero;			// Holds Z acc in between normal and inverted cals
+int16_t accVert = 0;			// Holds the level-zeroed Z-acc value. Used for height damping in hover only.
 
 void ReadAcc()
 {
 	uint8_t i;
 
 	get_raw_accs();				// Updates accADC[] (RPY)
+
+	// Recalculate current accVert
+	accVert = accADC[YAW] - Config.AccVertZero;
+
+	// Use default zero for Acc-Z if inverse calibration not done yet
+	// Actual zero is held in NormalAccZero waiting for inv calibration
+	if (!(Main_flags & (1 << inv_cal_done)))
+	{
+		Config.AccZero[YAW] = 643;
+	}
 
 	for (i=0;i<3;i++)			// For all axis (RPY)
 	{
@@ -81,12 +85,6 @@ void ReadAcc()
 
 		// Change polarity as per orientation mode
 		accADC[i] *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][i]);
-	}
-
-	// Use default inverse calibration value if not done yet
-	if (!(Main_flags & (1 << inv_cal_done)))
-	{
-		Config.AccZero[YAW] = (int16_t)pgm_read_word(&UncalDef[Config.Orientation]);
 	}
 }
 
@@ -116,11 +114,12 @@ void CalibrateAcc(int8_t type)
 		{
 			// Divide by 32
 			accZero[i] = (accZero[i] >> 5);
-			Config.AccZero[i] = accZero[i]; 	// 
+			Config.AccZero[i] = accZero[i]; 
 		}
 
 		// Save upright Z-axis zero
-		tempaccZero = Config.AccZero[YAW];
+		NormalAccZero = Config.AccZero[YAW];
+		Config.AccVertZero = NormalAccZero;
 
 		Main_flags |= (1 << normal_cal_done);
 		Main_flags &= ~(1 << inv_cal_done);
@@ -138,12 +137,11 @@ void CalibrateAcc(int8_t type)
 			for (i=0;i<32;i++)
 			{
 				get_raw_accs();					// Updates gyroADC[] with board-oriented vales
-
 				accZeroYaw += accADC[YAW];		
 				_delay_ms(10);					// Get a better acc average over time
 			}
 
-			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
+			accZeroYaw = (accZeroYaw >> 5);		// Inverted zero point
 
 			// Test if board is actually inverted relative to board orientation
 #ifdef KK21 
@@ -155,8 +153,8 @@ void CalibrateAcc(int8_t type)
 
 			{
 				// Reset zero to halfway between min and max Z
-				temp = ((tempaccZero - accZeroYaw) >> 1);
-				Config.AccZero[YAW] = tempaccZero - temp;
+				temp = ((NormalAccZero - accZeroYaw) >> 1);
+				Config.AccZero[YAW] = NormalAccZero - temp; // Config.AccZero[YAW] is now valid to use
 
 				Main_flags |= (1 << inv_cal_done);
 				Main_flags &= ~(1 << normal_cal_done);

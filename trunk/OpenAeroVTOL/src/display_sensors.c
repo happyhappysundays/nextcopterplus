@@ -18,6 +18,7 @@
 #include <util/delay.h>
 #include "acc.h"
 #include "gyros.h"
+#include "acc.h"
 #include "menu_ext.h"
 
 //************************************************************
@@ -63,6 +64,9 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,15);
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,25);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
+
+		// Debug
+//		mugui_lcd_puts(itoa(accVert,pBuffer,10),(prog_uchar*)Verdana8,110,35);
 		
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left

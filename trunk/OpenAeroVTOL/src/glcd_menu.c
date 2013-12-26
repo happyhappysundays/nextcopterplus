@@ -86,7 +86,7 @@ const char PText19[] PROGMEM = "Acc";
 const char SensorMenuItem1[]  PROGMEM = "Cal.";	
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	
 //
-const char StabMenuItem13[]  PROGMEM = "Z delta P:";
+const char StabMenuItem13[]  PROGMEM = "Acc Vert P:";
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
 const char StabMenuItem3[]  PROGMEM = "Roll D:";

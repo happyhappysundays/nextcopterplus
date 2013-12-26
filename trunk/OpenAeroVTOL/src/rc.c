@@ -32,7 +32,8 @@ void CenterSticks(void);
 //************************************************************
 // Defines
 //************************************************************
-#define	NOISE_THRESH	5			// Max RX noise threshold. Reduce if unintentional disarms occur.
+
+#define	NOISE_THRESH	5			// Max RX noise threshold
 
 //************************************************************
 // Code
