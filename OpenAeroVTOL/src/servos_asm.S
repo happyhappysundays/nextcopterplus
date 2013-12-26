@@ -221,9 +221,9 @@ output_servo_ppm_asm:
 	call	DelayLow
 
 // At this point, the largest pulse that we can generate is 256 * 8 = 2.048ms
-// However we would like to be able to generate up to 2.100ms (125%) - an extra 52us
+// However we would like to be able to generate up to 2.100ms (150%) - an extra 52us
 // So we can fluff it out another 200us so that we can subtract enough to keep r16 under 0xff or 256 :)
-// With this setup, M1 can go down to 850 (-135%) and M8 can go up to 2150 (135%)
+// With this setup, M1 can go down to 850 and M8 can go up to 2150
 
 	call    pwm_delay   // 150us
 	call    pwm_delay

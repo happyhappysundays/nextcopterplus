@@ -11,7 +11,7 @@
 
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define MAX_OUTPUTS 8					// Maximum output channels
-#define MAX_ZGAIN 200					// Maximum amount of Z-based height dampening
+#define MAX_ZGAIN 500					// Maximum amount of Z-based height dampening
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
@@ -164,6 +164,7 @@ typedef struct
 
 	// Acc zeros
 	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results
+	int16_t		AccVertZero;			// Acc-Z zero
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode

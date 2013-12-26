@@ -40,7 +40,7 @@ void output_servo_ppm(void)
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		temp = ServoOut[i];					// Promote to 32 bits
-		temp = ((temp << 2) / 10); 
+		temp = ((temp << 2) + 5) / 10; 		// Round and convert
 		ServoOut[i] = (uint16_t)temp;
 	}
 

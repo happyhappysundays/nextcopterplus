@@ -67,7 +67,6 @@ int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each
 
 void Calculate_PID(void)
 {
-	static	int16_t	old_z = 0; 				// Historical Z-axis acc value
 	static 	int32_t currentError[3];		// Used with lastError to keep track of D-Terms in PID calculations
 	static	int32_t lastError[3];
 
@@ -315,12 +314,11 @@ void Calculate_PID(void)
 	} // PID loop
 
 	//************************************************************
-	// Calculate a delta-Z value 
+	// Calculate an Acc-Z value 
 	//************************************************************
 
-	PID_acc_temp1 = old_z - accADC[YAW];
+	PID_acc_temp1 = accVert;				// Get absolute Z value
 	PID_acc_temp2 = PID_acc_temp1;
-
 
 	// P1
 	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)
@@ -328,6 +326,10 @@ void Calculate_PID(void)
 	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to a sensible value
 	{
 		PID_acc_temp1 = MAX_ZGAIN;
+	}
+	if (PID_acc_temp1 < -MAX_ZGAIN)
+	{
+		PID_acc_temp1 = -MAX_ZGAIN;
 	}
 
 	// P2
@@ -337,11 +339,12 @@ void Calculate_PID(void)
 	{
 		PID_acc_temp2 = MAX_ZGAIN;
 	}
+	if (PID_acc_temp2 < -MAX_ZGAIN)
+	{
+		PID_acc_temp2 = -MAX_ZGAIN;
+	}
 
 	// Update values
 	PID_ACCs[P1][YAW] = (int16_t)PID_acc_temp1;	
 	PID_ACCs[P2][YAW] = (int16_t)PID_acc_temp2;	
-
-	// Save current acc Z value
-	old_z = accADC[YAW];
 }

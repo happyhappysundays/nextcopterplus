@@ -34,7 +34,7 @@ void Display_status(void);
 void Display_status(void)
 {
 	int16_t temp;
-	uint16_t vbat_temp, free_ram;
+	uint16_t vbat_temp; 
 	int8_t	pos1, pos2, pos3;
 	mugui_size16_t size;
 
@@ -42,36 +42,34 @@ void Display_status(void)
 
 	// Display text
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,0); 		// Version text
-	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,11); 	// RX sync
-	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,22); 	// Profile
-	LCD_Display_Text(132,(prog_uchar*)Verdana8,0,33); 	// Battery
-	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,44); 	// Free RAM
-	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,22); 	// Pos
-	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,22); // transition value
+	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,16); 	// RX sync
+	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,27); 	// Profile
+	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,27); 	// Pos
+	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,38); 	// Battery
 
-//	mugui_lcd_puts(itoa(sine_table,pBuffer,10),(prog_uchar*)Verdana8,90,33); // debug
+	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,27); // transition value
 	
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (62 + Config.RxMode), 45, 11); // Rx mode
+	print_menu_text(0, 1, (62 + Config.RxMode), 45, 16); // Rx mode
 
 	// Display transition point
 	if (Config.TransitionSpeed == 0)
 	{
 		if (transition <= 0)
 		{
-			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(48,(prog_uchar*)Verdana8,45,27);
 		}
 		else if (transition >= 100)
 		{
-			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(50,(prog_uchar*)Verdana8,45,27);
 		}
 		else
 		{
-			LCD_Display_Text(49,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(49,(prog_uchar*)Verdana8,45,27);
 		}
 	}
 	// Use actual transition state to display state
@@ -79,25 +77,21 @@ void Display_status(void)
 	{
 		if (Transition_state == TRANS_P1)
 		{
-			LCD_Display_Text(48,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(48,(prog_uchar*)Verdana8,45,27);
 		}
 		else if (Transition_state == TRANS_P2)
 		{
-			LCD_Display_Text(50,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(50,(prog_uchar*)Verdana8,45,27);
 		}
 		else
 		{
-			LCD_Display_Text(49,(prog_uchar*)Verdana8,42,22);
+			LCD_Display_Text(49,(prog_uchar*)Verdana8,45,27);
 		}
 	}
 
-	// Display unused RAM
-	free_ram = StackCount();
-	mugui_lcd_puts(itoa(free_ram,pBuffer,10),(prog_uchar*)Verdana8,52,33);
-
 	// Display voltage
 	uint8_t x_loc = 45;		// X location of voltage display
-	uint8_t y_loc = 44;		// Y location of voltage display
+	uint8_t y_loc = 38;		// Y location of voltage display
 
 	vbat_temp = GetVbat();
 	temp = vbat_temp/100;	// Display whole decimal part first
@@ -123,7 +117,7 @@ void Display_status(void)
 		mugui_lcd_puts(itoa(vbat_temp,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
 
-	// Draw error messages, if any
+	// Display error messages
 	if (General_error != 0)
 	{
 		// Create message box

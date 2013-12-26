@@ -105,10 +105,12 @@ void Set_EEPROM_Default_Config(void)
 	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
 	Config.AccZero[PITCH]	= 0;
 	Config.AccZero[YAW]		= 0;
+	Config.AccVertZero		= 0;
 #else
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre
+	Config.AccVertZero		= 765;
 #endif
 
 	// Set up all profiles the same initially
