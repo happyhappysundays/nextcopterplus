@@ -75,7 +75,11 @@ void ReadAcc()
 	// Actual zero is held in NormalAccZero waiting for inv calibration
 	if (!(Main_flags & (1 << inv_cal_done)))
 	{
+#ifdef KK21 
+		Config.AccZero[YAW] = 0;
+#else
 		Config.AccZero[YAW] = 643;
+#endif
 	}
 
 	for (i=0;i<3;i++)			// For all axis (RPY)

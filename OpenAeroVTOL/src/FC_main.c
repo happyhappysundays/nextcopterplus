@@ -105,6 +105,7 @@
 // Beta 19	Throttle separated into Monopolar and Bipolar versions. Source list now includes Throttle, Aileron, 
 //			Elevator and Rudder again as a result. Changed Acc delta Z to an Acc P function.
 //			Fixed acc calibration issues. Removed Free RAM display to save space.
+//			Fixed Acc Z initial offset for KK2.1
 //
 //			Release 1.0 candidate.
 //
