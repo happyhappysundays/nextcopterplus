@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 19 - December 2013
+// Version: Beta 20 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -107,6 +107,8 @@
 //			Fixed acc calibration issues. Removed Free RAM display to save space.
 //			Fixed Acc Z initial offset for KK2.1. Added SQRTSINE curve for KK2.1
 //			Updated sine table data for 101 unique values.
+// Beta 20	Reduced Acc-Z gain by 32 and improved noise response.
+//			Fixed broken throttle high alarm
 //
 //			Release 1.0 candidate.
 //
@@ -418,9 +420,14 @@ int main(void)
 		}
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
-		if	(((General_error & (1 << LVA_ALARM)) ||
-			  (General_error & (1 << NO_SIGNAL))) && 
-			  (Alarm_flags & (1 << BUZZER_ON))) 
+		if	(
+			 (
+			  (General_error & (1 << LVA_ALARM)) ||
+			  (General_error & (1 << NO_SIGNAL)) ||
+			  (General_error & (1 << THROTTLE_HIGH))
+			 ) && 
+			  (Alarm_flags & (1 << BUZZER_ON))
+			) 
 		{
 			LVA = 1;
 		}

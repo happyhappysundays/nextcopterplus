@@ -39,13 +39,12 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 19";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 20";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
 const char StatusText5[]  PROGMEM = "0";	
-const char StatusText6[]  PROGMEM = "Free RAM:";
 const char StatusText7[]  PROGMEM = "Battery:";
 const char StatusText8[]  PROGMEM = "Pos:";
 //
@@ -163,7 +162,7 @@ const char MixerItem5[] PROGMEM = "P1 Pitch gyro:";
 const char MixerItem6[] PROGMEM = "P1 Yaw gyro:";
 const char MixerItem7[] PROGMEM = "P1 Roll acc:";
 const char MixerItem3[] PROGMEM = "P1 Pitch acc:";
-const char MixerItem42[] PROGMEM = "P1 Z delta acc:";
+const char MixerItem42[] PROGMEM = "P1 Z acc:";
 const char MixerItem23[] PROGMEM = "P1 Thr. volume:";
 const char MixerItem33[] PROGMEM = "P2 Thr. volume:";
 const char Mixeritem50[] PROGMEM = "Thottle curve";
@@ -180,7 +179,7 @@ const char MixerItem25[] PROGMEM = "P2 Pitch gyro:";
 const char MixerItem26[] PROGMEM = "P2 Yaw gyro:";
 const char MixerItem27[] PROGMEM = "P2 Roll acc:";
 const char MixerItem28[] PROGMEM = "P2 Pitch acc:";
-const char MixerItem43[] PROGMEM = "P2 Z delta acc:";
+const char MixerItem43[] PROGMEM = "P2 Z acc:";
 const char MixerItem29[] PROGMEM = "P2 Source A:";			
 const char MixerItem30[] PROGMEM = "P2 Volume:";
 const char MixerItem31[] PROGMEM = "P2 Source B:";
@@ -351,9 +350,9 @@ const char *text_menu[] PROGMEM =
 		//
 		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,	MixerMenuItem5, MixerMenuItem6,		// 124 to 128 H/V/UD/Aft/Sideways
 		//																
-		Dummy0,Dummy0,Dummy0,																// 129 to 131 Spare
+		Dummy0,Dummy0,Dummy0,Dummy0,														// 129 to 132 Spare
 		//
-		StatusText6,StatusText7,															// 132 - 133 Battery: Free:
+		StatusText7,																		// 133 Battery:
 		//
 		Status3,																			// 134 Battery
 		//
