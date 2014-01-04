@@ -317,13 +317,16 @@ void Calculate_PID(void)
 	// Calculate an Acc-Z value 
 	//************************************************************
 
-	PID_acc_temp1 = accVert;				// Get absolute Z value
+	PID_acc_temp1 = accVert;				// Get and copy Z-acc value
 	PID_acc_temp2 = PID_acc_temp1;
 
-	// P1
 	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)
+	PID_acc_temp2 *= L_gain[P2][YAW];		// Multiply P-term (Max gain of 127)
 
-	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to a sensible value
+	PID_ACCs[P1][YAW] = (int16_t)(PID_acc_temp1 >> 5);	// Moderate Z-acc to reasonable values
+	PID_ACCs[P2][YAW] = (int16_t)(PID_acc_temp2 >> 5);	
+
+	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to +/-MAX_ZGAIN
 	{
 		PID_acc_temp1 = MAX_ZGAIN;
 	}
@@ -332,10 +335,7 @@ void Calculate_PID(void)
 		PID_acc_temp1 = -MAX_ZGAIN;
 	}
 
-	// P2
-	PID_acc_temp2 *= L_gain[P2][YAW];		// Multiply P-term (Max gain of 127)
-
-	if (PID_acc_temp2 > MAX_ZGAIN)			// Limit to a sensible value
+	if (PID_acc_temp2 > MAX_ZGAIN)
 	{
 		PID_acc_temp2 = MAX_ZGAIN;
 	}
@@ -344,7 +344,4 @@ void Calculate_PID(void)
 		PID_acc_temp2 = -MAX_ZGAIN;
 	}
 
-	// Update values
-	PID_ACCs[P1][YAW] = (int16_t)PID_acc_temp1;	
-	PID_ACCs[P2][YAW] = (int16_t)PID_acc_temp2;	
 }
