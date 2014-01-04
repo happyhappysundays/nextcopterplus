@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/pgmspace.h> 
 #include <avr/io.h>
 #include <stdbool.h>
@@ -42,7 +43,7 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = 
 {
-	46,0,0,0,0,0,0,51,
+	46,0,0,0,0,0,0,56,
 	143,143,143,143,143,143,143,143,143,143,143,143,
 	0,0,0,0,0,0,230,0,230,0,230,0,230,0,230,0,230,0
 };
@@ -57,7 +58,11 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,1,0,0},				// P2 Offset (%)
 		{0,125,1,0,100},				// P1 throttle volume (5)
 		{0,125,1,0,100},				// P2 throttle volume
-		{LINEAR,SINE,1,1,LINEAR},		// Throttle curve
+#ifdef KK21
+		{LINEAR,SQRTSINE,1,1,LINEAR},	// Throttle curves for KK2.1
+#else
+		{LINEAR,SINE,1,1,LINEAR},		// Throttle curves for KK2.0
+#endif
 
 		// Mixer ranges
 		{OFF, SCALE,1,1,OFF},			// P1 roll_gyro (8)

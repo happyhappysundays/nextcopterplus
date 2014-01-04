@@ -117,7 +117,7 @@ enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10,
 enum Profiles		{P1 = 0, P2};
 enum Safety			{ARMED = 0, ARMABLE}; 
 enum Devices		{SERVO = 0, MOTOR}; 
-enum Curve			{LINEAR = 0, SINE}; 
+enum Curve			{LINEAR = 0, SINE, SQRTSINE}; 
 
 //***********************************************************
 // Flags

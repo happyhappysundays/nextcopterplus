@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/pgmspace.h> 
 #include <avr/io.h>
 #include <stdbool.h>
@@ -193,6 +194,9 @@ const char MixerItem41[] PROGMEM = "Motor";
 //
 const char MixerItem60[] PROGMEM = "Linear";
 const char MixerItem61[] PROGMEM = "Sine";
+#ifdef KK21
+const char MixerItem62[] PROGMEM = "SqrtSine";
+#endif
 
 const char MixerItem8[] PROGMEM = "Trvl Min(%):";
 const char MixerItem9[] PROGMEM = "Trvl Max(%):";
@@ -295,14 +299,20 @@ const char *text_menu[] PROGMEM =
 		// 
 		P1text, P2text, P3text, 															// 48 to 50 P1, P1.n, P2
 		//
-		MixerItem60, MixerItem61, 															// 51 to 52 Linear, Sine
+		Dummy0, Dummy0, 																	// 51 to 52 Spare
 		//
 		FSmode0, FSmode1, 																	// 53 and 54 
 
 		Random1,  																			// 55 High
 		//
-		Dummy0, Dummy0, 																	// 56 to 59
-		Dummy0, Dummy0, 
+		MixerItem60, MixerItem61, 															// 56 to 59 Linear, Sine, Sqrt Sine
+#ifdef KK21
+		MixerItem62,
+#else
+		Dummy0, 
+#endif		
+		//
+		Dummy0, 
 		//
 		SensorMenuItem1,																	// 60 calibrate
 		//
