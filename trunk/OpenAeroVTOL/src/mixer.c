@@ -739,7 +739,7 @@ void UpdateLimits(void)
 	int8_t gains[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
 			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult},
-			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult}
+			{Config.FlightMode[P2].Roll.I_mult, Config.FlightMode[P2].Pitch.I_mult, Config.FlightMode[P2].Yaw.I_mult}
 		};
 
 	// Update triggers

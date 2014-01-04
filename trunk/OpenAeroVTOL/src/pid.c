@@ -86,7 +86,8 @@ void Calculate_PID(void)
 	int16_t	stick;
 
 	// Cross-ref for actual RCinput elements
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
+	// Note that pitch and yaw are reversed here with respect to their gyros
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], -RCinputs[ELEVATOR], -RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -164,7 +165,7 @@ void Calculate_PID(void)
 		IntegralGyro[P1][axis] += (gyroADC[axis] - stick);
 		IntegralGyro[P2][axis] += (gyroADC[axis] - stick);
 
-		// Reset the I-terms when you need to adjust the I-term with RC
+		// Limit the I-terms when you need to adjust the I-term with RC
 		// Note that the I-term is not constrained when no RC input is present.
 		if (RCinputsAxis[axis] != 0)
 		{
@@ -323,8 +324,8 @@ void Calculate_PID(void)
 	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)
 	PID_acc_temp2 *= L_gain[P2][YAW];		// Multiply P-term (Max gain of 127)
 
-	PID_ACCs[P1][YAW] = (int16_t)(PID_acc_temp1 >> 5);	// Moderate Z-acc to reasonable values
-	PID_ACCs[P2][YAW] = (int16_t)(PID_acc_temp2 >> 5);	
+	PID_acc_temp1 = PID_acc_temp1 >> 5;		// Moderate Z-acc to reasonable values
+	PID_acc_temp2 = PID_acc_temp2 >> 5;	
 
 	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to +/-MAX_ZGAIN
 	{
@@ -343,5 +344,8 @@ void Calculate_PID(void)
 	{
 		PID_acc_temp2 = -MAX_ZGAIN;
 	}
+
+	PID_ACCs[P1][YAW] = (int16_t)PID_acc_temp1; // Copy to global values
+	PID_ACCs[P2][YAW] = (int16_t)PID_acc_temp2;	
 
 }
