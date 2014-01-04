@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <string.h>
 #include <avr/io.h>
 #include <stdbool.h>
@@ -41,16 +42,31 @@ int16_t scale_percent_nooffset(int8_t value);
 
 const int8_t SIN[101] PROGMEM = 
 			{0,2,3,5,6,8,10,11,13,14,
-			16,17,19,20,22,24,25,27,28,30,
-			31,33,34,36,37,39,40,42,43,44,
-			46,47,49,50,51,53,54,55,57,58,
-			59,61,62,63,64,65,67,68,69,70,
-			71,72,73,75,76,77,78,79,80,81,
-			81,82,83,84,85,86,87,87,88,89,
-			90,90,91,92,92,93,93,94,94,95,
-			95,96,96,97,97,98,98,98,98,99,
-			99,99,99,100,100,100,100,100,100,100
-			,100};
+			16,17,19,20,22,23,25,26,28,29,
+			31,32,34,35,37,38,40,41,43,44,
+			45,47,48,50,51,52,54,55,56,58,
+			59,60,61,63,64,65,66,67,68,70,
+			71,72,73,74,75,76,77,78,79,80,
+			81,82,83,84,84,85,86,87,88,88,
+			89,90,90,91,92,92,93,94,94,95,
+			95,96,96,96,97,97,98,98,98,99,
+			99,99,99,99,100,100,100,100,100,100,
+			100};
+
+#ifdef KK21
+const int8_t SQRTSIN[101] PROGMEM = 
+			{0,13,18,22,25,28,31,33,35,38,
+			40,41,43,45,47,48,50,51,53,54,
+			56,57,58,59,61,62,63,64,65,66,
+			67,68,69,70,71,72,73,74,75,76,
+			77,77,78,79,80,81,81,82,83,83,
+			84,85,85,86,87,87,88,88,89,89,
+			90,90,91,91,92,92,93,93,94,94,
+			94,95,95,95,96,96,96,97,97,97,
+			98,98,98,98,98,99,99,99,99,99,
+			99,99,100,100,100,100,100,100,100,100,
+			100};
+#endif
 
 #define	EXT_RC 8 // Offset for indexing RC sources
 
@@ -544,7 +560,8 @@ void ProcessMixer(void)
 					// Multiply [transition] steps (0 to 100)
 					temp3 = temp2 + (Step1 * transition);
 				}
-				else
+#ifdef KK21
+				else if (Config.Channel[i].Throttle_curve == SINE)
 				{
 					// Choose between SINE and COSINE
 					// If P2 less than P1, COSINE (reverse SINE) is the one we want
@@ -566,6 +583,51 @@ void ProcessMixer(void)
 					temp3 = temp2 + (Step1 * temp3);
 				}
 
+				// SQRT SINE
+				else
+				{
+					// Choose between SQRT SINE and SQRT COSINE
+					// If P2 less than P1, COSINE (reverse SINE) is the one we want
+					if (Step1 < 0)
+					{ 
+						// Multiply SQRTSIN[100 - transition] steps (0 to 100)
+						temp3 = 100 - (int8_t)pgm_read_byte(&SQRTSIN[100 - (int8_t)transition]);
+					}
+					// If P2 greater than P1, SINE is the one we want
+					else
+					{
+						// Multiply SQRTSIN[transition] steps (0 to 100)
+						temp3 = (int8_t)pgm_read_byte(&SQRTSIN[(int8_t)transition]);
+					}
+
+					// Get SINE% (temp2) of difference in volumes (Step1)
+					// Step1 is already in 100ths of the difference * 128
+					// temp1 is the start volume * 128
+					temp3 = temp2 + (Step1 * temp3);
+				}
+#else
+				else
+				{
+					// Choose between SINE and COSINE
+					// If P2 less than P1, COSINE (reverse SINE) is the one we want
+					if (Step1 < 0)
+					{ 
+						// Multiply SIN[100 - transition] steps (0 to 100)
+						temp3 = 100 - (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
+					}
+					// If P2 greater than P1, SINE is the one we want
+					else
+					{
+						// Multiply SIN[transition] steps (0 to 100)
+						temp3 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
+					}
+
+					// Get SINE% (temp2) of difference in volumes (Step1)
+					// Step1 is already in 100ths of the difference * 128
+					// temp1 is the start volume * 128
+					temp3 = temp2 + (Step1 * temp3);
+				}
+#endif
 				// Round, then rescale to normal value
 				temp3 = temp3 + 64;
 				temp3 = temp3 >> 7;
