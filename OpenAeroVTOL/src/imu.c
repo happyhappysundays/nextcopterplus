@@ -87,14 +87,14 @@ void UpdateIMUvalues(void);
 
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
+float 	accSmooth[NUMBEROFAXIS];
 
 int16_t	angle[2]; 			// Attitude
 
 void getEstimatedAttitude(void)
 {
-	static float deltaGyroAngle[3] = {0.0f,0.0f,0.0f};
+	static float deltaGyroAngle[NUMBEROFAXIS] = {0.0f,0.0f,0.0f};
 	static uint32_t PreviousTime = 0;
-	static float accSmooth[3];
 
 	float 		deltaTime, tempf;
 	uint32_t 	CurrentTime;
@@ -111,8 +111,8 @@ void getEstimatedAttitude(void)
 		Main_flags &= ~(1 << FirstTimeIMU);
 		PreviousTime = ticker_32;
 		
-		// Reset accumulating variables if Autolevel has been off.
-		for (axis = 0; axis < 3; axis++) 
+		// Reset accumulating variables
+		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 		{	
 			accSmooth[axis] = 0;
 			deltaGyroAngle[axis] = 0;
@@ -127,9 +127,10 @@ void getEstimatedAttitude(void)
 	}
 
 	// Initialization
-	for (axis = 0; axis < 3; axis++) 
+	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
-		if (Config.Acc_LPF > 0)
+		// Only use LPF if requested
+		if (Config.Acc_LPF > 1)
 		{
 			// LPF for ACC values
 			accSmooth[axis] = ((accSmooth[axis] * (Config.Acc_LPF - 1)) + accADC[axis]) / Config.Acc_LPF;

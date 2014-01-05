@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 21 - January 2014
+// Version: Beta 22 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -111,7 +111,8 @@
 //			Fixed broken throttle high alarm
 // Beta 21	Fixed I-term constraint calculation bug. Acc-Z code tweaked.
 //			Stick input into I-term reversed for Yaw and Pitch.
-//
+// Beta 22	Fixed small bug where Acc LPF would not turn off when set to minimum.
+//			Acc-Z now sourced from AccSmooth so is filtered according to ACC LPF
 //
 //			Release 1.0 candidate.
 //

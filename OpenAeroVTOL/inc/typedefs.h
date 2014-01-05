@@ -163,8 +163,8 @@ typedef struct
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
 	// Acc zeros
-	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results
-	int16_t		AccVertZero;			// Acc-Z zero
+	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
+	int16_t		AccVertZero;			// Acc-Z zero for zero-centered Z values
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode

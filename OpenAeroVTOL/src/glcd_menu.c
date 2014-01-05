@@ -39,9 +39,8 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 21";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 22";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
-const char StatusText2[]  PROGMEM = "Battery:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
 const char StatusText5[]  PROGMEM = "0";	
@@ -106,12 +105,6 @@ const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
 //
 const char AutoMenuItem11[] PROGMEM = "OFF";
 const char AutoMenuItem15[] PROGMEM = "ON"; 
-const char AutoMenuItem14[] PROGMEM = "3-pos";
-const char AutoMenuItem12[] PROGMEM = "AutoChan";
-const char AutoMenuItem13[] PROGMEM = "StabChan";
-//
-const char AutoMenuItem17[] PROGMEM = "Hands Free"; 
-const char AutoMenuItem18[] PROGMEM = "Adv. mode:";
 //
 const char RCMenuItem1[]  PROGMEM = "RX sync:";				// RC setup text
 const char RCMenuItem0[]  PROGMEM = "Ch. order:"; 	
@@ -121,7 +114,6 @@ const char StabMenuItem15[]  PROGMEM = "Dyn.Gain:";
 const char RCMenuItem8[]  PROGMEM = "Aileron pol.:";
 const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
 const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
-const char RCMenuItem21[] PROGMEM = "Deadband:";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode2[]  PROGMEM = "S-Bus";
@@ -139,9 +131,6 @@ const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char BattMenuItem2[]  PROGMEM = "Bat. LVA x10:";
-//
-const char AutoMenuItem16[] PROGMEM = "THR.pos %:"; 
-const char AutoMenuItem19[]  PROGMEM = "Delay time:";
 const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-term in Axis-lock mode
 
 //
@@ -152,22 +141,23 @@ const char P2text[] PROGMEM = "P1.n";
 const char P3text[] PROGMEM = "P2";
 //
 // Mixer menu items
-const char MixerItem1[] PROGMEM = "Device:";
+const char MixerItem1[]  PROGMEM = "Device:";
 const char MixerItem36[] PROGMEM = "P1.n Pos. %:";
 const char MixerItem20[] PROGMEM = "P1 Offset:";
 const char MixerItem35[] PROGMEM = "P1.n Offset:";
 const char MixerItem34[] PROGMEM = "P2 Offset:";
-const char MixerItem4[] PROGMEM = "P1 Roll gyro:"; // P1
-const char MixerItem5[] PROGMEM = "P1 Pitch gyro:";
-const char MixerItem6[] PROGMEM = "P1 Yaw gyro:";
-const char MixerItem7[] PROGMEM = "P1 Roll acc:";
-const char MixerItem3[] PROGMEM = "P1 Pitch acc:";
+//
+const char MixerItem4[]  PROGMEM = "P1 Roll gyro:"; // P1
+const char MixerItem5[]  PROGMEM = "P1 Pitch gyro:";
+const char MixerItem6[]  PROGMEM = "P1 Yaw gyro:";
+const char MixerItem7[]  PROGMEM = "P1 Roll acc:";
+const char MixerItem3[]  PROGMEM = "P1 Pitch acc:";
 const char MixerItem42[] PROGMEM = "P1 Z acc:";
 const char MixerItem23[] PROGMEM = "P1 Thr. volume:";
 const char MixerItem33[] PROGMEM = "P2 Thr. volume:";
 const char Mixeritem50[] PROGMEM = "Thottle curve";
-const char MixerItem0[] PROGMEM = "P1 Source A:";			
-const char MixerItem2[] PROGMEM = "P1 Volume:";
+const char MixerItem0[]  PROGMEM = "P1 Source A:";			
+const char MixerItem2[]  PROGMEM = "P1 Volume:";
 const char MixerItem21[] PROGMEM = "P1 Source B:";
 const char MixerItem22[] PROGMEM = "P1 Source C:";
 const char MixerItem51[] PROGMEM = "P1 Ail. volume:";
@@ -190,17 +180,11 @@ const char MixerItem56[] PROGMEM = "P2 Rud. volume:";
 //
 const char MixerItem40[] PROGMEM = "Servo";
 const char MixerItem41[] PROGMEM = "Motor";
-//
 const char MixerItem60[] PROGMEM = "Linear";
 const char MixerItem61[] PROGMEM = "Sine";
 #ifdef KK21
 const char MixerItem62[] PROGMEM = "SqrtSine";
 #endif
-
-const char MixerItem8[] PROGMEM = "Trvl Min(%):";
-const char MixerItem9[] PROGMEM = "Trvl Max(%):";
-const char MixerItem16[] PROGMEM = "Trim(%):";
-const char MixerItem19[] PROGMEM = "Reverse:";
 //
 const char ChannelRef0[] PROGMEM = "Throttle";				// RC channel text
 const char ChannelRef1[] PROGMEM = "Aileron"; 
@@ -247,9 +231,6 @@ const char MOUT6[] PROGMEM = "OUT6";
 const char MOUT7[] PROGMEM = "OUT7";	
 const char MOUT8[] PROGMEM = "OUT8";	
 //
-const char FSmode0[]  PROGMEM = "Fixed";
-const char FSmode1[]  PROGMEM = "Adv.";
-//
 const char MixerMenuItem2[]  PROGMEM = "Forward";			// Orientation
 const char MixerMenuItem3[]  PROGMEM = "Vertical";
 const char MixerMenuItem4[]  PROGMEM = "Inverted";
@@ -288,7 +269,7 @@ const char *text_menu[] PROGMEM =
 		//
 		SensorMenuItem2,																	// Inv.Cal. 37
 		//
-		AutoMenuItem11,AutoMenuItem15, AutoMenuItem17, 										// 38 to 40  Flight modes 
+		Dummy0,Dummy0,Dummy0,																// 38 to 40  Spare
 		//
 		ChannelRef10, ChannelRef12, Dummy0, 												// 41 to 43
 		//
@@ -298,10 +279,8 @@ const char *text_menu[] PROGMEM =
 		// 
 		P1text, P2text, P3text, 															// 48 to 50 P1, P1.n, P2
 		//
-		Dummy0, Dummy0, 																	// 51 to 52 Spare
+		Dummy0, Dummy0, Dummy0, Dummy0,														// 51 to 54 Spare
 		//
-		FSmode0, FSmode1, 																	// 53 and 54 
-
 		Random1,  																			// 55 High
 		//
 		MixerItem60, MixerItem61, 															// 56 to 59 Linear, Sine, Sqrt Sine
@@ -321,7 +300,7 @@ const char *text_menu[] PROGMEM =
 		//
 		Dummy0, Dummy0, Dummy0, Dummy0,														// 68 to 71 Spare 
 		//
-		ErrorText0, ErrorText10, GeneralText5, ErrorText3,	ErrorText4,						// 72 to 76 Error messages
+		ErrorText0, ErrorText10, Dummy0, ErrorText3,	ErrorText4,							// 72 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem7, MainMenuItem9, MainMenuItem2, 
 		MainMenuItem3, MainMenuItem8, MainMenuItem10,  										// 77 to 96 Main menu
