@@ -20,6 +20,7 @@
 #include "main.h"
 #include "i2c.h"
 #include "MPU6050.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -68,8 +69,10 @@ void ReadAcc()
 
 	get_raw_accs();				// Updates accADC[] (RPY)
 
-	// Recalculate current accVert
-	accVert = accADC[YAW] - Config.AccVertZero;
+	// Recalculate current accVert using filtered acc value
+	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
+	// that here so that Config.AccVertZero subtracts the correct amount
+	 accVert = accSmooth[YAW] - Config.AccVertZero + Config.AccZero[YAW];
 
 	// Use default zero for Acc-Z if inverse calibration not done yet
 	// Actual zero is held in NormalAccZero waiting for inv calibration
