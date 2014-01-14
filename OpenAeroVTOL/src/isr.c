@@ -100,86 +100,77 @@ ISR(PCINT1_vect)
 // NB: Raw CPPM channel order (0,1,2,3,4,5,6,7) is 
 // mapped via Config.ChannelOrder[]. Actual channel values are always
 // in the sequence THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3
+//
+// Compacted CPPM RX code thanks to Edgar
+//
 //************************************************************
 
 ISR(INT2_vect)
 {
+    uint16_t tCount;
+	uint8_t curChannel;
+	uint8_t prevChannel;
+
+    // Backup TCNT1
+    tCount = TCNT1;
+
 	if (Config.RxMode != CPPM_MODE)
 	{
 		if (RX_YAW)	// Rising
 		{
-			RxChannelStart[RUDDER] = TCNT1;
+			RxChannelStart[RUDDER] = tCount;
 		} 
 		else 
-		{				// Falling
-			RxChannel[RUDDER] = TCNT1 - RxChannelStart[RUDDER];
+		{			// Falling
+			RxChannel[RUDDER] = tCount - RxChannelStart[RUDDER];
 			if (Config.RxMode == PWM1) 
 			{
 				Interrupted = true;						// Signal that interrupt block has finished
 			}
 		}
 	}
+	// CPPM code
 	else
 	{
 		// Only respond to negative-going interrupts
 		if (CPPM) return;
-		// Check to see if previous period was a sync pulse
-		// If so, reset channel number
-		if ((TCNT1 - PPMSyncStart) > SYNCPULSEWIDTH) ch_num = 0;
 
-		// Check to see if previous period was too small to be valid
-		// If so, reset channel number
-		if ((TCNT1 - PPMSyncStart) < MINPULSEWIDTH) ch_num = 0;
-
-		PPMSyncStart = TCNT1;
-		switch(ch_num)
+		// Check to see if previous period was a sync pulse or too small to be valid
+		// If so, reset the channel number
+		if (((tCount - PPMSyncStart) > SYNCPULSEWIDTH) || ((tCount - PPMSyncStart) < MINPULSEWIDTH))
 		{
-			case 0:
-				RxChannelStart[Config.ChannelOrder[0]] = TCNT1;
-				ch_num++;
-				break;
-			case 1:
-				RxChannelStart[Config.ChannelOrder[1]] = TCNT1;
-				RxChannel[Config.ChannelOrder[0]] = TCNT1 - RxChannelStart[Config.ChannelOrder[0]];
-				ch_num++;
-				break;
-			case 2:
-				RxChannelStart[Config.ChannelOrder[2]] = TCNT1;
-				RxChannel[Config.ChannelOrder[1]] = TCNT1 - RxChannelStart[Config.ChannelOrder[1]];
-				ch_num++;
-				break;
-			case 3:
-				RxChannelStart[Config.ChannelOrder[3]] = TCNT1;
-				RxChannel[Config.ChannelOrder[2]] = TCNT1 - RxChannelStart[Config.ChannelOrder[2]];
-				ch_num++;
-				break;
-			case 4:
-				RxChannelStart[Config.ChannelOrder[4]] = TCNT1;
-				RxChannel[Config.ChannelOrder[3]] = TCNT1 - RxChannelStart[Config.ChannelOrder[3]];
-				ch_num++;
-				break;
-			case 5:
-				RxChannelStart[Config.ChannelOrder[5]] = TCNT1;
-				RxChannel[Config.ChannelOrder[4]] = TCNT1 - RxChannelStart[Config.ChannelOrder[4]];
-				ch_num++;
-				break;
-			case 6:
-				RxChannelStart[Config.ChannelOrder[6]] = TCNT1;
-				RxChannel[Config.ChannelOrder[5]] = TCNT1 - RxChannelStart[Config.ChannelOrder[5]];
-				ch_num++;
-				break;
-			case 7:
-				RxChannelStart[Config.ChannelOrder[7]] = TCNT1;
-				RxChannel[Config.ChannelOrder[6]] = TCNT1 - RxChannelStart[Config.ChannelOrder[6]];
-				ch_num++;
-				break;
-			case 8:
-				RxChannel[Config.ChannelOrder[7]] = TCNT1 - RxChannelStart[Config.ChannelOrder[7]];
-				ch_num++;
-				break;
-			default:
-				break;
-		} // Switch
+			ch_num = 0;
+		}
+
+		// Update PPMSyncStart with current value
+		PPMSyncStart = tCount;
+
+		// Get the channel number of the current channel in the requested channel order
+        curChannel = Config.ChannelOrder[ch_num];
+
+		// Set up previous channel number based on the requested channel order
+		if (ch_num > 0)
+		{
+			prevChannel = Config.ChannelOrder[ch_num-1];
+		}
+		else
+		{
+			prevChannel = 0;
+		}
+
+		// Measure the channel data
+        if (ch_num < MAX_RC_CHANNELS)
+		{
+            RxChannelStart[curChannel] = tCount;
+		}
+
+        if (ch_num > 0)
+        {
+		   RxChannel[prevChannel] = tCount - RxChannelStart[prevChannel];
+		}
+
+        // Increment to the next channel
+		ch_num++;
 
 		// Work out the highest channel number automagically
 		// Update the maximum channel seen so far

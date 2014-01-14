@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 22 - January 2014
+// Version: Beta 27 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -35,7 +35,7 @@
 // Alpha 2	Fixed bug where the output mixer switcher channel was screwing up the gyro signal distribution.
 // Alpha 3	Fixed all the missing "const" that annoy some compilers. 
 // Alpha 4	Fixed partial transition and offset bugs. Also fixed case where power up state is wrong. 
-// Beta 1	Changed flying wing mixing to the output mixers.
+// Beta 0	Changed flying wing mixing to the output mixers.
 //			Removed Source Mix setting that confused everyone. Also removed RC input Source B mixing
 //			as this is best done in the output mixers now. Dynamic gain effect reversed. Now max input
 //			is maximum stability. Decoupled stick and gyro for P gain.
@@ -113,7 +113,17 @@
 //			Stick input into I-term reversed for Yaw and Pitch.
 // Beta 22	Fixed small bug where Acc LPF would not turn off when set to minimum.
 //			Acc-Z now sourced from AccSmooth so is filtered according to ACC LPF
-//
+// Beta 23	Balance meter uses AccSmooth, so now shows an approximation of the Acc LPF. 
+//			Going into any menu disarms the system. Min/Max travel and gyro limits now incrementable by 1.
+// Beta 24	Changed lock rate back to Beta 15 values and reset range to accommodate.
+// Beta 25	Tweaked transition switch trigger points. Better rounding in Acc LPF calculation.
+//			Tidied up IMU multiplies to make sure there were no casting gotchas.
+//			Doubled the strength of the Acc Z signal. Saved code space in the CPPM section thanks to Edgar.
+//			Source C removed. Source A/B can now also select R/P/Y gyros and R/P accs.
+//			Added Yaw gyro trim to flight profiles. 
+// Beta 26	Added SQRTSINE curve for KK2.0 also. Source A/B accs now from accSmooth.
+// Beta 27	Halved the accSmooth feedback. Trialling a per-channel 3-point transition curve for KK2.1
+//			Unfortunately that means removing the SQRTSINE curve for KK2.0 also.
 //			Release 1.0 candidate.
 //
 //***********************************************************
@@ -121,9 +131,6 @@
 //***********************************************************
 //
 // Bugs:
-//
-// Tested:
-//
 //
 //***********************************************************
 //* Includes
@@ -170,8 +177,6 @@
 #define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 41667
 #define	SERVO_RATE_LOW 390			// Requested servo rate when in Normal mode. 19531 / 50(Hz) = 390
-
-#define REFRESH_TIMEOUT 39060		// Amount of time to wait after last RX activity before refreshing LCD (2 seconds)
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
@@ -201,6 +206,9 @@ char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
 char sBuffer[SBUFFER_SIZE];			// Serial buffer (25 bytes)
 
 // Transition matrix
+// Usage: Transition_state = Trans_Matrix[Config.FlightSel][old_flight]
+// Config.FlightSel is where you've been asked to go, and old_flight is where you were.
+// Transition_state is where you end up :)
 const int8_t Trans_Matrix[3][3] PROGMEM = 	
 	{
 		{TRANSITIONING, TRANS_P1n_to_P1_start, TRANS_P2_to_P1_start},
@@ -338,6 +346,9 @@ int main(void)
 			// In MENU mode, 
 			case MENU:
 				LVA = 0;	// Make sure buzzer is off :)
+				// Disarm the FC
+				General_error |= (1 << DISARMED);
+				// Start the menu system
 				menu_main();
 				// Force resync on next RC packet
 				Interrupted = false;
@@ -366,7 +377,7 @@ int main(void)
 			Status_timeout = 0;
 		}
 
-		// Update status provided no RX activity for REFRESH_TIMEOUT seconds (1s)
+		// Update status timer
 		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
 
@@ -550,13 +561,13 @@ int main(void)
 		//* The transition will hold at P1n position if directed to
 		//************************************************************
 
-		// P2 transition point hard-coded to 90% above center
-		if 	(RCinputs[Config.FlightChan] > 900)
+		// P2 transition point hard-coded to 50% above center
+		if 	(RCinputs[Config.FlightChan] > 500)
 		{
 			Config.FlightSel = 2;			// Flight mode 2 (P2)
 		}
-		// P1.n transition point hard-coded to 20% below center
-		else if (RCinputs[Config.FlightChan] > -200)
+		// P1.n transition point hard-coded to 50% below center
+		else if (RCinputs[Config.FlightChan] > -500)
 		{
 			Config.FlightSel = 1;			// Flight mode 1 (P1.n)
 		}

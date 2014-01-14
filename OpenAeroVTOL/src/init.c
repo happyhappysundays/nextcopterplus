@@ -111,11 +111,6 @@ void init(void)
 	//***********************************************************
 	// Timers
 	//***********************************************************
-	// Timer0 (8bit) - run @ 20MHz (50ns) - max 12.8us
-	// Fast timer for small, precise interval timing
-	TCCR0A = 0;								// Normal operation
-	TCCR0B = (1 << CS00);					// Clk / 1 = 20MHz = 50ns
-	TIMSK0 = 0; 							// No interrupts
 
 	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	// Used to measure Rx Signals & control ESC/servo output rate

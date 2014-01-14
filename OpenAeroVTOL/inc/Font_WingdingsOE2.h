@@ -30,7 +30,7 @@ const unsigned char Wingdings[] PROGMEM =
 	0x05,	// Number of Bitmaps 
 	0xD,	// Height 
 
-	// Bitmap Index (number of index entries 18)
+	// Bitmap Index (number of index entries 5)
  	0x0, 0x0F, // Index 0 (offset: 15)
 	0x0, 0x22, // Index 1 (offset: 15 + 19 = 34)
 	0x0, 0x33, // Index 2 (offset: 34 + 17 = 51)
