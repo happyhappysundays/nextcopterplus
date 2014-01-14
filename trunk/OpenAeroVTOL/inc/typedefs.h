@@ -39,19 +39,23 @@ typedef struct
 	int16_t		P1_value;				// Current value of this channel at P1
 	int16_t		P2_value;				// Current value of this channel at P2
 	
-	// Mixer menu (29 bytes, 38 items)
+	// Mixer menu (27 bytes, 36 items)
+	int8_t		P1n_position_t;			// Position of P1.n for this output
+	int8_t		P1n_percentage;			// P1.n value for this output
+	//
 	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1_offset;				// P1 Offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
 	int8_t		P2_offset;				// P2 Offset for this output
+	//
 	int8_t		P1_throttle_volume;		// Percentage of throttle to use in P1
 	int8_t		P2_throttle_volume;		// Percentage of throttle to use in P2
 	int8_t		Throttle_curve;			// Throttle transition curve (Linear, Sine)
 
 	int8_t		P1_sensors;				// Sensor switches (6), motor marker (1)
 	int8_t		P2_sensors;				// Sensor switches (6)
-	int8_t		P1_scale;				// P1 sensor scale flags (5)
-	int8_t		P2_scale;				// P2 sensor scale flags (5)
+	int8_t		P1_scale;				// P1 sensor scale flags (6)
+	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
 	int8_t		P1_aileron_volume;		// Percentage of aileron to use in P1
 	int8_t		P2_aileron_volume;		// Percentage of aileron to use in P2
@@ -68,10 +72,6 @@ typedef struct
 	int8_t		P1_source_b_volume;		// Percentage of source to use
 	int8_t		P2_source_b;			// Source B for calculation
 	int8_t		P2_source_b_volume;		// Percentage of source to use
-	int8_t		P1_source_c;			// Source C for calculation
-	int8_t		P1_source_c_volume;		// Percentage of source to use
-	int8_t		P2_source_c;			// Source C for calculation
-	int8_t		P2_source_c_volume;		// Percentage of source to use
 
 } channel_t;
 
@@ -97,6 +97,7 @@ typedef struct
 	PID_mult_t	Yaw;
 	int8_t		Yaw_limit;
 	int8_t		A_Zed_P_mult;
+	int8_t		Yaw_trim;
 } flight_control_t;
 
 // Settings structure

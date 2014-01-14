@@ -20,6 +20,7 @@
 #include "acc.h"
 #include "menu_ext.h"
 #include "adc.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -39,6 +40,13 @@ void Display_balance(void)
 	while(BUTTON1 != 0)
 	{
 		ReadAcc();
+
+
+		// Refresh accSmooth values
+		// Note that because it takes 4.096ms to refresh the whole GLCD this loop cannot run 
+		// faster than 244Hz, but that's close enough to the actual loop time so that the 
+		// actual Acc LPF effect is closely mirrored on the balance meter.
+		getEstimatedAttitude(); 
 
 		// HORIZONTAL: 	Pitch = X, Roll = Y
 		// UPSIDEDOWN:	Pitch = X, Roll = Y
@@ -61,11 +69,11 @@ void Display_balance(void)
 		// related to the KK2.0, not the model.
 		// For some reason, pitch has to be reversed on he KK2.1
 #ifdef KK21
-		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * -accADC[pitch_axis]) + 32;
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * -accSmooth[pitch_axis]) + 32;
 #else
-		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accADC[pitch_axis]) + 32;
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accSmooth[pitch_axis]) + 32;
 #endif
-		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accADC[roll_axis]) + 64;
+		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accSmooth[roll_axis]) + 64;
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
@@ -82,8 +90,12 @@ void Display_balance(void)
 		drawline(buffer, 32, 32, 96, 32, 1); 
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
+		// Debug - show IMU angles
+		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,15);
+		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,25);
+
+		// Refresh GLCD 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-		_delay_ms(20);
 	}
 }

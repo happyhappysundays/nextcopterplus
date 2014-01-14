@@ -70,20 +70,20 @@ void Calculate_PID(void)
 	static 	int32_t currentError[3];		// Used with lastError to keep track of D-Terms in PID calculations
 	static	int32_t lastError[3];
 
-	int16_t DifferentialGyro1;				// Holds difference between last two errors (angular acceleration)
-	int16_t DifferentialGyro2;
-	int16_t Differential;
-	int32_t PID_gyro_temp1;					// P1
-	int32_t PID_gyro_temp2;					// P2
+	int16_t DifferentialGyro1 = 0;			// Holds difference between last two errors (angular acceleration)
+	int16_t DifferentialGyro2 = 0;
+	int16_t Differential = 0;
+	int32_t PID_gyro_temp1 = 0;				// P1
+	int32_t PID_gyro_temp2 = 0;				// P2
 	int32_t PID_acc_temp1 = 0;				// P1
 	int32_t PID_acc_temp2 = 0;				// P2
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
 	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
 	int32_t mult32 = 0;
-	int32_t PID_Gyros_32;
-	int8_t	axis;
-	int16_t	stick;
+	int32_t PID_Gyros_32 = 0;
+	int8_t	axis = 0;
+	int16_t	stick = 0;
 
 	// Cross-ref for actual RCinput elements
 	// Note that pitch and yaw are reversed here with respect to their gyros
@@ -150,16 +150,9 @@ void Calculate_PID(void)
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 
-		// Work out stick rate divider/multiplier
-		// /16 (10), /8 (20), /4 (40), /2 (80), *1 (160), *2 (320), *4 (640)
-		if (Config.Stick_Lock_rate <= 4)
-		{
-			stick = RCinputsAxis[axis] >> (4 - Config.Stick_Lock_rate);
-		}
-		else
-		{
-			stick = RCinputsAxis[axis] << (Config.Stick_Lock_rate - 4);
-		}
+		// Work out stick rate divider. 0 is fastest, 4 is slowest.
+		// /64 (15), /32 (30), /16 (60*), /8 (120), /4 (240)
+		stick = RCinputsAxis[axis] >> (Config.Stick_Lock_rate + 2);
 
 		// Calculate I-term from gyro and stick data 
 		IntegralGyro[P1][axis] += (gyroADC[axis] - stick);
@@ -189,11 +182,21 @@ void Calculate_PID(void)
 		}
 
 		//************************************************************
+		// Add in gyro Yaw trim
+		//************************************************************
+
+		if (axis == YAW)
+		{
+			PID_gyro_temp1 = (int32_t)(Config.FlightMode[P1].Yaw_trim << 4);
+			PID_gyro_temp2 = (int32_t)(Config.FlightMode[P2].Yaw_trim << 4);
+		}
+
+		//************************************************************
 		// Calculate PID gains
 		//************************************************************
 
 		// Gyro P-term													// Profile P1
-		PID_gyro_temp1 = gyroADC[axis] * P_gain[P1][axis];				// Multiply P-term (Max gain of 127)
+		PID_gyro_temp1 += gyroADC[axis] * P_gain[P1][axis];				// Multiply P-term (Max gain of 127)
 		PID_gyro_temp1 = PID_gyro_temp1 * (int32_t)3;					// Multiply by 3
 
 		// Gyro I-term
@@ -207,7 +210,7 @@ void Calculate_PID(void)
 		DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
 
 		// Gyro P-term
-		PID_gyro_temp2 = gyroADC[axis] * P_gain[P2][axis];				// Profile P2
+		PID_gyro_temp2 += gyroADC[axis] * P_gain[P2][axis];				// Profile P2
 		PID_gyro_temp2 = PID_gyro_temp2 * (int32_t)3;
 
 		// Gyro I-term
@@ -324,8 +327,8 @@ void Calculate_PID(void)
 	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)
 	PID_acc_temp2 *= L_gain[P2][YAW];		// Multiply P-term (Max gain of 127)
 
-	PID_acc_temp1 = PID_acc_temp1 >> 5;		// Moderate Z-acc to reasonable values
-	PID_acc_temp2 = PID_acc_temp2 >> 5;	
+	PID_acc_temp1 = PID_acc_temp1 >> 4;		// Moderate Z-acc to reasonable values
+	PID_acc_temp2 = PID_acc_temp2 >> 4;	
 
 	if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to +/-MAX_ZGAIN
 	{
@@ -347,5 +350,4 @@ void Calculate_PID(void)
 
 	PID_ACCs[P1][YAW] = (int16_t)PID_acc_temp1; // Copy to global values
 	PID_ACCs[P2][YAW] = (int16_t)PID_acc_temp2;	
-
 }

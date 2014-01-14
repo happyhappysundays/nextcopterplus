@@ -33,8 +33,8 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 38	// Number of mixer menu items
-#define MIXERSTART 192 	// Start of Menu text items
+#define MIXERITEMS 36	// Number of mixer menu items
+#define MIXERSTART 190 	// Start of Menu text items
 #define MIXOFFSET  89	// Value offsets
 
 //************************************************************
@@ -43,29 +43,30 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = 
 {
-	46,0,0,0,0,0,0,56,
-	143,143,143,143,143,143,143,143,143,143,143,143,
-	0,0,0,0,0,0,230,0,230,0,230,0,230,0,230,0,230,0
+	46,0,0,0,0,0,0,0,0,56,					// Motor control and offsets (10)
+	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
+	0,0,0,0,0,0,230,0,230,0,230,0,230,0		// Sources (14)
 };
 
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
 {
-		// Motor control
+		// Motor control and offsets
 		{SERVO,MOTOR,1,1,SERVO},		// Motor marker (0)
+		{1,99,1,0,50},					// Position of P1.n for this output
+		{1,99,1,0,50},					// P1.n value for this output
 		{1,99,1,0,50},					// P1.n Position (%)
 		{-125,125,1,0,0},				// P1 Offset (%)
 		{-125,125,1,0,0},				// P1.n Offset (%)
 		{-125,125,1,0,0},				// P2 Offset (%)
-		{0,125,1,0,100},				// P1 throttle volume (5)
+		{0,125,1,0,100},				// P1 throttle volume 
 		{0,125,1,0,100},				// P2 throttle volume
 #ifdef KK21
 		{LINEAR,SQRTSINE,1,1,LINEAR},	// Throttle curves for KK2.1
 #else
 		{LINEAR,SINE,1,1,LINEAR},		// Throttle curves for KK2.0
 #endif
-
 		// Mixer ranges
-		{OFF, SCALE,1,1,OFF},			// P1 roll_gyro (8)
+		{OFF, SCALE,1,1,OFF},			// P1 roll_gyro (12)
 		{OFF, SCALE,1,1,OFF},			// P2 roll_gyro
 		{OFF, SCALE,1,1,OFF},			// P1 pitch_gyro
 		{OFF, SCALE,1,1,OFF},			// P2 pitch_gyro
@@ -79,7 +80,7 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{OFF, SCALE,1,1,OFF},			// P2 Z_delta_acc
 
 		// Sources
-		{-125,125,1,0,0},				// P1 Aileron volume (20)
+		{-125,125,1,0,0},				// P1 Aileron volume (14)
 		{-125,125,1,0,0},				// P2 Aileron volume
 		{-125,125,1,0,0},				// P1 Elevator volume
 		{-125,125,1,0,0},				// P2 Elevator volume
@@ -93,10 +94,6 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,1,0,0},				// P1 Source B volume
 		{SRC1,NOMIX,1,1,NOMIX},			// P2 Source B
 		{-125,125,1,0,0},				// P2 Source B volume
-		{SRC1,NOMIX,1,1,NOMIX},			// P1 Source C
-		{-125,125,1,0,0},				// P1 Source C volume
-		{SRC1,NOMIX,1,1,NOMIX},			// P2 Source C
-		{-125,125,1,0,0},				// P2 Source C volume
 };
 
 //************************************************************
@@ -137,40 +134,6 @@ void menu_mixer(uint8_t i)
 		{
 			if ((Config.Channel[i].P1_scale & (1 << RollScale)) != 0)
 			{	
-				values[8] = SCALE;
-			}
-			else
-			{
-				values[8] = ON;
-			}
-		}
-		else
-		{
-			values[8] = OFF;
-		}
-
-		// P2 roll gyro
-		if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0)
-		{
-			if ((Config.Channel[i].P2_scale & (1 << RollScale)) != 0)
-			{	
-				values[9] = SCALE;
-			}
-			else
-			{
-				values[9] = ON;
-			}
-		}
-		else
-		{
-			values[9] = OFF;
-		}
-
-		// P1 pitch gyro
-		if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
-		{
-			if ((Config.Channel[i].P1_scale & (1 << PitchScale)) != 0)
-			{	
 				values[10] = SCALE;
 			}
 			else
@@ -183,10 +146,10 @@ void menu_mixer(uint8_t i)
 			values[10] = OFF;
 		}
 
-		// P2 pitch gyro
-		if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
+		// P2 roll gyro
+		if ((Config.Channel[i].P2_sensors & (1 << RollGyro)) != 0)
 		{
-			if ((Config.Channel[i].P2_scale & (1 << PitchScale)) != 0)
+			if ((Config.Channel[i].P2_scale & (1 << RollScale)) != 0)
 			{	
 				values[11] = SCALE;
 			}
@@ -200,10 +163,10 @@ void menu_mixer(uint8_t i)
 			values[11] = OFF;
 		}
 
-		// P1 yaw_gyro
-		if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
+		// P1 pitch gyro
+		if ((Config.Channel[i].P1_sensors & (1 << PitchGyro)) != 0)
 		{
-			if ((Config.Channel[i].P1_scale & (1 << YawScale)) != 0)
+			if ((Config.Channel[i].P1_scale & (1 << PitchScale)) != 0)
 			{	
 				values[12] = SCALE;
 			}
@@ -217,10 +180,10 @@ void menu_mixer(uint8_t i)
 			values[12] = OFF;
 		}
 
-		// P2 yaw gyro
-		if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
+		// P2 pitch gyro
+		if ((Config.Channel[i].P2_sensors & (1 << PitchGyro)) != 0)
 		{
-			if ((Config.Channel[i].P2_scale & (1 << YawScale)) != 0)
+			if ((Config.Channel[i].P2_scale & (1 << PitchScale)) != 0)
 			{	
 				values[13] = SCALE;
 			}
@@ -234,10 +197,10 @@ void menu_mixer(uint8_t i)
 			values[13] = OFF;
 		}
 
-		// P1 roll acc
-		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
+		// P1 yaw_gyro
+		if ((Config.Channel[i].P1_sensors & (1 << YawGyro)) != 0)
 		{
-			if ((Config.Channel[i].P1_scale & (1 << AccRollScale)) != 0)
+			if ((Config.Channel[i].P1_scale & (1 << YawScale)) != 0)
 			{	
 				values[14] = SCALE;
 			}
@@ -251,10 +214,10 @@ void menu_mixer(uint8_t i)
 			values[14] = OFF;
 		}
 
-		// P2 roll acc
-		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
+		// P2 yaw gyro
+		if ((Config.Channel[i].P2_sensors & (1 << YawGyro)) != 0)
 		{
-			if ((Config.Channel[i].P2_scale & (1 << AccRollScale)) != 0)
+			if ((Config.Channel[i].P2_scale & (1 << YawScale)) != 0)
 			{	
 				values[15] = SCALE;
 			}
@@ -268,10 +231,10 @@ void menu_mixer(uint8_t i)
 			values[15] = OFF;
 		}
 
-		// P1 pitch acc
-		if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
+		// P1 roll acc
+		if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0)
 		{
-			if ((Config.Channel[i].P1_scale & (1 << AccPitchScale)) != 0)
+			if ((Config.Channel[i].P1_scale & (1 << AccRollScale)) != 0)
 			{	
 				values[16] = SCALE;
 			}
@@ -285,10 +248,10 @@ void menu_mixer(uint8_t i)
 			values[16] = OFF;
 		}
 
-		// P2 pitch acc
-		if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
+		// P2 roll acc
+		if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0)
 		{
-			if ((Config.Channel[i].P2_scale & (1 << AccPitchScale)) != 0)
+			if ((Config.Channel[i].P2_scale & (1 << AccRollScale)) != 0)
 			{	
 				values[17] = SCALE;
 			}
@@ -302,10 +265,10 @@ void menu_mixer(uint8_t i)
 			values[17] = OFF;
 		}
 
-		// P1 Z delta acc
-		if ((Config.Channel[i].P1_sensors & (1 << ZDeltaAcc)) != 0)
+		// P1 pitch acc
+		if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
 		{
-			if ((Config.Channel[i].P1_scale & (1 << AccZScale)) != 0)
+			if ((Config.Channel[i].P1_scale & (1 << AccPitchScale)) != 0)
 			{	
 				values[18] = SCALE;
 			}
@@ -319,10 +282,10 @@ void menu_mixer(uint8_t i)
 			values[18] = OFF;
 		}
 
-		// P2 Z delta acc
-		if ((Config.Channel[i].P2_sensors & (1 << ZDeltaAcc)) != 0)
+		// P2 pitch acc
+		if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
 		{
-			if ((Config.Channel[i].P2_scale & (1 << AccZScale)) != 0)
+			if ((Config.Channel[i].P2_scale & (1 << AccPitchScale)) != 0)
 			{	
 				values[19] = SCALE;
 			}
@@ -336,10 +299,44 @@ void menu_mixer(uint8_t i)
 			values[19] = OFF;
 		}
 
+		// P1 Z delta acc
+		if ((Config.Channel[i].P1_sensors & (1 << ZDeltaAcc)) != 0)
+		{
+			if ((Config.Channel[i].P1_scale & (1 << AccZScale)) != 0)
+			{	
+				values[20] = SCALE;
+			}
+			else
+			{
+				values[20] = ON;
+			}
+		}
+		else
+		{
+			values[20] = OFF;
+		}
+
+		// P2 Z delta acc
+		if ((Config.Channel[i].P2_sensors & (1 << ZDeltaAcc)) != 0)
+		{
+			if ((Config.Channel[i].P2_scale & (1 << AccZScale)) != 0)
+			{	
+				values[21] = SCALE;
+			}
+			else
+			{
+				values[21] = ON;
+			}
+		}
+		else
+		{
+			values[21] = OFF;
+		}
+
 		// Assemble remaining byte data for P1 offset to throttle curve into array
-		memcpy(&values[1],&Config.Channel[i].P1n_position, 7);
+		memcpy(&values[1],&Config.Channel[i].P1n_position_t, 9);
 		// Assemble remaining byte data for P1_aileron_volume to P2_source_c_volume into array
-		memcpy(&values[20],&Config.Channel[i].P1_aileron_volume, 18);
+		memcpy(&values[22],&Config.Channel[i].P1_aileron_volume, 18);
 
 		// Print menu
 		print_menu_items(mix_top, MIXERSTART, value_ptr, 1, (prog_uchar*)mixer_menu_ranges, 0, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
@@ -355,9 +352,9 @@ void menu_mixer(uint8_t i)
 		}
 
 		// Save modified byte data for P1 offset to throttle curve back to Config
-		memcpy(&Config.Channel[i].P1n_position,&values[1], 7);
+		memcpy(&Config.Channel[i].P1n_position_t,&values[1], 9);
 		// Save modified byte data for P1_source_a to P2_source_c_volume back to Config
-		memcpy(&Config.Channel[i].P1_aileron_volume,&values[20], 18);
+		memcpy(&Config.Channel[i].P1_aileron_volume,&values[22], 18);
 
 		// Clear flags before reconstruction
 		Config.Channel[i].P1_sensors = 0;
@@ -376,7 +373,7 @@ void menu_mixer(uint8_t i)
 		}
 
 		// P1 roll gyro
-		switch (values[8])
+		switch (values[10])
 		{
 			case OFF:
 				break;
@@ -387,7 +384,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 roll gyro
-		switch (values[9])
+		switch (values[11])
 		{
 			case OFF:
 				break;
@@ -398,7 +395,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P1 pitch gyro
-		switch (values[10])
+		switch (values[12])
 		{
 			case OFF:
 				break;
@@ -409,7 +406,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 pitch gyro
-		switch (values[11])
+		switch (values[13])
 		{
 			case OFF:
 				break;
@@ -420,7 +417,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P1 yaw gyro
-		switch (values[12])
+		switch (values[14])
 		{
 			case OFF:
 				break;
@@ -431,7 +428,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 yaw gyro
-		switch (values[13])
+		switch (values[15])
 		{
 			case OFF:
 				break;
@@ -442,7 +439,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P1 roll acc
-		switch (values[14])
+		switch (values[16])
 		{
 			case OFF:
 				break;
@@ -453,7 +450,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 roll acc
-		switch (values[15])
+		switch (values[17])
 		{
 			case OFF:
 				break;
@@ -464,7 +461,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P1 pitch acc
-		switch (values[16])
+		switch (values[18])
 		{
 			case OFF:
 				break;
@@ -476,7 +473,7 @@ void menu_mixer(uint8_t i)
 		}
 
 		// P2 pitch acc
-		switch (values[17])
+		switch (values[19])
 		{
 			case OFF:
 				break;
@@ -487,7 +484,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P1 Z delta acc
-		switch (values[18])
+		switch (values[20])
 		{
 			case OFF:
 				break;
@@ -498,7 +495,7 @@ void menu_mixer(uint8_t i)
 				break;
 		}
 		// P2 Z delta acc
-		switch (values[19])
+		switch (values[21])
 		{
 			case OFF:
 				break;

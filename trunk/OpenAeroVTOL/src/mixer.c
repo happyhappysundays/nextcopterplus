@@ -20,6 +20,7 @@
 #include "main.h"
 #include <avr/pgmspace.h> 
 #include "mixer.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -52,7 +53,6 @@ const int8_t SIN[101] PROGMEM =
 			95,96,96,96,97,97,98,98,98,99,
 			99,99,99,99,100,100,100,100,100,100,
 			100};
-
 #ifdef KK21
 const int8_t SQRTSIN[101] PROGMEM = 
 			{0,13,18,22,25,28,31,33,35,38,
@@ -68,7 +68,8 @@ const int8_t SQRTSIN[101] PROGMEM =
 			100};
 #endif
 
-#define	EXT_RC 8 // Offset for indexing RC sources
+#define	EXT_RC 8 		// Offset for indexing RC sources
+#define EXT_SOURCE 16	// Offset for indexing sensor sources
 
 //************************************************************
 // Code
@@ -78,8 +79,8 @@ int16_t	transition = 0; // Global for transition value
 
 void ProcessMixer(void)
 {
-	uint8_t i;
-	uint8_t j;
+	uint8_t i = 0;
+	uint8_t j = 0;
 	int16_t P1_solution = 0;
 	int16_t P2_solution = 0;
 
@@ -90,6 +91,12 @@ void ProcessMixer(void)
 	int16_t	Step2 = 0;
 	int16_t	rolltrim = 0;
 	int16_t	pitchtrim = 0;
+
+	// Copy the sensor data to an array for easy indexing - acc data is from accSmooth, increased to reasonable rates
+	temp1 = (int16_t)accSmooth[ROLL] << 3;
+	temp2 = (int16_t)accSmooth[PITCH] << 3;
+	int16_t	SensorDataP1[5] = {PID_Gyros[P1][ROLL], PID_Gyros[P1][PITCH], PID_Gyros[P1][YAW], temp1, temp2}; 
+	int16_t	SensorDataP2[5] = {PID_Gyros[P2][ROLL], PID_Gyros[P2][PITCH], PID_Gyros[P2][YAW], temp1, temp2}; 
 
 	//************************************************************
 	// Main mix loop - sensors, RC inputs and other channels
@@ -358,12 +365,18 @@ void ProcessMixer(void)
 			// Other sources
 			if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
 			{
+				// Is the source a sensor?
+				if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				{
+					temp2 = SensorDataP1[Config.Channel[i].P1_source_a - EXT_SOURCE];
+				}
 				// Is the source an RC input?
-				if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
+				else if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
 				{
 					// Yes, calculate RC channel number from source number and return RC value
 					temp2 = RCinputs[Config.Channel[i].P1_source_a - EXT_RC];
 				}
+				// The source is an output
 				else
 				{
 					// No, just use the selected output's old data
@@ -375,7 +388,13 @@ void ProcessMixer(void)
 			}
 			if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
 			{
-				if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
+				// Is the source a sensor?
+				if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				{
+					temp2 = SensorDataP1[Config.Channel[i].P1_source_b - EXT_SOURCE];
+				}
+				// Is the source an RC input?
+				else if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
 				{
 					temp2 = RCinputs[Config.Channel[i].P1_source_b - EXT_RC];
 				}
@@ -385,20 +404,6 @@ void ProcessMixer(void)
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P1_source_b_volume);
-				P1_solution = P1_solution + temp2;
-			}
-			if ((Config.Channel[i].P1_source_c_volume !=0) && (Config.Channel[i].P1_source_c != NOMIX)) // Mix in third extra source
-			{
-				if (Config.Channel[i].P1_source_c > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P1_source_c - EXT_RC];
-				}
-				else
-				{
-					temp2 = Config.Channel[Config.Channel[i].P1_source_c].P1_value;
-				}
-
-				temp2 = scale32(temp2, Config.Channel[i].P1_source_c_volume);
 				P1_solution = P1_solution + temp2;
 			}
 		}
@@ -426,7 +431,13 @@ void ProcessMixer(void)
 			// Other sources
 			if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
 			{
-				if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
+				// Is the source a sensor?
+				if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				{
+					temp2 = SensorDataP2[Config.Channel[i].P2_source_a - EXT_SOURCE];
+				}
+				// Is the source an RC input?
+				else if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
 				{
 					temp2 = RCinputs[Config.Channel[i].P2_source_a - EXT_RC];
 				}
@@ -440,7 +451,13 @@ void ProcessMixer(void)
 			}
 			if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
 			{
-				if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
+				// Is the source a sensor?
+				if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				{
+					temp2 = SensorDataP2[Config.Channel[i].P2_source_b - EXT_SOURCE];
+				}
+				// Is the source an RC input?
+				else if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
 				{
 					temp2 = RCinputs[Config.Channel[i].P2_source_b - EXT_RC];
 				}
@@ -450,20 +467,6 @@ void ProcessMixer(void)
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P2_source_b_volume);
-				P2_solution = P2_solution + temp2;
-			}
-			if ((Config.Channel[i].P2_source_c_volume !=0) && (Config.Channel[i].P2_source_c != NOMIX)) // Mix in third extra source
-			{
-				if (Config.Channel[i].P2_source_c > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_c - EXT_RC];
-				}
-				else
-				{
-					temp2 = Config.Channel[Config.Channel[i].P2_source_c].P2_value;
-				}
-
-				temp2 = scale32(temp2, Config.Channel[i].P2_source_c_volume);
 				P2_solution = P2_solution + temp2;
 			}
 		}
@@ -504,6 +507,54 @@ void ProcessMixer(void)
 	// Recalculate P1 values based on transition stage
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
+		// Per-channel, non-linear transition code
+		// Only recalculate if non-linear
+		if (!(Config.Channel[i].P1n_position_t == 50) && (Config.Channel[i].P1n_percentage == 50))
+		{
+			// Work out distance to cover over stage 1 (P1(0) to P1.n)
+			temp1 = Config.Channel[i].P1n_percentage;
+			temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
+
+			// Divide distance into steps
+			temp2 = Config.Channel[i].P1n_position_t; 
+			Step1 = ((temp1 + (temp2 >> 1)) / temp2) ; // Divide and round result
+		
+			// Work out distance to cover over stage 2 (P1.n to P2 (100))
+			temp2 = 100 - Config.Channel[i].P1n_percentage;
+			temp2 = temp2 << 7;
+
+			// Divide distance into steps
+			temp1 = (100 - Config.Channel[i].P1n_position_t); 
+			Step2 = ((temp2 + (temp1 >> 1)) / temp1) ; // Divide and round result		
+
+			// Set start (P1) point
+			temp3 = 0;
+
+			// Count up transition steps of the appropriate step size
+			for (j = 0; j < transition; j++)
+			{
+				// If in stage 1 use Step1 size
+				if (j < Config.Channel[i].P1n_position_t)
+				{
+					temp3 += Step1;
+				}
+				// If in stage 2 use Step2 size
+				else
+				{
+					temp3 += Step2;
+				}
+			}
+			// Round then divide by 128
+			temp3 = ((temp3 + 64) >> 7);	
+			//temp3 = 50;						
+		}
+
+		else
+		{
+			temp3 = 50;
+			//temp3 = transition;
+		}
+
 		// Speed up the easy ones :)
 		if (transition == 0)
 		{
@@ -517,11 +568,11 @@ void ProcessMixer(void)
 		{
 			// Get source channel value
 			temp1 = Config.Channel[i].P1_value;
-			temp1 = scale32(temp1, (100 - transition));
+			temp1 = scale32(temp1, (100 - temp3));
 
 			// Get destination channel value
 			temp2 = Config.Channel[i].P2_value;
-			temp2 = scale32(temp2, transition);
+			temp2 = scale32(temp2, temp3); 	
 
 			// Sum the mixers
 			temp1 = temp1 + temp2;
@@ -560,7 +611,8 @@ void ProcessMixer(void)
 					// Multiply [transition] steps (0 to 100)
 					temp3 = temp2 + (Step1 * transition);
 				}
-#ifdef KK21
+
+				// SINE
 				else if (Config.Channel[i].Throttle_curve == SINE)
 				{
 					// Choose between SINE and COSINE
@@ -582,7 +634,7 @@ void ProcessMixer(void)
 					// temp1 is the start volume * 128
 					temp3 = temp2 + (Step1 * temp3);
 				}
-
+#ifdef KK21
 				// SQRT SINE
 				else
 				{
@@ -598,28 +650,6 @@ void ProcessMixer(void)
 					{
 						// Multiply SQRTSIN[transition] steps (0 to 100)
 						temp3 = (int8_t)pgm_read_byte(&SQRTSIN[(int8_t)transition]);
-					}
-
-					// Get SINE% (temp2) of difference in volumes (Step1)
-					// Step1 is already in 100ths of the difference * 128
-					// temp1 is the start volume * 128
-					temp3 = temp2 + (Step1 * temp3);
-				}
-#else
-				else
-				{
-					// Choose between SINE and COSINE
-					// If P2 less than P1, COSINE (reverse SINE) is the one we want
-					if (Step1 < 0)
-					{ 
-						// Multiply SIN[100 - transition] steps (0 to 100)
-						temp3 = 100 - (int8_t)pgm_read_byte(&SIN[100 - (int8_t)transition]);
-					}
-					// If P2 greater than P1, SINE is the one we want
-					else
-					{
-						// Multiply SIN[transition] steps (0 to 100)
-						temp3 = (int8_t)pgm_read_byte(&SIN[(int8_t)transition]);
 					}
 
 					// Get SINE% (temp2) of difference in volumes (Step1)

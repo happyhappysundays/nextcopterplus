@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x21		// eePROM signature - change for each eePROM structure change 0x21 = Beta 19+
+#define MAGIC_NUMBER 0x23		// eePROM signature - change for each eePROM structure change 0x22 = Beta 26+
 								// to force factory reset
 
 //************************************************************
@@ -58,8 +58,6 @@ void Set_EEPROM_Default_Config(void)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
-		Config.min_travel[i] = -100;
-		Config.max_travel[i] = 100;
 	}
 	// Monopolar throttle is a special case. Set to -100% or -1000
 	Config.RxChannelZeroOffset[THROTTLE] = 2750;
@@ -68,12 +66,14 @@ void Set_EEPROM_Default_Config(void)
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		Config.Channel[i].P1n_position	= 50;
+		Config.Channel[i].P1n_position_t	= 50;
+		Config.Channel[i].P1n_percentage	= 50;
 		Config.Channel[i].P1_source_a 	= NOMIX;
 		Config.Channel[i].P1_source_b 	= NOMIX;
-		Config.Channel[i].P1_source_c 	= NOMIX;
 		Config.Channel[i].P2_source_a 	= NOMIX;
 		Config.Channel[i].P2_source_b 	= NOMIX;
-		Config.Channel[i].P2_source_c 	= NOMIX;
+		Config.min_travel[i] = -100;
+		Config.max_travel[i] = 100;
 	}
 
 	// Preset simple mixing for primary channels
