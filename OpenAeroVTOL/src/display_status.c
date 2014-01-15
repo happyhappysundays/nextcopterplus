@@ -118,7 +118,7 @@ void Display_status(void)
 		LCD_Display_Text(8,(prog_uchar*)Verdana8,(x_loc + pos1 + pos3),y_loc);
 		mugui_lcd_puts(itoa(vbat_temp,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
-/*
+
 	// Display error messages
 	if (General_error != 0)
 	{
@@ -153,7 +153,7 @@ void Display_status(void)
 			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); 	// Disarmed
 		}
 	}
-*/
+
 	// Write buffer to complete
 	write_buffer(buffer,1);
 	clear_buffer(buffer);
