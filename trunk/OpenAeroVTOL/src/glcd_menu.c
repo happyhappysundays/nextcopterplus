@@ -110,8 +110,6 @@ const char AutoMenuItem15[] PROGMEM = "ON";
 const char RCMenuItem1[]  PROGMEM = "RX sync:";				// RC setup text
 const char RCMenuItem0[]  PROGMEM = "Ch. order:"; 	
 const char RCMenuItem2[]  PROGMEM = "Profile Chan.:";
-const char StabMenuItem14[]  PROGMEM = "Dyn.Gain Ch.:";
-const char StabMenuItem15[]  PROGMEM = "Dyn.Gain:";
 const char RCMenuItem8[]  PROGMEM = "Aileron pol.:";
 const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
 const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
@@ -143,12 +141,12 @@ const char P3text[] PROGMEM = "P2";
 //
 // Mixer menu items
 const char MixerItem1[]  PROGMEM = "Device:";
-const char MixerItem80[] PROGMEM = "P1.n Trans. pos:";
-const char MixerItem81[] PROGMEM = "P1.n Trans %:";
-const char MixerItem36[] PROGMEM = "P1.n Offset pos:";
-const char MixerItem20[] PROGMEM = "P1 Offset:";
-const char MixerItem35[] PROGMEM = "P1.n Offset:";
-const char MixerItem34[] PROGMEM = "P2 Offset:";
+const char MixerItem80[] PROGMEM = "Trans. P1.n pos:";
+const char MixerItem81[] PROGMEM = "Trans. P1.n %:";
+const char MixerItem36[] PROGMEM = "Offset P1.n pos:";
+const char MixerItem20[] PROGMEM = "Offset P1 %:";
+const char MixerItem35[] PROGMEM = "Offset P1.n %:";
+const char MixerItem34[] PROGMEM = "Offset P2 %:";
 //
 const char MixerItem4[]  PROGMEM = "P1 Roll gyro:"; // P1
 const char MixerItem5[]  PROGMEM = "P1 Pitch gyro:";
@@ -192,9 +190,7 @@ const char MixerItem40[] PROGMEM = "Servo";
 const char MixerItem41[] PROGMEM = "Motor";
 const char MixerItem60[] PROGMEM = "Linear";
 const char MixerItem61[] PROGMEM = "Sine";
-#ifdef KK21
 const char MixerItem62[] PROGMEM = "SqrtSine";
-#endif
 //
 const char ChannelRef0[] PROGMEM = "Throttle";				// RC channel text
 const char ChannelRef1[] PROGMEM = "Aileron"; 
@@ -294,11 +290,8 @@ const char *text_menu[] PROGMEM =
 		Random1,  																			// 55 High
 		//
 		MixerItem60, MixerItem61, 															// 56 to 59 Linear, Sine, Sqrt Sine
-#ifdef KK21
 		MixerItem62,
-#else
-		Dummy0, 
-#endif		
+		
 		//
 		Dummy0, 
 		//
@@ -355,16 +348,15 @@ const char *text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 159 RC menu
-		StabMenuItem14, StabMenuItem15,
+		RCMenuItem1, RCMenuItem0, RCMenuItem2, 	 											// 149 to 157 RC menu
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		GeneralText9, Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 160 to 167 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 165 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 	
 		//
-		Dummy0,Dummy0,Dummy0,Dummy0,
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0, Dummy0,	
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem3, StabMenuItem10,						// Roll gyro

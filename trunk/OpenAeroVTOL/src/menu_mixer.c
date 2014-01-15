@@ -60,11 +60,8 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,1,0,0},				// P2 Offset (%)
 		{0,125,1,0,100},				// P1 throttle volume 
 		{0,125,1,0,100},				// P2 throttle volume
-#ifdef KK21
 		{LINEAR,SQRTSINE,1,1,LINEAR},	// Throttle curves for KK2.1
-#else
-		{LINEAR,SINE,1,1,LINEAR},		// Throttle curves for KK2.0
-#endif
+
 		// Mixer ranges
 		{OFF, SCALE,1,1,OFF},			// P1 roll_gyro (12)
 		{OFF, SCALE,1,1,OFF},			// P2 roll_gyro
