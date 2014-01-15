@@ -120,8 +120,6 @@ typedef struct
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
-	int8_t		DynGainSrc;				// Dynamic gain source channel
-	int8_t		DynGain;				// Dynamic gain attenuation (0% to 100%)
 	int8_t		AileronPol;				// Aileron RC input polarity
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
@@ -138,9 +136,6 @@ typedef struct
 
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
-	
-	// Dynamic gain divisor
-	int16_t		DynGainDiv;				// Precalculated dynamic gain variable
 
 	// General items (8)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)

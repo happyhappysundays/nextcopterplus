@@ -41,7 +41,7 @@ void menu_rc_setup(uint8_t i);
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
 
-#define RCITEMS 11 		// Number of menu items
+#define RCITEMS 9 		// Number of menu items
 #define GENERALITEMS 8 
 
 //************************************************************
@@ -50,19 +50,17 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[3][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 105, 0, 141, 141, 141, 0, 0, 0},				// RC setup
+	{RCTEXT, 116, 105, 141, 141, 141, 0, 0, 0},						// RC setup
 	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0},							// General
 };
 
 const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM = 
 {
 	{
-		// RC setup (11)				// Min, Max, Increment, Style, Default
+		// RC setup (9)					// Min, Max, Increment, Style, Default
 		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Receiver type
 		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
-		{THROTTLE,NOCHAN,1,1,NOCHAN},	// DynGainSrc
-		{0,100,1,0,0},					// Dynamic gain
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse

@@ -46,8 +46,10 @@ void Display_status(void)
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,27); 	// Profile
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,27); 	// Pos
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,38); 	// Battery
+	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,27); 		// Raw transition value
 
-	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,27); // transition value
+	// Debug
+	// mugui_lcd_puts(itoa(transition_curve,pBuffer,10),(prog_uchar*)Verdana8,105,38); // Transition curve value
 	
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
@@ -116,7 +118,7 @@ void Display_status(void)
 		LCD_Display_Text(8,(prog_uchar*)Verdana8,(x_loc + pos1 + pos3),y_loc);
 		mugui_lcd_puts(itoa(vbat_temp,pBuffer,10),(prog_uchar*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
-
+/*
 	// Display error messages
 	if (General_error != 0)
 	{
@@ -151,7 +153,7 @@ void Display_status(void)
 			LCD_Display_Text(18,(prog_uchar*)Verdana14,25,24); 	// Disarmed
 		}
 	}
-
+*/
 	// Write buffer to complete
 	write_buffer(buffer,1);
 	clear_buffer(buffer);

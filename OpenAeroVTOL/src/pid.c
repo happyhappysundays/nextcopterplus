@@ -67,23 +67,22 @@ int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each
 
 void Calculate_PID(void)
 {
-	static 	int32_t currentError[3];		// Used with lastError to keep track of D-Terms in PID calculations
-	static	int32_t lastError[3];
+	static	int16_t lastError[NUMBEROFAXIS];// Used to keep track of D-Terms in PID calculations
 
-	int16_t DifferentialGyro1 = 0;			// Holds difference between last two errors (angular acceleration)
-	int16_t DifferentialGyro2 = 0;
-	int16_t Differential = 0;
 	int32_t PID_gyro_temp1 = 0;				// P1
 	int32_t PID_gyro_temp2 = 0;				// P2
 	int32_t PID_acc_temp1 = 0;				// P1
 	int32_t PID_acc_temp2 = 0;				// P2
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
-	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
-	int32_t mult32 = 0;
-	int32_t PID_Gyros_32 = 0;
-	int8_t	axis = 0;
+
+	int16_t DifferentialGyro1 = 0;			// Holds difference between last two errors (angular acceleration)
+	int16_t DifferentialGyro2 = 0;
+	int16_t Differential = 0;
 	int16_t	stick = 0;
+
+	int8_t	axis = 0;
+
 
 	// Cross-ref for actual RCinput elements
 	// Note that pitch and yaw are reversed here with respect to their gyros
@@ -113,22 +112,6 @@ void Calculate_PID(void)
 			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
 			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
 		};
-
-	int16_t DynamicScale = 0;
-
-	//************************************************************
-	// Set up dynamic gain variable once per loop if requested
-	// N.B. Config.DynGainDiv = 2500 / Config.DynGain;
-	//************************************************************
-
-	if (Config.DynGainSrc != NOCHAN)
-	{
-		// Channel controlling the dynamic gain
-		DynamicScale = RxChannel[Config.DynGainSrc] - 2500; // 0-1250-2500 range
-
-		// Scale 0 - 2500 down to 0 - Config.DynGain (%)
-		DynamicScale = DynamicScale / Config.DynGainDiv;
-	}
 
 	//************************************************************
 	// PID loop
@@ -204,8 +187,8 @@ void Calculate_PID(void)
 		PID_Gyro_I_actual1 = PID_Gyro_I_actual1 >> 5;					// Divide by 32
 
 		// Gyro D-term
-		Differential = (int16_t)(currentError[axis] - lastError[axis]);
-		lastError[axis] = currentError[axis];
+		Differential = gyroADC[axis] - lastError[axis];
+		lastError[axis] = gyroADC[axis];
 		DifferentialGyro1 = Differential * D_gain[P1][axis];			// Multiply D-term by up to 127
 		DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
 
@@ -259,44 +242,6 @@ void Calculate_PID(void)
 
 		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + DifferentialGyro1) >> 6);
 		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> 6);
-
-		//************************************************************
-		// Modify gains dynamically as required.
-		// Do this by scaling PID based on the current percentage of 
-		// the user-set maximum Dynamic Gain.
-		// PID gains themselves are not changed but the effect is the same
-		//************************************************************
-
-		// If dynamic gain set up 
-		if (Config.DynGainSrc != NOCHAN)
-		{
-			temp32 = 0;
-			mult32 = 0;
-
-			// Promote to 32 bits and multiply
-			temp32 = PID_Gyros[P1][axis];
-			mult32 = DynamicScale;				// Max (100%). temp16 = 0 to Config.DynGain (Max. 100)
-			PID_Gyros_32 = temp32 * mult32;		// Scale to Config.DynGain (100% down to 0%) = 0x up to 100x
-
-			// Scale back to 0% to 100% gyro 
-			// If Config.DynGain is 50(%) the gyro gain is reduced by 50%
-			temp32 = PID_Gyros_32 / 100;
-
-			// Cast back to native size
-			PID_Gyros[P1][axis] = (int16_t)temp32;
-
-			// Promote to 32 bits and multiply
-			temp32 = PID_Gyros[P2][axis];
-			mult32 = DynamicScale;				// Max (100%). temp16 = 0 to Config.DynGain (Max. 100)
-			PID_Gyros_32 = temp32 * mult32;		// Scale to Config.DynGain (100% down to 0%) = 0x up to 100x
-
-			// Scale back to 0% to 100% gyro 
-			// If Config.DynGain is 50(%) the gyro gain is reduced by 50%
-			temp32 = PID_Gyros_32 / 100;
-
-			// Cast back to native size
-			PID_Gyros[P2][axis] = (int16_t)temp32;
-		}
 
 		//************************************************************
 		// Calculate acc error from angle data (roll and pitch only)

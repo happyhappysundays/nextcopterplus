@@ -32,7 +32,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x23		// eePROM signature - change for each eePROM structure change 0x22 = Beta 26+
+#define MAGIC_NUMBER 0x24		// eePROM signature - change for each eePROM structure change 0x22 = Beta 27+
 								// to force factory reset
 
 //************************************************************
@@ -128,8 +128,6 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Acc_LPF = 8;					// IMU CF defaults
 	Config.CF_factor = 30;
-	Config.DynGainSrc = NOCHAN;
-	Config.DynGain = 100;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.ArmMode = ARMED;				// Always armed
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical

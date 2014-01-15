@@ -90,10 +90,6 @@ void Display_balance(void)
 		drawline(buffer, 32, 32, 96, 32, 1); 
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
-		// Debug - show IMU angles
-		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(prog_uchar*)Verdana8,10,15);
-		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(prog_uchar*)Verdana8,10,25);
-
 		// Refresh GLCD 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);

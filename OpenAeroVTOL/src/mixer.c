@@ -53,7 +53,7 @@ const int8_t SIN[101] PROGMEM =
 			95,96,96,96,97,97,98,98,98,99,
 			99,99,99,99,100,100,100,100,100,100,
 			100};
-#ifdef KK21
+
 const int8_t SQRTSIN[101] PROGMEM = 
 			{0,13,18,22,25,28,31,33,35,38,
 			40,41,43,45,47,48,50,51,53,54,
@@ -66,7 +66,6 @@ const int8_t SQRTSIN[101] PROGMEM =
 			98,98,98,98,98,99,99,99,99,99,
 			99,99,100,100,100,100,100,100,100,100,
 			100};
-#endif
 
 #define	EXT_RC 8 		// Offset for indexing RC sources
 #define EXT_SOURCE 16	// Offset for indexing sensor sources
@@ -76,6 +75,9 @@ const int8_t SQRTSIN[101] PROGMEM =
 //************************************************************
 
 int16_t	transition = 0; // Global for transition value
+
+//debug
+//int16_t	transition_curve = 0;
 
 void ProcessMixer(void)
 {
@@ -504,26 +506,25 @@ void ProcessMixer(void)
 		transition = transition_counter;
 	}
 
-	// Recalculate P1 values based on transition stage
+	// Transition
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Per-channel, non-linear transition code
-		// Only recalculate if non-linear
-		if (!(Config.Channel[i].P1n_position_t == 50) && (Config.Channel[i].P1n_percentage == 50))
+		// Per-channel, non-linear transition code. This code modifies the "transition" variable.
+		// Only recalculate if non-linear. Any identical pair of values lead to a linear transition
+		if (!(Config.Channel[i].P1n_position_t == Config.Channel[i].P1n_percentage))
 		{
-			// Work out distance to cover over stage 1 (P1(0) to P1.n)
+			// Work out value range to cover over stage 1 (P1(0) to P1.n)
 			temp1 = Config.Channel[i].P1n_percentage;
 			temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
 
-			// Divide distance into steps
+			// Divide value into steps over stage 1
 			temp2 = Config.Channel[i].P1n_position_t; 
 			Step1 = ((temp1 + (temp2 >> 1)) / temp2) ; // Divide and round result
 		
 			// Work out distance to cover over stage 2 (P1.n to P2 (100))
-			temp2 = 100 - Config.Channel[i].P1n_percentage;
-			temp2 = temp2 << 7;
+			temp2 = 12800 - temp1; // 12800 = 128 * 100 (full range)
 
-			// Divide distance into steps
+			// Divide distance into steps over stage 2
 			temp1 = (100 - Config.Channel[i].P1n_position_t); 
 			Step2 = ((temp2 + (temp1 >> 1)) / temp1) ; // Divide and round result		
 
@@ -546,14 +547,15 @@ void ProcessMixer(void)
 			}
 			// Round then divide by 128
 			temp3 = ((temp3 + 64) >> 7);	
-			//temp3 = 50;						
 		}
 
 		else
 		{
-			temp3 = 50;
-			//temp3 = transition;
+			temp3 = transition;
 		}
+
+		//Debug for displaying the transition curve for OUT7
+		//if (i == 7) transition_curve = temp3;
 
 		// Speed up the easy ones :)
 		if (transition == 0)
@@ -634,7 +636,6 @@ void ProcessMixer(void)
 					// temp1 is the start volume * 128
 					temp3 = temp2 + (Step1 * temp3);
 				}
-#ifdef KK21
 				// SQRT SINE
 				else
 				{
@@ -657,7 +658,7 @@ void ProcessMixer(void)
 					// temp1 is the start volume * 128
 					temp3 = temp2 + (Step1 * temp3);
 				}
-#endif
+
 				// Round, then rescale to normal value
 				temp3 = temp3 + 64;
 				temp3 = temp3 >> 7;
@@ -808,16 +809,6 @@ void UpdateLimits(void)
 	{
 		Config.Limits[i].minimum = scale_percent(Config.min_travel[i]);
 		Config.Limits[i].maximum = scale_percent(Config.max_travel[i]);
-	}
-
-	// Update dynamic gain divisor
-	if (Config.DynGain > 0)
-	{
-		Config.DynGainDiv = 2500 / Config.DynGain;
-	}
-	else
-	{
-		Config.DynGainDiv = 2500;
 	}
 }
 
