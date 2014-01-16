@@ -153,10 +153,10 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_servo_setup(1);	// 17.Servo direction
 			break;
 		case MAINSTART+17:
-			menu_servo_setup(2); 	// 19.Neg. Servo trvl. (%)
+			menu_servo_setup(2); 	// 18.Neg. Servo trvl. (%)
 			break;
 		case MAINSTART+18:
-			menu_servo_setup(3); 	// 20.Pos. Servo trvl. (%)
+			menu_servo_setup(3); 	// 19.Pos. Servo trvl. (%)
 			break;
 		default:
 			break;

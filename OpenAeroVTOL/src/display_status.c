@@ -44,12 +44,9 @@ void Display_status(void)
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,0); 		// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,16); 	// RX sync
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,27); 	// Profile
-	LCD_Display_Text(23,(prog_uchar*)Verdana8,80,27); 	// Pos
+	LCD_Display_Text(23,(prog_uchar*)Verdana8,88,27); 	// Pos
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,38); 	// Battery
-	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,105,27); 		// Raw transition value
-
-	// Debug
-	// mugui_lcd_puts(itoa(transition_curve,pBuffer,10),(prog_uchar*)Verdana8,105,38); // Transition curve value
+	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,110,27); 		// Raw transition value
 	
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
@@ -59,36 +56,25 @@ void Display_status(void)
 	print_menu_text(0, 1, (62 + Config.RxMode), 45, 16); // Rx mode
 
 	// Display transition point
-	if (Config.TransitionSpeed == 0)
+	if (transition <= 0)
 	{
-		if (transition <= 0)
-		{
-			LCD_Display_Text(48,(prog_uchar*)Verdana8,45,27);
-		}
-		else if (transition >= 100)
-		{
-			LCD_Display_Text(50,(prog_uchar*)Verdana8,45,27);
-		}
-		else
-		{
-			LCD_Display_Text(49,(prog_uchar*)Verdana8,45,27);
-		}
+		LCD_Display_Text(48,(prog_uchar*)Verdana8,45,27);
 	}
-	// Use actual transition state to display state
-	else
+	else if (transition >= 100)
 	{
-		if (Transition_state == TRANS_P1)
-		{
-			LCD_Display_Text(48,(prog_uchar*)Verdana8,45,27);
-		}
-		else if (Transition_state == TRANS_P2)
-		{
-			LCD_Display_Text(50,(prog_uchar*)Verdana8,45,27);
-		}
-		else
-		{
-			LCD_Display_Text(49,(prog_uchar*)Verdana8,45,27);
-		}
+		LCD_Display_Text(50,(prog_uchar*)Verdana8,45,27);
+	}
+	else if (transition == Config.Transition_P1n)
+	{
+		LCD_Display_Text(49,(prog_uchar*)Verdana8,45,27);
+	}
+	else if (transition < Config.Transition_P1n)
+	{
+		LCD_Display_Text(51,(prog_uchar*)Verdana8,45,27);
+	}
+	else if (transition > Config.Transition_P1n)
+	{
+		LCD_Display_Text(52,(prog_uchar*)Verdana8,45,27);
 	}
 
 	// Display voltage

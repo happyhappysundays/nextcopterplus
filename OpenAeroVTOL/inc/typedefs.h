@@ -39,10 +39,7 @@ typedef struct
 	int16_t		P1_value;				// Current value of this channel at P1
 	int16_t		P2_value;				// Current value of this channel at P2
 	
-	// Mixer menu (27 bytes, 36 items)
-	int8_t		P1n_position_t;			// Position of P1.n for this output
-	int8_t		P1n_percentage;			// P1.n value for this output
-	//
+	// Mixer menu (25 bytes, 34 items)
 	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1_offset;				// P1 Offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
@@ -116,7 +113,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (11)
+	// RC items (9)
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
