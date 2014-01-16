@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 27 - January 2014
+// Version: Beta 28 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -124,6 +124,8 @@
 // Beta 26	Added SQRTSINE curve for KK2.0 also. Source A/B accs now from accSmooth.
 // Beta 27	Halved the accSmooth feedback. Added a per-channel 3-point transition curve.
 //			Dynamic gain removed. Fixed broken D-term.
+// Beta 28	Removed experimental 3-point transition curve. Removed the outputs as a selectable source.
+//			Added some more presets to help new users. Made the profile state display more informative.
 //
 //			Release 1.0 candidate.
 //
@@ -577,17 +579,7 @@ int main(void)
 		{
 			Config.FlightSel = 0;			// Flight mode 0 (P1)
 		}
-/*
-// debug
-		if (BUTTON4 == 0)
-		{
-			Config.FlightSel = 2;
-		}
-		else
-		{
-			Config.FlightSel = 0;
-		}
-*/
+
 		// Reset update request each loop
 		TransitionUpdated = false;
 

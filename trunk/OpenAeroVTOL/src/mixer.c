@@ -67,17 +67,13 @@ const int8_t SQRTSIN[101] PROGMEM =
 			99,99,100,100,100,100,100,100,100,100,
 			100};
 
-#define	EXT_RC 8 		// Offset for indexing RC sources
-#define EXT_SOURCE 16	// Offset for indexing sensor sources
+#define EXT_SOURCE 8	// Offset for indexing sensor sources
 
 //************************************************************
 // Code
 //************************************************************
 
 int16_t	transition = 0; // Global for transition value
-
-//debug
-//int16_t	transition_curve = 0;
 
 void ProcessMixer(void)
 {
@@ -368,21 +364,15 @@ void ProcessMixer(void)
 			if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
 			{
 				// Is the source a sensor?
-				if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				if (Config.Channel[i].P1_source_a > (MAX_RC_CHANNELS - 1))
 				{
 					temp2 = SensorDataP1[Config.Channel[i].P1_source_a - EXT_SOURCE];
 				}
 				// Is the source an RC input?
-				else if (Config.Channel[i].P1_source_a > (MAX_OUTPUTS - 1))
-				{
-					// Yes, calculate RC channel number from source number and return RC value
-					temp2 = RCinputs[Config.Channel[i].P1_source_a - EXT_RC];
-				}
-				// The source is an output
 				else
 				{
-					// No, just use the selected output's old data
-					temp2 = Config.Channel[Config.Channel[i].P1_source_a].P1_value;
+					// Yes, calculate RC channel number from source number and return RC value
+					temp2 = RCinputs[Config.Channel[i].P1_source_a];
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P1_source_a_volume);
@@ -391,18 +381,14 @@ void ProcessMixer(void)
 			if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
 			{
 				// Is the source a sensor?
-				if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				if (Config.Channel[i].P1_source_b > (MAX_RC_CHANNELS - 1))
 				{
 					temp2 = SensorDataP1[Config.Channel[i].P1_source_b - EXT_SOURCE];
 				}
 				// Is the source an RC input?
-				else if (Config.Channel[i].P1_source_b > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P1_source_b - EXT_RC];
-				}
 				else
 				{
-					temp2 = Config.Channel[Config.Channel[i].P1_source_b].P1_value;
+					temp2 = RCinputs[Config.Channel[i].P1_source_b];
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P1_source_b_volume);
@@ -434,18 +420,14 @@ void ProcessMixer(void)
 			if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
 			{
 				// Is the source a sensor?
-				if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				if (Config.Channel[i].P2_source_a > (MAX_RC_CHANNELS - 1))
 				{
 					temp2 = SensorDataP2[Config.Channel[i].P2_source_a - EXT_SOURCE];
 				}
 				// Is the source an RC input?
-				else if (Config.Channel[i].P2_source_a > (MAX_OUTPUTS - 1))
+				else 
 				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_a - EXT_RC];
-				}
-				else
-				{
-					temp2 = Config.Channel[Config.Channel[i].P2_source_a].P2_value;
+					temp2 = RCinputs[Config.Channel[i].P2_source_a];
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P2_source_a_volume);
@@ -454,18 +436,14 @@ void ProcessMixer(void)
 			if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
 			{
 				// Is the source a sensor?
-				if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS + MAX_RC_CHANNELS - 1))
+				if (Config.Channel[i].P2_source_b > (MAX_RC_CHANNELS - 1))
 				{
 					temp2 = SensorDataP2[Config.Channel[i].P2_source_b - EXT_SOURCE];
 				}
 				// Is the source an RC input?
-				else if (Config.Channel[i].P2_source_b > (MAX_OUTPUTS - 1))
-				{
-					temp2 = RCinputs[Config.Channel[i].P2_source_b - EXT_RC];
-				}
 				else
 				{
-					temp2 = Config.Channel[Config.Channel[i].P2_source_b].P2_value;
+					temp2 = RCinputs[Config.Channel[i].P2_source_b];
 				}
 
 				temp2 = scale32(temp2, Config.Channel[i].P2_source_b_volume);
@@ -506,57 +484,9 @@ void ProcessMixer(void)
 		transition = transition_counter;
 	}
 
-	// Transition
+	// Recalculate P1 values based on transition stage
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Per-channel, non-linear transition code. This code modifies the "transition" variable.
-		// Only recalculate if non-linear. Any identical pair of values lead to a linear transition
-		if (!(Config.Channel[i].P1n_position_t == Config.Channel[i].P1n_percentage))
-		{
-			// Work out value range to cover over stage 1 (P1(0) to P1.n)
-			temp1 = Config.Channel[i].P1n_percentage;
-			temp1 = temp1 << 7; // Multiply by 128 so divide gives reasonable step values
-
-			// Divide value into steps over stage 1
-			temp2 = Config.Channel[i].P1n_position_t; 
-			Step1 = ((temp1 + (temp2 >> 1)) / temp2) ; // Divide and round result
-		
-			// Work out distance to cover over stage 2 (P1.n to P2 (100))
-			temp2 = 12800 - temp1; // 12800 = 128 * 100 (full range)
-
-			// Divide distance into steps over stage 2
-			temp1 = (100 - Config.Channel[i].P1n_position_t); 
-			Step2 = ((temp2 + (temp1 >> 1)) / temp1) ; // Divide and round result		
-
-			// Set start (P1) point
-			temp3 = 0;
-
-			// Count up transition steps of the appropriate step size
-			for (j = 0; j < transition; j++)
-			{
-				// If in stage 1 use Step1 size
-				if (j < Config.Channel[i].P1n_position_t)
-				{
-					temp3 += Step1;
-				}
-				// If in stage 2 use Step2 size
-				else
-				{
-					temp3 += Step2;
-				}
-			}
-			// Round then divide by 128
-			temp3 = ((temp3 + 64) >> 7);	
-		}
-
-		else
-		{
-			temp3 = transition;
-		}
-
-		//Debug for displaying the transition curve for OUT7
-		//if (i == 7) transition_curve = temp3;
-
 		// Speed up the easy ones :)
 		if (transition == 0)
 		{
@@ -570,18 +500,18 @@ void ProcessMixer(void)
 		{
 			// Get source channel value
 			temp1 = Config.Channel[i].P1_value;
-			temp1 = scale32(temp1, (100 - temp3));
+			temp1 = scale32(temp1, (100 - transition));
 
 			// Get destination channel value
 			temp2 = Config.Channel[i].P2_value;
-			temp2 = scale32(temp2, temp3); 	
+			temp2 = scale32(temp2, transition);
 
 			// Sum the mixers
 			temp1 = temp1 + temp2;
 		}
 		// Save transitioned solution into P1
 		Config.Channel[i].P1_value = temp1;
-	} 
+	}  
 
 	//************************************************************
 	// Groovy throttle curve handling. Must be after the transition.

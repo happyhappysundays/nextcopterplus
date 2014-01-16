@@ -14,6 +14,3 @@ extern int16_t scale32(int16_t value16, int16_t multiplier16);
 extern int16_t scale_percent(int8_t value);
 extern int16_t scale_percent_nooffset(int8_t value);
 extern int16_t transition;
-
-//debug
-//extern int16_t transition_curve;
