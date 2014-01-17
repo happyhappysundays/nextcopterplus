@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 28 - January 2014
+// Version: Beta 29 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -9,7 +9,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2013 David Thompson
+// * Copyright (C) 2014 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -126,6 +126,7 @@
 //			Dynamic gain removed. Fixed broken D-term.
 // Beta 28	Removed experimental 3-point transition curve. Removed the outputs as a selectable source.
 //			Added some more presets to help new users. Made the profile state display more informative.
+// Beta 29	Changed presets to cover OUT1 to 4 instead of 1, 5, 6, 7 and 8.
 //
 //			Release 1.0 candidate.
 //

@@ -76,21 +76,18 @@ void Set_EEPROM_Default_Config(void)
 
 	// Preset simple mixing for primary channels
 	Config.Channel[OUT1].P1_throttle_volume = 100;
-	Config.Channel[OUT5].P1_elevator_volume = 100;
-	Config.Channel[OUT6].P1_aileron_volume = 100;
-	Config.Channel[OUT7].P1_aileron_volume = 100;
-	Config.Channel[OUT8].P1_rudder_volume = 100;	
 	Config.Channel[OUT1].P2_throttle_volume = 100;
-	Config.Channel[OUT5].P2_elevator_volume = 100;
-	Config.Channel[OUT6].P2_aileron_volume = 100;
-	Config.Channel[OUT7].P2_aileron_volume = 100;
-	Config.Channel[OUT8].P2_rudder_volume = 100;
+	Config.Channel[OUT2].P1_aileron_volume = 100;
+	Config.Channel[OUT2].P2_aileron_volume = 100;
+	Config.Channel[OUT3].P1_elevator_volume = 100;
+	Config.Channel[OUT3].P2_elevator_volume = 100;
+	Config.Channel[OUT4].P1_rudder_volume = 100;
+	Config.Channel[OUT4].P2_rudder_volume = 100;
 
 	// Preset basic axis gyros in P2
-	Config.Channel[OUT5].P2_sensors |= (1 << PitchGyro);
-	Config.Channel[OUT6].P2_sensors |= (1 << RollGyro);
-	Config.Channel[OUT7].P2_sensors |= (1 << RollGyro);
-	Config.Channel[OUT8].P2_sensors |= (1 << YawGyro);
+	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
+	Config.Channel[OUT3].P2_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT4].P2_sensors |= (1 << YawGyro);
 
 	// Misc settings
 	Config.RxMode = PWM1;				// Default to PWM1 (Rudder)

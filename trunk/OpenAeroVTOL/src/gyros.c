@@ -31,8 +31,7 @@ void get_raw_gyros(void);
 int16_t gyroADC[3];						// Holds Gyro ADCs
 int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
-// Polarity handling 
-#ifdef KK21 
+// Polarity handling - same for both KK2.0 and KK2.1
 const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
 {
 	{1,1,1},		// Forward
@@ -41,16 +40,6 @@ const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
 	{-1,-1,1},		// Aft
 	{1,-1,1},		// Sideways
 };
-#else
-const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
-{
-	{1,1,1},		// Forward
-	{1,1,1},		// Vertical
-	{1,-1,-1},		// Upside down
-	{-1,-1,1},		// Aft
-	{1,-1,1},		// Sideways
-};
-#endif
 
 void ReadGyros(void)					// Conventional orientation
 {
