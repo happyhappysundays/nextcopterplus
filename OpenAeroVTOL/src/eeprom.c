@@ -32,8 +32,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x2B		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x2B = Beta 31+
+#define MAGIC_NUMBER 0x2C		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x2B = Beta 32+
 
 //************************************************************
 // Code

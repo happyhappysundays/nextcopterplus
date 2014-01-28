@@ -19,6 +19,8 @@
 
 volatile bool Interrupted;			// Flag that RX packet completed
 volatile bool JitterFlag;			// Flag that interrupt occurred
+volatile bool JitterGate;			// Area when we care about JitterFlag - Debug
+
 volatile uint16_t RxChannel[MAX_RC_CHANNELS];
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
@@ -41,7 +43,7 @@ volatile uint8_t bytecount;
 
 ISR(INT1_vect)
 {
-	JitterFlag = true;	
+	if (JitterGate)	JitterFlag = true;	
 
 	if (RX_ROLL)	// Rising
 	{
@@ -59,7 +61,7 @@ ISR(INT1_vect)
 
 ISR(INT0_vect)
 {
-	JitterFlag = true;
+	if (JitterGate)	JitterFlag = true;	
 
 	if (RX_PITCH)	// Rising 
 	{
@@ -77,7 +79,7 @@ ISR(INT0_vect)
 
 ISR(PCINT3_vect)
 {
-	JitterFlag = true;
+	if (JitterGate)	JitterFlag = true;	
 		
 	if (RX_COLL)	// Rising
 	{
@@ -96,7 +98,7 @@ ISR(PCINT3_vect)
 
 ISR(PCINT1_vect)
 {
-	JitterFlag = true;
+	if (JitterGate)	JitterFlag = true;
 
 	if (RX_AUX)	// Rising
 	{
@@ -124,7 +126,7 @@ ISR(PCINT1_vect)
 
 ISR(INT2_vect)
 {
-	JitterFlag = true;
+	if (JitterGate)	JitterFlag = true;	
 
     // Backup TCNT1
     uint16_t tCount;

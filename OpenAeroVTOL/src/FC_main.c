@@ -142,6 +142,7 @@
 //			Screen contrast updated before logo - logo prettier.
 //			Lock rate default changed to 3.
 //			Magic jitter counter updated every second in PWM mode on Status screen.
+// Beta 32	Fixed jitter meter
 //
 //			Release 1.0 candidate.
 //
