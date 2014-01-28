@@ -27,10 +27,6 @@
 void getEstimatedAttitude(void);
 void UpdateIMUvalues(void);
 
-/*
-int16_t _atan2(int32_t y, int32_t x);
-float InvSqrt (float x);
-*/
 //************************************************************
 // 	Defines
 //************************************************************
@@ -105,6 +101,9 @@ void getEstimatedAttitude(void)
 	uint8_t		axis;
 	uint16_t	AccMag = 0;
 	bool		G_is_Normal = false;
+#ifdef KK21
+	int16_t		spike, filter = 0;
+#endif
 
 	// Get global timestamp
 	// The first calculation has no PreviousTime to measure from, so zero and move on.
@@ -129,17 +128,41 @@ void getEstimatedAttitude(void)
 		PreviousTime = CurrentTime;
 	}
 
-	// Initialization
+	// Acc LPF and gyro integration
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
-		// Only use LPF if requested
+		// Acc LPF with spike and surge mitigation
 		if (Config.Acc_LPF > 1)
 		{
-			// LPF for ACC values
-			// accSmooth is a float
-			// Config.Acc_LPF is an int8_t
-			// accADC is a int16_t
-			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + (float)(accADC[axis])) / (float)Config.Acc_LPF;
+#ifdef KK21
+			// Measure noise spikes first
+			spike = accADC[axis] - (int16_t)accSmooth[axis];
+
+			// If new accADC data is within Acc_Gate value, let it pass normally
+			if ((spike < Config.Acc_Gate) && (spike > -Config.Acc_Gate))
+			{
+				filter = accADC[axis];
+			}
+			// If new accADC data exceeds Acc_Gate value, replace with Acc_Slew data
+			else
+			{
+				if (spike < 0)
+				{
+					filter = (int16_t)accSmooth[axis] - Config.Acc_Slew;
+				}
+				else
+				{
+					filter = (int16_t)accSmooth[axis] + Config.Acc_Slew;
+				}
+			}
+
+			// Acc LPF
+			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + filter) / Config.Acc_LPF;
+#else
+			// Acc LPF
+			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + (float)(accADC[axis])) / Config.Acc_LPF;
+#endif
+
 		}
 		else
 		{

@@ -39,8 +39,8 @@ void CenterSticks(void);
 // Code
 //************************************************************
 
-int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
-int16_t MonopolarThrottle;			// Monopolar throttle
+int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
+int16_t MonopolarThrottle;				// Monopolar throttle
 
 // Get raw flight channel data (~2500 to 5000) and remove zero offset
 // Use channel mapping for configurability
@@ -92,6 +92,9 @@ void RxGetChannels(void)
 		Flight_flags &= ~(1 << RxActivity);
 	}
 	
+	// Preset RCinputs[NOCHAN] for sanity
+	RCinputs[NOCHAN] = 0;
+
 	OldRxSum = RxSum;
 }
 
@@ -113,7 +116,7 @@ void CenterSticks(void)
 
 	for (i=0;i<MAX_RC_CHANNELS;i++)
 	{
-		Config.RxChannelZeroOffset[i] = RxChannelZeroOffset[i] >> 3; // Divide by 8
+		Config.RxChannelZeroOffset[i] = ((RxChannelZeroOffset[i] + 4) >> 3); // Round and divide by 8
 	}
 
 	Save_Config_to_EEPROM();

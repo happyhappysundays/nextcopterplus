@@ -18,8 +18,7 @@
 #include <util/delay.h>
 #include "menu_ext.h"
 #include "mixer.h"
-
-extern uint16_t StackCount(void);	
+#include "main.h"
 
 //************************************************************
 // Prototypes
@@ -46,7 +45,6 @@ void Display_status(void)
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,27); 	// Profile
 	LCD_Display_Text(23,(prog_uchar*)Verdana8,88,27); 	// Pos
 	LCD_Display_Text(133,(prog_uchar*)Verdana8,0,38); 	// Battery
-	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,110,27); 		// Raw transition value
 	
 	// Display menu and markers
 	LCD_Display_Text(9, (prog_uchar*)Wingdings, 0, 59);	// Down
@@ -54,6 +52,13 @@ void Display_status(void)
 
 	// Display values
 	print_menu_text(0, 1, (62 + Config.RxMode), 45, 16); // Rx mode
+	mugui_lcd_puts(itoa(transition,pBuffer,10),(prog_uchar*)Verdana8,110,27); // Raw transition value
+
+	if (Config.RxMode == PWM)
+	{
+		LCD_Display_Text(24,(prog_uchar*)Verdana8,77,38); // Interrupt counter text 
+		mugui_lcd_puts(itoa(InterruptCount,pBuffer,10),(prog_uchar*)Verdana8,110,38); // Interrupt counter
+	}
 
 	// Display transition point
 	if (transition <= 0)
@@ -117,7 +122,6 @@ void Display_status(void)
 		{
 			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); 	// Sensor
 			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); 	// Error
-			menu_beep(9);
 		}
 		else if((General_error & (1 << LVA_ALARM)) != 0)
 		{

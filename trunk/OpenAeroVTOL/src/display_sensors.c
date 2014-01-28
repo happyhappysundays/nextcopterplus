@@ -39,7 +39,7 @@ void Display_sensors(void)
 		{
 			_delay_ms(500);
 			CalibrateAcc(NORMAL);
-			CalibrateGyros();
+			CalibrateGyrosFast();
 		}
 
 		if (BUTTON3 == 0)

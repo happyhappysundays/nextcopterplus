@@ -32,8 +32,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x28		// eePROM signature - change for each eePROM structure change 0x25 = Beta 28+
-								// to force factory reset
+#define MAGIC_NUMBER 0x2B		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x2B = Beta 31+
 
 //************************************************************
 // Code
@@ -90,7 +90,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.Channel[OUT4].P2_sensors |= (1 << YawGyro);
 
 	// Misc settings
-	Config.RxMode = PWM1;				// Default to PWM1 (Rudder)
+	Config.RxMode = PWM;				// Default to PWM
+	Config.PWM_Sync = GEAR;
 	Config.TxSeq = JRSEQ;
 
 #ifdef KK21
@@ -108,17 +109,21 @@ void Set_EEPROM_Default_Config(void)
 	// Set up all profiles the same initially
 	for (i = 0; i < FLIGHT_MODES; i++)
 	{
-		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults		
-		Config.FlightMode[i].Roll.I_mult = 50;	
-		Config.FlightMode[i].Pitch.P_mult = 80;
-		Config.FlightMode[i].Pitch.I_mult = 50;
-		Config.FlightMode[i].Yaw.P_mult = 80;
-		Config.FlightMode[i].Yaw.I_mult = 50;
+		Config.FlightMode[i].Roll_P_mult = 80;			// PID defaults		
+		Config.FlightMode[i].Roll_I_mult = 50;	
+		Config.FlightMode[i].Pitch_P_mult = 80;
+		Config.FlightMode[i].Pitch_I_mult = 50;
+		Config.FlightMode[i].Yaw_P_mult = 80;
+		Config.FlightMode[i].Yaw_I_mult = 50;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
 
 	Config.Acc_LPF = 8;					// IMU CF defaults
+#ifdef KK21
+	Config.Acc_Gate = 127;	
+	Config.Acc_Slew = 10;	
+#endif
 	Config.CF_factor = 30;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.ArmMode = ARMED;				// Always armed
@@ -126,7 +131,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Contrast = 0x26;				// Contrast
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
-	Config.Stick_Lock_rate = 2;
+	Config.Stick_Lock_rate = 3;
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 }
 

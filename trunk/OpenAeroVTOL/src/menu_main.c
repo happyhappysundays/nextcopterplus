@@ -108,22 +108,22 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_rc_setup(1); 		// 2.RX setup	
 			break;
 		case MAINSTART+2:
-			Display_sticks(); 		// 3.Stick polarity	
+			Display_rcinput();		// 3.RX inputs
 			break;
 		case MAINSTART+3:
-			Display_rcinput();		// 4.RX inputs
+			Display_sticks(); 		// 4.Stick polarity	
 			break;
 		case MAINSTART+4:
-			menu_flight(0);			// 5.Flight profile 1
+			Display_sensors();		// 5.Sensor calibration
 			break;
 		case MAINSTART+5:
-			menu_flight(1); 		// 6.Flight profile 2
+			Display_balance();		// 6.Level meter
 			break;
 		case MAINSTART+6:
-			Display_sensors();		// 7.Sensor calibration
+			menu_flight(0);			// 7.Flight profile 1
 			break;
 		case MAINSTART+7:
-			Display_balance();		// 8.Level meter
+			menu_flight(1); 		// 8.Flight profile 2
 			break;
 		case MAINSTART+8:
 			menu_mixer(0);			// 9.OUT1 Mixer
