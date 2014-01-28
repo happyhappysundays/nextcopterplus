@@ -41,43 +41,53 @@ void menu_rc_setup(uint8_t i);
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
 
-#define RCITEMS 9 		// Number of menu items
-#define GENERALITEMS 8 
+#define RCITEMS 10 		// Number of menu items
+
+#ifdef KK21
+#define GENERALITEMS 10 
+#else
+#define GENERALITEMS 8
+#endif
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[3][RCITEMS] PROGMEM = 
+const uint8_t RCMenuText[2][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 116, 105, 141, 141, 141, 0, 0, 0},						// RC setup
+	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0, 0},				// RC setup
 	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0},							// General
 };
 
-const menu_range_t rc_menu_ranges[4][RCITEMS] PROGMEM = 
+const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM = 
 {
 	{
-		// RC setup (9)					// Min, Max, Increment, Style, Default
-		{CPPM_MODE,SPEKTRUM,1,1,PWM1},	// Receiver type
-		{JRSEQ,SATSEQ,1,1,JRSEQ}, 		// Channel order
+		// RC setup (10)				// Min, Max, Increment, Style, Default
+		{CPPM_MODE,SPEKTRUM,1,1,PWM},	// Receiver type
+		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
+		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
 		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
-		{0,4,1,0,2},					// Axis lock stick rate (0 is fastest, 4 is slowest).
+		{0,4,1,0,3},					// Axis lock stick rate (0 is fastest, 4 is slowest).
 		{0,10,1,0,0},					// TransitionSpeed 0 to 10
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (8)
+		// General (8/10)
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,108},				// Low battery alarm voltage
 		{LOW,HIGH,1,1,LOW},				// Servo rate
-		{1,64,1,0,8},					// Acc. LPF
+		{1,127,1,0,8},					// Acc. LPF
 		{10,100,1,0,30},				// CF factor
+#ifdef KK21
+		{1,127,1,0,127},				// Acc_Gate
+		{1,127,1,0,10},					// Acc_Slew
+#endif
 	}
 };
 //************************************************************
@@ -92,8 +102,8 @@ void menu_rc_setup(uint8_t section)
 
 	menu_range_t range;
 	uint8_t text_link;
-	uint8_t i = 0;
-	uint8_t mult = 1;		// Multiplier
+	uint8_t i;
+	uint8_t mult;			// Multiplier
 	uint8_t offset;			// Index into channel structure
 	uint8_t	items;			// Items in group
 
@@ -162,17 +172,13 @@ void menu_rc_setup(uint8_t section)
 			// Update channel sequence
 			for (i = 0; i < MAX_RC_CHANNELS; i++)
 			{
-				if (Config.TxSeq == JRSEQ) 
-				{
-					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-				}
-				else if (Config.TxSeq == FUTABASEQ)
+				if (Config.TxSeq == FUTABASEQ)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
 				}
-				else if (Config.TxSeq == SATSEQ)
+				else
 				{
-					Config.ChannelOrder[i] = pgm_read_byte(&SATELLITE[i]);
+					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 				}
 			}
 

@@ -77,10 +77,8 @@ void init_uart(void)
 			break;
 
 		case CPPM_MODE:
-		case PWM1:
-		case PWM2:
-		case PWM3:
-			UCSR0B &= 	~(1 << RXEN0);					// Disable receiver in PWM modes
+		case PWM:
+			UCSR0B &= 	~(1 << RXEN0);					// Disable receiver in PWM and CPPM modes
 
 		default:
 			break;

@@ -101,8 +101,8 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW};
-enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, SBUS, SPEKTRUM};
-enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
+enum RX_Modes		{CPPM_MODE = 0, PWM, SBUS, SPEKTRUM};
+enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};

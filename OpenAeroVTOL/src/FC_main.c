@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 29 - January 2014
+// Version: Beta 30 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -127,6 +127,21 @@
 // Beta 28	Removed experimental 3-point transition curve. Removed the outputs as a selectable source.
 //			Added some more presets to help new users. Made the profile state display more informative.
 // Beta 29	Changed presets to cover OUT1 to 4 instead of 1, 5, 6, 7 and 8.
+//			Acc trim functionality restored. Main menu rearranged. Profile items rearranged. 
+//			Output mixer items rearranged.
+// Beta 30	Renamed and rearranged offset items. 
+//			Fixed broken Yaw trim that resulted in axis gyro data issues.
+//			Increased yaw trim effectiveness to about +/-50% throw.
+// Beta 31	Increased Acc LPF range to 127.
+//			Gyro calibrate on initialisation waits for stability.
+//			Arming now does a full recalibrate.
+//			Add two experimental test settings - Acc Gate and Acc Slew
+//			RX modes changed to CPPM, PWM, S.Bus and Satellite.
+//			Add new menu item for selecting PWM sync source.
+//			Now all five PWM inputs can be selectable as a sync source.
+//			Screen contrast updated before logo - logo prettier.
+//			Lock rate default changed to 3.
+//			Magic jitter counter updated every second in PWM mode on Status screen.
 //
 //			Release 1.0 candidate.
 //
@@ -135,6 +150,10 @@
 //***********************************************************
 //
 // Bugs:
+//	
+// Todo:
+//	
+//
 //
 //***********************************************************
 //* Includes
@@ -185,8 +204,8 @@
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
-#define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger disarm. Currently one second.
-#define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger arm. Currently three seconds.
+#define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger arm. Currently one second.
+#define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger disarm. Currently three seconds.
 
 //***********************************************************
 //* Code and Data variables
@@ -219,6 +238,9 @@ const int8_t Trans_Matrix[3][3] PROGMEM =
 		{TRANS_P1_to_P1n_start,TRANSITIONING,TRANS_P2_to_P1n_start},
 		{TRANS_P1_to_P2_start,TRANS_P1n_to_P2_start,TRANSITIONING}
 	};
+
+// Misc globals
+uint16_t InterruptCount = 0;
 
 //************************************************************
 //* Main loop
@@ -257,6 +279,7 @@ int main(void)
 	uint8_t ServoRate_TCNT2 = 0;
 
 	// Locals
+	uint16_t InterruptCounter = 0;
 	uint8_t	Disarm_seconds = 0;
 	uint8_t Status_seconds = 0;
 	uint8_t Menu_mode = STATUS_TIMEOUT;
@@ -268,6 +291,16 @@ int main(void)
 	// Main loop
 	while (1)
 	{
+		//************************************************************
+		//* Check for interruption of PWM generation
+		//* The "JitterFlag" flag was reset just before PWM generation
+		//************************************************************
+
+		if (JitterFlag == true)
+		{
+			InterruptCounter++;
+		}
+
 		//************************************************************
 		//* State machine for switching between screens safely
 		//************************************************************
@@ -367,7 +400,7 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Status menu refreshing
+		//* Status menu timing
 		//************************************************************
 
 		// Update status timeout
@@ -379,9 +412,13 @@ int main(void)
 		{
 			Status_seconds++;
 			Status_timeout = 0;
+
+			// Display the interrupt count each second
+			InterruptCount = InterruptCounter;
+			InterruptCounter = 0;
 		}
 
-		// Update status timer
+		// Status refresh timer
 		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
 
@@ -443,7 +480,8 @@ int main(void)
 			 (
 			  (General_error & (1 << LVA_ALARM)) ||
 			  (General_error & (1 << NO_SIGNAL)) ||
-			  (General_error & (1 << THROTTLE_HIGH))
+			  (General_error & (1 << THROTTLE_HIGH)) ||
+			  (General_error & (1 << SENSOR_ERROR))
 			 ) && 
 			  (Alarm_flags & (1 << BUZZER_ON))
 			) 
@@ -485,8 +523,10 @@ int main(void)
 			if ((Arm_timer > ARM_TIMER) && (RCinputs[AILERON] < -ARM_TIMER_RESET_1))
 			{
 				Arm_timer = 0;
-				General_error &= ~(1 << DISARMED);		// Set flags to armed
-				menu_beep(20);							// Signal that FC is now armed
+				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
+				General_error &= ~(1 << SENSOR_ERROR);	// Clear sensor error
+				CalibrateGyrosSlow();					// Calibrate gyros
+				menu_beep(20);							// Signal that FC is ready
 
 				// Force update of status screen
 				Menu_mode = STATUS_TIMEOUT;

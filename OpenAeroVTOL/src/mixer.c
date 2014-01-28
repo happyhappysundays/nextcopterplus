@@ -93,7 +93,7 @@ void ProcessMixer(void)
 	// Copy the sensor data to an array for easy indexing - acc data is from accSmooth, increased to reasonable rates
 	temp1 = (int16_t)accSmooth[ROLL] << 3;
 	temp2 = (int16_t)accSmooth[PITCH] << 3;
-	int16_t	SensorDataP1[5] = {PID_Gyros[P1][ROLL], PID_Gyros[P1][PITCH], PID_Gyros[P1][YAW], temp1, temp2}; 
+	int16_t	SensorDataP1[5] = {PID_Gyros[P1][ROLL], PID_Gyros[P1][PITCH], PID_Gyros[P1][YAW], temp1, temp2};
 	int16_t	SensorDataP2[5] = {PID_Gyros[P2][ROLL], PID_Gyros[P2][PITCH], PID_Gyros[P2][YAW], temp1, temp2}; 
 
 	//************************************************************
@@ -214,16 +214,12 @@ void ProcessMixer(void)
 		}
 
 		//************************************************************
-		// Autolevel trims
-		//************************************************************
-	
-		rolltrim = (Config.FlightMode[2].AccRollZeroTrim << 2); 	// Roll trim
-		pitchtrim = (Config.FlightMode[2].AccPitchZeroTrim << 2);	// Pitch trim
-
-		//************************************************************
 		// Mix in accelerometers
 		//************************************************************ 
 		// P1
+		rolltrim = (Config.FlightMode[P1].AccRollZeroTrim << 2); 			// Roll trim
+		pitchtrim = (Config.FlightMode[P1].AccPitchZeroTrim << 2);			// Pitch trim
+
 		if (Transition_state < TRANS_P2)
 		{
 			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
@@ -280,6 +276,9 @@ void ProcessMixer(void)
 		}
 
 		// P2
+		rolltrim = (Config.FlightMode[P2].AccRollZeroTrim << 2); 			// Roll trim
+		pitchtrim = (Config.FlightMode[P2].AccPitchZeroTrim << 2);			// Pitch trim
+
 		if (Transition_state > TRANS_P1)
 		{
 			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
@@ -450,7 +449,7 @@ void ProcessMixer(void)
 				P2_solution = P2_solution + temp2;
 			}
 		}
-				
+			
 		// Save solution for this channel. Note that this contains cross-mixed data from the *last* cycle
 		Config.Channel[i].P1_value = P1_solution;
 		Config.Channel[i].P2_value = P2_solution;
@@ -699,8 +698,8 @@ void UpdateLimits(void)
 
 	int8_t gains[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
-			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult},
-			{Config.FlightMode[P2].Roll.I_mult, Config.FlightMode[P2].Pitch.I_mult, Config.FlightMode[P2].Yaw.I_mult}
+			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
+			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
 		};
 
 	// Update triggers

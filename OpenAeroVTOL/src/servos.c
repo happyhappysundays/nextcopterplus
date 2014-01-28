@@ -66,6 +66,9 @@ void output_servo_ppm(void)
 		}
 	}
 
+	// Reset JitterFlag  immediately before PWM generation
+	JitterFlag = false;
+
 	// Suppress outputs during throttle high error
 	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{

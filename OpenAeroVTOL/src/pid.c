@@ -91,20 +91,20 @@ void Calculate_PID(void)
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
-			{Config.FlightMode[P1].Roll.P_mult, Config.FlightMode[P1].Pitch.P_mult, Config.FlightMode[P1].Yaw.P_mult},
-		 	{Config.FlightMode[P2].Roll.P_mult, Config.FlightMode[P2].Pitch.P_mult, Config.FlightMode[P2].Yaw.P_mult}
+			{Config.FlightMode[P1].Roll_P_mult, Config.FlightMode[P1].Pitch_P_mult, Config.FlightMode[P1].Yaw_P_mult},
+		 	{Config.FlightMode[P2].Roll_P_mult, Config.FlightMode[P2].Pitch_P_mult, Config.FlightMode[P2].Yaw_P_mult}
 		};
 
 	int8_t 	I_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
-			{Config.FlightMode[P1].Roll.I_mult, Config.FlightMode[P1].Pitch.I_mult, Config.FlightMode[P1].Yaw.I_mult},
-			{Config.FlightMode[P2].Roll.I_mult, Config.FlightMode[P2].Pitch.I_mult, Config.FlightMode[P2].Yaw.I_mult}
+			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
+			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
 		};
 
 	int8_t 	D_gain[FLIGHT_MODES][NUMBEROFAXIS] =  
 		{
-			{Config.FlightMode[P1].Roll.D_mult, Config.FlightMode[P1].Pitch.D_mult, Config.FlightMode[P1].Yaw.D_mult},
-			{Config.FlightMode[P2].Roll.D_mult, Config.FlightMode[P2].Pitch.D_mult, Config.FlightMode[P2].Yaw.D_mult}
+			{Config.FlightMode[P1].Roll_D_mult, Config.FlightMode[P1].Pitch_D_mult, Config.FlightMode[P1].Yaw_D_mult},
+			{Config.FlightMode[P2].Roll_D_mult, Config.FlightMode[P2].Pitch_D_mult, Config.FlightMode[P2].Yaw_D_mult}
 		};
 
 	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -170,8 +170,14 @@ void Calculate_PID(void)
 
 		if (axis == YAW)
 		{
-			PID_gyro_temp1 = (int32_t)(Config.FlightMode[P1].Yaw_trim << 4);
-			PID_gyro_temp2 = (int32_t)(Config.FlightMode[P2].Yaw_trim << 4);
+			PID_gyro_temp1 = (int32_t)(Config.FlightMode[P1].Yaw_trim << 6);
+			PID_gyro_temp2 = (int32_t)(Config.FlightMode[P2].Yaw_trim << 6);
+		}
+		// Reset PID_gyro variables to that data does not accumulate cross-axis
+		else
+		{
+			PID_gyro_temp1 = 0;
+			PID_gyro_temp2 = 0;
 		}
 
 		//************************************************************

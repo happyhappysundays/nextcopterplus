@@ -18,6 +18,7 @@
 //************************************************************
 
 volatile bool Interrupted;			// Flag that RX packet completed
+volatile bool JitterFlag;			// Flag that interrupt occurred
 volatile uint16_t RxChannel[MAX_RC_CHANNELS];
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
@@ -40,6 +41,8 @@ volatile uint8_t bytecount;
 
 ISR(INT1_vect)
 {
+	JitterFlag = true;	
+
 	if (RX_ROLL)	// Rising
 	{
 		RxChannelStart[AILERON] = TCNT1;
@@ -47,11 +50,17 @@ ISR(INT1_vect)
 	else 
 	{				// Falling
 		RxChannel[AILERON] = TCNT1 - RxChannelStart[AILERON];
+		if (Config.PWM_Sync == AILERON) 
+		{
+			Interrupted = true;						// Signal that interrupt block has finished
+		}
 	}
 }
 
 ISR(INT0_vect)
 {
+	JitterFlag = true;
+
 	if (RX_PITCH)	// Rising 
 	{
 		RxChannelStart[ELEVATOR] = TCNT1;
@@ -59,11 +68,17 @@ ISR(INT0_vect)
 	else 
 	{				// Falling
 		RxChannel[ELEVATOR] = TCNT1 - RxChannelStart[ELEVATOR];
+		if (Config.PWM_Sync == ELEVATOR) 
+		{
+			Interrupted = true;						// Signal that interrupt block has finished
+		}
 	}
 }
 
 ISR(PCINT3_vect)
-{	
+{
+	JitterFlag = true;
+		
 	if (RX_COLL)	// Rising
 	{
 		RxChannelStart[THROTTLE] = TCNT1;
@@ -71,7 +86,7 @@ ISR(PCINT3_vect)
 	else 
 	{				// Falling
 		RxChannel[THROTTLE] = TCNT1 - RxChannelStart[THROTTLE];
-		if (Config.RxMode == PWM2) 
+		if (Config.PWM_Sync == THROTTLE) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
 		}
@@ -81,6 +96,8 @@ ISR(PCINT3_vect)
 
 ISR(PCINT1_vect)
 {
+	JitterFlag = true;
+
 	if (RX_AUX)	// Rising
 	{
 		RxChannelStart[GEAR] = TCNT1;
@@ -88,7 +105,7 @@ ISR(PCINT1_vect)
 	else 
 	{				// Falling
 		RxChannel[GEAR] = TCNT1 - RxChannelStart[GEAR];
-		if (Config.RxMode == PWM3) 
+		if (Config.PWM_Sync == GEAR) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
 		}
@@ -107,12 +124,14 @@ ISR(PCINT1_vect)
 
 ISR(INT2_vect)
 {
-    uint16_t tCount;
-	uint8_t curChannel;
-	uint8_t prevChannel;
+	JitterFlag = true;
 
     // Backup TCNT1
+    uint16_t tCount;
     tCount = TCNT1;
+
+	uint8_t curChannel;
+	uint8_t prevChannel;
 
 	if (Config.RxMode != CPPM_MODE)
 	{
@@ -123,9 +142,9 @@ ISR(INT2_vect)
 		else 
 		{			// Falling
 			RxChannel[RUDDER] = tCount - RxChannelStart[RUDDER];
-			if (Config.RxMode == PWM1) 
+			if (Config.PWM_Sync == RUDDER) 
 			{
-				Interrupted = true;						// Signal that interrupt block has finished
+				Interrupted = true;					// Signal that interrupt block has finished
 			}
 		}
 	}

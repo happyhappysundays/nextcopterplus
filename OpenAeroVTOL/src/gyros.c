@@ -15,13 +15,22 @@
 #include <avr/pgmspace.h>
 #include "i2c.h"
 #include "MPU6050.h"
+#include "main.h"
+
+//************************************************************
+// Defines
+//************************************************************
+
+#define GYROS_STABLE 1
+#define SECOND_TIMER 19531			// Unit of timing for seconds
 
 //************************************************************
 // Prototypes
 //************************************************************
 
 void ReadGyros(void);
-void CalibrateGyros(void);
+void CalibrateGyrosFast(void);
+void CalibrateGyrosSlow(void);
 void get_raw_gyros(void);
 
 //************************************************************
@@ -29,7 +38,6 @@ void get_raw_gyros(void);
 //************************************************************
 
 int16_t gyroADC[3];						// Holds Gyro ADCs
-int16_t gyroZero[3];					// Used for calibrating Gyros on ground
 
 // Polarity handling - same for both KK2.0 and KK2.1
 const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
@@ -50,35 +58,95 @@ void ReadGyros(void)					// Conventional orientation
 	for (i=0;i<3;i++)					// For all axis
 	{
 		// Remove offsets from gyro outputs
-		gyroADC[i] -= gyroZero[i];
+		gyroADC[i] -= Config.gyroZero[i];
 
 		// Change polarity as per orientation mode
 		gyroADC[i] *= (int8_t)pgm_read_byte(&Gyro_Pol[Config.Orientation][i]);
 	}
 }
 
-void CalibrateGyros(void)
+void CalibrateGyrosFast(void)
 {
 	uint8_t i;
 
-	gyroZero[ROLL] 	= 0;						
-	gyroZero[PITCH] = 0;	
-	gyroZero[YAW] 	= 0;
+	Config.gyroZero[ROLL] 	= 0;						
+	Config.gyroZero[PITCH]	= 0;	
+	Config.gyroZero[YAW] 	= 0;
 
 	for (i=0;i<32;i++)					// Calculate average over 32 reads
 	{
 		get_raw_gyros();				// Updates gyroADC[]
 
-		gyroZero[ROLL] 	+= gyroADC[ROLL];						
-		gyroZero[PITCH] += gyroADC[PITCH];	
-		gyroZero[YAW] 	+= gyroADC[YAW];
+		Config.gyroZero[ROLL] 	+= gyroADC[ROLL];						
+		Config.gyroZero[PITCH] 	+= gyroADC[PITCH];	
+		Config.gyroZero[YAW] 	+= gyroADC[YAW];
 
 		_delay_ms(10);					// Get a better gyro average over time
 	}
 
-	gyroZero[ROLL] 	= (gyroZero[ROLL] 	>> 5);	//Divide by 32				
-	gyroZero[PITCH] = (gyroZero[PITCH] 	>> 5);
-	gyroZero[YAW] 	= (gyroZero[YAW]	>> 5);
+	Config.gyroZero[ROLL] 	= (Config.gyroZero[ROLL] >> 5);	//Divide by 32				
+	Config.gyroZero[PITCH] 	= (Config.gyroZero[PITCH] >> 5);
+	Config.gyroZero[YAW] 	= (Config.gyroZero[YAW]	>> 5);
+}
+
+void CalibrateGyrosSlow(void)
+{
+	uint8_t axis;
+	uint8_t Gyro_seconds = 0;
+	uint8_t Gyro_TCNT2 = 0;
+	uint16_t Gyro_timeout = 0;
+	bool	Gyros_Stable = false;
+	float 	GyroSmooth[NUMBEROFAXIS];
+
+	// Force recalculation
+	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
+	{
+		GyroSmooth[axis] = 0;
+	}
+
+	// Wait until gyros stable. Timeout after 5 seconds
+	while (!Gyros_Stable && (Gyro_seconds <= 5))
+	{
+		// Update status timeout
+		Gyro_timeout += (uint8_t) (TCNT2 - Gyro_TCNT2);
+		Gyro_TCNT2 = TCNT2;
+
+		// Count elapsed seconds
+		if (Gyro_timeout > SECOND_TIMER)
+		{
+			Gyro_seconds++;
+			Gyro_timeout = 0;
+		}
+
+		get_raw_gyros();
+
+		// Calculate very long rolling average
+		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
+		{
+			GyroSmooth[axis] = ((GyroSmooth[axis] * (float)999) + (float)(gyroADC[axis])) / (float)1000;
+			Config.gyroZero[axis] = (int16_t)GyroSmooth[axis];
+		}
+
+		// Check for movement
+		ReadGyros();
+
+		if ((gyroADC[ROLL] > GYROS_STABLE) || (gyroADC[ROLL] < -GYROS_STABLE) ||
+			(gyroADC[PITCH] > GYROS_STABLE) || (gyroADC[PITCH] < -GYROS_STABLE) ||
+			(gyroADC[YAW] > GYROS_STABLE) || (gyroADC[YAW] < -GYROS_STABLE))
+		{
+			Gyros_Stable = false;
+		}
+		else
+		{
+			Gyros_Stable = true;
+		}
+	}
+	
+	// Still no stability after 5 seconds
+	if (!Gyros_Stable)
+	{
+		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
+	}
 }
 
 void get_raw_gyros(void)

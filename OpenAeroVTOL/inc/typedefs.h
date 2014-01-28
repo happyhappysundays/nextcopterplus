@@ -2,6 +2,8 @@
  * typedefs.h
  ********************************************************************/
 
+#include "compiledefs.h"
+
 #ifndef TYPE_DEFS_H_
 #define TYPE_DEFS_H_
 
@@ -40,8 +42,8 @@ typedef struct
 	int16_t		P2_value;				// Current value of this channel at P2
 	
 	// Mixer menu (25 bytes, 34 items)
-	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1_offset;				// P1 Offset for this output
+	int8_t		P1n_position;			// Position of P1.n offset for this output
 	int8_t		P1n_offset;				// P1.n Offset for this output
 	int8_t		P2_offset;				// P2 Offset for this output
 	//
@@ -49,17 +51,17 @@ typedef struct
 	int8_t		P2_throttle_volume;		// Percentage of throttle to use in P2
 	int8_t		Throttle_curve;			// Throttle transition curve (Linear, Sine)
 
-	int8_t		P1_sensors;				// Sensor switches (6), motor marker (1)
-	int8_t		P2_sensors;				// Sensor switches (6)
-	int8_t		P1_scale;				// P1 sensor scale flags (6)
-	int8_t		P2_scale;				// P2 sensor scale flags (6)
-
 	int8_t		P1_aileron_volume;		// Percentage of aileron to use in P1
 	int8_t		P2_aileron_volume;		// Percentage of aileron to use in P2
 	int8_t		P1_elevator_volume;		// Percentage of elevator to use in P1
 	int8_t		P2_elevator_volume;		// Percentage of elevator to use in P2
 	int8_t		P1_rudder_volume;		// Percentage of rudder to use in P1
 	int8_t		P2_rudder_volume;		// Percentage of rudder to use in P2
+
+	int8_t		P1_sensors;				// Sensor switches (6), motor marker (1)
+	int8_t		P2_sensors;				// Sensor switches (6)
+	int8_t		P1_scale;				// P1 sensor scale flags (6)
+	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
 	int8_t		P1_source_a;			// Source A for calculation
 	int8_t		P1_source_a_volume;		// Percentage of source to use
@@ -72,29 +74,31 @@ typedef struct
 
 } channel_t;
 
-// PID type
-typedef struct
-{
-	int8_t	P_mult;
-	int8_t	I_mult;
-	int8_t	D_mult;
-} PID_mult_t;
-
 // Flight_control type (17)
 typedef struct
 {
-	PID_mult_t	Roll;					// Gyro PID
+	int8_t		Roll_P_mult;			// Roll PID
+	int8_t		Roll_I_mult;
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
+	int8_t		Roll_D_mult;
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
-	PID_mult_t	Pitch;
-	int8_t		Pitch_limit;
+
+	int8_t		Pitch_P_mult;			// Pitch PID
+	int8_t		Pitch_I_mult;
+	int8_t		Pitch_limit;			// I-term limits (0 to 125%)
+	int8_t		Pitch_D_mult;
 	int8_t		A_Pitch_P_mult;
 	int8_t		AccPitchZeroTrim;
-	PID_mult_t	Yaw;
-	int8_t		Yaw_limit;
-	int8_t		A_Zed_P_mult;
+
+	int8_t		Yaw_P_mult;				// Yaw PID
+	int8_t		Yaw_I_mult;
+	int8_t		Yaw_limit;				// I-term limits (0 to 125%)
+	int8_t		Yaw_D_mult;
 	int8_t		Yaw_trim;
+
+	int8_t		A_Zed_P_mult;
+
 } flight_control_t;
 
 // Settings structure
@@ -113,8 +117,9 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (9)
+	// RC items (10)
 	int8_t		RxMode;					// PWM, CPPM or serial types
+	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
 	int8_t		AileronPol;				// Aileron RC input polarity
@@ -134,7 +139,7 @@ typedef struct
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (8)
+	// General items (8/10)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
@@ -143,6 +148,11 @@ typedef struct
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
+	// Debug
+#ifdef KK21
+	int8_t		Acc_Gate;				// Threshold above which new acc data is processed differently
+	int8_t		Acc_Slew;				// Data is replaced by the current data + Acc_Slew
+#endif
 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
@@ -158,6 +168,9 @@ typedef struct
 	// Acc zeros
 	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
 	int16_t		AccVertZero;			// Acc-Z zero for zero-centered Z values
+
+	// Gyro zeros
+	int16_t	gyroZero[NUMBEROFAXIS];
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode

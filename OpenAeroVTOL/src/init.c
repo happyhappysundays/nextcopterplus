@@ -38,12 +38,6 @@
 extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
 
 //************************************************************
-// Defines
-//************************************************************
-
-#define GYROS_STABLE 30
-
-//************************************************************
 // Prototypes
 //************************************************************
 
@@ -192,16 +186,18 @@ void init(void)
 	// Load "Config" global data structure
 	else
 	{
-		Initial_EEPROM_Config_Load();			
+		Initial_EEPROM_Config_Load();	
+		
+		// Set contrast to the previously saved value
+		st7565_set_brightness((uint8_t)Config.Contrast);				
+
 		// Display logo if KK2.1
 #ifdef KK21
 		// Write logo from buffer
 		write_buffer(buffer,0);
+		_delay_ms(500);
 #endif
 	}
-
-	// Set contrast to the previously saved value
-	st7565_set_brightness((uint8_t)Config.Contrast);
 
 #ifndef KK21
 	// Display "Hold steady" message for KK2.0
@@ -221,21 +217,8 @@ void init(void)
 	// Initialise UART
 	init_uart();
 
-	// Pause to allow model to become stable
-	_delay_ms(1000);
-
-	// Calibrate gyros, hopefully after motion minimised
-	CalibrateGyros();	
-
-	// Check to see that gyros are stable
-	ReadGyros();
-
-	if ((gyroADC[ROLL] > GYROS_STABLE) || (gyroADC[ROLL] < -GYROS_STABLE) ||
-	 	(gyroADC[PITCH] > GYROS_STABLE) || (gyroADC[PITCH] < -GYROS_STABLE) ||
-		(gyroADC[YAW] > GYROS_STABLE) || (gyroADC[YAW] < -GYROS_STABLE))
-	{
-		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
-	}
+	// Initial gyro calibration
+	CalibrateGyrosSlow();
 
 	// Disarm on start-up if Armed setting is ARMABLE
 	if (Config.ArmMode == ARMABLE)
@@ -285,9 +268,7 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
 			break;
 
-		case PWM1:
-		case PWM2:
-		case PWM3:
+		case PWM:
 			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
 			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
 			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
