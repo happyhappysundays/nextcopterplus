@@ -66,13 +66,20 @@ void output_servo_ppm(void)
 		}
 	}
 
-	// Reset JitterFlag  immediately before PWM generation
-	JitterFlag = false;
-
 	// Suppress outputs during throttle high error
 	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{
+		// Reset JitterFlag immediately before PWM generation
+		JitterFlag = false;
+
+		// We now care about interrupts
+		JitterGate = true;
+
 		// Pass address of ServoOut array
 		output_servo_ppm_asm(&ServoOut[0]);
+
+		// We no longer care about interrupts
+		JitterGate = false;
+
 	}
 }
