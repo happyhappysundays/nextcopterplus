@@ -35,8 +35,6 @@
 #include "i2c.h"
 #include "MPU6050.h"
 
-extern void StackPaint(void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
-
 //************************************************************
 // Prototypes
 //************************************************************
@@ -140,22 +138,16 @@ void init(void)
 											// Clear INT2 interrupt flag (Rudder/CPPM)
 
 	//***********************************************************
-	// i2c init for KK2.1
-	//***********************************************************	
-
-#ifdef KK21
-	i2c_init();
-	init_i2c_gyros();
-	init_i2c_accs();
-#endif
-
-	//***********************************************************
 	// Start up
 	//***********************************************************
 
 	// Preset important flags
 	Interrupted = false;						
 	Main_flags |= (1 << FirstTimeIMU);
+
+	//***********************************************************
+	// GLCD initialisation
+	//***********************************************************
 
 	// Initialise the GLCD
 	st7565_init();
@@ -169,6 +161,10 @@ void init(void)
 
 	// This delay prevents the GLCD flashing up a ghost image of old data
 	_delay_ms(300);	
+
+	//***********************************************************
+	// Load or reset EEPROM settings
+	//***********************************************************
 
 	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users)
 	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
@@ -199,8 +195,22 @@ void init(void)
 #endif
 	}
 
+	//***********************************************************
+	// i2c init for KK2.1
+	//***********************************************************	
+
+#ifdef KK21
+	i2c_init();
+	init_i2c_gyros();
+	init_i2c_accs();
+#endif
+
+	//***********************************************************
+	// Remaining init tasks
+	//***********************************************************
+
 #ifndef KK21
-	// Display "Hold steady" message for KK2.0
+	// Display "Hold steady" message for KK2.0 (no room for logo)
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	clear_buffer(buffer);
 	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
@@ -213,9 +223,7 @@ void init(void)
 	UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 	init_int();								// Intialise interrupts based on RC input mode
-
-	// Initialise UART
-	init_uart();
+	init_uart();							// Initialise UART
 
 	// Initial gyro calibration
 	CalibrateGyrosSlow();
@@ -225,8 +233,6 @@ void init(void)
 	{
 		General_error |= (1 << DISARMED); 	// Set disarmed bit
 	}
-
-	_delay_ms(100);
 
 	// Check to see that throttle is low if RC detected
 	if (Interrupted)
@@ -246,8 +252,10 @@ void init(void)
 	// Beep that init is complete
 	menu_beep(1);
 
-	// Set text display mode back to normal
+#ifdef KK21
+	// Set text display mode back to normal (KK2.0 version has already done this)
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
+#endif
 
 } // init()
 

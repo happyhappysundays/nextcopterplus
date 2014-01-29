@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
 #include "io_cfg.h"
@@ -20,6 +21,8 @@
 #include "gyros.h"
 #include "acc.h"
 #include "menu_ext.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -65,9 +68,23 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,25);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
 
+#ifdef KK21
+/*	uint8_t	sample;
+
+	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG);
+	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,25,50);
+
+	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG);
+	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,45,50);
+
+	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV);
+	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,65,50);
+*/
+#endif
+
 		// Print bottom markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(37, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
+		LCD_Display_Text(25, (prog_uchar*)Verdana8, 75, 55); 	// Inverted Calibrate
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 108, 55); 	// Calibrate
 
 		// Update buffer

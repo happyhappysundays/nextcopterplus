@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/pgmspace.h> 
 #include <avr/io.h>
 #include <stdlib.h>
@@ -23,6 +24,8 @@
 #include "mixer.h"
 #include "imu.h"
 #include "uart.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -44,7 +47,7 @@ void menu_rc_setup(uint8_t i);
 #define RCITEMS 10 		// Number of menu items
 
 #ifdef KK21
-#define GENERALITEMS 10 
+#define GENERALITEMS 9 
 #else
 #define GENERALITEMS 8
 #endif
@@ -56,7 +59,11 @@ void menu_rc_setup(uint8_t i);
 const uint8_t RCMenuText[2][RCITEMS] PROGMEM = 
 {
 	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0},							// General
+#ifdef KK21
+	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0, 37},						// General
+#else
+	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0},
+#endif
 };
 
 const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM = 
@@ -75,7 +82,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (8/10)
+		// General (8/9)
 		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
@@ -85,8 +92,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{1,127,1,0,8},					// Acc. LPF
 		{10,100,1,0,30},				// CF factor
 #ifdef KK21
-		{1,127,1,0,127},				// Acc_Gate
-		{1,127,1,0,10},					// Acc_Slew
+		{0,6,1,1,6},					// MPU6050 LPF
 #endif
 	}
 };
@@ -169,6 +175,10 @@ void menu_rc_setup(uint8_t section)
 			UpdateIMUvalues();		// Update IMU variables
 			UpdateLimits();			// Update I-term limits and triggers based on percentages
 
+#ifdef KK21
+			// Update MPU6050 LPF
+			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, Config.MPU6050_LPF);
+#endif
 			// Update channel sequence
 			for (i = 0; i < MAX_RC_CHANNELS; i++)
 			{

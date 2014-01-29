@@ -44,9 +44,9 @@ void Display_rcinput(void)
 
 		RxGetChannels();
 
-		LCD_Display_Text(41,(prog_uchar*)Verdana8,0,0);
+		LCD_Display_Text(114,(prog_uchar*)Verdana8,0,0);
 		LCD_Display_Text(32,(prog_uchar*)Verdana8,0,10);
-		LCD_Display_Text(42,(prog_uchar*)Verdana8,0,20);
+		LCD_Display_Text(115,(prog_uchar*)Verdana8,0,20);
 		LCD_Display_Text(35,(prog_uchar*)Verdana8,0,30);
 
 		LCD_Display_Text(109,(prog_uchar*)Verdana8,70,0);

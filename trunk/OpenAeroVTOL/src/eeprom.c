@@ -16,6 +16,7 @@
 #include <util/delay.h>
 #include "mixer.h"
 #include "menu_ext.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -33,7 +34,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
 #define MAGIC_NUMBER 0x2C		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x2B = Beta 32+
+								// to force factory reset. 0x2C = Beta 32+
 
 //************************************************************
 // Code
@@ -121,8 +122,7 @@ void Set_EEPROM_Default_Config(void)
 
 	Config.Acc_LPF = 8;					// IMU CF defaults
 #ifdef KK21
-	Config.Acc_Gate = 127;	
-	Config.Acc_Slew = 10;	
+	Config.MPU6050_LPF = MPU60X0_DLPF_BW_5;	// 5Hz
 #endif
 	Config.CF_factor = 30;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default

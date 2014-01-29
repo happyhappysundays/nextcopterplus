@@ -21,7 +21,6 @@ extern char sBuffer[SBUFFER_SIZE];
 
 extern bool	RefreshStatus;
 extern uint32_t ticker_32;	
-extern uint16_t StackCount(void);	
 extern int16_t	transition_counter;	
 extern uint8_t	Transition_state;
 

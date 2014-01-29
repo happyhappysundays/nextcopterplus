@@ -139,7 +139,7 @@ typedef struct
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (8/10)
+	// General items (8/9)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
@@ -150,8 +150,7 @@ typedef struct
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
 	// Debug
 #ifdef KK21
-	int8_t		Acc_Gate;				// Threshold above which new acc data is processed differently
-	int8_t		Acc_Slew;				// Data is replaced by the current data + Acc_Slew
+	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
 #endif
 
 	// Channel configuration

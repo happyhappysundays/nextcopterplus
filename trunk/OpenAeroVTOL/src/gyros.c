@@ -23,6 +23,9 @@
 
 #define GYROS_STABLE 1
 #define SECOND_TIMER 19531			// Unit of timing for seconds
+#define GYROFS2000DEG 0x18			// 2000 deg/s fullscale
+#define GYROFS500DEG 0x08			// 500 deg/s fullscale
+#define GYROFS250DEG 0x00			// 250 deg/s fullscale
 
 //************************************************************
 // Prototypes
@@ -161,18 +164,18 @@ void get_raw_gyros(void)
 	// Check gyro array axis order and change in io_cfg.h
 	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_GYRO_XOUT_H,(uint8_t *)Gyros,6);
 
-	// Reassemble data into gyroADC array and down sample to reduce resolution and noise
+	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
 	temp1 = Gyros[0] << 8;
 	temp2 = Gyros[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 7;
+	RawADC[PITCH] = (temp1 + temp2) >> 6;
 
 	temp1 = Gyros[2] << 8;
 	temp2 = Gyros[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 7;
+	RawADC[ROLL] = (temp1 + temp2) >> 6;
 
 	temp1 = Gyros[4] << 8;
 	temp2 = Gyros[5];
-	RawADC[YAW] = (temp1 + temp2) >> 7;
+	RawADC[YAW] = (temp1 + temp2) >> 6;
 
 	// Reorient the data as per the board orientation
 	gyroADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][ROLL])];
@@ -196,11 +199,13 @@ void get_raw_gyros(void)
 void init_i2c_gyros(void)
 {
 	// First, configure the MPU6050
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x41); // Gyro X clock, sleep
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV, 0x02);	// Sample rate divder 1kHz / (2+1) = 333Hz
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, 0x06); 	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
+
+	// Other regs cannot be written until the MPU6050 is out of sleep mode
+//	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV, 0x02);	// Sample rate divder 1kHz / (2+1) = 333Hz
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, Config.MPU6050_LPF); 	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
 	
 	// Now configure gyros
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, 0x18); // 41
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS500DEG); // 500 deg/sec
 }
 #endif
