@@ -142,9 +142,10 @@
 //			Screen contrast updated before logo - logo prettier.
 //			Lock rate default changed to 3.
 //			Magic jitter counter updated every second in PWM mode on Status screen.
-// Beta 32	Fixed jitter meter
-//
-//			Release 1.0 candidate.
+// Beta 32	Fixed jitter meter.
+//			Changed sensor sensitivity to 500 deg/sec and 4G fullscale.
+//			Fixed MPU6050 setup codes. Now actually correct!
+//			Added user-settable chip LPF setting for KK2.1 version.
 //
 //***********************************************************
 //* Notes
@@ -153,7 +154,6 @@
 // Bugs:
 //	
 // Todo:
-//	
 //
 //
 //***********************************************************

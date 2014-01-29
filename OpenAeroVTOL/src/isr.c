@@ -43,6 +43,7 @@ volatile uint8_t bytecount;
 
 ISR(INT1_vect)
 {
+	// Log interrupts that iccur during PWM generation
 	if (JitterGate)	JitterFlag = true;	
 
 	if (RX_ROLL)	// Rising

@@ -101,9 +101,6 @@ void getEstimatedAttitude(void)
 	uint8_t		axis;
 	uint16_t	AccMag = 0;
 	bool		G_is_Normal = false;
-#ifdef KK21
-	int16_t		spike, filter = 0;
-#endif
 
 	// Get global timestamp
 	// The first calculation has no PreviousTime to measure from, so zero and move on.
@@ -134,35 +131,8 @@ void getEstimatedAttitude(void)
 		// Acc LPF with spike and surge mitigation
 		if (Config.Acc_LPF > 1)
 		{
-#ifdef KK21
-			// Measure noise spikes first
-			spike = accADC[axis] - (int16_t)accSmooth[axis];
-
-			// If new accADC data is within Acc_Gate value, let it pass normally
-			if ((spike < Config.Acc_Gate) && (spike > -Config.Acc_Gate))
-			{
-				filter = accADC[axis];
-			}
-			// If new accADC data exceeds Acc_Gate value, replace with Acc_Slew data
-			else
-			{
-				if (spike < 0)
-				{
-					filter = (int16_t)accSmooth[axis] - Config.Acc_Slew;
-				}
-				else
-				{
-					filter = (int16_t)accSmooth[axis] + Config.Acc_Slew;
-				}
-			}
-
-			// Acc LPF
-			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + filter) / Config.Acc_LPF;
-#else
 			// Acc LPF
 			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + (float)(accADC[axis])) / Config.Acc_LPF;
-#endif
-
 		}
 		else
 		{
@@ -205,7 +175,6 @@ void getEstimatedAttitude(void)
 		}	
 		
 		G_is_Normal = true;
-
 	} 
 	
 	// Whoooooaaaaaa

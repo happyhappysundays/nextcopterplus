@@ -136,8 +136,14 @@ const char GeneralText7[] PROGMEM =  "CF factor:";
 const char BattMenuItem2[]  PROGMEM = "Bat. LVA x10:";
 const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-term in Axis-lock mode
 #ifdef KK21
-const char GeneralText10[] PROGMEM =  "Acc. Gate:";
-const char GeneralText11[] PROGMEM =  "Acc. Slew:";
+const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
+const char MPU6050LPF1[] PROGMEM =  "5Hz";
+const char MPU6050LPF2[] PROGMEM =  "10Hz";
+const char MPU6050LPF3[] PROGMEM =  "21Hz";
+const char MPU6050LPF4[] PROGMEM =  "44Hz";
+const char MPU6050LPF5[] PROGMEM =  "94Hz";
+const char MPU6050LPF6[] PROGMEM =  "184Hz";
+const char MPU6050LPF7[] PROGMEM =  "260Hz";
 #endif
 //
 const char Transition[] PROGMEM = "Transition";
@@ -275,17 +281,20 @@ const char *text_menu[] PROGMEM =
 		Transition,																			// 22 Misc
 		StatusText8, 
 		StatusText9, 
-		Dummy0,		
+		SensorMenuItem2,		
 		//
 		PText15, PText16, PText17, PText18, PText19, Dummy0, 								// 26 to 31 Sensors
 		//
 		ChannelRef1, ChannelRef2, ChannelRef0, ChannelRef3, ChannelRef4,					// 32 to 36 RC inputs
 		//
-		SensorMenuItem2,																	// Inv.Cal. 37
-		//
-		Dummy0,Dummy0,Dummy0,																// 38 to 40  Spare
-		//
-		ChannelRef10, ChannelRef12, Dummy0, 												// 41 to 43
+#ifdef KK21
+		MPU6050LPF7, MPU6050LPF6, MPU6050LPF5, MPU6050LPF4,
+		MPU6050LPF3, MPU6050LPF2, MPU6050LPF1,												// 37 to 43  MPU6050 LPF
+#else
+		Dummy0,																				// 37 to 43  Spare
+		Dummy0,Dummy0,Dummy0,
+		Dummy0,Dummy0,Dummy0, 	
+#endif
 		//
 		Safety1, Safety2, 																	// 44 Safety 
 		//
@@ -332,7 +341,7 @@ const char *text_menu[] PROGMEM =
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
-		Dummy0, Dummy0, 
+		ChannelRef10, ChannelRef12, 														// 114, 115 Ch.ref abbreviations
 		//
 		RCMenuItem6, RCMenuItem7, RCMenuItem13,												// 116 to 118 JR/Futaba/Sat
 		//
@@ -362,16 +371,16 @@ const char *text_menu[] PROGMEM =
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		GeneralText9, Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 168 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 
 #ifdef KK21		
-		GeneralText10, GeneralText11, 
+		GeneralText10,
 #else
-		Dummy0, Dummy0,
+		Dummy0,
 #endif
 		//
-		Dummy0,Dummy0, Dummy0,	
+		Dummy0,Dummy0, Dummy0,	Dummy0,
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro

@@ -34,6 +34,10 @@ void get_raw_accs(void);
 // Defines
 //************************************************************
 
+#define ACCFS16G	0x18		// 16G full scale
+#define ACCFS4G 	0x08		// 4G full scale
+#define ACCFS2G		0x00		// 2G full scale
+
 // Polarity handling 
 #ifdef KK21 
 const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
@@ -192,15 +196,15 @@ void get_raw_accs(void)
 
 	temp1 = Accs[0] << 8;					// Accel X
 	temp2 = Accs[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 7;
+	RawADC[PITCH] = (temp1 + temp2) >> 6;
 
 	temp1 = Accs[2] << 8;					// Accel Y
 	temp2 = Accs[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 7;
+	RawADC[ROLL] = (temp1 + temp2) >> 6;
 
 	temp1 = Accs[4] << 8;					// Accel Z
 	temp2 = Accs[5];
-	RawADC[YAW] = (temp1 + temp2) >> 7;
+	RawADC[YAW] = (temp1 + temp2) >> 6;
 
 	// Reorient the data as per the board orientation
 	accADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][ROLL])];
@@ -224,10 +228,11 @@ void get_raw_accs(void)
 #ifdef KK21
 void init_i2c_accs(void)
 {
-	// Configure accs
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, 0x18); 
-
 	// Wake MPU6050
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
+
+	//writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, ACCFS16G); // 16G full scale
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, ACCFS4G); // 4G full scale
+	//writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, ACCFS2G); // 2G full scale
 }
 #endif
