@@ -23,6 +23,7 @@
 #include "menu_ext.h"
 #include "i2c.h"
 #include "MPU6050.h"
+#include "vbat.h"
 
 //************************************************************
 // Prototypes
@@ -41,8 +42,11 @@ void Display_sensors(void)
 		if (BUTTON4 == 0)
 		{
 			_delay_ms(500);
-			CalibrateAcc(NORMAL);
+#ifdef AIRSPEED
+			CalibrateAirspeed();
+#endif
 			CalibrateGyrosFast();
+			CalibrateAcc(NORMAL); // This also saves the data in eepom
 		}
 
 		if (BUTTON3 == 0)
@@ -56,30 +60,21 @@ void Display_sensors(void)
 
 		LCD_Display_Text(26,(prog_uchar*)Verdana8,37,0); 	// Gyro
 		LCD_Display_Text(30,(prog_uchar*)Verdana8,77,0); 	// Acc
-		LCD_Display_Text(27,(prog_uchar*)Verdana8,5,15);	// Roll
-		LCD_Display_Text(28,(prog_uchar*)Verdana8,5,25);	// Pitch
-		LCD_Display_Text(29,(prog_uchar*)Verdana8,5,35);	// Yaw/Z
+		LCD_Display_Text(27,(prog_uchar*)Verdana8,5,13);	// Roll
+		LCD_Display_Text(28,(prog_uchar*)Verdana8,5,23);	// Pitch
+		LCD_Display_Text(29,(prog_uchar*)Verdana8,5,33);	// Yaw/Z
 
-		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,40,15);
-		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,40,25);
-		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,40,35);
+		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,40,13);
+		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,40,23);
+		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,40,33);
 
-		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,15);
-		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,25);
-		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,35);
+		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(prog_uchar*)Verdana8,80,13);
+		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,23);
+		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,33);
 
-#ifdef KK21
-/*	uint8_t	sample;
-
-	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG);
-	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,25,50);
-
-	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG);
-	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,45,50);
-
-	sample = readI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV);
-	mugui_lcd_puts(itoa(sample,pBuffer,16),(prog_uchar*)Verdana8,65,50);
-*/
+#ifdef AIRSPEED
+		LCD_Display_Text(53,(prog_uchar*)Verdana8,5,45);		// Airspeed
+		mugui_lcd_puts(itoa((GetAirspeed() - Config.AirspeedZero),pBuffer,10),(prog_uchar*)Verdana8,55,45);
 #endif
 
 		// Print bottom markers

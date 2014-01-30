@@ -169,7 +169,10 @@ typedef struct
 	int16_t		AccVertZero;			// Acc-Z zero for zero-centered Z values
 
 	// Gyro zeros
-	int16_t	gyroZero[NUMBEROFAXIS];
+	int16_t		gyroZero[NUMBEROFAXIS];
+
+	// Airspeed zero
+	uint16_t	AirspeedZero;			// Zero airspeed sensor offset
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode

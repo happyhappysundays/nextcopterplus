@@ -20,11 +20,12 @@ void read_adc(uint8_t channel);
 
 //***********************************************************
 // Remap analog sensors for vertical and sideways modes
+// KK2.1 has no analog sensors but has ADC6 and ADC7 available
 //***********************************************************
 //											Vcc		Roll		Yaw			Vbat	Pitch		PitchA		RollA		ZA
-//										{AIN_VCC, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal/UD definition
-const int8_t ADCseqVert[8] PROGMEM = 	{AIN_VCC, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
-const int8_t ADCseqSide[8] PROGMEM = 	{AIN_VCC, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBAT, AIN_Y_GYRO, AIN_Y_ACC, AIN_X_ACC, AIN_Z_ACC}; // Sideways
+//										{AIN_VCC0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT0, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal/UD definition
+const int8_t ADCseqVert[8] PROGMEM = 	{AIN_VCC0, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT0, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
+const int8_t ADCseqSide[8] PROGMEM = 	{AIN_VCC0, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBAT0, AIN_Y_GYRO, AIN_Y_ACC, AIN_X_ACC, AIN_Z_ACC}; // Sideways
 
 #ifdef KK21
 //***********************************************************

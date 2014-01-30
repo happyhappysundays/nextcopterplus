@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 32";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 33";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -123,7 +123,6 @@ const char RXMode3[]  PROGMEM = "Spektrum";
 //
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 			// Channel order
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
-const char RCMenuItem13[] PROGMEM = "Satellite";
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
 const char Contrast[]  PROGMEM = "Contrast:";
@@ -259,6 +258,10 @@ const char MixerItem11[] PROGMEM = "Normal";				// Misc
 const char MixerItem12[] PROGMEM = "Rev.";
 const char MixerItem15[] PROGMEM = "Scale";
 const char GeneralText5[] PROGMEM =  "Fast";
+#ifdef AIRSPEED
+const char MiscText1[] PROGMEM =  "Pitot (Pa)";
+#endif
+
 //
 const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
@@ -302,8 +305,13 @@ const char *text_menu[] PROGMEM =
 		// 
 		P1text, P2text, P3text, 															// 48 to 52 P1, P1.n, P2, P1 to P1.n, P1.n to P2
 		P4text, P5text, 
-		
-		Dummy0, Dummy0,																		// 53 to 54 Spare
+
+#ifdef AIRSPEED
+		MiscText1,																			// 53 Airspeed 
+#else
+		Dummy0, 																			// 53 Spare 
+#endif
+		Dummy0,																				// 54 Spare
 		//
 		Random1,  																			// 55 High
 		//
@@ -343,7 +351,7 @@ const char *text_menu[] PROGMEM =
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
 		ChannelRef10, ChannelRef12, 														// 114, 115 Ch.ref abbreviations
 		//
-		RCMenuItem6, RCMenuItem7, RCMenuItem13,												// 116 to 118 JR/Futaba/Sat
+		RCMenuItem6, RCMenuItem7, Dummy0,													// 116 to 118 JR/Futaba
 		//
 		MixerItem11, GeneralText5,															// 119, 120 Normal, Fast
 		//
