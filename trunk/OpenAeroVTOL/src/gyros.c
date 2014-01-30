@@ -104,7 +104,12 @@ void CalibrateGyrosSlow(void)
 	// Force recalculation
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
+// Optimise starting point for each board
+#ifdef KK21
 		GyroSmooth[axis] = 0;
+#else
+		GyroSmooth[axis] = 500; // Debug
+#endif
 	}
 
 	// Wait until gyros stable. Timeout after 5 seconds
