@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 30 - January 2014
+// Version: Beta 33 - January 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -148,6 +148,7 @@
 //			Added user-settable chip LPF setting for KK2.1 version.
 // Beta 33	Optimised gyro slow cal starting point for each board
 //			Added airspeed sensor display on sensor screen if AIRSPEED compile option set (KK2.1 only)
+//			Contrast always set correctly on power-up.
 //
 //
 //***********************************************************
