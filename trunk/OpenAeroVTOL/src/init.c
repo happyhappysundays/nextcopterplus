@@ -183,17 +183,17 @@ void init(void)
 	else
 	{
 		Initial_EEPROM_Config_Load();	
-		
-		// Set contrast to the previously saved value
-		st7565_set_brightness((uint8_t)Config.Contrast);				
-
-		// Display logo if KK2.1
-#ifdef KK21
-		// Write logo from buffer
-		write_buffer(buffer,0);
-		_delay_ms(500);
-#endif
 	}
+
+	// Set contrast to the previously saved value
+	st7565_set_brightness((uint8_t)Config.Contrast);				
+
+	// Display logo if KK2.1
+#ifdef KK21
+	// Write logo from buffer
+	write_buffer(buffer,0);
+	_delay_ms(500);
+#endif
 
 	//***********************************************************
 	// i2c init for KK2.1
