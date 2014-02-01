@@ -74,21 +74,15 @@ void init(void)
 	DDRD		= 0xF2;		// Port D
 
 	// Hold all PWM outputs low to stop glitches
-	M1		= 0;
-	M2		= 0;
-	M3		= 0;
-	M4		= 0;
-	M5		= 0;
-	M6		= 0;
-	M7		= 0;
-	M8		= 0;		
+	// M5 and M6 are on PortA for KK2.1
+	MOTORS		= 0;
+	M5			= 0;
+	M6			= 0;		
 
 	// Preset I/O pins
 	LED1 		= 0;		// LED1 off
 	LVA 		= 0; 		// LVA alarm OFF
-	LCD_CSI		= 1;		// GLCD control bits
-	LCD_SCL		= 1;
-	LCD_RES		= 1;
+	LCD_SCL		= 1;		// GLCD clock high
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PINB		= 0xF5;		// Set PB pull-ups
@@ -101,13 +95,6 @@ void init(void)
 	_delay_ms(63);				// Pause while satellite wakes up	
 								// and pull-ups have time to rise.
 								// Tweak until bind pulses about 68ms after power-up
-
-	// Bind as slave if ONLY button 1 pressed
-	if ((PINB & 0xf0) == 0x70)
-	{
-		DDRD		= 0xF3;		// Switch PD0 to output
-		bind_slave();
-	}
 
 	// Bind as master if ONLY button 4 pressed
 	if ((PINB & 0xf0) == 0xE0)
@@ -178,11 +165,9 @@ void init(void)
 	//***********************************************************
 
 	// Preset important flags
-	RC_Lock = false;						
-	Flight_flags &= ~(1 << Failsafe);
-	Flight_flags &= ~(1 << AutoLevel);
-	Flight_flags &= ~(1 << Stability);
+	Interrupted  = false;						
 	Main_flags |= (1 << FirstTimeIMU);
+	Main_flags |= (1 << FirstTimeFlightMode);
 
 	// Initialise the GLCD
 	st7565_init();
@@ -213,13 +198,17 @@ void init(void)
 	// Load "Config" global data structure
 	else
 	{
-		Initial_EEPROM_Config_Load();			
-		// Pause for logo if KK2.1
+		Initial_EEPROM_Config_Load();
+	}		
+
+	// Now set contrast to the previously saved value
+	st7565_set_brightness((uint8_t)Config.Contrast);
+						
 #ifdef KK21
-		// Write logo from buffer
-		write_buffer(buffer,0);
+	// Write logo from buffer
+	write_buffer(buffer,0);
+	_delay_ms(500);
 #endif
-	}
 
 #ifndef KK21
 	// Display "Hold steady" message for KK2.0
@@ -236,22 +225,11 @@ void init(void)
 	Init_ADC();
 	init_int();								// Intialise interrupts based on RC input mode
 
-	// Reset I-terms (possibly unnecessary)
-	IntegralGyro[ROLL] = 0;	
-	IntegralGyro[PITCH] = 0;
-	IntegralGyro[YAW] = 0;
-
-	// Now set contrast to the previously saved value
-	st7565_set_brightness((uint8_t)Config.Contrast);
-
 	// Initialise UART
 	init_uart();
 
-	// Pause to allow model to become stable
-	_delay_ms(1000);
-
-	// Calibrate gyros, hopefully after motion minimised
-	CalibrateGyros();	
+	// Initial gyro calibration
+	CalibrateGyrosSlow();
 
 	// Check to see that gyros are stable
 	ReadGyros();
@@ -263,7 +241,7 @@ void init(void)
 		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
 	}
 
-	// Check to see that throttle is low if in serial mode if RC detected
+	// Check to see that throttle is low if in serial mode.
 	// Don't bother if in CamStab mode
 	_delay_ms(100);
 	if (
@@ -273,7 +251,6 @@ void init(void)
 		 (Config.RxMode == SBUS) ||
 		 (Config.RxMode == SPEKTRUM)
 		)
-		&& RC_Lock
 		&& (Config.CamStab == OFF)
 	   )
 	{
@@ -311,9 +288,7 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
 			break;
 
-		case PWM1:
-		case PWM2:
-		case PWM3:
+		case PWM:
 			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
 			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
 			EIMSK  = 0x07;						// Enable INT0, 1 and 2 

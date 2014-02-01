@@ -37,6 +37,8 @@ void do_main_menu_item(uint8_t menuitem);
 // Main menu-specific setup
 //************************************************************
 
+uint8_t menu_flag;
+
 void menu_main(void)
 {
 	static uint8_t main_cursor = LINE0;	// These are now static so as to remember the main menu position
@@ -80,6 +82,7 @@ void menu_main(void)
 			cursor = LINE0;
 			menu_temp = 0;
 			old_menu = main_temp;
+			menu_flag = 1;
 		}
 
 		// If ENTER pressed, jump to menu 

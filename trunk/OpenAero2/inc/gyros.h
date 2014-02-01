@@ -7,6 +7,7 @@
 //***********************************************************
 
 extern void ReadGyros(void);
-extern void CalibrateGyros(void);
+extern void CalibrateGyrosSlow(void);
+extern void CalibrateGyrosFast(void);
 
-extern int16_t gyroADC[3];		// Holds 16-bit gyro values
+extern int16_t gyroADC[NUMBEROFAXIS];		// Holds 16-bit gyro values

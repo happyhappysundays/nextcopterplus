@@ -72,8 +72,8 @@ void UpdateIMUvalues(void);
 
 /* Scaling factor for acc to read in Gs */
 #define acc_1G		125					// Z-axis full scale (+/- 1G) is 249 so I guess 1G is half of that
-#define acc_1_4G 	(1.4 * acc_1G) * (1.4 * acc_1G)
-#define acc_0_6G 	(0.6 * acc_1G) * (0.6 * acc_1G)
+#define acc_1_4G_SQ 30625				// (1.4 * acc_1G) * (1.4 * acc_1G)
+#define acc_0_6G_SQ 5625				// (0.6 * acc_1G) * (0.6 * acc_1G)
 
 // Notes:
 // Pitch should have a range of +/-90 degrees. 
@@ -87,14 +87,13 @@ void UpdateIMUvalues(void);
 
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
-
+float 	accSmooth[NUMBEROFAXIS];
 int16_t	angle[2]; 			// Attitude
 
 void getEstimatedAttitude(void)
 {
-	static float deltaGyroAngle[3] = {0.0f,0.0f,0.0f};
+	static float deltaGyroAngle[NUMBEROFAXIS] = {0.0f,0.0f,0.0f};
 	static uint32_t PreviousTime = 0;
-	static float accSmooth[3];
 
 	float 		deltaTime, tempf;
 	uint32_t 	CurrentTime;
@@ -111,8 +110,8 @@ void getEstimatedAttitude(void)
 		Main_flags &= ~(1 << FirstTimeIMU);
 		PreviousTime = ticker_32;
 		
-		// Reset accumulating variables if Autolevel has been off.
-		for (axis = 0; axis < 3; axis++) 
+		// Reset accumulating variables
+		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 		{	
 			accSmooth[axis] = 0;
 			deltaGyroAngle[axis] = 0;
@@ -127,12 +126,16 @@ void getEstimatedAttitude(void)
 	}
 
 	// Initialization
-	for (axis = 0; axis < 3; axis++) 
+	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
-		if (Config.Acc_LPF > 0)
+		// Only use LPF if requested
+		if (Config.Acc_LPF > 1)
 		{
 			// LPF for ACC values
-			accSmooth[axis] = ((accSmooth[axis] * (Config.Acc_LPF - 1)) + accADC[axis]) / Config.Acc_LPF;
+			// accSmooth is a float
+			// Config.Acc_LPF is an int8_t
+			// accADC is a int16_t
+			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + (float)(accADC[axis])) / (float)Config.Acc_LPF;
 		}
 		else
 		{
@@ -150,7 +153,7 @@ void getEstimatedAttitude(void)
 	pitch_sq = (accADC[PITCH] * accADC[PITCH]) ;
 	yaw_sq = (accADC[YAW] * accADC[YAW]);
 
-	AccMag = (roll_sq + pitch_sq + yaw_sq);
+	AccMag = (uint16_t)(roll_sq + pitch_sq + yaw_sq);
 
 	// Apply complimentary filter (Gyro drift correction)
 	// If accel magnitude >1.4G or <0.6G => we neutralize the effect of accelerometers in the angle estimation.
@@ -159,19 +162,19 @@ void getEstimatedAttitude(void)
 	// The equation is really just mag^2 = x^2 + y^2 + z^2.
 	// 125^2 or 15625 represents 1G (standing still). 0.6G is 5625 and 1.4G is 30625.
 
-	if (!((acc_0_6G > AccMag) || (AccMag > acc_1_4G))) // While under normal G
+	if (!((acc_0_6G_SQ > AccMag) || (AccMag > acc_1_4G_SQ))) // While under normal G
 	{ 
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
 
 		// The CF algorithm will fail when inverted as acc moves opposite gyro
-		// When inverted, use acc only. In old IMU mode don't bother.
-		if ((accADC[YAW] > 0) || (Config.IMUType == 0))
+		// When inverted, use acc only.
+		if (accADC[YAW] > 0)
 		{
 			deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 		}
 		else
 		{
-			deltaGyroAngle[PITCH] = - accSmooth[PITCH];
+			deltaGyroAngle[PITCH] = -accSmooth[PITCH];
 		}	
 		
 		G_is_Normal = true;
@@ -184,21 +187,22 @@ void getEstimatedAttitude(void)
 		G_is_Normal = false;
 	}
 
-	// If advanced IMU type and when under normal G
-	if ((Config.IMUType == 1) && (G_is_Normal == true))
+	// If under normal G
+	if (G_is_Normal == true)
 	{
 		// Calculate the roll and pitch angles properly
 		// then convert to degrees
-		tempf = atan(deltaGyroAngle[PITCH] / sqrt(roll_sq + yaw_sq));
-		angle[PITCH]  = tempf * (180 / M_PI);
+		tempf = atan(deltaGyroAngle[PITCH] / (float)sqrt(roll_sq + yaw_sq));
+		angle[PITCH]  = (int16_t)(tempf * (float)(180 / M_PI));
 
-		tempf = atan(deltaGyroAngle[ROLL]  / sqrt(pitch_sq + yaw_sq));
-		angle[ROLL]  = tempf * (180 / M_PI);
+		tempf = atan(deltaGyroAngle[ROLL]  / (float)sqrt(pitch_sq + yaw_sq));
+		angle[ROLL]  = (int16_t)(tempf * (float)(180 / M_PI));
 
 		// And I think this solves the upside down issue...
-		// Handle roll reversal when inverted
+		// Handle axis reversal when inverted
 		if (accADC[YAW] < 0)
 		{
+			// Roll
 			if (accADC[ROLL] < 0)
 			{
 				angle[ROLL] = (180 - angle[ROLL]);
@@ -206,6 +210,16 @@ void getEstimatedAttitude(void)
 			else
 			{
 				angle[ROLL] = (-180 - angle[ROLL]);
+			}
+
+			// Pitch
+			if (accADC[PITCH] < 0)
+			{
+				angle[PITCH] = (180 - angle[PITCH]);
+			}
+			else
+			{
+				angle[PITCH] = (-180 - angle[PITCH]);
 			}
 		}
 	}

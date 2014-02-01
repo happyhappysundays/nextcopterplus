@@ -16,6 +16,7 @@
 #include <util/delay.h>
 #include "mixer.h"
 #include "menu_ext.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -32,7 +33,7 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x12		// eePROM signature - change for each eePROM structure change 0x12 = V1.2b9
+#define MAGIC_NUMBER 0x15		// eePROM signature - change for each eePROM structure change 0x15 = V1.2b11
 								// to force factory reset
 
 //************************************************************
@@ -41,7 +42,6 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 
 const uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
 const uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
-const uint8_t	SATELLITE[MAX_RC_CHANNELS] PROGMEM = {5,1,2,3,4,0,6,7}; // Spektrum satellite channel sequence (FAERGT12)
 
 void Set_EEPROM_Default_Config(void)
 {
@@ -71,35 +71,32 @@ void Set_EEPROM_Default_Config(void)
 	//
 	get_preset_mix(AEROPLANE_MIX);		// Load AEROPLANE default mix
 	//
-	Config.RxMode = PWM1;				// Default to PWM1
+	Config.RxMode = PWM;				// Default to PWM1
+	Config.PWM_Sync = GEAR;
 	Config.TxSeq = JRSEQ;
 
 #ifdef KK21
 	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
 	Config.AccZero[PITCH]	= 0;
 	Config.AccZero[YAW]		= 0;
+	Config.AccVertZero		= 0;
 #else
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre
+	Config.AccVertZero		= 765;
 #endif
 	
 	// Flight modes
-	Config.FlightMode[0].Profilelimit = -100;			// Trigger setting
-
-	Config.FlightMode[1].Profilelimit = 0;	
+	Config.FlightMode[0].Profilelimit = -90;			// Trigger setting
+	Config.FlightMode[1].Profilelimit = -50;	
 	Config.FlightMode[1].StabMode = ALWAYSON;
-//	Config.FlightMode[1].Yaw_type = LOCK; // debug for axis lock testing
-//	Config.FlightMode[1].Yaw_limit = 125; // debug
-
-	Config.FlightMode[2].Profilelimit = 80;	
+	Config.FlightMode[2].Profilelimit = 90;	
 	Config.FlightMode[2].StabMode = ALWAYSON;
 	Config.FlightMode[2].AutoMode = ALWAYSON;
-//	Config.FlightMode[2].Yaw_type = LOCK; // debug
-//	Config.FlightMode[2].Yaw_limit = 125; // debug
 
 	// Set up all three profiles the same initially
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < FLIGHT_MODES; i++)
 	{
 		Config.FlightMode[i].Roll.P_mult = 80;			// PID defaults		
 		Config.FlightMode[i].Roll.I_mult = 50;	
@@ -112,6 +109,9 @@ void Set_EEPROM_Default_Config(void)
 	}
 
 	Config.Acc_LPF = 8;
+#ifdef KK21
+	Config.MPU6050_LPF = MPU60X0_DLPF_BW_5;	// 5Hz
+#endif
 	Config.CF_factor = 30;
 	Config.DynGainSrc = NOCHAN;
 	Config.DynGain = 100;
@@ -127,7 +127,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.Status_timer = 10;			// Refresh timeout
 	Config.LMA_enable = 3;				// Default to 3 minutes
 	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
-	Config.Stick_Lock_rate = 2;
+	Config.Stick_Lock_rate = 3;
 	Config.Deadband = 2;				// RC deadband = 2%
 	Config.FailsafeThrottle = -100;		// Throttle position in failsafe
 }

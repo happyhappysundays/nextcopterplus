@@ -1,6 +1,7 @@
 /*********************************************************************
  * typedefs.h
  ********************************************************************/
+#include "compiledefs.h"
 
 #ifndef TYPE_DEFS_H_
 #define TYPE_DEFS_H_
@@ -11,12 +12,13 @@
 
 #define INPUT 	0
 #define OUTPUT 	1
-#define MAX_RC_SOURCES 9				// Maximum input channels including non-RX channels
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define PSUEDO_OUTPUTS 12				// Total number of mixer channels
 #define MAX_OUTPUTS 8					// Maximum output channels
 #define MIN_OUTPUTS 4					// Minimum output channels
 #define NUM_MIXERS 2
+#define	FLIGHT_MODES 3					// Number of flight profiles
+#define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
 
 typedef struct
 {
@@ -42,7 +44,6 @@ typedef struct
 	int8_t		source_a_volume;		// Percentage of source to pass on
 	int8_t		source_b;				// Optional source B RC input for calculation
 	int8_t		source_b_volume;		// Percentage of source to pass on
-	int8_t		source_mix;				// Source RC included in stabilised modes
 	int8_t		roll_gyro;				// Use roll gyro
 	int8_t		pitch_gyro;				// Use pitch gyro
 	int8_t		yaw_gyro;				// Use yaw gyro
@@ -107,8 +108,9 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];	// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (14)
-	int8_t		RxMode;					// PWM or CPPM mode
+	// RC items (15)
+	int8_t		RxMode;					// PWM, CPPM or serial types
+	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
 	int8_t		FlapChan;				// Channel number for second aileron input
@@ -131,11 +133,11 @@ typedef struct
 	int8_t		FailsafeRudder;			// Rudder trim in failsafe
 	
 	// Flight mode settings
-	flight_control_t FlightMode[3];		// Flight control settings (3)
+	flight_control_t FlightMode[FLIGHT_MODES];		// Flight control settings (3)
 
 	// Servo travel limts
-	int32_t		Raw_I_Limits[3];		// Actual, unspanned I-term out limits to save recalculation each loop
-	int32_t		Raw_I_Constrain[3];		// Actual, unspanned I-term in limits to save recalculation each loop
+	int32_t		Raw_I_Limits[NUMBEROFAXIS];			// Actual, unspanned I-term out limits to save recalculation each loop
+	int32_t		Raw_I_Constrain[NUMBEROFAXIS];		// Actual, unspanned I-term in limits to save recalculation each loop
 
 	// Triggers
 	int16_t		Autotrigger1;			// Actual, unspanned flight mode 0 trigger to save recalculation each loop
@@ -158,7 +160,7 @@ typedef struct
 	int8_t		MaxVoltage;				// Maximum cell voltage in charged state (0 to 127 = 0 to 508mV)
 	int8_t		MinVoltage;				// Minimum cell voltage in discharge state
 
-	// General items (14)
+	// General items (14/15)
 	int8_t		MixMode;				// Aeroplane/Flying Wing/Camstab
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
@@ -173,6 +175,10 @@ typedef struct
 	int8_t		LaunchMode;				// Launch mode on/off
 	int8_t		LaunchThrPos;			// Launch mode throttle position
 	int8_t		LaunchDelay;			// Launch mode delay time
+	// Debug
+#ifdef KK21
+	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+#endif
 
 	// Non-menu items 
 	// Input channel configuration
@@ -188,8 +194,12 @@ typedef struct
 	// RC inputs
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
-	// Acc
-	uint16_t	AccZero[3];				// Acc calibration results
+	// Acc zeros
+	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results
+	int16_t		AccVertZero;			// Acc-Z zero
+
+	// Gyro zeros
+	int16_t		gyroZero[NUMBEROFAXIS];
 	
 	// Menu channel number
 	int8_t		MenuChannel;			// Current M1 to M8 channel

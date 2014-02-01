@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 170 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 171 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -339,7 +339,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			servo_update = 0;
 
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
-			temp16 = ((temp16 << 2) / 10); 	// Span back to what the output wants
+			temp16 = (((temp16 << 2) + (int16_t)5) / (int16_t)10); 	// Span back to what the output wants
 
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);

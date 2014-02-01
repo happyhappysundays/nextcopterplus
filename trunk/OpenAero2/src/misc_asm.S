@@ -30,32 +30,6 @@ glcd_delay:
 	.endfunc
 
 ;*************************************************************************	
-; Do slave binding timing
-;*************************************************************************
-
-	.global bind_slave
-	.func   bind_slave
-bind_slave:
-	push	YL			//	1
-	push	XL			//	1
-
-	ldi		XL,0x6		// 	1 Slave is 6 pulses
-slave_loop:
-	cbi 	BIND		//	2
-	ldi		YL,0x78		// 	1 		120us
-	call	VarDelay	//	4
-	sbi		BIND		//	2
-	ldi		YL,0x78		// 	1 		120us
-	call	VarDelay	//	4
-	dec		XL			//	1
-	brne	slave_loop	//  2 1
-
-	pop		XL			//	  1
-	pop		YL			//	  1
-	ret					//	  4 
-	.endfunc
-
-;*************************************************************************	
 ; Do master binding timing
 ;*************************************************************************
 

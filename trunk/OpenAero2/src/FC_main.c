@@ -1,16 +1,15 @@
 // **************************************************************************
 // OpenAero2 software for KK2.0
 // ===========================
-// Version 1.2 Beta 11 - December 2013
+// Version 1.2 Beta 11 - January 2014
 //
-// May contain trace elements of old C code by Mike Barton
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2013 David Thompson
+// * Copyright (C) 2014 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -211,12 +210,107 @@
 //			Fixed all invert calibrate bugs and retested every board orientation.
 //			Camstab offset bug also fixed.
 // Beta 11	Compiler clean-up. Contrast bug fixed.
+//			Axis lock stick rate now calibrated to 10, 20, 40, 80, 160, 320 and 640 deg/sec.
+// 			Servo limits corrected to accurately move to the stated position.
+// 			Divides rounded correctly, not truncated. Tidied up CPPM code
+// 			Fixed the balance meter display for all orientations
+// 			Battery voltage calculation faster and more accurate.
+// 			IMU update. Pitch response works the same as roll in autolevel when inverted.
+// 			Fixed balance meter response in KK2.1. Added Manual mixer option.
+//			Removed Source Mix setting as per OpenAero VTOL.
+//			Vbat now displays correctly for both KK2.0 and KK2.1. S.Bus timing tweaked.
+//			RC noise threshold changed from +/-20 to +/-5. Tweaked battery display.
+// 			Fixed acc calibration issues. Fixed Acc Z initial offset for KK2.1.
+//			Fixed small bug where Acc LPF would not turn off when set to minimum.
+//			Balance meter uses AccSmooth, so now shows an approximation of the Acc LPF.	
+//			Better rounding in Acc LPF calculation. Tidied up IMU multiplies to make sure there were no casting gotchas.			
+//			Saved code space in the CPPM section thanks to Edgar.		
+//			Fixed code where RCinputs[NOCHAN] broke things.
+//			Added test for first time though the main loop so that UpdateLimits() is done with the correct flight mode.
+//			Increased Acc LPF range to 127. Gyro calibrate on initialisation waits for stability.
+//			RX modes changed to CPPM, PWM, S.Bus and Satellite.
+//			Add new menu item for selecting PWM sync source. Now all five PWM inputs can be selectable as a sync source.
+//			Screen contrast updated before logo - logo prettier.
+//			Lock rate default changed to 3.
+//			Fixed MPU6050 setup codes. Now actually correct! Currently 500 deg/sec and 4G fullscale.
+//			Added user-settable chip LPF setting for KK2.1 version.
+//
+//
+//
 //
 //***********************************************************
 //* To do
 //***********************************************************
 //
-// 
+//	Bugs:
+//	Axis lock stick is opposite integral - retest now that code aligned with OpenAeroVTOL
+//	
+//
+//	To test:
+//  =======
+//	General:
+//		Mixer presets
+//			Manual ok
+//			F.Wing ok
+//			Camstab ok
+//			Aero ok
+//		Orientations - TBD
+//		Contrast ok
+//		Status time ok
+//		Lost model alarm ok
+//		Camstab mode - OK (Fixed)
+//		Servo rate
+//		Cam. center - OK
+//		Acc. LPF
+//		CF factor
+//		ADv. IMU
+//		Launch delay
+//			THR pos %
+//			Delay time  
+//
+//  RX setup:
+//		Dynamic gain ok
+//		Profile switching ok
+//
+//	Flight profile settings:
+//
+//	Sensor calibration:
+//
+//	Level meter:
+//
+//	Channel mixing:
+//
+//	Output mixing:
+//
+//	Servo direction:
+//
+//	Servo trim:
+//
+// 	Neg servo travel:
+//
+//	Pos servo travel:
+//
+//	Failsafe settings:
+//
+//	Failsafe positions:
+//
+//	Battery monitor:
+//		Battery OK on KK2.0
+//		LVA tested OK
+//
+//
+//
+//	Tested:
+//  ======
+//
+//	Stick polarity screen: ok
+//
+//	RX inputs: ok
+//
+//	Misc:
+//		No signal alarm ok
+//		Throttle high alarm OK
+//
 //
 //***********************************************************
 //* Includes
@@ -345,30 +439,14 @@ int main(void)
 		switch(Menu_mode) 
 		{
 			// In IDLE mode, the text "Press for status" is displayed ONCE.
-			// If a button is pressed the mode changes to REQ_STATUS
+			// If a button is pressed the mode changes to STATUS
 			case IDLE:
 				if((PINB & 0xf0) != 0xf0)
 				{
-					Menu_mode = REQ_STATUS;
+					Menu_mode = STATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
 					menu_beep(1);
-				}
-				break;
-
-			// Request the status be updated when safe
-			case REQ_STATUS:
-				// Reset safe to refresh flag
-				Main_flags &= ~(1 << Refresh_safe);
-				Menu_mode = WAITING_STATUS;
-				break;
-
-			// Waiting for status screen to be updated
-			case WAITING_STATUS:
-				// Next time Refresh_safe is set, switch to status screen
-				if (Refresh_safe)
-				{
-					Menu_mode = STATUS;
 				}
 				break;
 
@@ -404,17 +482,19 @@ int main(void)
 					Menu_mode = STATUS_TIMEOUT;
 				}
 
-				// Update status screen while waiting to time out
-				else if (UpdateStatus_timer > SECOND_TIMER)
-				{
-					Menu_mode = REQ_STATUS;
-				}
-
 				// Jump to menu if button pressed
 				else if(BUTTON1 == 0)
 				{
 					Menu_mode = MENU;
 					menu_beep(1);
+					// Force resync on next RC packet
+					Interrupted = false;
+				}
+
+				// Update status screen while waiting to time out
+				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
+				{
+					Menu_mode = STATUS;
 				}
 				break;
 
@@ -422,6 +502,8 @@ int main(void)
 			case STATUS_TIMEOUT:
 				// Pop up the Idle screen
 				idle_screen();
+				// Force resync on next RC packet
+				Interrupted = false;
 				// Switch to IDLE mode
 				Menu_mode = IDLE;
 				break;
@@ -430,6 +512,8 @@ int main(void)
 			case MENU:
 				LVA = 0;	// Make sure buzzer is off :)
 				menu_main();
+				// Force resync on next RC packet
+				Interrupted = false;
 				// Switch back to status screen when leaving menu
 				Menu_mode = STATUS;
 				// Reset timeout once back in status screen
@@ -482,6 +566,27 @@ int main(void)
 		//* Alarms
 		//************************************************************
 
+		// If simply overdue, signal RX error message
+		// If in independant camstab mode, don't bother
+		if (Overdue && (Config.CamStab == OFF))
+		{
+			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
+		}
+		else
+		{
+			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
+		}
+
+		// Check for failsafe condition
+		if (Overdue)
+		{
+			Flight_flags |= (1 << Failsafe);
+		}
+		else
+		{
+			Flight_flags &= ~(1 << Failsafe);
+		}
+
 		// Lost model alarm
 		LostModel_timer += (uint8_t) (TCNT2 - Lost_TCNT2);
 		Lost_TCNT2 = TCNT2;
@@ -490,11 +595,11 @@ int main(void)
 		if ((Flight_flags & (1 << RxActivity)) || (Config.LMA_enable == 0) || (Config.CamStab == ON))
 		{														
 			LostModel_timer = 0;
-			Flight_flags &= ~(1 << Model_lost);
 			LMA_minutes = 0;
-			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit		
+			General_error &= ~(1 << LOST_MODEL); // Clear lost model bit
 		}
 		
+		// Count the minutes
 		if (LostModel_timer > LMA_TIMEOUT)
 		{
 			LMA_minutes++;
@@ -504,7 +609,6 @@ int main(void)
 		// Trigger lost model alarm if enabled and due or failsafe
 		if ((LMA_minutes >= Config.LMA_enable) && (Config.LMA_enable != 0))	
 		{
-			Flight_flags |= (1 << Model_lost);
 			General_error |= (1 << LOST_MODEL); // Set lost model bit
 		}
 
@@ -512,20 +616,19 @@ int main(void)
 		// Vbat is measured in units of 10mV, so a PowerTrigger of 127 equates to
 		if (GetVbat() < Config.PowerTriggerActual)
 		{
-			Alarm_flags |= (1 << LVA_Alarm);	// Set LVA_Alarm flag
 			General_error |= (1 << LOW_BATT); 	// Set low battery bit
 		}
 		else 
 		{
-			Alarm_flags &= ~(1 << LVA_Alarm);	// Clear LVA_Alarm flag
 			General_error &= ~(1 << LOW_BATT); 	// Clear low battery bit
 		}
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
-		if	(((Alarm_flags & (1 << LVA_Alarm)) ||
-			  (Flight_flags & (1 << Model_lost)) || 
-			  (Alarm_flags & (1 << SIG_Alarm))) &&
-			  (Alarm_flags & (1 << BUZZER_ON))) 
+		if	(((General_error & (1 << LOW_BATT)) ||
+			  (General_error & (1 << LOST_MODEL)) || 
+			  (General_error & (1 << THROTTLE_HIGH)) ||	
+			  (General_error & (1 << NO_SIGNAL))) &&
+			  (Alarm_flags	 & (1 << BUZZER_ON))) 
 		{
 			LVA = 1;
 		}
@@ -614,9 +717,12 @@ int main(void)
 			Config.Flight = 0;			// Flight mode 0
 		}
 
-		// When changing flight modes...
-		if (Config.Flight != old_flight)
+		// When changing flight modes or on first startup
+		if ((Config.Flight != old_flight) || (Main_flags & (1 << FirstTimeFlightMode)))
 		{
+			// Clear first time flag
+			Main_flags &= ~(1 << FirstTimeFlightMode);
+
 			// Update travel limits
 			UpdateLimits();
 	
@@ -746,10 +852,19 @@ int main(void)
 		// Servo_Timeout increments at 19.531 kHz, in loop cycle chunks
 		Servo_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
+
+		//************************************************************
+		//* Check prescence of RC
+		//************************************************************
+
 		if (Servo_Timeout > SERVO_OVERDUE)
 		{
-			Overdue = true;
+			Overdue = true; // This results in a "No Signal" error
 		}
+
+		//************************************************************
+		//* Measure incoming RC rate
+		//************************************************************
 
 		// Always clear overdue state is an input received.
 		if (Interrupted)
@@ -771,8 +886,12 @@ int main(void)
 			RC_Rate_Timer = 0;
 		}
 
+		//************************************************************
+		//* Manage desired output update rate when limited by
+		//* the PWM rate set to "Normal"
+		//************************************************************
 
-		// If in CabStab mode (no RC to synch) AND the Servo Rate is set to HIGH run at full speed
+		// If in CambStab mode (no RC to synch) AND the Servo Rate is set to HIGH run at full speed
 		if (Config.Servo_rate == HIGH)
 		//if ((Config.CamStab == ON) && (Config.Servo_rate == HIGH))
 		{
@@ -796,46 +915,23 @@ int main(void)
 			}
 		}
 
-		// If simply overdue, signal RX error message
-		// If in independant camstab mode, don't bother
-		if (Overdue && (Config.CamStab == OFF))
-		{
-			General_error |= (1 << NO_SIGNAL);	// Set NO_SIGNAL bit
-			Alarm_flags |= (1 << SIG_Alarm);	// Set SIG_Alarm flag
-		}
-		else
-		{
-			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
-			Alarm_flags &= ~(1 << SIG_Alarm);	// Clear SIG_Alarm flag
-		}
+		//************************************************************
+		//* Synchronise output update rate to the RC interrupts
+		//* based on a specific set of conditions
+		//************************************************************
 
-		// Check for failsafe condition (Had RC lock but now overdue)
-		if (Overdue && RC_Lock)
-		{
-			Flight_flags |= (1 << Failsafe);
-			RC_Lock = false;
-		}
-
-
-		// Ensure that output_servo_ppm() is synchronised to the RC interrupts
-		//if (Interrupted) 					// Plan A
-		//if (Interrupted && ServoTick) 	// Plan B
-
-		if ((Interrupted && SlowRC) || 					// Plan A (slow RC)
-			(Interrupted && ServoTick && !SlowRC) ||	// Plan B (fast RC)
-			(Interrupted && (Config.Servo_rate == HIGH))) // Plan C (any RC with servo rate = HIGH)
+		// Cases where we are ready to output
+		if	(Interrupted &&						// Only when interrupted (RC receive completed)
+				(
+				  (SlowRC) || 					// Plan A (Run as fast as the incoming RC if slow RC detected)
+				  (ServoTick && !SlowRC) ||		// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected)
+				  (Config.Servo_rate == HIGH) 	// Plan C (Run as fast as the incoming RC if in HIGH mode)
+				)
+			)
 		{
 			Interrupted = false;			// Reset interrupted flag
 			ServoTick = false;
 			Servo_Rate = 0;
-
-			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
-
-			if (Config.RxMode != SBUS)		// SBUS can report its own failsafe
-			{
-				Flight_flags &= ~(1 << Failsafe);// Cancel failsafe unless failsafe source is receiver
-			}
-
 			output_servo_ppm();				// Output servo signal
 		}
 
@@ -845,13 +941,8 @@ int main(void)
 		{
 			ServoTick = false;				// Reset servo update ticker
 			Servo_Rate = 0;					// Reset servo rate timer
-			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
 			output_servo_ppm();				// Output servo signal
-		}
-
-		if (Overdue && ServoTick)
-		{
-			Main_flags |= (1 << Refresh_safe); // Safe to try and refresh status screen
+			Interrupted = false;			// Reset interrupted flag
 		}
 
 		// Measure the current loop rate

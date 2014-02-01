@@ -36,9 +36,7 @@ extern CONFIG_STRUCT Config;
 #define RX_AUX_DIR 		REGISTER_BIT(DDRB,0)
 
 // Misc analog inputs
-#define	VCC_PIN			REGISTER_BIT(PINA,0)
 #define VBAT_PIN		REGISTER_BIT(PINA,3)
-#define VCC_DIR 		REGISTER_BIT(DDRA,0)
 #define VBAT_DIR		REGISTER_BIT(DDRA,3)
 
 // Motor outputs
@@ -94,22 +92,21 @@ extern CONFIG_STRUCT Config;
 #define BUTTON3_DIR 	REGISTER_BIT(DDRB,5)
 #define BUTTON4			REGISTER_BIT(PINB,4)	// Button 4
 #define BUTTON4_DIR 	REGISTER_BIT(DDRB,4)
+#define MOTORS			PORTC
 
 // I/O clones
 #define CPPM			REGISTER_BIT(PINB,2)	// Same physical port as RUDDER input
 #define CPPM_DIR 		REGISTER_BIT(DDRB,2)
-#define TX 				REGISTER_BIT(PORTB,0)	// UART output (AUX input)
-#define TX_DIR			REGISTER_BIT(DDRB,0)
 
 //***********************************************************
 // Enumeration
 //***********************************************************
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, NO_GYRO};
-enum RX_Modes		{CPPM_MODE = 0, PWM1, PWM2, PWM3, XTREME, SBUS, SPEKTRUM};
+enum RX_Modes		{CPPM_MODE = 0, PWM, XTREME, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, SATSEQ};
-enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB};
+enum MIX_Modes		{AEROPLANE = 0, FWING, CAMSTAB, MANUAL};
 enum Polarity 		{NORMAL = 0, REVERSED};
-enum RCinputs 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, CH9, CH10, CH11, CH12, UNUSED};
+enum MixSource 		{CH1 = 0, CH2, CH3, CH4, CH5, CH6, CH7, CH8, CH9, CH10, CH11, CH12, UNUSED};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
 enum SwitchModes	{DISABLED = 0, ALWAYSON, HANDSFREE};
 enum Availability	{OFF = 0, ON, REV};
@@ -125,10 +122,8 @@ enum Failsafes		{SIMPLE = 0, ADVANCED};
 // Flags
 //***********************************************************
 
-enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL};
-enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block, Model_lost};
-enum MainFlags		{inv_cal_done = 0, normal_cal_done, Refresh_safe, FirstTimeIMU, Overdue, ServoTick};
-enum AlarmFlags		{BUZZER_ON = 0, LVA_Alarm, SIG_Alarm};
-
+enum GlobalError	{NO_ERROR = 0, LOW_BATT, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, LOST_MODEL, LVA_ALARM, BUZZER_ON};
+enum FlightFlags	{AutoLevel = 0, Stability, Failsafe, RxActivity, HandsFree, Launch_Mode, Launch_Block};
+enum MainFlags		{inv_cal_done = 0, normal_cal_done, FirstTimeIMU, Overdue, ServoTick, FirstTimeFlightMode};
 
 #endif //IO_CFG_H
