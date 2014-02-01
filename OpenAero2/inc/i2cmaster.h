@@ -173,7 +173,5 @@ extern unsigned char i2c_readNak(void);
 extern unsigned char i2c_read(unsigned char ack);
 #define i2c_read(ack)  (ack) ? i2c_readAck() : i2c_readNak(); 
 
-extern void i2c_test(void); // D.Thompson - debug i2c exerciser
-
 /**@}*/
 #endif

@@ -3,21 +3,23 @@
 //***********************************************************
 
 //***********************************************************
-//* Include//***********************************************************s
+//* Includes
+//***********************************************************s
 
-
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
-#include "..\inc\io_cfg.h"
-#include "..\inc\glcd_driver.h"
-#include "..\inc\mugui.h"
+#include "io_cfg.h"
+#include "glcd_driver.h"
+#include "mugui.h"
 #include <avr/pgmspace.h>
-#include "..\inc\glcd_menu.h"
-#include "..\inc\main.h"
-#include "..\inc\isr.h"
+#include "glcd_menu.h"
+#include "main.h"
+#include "isr.h"
 #include <util/delay.h>
-#include "..\inc\acc.h"
-#include "..\inc\menu_ext.h"
+#include "acc.h"
+#include "menu_ext.h"
+#include "imu.h"
 
 //***********************************************************
 // Prototypes
@@ -32,10 +34,18 @@ void Display_balance(void);
 void Display_balance(void)
 {
 	int16_t	x_pos, y_pos;
+	int8_t	roll_axis, pitch_axis;
 
 	while(BUTTON1 != 0)
 	{
 		ReadAcc();
+
+
+		// Refresh accSmooth values
+		// Note that because it takes 4.096ms to refresh the whole GLCD this loop cannot run 
+		// faster than 244Hz, but that's close enough to the actual loop time so that the 
+		// actual Acc LPF effect is closely mirrored on the balance meter.
+		getEstimatedAttitude(); 
 
 		// HORIZONTAL: 	Pitch = X, Roll = Y
 		// UPSIDEDOWN:	Pitch = X, Roll = Y
@@ -43,16 +53,26 @@ void Display_balance(void)
 		// VERTICAL:	Pitch = Y, Roll = X
 		// SIDEWAYS:	Pitch = Y, Roll = X
 
-/*		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
+		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
 		{
-			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 32;
-			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 64;	
+			roll_axis = PITCH;
+			pitch_axis = ROLL;
 		}
 		else
-		{*/
-			x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][PITCH]) * accADC[PITCH]) + 32;
-			y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][ROLL]) * accADC[ROLL]) + 64;
-//		}
+		{
+			roll_axis = ROLL;
+			pitch_axis = PITCH;
+		}
+
+		// We need to reverse the polarity reversal so that the meter is once again
+		// related to the KK2.0, not the model.
+		// For some reason, pitch has to be reversed on he KK2.1
+#ifdef KK21
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * -accSmooth[pitch_axis]) + 32;
+#else
+		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accSmooth[pitch_axis]) + 32;
+#endif
+		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accSmooth[roll_axis]) + 64;
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;
@@ -69,8 +89,8 @@ void Display_balance(void)
 		drawline(buffer, 32, 32, 96, 32, 1); 
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
+		// Refresh GLCD 
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-		_delay_ms(20);
 	}
 }

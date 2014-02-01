@@ -32,10 +32,10 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define INPUTITEMS 10
+#define INPUTITEMS 9
 #define OUTPUTITEMS 6
 
-#define MIXERSTART 209 	// Start of Menu text items
+#define MIXERSTART 211 	// Start of Menu text items
 #define MIXOFFSET  80	// Value offsets
 
 //************************************************************
@@ -44,20 +44,19 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[2][INPUTITEMS+1] PROGMEM = 
 {
-	{228,105,0,105,0,143,143,143,143,143,143},
+	{228,105,0,105,0,143,143,143,143,143},
 	{228,228,0,228,0,228,0}
 };
 
 const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM = 
 {
 	{
-		// Input mixer ranges (11)
+		// Input mixer ranges (10)
 		{CH1,CH12,1,1,CH1},				// Ch. number
 		{THROTTLE,NOCHAN,1,1,CH1}, 		// Source A
 		{-125,125,5,0,100},				// Source A volume (%)
 		{THROTTLE,NOCHAN,1,1,NOCHAN}, 	// Source B
 		{-125,125,5,0,0},				// Source B volume (%)
-		{OFF, ON,1,1,OFF},				// Source mix enable
 		{OFF, REV,1,1,OFF},				// roll_gyro
 		{OFF, REV,1,1,OFF},				// pitch_gyro
 		{OFF, REV,1,1,OFF},				// yaw_gyro
@@ -83,7 +82,6 @@ const menu_range_t mixer_menu_ranges[2][INPUTITEMS+1] PROGMEM =
 void menu_mixer(uint8_t section)
 {
 	static uint8_t mix_top = MIXERSTART;
-	static	uint8_t old_section;
 	int8_t *value_ptr;
 
 	int8_t values[INPUTITEMS+1];
@@ -93,10 +91,10 @@ void menu_mixer(uint8_t section)
 	uint8_t	items;			// Items in group
 
 	// If submenu item has changed, reset submenu positions
-	if (section != old_section)
+	if (menu_flag)
 	{
 		mix_top = MIXERSTART;
-		old_section = section;
+		menu_flag = 0;
 	}
 
 	// Get mixer menu offsets

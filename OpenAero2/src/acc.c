@@ -20,6 +20,7 @@
 #include "main.h"
 #include "i2c.h"
 #include "MPU6050.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -33,12 +34,9 @@ void get_raw_accs(void);
 // Defines
 //************************************************************
 
-// Uncalibrated default values of Z middle per orientation
-#ifdef KK21
-const int16_t UncalDef[5] PROGMEM = {0, 0, 0, 0, 0}; // KK2.1 has zero offsets
-#else
-const int16_t UncalDef[5] PROGMEM = {640, 615, 640, 640, 640}; // 764-515, 488-743, 515-764, 764-515, 764-515
-#endif
+#define ACCFS16G	0x18		// 16G full scale
+#define ACCFS4G 	0x08		// 4G full scale
+#define ACCFS2G		0x00		// 2G full scale
 
 // Polarity handling 
 #ifdef KK21 
@@ -66,13 +64,30 @@ const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
 //************************************************************
 
 int16_t accADC[3];				// Holds Acc ADC values - alwys in RPY order
-int16_t tempaccZero = 0;		// Holds Z acc in between normal and inverted cals
+int16_t NormalAccZero;			// Holds Z acc in between normal and inverted cals
+int16_t accVert = 0;			// Holds the level-zeroed Z-acc value. Used for height damping in hover only.
 
 void ReadAcc()
 {
 	uint8_t i;
 
 	get_raw_accs();				// Updates accADC[] (RPY)
+
+	// Recalculate current accVert using filtered acc value
+	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
+	// that here so that Config.AccVertZero subtracts the correct amount
+	 accVert = accSmooth[YAW] - Config.AccVertZero + Config.AccZero[YAW];
+
+	// Use default zero for Acc-Z if inverse calibration not done yet
+	// Actual zero is held in NormalAccZero waiting for inv calibration
+	if (!(Main_flags & (1 << inv_cal_done)))
+	{
+#ifdef KK21 
+		Config.AccZero[YAW] = 0;
+#else
+		Config.AccZero[YAW] = 643;
+#endif
+	}
 
 	for (i=0;i<3;i++)			// For all axis (RPY)
 	{
@@ -81,12 +96,6 @@ void ReadAcc()
 
 		// Change polarity as per orientation mode
 		accADC[i] *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][i]);
-	}
-
-	// Use default inverse calibration value if not done yet
-	if (!(Main_flags & (1 << inv_cal_done)))
-	{
-		Config.AccZero[YAW] = (int16_t)pgm_read_word(&UncalDef[Config.Orientation]);
 	}
 }
 
@@ -116,11 +125,12 @@ void CalibrateAcc(int8_t type)
 		{
 			// Divide by 32
 			accZero[i] = (accZero[i] >> 5);
-			Config.AccZero[i] = accZero[i]; 	// 
+			Config.AccZero[i] = accZero[i]; 
 		}
 
 		// Save upright Z-axis zero
-		tempaccZero = Config.AccZero[YAW];
+		NormalAccZero = Config.AccZero[YAW];
+		Config.AccVertZero = NormalAccZero;
 
 		Main_flags |= (1 << normal_cal_done);
 		Main_flags &= ~(1 << inv_cal_done);
@@ -138,12 +148,11 @@ void CalibrateAcc(int8_t type)
 			for (i=0;i<32;i++)
 			{
 				get_raw_accs();					// Updates gyroADC[] with board-oriented vales
-
 				accZeroYaw += accADC[YAW];		
 				_delay_ms(10);					// Get a better acc average over time
 			}
 
-			accZeroYaw = (accZeroYaw >> 5);	// Inverted zero point
+			accZeroYaw = (accZeroYaw >> 5);		// Inverted zero point
 
 			// Test if board is actually inverted relative to board orientation
 #ifdef KK21 
@@ -155,8 +164,8 @@ void CalibrateAcc(int8_t type)
 
 			{
 				// Reset zero to halfway between min and max Z
-				temp = ((tempaccZero - accZeroYaw) >> 1);
-				Config.AccZero[YAW] = tempaccZero - temp;
+				temp = ((NormalAccZero - accZeroYaw) >> 1);
+				Config.AccZero[YAW] = NormalAccZero - temp; // Config.AccZero[YAW] is now valid to use
 
 				Main_flags |= (1 << inv_cal_done);
 				Main_flags &= ~(1 << normal_cal_done);
@@ -187,20 +196,20 @@ void get_raw_accs(void)
 
 	temp1 = Accs[0] << 8;					// Accel X
 	temp2 = Accs[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 7;
+	RawADC[PITCH] = (temp1 + temp2) >> 6;
 
 	temp1 = Accs[2] << 8;					// Accel Y
 	temp2 = Accs[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 7;
+	RawADC[ROLL] = (temp1 + temp2) >> 6;
 
 	temp1 = Accs[4] << 8;					// Accel Z
 	temp2 = Accs[5];
-	RawADC[YAW] = (temp1 + temp2) >> 7;
+	RawADC[YAW] = (temp1 + temp2) >> 6;
 
 	// Reorient the data as per the board orientation
-	accADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][ROLL])]; 	// 
-	accADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][PITCH])];	// 
-	accADC[YAW]		= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][YAW])]; 	// 
+	accADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][ROLL])];
+	accADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][PITCH])];
+	accADC[YAW]		= RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][YAW])];
 
 #else
 	//	For the KK2.0, the order of the analog sensors is swapped in adc.c
@@ -219,10 +228,8 @@ void get_raw_accs(void)
 #ifdef KK21
 void init_i2c_accs(void)
 {
-	// Configure accs
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, 0x18); 
-
 	// Wake MPU6050
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, ACCFS4G); // 4G full scale
 }
 #endif

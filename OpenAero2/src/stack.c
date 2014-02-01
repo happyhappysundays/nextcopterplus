@@ -47,26 +47,11 @@ uint16_t StackCount(void)
 
 void StackPaint(void)
 {
-#if 0
-    uint8_t *p = &_end;
+    uint8_t *p = &__bss_end;
 
     while(p <= &__stack)
     {
         *p = STACK_CANARY;
         p++;
     }
-#else
-    __asm volatile ("    ldi r30,lo8(__bss_end)\n"
-                    "    ldi r31,hi8(__bss_end)\n"
-                    "    ldi r24,lo8(0xc5)\n" 
-                    "    ldi r25,hi8(__stack)\n"
-                    "    rjmp .cmp\n"
-                    ".loop:\n"
-                    "    st Z+,r24\n"
-                    ".cmp:\n"
-                    "    cpi r30,lo8(__stack)\n"
-                    "    cpc r31,r25\n"
-                    "    brlo .loop\n"
-                    "    breq .loop"::);
-#endif
 } 

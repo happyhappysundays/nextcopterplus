@@ -35,23 +35,25 @@ void output_servo_ppm(void)
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		temp = ServoOut[i];					// Promote to 32 bits
-		temp = ((temp << 2) / 10); 
+		temp = ((temp << 2) + 5) / 10; 		// Round and convert
 		ServoOut[i] = (uint16_t)temp;
 	}
 
 	// Suppress outputs during throttle high error
 	if((General_error & (1 << THROTTLE_HIGH)) == 0)
 	{
-		// Create the output pulses if in sync with RC inputs
-		if (RC_Lock) 
-		{
-			output_servo_ppm_asm(&ServoOut[0]);
-		}
-		else if ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON)) // Unsynchronised so need to disable interrupts
+		// Create unsynchronised output pulses if needed
+		if ((Flight_flags & (1 << Failsafe)) || (Config.CamStab == ON))
 		{
 			cli();
 			output_servo_ppm_asm(&ServoOut[0]);
 			sei();
+		}
+		// Create synchronised output pulses if in sync with RC inputs
+		else
+		{
+			// Pass address of ServoOut array
+			output_servo_ppm_asm(&ServoOut[0]);
 		}
 	}
 }

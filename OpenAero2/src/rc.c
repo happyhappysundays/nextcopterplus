@@ -33,13 +33,13 @@ void SetFailsafe(void);
 //************************************************************
 // Defines
 //************************************************************
-#define	NOISE_THRESH	20			// Max RX noise threshold. Increase if lost alarm keeps being reset.
+#define	NOISE_THRESH	5			// Max RX noise threshold. Increase if lost alarm keeps being reset.
 
 //************************************************************
 // Code
 //************************************************************
 
-int16_t RCinputs[MAX_RC_CHANNELS];	// Normalised RC inputs
+int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
 
 // Get raw flight channel data and remove zero offset
 // Use channel mapping for configurability
@@ -95,6 +95,9 @@ void RxGetChannels(void)
 		Flight_flags &= ~(1 << RxActivity);
 	}
 	
+	// Preset RCinputs[NOCHAN] for sanity
+	RCinputs[NOCHAN] = 0;
+
 	OldRxSum = RxSum;
 }
 
@@ -149,7 +152,7 @@ void CenterSticks(void)
 	uint16_t RxChannelZeroOffset[MAX_RC_CHANNELS] = {0,0,0,0,0,0,0,0};
 
 	// Take an average of eight readings
-	for (i=0;i<8;i++)
+	for (i=0; i < 8; i++)
 	{
 		for (j=0;j<MAX_RC_CHANNELS;j++)
 		{
@@ -160,7 +163,8 @@ void CenterSticks(void)
 
 	for (i=0;i<MAX_RC_CHANNELS;i++)
 	{
-		Config.RxChannelZeroOffset[i] = RxChannelZeroOffset[i] >> 3; // Divide by 8
+		// Round and average result
+		Config.RxChannelZeroOffset[i] = (RxChannelZeroOffset[i] + 4) >> 3; // Divide by 8
 	}
 
 	Save_Config_to_EEPROM();
@@ -184,8 +188,8 @@ void SetFailsafe(void)
 		// Set primary failsafe point
 		Config.Limits[i].failsafe = ServoOut[i];
 
-		// Rescale and set noob-friendly mixer failsafe percentages
-		failsafe = (ServoOut[i] - 3750) / 12;
+		// Round and rescale and set noob-friendly mixer failsafe percentages
+		failsafe = ((ServoOut[i] - 3750) + 6) / 12;
 		Config.Failsafe[i] = failsafe;
 	}
 

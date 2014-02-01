@@ -63,5 +63,5 @@ extern const char *text_menu[];
 extern uint8_t cursor;
 extern uint8_t menu_temp;
 extern const uint8_t lines[4];
-
+extern uint8_t menu_flag; // debug
 

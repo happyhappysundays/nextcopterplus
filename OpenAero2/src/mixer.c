@@ -29,6 +29,7 @@ void UpdateLimits(void);
 void get_preset_mix (const channel_t*);
 int16_t scale32(int16_t value16, int16_t multiplier16);
 int16_t scale_percent(int8_t value);
+int16_t scale_percent_nooffset(int8_t value);
 
 //************************************************************
 // Mix tables (both RC inputs and servo/ESC outputs)
@@ -42,17 +43,17 @@ const channel_t AEROPLANE_MIX[MAX_OUTPUTS] PROGMEM =
 	// Elevator += Pitch; (normal)
 
 	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
+	// source_a, source_a_vol, source_b,src_vol,roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Right aileron)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,ELEVATOR,100,NOCHAN,0,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 (Elevator)
+	{0,AILERON,100,NOCHAN,0,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut6 (Left aileron)
+	{0,NOCHAN,0,NOCHAN,0,ON,OFF,OFF,ON,OFF,UNUSED,0,UNUSED,0,UNUSED,0},			// ServoOut7 (Right aileron)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 
 }; 
 
@@ -63,17 +64,17 @@ const channel_t FLYING_WING_MIX[MAX_OUTPUTS] PROGMEM =
 	// R.Elevon + Roll (reversed) + Pitch (reversed)
 
 	// Value, 
-	// source_a, source_a_vol, source_b,src_vol,source_mix, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
+	// source_a, source_a_vol, source_b,src_vol, roll_gyro,pitch_gyro,yaw_gyro,roll_acc,pitch_acc
 	// source_b,source_b_volume,source_c,source_c_volume,source_d,source_d_volume
 
-	{0,THROTTLE,100,NOCHAN,0,ON ,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
-	{0,AILERON,100,ELEVATOR,100,OFF,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
-	{0,AILERON,-100,ELEVATOR,100,OFF,REV,ON,OFF,REV,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
+	{0,THROTTLE,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut1 (Throttle)
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5
+	{0,AILERON,100,ELEVATOR,100,ON,ON,OFF,ON,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Left elevon)
+	{0,AILERON,-100,ELEVATOR,100,REV,ON,OFF,REV,ON,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut7 (Left elevon)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Rudder)
 }; 
 
 const channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM = 
@@ -88,14 +89,15 @@ const channel_t CAM_STAB[MAX_OUTPUTS] PROGMEM =
  	// M7 Yaw	(Pan) + Yaw;
  	// M8 Roll (Roll - only for 3-axis gimbals) + Roll gyro;
 
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut1 (Throttle)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
-	{0,NOCHAN,100,NOCHAN,0,OFF,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut5 
-	{0,ELEVATOR,100,NOCHAN,0,OFF,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Pitch axis)
-	{0,RUDDER,100,NOCHAN,0,OFF,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
-	{0,AILERON,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},	
+		// ServoOut1
+	{0,NOCHAN,0,NOCHAN,0,OFF,ON, OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut2 (Pitch axis)
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut3 (Yaw axis)
+	{0,NOCHAN,0,NOCHAN,0,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut4 (Roll axis)
+	{0,NOCHAN,0,NOCHAN,0,OFF,OFF, OFF,OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut5 
+	{0,ELEVATOR,100,NOCHAN,0,OFF,ON,OFF,OFF,ON, UNUSED,0,UNUSED,0,UNUSED,0},	// ServoOut6 (Pitch axis)
+	{0,RUDDER,100,NOCHAN,0,OFF,OFF,ON, OFF,OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut7 (Yaw axis)
+	{0,AILERON,100,NOCHAN,0,ON,OFF,OFF,ON, OFF,UNUSED,0,UNUSED,0,UNUSED,0},		// ServoOut8 (Roll axis)
 
 };
 
@@ -215,15 +217,8 @@ void ProcessMixer(void)
 	{
 		for (i = 0; i < outputs; i++)
 		{
-			// Clear RC source if not needed in mix with sensors
-			if (Config.Channel[i].source_mix == ON)
-			{
-				temp = Config.Channel[i].value;
-			}
-			else
-			{
-				temp = 0;
-			}
+			// Get solution
+			temp = Config.Channel[i].value;
 
 			// Mix in gyros
 			switch (Config.Channel[i].roll_gyro)
@@ -251,10 +246,10 @@ void ProcessMixer(void)
 			switch (Config.Channel[i].yaw_gyro)
 			{
 				case ON:
-					temp = temp - PID_Gyros[YAW];
+					temp = temp + PID_Gyros[YAW];
 					break;
 				case REV:
-					temp = temp + PID_Gyros[YAW];
+					temp = temp - PID_Gyros[YAW];
 					break;	
 				default:
 					break;
@@ -433,7 +428,7 @@ void ProcessMixer(void)
 			Config.Channel[i].value = temp;
 		} // Flaps
 	}
-		
+
 	//************************************************************
 	// Process output mixers
 	//************************************************************ 
@@ -480,7 +475,6 @@ void ProcessMixer(void)
 
 	for (i = 0; i < outputs; i++)
 	{
-	//	Config.Channel[i].value = 0;
 		Config.Channel[i].value += Config.Limits[i].trim;
 	}
 
@@ -538,9 +532,9 @@ void get_preset_mix(const channel_t* preset)
 void UpdateLimits(void)
 {
 	uint8_t i;
-	int8_t temp8[3] = {Config.FlightMode[Config.Flight].Roll_limit, Config.FlightMode[Config.Flight].Pitch_limit, Config.FlightMode[Config.Flight].Yaw_limit};
+	int8_t temp8[NUMBEROFAXIS] = {Config.FlightMode[Config.Flight].Roll_limit, Config.FlightMode[Config.Flight].Pitch_limit, Config.FlightMode[Config.Flight].Yaw_limit};
 	int32_t temp32, gain32;
-	int8_t gains[3] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
+	int8_t gains[NUMBEROFAXIS] = {Config.FlightMode[Config.Flight].Roll.I_mult, Config.FlightMode[Config.Flight].Pitch.I_mult, Config.FlightMode[Config.Flight].Yaw.I_mult};
 
 	// Update triggers
 	Config.Autotrigger1 = scale_percent(Config.FlightMode[0].Profilelimit);
@@ -550,7 +544,7 @@ void UpdateLimits(void)
 	Config.PowerTriggerActual = Config.PowerTrigger * 40;
 
 	// Update I_term limits
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < NUMBEROFAXIS; i++)
 	{
 		temp32 	= temp8[i]; 						// Promote
 
@@ -660,7 +654,7 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 		temp32 = temp32 * mult32;
 
 		// Divide by 100 to get scaled value
-		temp32 = temp32 / (int32_t)100; // I shit you not...
+		temp32 = (temp32 + 50) / (int32_t)100; // I shit you not...
 		value16 = (int16_t) temp32;
 	}
 
@@ -673,8 +667,19 @@ int16_t scale_percent(int8_t value)
 	int16_t temp16_1, temp16_2;
 
 	temp16_1 = value; // Promote
-	temp16_2 = ((temp16_1 * (int16_t)12) + 3750);
+	temp16_2 = ((temp16_1 * (int16_t)10) + 3750);
 
 	return temp16_2;
 }
 
+
+// Scale percentages to relative position
+int16_t scale_percent_nooffset(int8_t value)
+{
+	int16_t temp16_1, temp16_2;
+
+	temp16_1 = value; // Promote
+	temp16_2 = (temp16_1 * (int16_t)10);
+
+	return temp16_2;
+}

@@ -40,7 +40,7 @@ void Display_status(void)
 	clear_buffer(buffer);
 
 	// Display text
-	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Mode
+	LCD_Display_Text(4,(prog_uchar*)Verdana8,0,0); 		// Preset
 	LCD_Display_Text(3,(prog_uchar*)Verdana8,0,11); 	// Version text
 	LCD_Display_Text(5,(prog_uchar*)Verdana8,0,22); 	// RX sync
 	LCD_Display_Text(6,(prog_uchar*)Verdana8,0,33); 	// Profile
@@ -51,7 +51,7 @@ void Display_status(void)
 	LCD_Display_Text(14,(prog_uchar*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (22 + Config.MixMode), 33, 0);
+	print_menu_text(0, 1, (22 + Config.MixMode), 43, 0);
 	print_menu_text(0, 1, (62 + Config.RxMode), 45, 22);
 	mugui_lcd_puts(itoa((Config.Flight + 1),pBuffer,10),(prog_uchar*)Verdana8,45,33);
 
@@ -61,7 +61,7 @@ void Display_status(void)
 
 	// Draw battery
 	drawrect(buffer, 100,4, 28, 50, 1);					// Battery body
-	drawrect(buffer, 110,0, 8, 4, 1);					// Battery terminal
+	drawrect(buffer, 110,0, 8, 5, 1);					// Battery terminal
 
 	vbat_temp = GetVbat();
 
@@ -125,7 +125,7 @@ void Display_status(void)
 			LCD_Display_Text(98,(prog_uchar*)Verdana14,43,34); // Error
 			menu_beep(9);
 		}
-		else if((General_error & (1 << LOW_BATT)) != 0)
+		else if((General_error & (1 << LVA_ALARM)) != 0)
 		{
 			LCD_Display_Text(134,(prog_uchar*)Verdana14,33,14); // Battery
 			LCD_Display_Text(119,(prog_uchar*)Verdana14,46,34); // Low
