@@ -272,6 +272,7 @@ void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t
 }
 
 // Draw a filled circle
+// Edge-clip bug fixed by D. Thompson - 3/2/2014
 void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color) 
 {
 	int8_t f = 1 - r;
@@ -279,8 +280,9 @@ void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color)
 	int8_t ddF_y = -2 * r;
 	int8_t x = 0;
 	int8_t y = r;
+	int8_t i = 0;
 
-	for (uint8_t i=y0-r; i<=y0+r; i++) 
+	for (i=y0-r; i<=y0+r; i++) 
 	{
 		setpixel(buff, x0, i, color);
 	}
@@ -298,12 +300,12 @@ void fillcircle(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t r, uint8_t color)
 		ddF_x += 2;
 		f += ddF_x;
 
-		for (uint8_t i=y0-y; i<=y0+y; i++) 
+		for (i=y0-y; i<=y0+y; i++) 
 		{
 			setpixel(buff, x0+x, i, color);
 			setpixel(buff, x0-x, i, color);
 		} 
-		for (uint8_t i=y0-x; i<=y0+x; i++) 
+		for (i=y0-x; i<=y0+x; i++) 
 		{
 			setpixel(buff, x0+y, i, color);
 			setpixel(buff, x0-y, i, color);

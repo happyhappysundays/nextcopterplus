@@ -1,5 +1,5 @@
 /*
- * modified version of I2C master library
+ * Modified version of I2C master library
  * added a timeout variable for non blocking i2c
  */
 
@@ -22,7 +22,7 @@
 // Only for KK2.1 boards
 #ifdef KK21
 
-/* define CPU frequency in Mhz here if not defined in Makefile */
+/* define CPU frequency in MHz here if not defined in Makefile */
 #ifndef F_CPU
 #define F_CPU 20000000UL
 #endif

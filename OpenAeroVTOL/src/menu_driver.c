@@ -385,8 +385,6 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 			default:
 				break;
 		}
-		menu_beep(1);
-		_delay_ms(200);
 	}
 
 	// Handle cursor Up/Down limits
@@ -410,8 +408,6 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 				*cursor = NEXTLINE;
 				break;
 		}
-		menu_beep(1);
-		_delay_ms(200);
 	}
 
 	if (button == UP)	
@@ -434,6 +430,10 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 				*cursor = PREVLINE;
 				break;
 		}
+	}
+
+	if (button != NONE)	
+	{
 		menu_beep(1);
 		_delay_ms(200);
 	}

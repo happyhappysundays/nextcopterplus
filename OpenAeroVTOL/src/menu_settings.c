@@ -83,14 +83,14 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 	},
 	{
 		// General (8/9)
-		{HORIZONTAL,SIDEWAYS,1,1,HORIZONTAL}, // Orientation
+		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,108},				// Low battery alarm voltage
 		{LOW,HIGH,1,1,LOW},				// Servo rate
 		{1,127,1,0,8},					// Acc. LPF
-		{10,100,1,0,30},				// CF factor
+		{1,100,1,0,30},					// CF factor
 #ifdef KK21
 		{0,6,1,1,6},					// MPU6050 LPF
 #endif
@@ -104,14 +104,13 @@ void menu_rc_setup(uint8_t section)
 {
 	static uint8_t rc_top = RCSTART;
 
-	int8_t *value_ptr;
+	int8_t *value_ptr = &Config.RxMode;
 
 	menu_range_t range;
 	uint8_t text_link;
 	uint8_t i;
-	uint8_t mult;			// Multiplier
-	uint8_t offset;			// Index into channel structure
-	uint8_t	items;			// Items in group
+	uint8_t offset = 0;			// Index into channel structure
+	uint8_t	items= RCITEMS;		// Items in group
 
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
@@ -127,29 +126,18 @@ void menu_rc_setup(uint8_t section)
 		switch(section)
 		{
 			case 1:				// RC setup menu
-				offset = 0;
-				items = RCITEMS;
-				value_ptr = &Config.RxMode;
-				mult = 1;
 				break;
 			case 2:				// General menu
 				offset = RCITEMS;
 				items = GENERALITEMS;
 				value_ptr = &Config.Orientation;
-				mult = 1;
 				break;
 			default:
-				offset = 0;
-				items = RCITEMS;
-				value_ptr = &Config.RxMode;
-				mult = 1;
 				break;
 		}
-		// Save pre-edited values
-		int8_t temp_arm = Config.ArmMode;
 
 		// Print menu
-		print_menu_items(rc_top + offset, RCSTART + offset, value_ptr, mult, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
+		print_menu_items(rc_top + offset, RCSTART + offset, value_ptr, 1, (prog_uchar*)rc_menu_ranges[section - 1], 0, RCOFFSET, (prog_uchar*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &rc_top, &menu_temp);
@@ -158,17 +146,11 @@ void menu_rc_setup(uint8_t section)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&RCMenuText[section - 1][menu_temp - RCSTART - offset]);
-			do_menu_item(menu_temp, value_ptr + (menu_temp - RCSTART - offset), mult, range, 0, text_link, false, 0);
+			do_menu_item(menu_temp, value_ptr + (menu_temp - RCSTART - offset), 1, range, 0, text_link, false, 0);
 		}
 
 		if (button == ENTER)
 		{
-			// See if arming mode has changed to ON
-			if ((temp_arm == OFF) && (Config.ArmMode == ON))
-			{
-				General_error |= (1 << DISARMED);		// Set flags to disarmed
-			}
-
 			init_int();				// In case RC type has changed, reinitialise interrupts
 			init_uart();			// and UART
 

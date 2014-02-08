@@ -144,6 +144,7 @@ void init(void)
 	// Preset important flags
 	Interrupted = false;						
 	Main_flags |= (1 << FirstTimeIMU);
+	Main_flags |= (1 << inv_cal_done);
 
 	//***********************************************************
 	// GLCD initialisation

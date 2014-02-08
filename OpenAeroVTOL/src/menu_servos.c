@@ -71,7 +71,7 @@ const menu_range_t servo_menu_ranges[3][1] PROGMEM =
 void menu_servo_setup(uint8_t section)
 {
 	static uint8_t servo_top = SERVOSTART;
-	int8_t *value_ptr;
+	int8_t *value_ptr = &Config.Servo_reverse[0];
 
 	menu_range_t range;
 	uint8_t text_link;
@@ -96,7 +96,6 @@ void menu_servo_setup(uint8_t section)
 			switch(section)
 			{
 				case 1:
-					value_ptr = &Config.Servo_reverse[0];
 					break;
 				case 2:
 					value_ptr = &Config.min_travel[0];
@@ -109,7 +108,6 @@ void menu_servo_setup(uint8_t section)
 					zero_setting = true;
 					break;
 				default:
-					value_ptr = &Config.Servo_reverse[0];
 					break;
 			}
 		}
@@ -124,6 +122,7 @@ void menu_servo_setup(uint8_t section)
 		if (button == ENTER)
 		{
 			text_link = pgm_read_byte(&ServoMenuText[section - 1][menu_temp - SERVOSTART]);
+
 			// Zero limits if adjusting
 			if (zero_setting)
 			{
@@ -144,11 +143,9 @@ void menu_servo_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			Save_Config_to_EEPROM(); // Save value and return
+			UpdateLimits();				// Update actual servo trims
+			Save_Config_to_EEPROM();	// Save value and return
 		}
 	}
-
-	UpdateLimits();					// Update actual servo trims
-	_delay_ms(200);
 }
 

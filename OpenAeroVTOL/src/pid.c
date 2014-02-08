@@ -83,9 +83,8 @@ void Calculate_PID(void)
 
 	int8_t	axis = 0;
 
-
 	// Cross-ref for actual RCinput elements
-	// Note that pitch and yaw are reversed here with respect to their gyros
+	// Note that axes are reversed here with respect to their gyros
 	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], -RCinputs[ELEVATOR], -RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values.
@@ -138,6 +137,7 @@ void Calculate_PID(void)
 		stick = RCinputsAxis[axis] >> (Config.Stick_Lock_rate + 2);
 
 		// Calculate I-term from gyro and stick data 
+		// These may look identical, but they are constrained quite differently.
 		IntegralGyro[P1][axis] += (gyroADC[axis] - stick);
 		IntegralGyro[P2][axis] += (gyroADC[axis] - stick);
 
@@ -253,7 +253,7 @@ void Calculate_PID(void)
 		// Calculate acc error from angle data (roll and pitch only)
 		//************************************************************
 
-		// Autolevel mode (Use IMU to calculate attitude) for roll and pitch only
+		// Autolevel mode (uses IMU to calculate attitude) for roll and pitch only
 		if (axis < YAW)
 		{
 			PID_acc_temp1 = angle[axis];

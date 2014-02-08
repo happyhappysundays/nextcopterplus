@@ -105,9 +105,10 @@ void CenterSticks(void)
 	uint16_t RxChannelZeroOffset[MAX_RC_CHANNELS] = {0,0,0,0,0,0,0,0};
 
 	// Take an average of eight readings
-	for (i=0;i<8;i++)
+	// RxChannel will auto-update every RC frame (normally 46Hz or so)
+	for (i=0; i<8; i++)
 	{
-		for (j=0;j<MAX_RC_CHANNELS;j++)
+		for (j=0; j<MAX_RC_CHANNELS; j++)
 		{
 			RxChannelZeroOffset[j] += RxChannel[j];
 		}

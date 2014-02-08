@@ -120,7 +120,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P1_scale & (1 << RollScale)) != 0)	// Scale gyro
 				{
-					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume); 
+					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
 				}
 				else if (Config.Channel[i].P1_aileron_volume < 0 )
 				{
@@ -135,7 +135,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P1_scale & (1 << PitchScale)) != 0)
 				{
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume); 
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5); 
 				}
 				else if (Config.Channel[i].P1_elevator_volume < 0 )
 				{
@@ -150,7 +150,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P1_scale & (1 << YawScale)) != 0)
 				{
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume); 
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5); 
 				}
 				else if (Config.Channel[i].P1_rudder_volume < 0 )
 				{
@@ -170,7 +170,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P2_scale & (1 << RollScale)) != 0)	// Scale gyro
 				{
-					P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume); 
+					P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5); 
 				}
 				else if (Config.Channel[i].P2_aileron_volume < 0 )
 				{
@@ -185,7 +185,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P2_scale & (1 << PitchScale)) != 0)
 				{
-					P2_solution = P2_solution + scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume); 
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5); 
 				}
 				else if (Config.Channel[i].P2_elevator_volume < 0 )
 				{
@@ -200,7 +200,7 @@ void ProcessMixer(void)
 			{
 				if ((Config.Channel[i].P2_scale & (1 << YawScale)) != 0)
 				{
-					P2_solution = P2_solution + scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume); 
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5); 
 				}
 				else if (Config.Channel[i].P2_rudder_volume < 0 )
 				{
@@ -228,7 +228,7 @@ void ProcessMixer(void)
 			
 				if ((Config.Channel[i].P1_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
-					P1_solution = P1_solution -  scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume); 
+					P1_solution = P1_solution -  scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
 				}
 				else if (Config.Channel[i].P1_aileron_volume < 0 )
 				{
@@ -246,7 +246,7 @@ void ProcessMixer(void)
 			
 				if ((Config.Channel[i].P1_scale & (1 << AccPitchScale)) != 0)
 				{
-					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume); 
+					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5); 
 				}
 				else if (Config.Channel[i].P1_elevator_volume < 0 )
 				{
@@ -287,7 +287,7 @@ void ProcessMixer(void)
 			
 				if ((Config.Channel[i].P2_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
-					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume); 
+					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5); 
 				}
 				else if (Config.Channel[i].P2_aileron_volume < 0 )
 				{
@@ -305,7 +305,7 @@ void ProcessMixer(void)
 			
 				if ((Config.Channel[i].P2_scale & (1 << AccPitchScale)) != 0)
 				{
-					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume); 
+					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5); 
 				}
 				else if (Config.Channel[i].P2_elevator_volume < 0 )
 				{

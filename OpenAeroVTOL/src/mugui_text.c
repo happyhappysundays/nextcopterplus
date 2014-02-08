@@ -145,6 +145,7 @@ void pgm_mugui_scopy(const char *s)
 	int i = 0;
 
 	// Clear buffer first
+	// Actually two bytes smaller than using memset()
 	for (i = 0; i < 16; i++)
 	{
 		pBuffer[i] = 0x00;
@@ -173,7 +174,7 @@ void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_ui
 	mugui_uint16_t i 		= 0;			//counter variable
 	
 	length = strlen(s);
-	for(i=0;i<length;i++)
+	for(i=0; i<length; i++)
 	{
 		xpos += mugui_lcd_putc(s[i], font, x + xpos, y) + distance;
 	}

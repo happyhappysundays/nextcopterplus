@@ -7,6 +7,7 @@
 //***********************************************************
 
 #include "compiledefs.h"
+#include <string.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
@@ -43,13 +44,14 @@ void get_raw_gyros(void);
 int16_t gyroADC[3];						// Holds Gyro ADCs
 
 // Polarity handling - same for both KK2.0 and KK2.1
-const int8_t Gyro_Pol[5][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
+const int8_t Gyro_Pol[6][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
 {
 	{1,1,1},		// Forward
 	{1,1,1},		// Vertical
 	{1,-1,-1},		// Upside down
 	{-1,-1,1},		// Aft
 	{1,-1,1},		// Sideways
+	{-1,1,1},		// Rear/bottom (PitchUp)
 };
 
 void ReadGyros(void)					// Conventional orientation
@@ -58,7 +60,7 @@ void ReadGyros(void)					// Conventional orientation
 
 	get_raw_gyros();					// Updates gyroADC[]
 
-	for (i=0;i<3;i++)					// For all axis
+	for (i=0; i<3; i++)					// For all axis
 	{
 		// Remove offsets from gyro outputs
 		gyroADC[i] -= Config.gyroZero[i];
@@ -72,11 +74,10 @@ void CalibrateGyrosFast(void)
 {
 	uint8_t i;
 
-	Config.gyroZero[ROLL] 	= 0;						
-	Config.gyroZero[PITCH]	= 0;	
-	Config.gyroZero[YAW] 	= 0;
+	// Clear gyro zeros
+	memset(&Config.gyroZero[ROLL],0,(sizeof(int16_t) * NUMBEROFAXIS));
 
-	for (i=0;i<32;i++)					// Calculate average over 32 reads
+	for (i=0; i<32; i++)				// Calculate average over 32 reads
 	{
 		get_raw_gyros();				// Updates gyroADC[]
 
@@ -87,9 +88,10 @@ void CalibrateGyrosFast(void)
 		_delay_ms(10);					// Get a better gyro average over time
 	}
 
-	Config.gyroZero[ROLL] 	= (Config.gyroZero[ROLL] >> 5);	//Divide by 32				
-	Config.gyroZero[PITCH] 	= (Config.gyroZero[PITCH] >> 5);
-	Config.gyroZero[YAW] 	= (Config.gyroZero[YAW]	>> 5);
+	for (i=0; i<3; i++)					// Average readings for all axis
+	{
+		Config.gyroZero[i] 	= (Config.gyroZero[i] >> 5);	// Divide by 32	
+	}
 }
 
 void CalibrateGyrosSlow(void)
@@ -207,7 +209,6 @@ void init_i2c_gyros(void)
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
 
 	// Other regs cannot be written until the MPU6050 is out of sleep mode
-//	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_SMPLRT_DIV, 0x02);	// Sample rate divder 1kHz / (2+1) = 333Hz
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, Config.MPU6050_LPF); 	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
 	
 	// Now configure gyros

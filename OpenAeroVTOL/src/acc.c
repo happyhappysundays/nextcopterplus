@@ -40,22 +40,24 @@ void get_raw_accs(void);
 
 // Polarity handling 
 #ifdef KK21 
-const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
+const int8_t Acc_Pol[6][3] PROGMEM =  // ROLL, PITCH, YAW
 {
 	{1,-1,1},		// Forward
 	{1,-1,1},		// Vertical
 	{-1,-1,-1},		// Upside down
 	{-1,1,1},		// Aft
 	{-1,-1,1},		// Sideways
+	{1,1,1},		// Rear/bottom (PitchUp)
 };
 #else
-const int8_t Acc_Pol[5][3] PROGMEM =  // ROLL, PITCH, YAW
+const int8_t Acc_Pol[6][3] PROGMEM =  // ROLL, PITCH, YAW
 {
 	{1,1,1},		// Forward
 	{1,-1,-1},		// Vertical
 	{-1,1,-1},		// Upside down
 	{-1,-1,1},		// Aft
 	{1,-1,1},		// Sideways
+	{1,1,-1},		// Rear/bottom (PitchUp)
 };
 #endif
 
