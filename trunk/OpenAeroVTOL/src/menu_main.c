@@ -91,10 +91,16 @@ void menu_main(void)
 		{
 			do_main_menu_item(main_temp);
 			button = NONE;
+
+			// Wait until user's finger is off button 1
+			while(BUTTON1 == 0)
+			{
+				_delay_ms(50);
+			}
 		}
 	}
-	menu_beep(1);
-	_delay_ms(200);
+
+//	menu_beep(1);
 }
 
 void do_main_menu_item(uint8_t menuitem)
@@ -161,7 +167,5 @@ void do_main_menu_item(uint8_t menuitem)
 		default:
 			break;
 	} // Switch
-	menu_beep(1);
-	_delay_ms(200);
 }
 

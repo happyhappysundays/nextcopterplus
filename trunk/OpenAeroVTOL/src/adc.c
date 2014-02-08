@@ -26,6 +26,7 @@ void read_adc(uint8_t channel);
 //										{AIN_VCC0, AIN_Y_GYRO, AIN_Z_GYRO, AIN_VBAT0, AIN_X_GYRO, AIN_X_ACC, AIN_Y_ACC, AIN_Z_ACC}; // Normal/UD definition
 const int8_t ADCseqVert[8] PROGMEM = 	{AIN_VCC0, AIN_X_GYRO, AIN_Y_GYRO, AIN_VBAT0, AIN_Z_GYRO, AIN_Y_ACC, AIN_Z_ACC, AIN_X_ACC}; // Vertical
 const int8_t ADCseqSide[8] PROGMEM = 	{AIN_VCC0, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBAT0, AIN_Y_GYRO, AIN_Y_ACC, AIN_X_ACC, AIN_Z_ACC}; // Sideways
+const int8_t ADCseqBack[8] PROGMEM = 	{AIN_VCC0, AIN_Z_GYRO, AIN_Y_GYRO, AIN_VBAT0, AIN_X_GYRO, AIN_Z_ACC, AIN_Y_ACC, AIN_X_ACC}; // PitchUp
 
 #ifdef KK21
 //***********************************************************
@@ -33,21 +34,23 @@ const int8_t ADCseqSide[8] PROGMEM = 	{AIN_VCC0, AIN_X_GYRO, AIN_Z_GYRO, AIN_VBA
 // The KK2.1 has the ACC X and Y axis swapped compared with the KK2.0
 //***********************************************************
 
-const int8_t ACC_RPY_Order[5][3] PROGMEM = 
+const int8_t ACC_RPY_Order[6][3] PROGMEM = 
 {
 	{PITCH, ROLL, YAW}, // Normal
 	{YAW, PITCH, ROLL}, // Vertical
 	{PITCH, ROLL, YAW},	// Upside down
 	{PITCH, ROLL, YAW},	// Aft
-	{ROLL, PITCH, YAW}	// Sideways
+	{ROLL, PITCH, YAW},	// Sideways
+	{PITCH, YAW, ROLL}, // Rear/bottom (PitchUp)
 };
-const int8_t Gyro_RPY_Order[5][3] PROGMEM = 
+const int8_t Gyro_RPY_Order[6][3] PROGMEM = 
 {
 	{ROLL, PITCH, YAW}, // Normal
 	{PITCH, YAW, ROLL}, // Vertical
 	{ROLL, PITCH, YAW},	// Upside down
 	{ROLL, PITCH, YAW},	// Aft
-	{PITCH, ROLL, YAW}	// Sideways
+	{PITCH, ROLL, YAW},	// Sideways
+	{YAW, PITCH, ROLL}, // Rear/bottom (PitchUp)
 };
 #endif
 
@@ -71,6 +74,11 @@ void read_adc(uint8_t channel)
 	else if (Config.Orientation == SIDEWAYS)
 	{
 		ADMUX = (int8_t)pgm_read_byte(&ADCseqSide[channel]);	// Set channel swapped as per ADCseqSide[]
+	}
+
+	else if (Config.Orientation == PITCHUP)
+	{
+		ADMUX = (int8_t)pgm_read_byte(&ADCseqBack[channel]);	// Set channel swapped as per ADCseqBack[]
 	}
 
 	else

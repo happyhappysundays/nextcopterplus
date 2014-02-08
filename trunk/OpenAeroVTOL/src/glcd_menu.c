@@ -224,7 +224,6 @@ const char ErrorText7[] PROGMEM = "Model";
 const char Status3[] 	PROGMEM = "Battery";
 const char ErrorText10[] PROGMEM =  "Low";
 const char Disarmed[]	PROGMEM = "Disarmed";
-
 //
 const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
@@ -253,13 +252,23 @@ const char MixerMenuItem3[]  PROGMEM = "Vertical";
 const char MixerMenuItem4[]  PROGMEM = "Inverted";
 const char MixerMenuItem5[]  PROGMEM = "Aft";
 const char MixerMenuItem6[]  PROGMEM = "Sideways";
+const char MixerMenuItem7[]  PROGMEM = "PitchUp";
 //
 const char MixerItem11[] PROGMEM = "Normal";				// Misc
 const char MixerItem12[] PROGMEM = "Rev.";
-const char MixerItem15[] PROGMEM = "Scale";
+const char MixerItem15[] PROGMEM = "Scaled";
 const char GeneralText5[] PROGMEM =  "Fast";
 #ifdef AIRSPEED
 const char MiscText1[] PROGMEM =  "Pitot (Pa)";
+#endif
+//
+#ifdef KK21
+// Debug
+const char DebugText1[] PROGMEM =  "Deltagyro:";
+const char DebugText2[] PROGMEM =  "AccSmooth:";
+const char DebugText3[] PROGMEM =  "CF output:";
+const char DebugText4[] PROGMEM =  "Angle:";
+const char DebugText5[] PROGMEM =  "Acc Mag:";
 #endif
 
 //
@@ -333,15 +342,17 @@ const char *text_menu[] PROGMEM =
 		ErrorText0, ErrorText10, Dummy0, ErrorText3,	ErrorText4,							// 72 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem7, MainMenuItem8, 
-		MainMenuItem10, MainMenuItem2, MainMenuItem3,  										// 77 to 96 Main menu
-		
-		//
+		MainMenuItem10, MainMenuItem2, MainMenuItem3,  										// 77 to 95 Main menu
 		MainMenuItem11,MainMenuItem12,MainMenuItem13,MainMenuItem14,
 		MainMenuItem15,MainMenuItem16,MainMenuItem17,MainMenuItem18,		
 		MainMenuItem20,MainMenuItem22, MainMenuItem23, 
 		//
 		//
-		Dummy0, Dummy0,	Dummy0, Dummy0, Dummy0,		
+#ifdef KK21
+		DebugText1, DebugText2,	DebugText3, DebugText4, DebugText5,							// 96 to 100	
+#else
+		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 
+#endif	
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem12,										// 101 to 103 OFF/ON/REV
 		//
@@ -357,9 +368,10 @@ const char *text_menu[] PROGMEM =
 		//
 		Status0, Status2, Dummy0,															// 121 to 123 Press any button
 		//
-		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,	MixerMenuItem5, MixerMenuItem6,		// 124 to 128 H/V/UD/Aft/Sideways
+		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,										// 124 to 129 H/V/UD/Aft/Sideways/PitchUp
+		MixerMenuItem5, MixerMenuItem6,	MixerMenuItem7,
 		//																
-		Dummy0,Dummy0,Dummy0,Dummy0,														// 129 to 132 Spare
+		Dummy0,Dummy0,Dummy0,																// 130 to 132 Spare
 		//
 		StatusText7,																		// 133 Battery:
 		//
@@ -383,7 +395,7 @@ const char *text_menu[] PROGMEM =
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 
 #ifdef KK21		
-		GeneralText10,
+		GeneralText10,																		// MPU6050 LPF
 #else
 		Dummy0,
 #endif
@@ -453,17 +465,16 @@ void idle_screen(void)
 	clear_buffer(buffer);
 
 	// Change Status screen depending on arm mode
+	LCD_Display_Text(121,(prog_uchar*)Verdana14,41,3); 	// "Press"
+	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
+
 	if ((General_error & (1 << DISARMED)) != 0) // Disarmed
 	{
-		LCD_Display_Text(121,(prog_uchar*)Verdana14,41,3); 	// "Press"
-		LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
 		LCD_Display_Text(139,(prog_uchar*)Verdana14,20,43); // "(Disarmed)"
 	}
 	else
 	{
-		LCD_Display_Text(121,(prog_uchar*)Verdana14,41,3); 	// "Press"
-		LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
-		LCD_Display_Text(138,(prog_uchar*)Verdana14,28,43); // "Armed"
+		LCD_Display_Text(138,(prog_uchar*)Verdana14,28,43); // "(Armed)"
 	}
 	
 	write_buffer(buffer,1);

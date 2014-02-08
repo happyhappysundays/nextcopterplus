@@ -9,6 +9,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -24,7 +25,7 @@
 // Prototypes
 //************************************************************
 
-void getEstimatedAttitude(void);
+void getEstimatedAttitude(uint16_t period);
 void UpdateIMUvalues(void);
 
 //************************************************************
@@ -68,12 +69,21 @@ void UpdateIMUvalues(void);
 
 //#define GYRO_SCALE	0.000000007f 	// for conversion to radians
 //#define GYRO_SCALE	0.0000004f 		// for conversion to degrees
-#define GYRO_SCALE	0.000001f 			// for conversion to the same scale as the accs
+#ifdef KK21
+#define GYRO_SCALE	0.0000008f 			// for conversion to the same scale as the accs
+#else
+#define GYRO_SCALE	0.0000010f 			// for KK2.0
+#endif
+
 
 /* Scaling factor for acc to read in Gs */
 #define acc_1G		125					// Z-axis full scale (+/- 1G) is 249 so I guess 1G is half of that
+// MW 1.9 values
 #define acc_1_4G_SQ 30625				// (1.4 * acc_1G) * (1.4 * acc_1G)
 #define acc_0_6G_SQ 5625				// (0.6 * acc_1G) * (0.6 * acc_1G)
+// MW2.3 values
+#define acc_1_15G_SQ 20664				// (1.15 * acc_1G) * (1.15 * acc_1G)
+#define acc_0_85G_SQ 11289				// (0.85 * acc_1G) * (0.85 * acc_1G)
 
 // Notes:
 // Pitch should have a range of +/-90 degrees. 
@@ -90,13 +100,10 @@ float	INV_GYR_CMPF_FACTOR;
 float 	accSmooth[NUMBEROFAXIS];
 int16_t	angle[2]; 			// Attitude
 
-void getEstimatedAttitude(void)
+void getEstimatedAttitude(uint16_t period)
 {
 	static float deltaGyroAngle[NUMBEROFAXIS] = {0.0f,0.0f,0.0f};
-	static uint32_t PreviousTime = 0;
-
 	float 		deltaTime, tempf;
-	uint32_t 	CurrentTime;
 	int16_t		roll_sq, pitch_sq, yaw_sq;
 	uint8_t		axis;
 	uint16_t	AccMag = 0;
@@ -108,7 +115,6 @@ void getEstimatedAttitude(void)
 	{
 		deltaTime = 0.0f;
 		Main_flags &= ~(1 << FirstTimeIMU);
-		PreviousTime = ticker_32;
 		
 		// Reset accumulating variables
 		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
@@ -119,16 +125,14 @@ void getEstimatedAttitude(void)
 	}
 	else
 	{
-		CurrentTime = ticker_32;
-		deltaTime = (CurrentTime - PreviousTime);
-		deltaTime = deltaTime * GYRO_SCALE;
-		PreviousTime = CurrentTime;
+		tempf = (float)period;
+		deltaTime = tempf * GYRO_SCALE;	
 	}
 
 	// Acc LPF and gyro integration
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
-		// Acc LPF with spike and surge mitigation
+		// Acc LPF
 		if (Config.Acc_LPF > 1)
 		{
 			// Acc LPF
@@ -154,12 +158,16 @@ void getEstimatedAttitude(void)
 
 	// Apply complimentary filter (Gyro drift correction)
 	// If accel magnitude >1.4G or <0.6G => we neutralize the effect of accelerometers in the angle estimation.
-	// To do that, we just skip the filter temporarily and use the old andgle estimation code.
+	// To do that, we just skip the filter temporarily and use the old angle estimation code.
 	// Note that this equation is a cheat to save doing a square root on the right-hand side.
 	// The equation is really just mag^2 = x^2 + y^2 + z^2.
 	// 125^2 or 15625 represents 1G (standing still). 0.6G is 5625 and 1.4G is 30625.
 
-	if (!((acc_0_6G_SQ > AccMag) || (AccMag > acc_1_4G_SQ))) // While under normal G
+	//	MW2.3 values have been updated to +/- 0.15G (up from +/-0.4G)
+	//	acc_1_15G_SQ
+	//	acc_0_85G_SQ
+
+	if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ)) // While under normal G
 	{ 
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
 
@@ -222,8 +230,8 @@ void getEstimatedAttitude(void)
 	// Use simple IMU when under unusual acceleration
 	else
 	{
-		angle[ROLL] = (int16_t)deltaGyroAngle[ROLL];
-		angle[PITCH] = (int16_t)deltaGyroAngle[PITCH];
+		angle[ROLL] = ((int16_t)(deltaGyroAngle[ROLL]) >> 1);
+		angle[PITCH] = ((int16_t)(deltaGyroAngle[PITCH]) >> 1);
 	}
 }
 

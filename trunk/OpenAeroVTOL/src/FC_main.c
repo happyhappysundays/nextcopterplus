@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 33 - January 2014
+// Version: Beta 33 - February 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -149,7 +149,13 @@
 // Beta 33	Optimised gyro slow cal starting point for each board
 //			Added airspeed sensor display on sensor screen if AIRSPEED compile option set (KK2.1 only)
 //			Contrast always set correctly on power-up.
-//
+//			Tweaked the G limits of the IMU to MultiWii 2.3 levels.
+//			Changed the Scaled gyro response to Scaled x5 for all except Acc-Z.
+//			Edge-clip bug fixed in fillcircle() so level meter works properly. 
+//			Added PitchUp board orientation. CF factor goes down to 1.
+//			Big change to IMU. Loop time is now calculated at the source and passed to getEstimatedAttitude().
+//			The case where local G is outside 0.85 to 1.15 now returns angle numbers of the same size as within.
+//			Fixed the over-writing of the inverted acc calibration on power-up.
 //
 //***********************************************************
 //* Notes
@@ -157,8 +163,9 @@
 //
 // Bugs:
 //	
-// Todo:
 //
+// Todo:
+//	
 //
 //***********************************************************
 //* Includes
@@ -270,6 +277,8 @@ int main(void)
 	uint16_t Servo_Rate = 0;
 	uint16_t Transition_timeout = 0;
 	uint16_t Disarm_timer = 0;
+	uint16_t ticker_16 = 0;
+	uint16_t LoopTCNT1 = 0;
 
 	// Timer incrementers
 	uint16_t LoopStartTCNT1 = 0;
@@ -782,7 +791,12 @@ int main(void)
 		// Read sensors
 		ReadGyros();
 		ReadAcc();	
-		getEstimatedAttitude();
+
+		// ticker_16 is incremented at 2.5MHz (400ns) - max 26.2ms
+		ticker_16 = (uint16_t)((uint16_t)TCNT1 - LoopTCNT1);	
+		LoopTCNT1 = TCNT1;	
+
+		getEstimatedAttitude(ticker_16); 
 
 		// Calculate PID
 		Calculate_PID();
@@ -887,8 +901,8 @@ int main(void)
 		//* Increment system time
 		//************************************************************
 
-		ticker_32 += (TCNT1 - LoopStartTCNT1);	// Update system time
-		LoopStartTCNT1 = TCNT1;					// Measure system time from here
+		ticker_32 += ((uint16_t)TCNT1 - LoopStartTCNT1);	// Update system time
+		LoopStartTCNT1 = (uint16_t)TCNT1;					// Measure system time from here
 
 	} // main loop
 } // main()

@@ -22,6 +22,8 @@
 #include "adc.h"
 #include "imu.h"
 
+#include "gyros.h"
+
 //************************************************************
 // Prototypes
 //************************************************************
@@ -34,6 +36,8 @@ void Display_balance(void);
 
 void Display_balance(void)
 {
+	uint16_t ticker_16 = 0;
+	uint16_t LoopTCNT1 = 0;
 	int16_t	x_pos, y_pos;
 	int8_t	roll_axis, pitch_axis;
 
@@ -41,12 +45,16 @@ void Display_balance(void)
 	{
 		ReadAcc();
 
+		// Time the loop for the IMU
+		// ticker_16 is incremented at 2.5MHz (400ns) - max 26.2ms
+		ticker_16 = (uint16_t)((uint16_t)TCNT1 - LoopTCNT1);	
+		LoopTCNT1 = TCNT1;	
 
 		// Refresh accSmooth values
 		// Note that because it takes 4.096ms to refresh the whole GLCD this loop cannot run 
 		// faster than 244Hz, but that's close enough to the actual loop time so that the 
 		// actual Acc LPF effect is closely mirrored on the balance meter.
-		getEstimatedAttitude(); 
+		getEstimatedAttitude(ticker_16); 
 
 		// HORIZONTAL: 	Pitch = X, Roll = Y
 		// UPSIDEDOWN:	Pitch = X, Roll = Y

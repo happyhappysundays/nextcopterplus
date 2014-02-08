@@ -69,7 +69,6 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 	{-127,127,1,0,0},				// Yaw trim
 
 	{0,127,1,0,0},					// Z Acc D gain
-
 };
 
 //************************************************************

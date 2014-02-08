@@ -6,9 +6,9 @@
 //* Externals
 //***********************************************************
 
-extern void getEstimatedAttitude(void);
+extern void getEstimatedAttitude(uint16_t period);
 extern void UpdateIMUvalues(void);
-extern int16_t	angle[2];
 
+extern int16_t	angle[2];
 extern float accSmooth[NUMBEROFAXIS];
-//extern int16_t accSmooth[NUMBEROFAXIS];
+

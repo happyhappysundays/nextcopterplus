@@ -513,7 +513,6 @@ void menu_mixer(uint8_t i)
 
 	} // while(button != BACK)
 
-	_delay_ms(200);
 }
 
 
