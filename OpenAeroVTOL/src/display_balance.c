@@ -39,10 +39,11 @@ void Display_balance(void)
 	uint16_t ticker_16 = 0;
 	uint16_t LoopTCNT1 = 0;
 	int16_t	x_pos, y_pos;
-	int8_t	roll_axis, pitch_axis;
 
 	while(BUTTON1 != 0)
 	{
+		// Read sensors
+		ReadGyros();
 		ReadAcc();
 
 		// Time the loop for the IMU
@@ -56,32 +57,9 @@ void Display_balance(void)
 		// actual Acc LPF effect is closely mirrored on the balance meter.
 		getEstimatedAttitude(ticker_16); 
 
-		// HORIZONTAL: 	Pitch = X, Roll = Y
-		// UPSIDEDOWN:	Pitch = X, Roll = Y
-		// AFT:			Pitch = X, Roll = Y
-		// VERTICAL:	Pitch = Y, Roll = X
-		// SIDEWAYS:	Pitch = Y, Roll = X
-
-		if ((Config.Orientation == VERTICAL) || (Config.Orientation == SIDEWAYS))
-		{
-			roll_axis = PITCH;
-			pitch_axis = ROLL;
-		}
-		else
-		{
-			roll_axis = ROLL;
-			pitch_axis = PITCH;
-		}
-
-		// We need to reverse the polarity reversal so that the meter is once again
-		// related to the KK2.0, not the model.
-		// For some reason, pitch has to be reversed on he KK2.1
-#ifdef KK21
-		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * -accSmooth[pitch_axis]) + 32;
-#else
-		x_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][pitch_axis]) * accSmooth[pitch_axis]) + 32;
-#endif
-		y_pos = ((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][roll_axis]) * accSmooth[roll_axis]) + 64;
+		// Convert acc signal to a pixel position
+		x_pos = -accSmooth[PITCH] + 32;
+		y_pos = accSmooth[ROLL] + 64;
 
 		if (x_pos < 0) x_pos = 0;
 		if (x_pos > 64) x_pos = 64;

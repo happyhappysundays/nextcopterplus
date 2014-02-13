@@ -72,6 +72,7 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(prog_uchar*)Verdana8,80,23);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(prog_uchar*)Verdana8,80,33);
 
+		
 #ifdef AIRSPEED
 		LCD_Display_Text(53,(prog_uchar*)Verdana8,5,45);		// Airspeed
 		mugui_lcd_puts(itoa((GetAirspeed() - Config.AirspeedZero),pBuffer,10),(prog_uchar*)Verdana8,55,45);

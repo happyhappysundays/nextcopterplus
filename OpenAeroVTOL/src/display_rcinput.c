@@ -64,7 +64,6 @@ void Display_rcinput(void)
 		mugui_lcd_puts(itoa(RCinputs[AUX2],pBuffer,10),(prog_uchar*)Verdana8,100,20);
 		mugui_lcd_puts(itoa(RCinputs[AUX3],pBuffer,10),(prog_uchar*)Verdana8,100,30);
 
-
 		// Print bottom text and markers
 		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
 		LCD_Display_Text(60, (prog_uchar*)Verdana8, 100, 55); 	// Cal.

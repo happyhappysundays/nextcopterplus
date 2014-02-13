@@ -146,7 +146,7 @@ void pgm_mugui_scopy(const char *s)
 
 	// Clear buffer first
 	// Actually two bytes smaller than using memset()
-	for (i = 0; i < 16; i++)
+	for (i = 0; i < PBUFFER_SIZE; i++)
 	{
 		pBuffer[i] = 0x00;
 	}

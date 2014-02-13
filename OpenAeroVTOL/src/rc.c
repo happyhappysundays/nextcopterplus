@@ -79,7 +79,7 @@ void RxGetChannels(void)
 	}
 
 	// Calculate RX activity
-	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[GEAR] + RCinputs[RUDDER] + RCinputs[AUX1];
+	RxSum = RCinputs[AILERON] + RCinputs[ELEVATOR] + RCinputs[RUDDER];
 	RxSumDiff = RxSum - OldRxSum;
 
 	// Set RX activity flag if movement above noise floor or throttle above minimum

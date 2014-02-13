@@ -80,7 +80,7 @@ void Calculate_PID(void)
 	int16_t DifferentialGyro2 = 0;
 	int16_t Differential = 0;
 	int16_t	stick = 0;
-
+	int8_t i = 0;
 	int8_t	axis = 0;
 
 	// Cross-ref for actual RCinput elements
@@ -110,6 +110,13 @@ void Calculate_PID(void)
 		{
 			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
 			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
+		};
+
+	// Only for roll and pitch
+	int16_t	L_trim[FLIGHT_MODES][2] =
+		{
+			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
+			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
 		};
 
 	//************************************************************
@@ -145,22 +152,16 @@ void Calculate_PID(void)
 		// Note that the I-term is not constrained when no RC input is present.
 		if (RCinputsAxis[axis] != 0)
 		{
-			if (IntegralGyro[P1][axis] > Config.Raw_I_Constrain[P1][axis])
+			for (i = P1; i <= P2; i++)
 			{
-				IntegralGyro[P1][axis] = Config.Raw_I_Constrain[P1][axis];
-			}
-			if (IntegralGyro[P1][axis] < -Config.Raw_I_Constrain[P1][axis])
-			{
-				IntegralGyro[P1][axis] = -Config.Raw_I_Constrain[P1][axis];
-			}
-
-			if (IntegralGyro[P2][axis] > Config.Raw_I_Constrain[P2][axis])
-			{
-				IntegralGyro[P2][axis] = Config.Raw_I_Constrain[P2][axis];
-			}
-			if (IntegralGyro[P2][axis] < -Config.Raw_I_Constrain[P2][axis])
-			{
-				IntegralGyro[P2][axis] = -Config.Raw_I_Constrain[P2][axis];
+				if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])
+				{
+					IntegralGyro[i][axis] = Config.Raw_I_Constrain[i][axis];
+				}
+				if (IntegralGyro[i][axis] < -Config.Raw_I_Constrain[i][axis])
+				{
+					IntegralGyro[i][axis] = -Config.Raw_I_Constrain[i][axis];
+				}
 			}
 		}
 
@@ -250,20 +251,19 @@ void Calculate_PID(void)
 		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> 6);
 
 		//************************************************************
-		// Calculate acc error from angle data (roll and pitch only)
+		// Calculate error from angle data and trim (roll and pitch only)
 		//************************************************************
 
-		// Autolevel mode (uses IMU to calculate attitude) for roll and pitch only
 		if (axis < YAW)
 		{
-			PID_acc_temp1 = angle[axis];
-			PID_acc_temp2 = PID_acc_temp1;
+			PID_acc_temp1 = angle[axis] - L_trim[P1][axis];				// Offset angle with trim
+			PID_acc_temp2 = angle[axis] - L_trim[P2][axis];
 
 			PID_acc_temp1 *= L_gain[P1][axis];							// P-term of accelerometer (Max gain of 127)
-			PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 2);			// Accs need much less scaling
+			PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 8);			// Reduce and convert to integer
 
 			PID_acc_temp2 *= L_gain[P2][axis];							// Same for P2
-			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 2);	
+			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 8);	
 		}
 
 	} // PID loop

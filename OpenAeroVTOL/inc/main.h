@@ -27,7 +27,6 @@ extern uint8_t	Transition_state;
 // Flags
 extern uint8_t	General_error;
 extern uint8_t	Flight_flags;
-extern uint8_t	Main_flags;
 extern uint8_t	Alarm_flags;
 
 // Misc

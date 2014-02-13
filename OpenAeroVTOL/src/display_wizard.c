@@ -130,7 +130,6 @@ void Display_sticks(void)
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		Save_Config_to_EEPROM();
-		_delay_ms(500);
  	}
 	else
 	{

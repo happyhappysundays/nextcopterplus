@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 33 - February 2014
+// Version: Beta 34 - February 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -156,6 +156,11 @@
 //			Big change to IMU. Loop time is now calculated at the source and passed to getEstimatedAttitude().
 //			The case where local G is outside 0.85 to 1.15 now returns angle numbers of the same size as within.
 //			Fixed the over-writing of the inverted acc calibration on power-up.
+// Beta 34	Moved roll/pitch trim to the PID loop as ineffective in mixer.
+//			Renamed angle-based terms in menus to "Level".
+//			Improved autolevel angle resolution from 1 degree to 0.01 degree.
+//			MPU6050 LPF fixed at 5Hz. Saved some more bytes.
+//			Acc calibration values saved so that redoing normal acc does not reset the inv cal.
 //
 //***********************************************************
 //* Notes
@@ -231,7 +236,6 @@ uint8_t Transition_state = TRANS_P1;
 // Flags
 uint8_t	General_error = 0;
 uint8_t	Flight_flags = 0;
-uint8_t	Main_flags = 0;
 uint8_t	Alarm_flags = 0;
 
 // Global buffers
@@ -494,8 +498,7 @@ int main(void)
 			 (
 			  (General_error & (1 << LVA_ALARM)) ||
 			  (General_error & (1 << NO_SIGNAL)) ||
-			  (General_error & (1 << THROTTLE_HIGH)) ||
-			  (General_error & (1 << SENSOR_ERROR))
+			  (General_error & (1 << THROTTLE_HIGH)) 
 			 ) && 
 			  (Alarm_flags & (1 << BUZZER_ON))
 			) 
@@ -538,7 +541,6 @@ int main(void)
 			{
 				Arm_timer = 0;
 				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
-				General_error &= ~(1 << SENSOR_ERROR);	// Clear sensor error
 				CalibrateGyrosSlow();					// Calibrate gyros
 				menu_beep(20);							// Signal that FC is ready
 

@@ -19,16 +19,6 @@
 #include "main.h"
 
 //************************************************************
-// Defines
-//************************************************************
-
-#define GYROS_STABLE 1
-#define SECOND_TIMER 19531			// Unit of timing for seconds
-#define GYROFS2000DEG 0x18			// 2000 deg/s fullscale
-#define GYROFS500DEG 0x08			// 500 deg/s fullscale
-#define GYROFS250DEG 0x00			// 250 deg/s fullscale
-
-//************************************************************
 // Prototypes
 //************************************************************
 
@@ -38,15 +28,36 @@ void CalibrateGyrosSlow(void);
 void get_raw_gyros(void);
 
 //************************************************************
-// Code
+// Defines
 //************************************************************
 
-int16_t gyroADC[3];						// Holds Gyro ADCs
+#define GYROS_STABLE 1
+#define SECOND_TIMER 19531			// Unit of timing for seconds
+#define GYROFS2000DEG 0x18			// 2000 deg/s fullscale
+#define GYROFS500DEG 0x08			// 500 deg/s fullscale
+#define GYROFS250DEG 0x00			// 250 deg/s fullscale
 
-// Polarity handling - same for both KK2.0 and KK2.1
-const int8_t Gyro_Pol[6][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
+//***********************************************************
+// ROLL, PITCH, YAW mapping for alternate orientation modes
+//***********************************************************
+
+// This is the order to return data in ROLL, PITCH, YAW order
+const int8_t Gyro_RPY_Order[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM = 
 {
-	{1,1,1},		// Forward
+// 	 ROLL, PITCH, YAW
+	{ROLL, PITCH, YAW}, // Forward (Normal)
+	{PITCH, YAW, ROLL}, // Vertical
+	{ROLL, PITCH, YAW},	// Upside down
+	{ROLL, PITCH, YAW},	// Aft
+	{PITCH, ROLL, YAW},	// Sideways
+	{YAW, PITCH, ROLL}, // Rear/bottom (PitchUp)
+};
+
+// These are the polarities to return them to the default
+const int8_t Gyro_Pol[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM = 
+{
+// 	ROLL, PITCH, YAW
+	{1,1,1},		// Forward (Normal)
 	{1,1,1},		// Vertical
 	{1,-1,-1},		// Upside down
 	{-1,-1,1},		// Aft
@@ -54,21 +65,76 @@ const int8_t Gyro_Pol[6][3] PROGMEM = // ROLL, PITCH, YAW * 5 orientations
 	{-1,1,1},		// Rear/bottom (PitchUp)
 };
 
+//************************************************************
+// Code
+//************************************************************
+
+int16_t gyroADC[NUMBEROFAXIS];			// Holds Gyro ADCs
+
 void ReadGyros(void)					// Conventional orientation
 {
 	uint8_t i;
 
 	get_raw_gyros();					// Updates gyroADC[]
 
-	for (i=0; i<3; i++)					// For all axis
+	for (i=0; i<NUMBEROFAXIS; i++)	
 	{
 		// Remove offsets from gyro outputs
 		gyroADC[i] -= Config.gyroZero[i];
 
-		// Change polarity as per orientation mode
+		// Change polarity
 		gyroADC[i] *= (int8_t)pgm_read_byte(&Gyro_Pol[Config.Orientation][i]);
 	}
 }
+
+void get_raw_gyros(void)
+{
+	int16_t RawADC[NUMBEROFAXIS];
+	uint8_t i;
+
+// Get data from MPU6050 for KK2.1
+#ifdef KK21
+	uint8_t Gyros[6];
+	int16_t temp1, temp2;
+
+	// For KK2.1 boards, use the i2c data from the MPU6050
+	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_GYRO_XOUT_H,(uint8_t *)Gyros,6);
+
+	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
+	temp1 = Gyros[0] << 8;
+	temp2 = Gyros[1];
+	RawADC[PITCH] = (temp1 + temp2) >> 6;
+
+	temp1 = Gyros[2] << 8;
+	temp2 = Gyros[3];
+	RawADC[ROLL] = (temp1 + temp2) >> 6;
+
+	temp1 = Gyros[4] << 8;
+	temp2 = Gyros[5];
+	RawADC[YAW] = (temp1 + temp2) >> 6;
+
+#else
+	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
+	RawADC[ROLL] = ADCW;
+
+	read_adc(AIN_X_GYRO);				// Read pitch gyro ADC4 (Pitch)
+	RawADC[PITCH] = ADCW;
+
+	read_adc(AIN_Z_GYRO);				// Read yaw gyro ADC2 (Yaw)
+	RawADC[YAW] = ADCW;
+#endif
+
+	// Reorient the data as per the board orientation	
+	for (i=0; i<NUMBEROFAXIS; i++)
+	{
+		// Rearrange the sensors
+		gyroADC[i] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][i])];
+	}
+}
+
+//***************************************************************
+// Calibration routines
+//***************************************************************
 
 void CalibrateGyrosFast(void)
 {
@@ -88,7 +154,7 @@ void CalibrateGyrosFast(void)
 		_delay_ms(10);					// Get a better gyro average over time
 	}
 
-	for (i=0; i<3; i++)					// Average readings for all axis
+	for (i=0; i<NUMBEROFAXIS; i++)		// Average readings for all axis
 	{
 		Config.gyroZero[i] 	= (Config.gyroZero[i] >> 5);	// Divide by 32	
 	}
@@ -110,7 +176,7 @@ void CalibrateGyrosSlow(void)
 #ifdef KK21
 		GyroSmooth[axis] = 0;
 #else
-		GyroSmooth[axis] = 500; // Debug
+		GyroSmooth[axis] = 500;
 #endif
 	}
 
@@ -151,67 +217,22 @@ void CalibrateGyrosSlow(void)
 			Gyros_Stable = true;
 		}
 	}
-	
-	// Still no stability after 5 seconds
-	if (!Gyros_Stable)
-	{
-		General_error |= (1 << SENSOR_ERROR); 	// Set sensor error bit
-	}
 }
 
-void get_raw_gyros(void)
-{
-// Get data from MPU6050 for KK2.1
 #ifdef KK21
-	uint8_t Gyros[6];
-	int16_t temp1, temp2;
-	int16_t RawADC[3];
+//***************************************************************
+// Set up the MPU6050 (Gyro)
+//***************************************************************
 
-	// For KK2.1 boards, use the i2c data from the MPU6050
-	// Check gyro array axis order and change in io_cfg.h
-	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_GYRO_XOUT_H,(uint8_t *)Gyros,6);
-
-	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
-	temp1 = Gyros[0] << 8;
-	temp2 = Gyros[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 6;
-
-	temp1 = Gyros[2] << 8;
-	temp2 = Gyros[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 6;
-
-	temp1 = Gyros[4] << 8;
-	temp2 = Gyros[5];
-	RawADC[YAW] = (temp1 + temp2) >> 6;
-
-	// Reorient the data as per the board orientation
-	gyroADC[ROLL] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][ROLL])];
-	gyroADC[PITCH] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][PITCH])];
-	gyroADC[YAW]	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][YAW])];
-
-#else
-	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
-	gyroADC[ROLL] = ADCW;
-
-	read_adc(AIN_X_GYRO);				// Read pitch gyro ADC4 (Pitch)
-	gyroADC[PITCH] = ADCW;
-
-	read_adc(AIN_Z_GYRO);				// Read yaw gyro ADC2 (Yaw)
-	gyroADC[YAW] = ADCW;
-#endif
-}
-
-
-#ifdef KK21
 void init_i2c_gyros(void)
 {
 	// First, configure the MPU6050
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); // Gyro X clock, awake
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); 			// Gyro X clock, awake
 
 	// Other regs cannot be written until the MPU6050 is out of sleep mode
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, Config.MPU6050_LPF); 	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, MPU60X0_DLPF_BW_5);	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
 	
 	// Now configure gyros
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS500DEG); // 500 deg/sec
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS500DEG);	// 500 deg/sec
 }
 #endif

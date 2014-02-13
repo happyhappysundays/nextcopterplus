@@ -87,8 +87,6 @@ void ProcessMixer(void)
 	int16_t	temp3 = 0;
 	int16_t	Step1 = 0;
 	int16_t	Step2 = 0;
-	int16_t	rolltrim = 0;
-	int16_t	pitchtrim = 0;
 
 	// Copy the sensor data to an array for easy indexing - acc data is from accSmooth, increased to reasonable rates
 	temp1 = (int16_t)accSmooth[ROLL] << 3;
@@ -217,15 +215,10 @@ void ProcessMixer(void)
 		// Mix in accelerometers
 		//************************************************************ 
 		// P1
-		rolltrim = (Config.FlightMode[P1].AccRollZeroTrim << 2); 			// Roll trim
-		pitchtrim = (Config.FlightMode[P1].AccPitchZeroTrim << 2);			// Pitch trim
-
 		if (Transition_state < TRANS_P2)
 		{
 			if ((Config.Channel[i].P1_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
-				P1_solution += rolltrim;
-			
 				if ((Config.Channel[i].P1_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
 					P1_solution = P1_solution -  scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
@@ -242,8 +235,6 @@ void ProcessMixer(void)
 
 			if ((Config.Channel[i].P1_sensors & (1 << PitchAcc)) != 0)
 			{
-				P1_solution += pitchtrim;
-			
 				if ((Config.Channel[i].P1_scale & (1 << AccPitchScale)) != 0)
 				{
 					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5); 
@@ -276,15 +267,10 @@ void ProcessMixer(void)
 		}
 
 		// P2
-		rolltrim = (Config.FlightMode[P2].AccRollZeroTrim << 2); 			// Roll trim
-		pitchtrim = (Config.FlightMode[P2].AccPitchZeroTrim << 2);			// Pitch trim
-
 		if (Transition_state > TRANS_P1)
 		{
 			if ((Config.Channel[i].P2_sensors & (1 << RollAcc)) != 0) 		// Only add if acc ON
 			{
-				P2_solution += rolltrim;
-			
 				if ((Config.Channel[i].P2_scale & (1 << AccRollScale)) != 0)// Scale acc
 				{
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5); 
@@ -301,8 +287,6 @@ void ProcessMixer(void)
 
 			if ((Config.Channel[i].P2_sensors & (1 << PitchAcc)) != 0)
 			{
-				P2_solution += pitchtrim;
-			
 				if ((Config.Channel[i].P2_scale & (1 << AccPitchScale)) != 0)
 				{
 					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5); 
@@ -739,6 +723,14 @@ void UpdateLimits(void)
 		Config.Limits[i].minimum = scale_percent(Config.min_travel[i]);
 		Config.Limits[i].maximum = scale_percent(Config.max_travel[i]);
 	}
+
+	// Adjust trim to match 0.01 degree resolution
+	// A value of 127 multiplied by 10 = 1270 which in 1/100ths of a degree equates to 12.7 degrees
+	for (i = P1; i <= P2; i++)
+	{
+		Config.Rolltrim[i] = Config.FlightMode[i].AccRollZeroTrim * 10;
+		Config.Pitchtrim[i] = Config.FlightMode[i].AccPitchZeroTrim * 10;
+	}
 }
 
 // Update servos from the mixer Config.Channel[i].P1_value data, add offsets and enforce travel limits
@@ -771,6 +763,7 @@ void UpdateServos(void)
 		{
 			ServoOut[i] = Config.Limits[i].minimum;
 		}
+
 		// Transfer value to servo
 		else
 		{
