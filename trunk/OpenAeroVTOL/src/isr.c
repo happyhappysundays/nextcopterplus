@@ -19,7 +19,7 @@
 
 volatile bool Interrupted;			// Flag that RX packet completed
 volatile bool JitterFlag;			// Flag that interrupt occurred
-volatile bool JitterGate;			// Area when we care about JitterFlag - Debug
+volatile bool JitterGate;			// Area when we care about JitterFlag
 
 volatile uint16_t RxChannel[MAX_RC_CHANNELS];
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	

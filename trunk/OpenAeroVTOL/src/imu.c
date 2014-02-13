@@ -85,6 +85,10 @@ void UpdateIMUvalues(void);
 #define acc_1_15G_SQ 20664				// (1.15 * acc_1G) * (1.15 * acc_1G)
 #define acc_0_85G_SQ 11289				// (0.85 * acc_1G) * (0.85 * acc_1G)
 
+// AVRGCC defines M_PI as this
+//#define M_PI		3.14159265358979323846
+#define CONV_DEGREES_100 (float)(1800.0f / M_PI)
+
 // Notes:
 // Pitch should have a range of +/-90 degrees. 
 // After you pitch past vertical (90 degrees) your roll and yaw value should swing 180 degrees. 
@@ -109,12 +113,11 @@ void getEstimatedAttitude(uint16_t period)
 	uint16_t	AccMag = 0;
 	bool		G_is_Normal = false;
 
-	// Get global timestamp
-	// The first calculation has no PreviousTime to measure from, so zero and move on.
-	if (Main_flags & (1 << FirstTimeIMU))
+	// Reset IMU 
+	if (Config.Main_flags & (1 << FirstTimeIMU))
 	{
 		deltaTime = 0.0f;
-		Main_flags &= ~(1 << FirstTimeIMU);
+		Config.Main_flags &= ~(1 << FirstTimeIMU);
 		
 		// Reset accumulating variables
 		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
@@ -195,12 +198,12 @@ void getEstimatedAttitude(uint16_t period)
 	if (G_is_Normal == true)
 	{
 		// Calculate the roll and pitch angles properly
-		// then convert to degrees
+		// then convert to degrees x 100
 		tempf = atan(deltaGyroAngle[PITCH] / (float)sqrt(roll_sq + yaw_sq));
-		angle[PITCH]  = (int16_t)(tempf * (float)(180 / M_PI));
+		angle[PITCH]  = (int16_t)(tempf * CONV_DEGREES_100);
 
 		tempf = atan(deltaGyroAngle[ROLL]  / (float)sqrt(pitch_sq + yaw_sq));
-		angle[ROLL]  = (int16_t)(tempf * (float)(180 / M_PI));
+		angle[ROLL]  = (int16_t)(tempf * CONV_DEGREES_100);
 
 		// And I think this solves the upside down issue...
 		// Handle axis reversal when inverted
@@ -209,34 +212,37 @@ void getEstimatedAttitude(uint16_t period)
 			// Roll
 			if (accADC[ROLL] < 0)
 			{
-				angle[ROLL] = (180 - angle[ROLL]);
+				angle[ROLL] = (18000 - angle[ROLL]);
 			}
 			else
 			{
-				angle[ROLL] = (-180 - angle[ROLL]);
+				angle[ROLL] = (-18000 - angle[ROLL]);
 			}
 
 			// Pitch
 			if (accADC[PITCH] < 0)
 			{
-				angle[PITCH] = (180 - angle[PITCH]);
+				angle[PITCH] = (18000 - angle[PITCH]);
 			}
 			else
 			{
-				angle[PITCH] = (-180 - angle[PITCH]);
+				angle[PITCH] = (-18000 - angle[PITCH]);
 			}
 		}
 	}
 	// Use simple IMU when under unusual acceleration
+	// deltaGyroAngle[] is 50 times smaller than angle[]
+	// So we need to compensate here to make them equal
 	else
 	{
-		angle[ROLL] = ((int16_t)(deltaGyroAngle[ROLL]) >> 1);
-		angle[PITCH] = ((int16_t)(deltaGyroAngle[PITCH]) >> 1);
+		angle[ROLL] = (int16_t)(deltaGyroAngle[ROLL] * 50);
+		angle[PITCH] = (int16_t)(deltaGyroAngle[PITCH] * 50);
 	}
 }
 
 void UpdateIMUvalues(void)
 {
+	// Recalculate CF factors
 	GYR_CMPF_FACTOR = (int16_t)Config.CF_factor * 10;
 	INV_GYR_CMPF_FACTOR = (1.0f / (GYR_CMPF_FACTOR + 1.0f));
 }

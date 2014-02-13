@@ -16,6 +16,7 @@
 #define MAX_ZGAIN 500					// Maximum amount of Z-based height dampening
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
+#define NUMBEROFORIENTS 6				// Number board orientations
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
 #define	MOTORMIN 1000					// Minimum throttle value. 1000 or 1.1ms
 
@@ -139,7 +140,7 @@ typedef struct
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (8/9)
+	// General items (8)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
@@ -148,10 +149,6 @@ typedef struct
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	// Debug
-#ifdef KK21
-	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-#endif
 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
@@ -165,17 +162,26 @@ typedef struct
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
 	// Acc zeros
-	uint16_t	AccZero[NUMBEROFAXIS];	// Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
-	int16_t		AccVertZero;			// Acc-Z zero for zero-centered Z values
+	int16_t		AccZero[NUMBEROFAXIS];	// Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
+	int16_t		AccZeroNormZ;			// Acc-Z zero for normal Z values
+	int16_t		AccZeroInvZ;			// Acc-Z zero for inverted Z values
+	int16_t		AccZeroDiff;			// Difference between normal and inverted Acc-Z zeros
 
 	// Gyro zeros
 	int16_t		gyroZero[NUMBEROFAXIS];
 
 	// Airspeed zero
-	uint16_t	AirspeedZero;			// Zero airspeed sensor offset
+	int16_t		AirspeedZero;			// Zero airspeed sensor offset
 
 	// Flight mode
 	int8_t		FlightSel;				// User set flight mode
+
+	// Adjusted trims
+	int16_t		Rolltrim[FLIGHT_MODES];	// User set trims * 100
+	int16_t		Pitchtrim[FLIGHT_MODES];
+
+	// Sticky flags
+	uint8_t		Main_flags;				// Non-volatile flags
 
 } CONFIG_STRUCT;
 

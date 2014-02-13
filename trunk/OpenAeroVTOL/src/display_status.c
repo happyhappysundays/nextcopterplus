@@ -118,12 +118,7 @@ void Display_status(void)
 		drawrect(buffer, 14,8, 96, 48, 1); 	// Outline
 
 		// Prioritise error from top to bottom
-		if((General_error & (1 << SENSOR_ERROR)) != 0)
-		{
-			LCD_Display_Text(72,(prog_uchar*)Verdana14,35,14); 	// Sensor
-			LCD_Display_Text(19,(prog_uchar*)Verdana14,43,34); 	// Error
-		}
-		else if((General_error & (1 << LVA_ALARM)) != 0)
+		if((General_error & (1 << LVA_ALARM)) != 0)
 		{
 			LCD_Display_Text(134,(prog_uchar*)Verdana14,33,14); // Battery
 			LCD_Display_Text(73,(prog_uchar*)Verdana14,46,34); 	// Low

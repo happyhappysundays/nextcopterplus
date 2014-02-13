@@ -143,8 +143,7 @@ void init(void)
 
 	// Preset important flags
 	Interrupted = false;						
-	Main_flags |= (1 << FirstTimeIMU);
-	Main_flags |= (1 << inv_cal_done);
+	Config.Main_flags |= (1 << FirstTimeIMU);
 
 	//***********************************************************
 	// GLCD initialisation
@@ -167,8 +166,8 @@ void init(void)
 	// Load or reset EEPROM settings
 	//***********************************************************
 
-	// Reload default eeprom settings if middle two buttons are pressed (or all, for older users)
-	if (((PINB & 0xf0) == 0x90) || ((PINB & 0xf0) == 0x00))
+	// Reload default eeprom settings if middle two buttons are pressed
+	if ((PINB & 0xf0) == 0x90)
 	{
 		// Display reset message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
@@ -176,7 +175,6 @@ void init(void)
 		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
 	}

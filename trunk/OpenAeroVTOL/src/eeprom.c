@@ -33,8 +33,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x2D		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x2D = Beta 33+
+#define MAGIC_NUMBER 0x2E		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x2E = Beta 34+
 
 //************************************************************
 // Code
@@ -76,34 +76,35 @@ void Set_EEPROM_Default_Config(void)
 
 	// Preset simple mixing for primary channels
 	Config.Channel[OUT1].P1_throttle_volume = 100;
-	Config.Channel[OUT1].P2_throttle_volume = 100;
 	Config.Channel[OUT2].P1_aileron_volume = 100;
-	Config.Channel[OUT2].P2_aileron_volume = 100;
 	Config.Channel[OUT3].P1_elevator_volume = 100;
-	Config.Channel[OUT3].P2_elevator_volume = 100;
 	Config.Channel[OUT4].P1_rudder_volume = 100;
+#ifdef KK21
+	Config.Channel[OUT1].P2_throttle_volume = 100;
+	Config.Channel[OUT2].P2_aileron_volume = 100;
+	Config.Channel[OUT3].P2_elevator_volume = 100;
 	Config.Channel[OUT4].P2_rudder_volume = 100;
 
 	// Preset basic axis gyros in P2
 	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
 	Config.Channel[OUT3].P2_sensors |= (1 << PitchGyro);
 	Config.Channel[OUT4].P2_sensors |= (1 << YawGyro);
+#endif
 
 	// Misc settings
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
-	Config.TxSeq = JRSEQ;
 
 #ifdef KK21
 	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
 	Config.AccZero[PITCH]	= 0;
 	Config.AccZero[YAW]		= 0;
-	Config.AccVertZero		= 0;
+	Config.AccZeroNormZ		= 0;
 #else
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
 	Config.AccZero[YAW]		= 643; 		// 643 is the centre
-	Config.AccVertZero		= 765;
+	Config.AccZeroNormZ		= 765;
 #endif
 
 	// Set up all profiles the same initially
@@ -120,16 +121,11 @@ void Set_EEPROM_Default_Config(void)
 	}
 
 	Config.Acc_LPF = 8;					// IMU CF defaults
-#ifdef KK21
-	Config.MPU6050_LPF = MPU60X0_DLPF_BW_5;	// 5Hz
-#endif
 	Config.CF_factor = 30;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
-	Config.ArmMode = ARMED;				// Always armed
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
 	Config.Contrast = 0x26;				// Contrast
 	Config.Disarm_timer = 30;			// Default to 30 seconds
-	Config.Servo_rate = LOW;			// Default to LOW (50Hz)
 	Config.Stick_Lock_rate = 3;
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 }
@@ -171,7 +167,6 @@ void Initial_EEPROM_Config_Load(void)
 	// Load last settings from EEPROM
 	if(eeprom_read_byte((uint8_t*) EEPROM_DATA_START_POS )!= MAGIC_NUMBER)
 	{
-		Config.setup = MAGIC_NUMBER;
 		Set_EEPROM_Default_Config();
 		// Write to eeProm
 		Save_Config_to_EEPROM();

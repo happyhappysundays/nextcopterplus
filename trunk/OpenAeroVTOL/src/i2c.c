@@ -33,17 +33,25 @@ void writeI2Cbyte(uint8_t address, uint8_t location, uint8_t value)
 
 void readI2CbyteArray(uint8_t address, uint8_t location, uint8_t *array,uint8_t size)
 {
+	int i=0;
+
     i2c_start_wait(address+I2C_WRITE);
     i2c_write(location);							// Set up register address 
     i2c_rep_start(address+I2C_READ);
-	int i=0;
-	while(i < size)
+
+	while (i < size)
 	{
 		if ((i+1)!=size)
+		{
 			array[i]=i2c_readAck();
-		else array[i]=i2c_readNak(); 				// Read without ACK on last byte
+		}
+		else
+		{
+			array[i]=i2c_readNak(); 				// Read without ACK on last byte
+		}
 		i++;
 	}
+
     i2c_stop();
 }
 

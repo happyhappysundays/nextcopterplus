@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 33";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 34";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -91,13 +91,13 @@ const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
 const char StabMenuItem3[]  PROGMEM = "Roll D:";
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
-const char AutoMenuItem20[]  PROGMEM = "Acc Roll P:";
+const char AutoMenuItem20[]  PROGMEM = "Level Roll P:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char StabMenuItem5[]  PROGMEM = "Pitch I:";
 const char StabMenuItem6[]  PROGMEM = "Pitch D:"; 
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
-const char AutoMenuItem21[]  PROGMEM = "Acc Pitch P:";
+const char AutoMenuItem21[]  PROGMEM = "Level Pitch P:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char StabMenuItem7[]  PROGMEM = "Yaw P:"; 
 const char StabMenuItem8[]  PROGMEM = "Yaw I:";
@@ -134,16 +134,6 @@ const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText7[] PROGMEM =  "CF factor:";
 const char BattMenuItem2[]  PROGMEM = "Bat. LVA x10:";
 const char GeneralText9[] PROGMEM =  "Lock rate:";			// Stick rate for gyro I-term in Axis-lock mode
-#ifdef KK21
-const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
-const char MPU6050LPF1[] PROGMEM =  "5Hz";
-const char MPU6050LPF2[] PROGMEM =  "10Hz";
-const char MPU6050LPF3[] PROGMEM =  "21Hz";
-const char MPU6050LPF4[] PROGMEM =  "44Hz";
-const char MPU6050LPF5[] PROGMEM =  "94Hz";
-const char MPU6050LPF6[] PROGMEM =  "184Hz";
-const char MPU6050LPF7[] PROGMEM =  "260Hz";
-#endif
 //
 const char Transition[] PROGMEM = "Transition";
 const char Transition_P1n[] PROGMEM = "Trans. P1n:";
@@ -215,9 +205,8 @@ const char ChannelRef8[] PROGMEM = "None";
 const char ChannelRef10[] PROGMEM = "Throt.";				// RC channel text (Abbr.)
 const char ChannelRef12[] PROGMEM = "Elev."; 
 //
-const char ErrorText0[] PROGMEM = "Sensor"; 				// Error text
-const char ErrorText3[] PROGMEM = "No";
-const char ErrorText4[] PROGMEM = "Signal";
+const char ErrorText3[] PROGMEM = "No";						// Error text
+const char ErrorText4[] PROGMEM = "Signal";	
 const char ErrorText5[] PROGMEM = "Error";
 const char ErrorText6[] PROGMEM = "Lost";
 const char ErrorText7[] PROGMEM = "Model";
@@ -299,14 +288,9 @@ const char *text_menu[] PROGMEM =
 		//
 		ChannelRef1, ChannelRef2, ChannelRef0, ChannelRef3, ChannelRef4,					// 32 to 36 RC inputs
 		//
-#ifdef KK21
-		MPU6050LPF7, MPU6050LPF6, MPU6050LPF5, MPU6050LPF4,
-		MPU6050LPF3, MPU6050LPF2, MPU6050LPF1,												// 37 to 43  MPU6050 LPF
-#else
 		Dummy0,																				// 37 to 43  Spare
 		Dummy0,Dummy0,Dummy0,
 		Dummy0,Dummy0,Dummy0, 	
-#endif
 		//
 		Safety1, Safety2, 																	// 44 Safety 
 		//
@@ -339,7 +323,7 @@ const char *text_menu[] PROGMEM =
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15,MixerItem12,							// 68 to 71 off/on/scale/rev 
 		//
-		ErrorText0, ErrorText10, Dummy0, ErrorText3,	ErrorText4,							// 72 to 76 Error messages
+		Dummy0, ErrorText10, Dummy0, ErrorText3, ErrorText4,								// 72 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem7, MainMenuItem8, 
 		MainMenuItem10, MainMenuItem2, MainMenuItem3,  										// 77 to 95 Main menu

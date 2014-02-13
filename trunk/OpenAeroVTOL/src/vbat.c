@@ -71,7 +71,7 @@ uint16_t GetAirspeed(void)			// Get airspeed (ADC6)
 	uint16_t	AirSpeed;
 		
 	// Read analog airspeed input
-	read_adc(AIN_ADC6);				
+	read_adc(AIN_PITOT);				
 	AirSpeed = ADCW;
 
 	// Multiplication factor = 2305 / 1024 = 2.2509766
@@ -86,7 +86,7 @@ void CalibrateAirspeed(void)
 	int8_t		i = 0;
 
 	// Get average of 32 reads
-	for (i=0;i<32;i++)
+	for (i=0; i<32; i++)
 	{
 		temp += GetAirspeed();		// Get airspeed sensor reading
 
