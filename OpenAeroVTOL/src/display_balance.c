@@ -58,7 +58,7 @@ void Display_balance(void)
 		getEstimatedAttitude(ticker_16); 
 
 		// Convert acc signal to a pixel position
-		x_pos = -accSmooth[PITCH] + 32;
+		x_pos = accSmooth[PITCH] + 32;
 		y_pos = accSmooth[ROLL] + 64;
 
 		if (x_pos < 0) x_pos = 0;

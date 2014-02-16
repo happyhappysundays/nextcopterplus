@@ -378,13 +378,8 @@ const char *text_menu[] PROGMEM =
 		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 
-#ifdef KK21		
-		GeneralText10,																		// MPU6050 LPF
-#else
-		Dummy0,
-#endif
 		//
-		Dummy0,Dummy0, Dummy0,	Dummy0,
+		Dummy0,	Dummy0,Dummy0, Dummy0,	Dummy0,
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro

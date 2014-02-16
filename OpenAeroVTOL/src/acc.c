@@ -58,12 +58,12 @@ const int8_t ACC_RPY_Order[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM =
 const int8_t Acc_Pol[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM =
 {
 // 	 ROLL, PITCH, YAW
-	{1,-1,1},		// Forward 
-	{1,1,-1},		// Vertical 
-	{-1,-1,-1},		// Upside down 
-	{-1,1,1},		// Aft 
-	{1,1,1},		// Sideways 
-	{1,-1,-1},		// Rear/bottom (PitchUp)
+	{-1,-1,1},		// Forward 
+	{-1,1,-1},		// Vertical 
+	{1,-1,-1},		// Upside down 
+	{1,1,1},		// Aft 
+	{-1,1,1},		// Sideways 
+	{-1,-1,-1},		// Rear/bottom (PitchUp)
 };
 
 //************************************************************
@@ -78,11 +78,6 @@ void ReadAcc()
 	uint8_t i;
 
 	get_raw_accs();				// Updates accADC[] (RPY)
-
-	// Recalculate current accVert using filtered acc value
-	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
-	// the zero back here so that Config.AccZeroNormZ subtracts the correct amount
-	 accVert = accSmooth[YAW] + Config.AccZero[YAW] - Config.AccZeroNormZ ;
 
 	// Use default Config.AccZero for Acc-Z if inverse calibration not done yet
 	// Actual zero is held in Config.AccZeroNormZ waiting for inv calibration
@@ -110,6 +105,13 @@ void ReadAcc()
 		// Change polarity
 		accADC[i] *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][i]);
 	}
+
+
+	// Recalculate current accVert using filtered acc value
+	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
+	// the zero back here so that Config.AccZeroNormZ subtracts the correct amount
+	 accVert = accSmooth[YAW] - Config.AccZero[YAW] + Config.AccZeroNormZ ;
+
 }
 
 //***************************************************************
