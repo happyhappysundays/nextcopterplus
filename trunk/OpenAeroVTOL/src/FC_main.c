@@ -103,7 +103,7 @@
 //			RC noise threshold changed from +/-20 to +/-5. Improved throttle curve response.
 // Beta 18	Fixed throttle minimum offset. Fixed slight rounding error when P2 throttle vol is 80% and P1 is 0%
 // Beta 19	Throttle separated into Monopolar and Bipolar versions. Source list now includes Throttle, Aileron, 
-//			Elevator and Rudder again as a result. Changed Acc delta Z to an Acc P function.
+//			Elevator and Rudder again as a result. Changed Acc delta Z to an Acc P function. 
 //			Fixed acc calibration issues. Removed Free RAM display to save space.
 //			Fixed Acc Z initial offset for KK2.1. Added SQRTSINE curve for KK2.1
 //			Updated sine table data for 101 unique values.
@@ -159,8 +159,10 @@
 // Beta 34	Moved roll/pitch trim to the PID loop as ineffective in mixer.
 //			Renamed angle-based terms in menus to "Level".
 //			Improved autolevel angle resolution from 1 degree to 0.01 degree.
-//			MPU6050 LPF fixed at 5Hz. Saved some more bytes.
+//			MPU6050 LPF fixed at 5Hz.
 //			Acc calibration values saved so that redoing normal acc does not reset the inv cal.
+//			Normalised the whole sensor polarity system.
+//			Simplified inverted behaviour of IMU
 //
 //***********************************************************
 //* Notes

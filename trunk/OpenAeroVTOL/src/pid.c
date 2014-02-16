@@ -85,7 +85,7 @@ void Calculate_PID(void)
 
 	// Cross-ref for actual RCinput elements
 	// Note that axes are reversed here with respect to their gyros
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], -RCinputs[ELEVATOR], -RCinputs[RUDDER]}; 
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], -RCinputs[ELEVATOR], -RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -112,7 +112,7 @@ void Calculate_PID(void)
 			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
 		};
 
-	// Only for roll and pitch
+	// Only for roll and pitch acc trim
 	int16_t	L_trim[FLIGHT_MODES][2] =
 		{
 			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
@@ -261,9 +261,11 @@ void Calculate_PID(void)
 
 			PID_acc_temp1 *= L_gain[P1][axis];							// P-term of accelerometer (Max gain of 127)
 			PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 8);			// Reduce and convert to integer
+			//PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 2);			// Reduce and convert to integer
 
 			PID_acc_temp2 *= L_gain[P2][axis];							// Same for P2
 			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 8);	
+			//PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 2);	
 		}
 
 	} // PID loop
@@ -272,7 +274,7 @@ void Calculate_PID(void)
 	// Calculate an Acc-Z value 
 	//************************************************************
 
-	PID_acc_temp1 = accVert;				// Get and copy Z-acc value
+	PID_acc_temp1 = -accVert;				// Get and copy Z-acc value. Negate to oppose G
 	PID_acc_temp2 = PID_acc_temp1;
 
 	PID_acc_temp1 *= L_gain[P1][YAW];		// Multiply P-term (Max gain of 127)

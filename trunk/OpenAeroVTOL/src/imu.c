@@ -86,8 +86,12 @@ void UpdateIMUvalues(void);
 #define acc_0_85G_SQ 11289				// (0.85 * acc_1G) * (0.85 * acc_1G)
 
 // AVRGCC defines M_PI as this
-//#define M_PI		3.14159265358979323846
-#define CONV_DEGREES_100 (float)(1800.0f / M_PI)
+// #define M_PI		3.14159265358979323846
+#define CONV_DEGREES (float)(18000.0f / M_PI)	// For 0.01 deg/bit accuracy
+#define ONE_EIGHTY 18000 						// For 0.01 deg/bit accuracy
+
+//#define CONV_DEGREES (float)(180.0f / M_PI)	// For 1 deg/bit accuracy
+//#define ONE_EIGHTY 180 						// For 0.01 deg/bit accuracy
 
 // Notes:
 // Pitch should have a range of +/-90 degrees. 
@@ -139,7 +143,7 @@ void getEstimatedAttitude(uint16_t period)
 		if (Config.Acc_LPF > 1)
 		{
 			// Acc LPF
-			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) + (float)(accADC[axis])) / Config.Acc_LPF;
+			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) - (float)(accADC[axis])) / Config.Acc_LPF;
 		}
 		else
 		{
@@ -172,19 +176,14 @@ void getEstimatedAttitude(uint16_t period)
 
 	if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ)) // While under normal G
 	{ 
-		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
-
 		// The CF algorithm will fail when inverted as acc moves opposite gyro
 		// When inverted, use acc only.
 		if (accADC[YAW] > 0)
 		{
+			deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
 			deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 		}
-		else
-		{
-			deltaGyroAngle[PITCH] = -accSmooth[PITCH];
-		}	
-		
+			
 		G_is_Normal = true;
 	} 
 	
@@ -198,38 +197,40 @@ void getEstimatedAttitude(uint16_t period)
 	if (G_is_Normal == true)
 	{
 		// Calculate the roll and pitch angles properly
-		// then convert to degrees x 100
+		// then convert to degrees
 		tempf = atan(deltaGyroAngle[PITCH] / (float)sqrt(roll_sq + yaw_sq));
-		angle[PITCH]  = (int16_t)(tempf * CONV_DEGREES_100);
+		angle[PITCH]  = (int16_t)(tempf * CONV_DEGREES);
 
 		tempf = atan(deltaGyroAngle[ROLL]  / (float)sqrt(pitch_sq + yaw_sq));
-		angle[ROLL]  = (int16_t)(tempf * CONV_DEGREES_100);
+		angle[ROLL]  = (int16_t)(tempf * CONV_DEGREES);
 
 		// And I think this solves the upside down issue...
 		// Handle axis reversal when inverted
-		if (accADC[YAW] < 0)
+/*		if (accADC[YAW] < 0)
 		{
 			// Roll
-			if (accADC[ROLL] < 0)
+			if (accADC[ROLL] > 0)
 			{
-				angle[ROLL] = (18000 - angle[ROLL]);
+				angle[ROLL] = (ONE_EIGHTY - angle[ROLL]);
 			}
 			else
 			{
-				angle[ROLL] = (-18000 - angle[ROLL]);
+				angle[ROLL] = (-ONE_EIGHTY - angle[ROLL]);
 			}
 
 			// Pitch
-			if (accADC[PITCH] < 0)
+			if (accADC[PITCH] > 0)
 			{
-				angle[PITCH] = (18000 - angle[PITCH]);
+				angle[PITCH] = (ONE_EIGHTY - angle[PITCH]);
 			}
 			else
 			{
-				angle[PITCH] = (-18000 - angle[PITCH]);
+				angle[PITCH] = (-ONE_EIGHTY - angle[PITCH]);
 			}
 		}
+*/
 	}
+
 	// Use simple IMU when under unusual acceleration
 	// deltaGyroAngle[] is 50 times smaller than angle[]
 	// So we need to compensate here to make them equal
@@ -237,6 +238,9 @@ void getEstimatedAttitude(uint16_t period)
 	{
 		angle[ROLL] = (int16_t)(deltaGyroAngle[ROLL] * 50);
 		angle[PITCH] = (int16_t)(deltaGyroAngle[PITCH] * 50);
+
+		//angle[ROLL] = ((int16_t)(deltaGyroAngle[ROLL]) >> 1);
+		//angle[PITCH] = ((int16_t)(deltaGyroAngle[PITCH]) >> 1);
 	}
 }
 
