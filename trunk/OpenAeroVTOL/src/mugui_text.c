@@ -63,10 +63,10 @@ typedef struct
 extern uint8_t buffer[];
 
 // Prototypes
-void mugui_text_sizestring(mugui_char_t *s, prog_uchar* font, mugui_size16_t *size);
-void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y);
-mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y);
-void pgm_mugui_lcd_puts(prog_uchar* s, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y);
+void mugui_text_sizestring(mugui_char_t *s, const unsigned char* font, mugui_size16_t *size);
+void mugui_lcd_puts(mugui_char_t *s, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y);
+mugui_uint16_t mugui_lcd_putc(mugui_char_t c, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y);
+void pgm_mugui_lcd_puts(const unsigned char* s, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y);
 void pgm_mugui_scopy(const char *s);
 
 /*************************************************************************/
@@ -78,7 +78,7 @@ void pgm_mugui_scopy(const char *s);
 	\date 	12.08.2009
 */
 /************************************************************************/
-void mugui_text_sizestring(mugui_char_t *s, prog_uchar* font, mugui_size16_t *size)
+void mugui_text_sizestring(mugui_char_t *s, const unsigned char* font, mugui_size16_t *size)
 {
 	mugui_uint8_t  distance = 1;			//distance between characters
 	mugui_uint16_t length = 0;				//temporary length of string
@@ -121,7 +121,7 @@ void mugui_text_sizestring(mugui_char_t *s, prog_uchar* font, mugui_size16_t *si
 	\Modified by D. Thompson 27/07/2012
 */
 /************************************************************************/
-void pgm_mugui_lcd_puts(prog_uchar* s, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y)
+void pgm_mugui_lcd_puts(const unsigned char* s, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y)
 {
 	mugui_uint8_t distance  = 1;			// Distance between characters
 	mugui_uint16_t xpos     = 0;			// Relative xpos of character
@@ -166,7 +166,7 @@ void pgm_mugui_scopy(const char *s)
 	\date 	12.08.2009
 */
 /************************************************************************/
-void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y)
+void mugui_lcd_puts(mugui_char_t *s, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y)
 {
 	mugui_uint8_t distance  = 1;			//distance between characters
 	mugui_uint16_t xpos     = 0;			//relativ xpos of character
@@ -191,7 +191,7 @@ void mugui_lcd_puts(mugui_char_t *s, prog_uchar* font,mugui_uint16_t x, mugui_ui
 	\Modified by D. Thompson 14/08/2012 - Now hard-coded for proportional, type 2 (verticalCeiling)
 */
 /************************************************************************/
-mugui_uint16_t mugui_lcd_putc(mugui_char_t c, prog_uchar* font,mugui_uint16_t x, mugui_uint16_t y)
+mugui_uint16_t mugui_lcd_putc(mugui_char_t c, const unsigned char* font,mugui_uint16_t x, mugui_uint16_t y)
 {
 	mugui_uint16_t startcharacter = 0; 		//startcharacter of the font
 	mugui_uint16_t height = 0;				//height of the bitmap

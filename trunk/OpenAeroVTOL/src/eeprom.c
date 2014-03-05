@@ -123,8 +123,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.Acc_LPF = 8;					// IMU CF defaults
 	Config.CF_factor = 30;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
-	Config.Orientation = HORIZONTAL;	// Horizontal / vertical
-	Config.Contrast = 0x26;				// Contrast
+	Config.Orientation = HORIZONTAL;	// Horizontal / vertical etc.
+	Config.Contrast = 38;				// Contrast
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Stick_Lock_rate = 3;
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%

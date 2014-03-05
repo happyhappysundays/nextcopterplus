@@ -31,10 +31,7 @@ volatile uint16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
 void output_servo_ppm(void)
 {
 	uint32_t temp;
-	uint8_t i, stop;
-
-	// Clear motor stop flag;
-	stop = 0;
+	uint8_t i;
 
 	// Scale servo from 2500~5000 to 1000~2000
 	for (i = 0; i < MAX_OUTPUTS; i++)

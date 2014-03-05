@@ -100,7 +100,6 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 
 void menu_mixer(uint8_t i)
 {
-	static uint8_t mix_top = MIXERSTART;
 	int8_t *value_ptr;
 	int8_t values[MIXERITEMS];
 	menu_range_t range;
@@ -109,7 +108,7 @@ void menu_mixer(uint8_t i)
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
 	{
-		mix_top = MIXERSTART;
+		sub_top = MIXERSTART;
 		menu_flag = 0;
 	}
 
@@ -337,11 +336,11 @@ void menu_mixer(uint8_t i)
 		memcpy(&values[26],&Config.Channel[i].P1_source_a, 8);
 
 		// Print menu
-		print_menu_items(mix_top, MIXERSTART, value_ptr, 1, (prog_uchar*)mixer_menu_ranges, 0, MIXOFFSET, (prog_uchar*)MixerMenuText, cursor);
+		print_menu_items(sub_top, MIXERSTART, value_ptr, 1, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const unsigned char*)MixerMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(MIXERITEMS, MIXERSTART, 0, button, &cursor, &mix_top, &menu_temp);
-		range = get_menu_range ((prog_uchar*)mixer_menu_ranges, menu_temp - MIXERSTART);
+		update_menu(MIXERITEMS, MIXERSTART, 0, button, &cursor, &sub_top, &menu_temp);
+		range = get_menu_range ((const unsigned char*)mixer_menu_ranges, menu_temp - MIXERSTART);
 
 		if (button == ENTER)
 		{

@@ -5,6 +5,8 @@
  *********************************************************************/
 
 // Comment this line out to build for KK2.0
+// Note: For the Studio 6 complete solution, this is done automatically. 
+// Please leave this line commented out if using the Studio 6 solution
 //#define KK21 
 
 #ifdef KK21

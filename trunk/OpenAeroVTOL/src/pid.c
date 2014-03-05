@@ -83,9 +83,14 @@ void Calculate_PID(void)
 	int8_t i = 0;
 	int8_t	axis = 0;
 
-	// Cross-ref for actual RCinput elements
+	// Cross-reference table for actual RCinput elements
 	// Note that axes are reversed here with respect to their gyros
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], -RCinputs[ELEVATOR], -RCinputs[RUDDER]}; 
+	// So why is AILERON different? Well on the KK hardware the sensors are arranged such that
+	// RIGHT roll = +ve gyro, UP pitch = +ve gyro and LEFT yaw = +ve gyro.
+	// However the way we have organised stick polarity, RIGHT roll and yaw are +ve, and DOWN elevator is too.
+	// When combining with the gyro signals, the sticks have to be in the opposite polarity as the gyros.
+	// As described above, pitch and yaw are already opposed, but roll needs to be reversed.
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
 
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -145,8 +150,8 @@ void Calculate_PID(void)
 
 		// Calculate I-term from gyro and stick data 
 		// These may look identical, but they are constrained quite differently.
-		IntegralGyro[P1][axis] += (gyroADC[axis] - stick);
-		IntegralGyro[P2][axis] += (gyroADC[axis] - stick);
+		IntegralGyro[P1][axis] += (gyroADC[axis] + stick);
+		IntegralGyro[P2][axis] += (gyroADC[axis] + stick);
 
 		// Limit the I-terms when you need to adjust the I-term with RC
 		// Note that the I-term is not constrained when no RC input is present.
@@ -261,11 +266,9 @@ void Calculate_PID(void)
 
 			PID_acc_temp1 *= L_gain[P1][axis];							// P-term of accelerometer (Max gain of 127)
 			PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 8);			// Reduce and convert to integer
-			//PID_ACCs[P1][axis] = (int16_t)(PID_acc_temp1 >> 2);			// Reduce and convert to integer
 
 			PID_acc_temp2 *= L_gain[P2][axis];							// Same for P2
 			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 8);	
-			//PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 2);	
 		}
 
 	} // PID loop

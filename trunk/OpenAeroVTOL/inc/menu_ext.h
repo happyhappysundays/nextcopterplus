@@ -26,7 +26,7 @@ extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc subroutines
 extern uint8_t poll_buttons(bool acceleration);
@@ -39,7 +39,7 @@ extern void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_ra
 
 // Special print routine - prints either numeric or text
 extern void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
-extern menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
+extern menu_range_t get_menu_range (const unsigned char* menu_ranges, uint8_t menuitem);
 
 // Externs
 extern const char *text_menu[]; 
@@ -64,5 +64,6 @@ extern uint8_t cursor;
 extern uint8_t menu_temp;
 extern const uint8_t lines[4];
 extern uint8_t menu_flag;
+extern uint8_t sub_top;
 
 

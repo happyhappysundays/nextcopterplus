@@ -172,7 +172,7 @@ void init(void)
 		// Display reset message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 		clear_buffer(buffer);
-		LCD_Display_Text(1,(prog_uchar*)Verdana14,40,25);
+		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25);
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		Set_EEPROM_Default_Config();
@@ -212,7 +212,7 @@ void init(void)
 	// Display "Hold steady" message for KK2.0 (no room for logo)
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	clear_buffer(buffer);
-	LCD_Display_Text(2,(prog_uchar*)Verdana14,18,25);
+	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);
 	write_buffer(buffer,1);
 	clear_buffer(buffer);
 #endif

@@ -70,7 +70,6 @@ const menu_range_t servo_menu_ranges[3][1] PROGMEM =
 
 void menu_servo_setup(uint8_t section)
 {
-	static uint8_t servo_top = SERVOSTART;
 	int8_t *value_ptr = &Config.Servo_reverse[0];
 
 	menu_range_t range;
@@ -82,7 +81,7 @@ void menu_servo_setup(uint8_t section)
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
 	{
-		servo_top = SERVOSTART;
+		sub_top = SERVOSTART;
 		menu_flag = 0;
 	}
 
@@ -113,11 +112,11 @@ void menu_servo_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(servo_top, SERVOSTART, value_ptr, 1, (prog_uchar*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (prog_uchar*)ServoMenuText[section - 1], cursor);
+		print_menu_items(sub_top, SERVOSTART, value_ptr, 1, (const unsigned char*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (const unsigned char*)ServoMenuText[section - 1], cursor);
 
 		// Handle menu changes
-		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &servo_top, &menu_temp);
-		range = get_menu_range ((prog_uchar*)servo_menu_ranges[section - 1], 0);
+		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &sub_top, &menu_temp);
+		range = get_menu_range ((const unsigned char*)servo_menu_ranges[section - 1], 0);
 
 		if (button == ENTER)
 		{

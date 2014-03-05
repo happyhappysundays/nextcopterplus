@@ -77,16 +77,14 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 
 void menu_flight(uint8_t mode)
 {
-	static uint8_t flight_top = FLIGHTSTART;
 	int8_t *value_ptr;
-
 	menu_range_t range;
 	uint8_t text_link;
 
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
 	{
-		flight_top = FLIGHTSTART;
+		sub_top = FLIGHTSTART;
 		menu_flag = 0;
 	}
 
@@ -95,11 +93,11 @@ void menu_flight(uint8_t mode)
 		value_ptr = &Config.FlightMode[mode].Roll_P_mult;
 
 		// Print menu
-		print_menu_items(flight_top, FLIGHTSTART, value_ptr, 1, (prog_uchar*)flight_menu_ranges, 0, FLIGHTOFFSET, (prog_uchar*)FlightMenuText, cursor);
+		print_menu_items(sub_top, FLIGHTSTART, value_ptr, 1, (const unsigned char*)flight_menu_ranges, 0, FLIGHTOFFSET, (const unsigned char*)FlightMenuText, cursor);
 
 		// Handle menu changes
-		update_menu(FLIGHTITEMS, FLIGHTSTART, 0, button, &cursor, &flight_top, &menu_temp);
-		range = get_menu_range ((prog_uchar*)flight_menu_ranges, (menu_temp - FLIGHTSTART));
+		update_menu(FLIGHTITEMS, FLIGHTSTART, 0, button, &cursor, &sub_top, &menu_temp);
+		range = get_menu_range ((const unsigned char*)flight_menu_ranges, (menu_temp - FLIGHTSTART));
 
 		if (button == ENTER)
 		{

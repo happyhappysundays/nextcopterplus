@@ -37,12 +37,13 @@ void do_main_menu_item(uint8_t menuitem);
 // Main menu-specific setup
 //************************************************************
 
+uint8_t main_top = MAINSTART;
+uint8_t sub_top = 0;
 uint8_t menu_flag;
 
 void menu_main(void)
 {
 	static uint8_t main_cursor = LINE0;	// These are now static so as to remember the main menu position
-	static uint8_t main_top = MAINSTART;
 	static uint8_t main_temp = 0;
 	static uint8_t old_menu = 0;
 
@@ -64,7 +65,7 @@ void menu_main(void)
 		
 		for (uint8_t i = 0; i < 4; i++)
 		{
-			LCD_Display_Text(main_top+i,(prog_uchar*)Verdana8,ITEMOFFSET,(uint8_t)pgm_read_byte(&lines[i]));	// Lines
+			LCD_Display_Text(main_top+i,(const unsigned char*)Verdana8,ITEMOFFSET,(uint8_t)pgm_read_byte(&lines[i]));	// Lines
 		}
 
 		print_cursor(main_cursor);												// Cursor
