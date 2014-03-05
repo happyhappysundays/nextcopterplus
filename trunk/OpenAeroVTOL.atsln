@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "OpenAeroVTOL_2_0", "OpenAeroVTOL_2_0\OpenAeroVTOL_2_0.cproj", "{AB274BCA-92AE-4125-8FED-106881FE77F2}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "OpenAeroVTOL_2_1", "OpenAeroVTOL_2_1\OpenAeroVTOL_2_1.cproj", "{A6114521-CC11-4E16-A02A-A8BF012A35E4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB274BCA-92AE-4125-8FED-106881FE77F2}.Debug|AVR.ActiveCfg = Debug|AVR
+		{AB274BCA-92AE-4125-8FED-106881FE77F2}.Debug|AVR.Build.0 = Debug|AVR
+		{AB274BCA-92AE-4125-8FED-106881FE77F2}.Release|AVR.ActiveCfg = Release|AVR
+		{AB274BCA-92AE-4125-8FED-106881FE77F2}.Release|AVR.Build.0 = Release|AVR
+		{A6114521-CC11-4E16-A02A-A8BF012A35E4}.Debug|AVR.ActiveCfg = Debug|AVR
+		{A6114521-CC11-4E16-A02A-A8BF012A35E4}.Debug|AVR.Build.0 = Debug|AVR
+		{A6114521-CC11-4E16-A02A-A8BF012A35E4}.Release|AVR.ActiveCfg = Release|AVR
+		{A6114521-CC11-4E16-A02A-A8BF012A35E4}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
