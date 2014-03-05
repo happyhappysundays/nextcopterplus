@@ -27,10 +27,10 @@
 //************************************************************
 
 // Print an indexed text string from Program memory at a particular location
-void LCD_Display_Text (uint8_t menuitem, prog_uchar* font,uint16_t x, uint16_t y);
+void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y);
 
 // Print a string from at a particular location
-void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y);
+void gLCDprint_Menu_P(const char *s, const unsigned char* font,uint16_t x, uint16_t y);
 
 // Misc
 void idle_screen(void);
@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 34";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 35";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -91,13 +91,13 @@ const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
 const char StabMenuItem3[]  PROGMEM = "Roll D:";
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
-const char AutoMenuItem20[]  PROGMEM = "Level Roll P:";
+const char AutoMenuItem20[]  PROGMEM = "Roll AutoLvl:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char StabMenuItem5[]  PROGMEM = "Pitch I:";
 const char StabMenuItem6[]  PROGMEM = "Pitch D:"; 
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
-const char AutoMenuItem21[]  PROGMEM = "Level Pitch P:";
+const char AutoMenuItem21[]  PROGMEM = "Pitch AutoLvl:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char StabMenuItem7[]  PROGMEM = "Yaw P:"; 
 const char StabMenuItem8[]  PROGMEM = "Yaw I:";
@@ -166,10 +166,10 @@ const char MixerItem5[]  PROGMEM = "P1 Pitch gyro:";
 const char MixerItem25[] PROGMEM = "P2 Pitch gyro:";
 const char MixerItem6[]  PROGMEM = "P1 Yaw gyro:";
 const char MixerItem26[] PROGMEM = "P2 Yaw gyro:";
-const char MixerItem7[]  PROGMEM = "P1 Roll acc:";
-const char MixerItem27[] PROGMEM = "P2 Roll acc:";
-const char MixerItem3[]  PROGMEM = "P1 Pitch acc:";
-const char MixerItem28[] PROGMEM = "P2 Pitch acc:";
+const char MixerItem7[]  PROGMEM = "P1 Roll AL:";
+const char MixerItem27[] PROGMEM = "P2 Roll AL:";
+const char MixerItem3[]  PROGMEM = "P1 Pitch AL";
+const char MixerItem28[] PROGMEM = "P2 Pitch AL:";
 const char MixerItem42[] PROGMEM = "P1 Z acc:";
 const char MixerItem43[] PROGMEM = "P2 Z acc:";
 //
@@ -268,7 +268,7 @@ const char Random1[] PROGMEM =  "High";
 const char Dummy0[] PROGMEM = "";
 //
 
-const char *text_menu[] PROGMEM = 
+const char* const text_menu[] PROGMEM = 
 	{
 		PText0,	PText1, PText2, 															// 0 Logo 1 to 2 Reset															
 		//
@@ -427,15 +427,15 @@ const char *text_menu[] PROGMEM =
 //************************************************************
 
 // Print Menuitem from Program memory at a particular location
-void LCD_Display_Text (uint8_t menuitem, prog_uchar* font,uint16_t x, uint16_t y)
+void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y)
 {
 	gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), font, x, y);
 }
 
 // Print a string from RAM at a particular location in a particular font
-void gLCDprint_Menu_P(const char *s, prog_uchar* font,uint16_t x, uint16_t y)
+void gLCDprint_Menu_P(const char *s, const unsigned char* font,uint16_t x, uint16_t y)
 {
-	pgm_mugui_lcd_puts((prog_uchar*)s, font, x, y);
+	pgm_mugui_lcd_puts((const unsigned char*)s, font, x, y);
 }
 
 // Pop up the Idle screen
@@ -444,16 +444,16 @@ void idle_screen(void)
 	clear_buffer(buffer);
 
 	// Change Status screen depending on arm mode
-	LCD_Display_Text(121,(prog_uchar*)Verdana14,41,3); 	// "Press"
-	LCD_Display_Text(122,(prog_uchar*)Verdana14,24,23); // "for status."
+	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 	// "Press"
+	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23); // "for status."
 
 	if ((General_error & (1 << DISARMED)) != 0) // Disarmed
 	{
-		LCD_Display_Text(139,(prog_uchar*)Verdana14,20,43); // "(Disarmed)"
+		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43); // "(Disarmed)"
 	}
 	else
 	{
-		LCD_Display_Text(138,(prog_uchar*)Verdana14,28,43); // "(Armed)"
+		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43); // "(Armed)"
 	}
 	
 	write_buffer(buffer,1);

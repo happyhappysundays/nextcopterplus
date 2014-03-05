@@ -35,18 +35,17 @@ void init_uart(void);
 // Initialise UART with adjusted bitrate
 void init_uart(void)
 {
-	char temp = 0;
-	
 	cli();								// Atmel wants global interrupts disabled when changing UART setup on the fly
+	
 	UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
 
 	while (UCSR0A & (1 << RXC0))		// Make sure there is nothing in the RX0 reg
 	{
-		temp = UDR0;			
+		UCSR0C = UDR0;					// So as not to annoy Studio 6, use UCSR0C as a temp reg until UDR0 empty. Sorry, UCSR0C...
 	}
 	
 	// Reset UART regs to a known state
-	UCSR0A = 0; // U2X = 0, no master moed, flags cleared 
+	UCSR0A = 0; // U2X = 0, no master mode, flags cleared 
 	UCSR0B = 0; // Clear flags, disable tx/rx, 8 bits
 	UCSR0C = 6; // 8N1
 

@@ -67,7 +67,7 @@ void Display_balance(void)
 		if (y_pos > 128) y_pos = 128;
 
 		// Print bottom markers
-		LCD_Display_Text(12, (prog_uchar*)Wingdings, 2, 55); 	// Left
+		LCD_Display_Text(12, (const unsigned char*)Wingdings, 2, 55); 	// Left
 
 		// Draw balance meter
 		drawrect(buffer, 0, 0, 128, 64, 1);		// Border

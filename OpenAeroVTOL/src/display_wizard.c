@@ -71,7 +71,7 @@ void Display_sticks(void)
 		}
 
 		// Print bottom text and markers
-		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 		// Left
+		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 		// Left
 
 		// If uncalibrated
 		if (!CalibrateDone)
@@ -81,13 +81,13 @@ void Display_sticks(void)
 			// Display "No RX signal" if no input detected
 			if(RxChannel[AILERON] == 0)
 			{
-				LCD_Display_Text(135,(prog_uchar*)Verdana14,14,43); 	// "No RX signal"
+				LCD_Display_Text(135,(const unsigned char*)Verdana14,14,43); 	// "No RX signal"
 			}
 
 			// Sticks have not moved far enough
 			else if ((RxChannel[AILERON] > 3000) && (RxChannel[AILERON] < 4500))
 			{
-				LCD_Display_Text(136,(prog_uchar*)Verdana14,9,43); 		// "Hold as shown"
+				LCD_Display_Text(136,(const unsigned char*)Verdana14,9,43); 		// "Hold as shown"
 			}
 
 			// Sticks should now be in the right position
@@ -125,7 +125,7 @@ void Display_sticks(void)
 	// Save value and return
 	if (CalibrateDone)
 	{
-		LCD_Display_Text(137,(prog_uchar*)Verdana14,40,43); 	// "Done!"
+		LCD_Display_Text(137,(const unsigned char*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);

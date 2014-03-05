@@ -33,14 +33,14 @@ void print_menu_frame(uint8_t style);
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
 void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor);
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
 uint8_t poll_buttons(bool acceleration);
 void print_cursor(uint8_t line);
 void draw_expo(int16_t value);
-menu_range_t get_menu_range (prog_uchar* menu_ranges, uint8_t menuitem);
+menu_range_t get_menu_range (const unsigned char* menu_ranges, uint8_t menuitem);
 
 // Special print routine - prints either numeric or text
 void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
@@ -66,17 +66,17 @@ void print_menu_frame(uint8_t style)
 	// Print bottom markers
 	if (style == 0)
 	{
-		LCD_Display_Text(12, (prog_uchar*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(10, (prog_uchar*)Wingdings, 38, 59); 	// Up
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59); 	// Down
-		LCD_Display_Text(11, (prog_uchar*)Wingdings, 120, 57); 	// Right
+		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
+		LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59); 	// Up
+		LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59); 	// Down
+		LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); 	// Right
 	}
 	else
 	{
-		LCD_Display_Text(16, (prog_uchar*)Verdana8, 0, 54); 	// Clear
-		LCD_Display_Text(10, (prog_uchar*)Wingdings, 38, 59);	// Up
-		LCD_Display_Text(9, (prog_uchar*)Wingdings, 80, 59);	// Down
-		LCD_Display_Text(17, (prog_uchar*)Verdana8, 103, 54);	// Save
+		LCD_Display_Text(16, (const unsigned char*)Verdana8, 0, 54); 	// Clear
+		LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59);	// Up
+		LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59);	// Down
+		LCD_Display_Text(17, (const unsigned char*)Verdana8, 103, 54);	// Save
 	}
 
 	// Write from buffer
@@ -97,7 +97,7 @@ void print_menu_frame(uint8_t style)
 // text_link = pointer to the text list for the values if not numeric
 // cursor = cursor position
 //**********************************************************************
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, prog_uchar* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, prog_uchar* text_link, uint8_t cursor)
+void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor)
 {
 	menu_range_t	range1;
 	uint8_t multiplier;
@@ -109,7 +109,7 @@ void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult,
 	// Print each line
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		LCD_Display_Text(top+i,(prog_uchar*)Verdana8,ITEMOFFSET,(uint8_t)pgm_read_byte(&lines[i]));
+		LCD_Display_Text(top+i,(const unsigned char*)Verdana8,ITEMOFFSET,(uint8_t)pgm_read_byte(&lines[i]));
 
 		// Handle unique or copied ranges (to reduce space)
 		if (rangetype == 0)
@@ -144,7 +144,7 @@ void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult,
 // get_menu_range - Get range info from PROGMEM for a specific item
 //************************************************************
 
-menu_range_t get_menu_range(prog_uchar* menu_ranges, uint8_t menuitem)
+menu_range_t get_menu_range(const unsigned char* menu_ranges, uint8_t menuitem)
 {
 	menu_range_t	range;
 	memcpy_P(&range, &menu_ranges[menuitem * sizeof(range)], sizeof(range));
@@ -234,22 +234,22 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			clear_buffer(buffer);
 
 			// Print title
-			gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (prog_uchar*)Verdana14, 0, 0);
+			gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (const unsigned char*)Verdana14, 0, 0);
 
 			// Print value
 			if ((range.style == 0) || (range.style == 2)) // numeric and numeric * 4
 			{
 				// Write numeric value, centered on screen
-				mugui_text_sizestring(itoa(value,pBuffer,10), (prog_uchar*)Verdana14, &size);
-				mugui_lcd_puts(itoa(value,pBuffer,10),(prog_uchar*)Verdana14,((128-size.x)/2)+offset,25);
+				mugui_text_sizestring(itoa(value,pBuffer,10), (const unsigned char*)Verdana14, &size);
+				mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana14,((128-size.x)/2)+offset,25);
 			}
 			else // text
 			{
 				// Write text, centered on screen
 				pgm_mugui_scopy((char*)pgm_read_word(&text_menu[text_link + value])); // Copy string to pBuffer
 
-				mugui_text_sizestring((char*)pBuffer, (prog_uchar*)Verdana14, &size);
-				LCD_Display_Text(text_link + value, (prog_uchar*)Verdana14,((128-size.x)/2),25);
+				mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana14, &size);
+				LCD_Display_Text(text_link + value, (const unsigned char*)Verdana14,((128-size.x)/2),25);
 			}
 
 			// Print bottom markers
@@ -467,11 +467,11 @@ void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x
 {
 	if ((style == 0) || (style == 2)) // Numeral
 	{
-		mugui_lcd_puts(itoa(values,pBuffer,10),(prog_uchar*)Verdana8,x,y);
+		mugui_lcd_puts(itoa(values,pBuffer,10),(const unsigned char*)Verdana8,x,y);
 	}
 	else if (style == 1) // Text
 	{
-		LCD_Display_Text(text_link, (prog_uchar*)Verdana8,x,y);
+		LCD_Display_Text(text_link, (const unsigned char*)Verdana8,x,y);
 	}
 }
 
@@ -544,5 +544,5 @@ void menu_beep(uint8_t beeps)
 
 void print_cursor(uint8_t line)
 {
-	LCD_Display_Text(13, (prog_uchar*)Wingdings, CURSOROFFSET, line);
+	LCD_Display_Text(13, (const unsigned char*)Wingdings, CURSOROFFSET, line);
 }
