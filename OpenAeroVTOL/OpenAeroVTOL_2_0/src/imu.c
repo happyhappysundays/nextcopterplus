@@ -106,6 +106,7 @@ void UpdateIMUvalues(void);
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
 float 	accSmooth[NUMBEROFAXIS];
+float 	accFinalPitch;
 int16_t	angle[2]; 			// Attitude
 
 void getEstimatedAttitude(uint16_t period)
@@ -155,20 +156,6 @@ void getEstimatedAttitude(uint16_t period)
 		deltaGyroAngle[axis] += (float)gyroADC[axis] * deltaTime;
 	}
 
-	// As the deltaGyroAngle estimation passes through 180 or -180 we have to limit it 
-	// and flip it to the other side, otherwise it will increment past 180.
-	// A bit of hysteresis is helpful to minimise flapping about
-	if (deltaGyroAngle[ROLL] > 185.0f)
-	{
-		deltaGyroAngle[ROLL] = -175.0f;
-	}
-	if (deltaGyroAngle[ROLL] < -185.0f)
-	{
-		deltaGyroAngle[ROLL] = 175.0f;
-	}
-
-	// Note to self. Have to try this out with the board, watching the angles as you go past 90 and 180.
-
 	// Calculate acceleration magnitude
 	// This works perfectly as long as ACC_Z is calibrated to have =/- values (+/-125)
 	roll_sq = (accADC[ROLL] * accADC[ROLL]);
@@ -190,19 +177,23 @@ void getEstimatedAttitude(uint16_t period)
 
 	// Region of true CF-based operation (gyros + accs) - While under normal G.
 	// Note the CF angles go from 
+
 	if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ))
 	{ 
 		// The CF algorithm will fail when inverted as acc moves opposite gyro
-		// When inverted, reverse acc polarity.
+		// When inverted, reverse pitch acc polarity.
 		if (accADC[YAW] < 0)
 		{
-			accSmooth[ROLL] = -accSmooth[ROLL];
-			accSmooth[PITCH] = -accSmooth[PITCH];
+			accFinalPitch = -accSmooth[PITCH];
+		}
+		else
+		{
+			accFinalPitch = accSmooth[PITCH];
 		}
 
 		// Complementary filter
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
-		deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
+		deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accFinalPitch) * INV_GYR_CMPF_FACTOR;
 
 		// Calculate the roll and pitch angles properly then convert to degrees x 100
 		tempf = atan(deltaGyroAngle[PITCH] / (float)sqrt(roll_sq + yaw_sq));
