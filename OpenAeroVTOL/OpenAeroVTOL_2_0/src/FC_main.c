@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 35 - March 2014
+// Version: Beta 36 - March 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -166,6 +166,7 @@
 // Beta 35	Changes to inverted behaviour of IMU. Menu text tweaks. Ported to Studio 6 solution.
 //			Made the default menu item values the same as the factory defaults in all cases.
 //			Simplified submenu cursor position code and saved some RAM
+// Beta 36	Final changes to IMU to correct glitch when rotating 360 degrees
 //
 //***********************************************************
 //* Notes
