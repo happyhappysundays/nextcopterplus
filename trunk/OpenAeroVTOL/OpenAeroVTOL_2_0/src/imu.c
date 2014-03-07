@@ -75,7 +75,6 @@ void UpdateIMUvalues(void);
 #define GYRO_SCALE	0.0000010f 			// for KK2.0
 #endif
 
-
 /* Scaling factor for acc to read in Gs */
 #define acc_1G		125					// Z-axis full scale (+/- 1G) is 249 so I guess 1G is half of that
 // MW 1.9 values
@@ -88,7 +87,11 @@ void UpdateIMUvalues(void);
 // AVRGCC defines M_PI as this
 // #define M_PI		3.14159265358979323846
 #define CONV_DEGREES (float)(18000.0f / M_PI)	// For 0.01 deg/bit accuracy
-#define ONE_EIGHTY 18000 						// For 0.01 deg/bit accuracy
+#define ONE_EIGHTY 18000
+#define NINETY 9000
+#define DELTA_FACTOR 50							// deltaGyroAngle is 50 times smaller than the angle value
+#define DELTA_180 (ONE_EIGHTY/DELTA_FACTOR)		// 180 degrees in the same scale as deltaGyroAngle
+#define DELTA_90 (NINETY/DELTA_FACTOR)			// 90 degrees in the same scale as deltaGyroAngle
 
 //#define CONV_DEGREES (float)(180.0f / M_PI)	// For 1 deg/bit accuracy
 //#define ONE_EIGHTY 180 						// For 0.01 deg/bit accuracy
@@ -106,7 +109,6 @@ void UpdateIMUvalues(void);
 float	GYR_CMPF_FACTOR;
 float	INV_GYR_CMPF_FACTOR;
 float 	accSmooth[NUMBEROFAXIS];
-float 	accFinalPitch;
 int16_t	angle[2]; 			// Attitude
 
 void getEstimatedAttitude(uint16_t period)
@@ -117,6 +119,10 @@ void getEstimatedAttitude(uint16_t period)
 	uint8_t		axis;
 	uint16_t	AccMag = 0;
 
+	//************************************************************
+	// Set up IMU
+	//************************************************************
+	
 	// Reset IMU 
 	if (Config.Main_flags & (1 << FirstTimeIMU))
 	{
@@ -137,6 +143,10 @@ void getEstimatedAttitude(uint16_t period)
 		deltaTime = tempf * GYRO_SCALE;	
 	}
 
+	//************************************************************
+	// Process sensor data
+	//************************************************************
+
 	// Smooth Acc signals and estimate angle from gyro
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
@@ -153,10 +163,22 @@ void getEstimatedAttitude(uint16_t period)
 		}
 
 		// Estimate angle via gyros
-		deltaGyroAngle[axis] += (float)gyroADC[axis] * deltaTime;
+		// Flip sign when inverted (>90 right or <-90 left, aka top 180 degrees)
+		// This keeps the CF happy as the gyros and accs are always the same sign regardless of orientation
+		if (accADC[YAW] < 0)
+		{
+			deltaGyroAngle[axis] -= (float)gyroADC[axis] * deltaTime;
+		}
+		else
+		{
+			deltaGyroAngle[axis] += (float)gyroADC[axis] * deltaTime;
+		}
 	}
 
+	//************************************************************
 	// Calculate acceleration magnitude
+	//************************************************************
+	
 	// This works perfectly as long as ACC_Z is calibrated to have =/- values (+/-125)
 	roll_sq = (accADC[ROLL] * accADC[ROLL]);
 	pitch_sq = (accADC[PITCH] * accADC[PITCH]) ;
@@ -164,36 +186,23 @@ void getEstimatedAttitude(uint16_t period)
 
 	AccMag = (uint16_t)(roll_sq + pitch_sq + yaw_sq);
 
+	//************************************************************
 	// Apply complementary filter (Gyro drift correction)
+	//************************************************************
 	// If accel magnitude >1.4G or <0.6G => we neutralize the effect of accelerometers in the angle estimation.
 	// To do that, we just skip the filter temporarily and use the old angle estimation code.
 	// Note that this equation is a cheat to save doing a square root on the right-hand side.
 	// The equation is really just mag^2 = x^2 + y^2 + z^2.
-	// 125^2 or 15625 represents 1G (standing still). 0.6G is 5625 and 1.4G is 30625.
-
+	// 125^2 or 15625 represents 1G (standing still). 
 	//	MW2.3 values have been updated to +/- 0.15G (up from +/-0.4G)
-	//	acc_1_15G_SQ
-	//	acc_0_85G_SQ
 
 	// Region of true CF-based operation (gyros + accs) - While under normal G.
-	// Note the CF angles go from 
-
+//	if(1)
 	if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ))
 	{ 
-		// The CF algorithm will fail when inverted as acc moves opposite gyro
-		// When inverted, reverse pitch acc polarity.
-		if (accADC[YAW] < 0)
-		{
-			accFinalPitch = -accSmooth[PITCH];
-		}
-		else
-		{
-			accFinalPitch = accSmooth[PITCH];
-		}
-
 		// Complementary filter
 		deltaGyroAngle[ROLL] = ((deltaGyroAngle[ROLL] * GYR_CMPF_FACTOR) - accSmooth[ROLL]) * INV_GYR_CMPF_FACTOR;
-		deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accFinalPitch) * INV_GYR_CMPF_FACTOR;
+		deltaGyroAngle[PITCH] = ((deltaGyroAngle[PITCH] * GYR_CMPF_FACTOR) - accSmooth[PITCH]) * INV_GYR_CMPF_FACTOR;
 
 		// Calculate the roll and pitch angles properly then convert to degrees x 100
 		tempf = atan(deltaGyroAngle[PITCH] / (float)sqrt(roll_sq + yaw_sq));
@@ -201,21 +210,6 @@ void getEstimatedAttitude(uint16_t period)
 
 		tempf = atan(deltaGyroAngle[ROLL]  / (float)sqrt(pitch_sq + yaw_sq));
 		angle[ROLL]  = (int16_t)(tempf * CONV_DEGREES);
-
-		// The following code changes the 0-90-0 deg to 0-90-180 deg
-		// It will snap between 180 and -180 deg when 100% inverted
-		if (accADC[YAW] < 0)
-		{
-			// Roll
-			if (accADC[ROLL] > 0)
-			{
-				angle[ROLL] = (ONE_EIGHTY - angle[ROLL]);
-			}
-			else
-			{
-				angle[ROLL] = (-ONE_EIGHTY - angle[ROLL]);
-			}
-		}
 	}
 
 	// Use simple IMU when under unusual acceleration
@@ -224,8 +218,23 @@ void getEstimatedAttitude(uint16_t period)
 	// Note that the above adjustments when inverted are not needed for gyro-based angles
 	else
 	{
-		angle[ROLL] = (int16_t)(deltaGyroAngle[ROLL] * 50);
-		angle[PITCH] = (int16_t)(deltaGyroAngle[PITCH] * 50);
+		angle[ROLL] = (int16_t)(deltaGyroAngle[ROLL] * DELTA_FACTOR);
+		angle[PITCH] = (int16_t)(deltaGyroAngle[PITCH] * DELTA_FACTOR);
+	}
+
+	// The following code changes the (CW - 0,90,0,-90) and (CCW - 0,-90,0,90,0) deg to 0-90-180 deg
+	// It will snap between 180 and -180 deg when 100% inverted
+	if (accADC[YAW] < 0)
+	{
+		// Roll
+		if (accADC[ROLL] > 0)	// Right hemisphere
+		{
+			angle[ROLL] = (ONE_EIGHTY - angle[ROLL]);
+		}
+		else					// Left hemisphere
+		{
+			angle[ROLL] = (-ONE_EIGHTY - angle[ROLL]);
+		}
 	}
 }
 
