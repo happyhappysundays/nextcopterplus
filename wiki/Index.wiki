@@ -1,6 +1,3 @@
-*OpenAeroVTOL User Guide*
- * [OpenAeroVTOL_Manual User Manual]
-
 *!OpenAero2 V1.2 User Guides*
 
 It is recommended that you read the manuals in the following order.
