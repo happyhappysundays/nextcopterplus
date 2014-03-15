@@ -31,3 +31,4 @@ extern uint8_t	Alarm_flags;
 
 // Misc
 extern uint16_t InterruptCount;
+extern bool Overdue;

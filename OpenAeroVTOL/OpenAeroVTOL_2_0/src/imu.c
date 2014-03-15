@@ -197,7 +197,6 @@ void getEstimatedAttitude(uint16_t period)
 	//	MW2.3 values have been updated to +/- 0.15G (up from +/-0.4G)
 
 	// Region of true CF-based operation (gyros + accs) - While under normal G.
-//	if(1)
 	if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ))
 	{ 
 		// Complementary filter

@@ -1,7 +1,7 @@
 // **************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 36 - March 2014
+// Version: Beta 38 - March 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -167,6 +167,10 @@
 //			Made the default menu item values the same as the factory defaults in all cases.
 //			Simplified submenu cursor position code and saved some RAM
 // Beta 36	Final changes to IMU to correct glitch when rotating 360 degrees
+// Beta 37	Compiler fix for KK2.1 builds
+// Beta 38	Minimum CPPM pulse filter changed from 500us to 300us to cover FrSky 27ms firmware.
+//			Added measures to stop false extra channel data breaking CPPM reception.
+//			Now a "no signal" event resets the CPPM max channel number calculation.
 //
 //***********************************************************
 //* Notes
@@ -263,14 +267,14 @@ const int8_t Trans_Matrix[3][3] PROGMEM =
 
 // Misc globals
 uint16_t InterruptCount = 0;
-
+bool Overdue = false;
+	
 //************************************************************
 //* Main loop
 //************************************************************
 
 int main(void)
 {
-	bool Overdue = false;
 	bool ServoTick = false;
 	bool SlowRC = false;
 	bool TransitionUpdated = false;

@@ -33,7 +33,7 @@ volatile uint16_t checksum;
 volatile uint8_t bytecount;
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
-#define MINPULSEWIDTH 1250			// Minimum pulse is 500us
+#define MINPULSEWIDTH 750			// Minimum pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
 
 //************************************************************
@@ -180,13 +180,16 @@ ISR(INT2_vect)
 			prevChannel = 0;
 		}
 
-		// Measure the channel data
+		// Measure the channel data only for the first MAX_RC_CHANNELS (currently 8)
+		// Prevent code from over-running RxChannelStart[]
         if (ch_num < MAX_RC_CHANNELS)
 		{
             RxChannelStart[curChannel] = tCount;
 		}
 
-        if (ch_num > 0)
+		// When ch_num = 0, the first channel has not yet been measured.
+		// That only occurs at the second pulse. Prevent code from over-running RxChannel[]
+        if ((ch_num > 0) && (ch_num <= MAX_RC_CHANNELS))
         {
 		   RxChannel[prevChannel] = tCount - RxChannelStart[prevChannel];
 		}
@@ -194,9 +197,9 @@ ISR(INT2_vect)
         // Increment to the next channel
 		ch_num++;
 
-		// Work out the highest channel number automagically
-		// Update the maximum channel seen so far
-		if (ch_num > max_chan)
+		// Work out the highest channel number automatically.
+		// Update the maximum channel seen so far.
+		if (ch_num > max_chan) 
 		{
 			max_chan = ch_num;					// Reset max channel number
 		}
@@ -204,6 +207,15 @@ ISR(INT2_vect)
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished
+			ch_num = 0;							// Reset channel counter
+		}
+	
+		// If the signal is ever lost, reset measured max channel number
+		// and force a recalculation
+		if (Overdue)
+		{
+			max_chan = 0;
+			Overdue = false;
 		}
 	}
 } // ISR(INT2_vect)
