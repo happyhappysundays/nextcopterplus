@@ -106,12 +106,10 @@ void ReadAcc()
 		accADC[i] *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][i]);
 	}
 
-
 	// Recalculate current accVert using filtered acc value
 	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
 	// the zero back here so that Config.AccZeroNormZ subtracts the correct amount
 	 accVert = accSmooth[YAW] - Config.AccZero[YAW] + Config.AccZeroNormZ ;
-
 }
 
 //***************************************************************
@@ -204,6 +202,9 @@ void CalibrateAcc(int8_t type)
 
 		// Flag that normal cal done
 		Config.Main_flags |= (1 << normal_cal_done);
+	
+		// Reset IMU on recalibration
+		reset_IMU();
 
 		Save_Config_to_EEPROM();
 	}

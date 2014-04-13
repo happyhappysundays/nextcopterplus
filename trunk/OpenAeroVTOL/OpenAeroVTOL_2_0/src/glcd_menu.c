@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 38";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 39";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -218,7 +218,7 @@ const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
 const char PText2[]  PROGMEM = "Hold steady";
 //
-const char WizardText0[] PROGMEM = "No RX signal!"; 		// Wizard screen
+const char WizardText0[] PROGMEM = "No RX signal?"; 		// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
 const char WizardText2[] PROGMEM = "Done!";
 //

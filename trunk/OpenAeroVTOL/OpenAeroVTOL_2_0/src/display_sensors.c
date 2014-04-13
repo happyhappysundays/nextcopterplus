@@ -24,6 +24,7 @@
 #include "i2c.h"
 #include "MPU6050.h"
 #include "vbat.h"
+#include "imu.h"
 
 //************************************************************
 // Prototypes
@@ -46,7 +47,7 @@ void Display_sensors(void)
 			CalibrateAirspeed();
 #endif
 			CalibrateGyrosFast();
-			CalibrateAcc(NORMAL); // This also saves the data in eepom
+			CalibrateAcc(NORMAL); // This also saves the data in eeprom
 		}
 
 		if (BUTTON3 == 0)
@@ -60,18 +61,29 @@ void Display_sensors(void)
 
 		LCD_Display_Text(26,(const unsigned char*)Verdana8,37,0); 	// Gyro
 		LCD_Display_Text(30,(const unsigned char*)Verdana8,77,0); 	// Acc
+		//
 		LCD_Display_Text(27,(const unsigned char*)Verdana8,5,13);	// Roll
 		LCD_Display_Text(28,(const unsigned char*)Verdana8,5,23);	// Pitch
 		LCD_Display_Text(29,(const unsigned char*)Verdana8,5,33);	// Yaw/Z
-
+		//
 		mugui_lcd_puts(itoa(gyroADC[ROLL],pBuffer,10),(const unsigned char*)Verdana8,40,13);
 		mugui_lcd_puts(itoa(gyroADC[PITCH],pBuffer,10),(const unsigned char*)Verdana8,40,23);
 		mugui_lcd_puts(itoa(gyroADC[YAW],pBuffer,10),(const unsigned char*)Verdana8,40,33);
-
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(const unsigned char*)Verdana8,80,13);
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,23);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(const unsigned char*)Verdana8,80,33);
-
+/*	
+#ifdef KK21
+		// Use this for checking MPU6050 register values
+		readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, (uint8_t *)test, 1);
+		mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
+#endif
+*/
+		// Debug for IMU
+		//mugui_lcd_puts(ultoa(interval,pBuffer,10),(const unsigned char*)Verdana8,40,45);
+		//mugui_lcd_puts(itoa(counter_copy,pBuffer,10),(const unsigned char*)Verdana8,80,45);
+		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(const unsigned char*)Verdana8,40,45);
+		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,45);
 		
 #ifdef AIRSPEED
 		LCD_Display_Text(53,(const unsigned char*)Verdana8,5,45);		// Airspeed

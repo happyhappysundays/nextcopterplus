@@ -38,6 +38,7 @@
 #include "main.h"
 
 void glcd_delay(void);
+void glcd_delay_1us(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void write_buffer(uint8_t *buffer, uint8_t type);
 void clear_screen(void);
@@ -59,16 +60,18 @@ inline void spiwrite(uint8_t c)
 		if (c & (1 << (i)))		// Bit set?
 		{
 			LCD_SI = 1;
-			glcd_delay();
+			//glcd_delay();		// 250ns
 			LCD_SCL = 1;
 		}
 		else					// Bit clear?
 		{
 			LCD_SI = 0;
-			glcd_delay();
+			//glcd_delay();		// 250ns
 			LCD_SCL = 1;
 		}
-		_delay_us(1);
+		//_delay_us(1);
+		glcd_delay();		// 250ns
+		//glcd_delay_1us();
 	}
 }
 
@@ -120,7 +123,7 @@ void st7565_set_brightness(uint8_t val)
 	st7565_command(CMD_SET_VOLUME_SECOND | (val & 0x3f));
 }
 
-// Write LCD buffer if type = 1 normal, 0 = logo
+// Write LCD buffer if type = 1 normal, 0 = logo. Takes about 10ms
 void write_buffer(uint8_t *buffer, uint8_t type) 
 {
 	uint8_t c, p;

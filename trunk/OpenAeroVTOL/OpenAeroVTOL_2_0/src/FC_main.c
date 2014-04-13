@@ -1,9 +1,9 @@
-// **************************************************************************
+//**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 38 - March 2014
+// Version: Beta 39 - March 2014
 //
-// Some receiver format decoding code from Jim Drew of XPS and the Papparazzi project
+// Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
@@ -171,6 +171,9 @@
 // Beta 38	Minimum CPPM pulse filter changed from 500us to 300us to cover FrSky 27ms firmware.
 //			Added measures to stop false extra channel data breaking CPPM reception.
 //			Now a "no signal" event resets the CPPM max channel number calculation.
+// Beta 39	Fixed a CPPM mis-detection bug. Gyro full scale resolution changed to 2000 deg/s
+//			Display wizard improved so that bad RX selection doesn't read as stick inputs.
+//			Changed to a vector-based IMU from KK2 assembler code
 //
 //***********************************************************
 //* Notes
@@ -239,7 +242,7 @@
 //***********************************************************
 
 // Flight variables
-uint32_t ticker_32;					// Incrementing system ticker
+uint32_t interval;					// IMU interval
 int16_t transition_counter = 0;
 uint8_t Transition_state = TRANS_P1;
 
@@ -291,8 +294,8 @@ int main(void)
 	uint16_t Servo_Rate = 0;
 	uint16_t Transition_timeout = 0;
 	uint16_t Disarm_timer = 0;
+	uint16_t Save_TCNT1 = 0;
 	uint16_t ticker_16 = 0;
-	uint16_t LoopTCNT1 = 0;
 
 	// Timer incrementers
 	uint16_t LoopStartTCNT1 = 0;
@@ -344,6 +347,15 @@ int main(void)
 					// Reset the status screen timeout
 					Status_seconds = 0;
 					menu_beep(1);
+					
+					// Enable Timer0 interrupts as loop rate is slow
+					TIMSK0 |= (1 << TOIE0);	
+				}
+				// Idle mode - fast loop rate so don't need TMR0 hack
+				else
+				{
+					TIMSK0 = 0; 		// Disable Timer0 interrupts
+					TIFR0 = 1;			// Clear interrupt flag
 				}
 				break;
 
@@ -421,6 +433,8 @@ int main(void)
 				Menu_mode = STATUS;
 				// Reset timeout once back in status screen
 				Status_seconds = 0;
+				// Reset IMU on return from menu
+				reset_IMU();
 				break;
 
 			default:
@@ -540,7 +554,6 @@ int main(void)
 				((-ARM_TIMER_RESET_1 < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET_1)) ||
 				(ARM_TIMER_RESET_2 < MonopolarThrottle)
 			   )
-
 			{
 				Arm_timer = 0;
 			}
@@ -552,6 +565,7 @@ int main(void)
 				Arm_timer = 0;
 				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
 				CalibrateGyrosSlow();					// Calibrate gyros
+				reset_IMU();							// Reset IMU just in case...
 				menu_beep(20);							// Signal that FC is ready
 
 				// Force update of status screen
@@ -693,7 +707,7 @@ int main(void)
 		}
 
 		// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
-		// This prevents state chanegs when controlled by a channel
+		// This prevents state changes when controlled by a channel
 		if (Config.TransitionSpeed == 0)
 		{
 			Transition_state = TRANSITIONING;
@@ -797,26 +811,64 @@ int main(void)
 		old_flight = Config.FlightSel;
 
 		//************************************************************
-		//* Remaining loop tasks
+		//* Update IMU
 		//************************************************************
 
 		// Read sensors
 		ReadGyros();
-		ReadAcc();	
+		ReadAcc();
+		
+		// Save current time stamp
+		Save_TCNT1 = (uint16_t)TCNT1;
+		
+		// Reset Timer0 count
+		TCNT0 = 0;
 
-		// ticker_16 is incremented at 2.5MHz (400ns) - max 26.2ms
-		ticker_16 = (uint16_t)((uint16_t)TCNT1 - LoopTCNT1);	
-		LoopTCNT1 = TCNT1;	
+		// Handle TCNT1 overflow correctly - this actually seems necessary...
+		// ticker_16 will hold the most recent amount measured by TCNT1
+		if (Save_TCNT1 < LoopStartTCNT1)
+		{
+			ticker_16 = (65536 - LoopStartTCNT1) + Save_TCNT1;
+		}
+		else
+		{
+			ticker_16 = (Save_TCNT1 - LoopStartTCNT1);
+		}
+		
+		// Store old TCNT for next measurement
+		LoopStartTCNT1 = Save_TCNT1;
+		
+		// Handle both Timer1 under- and over-run cases
+		// If TMR0_counter is less than 2, ICNT1 has not overflowed
+		if (TMR0_counter < 2)
+		{
+			interval = ticker_16;
+		}
+		
+		// If TMR0_counter is 2 or more, then TCNT1 has overflowed
+		// So we use chunks of TCNT0, counted during the loop interval
+		// to work out the exact period.
+		else
+		{
+			interval = ticker_16 + (TMR0_counter * 32768);
+		}
+		
+		TMR0_counter = 0;		// Reset timer 0 counter
+				
+		// Simple IMU test code
+		simple_imu_update(interval);
 
-		getEstimatedAttitude(ticker_16); 
+		//************************************************************
+		//* Remaining loop tasks
+		//************************************************************
 
-		// Calculate PID
+		// Calculate PID values
 		Calculate_PID();
 
-		// Calculate mix
+		// Do all the mixer tasks
 		ProcessMixer();
 
-		// Transfer Config.Channel[i].value data to ServoOut[i] and check limits
+		// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
 		UpdateServos();
 
 		//************************************************************
@@ -908,14 +960,6 @@ int main(void)
 		{
 			Interrupted = false;				// Reset interrupted flag
 		}
-
-		//************************************************************
-		//* Increment system time
-		//************************************************************
-
-		ticker_32 += ((uint16_t)TCNT1 - LoopStartTCNT1);	// Update system time
-		LoopStartTCNT1 = (uint16_t)TCNT1;					// Measure system time from here
-
 	} // main loop
 } // main()
 
