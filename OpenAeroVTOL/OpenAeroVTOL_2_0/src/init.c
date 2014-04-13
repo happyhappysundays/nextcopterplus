@@ -104,10 +104,17 @@ void init(void)
 	// Timers
 	//***********************************************************
 
+	// Timer0 (8bit) - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
+	// Slow timer to extend Timer 1
+	TCCR0A = 0;								// Normal operation
+	TCCR0B = 0x05;							// Clk / 1024 = 19.531kHz or 51.2us - max 13.1ms
+	TIMSK0 |= (1 << TOIE0);					// Enable interrupts
+	TCNT0 = 0;								// Reset counter
+	
 	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	// Used to measure Rx Signals & control ESC/servo output rate
 	TCCR1A = 0;
-	TCCR1B = (1 << CS11);					// Clk/8 = 2.5MHz
+	TCCR1B |= (1 << CS11);					// Clk/8 = 2.5MHz
 
 	// Timer2 8bit - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
 	// Used to time arm/disarm intervals
@@ -219,7 +226,7 @@ void init(void)
 		
 	// Do startup tasks
 	UpdateLimits();							// Update travel limts	
-	UpdateIMUvalues();						// Update IMU factors
+	//UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 	init_int();								// Intialise interrupts based on RC input mode
 	init_uart();							// Initialise UART
@@ -242,6 +249,9 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
+
+	// Debug
+//	imu_init();
 
 	// Flash LED
 	LED1 = 1;

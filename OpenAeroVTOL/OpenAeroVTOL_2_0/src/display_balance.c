@@ -55,8 +55,10 @@ void Display_balance(void)
 		// Note that because it takes 4.096ms to refresh the whole GLCD this loop cannot run 
 		// faster than 244Hz, but that's close enough to the actual loop time so that the 
 		// actual Acc LPF effect is closely mirrored on the balance meter.
-		getEstimatedAttitude(ticker_16); 
-
+		//imu_update(ticker_16);
+		//getEstimatedInclination();
+		simple_imu_update(ticker_16);
+		
 		// Convert acc signal to a pixel position
 		x_pos = accSmooth[PITCH] + 32;
 		y_pos = accSmooth[ROLL] + 64;

@@ -39,6 +39,7 @@ void Display_sticks(void)
 	int8_t	offset;
 	int8_t	temp_aileron, temp_elevator, temp_rudder;
 	bool	CalibrateDone = false;
+	bool	CalibrateStarted = false;
 
 	// Save original settings in case user aborts
 	temp_aileron = Config.AileronPol;
@@ -77,17 +78,18 @@ void Display_sticks(void)
 		if (!CalibrateDone)
 		{
 			RxGetChannels();
-
-			// Display "No RX signal" if no input detected
-			if(RxChannel[AILERON] == 0)
+			
+			// Display warning if sticks not centered or no RC signal while not started calibrating
+			if ((RxChannel[AILERON] < 3250) && (RxChannel[AILERON] > 4250) && !CalibrateStarted)
 			{
-				LCD_Display_Text(135,(const unsigned char*)Verdana14,14,43); 	// "No RX signal"
+				LCD_Display_Text(135,(const unsigned char*)Verdana14,14,43); 	// "No RX signal?"
 			}
 
-			// Sticks have not moved far enough
+			// Sticks have not moved far enough but RC being received
 			else if ((RxChannel[AILERON] > 3000) && (RxChannel[AILERON] < 4500))
 			{
-				LCD_Display_Text(136,(const unsigned char*)Verdana14,9,43); 		// "Hold as shown"
+				CalibrateStarted = true;
+				LCD_Display_Text(136,(const unsigned char*)Verdana14,9,43); 	// "Hold as shown"
 			}
 
 			// Sticks should now be in the right position
@@ -130,6 +132,7 @@ void Display_sticks(void)
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		Save_Config_to_EEPROM();
+		_delay_ms(500);
  	}
 	else
 	{
@@ -139,4 +142,5 @@ void Display_sticks(void)
 		Config.RudderPol = temp_rudder;
 	}
 }
+
 

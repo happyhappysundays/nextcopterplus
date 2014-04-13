@@ -80,7 +80,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{0,127,1,0,0},					// Low battery alarm voltage
 		{LOW,HIGH,1,1,LOW},				// Servo rate
 		{1,127,1,0,8},					// Acc. LPF
-		{1,100,1,0,30},					// CF factor
+		{1,10,1,0,4},					// CF factor
 	}
 };
 //************************************************************
@@ -139,7 +139,7 @@ void menu_rc_setup(uint8_t section)
 			init_int();				// In case RC type has changed, reinitialise interrupts
 			init_uart();			// and UART
 
-			UpdateIMUvalues();		// Update IMU variables
+			//UpdateIMUvalues();		// Update IMU variables
 			UpdateLimits();			// Update I-term limits and triggers based on percentages
 
 			// Update channel sequence

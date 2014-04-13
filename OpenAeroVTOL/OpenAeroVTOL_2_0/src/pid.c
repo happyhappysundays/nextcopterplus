@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
@@ -24,6 +25,12 @@
 //************************************************************
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
+
+#ifdef KK21 
+#define PID_SCALE 4					// KK2.1 has 2000deg/s gyros compared with the KK2.0's 500deg/s
+#else
+#define PID_SCALE 6
+#endif
 
 //************************************************************
 // Notes
@@ -252,8 +259,8 @@ void Calculate_PID(void)
 		// Sum Gyro P, I and D terms and rescale
 		//************************************************************
 
-		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + DifferentialGyro1) >> 6);
-		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> 6);
+		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + DifferentialGyro1) >> PID_SCALE);
+		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> PID_SCALE);
 
 		//************************************************************
 		// Calculate error from angle data and trim (roll and pitch only)

@@ -31,10 +31,19 @@ volatile uint8_t rcindex;			// Serial data buffer pointer
 volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
+volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
+
+//************************************************************
+//* Timer 0 overflow handler
+//************************************************************
+ISR(TIMER0_OVF_vect)
+{
+	TMR0_counter++;
+}
 
 //************************************************************
 //* Standard PWM mode
@@ -151,7 +160,15 @@ ISR(INT2_vect)
 			}
 		}
 	}
-	// CPPM code
+	//************************************************************
+	// CPPM code:
+	// This code keeps track of the number of channels received
+	// within a frame and only signals the data received when the 
+	// last data is complete. This makes it compatible with any 
+	// number of channels. The minimum sync pulse is 2.7ms and the
+	// minimum inter-channel pulse is 300us. This suits "27ms" FrSky
+	// CPPM receivers.
+	//************************************************************
 	else
 	{
 		// Only respond to negative-going interrupts
@@ -201,13 +218,12 @@ ISR(INT2_vect)
 		// Update the maximum channel seen so far.
 		if (ch_num > max_chan) 
 		{
-			max_chan = ch_num;					// Reset max channel number
+			max_chan = ch_num;					// Update max channel number
 		}
 		// If the current channel is the highest channel, CPPM is complete
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished
-			ch_num = 0;							// Reset channel counter
 		}
 	
 		// If the signal is ever lost, reset measured max channel number

@@ -30,6 +30,20 @@ glcd_delay:
 	.endfunc
 
 ;*************************************************************************	
+; void glcd_delay(void) 1us delay for glcd clock
+;*************************************************************************
+
+	.global glcd_delay_1us
+	.func   glcd_delay_1us
+glcd_delay_1us:
+	rcall	glcd_delay
+	rcall	glcd_delay
+	rcall	glcd_delay
+	rcall	glcd_delay
+	ret
+	.endfunc
+
+;*************************************************************************	
 ; Do master binding timing
 ;*************************************************************************
 

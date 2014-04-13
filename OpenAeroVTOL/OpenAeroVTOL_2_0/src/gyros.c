@@ -31,11 +31,13 @@ void get_raw_gyros(void);
 // Defines
 //************************************************************
 
-#define GYROS_STABLE 1
+#define CAL_TIMEOUT	5				// Calibration timeout
+#define CAL_STABLE_TIME	100			// Calibration stable timeout
+#define GYROS_STABLE 1				// Minimum gyro error
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define GYROFS2000DEG 0x18			// 2000 deg/s fullscale
-#define GYROFS500DEG 0x08			// 500 deg/s fullscale
-#define GYROFS250DEG 0x00			// 250 deg/s fullscale
+#define GYROFS2000DEG 0x18			// 2000 deg/s full scale
+#define GYROFS500DEG 0x08			// 500 deg/s full scale
+#define GYROFS250DEG 0x00			// 250 deg/s full scale
 
 //***********************************************************
 // ROLL, PITCH, YAW mapping for alternate orientation modes
@@ -168,20 +170,21 @@ void CalibrateGyrosSlow(void)
 	uint16_t Gyro_timeout = 0;
 	bool	Gyros_Stable = false;
 	float 	GyroSmooth[NUMBEROFAXIS];
+	uint16_t Stable_counter = 0;
 
 	// Force recalculation
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
 // Optimise starting point for each board
 #ifdef KK21
-		GyroSmooth[axis] = 0;
+		GyroSmooth[axis] = 10;
 #else
 		GyroSmooth[axis] = 500;
 #endif
 	}
 
-	// Wait until gyros stable. Timeout after 5 seconds
-	while (!Gyros_Stable && (Gyro_seconds <= 5))
+	// Wait until gyros stable. Timeout after CAL_TIMEOUT seconds
+	while (!Gyros_Stable && (Gyro_seconds <= CAL_TIMEOUT))
 	{
 		// Update status timeout
 		Gyro_timeout += (uint8_t) (TCNT2 - Gyro_TCNT2);
@@ -211,11 +214,24 @@ void CalibrateGyrosSlow(void)
 			(gyroADC[YAW] > GYROS_STABLE) || (gyroADC[YAW] < -GYROS_STABLE))
 		{
 			Gyros_Stable = false;
+			Stable_counter = 0;
 		}
 		else
 		{
-			Gyros_Stable = true;
+			Stable_counter++;
 		}
+		
+		if (Stable_counter > CAL_STABLE_TIME)
+		{
+			Gyros_Stable = true;			
+			CalibrateGyrosFast();		
+		}
+	}
+	
+	// Handle timeout better
+	if (Gyro_seconds > 5)
+	{
+		CalibrateGyrosFast();
 	}
 }
 
@@ -233,6 +249,6 @@ void init_i2c_gyros(void)
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, MPU60X0_DLPF_BW_5);	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
 	
 	// Now configure gyros
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS500DEG);	// 500 deg/sec
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS2000DEG);	// 2000 deg/sec
 }
 #endif

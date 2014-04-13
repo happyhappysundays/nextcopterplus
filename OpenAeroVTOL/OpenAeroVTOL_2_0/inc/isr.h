@@ -15,3 +15,4 @@ extern volatile uint8_t ch_num;
 extern volatile uint16_t checksum;
 extern volatile bool JitterFlag;
 extern volatile bool JitterGate;
+extern volatile uint16_t TMR0_counter;	
