@@ -18,7 +18,13 @@
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
 #define NUMBEROFORIENTS 6				// Number board orientations
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
-#define	MOTORMIN 1000					// Minimum throttle value. 1000 or 1.1ms
+#define	MOTORMIN 1000					// Minimum throttle channel output value. 1000 or 1.0ms
+
+#ifdef WIDE_PULSES	
+#define	THROTTLEMIN 800					// Minimum throttle input value. 3750-800 = 2950 or 1.1ms (150% code)
+#else
+#define	THROTTLEMIN 1000				// Minimum throttle input value. 3750-1000 = 2750 or 1.1ms (125% code)
+#endif
 
 /*********************************************************************
  * Type definitions
@@ -149,6 +155,10 @@ typedef struct
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
+	// Debug
+	#ifdef KK21
+	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	#endif
 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	

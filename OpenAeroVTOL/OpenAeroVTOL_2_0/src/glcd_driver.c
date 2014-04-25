@@ -60,7 +60,7 @@ inline void spiwrite(uint8_t c)
 		if (c & (1 << (i)))		// Bit set?
 		{
 			LCD_SI = 1;
-			//glcd_delay();		// 250ns
+			//glcd_delay();		// 250ns - This seems not necessary?
 			LCD_SCL = 1;
 		}
 		else					// Bit clear?
@@ -71,7 +71,7 @@ inline void spiwrite(uint8_t c)
 		}
 		//_delay_us(1);
 		glcd_delay();		// 250ns
-		//glcd_delay_1us();
+		//glcd_delay_1us(); - This seems not necessary?
 	}
 }
 

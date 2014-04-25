@@ -105,15 +105,15 @@ void get_raw_gyros(void)
 	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
 	temp1 = Gyros[0] << 8;
 	temp2 = Gyros[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 6;
+	RawADC[PITCH] = (temp1 + temp2) >> 4; // Changed 6 to 4 to compensate for 500 -> 2000 deg/s change
 
 	temp1 = Gyros[2] << 8;
 	temp2 = Gyros[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 6;
+	RawADC[ROLL] = (temp1 + temp2) >> 4;
 
 	temp1 = Gyros[4] << 8;
 	temp2 = Gyros[5];
-	RawADC[YAW] = (temp1 + temp2) >> 6;
+	RawADC[YAW] = (temp1 + temp2) >> 4;
 
 #else
 	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
@@ -244,9 +244,12 @@ void init_i2c_gyros(void)
 {
 	// First, configure the MPU6050
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_PWR_MGMT_1, 0x01); 			// Gyro X clock, awake
+	
+	// Make INT pin open-drain so that we can connect it straight to the MPU
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_INT_PIN_CFG, 0x40);			// INT output is open-drain
 
 	// Other regs cannot be written until the MPU6050 is out of sleep mode
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, MPU60X0_DLPF_BW_5);	// 0x06 = 5Hz, (5)10Hz, (4)20Hz, (3)42Hz, (2)98Hz, (1)188Hz LPF
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, MPU60X0_DLPF_BW_256);	// 0x00 = 256Hz
 	
 	// Now configure gyros
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS2000DEG);	// 2000 deg/sec

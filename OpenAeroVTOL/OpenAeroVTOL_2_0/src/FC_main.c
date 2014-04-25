@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 39 - March 2014
+// Version: Beta 41 - April 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -173,7 +173,12 @@
 //			Now a "no signal" event resets the CPPM max channel number calculation.
 // Beta 39	Fixed a CPPM mis-detection bug. Gyro full scale resolution changed to 2000 deg/s
 //			Display wizard improved so that bad RX selection doesn't read as stick inputs.
-//			Changed to a vector-based IMU from KK2 assembler code
+//			Changed to a vector-based IMU from KK2 assembler code.
+//			GLCD update speed improved.
+// Beta 40	Type casting tweaks in IMU. Changed MPU6050 gyro/acc LPF default to 256Hz.
+//			Re-added user adjustable LPF. 
+// Beta 41	Fixed KK2.1 gyro handling so that the stick rate is unaffected.
+//			Added compile option for Servo travel rescaled to 0.875~2.125 (150%) for an indicated 125%
 //
 //***********************************************************
 //* Notes

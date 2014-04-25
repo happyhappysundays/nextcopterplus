@@ -25,12 +25,7 @@
 //************************************************************
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
-
-#ifdef KK21 
-#define PID_SCALE 4					// KK2.1 has 2000deg/s gyros compared with the KK2.0's 500deg/s
-#else
-#define PID_SCALE 6
-#endif
+#define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
 
 //************************************************************
 // Notes
@@ -46,17 +41,13 @@
 // This seems about right for heading hold usage.
 //
 // On the KK2.1 the gyros are configured to read +/-2000 deg/sec at full scale, or 16.4 deg/sec for each LSB value.  
-// I divide that by 128 to give 0.128 deg/sec for each digit the gyros show. So "50" is only 6.4 degrees per second.
-// 360 deg/sec would give a reading of 2809 on the sensor calibration screen. Full stick is about 1250 or so. 
-// So with no division of stick value by "Axis rate", full stick would equate to (1250/2809 * 360) = 160 deg/sec. 
-// With axis rate set to 2, the stick amount is quartered (312.5) or 40 deg/sec. A value of 3 would result in 20 deg/sec. 
+// I divide that by 16 to give 0.976 deg/sec for each digit the gyros show. So "50" is about 48.8 degrees per second.
+// 360 deg/sec would give a reading of 368 on the sensor calibration screen. Full stick is about 1000 or so. 
+// So with no division of stick value by "Axis rate", full stick would equate to (1000/368 * 360) = 978 deg/sec. 
+// With axis rate set to 2, the stick amount is quartered (250) or 244 deg/sec. A value of 3 would result in 122 deg/sec. 
 //
-// 90 to 720 deg/sec is a good range so to achieve this we need to both divide and multiply the stick.
-// Stick * 2 would give 320 deg/sec, *4 = 640 deg/sec
-//
-// Therefore, usable operations on the stick throw are *4 (640), *2 (320), *1 (160), /2 (80) 
-//
-
+// Stick rates: /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
+		
 //************************************************************
 // Prototypes
 //************************************************************
@@ -146,13 +137,13 @@ void Calculate_PID(void)
 		{
 			gyroADC[axis] = 0;
 		}
-
+		
 		//************************************************************
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 
 		// Work out stick rate divider. 0 is fastest, 4 is slowest.
-		// /64 (15), /32 (30), /16 (60*), /8 (120), /4 (240)
+		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
 		stick = RCinputsAxis[axis] >> (Config.Stick_Lock_rate + 2);
 
 		// Calculate I-term from gyro and stick data 

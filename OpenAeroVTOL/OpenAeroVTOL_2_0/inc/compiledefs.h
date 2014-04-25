@@ -13,3 +13,6 @@
 // Comment out this line if no airspeed sensor used (only for KK2.1)
 //#define AIRSPEED
 #endif
+
+// If defined, the min/max pulse range changes from 1.0ms to 2.0ms to 0.825 to 2.125ms
+#define WIDE_PULSES

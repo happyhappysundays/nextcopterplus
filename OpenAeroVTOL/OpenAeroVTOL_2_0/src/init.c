@@ -226,7 +226,6 @@ void init(void)
 		
 	// Do startup tasks
 	UpdateLimits();							// Update travel limts	
-	//UpdateIMUvalues();						// Update IMU factors
 	Init_ADC();
 	init_int();								// Intialise interrupts based on RC input mode
 	init_uart();							// Initialise UART
@@ -249,9 +248,6 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
-
-	// Debug
-//	imu_init();
 
 	// Flash LED
 	LED1 = 1;
