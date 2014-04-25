@@ -38,6 +38,10 @@ void Display_sensors(void);
 
 void Display_sensors(void)
 {
+#ifdef KK21
+	//uint8_t	test[2];
+#endif 
+		
 	while(BUTTON1 != 0)
 	{
 		if (BUTTON4 == 0)
@@ -72,16 +76,15 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[ROLL],pBuffer,10),(const unsigned char*)Verdana8,80,13);
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,23);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(const unsigned char*)Verdana8,80,33);
-/*	
+	
 #ifdef KK21
 		// Use this for checking MPU6050 register values
-		readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, (uint8_t *)test, 1);
-		mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
+		//readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, (uint8_t *)test, 1);
+		//readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_INT_PIN_CFG, (uint8_t *)test, 1);
+		//mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
 #endif
-*/
+
 		// Debug for IMU
-		//mugui_lcd_puts(ultoa(interval,pBuffer,10),(const unsigned char*)Verdana8,40,45);
-		//mugui_lcd_puts(itoa(counter_copy,pBuffer,10),(const unsigned char*)Verdana8,80,45);
 		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(const unsigned char*)Verdana8,40,45);
 		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,45);
 		

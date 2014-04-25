@@ -33,8 +33,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x2E		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x2E = Beta 34+
+#define MAGIC_NUMBER 0x2F		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x2E = Beta 40+
 
 //************************************************************
 // Code
@@ -103,7 +103,7 @@ void Set_EEPROM_Default_Config(void)
 #else
 	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
 	Config.AccZero[PITCH]	= 623;
-	Config.AccZero[YAW]		= 643; 		// 643 is the centre
+	Config.AccZero[YAW]		= 643; 		// 643 is the center
 	Config.AccZeroNormZ		= 765;
 #endif
 
@@ -128,6 +128,10 @@ void Set_EEPROM_Default_Config(void)
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Stick_Lock_rate = 3;
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
+
+	#ifdef KK21
+	Config.MPU6050_LPF = 0;				// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	#endif	
 }
 
 void Save_Config_to_EEPROM(void)

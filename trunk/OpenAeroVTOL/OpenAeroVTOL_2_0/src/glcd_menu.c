@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 39";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 41";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -251,19 +251,20 @@ const char GeneralText5[] PROGMEM =  "Fast";
 const char MiscText1[] PROGMEM =  "Pitot (Pa)";
 #endif
 //
-#ifdef KK21
-// Debug
-const char DebugText1[] PROGMEM =  "Deltagyro:";
-const char DebugText2[] PROGMEM =  "AccSmooth:";
-const char DebugText3[] PROGMEM =  "CF output:";
-const char DebugText4[] PROGMEM =  "Angle:";
-const char DebugText5[] PROGMEM =  "Acc Mag:";
-#endif
-
-//
 const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
 const char Random1[] PROGMEM =  "High";
+//
+#ifdef KK21
+const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
+const char MPU6050LPF1[] PROGMEM =  "5Hz";
+const char MPU6050LPF2[] PROGMEM =  "10Hz";
+const char MPU6050LPF3[] PROGMEM =  "21Hz";
+const char MPU6050LPF4[] PROGMEM =  "44Hz";
+const char MPU6050LPF5[] PROGMEM =  "94Hz";
+const char MPU6050LPF6[] PROGMEM =  "184Hz";
+const char MPU6050LPF7[] PROGMEM =  "260Hz";
+#endif
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -288,9 +289,14 @@ const char* const text_menu[] PROGMEM =
 		//
 		ChannelRef1, ChannelRef2, ChannelRef0, ChannelRef3, ChannelRef4,					// 32 to 36 RC inputs
 		//
+#ifdef KK21
+		MPU6050LPF7, MPU6050LPF6, MPU6050LPF5, MPU6050LPF4,
+		MPU6050LPF3, MPU6050LPF2, MPU6050LPF1,												// 37 to 43  MPU6050 LPF
+#else
 		Dummy0,																				// 37 to 43  Spare
 		Dummy0,Dummy0,Dummy0,
-		Dummy0,Dummy0,Dummy0, 	
+		Dummy0,Dummy0,Dummy0,
+#endif
 		//
 		Safety1, Safety2, 																	// 44 Safety 
 		//
@@ -331,12 +337,7 @@ const char* const text_menu[] PROGMEM =
 		MainMenuItem15,MainMenuItem16,MainMenuItem17,MainMenuItem18,		
 		MainMenuItem20,MainMenuItem22, MainMenuItem23, 
 		//
-		//
-#ifdef KK21
-		DebugText1, DebugText2,	DebugText3, DebugText4, DebugText5,							// 96 to 100	
-#else
-		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 
-#endif	
+		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 											// 96 to 100	
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem12,										// 101 to 103 OFF/ON/REV
 		//
@@ -378,8 +379,13 @@ const char* const text_menu[] PROGMEM =
 		MixerMenuItem0, Contrast, AutoMenuItem2,											// 159 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText7, 
+#ifdef KK21
+		GeneralText10,
+#else
+		Dummy0,
+#endif
 		//
-		Dummy0,	Dummy0,Dummy0, Dummy0,	Dummy0,
+		Dummy0,	Dummy0,Dummy0, Dummy0,
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro

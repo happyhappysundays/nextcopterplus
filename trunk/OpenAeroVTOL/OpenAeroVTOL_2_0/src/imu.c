@@ -47,19 +47,15 @@ void reset_IMU(void);
 #define ACCSENSITIVITY		128.0f		// Calculate factor for Acc to report directly in g
 										// For +/-4g FS, accelerometer sensitivity (+/-512 / +/-4g) = 1024/8 = 128
 
-#ifdef KK21
-#define GYROSENSRADIANS		0.06818f	// Calculate factor for Gyros to report directly in rad/s
-										// For +/-2000 deg/s FS, gyro sensitivity for 10 bits (+/-512) = (4000/1024) = 3.90625 deg/s/lsb
-										// 3.90625 * Pi/180 = 0.06818f rad/s/lsb
-#else
-#define GYROSENSRADIANS		0.017045f	// KK2.0 has 500deg/s gyros compared with the KK2.1's 2000deg/s
-#endif
+#define GYROSENSRADIANS		0.017045f	// Calculate factor for Gyros to report directly in rad/s
+										// For +/-2000 deg/s FS, gyro sensitivity for 12 bits (+/-2048) = (4000/4096) = 0.97656 deg/s/lsb
+										// 0.97656 * Pi/180 = 0.017044 rad/s/lsb
 										
 #define SMALLANGLEFACTOR	0.66f		// Empirically calculated to produce exactly 20 at 20 degrees. Was 0.66			
 										
 										// Acc magnitude values - based on MultiWii 2.3 values
-#define acc_1_15G_SQ 21668				// (1.15 * ACCSENSITIVITY) * (1.15 * ACCSENSITIVITY)
-#define acc_0_85G_SQ 11837				// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)												
+#define acc_1_15G_SQ		21668.0f	// (1.15 * ACCSENSITIVITY) * (1.15 * ACCSENSITIVITY)
+#define acc_0_85G_SQ		11837.0f	// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)												
 
 //************************************************************
 // 	Globals
@@ -110,7 +106,7 @@ float	interval;						// Interval in seconds since the last loop
 
 void simple_imu_update(uint32_t period)
 {
-	float		tempf;
+	float		tempf, accADCf;
 	int8_t		axis;
 	uint32_t	roll_sq, pitch_sq, yaw_sq;
 	uint32_t 	AccMag = 0;
@@ -119,20 +115,24 @@ void simple_imu_update(uint32_t period)
 	// Convert (period) from units of 400ns (1/2500000) to seconds (1s/400ns = 2500000)
 	tempf = period; // Promote int16_t to float
 	interval = tempf/2500000.0f;		
+
+	tempf = Config.Acc_LPF; // Promote
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
 	for (axis = 0; axis < NUMBEROFAXIS; axis++)
 	{
+		accADCf = accADC[axis]; // Promote
+		
 		// Acc LPF
 		if (Config.Acc_LPF > 1)
 		{
 			// Acc LPF
-			accSmooth[axis] = ((accSmooth[axis] * (float)(Config.Acc_LPF - 1)) - (float)(accADC[axis])) / Config.Acc_LPF;
+			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;
 		}
 		else
 		{
 			// Use raw accADC[axis] as source for acc values
-			accSmooth[axis] =  -accADC[axis];
+			accSmooth[axis] =  -accADCf;
 		}
 	}
 	
@@ -149,7 +149,7 @@ void simple_imu_update(uint32_t period)
 	roll_sq = (accADC[ROLL] * accADC[ROLL]);
 	pitch_sq = (accADC[PITCH] * accADC[PITCH]) ;
 	yaw_sq = (accADC[YAW] * accADC[YAW]);
-	AccMag = (uint16_t)(roll_sq + pitch_sq + yaw_sq);
+	AccMag = roll_sq + pitch_sq + yaw_sq;
 
 	// Add acc correction if inside local acceleration bounds and not inverted according to VectorZ 
 	// This is actually a kind of Complementary Filter
