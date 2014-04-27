@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 41";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 42";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -217,6 +217,7 @@ const char Disarmed[]	PROGMEM = "Disarmed";
 const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
 const char PText2[]  PROGMEM = "Hold steady";
+const char PText3[]  PROGMEM = "ESC Calibrate";
 //
 const char WizardText0[] PROGMEM = "No RX signal?"; 		// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
@@ -314,11 +315,11 @@ const char* const text_menu[] PROGMEM =
 		//
 		Random1,  																			// 55 High
 		//
-		MixerItem60, MixerItem61, 															// 56 to 59 Linear, Sine, Sqrt Sine
+		MixerItem60, MixerItem61, 															// 56 to 58 Linear, Sine, Sqrt Sine
 		MixerItem62,
 		
 		//
-		Dummy0, 
+		PText3,																				// 59 ESC Calibrate
 		//
 		SensorMenuItem1,																	// 60 calibrate
 		//

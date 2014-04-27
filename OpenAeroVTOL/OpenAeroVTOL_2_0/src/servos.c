@@ -34,18 +34,28 @@ void output_servo_ppm(void)
 	uint32_t temp;
 	uint8_t i;
 
+	// Re-span numbers from internal values to microseconds
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		temp = ServoOut[i];					// Promote to 32 bits
 
 #ifdef WIDE_PULSES		
-		// Scale servo from 2500~5000 to 875~2125
-		temp = ((temp - 3749) >> 1) + 1500; // -3750 + 1 = -3749 for rounding
+		// Check for motor marker and ignore if set
+		if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) == 0)
+		{
+			// Scale servo from 2500~5000 to 875~2125
+			temp = ((temp - 3749) >> 1) + 1500; // -3750 + 1 = -3749 for rounding
+		}
+		else
+		{
+			// Scale servo from 2500~5000 to 1000~2000
+			temp = ((temp << 2) + 5) / 10; 	// Round and convert	
+		}
 #else
 		// Scale servo from 2500~5000 to 1000~2000
 		temp = ((temp << 2) + 5) / 10; 	// Round and convert
 #endif	
-					
+		
 		ServoOut[i] = (uint16_t)temp;
 	}
 

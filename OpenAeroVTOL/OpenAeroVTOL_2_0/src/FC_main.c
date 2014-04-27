@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 41 - April 2014
+// Version: Beta 42 - April 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -179,6 +179,11 @@
 //			Re-added user adjustable LPF. 
 // Beta 41	Fixed KK2.1 gyro handling so that the stick rate is unaffected.
 //			Added compile option for Servo travel rescaled to 0.875~2.125 (150%) for an indicated 125%
+//			Added ESC calibration routine.
+// Beta 42	Expanded servo pulses only affect outputs marked as "Servo".
+//			Trim/limit settings also now work with expanded pulse widths.
+//			D-terms no longer multiplied by 16 as this results in too coarse behaviour.
+//			Power up with no radio connected no longer causes menu entry and arming issues.
 //
 //***********************************************************
 //* Notes

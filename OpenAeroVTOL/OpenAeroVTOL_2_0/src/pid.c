@@ -200,7 +200,7 @@ void Calculate_PID(void)
 		Differential = gyroADC[axis] - lastError[axis];
 		lastError[axis] = gyroADC[axis];
 		DifferentialGyro1 = Differential * D_gain[P1][axis];			// Multiply D-term by up to 127
-		DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
+		//DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
 
 		// Gyro P-term
 		PID_gyro_temp2 += gyroADC[axis] * P_gain[P2][axis];				// Profile P2
@@ -212,7 +212,7 @@ void Calculate_PID(void)
 
 		// Gyro D-term
 		DifferentialGyro2 = Differential * D_gain[P2][axis];			// Multiply D-term by up to 127
-		DifferentialGyro2 = DifferentialGyro2 << 4;						// Multiply by 16
+		//DifferentialGyro2 = DifferentialGyro2 << 4;						// Multiply by 16
 
 		//************************************************************
 		// I-term output limits
