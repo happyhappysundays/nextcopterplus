@@ -50,6 +50,8 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 
 void init(void)
 {
+	uint8_t i;
+
 	//***********************************************************
 	// I/O setup
 	//***********************************************************
@@ -99,7 +101,7 @@ void init(void)
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PIND		= 0x0D;			// Set PD pull-ups (now pull up RX as well)
-
+	
 	//***********************************************************
 	// Timers
 	//***********************************************************
@@ -152,6 +154,32 @@ void init(void)
 	Interrupted = false;						
 	Config.Main_flags |= (1 << FirstTimeIMU);
 
+	// Load EEPROM settings
+	Initial_EEPROM_Config_Load();
+
+	//***********************************************************
+	// RX channel defaults for when no RC connected
+	// Not doing this can result in the FC trying (unsuccessfully) to arm
+	// and makes entry into the menus very hard
+	//***********************************************************
+	
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		RxChannel[i] = 3750;
+	}
+	
+	RxChannel[THROTTLE] = 2500; // Min throttle
+	
+	//***********************************************************
+	// RX channel defaults for when no RC connected
+	//***********************************************************
+	
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		RxChannel[i] = 3750;
+	}
+	
+	
 	//***********************************************************
 	// GLCD initialisation
 	//***********************************************************
@@ -166,12 +194,74 @@ void init(void)
 	// Make sure the LCD is blank
 	clear_screen();
 
-	// This delay prevents the GLCD flashing up a ghost image of old data
-	_delay_ms(300);	
+	//***********************************************************
+	// ESC calibration
+	//***********************************************************
+	
+	// Calibrate ESCs if ONLY buttons 1 and 4 pressed
+	if ((PINB & 0xf0) == 0x60)
+	{
+		// Display calibrating message
+		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
+		clear_buffer(buffer);
+		LCD_Display_Text(59,(const unsigned char*)Verdana14,10,25);
+		write_buffer(buffer,1);
+		clear_buffer(buffer);
+				
+		// For each output
+		for (i = 0; i < MAX_OUTPUTS; i++)
+		{
+			// Check for motor marker
+			if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
+			{
+				// Set output to maximum pulse width
+				ServoOut[i] = MOTOR_100;
+			}
+			else
+			{
+				ServoOut[i] = SERVO_CENTER;
+			}
+		}
+					
+		// Output HIGH pulse (1.9ms) until buttons released
+		while ((PINB & 0xf0) == 0x60)
+		{
+			// Pass address of ServoOut array
+			output_servo_ppm_asm(&ServoOut[0]);
+
+			// Loop rate = 20ms (50Hz)
+			_delay_ms(20);			
+		}
+
+		// Output LOW pulse (1.1ms) after buttons released
+		// For each output
+		for (i = 0; i < MAX_OUTPUTS; i++)
+		{
+			// Check for motor marker
+			if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
+			{
+				// Set output to maximum pulse width
+				ServoOut[i] = MOTOR_0;
+			}
+		}		
+
+		// Loop forever here
+		while(1)
+		{
+			// Pass address of ServoOut array
+			output_servo_ppm_asm(&ServoOut[0]);
+
+			// Loop rate = 20ms (50Hz)
+			_delay_ms(20);			
+		}
+	}
 
 	//***********************************************************
 	// Load or reset EEPROM settings
 	//***********************************************************
+
+	// This delay prevents the GLCD flashing up a ghost image of old data
+	_delay_ms(300);
 
 	// Reload default eeprom settings if middle two buttons are pressed
 	if ((PINB & 0xf0) == 0x90)
@@ -182,15 +272,17 @@ void init(void)
 		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25);
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
+		
+		// Reset EEPROM settings
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
 	}
 	// Load "Config" global data structure
-	else
+/*	else
 	{
 		Initial_EEPROM_Config_Load();	
 	}
-
+*/
 	// Set contrast to the previously saved value
 	st7565_set_brightness((uint8_t)Config.Contrast);				
 

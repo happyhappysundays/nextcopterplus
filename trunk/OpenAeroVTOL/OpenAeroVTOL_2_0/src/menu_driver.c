@@ -323,7 +323,14 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 			servo_update = 0;
 
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
-			temp16 = (((temp16 << 2) + (int16_t)5) / (int16_t)10); 	// Span back to what the output wants
+
+#ifdef WIDE_PULSES
+			// Scale servo from 2500~5000 to 875~2125
+			temp16 = ((temp16 - (int16_t)3749) >> 1) + (int16_t)1500; // -3750 + 1 = -3749 for rounding
+#else
+			// Scale servo from 2500~5000 to 1000~2000
+			temp16 = ((temp16 << 2) + (int16_t)5) / (int16_t)10); 	// Round and convert
+#endif			
 
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);
