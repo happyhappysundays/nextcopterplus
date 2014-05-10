@@ -44,7 +44,7 @@ void output_servo_ppm(void)
 		if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) == 0)
 		{
 			// Scale servo from 2500~5000 to 875~2125
-			temp = ((temp - 3749) >> 1) + 1500; // -3750 + 1 = -3749 for rounding
+			temp = ((temp - 3750) >> 1) + 1500;
 		}
 		else
 		{
@@ -75,7 +75,7 @@ void output_servo_ppm(void)
 			// Check for motor marker
 			if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
 			{
-				// Set output to minimum pulse width
+				// Set output to minimum pulse width (1000us)
 				ServoOut[i] = MOTORMIN;
 			}
 		}

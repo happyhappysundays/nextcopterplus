@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 42 - April 2014
+// Version: Beta 43 - May 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -184,6 +184,8 @@
 //			Trim/limit settings also now work with expanded pulse widths.
 //			D-terms no longer multiplied by 16 as this results in too coarse behaviour.
 //			Power up with no radio connected no longer causes menu entry and arming issues.
+// Beta 43	Fixed min throttle bug. Fixed output_servo_ppm_asm3() so that it can operate up to 2.3ms
+//			and so support the new wider pulse widths.
 //
 //***********************************************************
 //* Notes

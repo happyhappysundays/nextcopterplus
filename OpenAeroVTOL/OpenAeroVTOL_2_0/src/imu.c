@@ -145,9 +145,8 @@ void simple_imu_update(uint32_t period)
 	GyroPitchVC = gyroADC[PITCH];
 
 	// Calculate acceleration magnitude.
-	// This will determine the method used for estimating attitude
 	roll_sq = (accADC[ROLL] * accADC[ROLL]);
-	pitch_sq = (accADC[PITCH] * accADC[PITCH]) ;
+	pitch_sq = (accADC[PITCH] * accADC[PITCH]);
 	yaw_sq = (accADC[YAW] * accADC[YAW]);
 	AccMag = roll_sq + pitch_sq + yaw_sq;
 
@@ -223,7 +222,7 @@ void thetascale(float gyro, float interval)
 // Small angle approximations of Sine, Cosine
 float small_sine(float angle)
 {
-	//sin(angle) = angle
+	// sin(angle) = angle
 	return angle;
 }
 
