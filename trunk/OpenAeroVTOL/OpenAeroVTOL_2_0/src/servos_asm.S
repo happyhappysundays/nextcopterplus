@@ -377,7 +377,8 @@ output_servo_ppm_asm3:
 	push	17
 	push	18
 
-	ldi 	16,0x34		// 1			Set loop count to 834h or 2100
+	//ldi 	16,0x34		// 1			Set loop count to 834h or 2100
+	ldi 	16,0xFC		// 1			Set loop count to 8FCh or 2300(us)
 	ldi		17,0x08	
 	clr		0
 

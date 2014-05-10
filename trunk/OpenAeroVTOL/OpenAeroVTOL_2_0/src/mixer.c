@@ -584,13 +584,13 @@ void ProcessMixer(void)
 				temp3 = Config.Channel[i].P1_throttle_volume; // Promote to 16 bits
 			}
 
-			// Calculate actual throttle value
+			// Calculate actual throttle value to the curve
 			temp3 = scale32(MonopolarThrottle, temp3);
 
 			// At this point, the throttle values are 0 to 2500 (+/-150%)
 			// Re-scale throttle values back to neutral-centered system values (+/-1250) 
-			// as throttle offset is actually at some variable value.
-			// Reset throttle minimum to 1.1ms or (3750 (1.5ms center) - 1000 (1.1ms min throttle) = 2750)
+			// and set the minimum throttle point to 1.1ms.
+			// A THROTTLEMIN value of 1000 will result in 1.1ms
 			temp3 = temp3 - THROTTLEMIN;
 
 			// Add offset to channel value

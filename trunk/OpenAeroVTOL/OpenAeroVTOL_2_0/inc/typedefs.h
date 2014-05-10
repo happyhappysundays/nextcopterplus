@@ -19,16 +19,12 @@
 #define NUMBEROFORIENTS 6				// Number board orientations
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
 
-#define MOTOR_100 1900					// Value to produce a 1.9ms throttle pulse
-#define MOTOR_0	1100					// Value to produce a 1.1ms throttle pulse
-#define	MOTORMIN 1000					// Minimum throttle channel output value. 1000 or 1.0ms
+#define MOTOR_100 1900					// Value to produce a 1.9ms throttle pulse regardless of pulse width mode
+#define MOTOR_0	1100					// Value to produce a 1.1ms throttle pulse regardless of pulse width mode
+#define	MOTORMIN 1000					// Throttle cut output value. 1000 or 1.0ms regardless of pulse width mode
 #define SERVO_CENTER 1500				// Servo center position. 1500us
-
-#ifdef WIDE_PULSES	
-#define	THROTTLEMIN 800					// Minimum throttle input value. 3750-800 = 2950 or 1.1ms (150% code)
-#else
-#define	THROTTLEMIN 1000				// Minimum throttle input value. 3750-1000 = 2750 or 1.1ms (125% code)
-#endif
+#define	THROTTLEMIN 1000				// Minimum throttle input offset value. 3750-1000 = 2750 or 1.1ms. 
+										// Not to be confused with MOTORMIN which is a PWM value.
 
 /*********************************************************************
  * Type definitions

@@ -197,7 +197,6 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 		if (servo_enable)
 		{
 			button_inc = 20; // For servos
-
 		}
 		else
 		{
@@ -326,7 +325,7 @@ void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t r
 
 #ifdef WIDE_PULSES
 			// Scale servo from 2500~5000 to 875~2125
-			temp16 = ((temp16 - (int16_t)3749) >> 1) + (int16_t)1500; // -3750 + 1 = -3749 for rounding
+			temp16 = ((temp16 - (int16_t)3750) >> 1) + (int16_t)1500; 
 #else
 			// Scale servo from 2500~5000 to 1000~2000
 			temp16 = ((temp16 << 2) + (int16_t)5) / (int16_t)10); 	// Round and convert
