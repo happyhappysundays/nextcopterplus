@@ -17,6 +17,8 @@
 #include "i2c.h"
 #include "MPU6050.h"
 #include "main.h"
+#include "imu.h"
+#include "eeprom.h"
 
 //************************************************************
 // Prototypes
@@ -24,7 +26,7 @@
 
 void ReadGyros(void);
 void CalibrateGyrosFast(void);
-void CalibrateGyrosSlow(void);
+bool CalibrateGyrosSlow(void);
 void get_raw_gyros(void);
 
 //************************************************************
@@ -32,7 +34,7 @@ void get_raw_gyros(void);
 //************************************************************
 
 #define CAL_TIMEOUT	5				// Calibration timeout
-#define CAL_STABLE_TIME	100			// Calibration stable timeout
+#define CAL_STABLE_TIME 200			// Calibration stable timeout
 #define GYROS_STABLE 1				// Minimum gyro error
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define GYROFS2000DEG 0x18			// 2000 deg/s full scale
@@ -145,24 +147,29 @@ void CalibrateGyrosFast(void)
 	// Clear gyro zeros
 	memset(&Config.gyroZero[ROLL],0,(sizeof(int16_t) * NUMBEROFAXIS));
 
-	for (i=0; i<32; i++)				// Calculate average over 32 reads
+	// Calculate average over 32 reads
+	for (i=0; i<32; i++)
 	{
 		get_raw_gyros();				// Updates gyroADC[]
 
 		Config.gyroZero[ROLL] 	+= gyroADC[ROLL];						
 		Config.gyroZero[PITCH] 	+= gyroADC[PITCH];	
 		Config.gyroZero[YAW] 	+= gyroADC[YAW];
-
-		_delay_ms(10);					// Get a better gyro average over time
 	}
 
-	for (i=0; i<NUMBEROFAXIS; i++)		// Average readings for all axis
+	// Average readings for all axis
+	for (i=0; i<NUMBEROFAXIS; i++)
 	{
 		Config.gyroZero[i] 	= (Config.gyroZero[i] >> 5);	// Divide by 32	
 	}
+	
+	// Reset IMU on recalibration
+	reset_IMU();
+
+	Save_Config_to_EEPROM();
 }
 
-void CalibrateGyrosSlow(void)
+bool CalibrateGyrosSlow(void)
 {
 	uint8_t axis;
 	uint8_t Gyro_seconds = 0;
@@ -170,21 +177,25 @@ void CalibrateGyrosSlow(void)
 	uint16_t Gyro_timeout = 0;
 	bool	Gyros_Stable = false;
 	float 	GyroSmooth[NUMBEROFAXIS];
+	int16_t GyroOld[NUMBEROFAXIS];
+	bool	firsttime = false;
 	uint16_t Stable_counter = 0;
 
 	// Force recalculation
 	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 	{
-// Optimise starting point for each board
-#ifdef KK21
-		GyroSmooth[axis] = 10;
-#else
-		GyroSmooth[axis] = 500;
-#endif
+		// Optimise starting point for each board
+		GyroSmooth[axis] = Config.gyroZero[axis];
 	}
 
-	// Wait until gyros stable. Timeout after CAL_TIMEOUT seconds
-	while (!Gyros_Stable && (Gyro_seconds <= CAL_TIMEOUT))
+	// Is this the first ever calibration?
+	if ((Config.AccZero[ROLL] == 1) && (Config.AccZero[PITCH] == 2) && (Config.AccZero[YAW]	== 3))		// Uncalibrated signature
+	{
+		firsttime = true;
+	}
+	
+	// Wait until gyros stable. Timeout after CAL_TIMEOUT seconds or never if first calibrate
+	while (!Gyros_Stable && ((Gyro_seconds <= CAL_TIMEOUT) || firsttime))
 	{
 		// Update status timeout
 		Gyro_timeout += (uint8_t) (TCNT2 - Gyro_TCNT2);
@@ -203,36 +214,36 @@ void CalibrateGyrosSlow(void)
 		for (axis = 0; axis < NUMBEROFAXIS; axis++) 
 		{
 			GyroSmooth[axis] = ((GyroSmooth[axis] * (float)999) + (float)(gyroADC[axis])) / (float)1000;
-			Config.gyroZero[axis] = (int16_t)GyroSmooth[axis];
-		}
-
-		// Check for movement
-		ReadGyros();
-
-		if ((gyroADC[ROLL] > GYROS_STABLE) || (gyroADC[ROLL] < -GYROS_STABLE) ||
-			(gyroADC[PITCH] > GYROS_STABLE) || (gyroADC[PITCH] < -GYROS_STABLE) ||
-			(gyroADC[YAW] > GYROS_STABLE) || (gyroADC[YAW] < -GYROS_STABLE))
-		{
-			Gyros_Stable = false;
-			Stable_counter = 0;
-		}
-		else
-		{
-			Stable_counter++;
+			
+			// See if changing
+			if (GyroOld[axis] != (int16_t)GyroSmooth[axis])
+			{
+				Gyros_Stable = false;
+				Stable_counter = 0;
+			}
+		
+			// Save old reading
+			GyroOld[axis] = (int16_t)GyroSmooth[axis];
 		}
 		
+		// Increment stable counter to measure how long we are still
+		Stable_counter++;
+		
+		// If stable for 5 seconds, do a quick calibrate
 		if (Stable_counter > CAL_STABLE_TIME)
 		{
-			Gyros_Stable = true;			
+			Gyros_Stable = true;	
+			firsttime = false;		
 			CalibrateGyrosFast();		
 		}
+		
+		_delay_ms(1);
+
+		// Otherwise the original saved values are used
 	}
 	
-	// Handle timeout better
-	if (Gyro_seconds > 5)
-	{
-		CalibrateGyrosFast();
-	}
+	// Return success or failure
+	return(Gyros_Stable);
 }
 
 #ifdef KK21

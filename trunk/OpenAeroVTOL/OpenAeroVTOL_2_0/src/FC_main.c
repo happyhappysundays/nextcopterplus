@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 43 - May 2014
+// Version: Beta 45 - May 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -186,6 +186,10 @@
 //			Power up with no radio connected no longer causes menu entry and arming issues.
 // Beta 43	Fixed min throttle bug. Fixed output_servo_ppm_asm3() so that it can operate up to 2.3ms
 //			and so support the new wider pulse widths.
+// Beta 44	Increased the maximum automatic transition time to 20 seconds.
+//			Reset the IMU at init and gyro cal. Changed gyro slow calibration method. "Hold steady" on all boards now.
+//			Board does a software reset if cal fails at startup.
+// Beta 45	Errors now show on the Idle screen
 //
 //***********************************************************
 //* Notes
@@ -262,6 +266,7 @@ uint8_t Transition_state = TRANS_P1;
 uint8_t	General_error = 0;
 uint8_t	Flight_flags = 0;
 uint8_t	Alarm_flags = 0;
+uint8_t	old_alarms = 0;
 
 // Global buffers
 char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
@@ -508,8 +513,6 @@ int main(void)
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
 				menu_beep(1);						// Signal that FC is now disarmed
 			}
 		}
@@ -579,9 +582,6 @@ int main(void)
 				CalibrateGyrosSlow();					// Calibrate gyros
 				reset_IMU();							// Reset IMU just in case...
 				menu_beep(20);							// Signal that FC is ready
-
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
 			}
 			// Else, disarm the FC after DISARM_TIMER seconds if aileron at max
 			else if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
@@ -589,9 +589,6 @@ int main(void)
 				Arm_timer = 0;
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
 				menu_beep(1);							// Signal that FC is now disarmed
-
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
 			}
 
 			// Automatic disarm
@@ -619,9 +616,6 @@ int main(void)
 			{
 				// Disarm the FC
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
-
-				// Force update of status screen
-				Menu_mode = STATUS_TIMEOUT;
 				menu_beep(1);							// Signal that FC is now disarmed
 			}
 		}
@@ -972,6 +966,22 @@ int main(void)
 		{
 			Interrupted = false;				// Reset interrupted flag
 		}
+		
+		//************************************************************
+		//* Carefully update idle screen if error level changed
+		//************************************************************	
+
+		// Only update idle when error state has changed.
+		// This prevents the continual updating of the LCD disrupting the FC
+		if (old_alarms != General_error)
+		{
+			// Force update of idle screen
+			Menu_mode = STATUS_TIMEOUT;
+		}
+			
+		// Save current alarm state into old_alarms
+		old_alarms = General_error;
+		
 	} // main loop
 } // main()
 

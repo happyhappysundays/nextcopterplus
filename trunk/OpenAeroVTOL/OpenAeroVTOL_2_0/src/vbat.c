@@ -63,6 +63,8 @@ uint16_t GetVbat(void)				// Get battery voltage (VBAT on ADC3)
 //* Lowest resolution (lsb) is 2.305 / 1024 = 2.25mV = 2.25Pa = 1.8m/s = 6.7 km/h
 //* Highest resolution is 2.305 kPa = 59.7m/s = 215 km/h
 //*
+//* Note that to convert Pa to m/s = x^2 * 0.613 Pa
+//*
 //************************************************************
 
 #ifdef AIRSPEED

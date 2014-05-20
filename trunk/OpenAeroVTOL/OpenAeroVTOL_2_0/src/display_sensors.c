@@ -50,8 +50,18 @@ void Display_sensors(void)
 #ifdef AIRSPEED
 			CalibrateAirspeed();
 #endif
-			CalibrateGyrosFast();
-			CalibrateAcc(NORMAL); // This also saves the data in eeprom
+			// Calibrate sensors. Stop if gyro cal fails
+			if (!CalibrateGyrosSlow())
+			{
+				clear_buffer(buffer);
+				LCD_Display_Text(61,(const unsigned char*)Verdana14,25,25); // "Cal. failed"
+				write_buffer(buffer,1);
+				_delay_ms(1000);
+			}			
+			else
+			{
+				CalibrateAcc(NORMAL);
+			}
 		}
 
 		if (BUTTON3 == 0)
@@ -84,7 +94,7 @@ void Display_sensors(void)
 		//mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
 #endif
 
-		// Debug for IMU
+		// Debug for IMU (Needs code to measure interval and run IMU)
 		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(const unsigned char*)Verdana8,40,45);
 		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,45);
 		
