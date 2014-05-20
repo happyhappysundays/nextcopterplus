@@ -78,7 +78,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
 		{0,4,1,0,3},					// Axis lock stick rate (0 is fastest, 4 is slowest).
-		{0,10,1,0,0},					// TransitionSpeed 0 to 10
+		{0,20,1,0,0},					// TransitionSpeed 0 to 20
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{

@@ -124,7 +124,7 @@ enum Curve			{LINEAR = 0, SINE, SQRTSINE};
 // Flags
 //***********************************************************
 
-enum GlobalError	{NO_ERROR = 0, THROTTLE_HIGH, NO_SIGNAL, SENSOR_ERROR, DISARMED, LVA_ALARM, BUZZER_ON};
+enum GlobalError	{THROTTLE_HIGH = 0, NO_SIGNAL, DISARMED, LVA_ALARM, BUZZER_ON};
 enum FlightFlags	{RxActivity = 0};
 enum MainFlags		{inv_cal_done = 0, normal_cal_done, FirstTimeIMU, ServoTick};
 enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};

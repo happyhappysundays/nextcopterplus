@@ -95,6 +95,11 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
 
+	// Default gyro zeros
+	Config.AccZero[ROLL] 	= 1;		// Uncalibrated signature
+	Config.AccZero[PITCH]	= 2;
+	Config.AccZero[YAW]		= 3;
+
 #ifdef KK21
 	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
 	Config.AccZero[PITCH]	= 0;

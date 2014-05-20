@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 43";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: VTOL Beta 45";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -218,13 +218,14 @@ const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
 const char PText2[]  PROGMEM = "Hold steady";
 const char PText3[]  PROGMEM = "ESC Calibrate";
+const char PText4[]  PROGMEM = "Cal. failed";
 //
 const char WizardText0[] PROGMEM = "No RX signal?"; 		// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
 const char WizardText2[] PROGMEM = "Done!";
 //
 const char Status0[] PROGMEM = "Press";						// Idle text
-const char Status2[] PROGMEM = "for status";
+const char Status2[] PROGMEM = "for status.";
 const char Status4[] PROGMEM = "(Armed)";
 const char Status5[] PROGMEM = "(Disarmed)";
 //
@@ -323,7 +324,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		SensorMenuItem1,																	// 60 calibrate
 		//
-		Dummy0, 																			// 61 
+		PText4, 																			// 61 Failed
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3,													// 62 to 65 RX mode
 		Dummy0, Dummy0, 
@@ -452,16 +453,53 @@ void idle_screen(void)
 
 	// Change Status screen depending on arm mode
 	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 	// "Press"
-	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23); // "for status."
+	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
 
-	if ((General_error & (1 << DISARMED)) != 0) // Disarmed
+#ifdef KK21
+	// Display most important error
+	if ((General_error & (1 << LVA_ALARM)) != 0)					// Low voltage
 	{
-		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43); // "(Disarmed)"
+		LCD_Display_Text(134,(const unsigned char*)Verdana14,12,43);// "Battery"
+		LCD_Display_Text(73,(const unsigned char*)Verdana14,80,43); // "Low"
+	}
+	
+	else if ((General_error & (1 << NO_SIGNAL)) != 0)				// No signal
+	{
+		LCD_Display_Text(75,(const unsigned char*)Verdana14,28,43); // "No"
+		LCD_Display_Text(76,(const unsigned char*)Verdana14,54,43); // "Signal"
+	}
+	
+	else if ((General_error & (1 << THROTTLE_HIGH)) != 0)			// Throttle high
+	{
+		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
+		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
+	}
+	
+	else if ((General_error & (1 << DISARMED)) != 0)				// Disarmed
+	{
+		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
 	}
 	else
 	{
-		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43); // "(Armed)"
+		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
 	}
-	
+
+#else	
+	if ((General_error & (1 << THROTTLE_HIGH)) != 0)				// Throttle high
+	{
+		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
+		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
+	}
+
+	else if ((General_error & (1 << DISARMED)) != 0)				// Disarmed
+	{
+		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
+	}
+	else
+	{
+		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
+	}
+#endif	
+
 	write_buffer(buffer,1);
 };

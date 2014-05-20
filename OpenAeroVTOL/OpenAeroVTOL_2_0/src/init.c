@@ -34,6 +34,7 @@
 #include "i2cmaster.h"
 #include "i2c.h"
 #include "MPU6050.h"
+#include <avr/wdt.h>
 
 //************************************************************
 // Prototypes
@@ -41,6 +42,16 @@
 
 void init(void);
 void init_int(void);
+
+// WDT reset prototype. Placed before main() in code to prevent wdt re-firing
+void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
+
+void wdt_init(void)
+{
+	MCUSR = 0;
+	wdt_disable();
+	return;
+}
 
 //************************************************************
 // Code
@@ -152,7 +163,7 @@ void init(void)
 
 	// Preset important flags
 	Interrupted = false;						
-	Config.Main_flags |= (1 << FirstTimeIMU);
+	Config.Main_flags |= (1 << FirstTimeIMU);	// First time into IMU
 
 	// Load EEPROM settings
 	Initial_EEPROM_Config_Load();
@@ -169,16 +180,6 @@ void init(void)
 	}
 	
 	RxChannel[THROTTLE] = 2500; // Min throttle
-	
-	//***********************************************************
-	// RX channel defaults for when no RC connected
-	//***********************************************************
-	
-	for (i = 0; i < MAX_RC_CHANNELS; i++)
-	{
-		RxChannel[i] = 3750;
-	}
-	
 	
 	//***********************************************************
 	// GLCD initialisation
@@ -269,7 +270,7 @@ void init(void)
 		// Display reset message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 		clear_buffer(buffer);
-		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25);
+		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25); // "Reset"
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
 		
@@ -277,12 +278,7 @@ void init(void)
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
 	}
-	// Load "Config" global data structure
-/*	else
-	{
-		Initial_EEPROM_Config_Load();	
-	}
-*/
+
 	// Set contrast to the previously saved value
 	st7565_set_brightness((uint8_t)Config.Contrast);				
 
@@ -290,7 +286,7 @@ void init(void)
 #ifdef KK21
 	// Write logo from buffer
 	write_buffer(buffer,0);
-	_delay_ms(500);
+	_delay_ms(1000);
 #endif
 
 	//***********************************************************
@@ -307,14 +303,12 @@ void init(void)
 	// Remaining init tasks
 	//***********************************************************
 
-#ifndef KK21
-	// Display "Hold steady" message for KK2.0 (no room for logo)
+	// Display "Hold steady" message
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	clear_buffer(buffer);
-	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);
-	write_buffer(buffer,1);
+	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
+	write_buffer(buffer,1);	
 	clear_buffer(buffer);
-#endif
 		
 	// Do startup tasks
 	UpdateLimits();							// Update travel limts	
@@ -323,7 +317,18 @@ void init(void)
 	init_uart();							// Initialise UART
 
 	// Initial gyro calibration
-	CalibrateGyrosSlow();
+	if (!CalibrateGyrosSlow())
+	{
+		clear_buffer(buffer);
+		LCD_Display_Text(61,(const unsigned char*)Verdana14,25,25); // "Cal. failed"
+		write_buffer(buffer,1);
+		_delay_ms(1000);
+		
+		// Reset
+		cli();
+		wdt_enable(WDTO_15MS);				// Watchdog on, 15ms
+		while(1);
+	}
 
 	// Disarm on start-up if Armed setting is ARMABLE
 	if (Config.ArmMode == ARMABLE)
@@ -345,6 +350,9 @@ void init(void)
 	LED1 = 1;
 	_delay_ms(150);
 	LED1 = 0;
+
+	// Reset IMU
+	reset_IMU();
 
 	// Beep that init is complete
 	menu_beep(1);
