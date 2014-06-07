@@ -33,7 +33,12 @@ void get_raw_gyros(void);
 // Defines
 //************************************************************
 
-#define CAL_TIMEOUT	5				// Calibration timeout
+#ifdef KK21
+#define CAL_TIMEOUT	5				// Calibration timeout for KK2.1
+#else
+#define CAL_TIMEOUT	10				// Calibration timeout for KK2.0 (it's slower)
+#endif
+
 #define CAL_STABLE_TIME 200			// Calibration stable timeout
 #define GYROS_STABLE 1				// Minimum gyro error
 #define SECOND_TIMER 19531			// Unit of timing for seconds
