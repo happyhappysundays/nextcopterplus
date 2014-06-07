@@ -195,12 +195,13 @@
 //			High-speed PWM output for S.Bus and Satellite modes. Removed D-terms again.
 //			Basic bumpless I-term handling added. CF factor now "AL correct" and numbers reversed.
 //			High-speed PWM now locked to incoming RC.
+//			Fixed broken slow gyro calibrate on KK2.0
 //			
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:
+// Bugs: "No signal" alarm doesn't work in High-speed mode. Disabled.
 //	
 //
 // Todo: 
