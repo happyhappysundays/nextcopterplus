@@ -44,12 +44,12 @@ void Display_rcinput(void)
 
 		RxGetChannels();
 
-		LCD_Display_Text(114,(const unsigned char*)Verdana8,0,0);
+		LCD_Display_Text(114,(const unsigned char*)Verdana8,0,0); // Throttle
 		LCD_Display_Text(32,(const unsigned char*)Verdana8,0,10);
 		LCD_Display_Text(115,(const unsigned char*)Verdana8,0,20);
 		LCD_Display_Text(35,(const unsigned char*)Verdana8,0,30);
 
-		LCD_Display_Text(109,(const unsigned char*)Verdana8,70,0);
+		LCD_Display_Text(109,(const unsigned char*)Verdana8,70,0); // Gear
 		LCD_Display_Text(110,(const unsigned char*)Verdana8,70,10);
 		LCD_Display_Text(111,(const unsigned char*)Verdana8,70,20);
 		LCD_Display_Text(112,(const unsigned char*)Verdana8,70,30);

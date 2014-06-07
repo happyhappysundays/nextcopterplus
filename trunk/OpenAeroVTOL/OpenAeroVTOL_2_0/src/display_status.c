@@ -40,14 +40,14 @@ void Display_status(void)
 	clear_buffer(buffer);
 
 	// Display text
-	LCD_Display_Text(3,(const unsigned char*)Verdana8,0,0); 		// Version text
+	LCD_Display_Text(3,(const unsigned char*)Verdana8,0,0); 	// Version text
 	LCD_Display_Text(5,(const unsigned char*)Verdana8,0,16); 	// RX sync
 	LCD_Display_Text(6,(const unsigned char*)Verdana8,0,27); 	// Profile
 	LCD_Display_Text(23,(const unsigned char*)Verdana8,88,27); 	// Pos
 	LCD_Display_Text(133,(const unsigned char*)Verdana8,0,38); 	// Battery
 	
 	// Display menu and markers
-	LCD_Display_Text(9, (const unsigned char*)Wingdings, 0, 59);	// Down
+	LCD_Display_Text(9, (const unsigned char*)Wingdings, 0, 59);// Down
 	LCD_Display_Text(14,(const unsigned char*)Verdana8,10,55);	// Menu
 
 	// Display values
@@ -120,18 +120,18 @@ void Display_status(void)
 		// Prioritise error from top to bottom
 		if((General_error & (1 << LVA_ALARM)) != 0)
 		{
-			LCD_Display_Text(134,(const unsigned char*)Verdana14,33,14); // Battery
-			LCD_Display_Text(73,(const unsigned char*)Verdana14,46,34); 	// Low
+			LCD_Display_Text(134,(const unsigned char*)Verdana14,33,14);	// Battery
+			LCD_Display_Text(73,(const unsigned char*)Verdana14,46,34);		// Low
 		}
 		else if((General_error & (1 << NO_SIGNAL)) != 0)
 		{
 			LCD_Display_Text(75,(const unsigned char*)Verdana14,51,13); 	// No
-			LCD_Display_Text(76,(const unsigned char*)Verdana14,39,33);  // Signal
+			LCD_Display_Text(76,(const unsigned char*)Verdana14,39,33);		// Signal
 		}
 		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
 		{
-			LCD_Display_Text(105,(const unsigned char*)Verdana14,28,14); // Throttle
-			LCD_Display_Text(55,(const unsigned char*)Verdana14,46,34);	// High
+			LCD_Display_Text(105,(const unsigned char*)Verdana14,28,14);	// Throttle
+			LCD_Display_Text(55,(const unsigned char*)Verdana14,46,34);		// High
 		}
 		else if((General_error & (1 << DISARMED)) != 0)
 		{

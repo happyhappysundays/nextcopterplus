@@ -68,7 +68,7 @@ float VectorY = 0;
 float VectorZ = 1;
 
 float VectorNewA, VectorNewB;
-float LengthVector, theta;
+float theta;
 float GyroPitchVC, GyroRollVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
@@ -116,7 +116,7 @@ void simple_imu_update(uint32_t period)
 	tempf = period; // Promote int16_t to float
 	interval = tempf/2500000.0f;		
 
-	tempf = Config.Acc_LPF; // Promote
+	tempf = (128 - Config.Acc_LPF); // Promote and reverse scale from 1-127 to 127-1
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
 	for (axis = 0; axis < NUMBEROFAXIS; axis++)
@@ -124,7 +124,7 @@ void simple_imu_update(uint32_t period)
 		accADCf = accADC[axis]; // Promote
 		
 		// Acc LPF
-		if (Config.Acc_LPF > 1)
+		if (Config.Acc_LPF < 127)
 		{
 			// Acc LPF
 			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;
@@ -151,13 +151,12 @@ void simple_imu_update(uint32_t period)
 	AccMag = roll_sq + pitch_sq + yaw_sq;
 
 	// Add acc correction if inside local acceleration bounds and not inverted according to VectorZ 
-	// This is actually a kind of Complementary Filter
 	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5))
 	{
-		tempf = (EulerAngleRoll - AccAngleRoll) / Config.CF_factor; // Default Config.CF_factor is 4
+		tempf = (EulerAngleRoll - AccAngleRoll) / (11 - Config.CF_factor); // Default Config.CF_factor is 7
 		GyroRollVC = GyroRollVC + tempf;
 		
-		tempf = (EulerAnglePitch - AccAnglePitch) / Config.CF_factor;
+		tempf = (EulerAnglePitch - AccAnglePitch) /(11 - Config.CF_factor);
 		GyroPitchVC = GyroPitchVC + tempf;
 	}
 	
@@ -204,10 +203,13 @@ void RotateVector(float angle)
 	
 	// Keep Vectors within manageable bounds. Can lock up otherwise.
 	// This seem to only affect operation via the sensor display screen.
-/*	if (VectorNewA < -2) VectorNewA = -2;
+	// 1 = 90 degrees
+	/*	
+	if (VectorNewA < -2) VectorNewA = -2;
 	if (VectorNewA > 2)	VectorNewA = 2;
 	if (VectorNewB < -2) VectorNewB = -2;
-	if (VectorNewB > 2) VectorNewB = 2;*/
+	if (VectorNewB > 2) VectorNewB = 2;
+	*/
 }
 
 void thetascale(float gyro, float interval)
@@ -273,4 +275,8 @@ void reset_IMU(void)
 	VectorX = 0;						// Initialise the vector to point straight up
 	VectorY = 0;
 	VectorZ = 1;
+	VectorA = 0;						// Initialise internal vectors and attitude
+	VectorB = 0;
+	EulerAngleRoll = 0;
+	EulerAnglePitch = 0;
 }

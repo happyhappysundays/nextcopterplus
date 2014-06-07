@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
 #include "io_cfg.h"
@@ -127,12 +128,16 @@ void Display_sticks(void)
 	// Save value and return
 	if (CalibrateDone)
 	{
+#ifdef KK21
 		LCD_Display_Text(137,(const unsigned char*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
+#endif
 		Save_Config_to_EEPROM();
+#ifdef KK21
 		_delay_ms(500);
+#endif
  	}
 	else
 	{

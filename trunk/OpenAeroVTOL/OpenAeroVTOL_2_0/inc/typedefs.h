@@ -81,27 +81,27 @@ typedef struct
 
 } channel_t;
 
-// Flight_control type (17)
+// Flight_control type (18)
 typedef struct
 {
-	int8_t		Roll_P_mult;			// Roll PID
+	int8_t		Roll_P_mult;			// Roll PI
 	int8_t		Roll_I_mult;
 	int8_t		Roll_limit;				// I-term limits (0 to 125%)
-	int8_t		Roll_D_mult;
+	int8_t		Roll_Rate;				// 0 to 4, 1 (Default)
 	int8_t		A_Roll_P_mult;			// Acc gain settings
 	int8_t		AccRollZeroTrim;		// User-set ACC trim (+/-127)
 
-	int8_t		Pitch_P_mult;			// Pitch PID
+	int8_t		Pitch_P_mult;			// Pitch PI
 	int8_t		Pitch_I_mult;
 	int8_t		Pitch_limit;			// I-term limits (0 to 125%)
-	int8_t		Pitch_D_mult;
+	int8_t		Pitch_Rate;				// 0 to 4, 1 (Default)
 	int8_t		A_Pitch_P_mult;
 	int8_t		AccPitchZeroTrim;
 
-	int8_t		Yaw_P_mult;				// Yaw PID
+	int8_t		Yaw_P_mult;				// Yaw PI
 	int8_t		Yaw_I_mult;
 	int8_t		Yaw_limit;				// I-term limits (0 to 125%)
-	int8_t		Yaw_D_mult;
+	int8_t		Yaw_Rate;				// 0 to 4, 1 (Default)
 	int8_t		Yaw_trim;
 
 	int8_t		A_Zed_P_mult;
@@ -124,7 +124,7 @@ typedef struct
 	// Servo travel limts
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (10)
+	// RC items (9)
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
@@ -132,7 +132,6 @@ typedef struct
 	int8_t		AileronPol;				// Aileron RC input polarity
 	int8_t		ElevatorPol;			// Elevator RC input polarity
 	int8_t		RudderPol;				// Rudder RC input polarity
-	int8_t		Stick_Lock_rate;		// Axis lock mode stick rate
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
 	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
 
@@ -154,11 +153,10 @@ typedef struct
 	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
 	int8_t		Servo_rate;				// Servo rate for camstab (Low = ~50Hz, High = ~300Hz)
 	int8_t		Acc_LPF;				// LPF for accelerometers
-	int8_t		CF_factor;				// Gyro/Acc Complementary Filter mix
-	// Debug
-	#ifdef KK21
+	int8_t		CF_factor;				// Autolevel correction rate
+#ifdef KK21
 	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-	#endif
+#endif
 
 	// Channel configuration
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	

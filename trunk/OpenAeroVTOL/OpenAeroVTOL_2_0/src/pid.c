@@ -65,8 +65,6 @@ int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each
 
 void Calculate_PID(void)
 {
-	static	int16_t lastError[NUMBEROFAXIS];// Used to keep track of D-Terms in PID calculations
-
 	int32_t PID_gyro_temp1 = 0;				// P1
 	int32_t PID_gyro_temp2 = 0;				// P2
 	int32_t PID_acc_temp1 = 0;				// P1
@@ -74,10 +72,8 @@ void Calculate_PID(void)
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
 
-	int16_t DifferentialGyro1 = 0;			// Holds difference between last two errors (angular acceleration)
-	int16_t DifferentialGyro2 = 0;
-	int16_t Differential = 0;
-	int16_t	stick = 0;
+	int16_t	stick_P1 = 0;
+	int16_t	stick_P2 = 0;
 	int8_t i = 0;
 	int8_t	axis = 0;
 
@@ -103,12 +99,6 @@ void Calculate_PID(void)
 			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
 		};
 
-	int8_t 	D_gain[FLIGHT_MODES][NUMBEROFAXIS] =  
-		{
-			{Config.FlightMode[P1].Roll_D_mult, Config.FlightMode[P1].Pitch_D_mult, Config.FlightMode[P1].Yaw_D_mult},
-			{Config.FlightMode[P2].Roll_D_mult, Config.FlightMode[P2].Pitch_D_mult, Config.FlightMode[P2].Yaw_D_mult}
-		};
-
 	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
 			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
@@ -120,6 +110,12 @@ void Calculate_PID(void)
 		{
 			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
 			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
+		};
+	
+	int8_t Stick_rates[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
+			{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 		};
 
 	//************************************************************
@@ -142,29 +138,26 @@ void Calculate_PID(void)
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 
-		// Work out stick rate divider. 0 is fastest, 4 is slowest.
+		// Work out stick rate divider. 0 is slowest, 4 is fastest.
 		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
-		stick = RCinputsAxis[axis] >> (Config.Stick_Lock_rate + 2);
+		stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
+		stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
 
 		// Calculate I-term from gyro and stick data 
-		// These may look identical, but they are constrained quite differently.
-		IntegralGyro[P1][axis] += (gyroADC[axis] + stick);
-		IntegralGyro[P2][axis] += (gyroADC[axis] + stick);
+		// These may look similar, but they are constrained quite differently.
+		IntegralGyro[P1][axis] += (gyroADC[axis] + stick_P1);
+		IntegralGyro[P2][axis] += (gyroADC[axis] + stick_P2);
 
-		// Limit the I-terms when you need to adjust the I-term with RC
-		// Note that the I-term is not constrained when no RC input is present.
-		if (RCinputsAxis[axis] != 0)
+		// Limit the I-terms to the user-set limits
+		for (i = P1; i <= P2; i++)
 		{
-			for (i = P1; i <= P2; i++)
+			if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])
 			{
-				if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])
-				{
-					IntegralGyro[i][axis] = Config.Raw_I_Constrain[i][axis];
-				}
-				if (IntegralGyro[i][axis] < -Config.Raw_I_Constrain[i][axis])
-				{
-					IntegralGyro[i][axis] = -Config.Raw_I_Constrain[i][axis];
-				}
+				IntegralGyro[i][axis] = Config.Raw_I_Constrain[i][axis];
+			}
+			if (IntegralGyro[i][axis] < -Config.Raw_I_Constrain[i][axis])
+			{
+				IntegralGyro[i][axis] = -Config.Raw_I_Constrain[i][axis];
 			}
 		}
 
@@ -196,12 +189,6 @@ void Calculate_PID(void)
 		PID_Gyro_I_actual1 = IntegralGyro[P1][axis] * I_gain[P1][axis];	// Multiply I-term (Max gain of 127)
 		PID_Gyro_I_actual1 = PID_Gyro_I_actual1 >> 5;					// Divide by 32
 
-		// Gyro D-term
-		Differential = gyroADC[axis] - lastError[axis];
-		lastError[axis] = gyroADC[axis];
-		DifferentialGyro1 = Differential * D_gain[P1][axis];			// Multiply D-term by up to 127
-		//DifferentialGyro1 = DifferentialGyro1 << 4;						// Multiply by 16
-
 		// Gyro P-term
 		PID_gyro_temp2 += gyroADC[axis] * P_gain[P2][axis];				// Profile P2
 		PID_gyro_temp2 = PID_gyro_temp2 * (int32_t)3;
@@ -209,10 +196,6 @@ void Calculate_PID(void)
 		// Gyro I-term
 		PID_Gyro_I_actual2 = IntegralGyro[P2][axis] * I_gain[P2][axis];
 		PID_Gyro_I_actual2 = PID_Gyro_I_actual2 >> 5;
-
-		// Gyro D-term
-		DifferentialGyro2 = Differential * D_gain[P2][axis];			// Multiply D-term by up to 127
-		//DifferentialGyro2 = DifferentialGyro2 << 4;						// Multiply by 16
 
 		//************************************************************
 		// I-term output limits
@@ -227,10 +210,6 @@ void Calculate_PID(void)
 		{
 			PID_Gyro_I_actual1 = -Config.Raw_I_Limits[P1][axis];	
 		}
-		else
-		{
-			PID_Gyro_I_actual1 = PID_Gyro_I_actual1;
-		}
 
 		// P2 limits
 		if (PID_Gyro_I_actual2 > Config.Raw_I_Limits[P2][axis]) 
@@ -241,17 +220,13 @@ void Calculate_PID(void)
 		{
 			PID_Gyro_I_actual2 = -Config.Raw_I_Limits[P2][axis];	
 		}
-		else
-		{
-			PID_Gyro_I_actual2 = PID_Gyro_I_actual2;
-		}
 
 		//************************************************************
 		// Sum Gyro P, I and D terms and rescale
 		//************************************************************
 
-		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + DifferentialGyro1) >> PID_SCALE);
-		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + DifferentialGyro2) >> PID_SCALE);
+		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE);
+		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> PID_SCALE);
 
 		//************************************************************
 		// Calculate error from angle data and trim (roll and pitch only)

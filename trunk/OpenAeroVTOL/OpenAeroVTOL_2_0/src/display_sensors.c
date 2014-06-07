@@ -93,10 +93,6 @@ void Display_sensors(void)
 		//readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_INT_PIN_CFG, (uint8_t *)test, 1);
 		//mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
 #endif
-
-		// Debug for IMU (Needs code to measure interval and run IMU)
-		//mugui_lcd_puts(itoa(angle[ROLL],pBuffer,10),(const unsigned char*)Verdana8,40,45);
-		//mugui_lcd_puts(itoa(angle[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,45);
 		
 #ifdef AIRSPEED
 		LCD_Display_Text(53,(const unsigned char*)Verdana8,5,45);		// Airspeed

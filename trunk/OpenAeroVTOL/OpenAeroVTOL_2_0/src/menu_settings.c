@@ -43,7 +43,7 @@ void menu_rc_setup(uint8_t i);
 
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
-#define RCITEMS 10 		// Number of menu items
+#define RCITEMS 9 		// Number of menu items
 
 #ifdef KK21
 #define GENERALITEMS 9
@@ -51,25 +51,24 @@ void menu_rc_setup(uint8_t i);
 #define GENERALITEMS 8
 #endif
 
-
 //************************************************************
 // RC menu items
 //************************************************************
 	 
 const uint8_t RCMenuText[2][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0, 0},				// RC setup
+	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},			// RC setup
 #ifdef KK21
-	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0, 37},						// General
+	{GENERALTEXT, 0, 44, 0, 0, 118, 0, 0, 37},				// General
 #else
-	{GENERALTEXT, 0, 44, 0, 0, 119, 0, 0},
+	{GENERALTEXT, 0, 44, 0, 0, 118, 0, 0},
 #endif
 };
 
 const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM = 
 {
 	{
-		// RC setup (10)				// Min, Max, Increment, Style, Default
+		// RC setup (9)				// Min, Max, Increment, Style, Default
 		{CPPM_MODE,SPEKTRUM,1,1,PWM},	// Receiver type
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
@@ -77,7 +76,6 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
-		{0,4,1,0,3},					// Axis lock stick rate (0 is fastest, 4 is slowest).
 		{0,20,1,0,0},					// TransitionSpeed 0 to 20
 		{1,99,1,0,50},					// Transition P1n point
 	},
@@ -88,9 +86,9 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,0},					// Low battery alarm voltage
-		{LOW,HIGH,1,1,LOW},				// Servo rate
-		{1,127,1,0,8},					// Acc. LPF
-		{1,10,1,0,4},					// CF factor
+		{LOW,MAX,1,1,LOW},				// Servo rate
+		{1,127,1,0,120},				// Acc. LPF
+		{1,10,1,0,7},					// AL correction
 #ifdef KK21
 		{0,6,1,1,6},					// MPU6050 LPF
 #endif

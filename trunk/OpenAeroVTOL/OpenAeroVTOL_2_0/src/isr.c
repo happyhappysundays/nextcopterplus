@@ -13,11 +13,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+//***********************************************************
+//* Prototypes
+//***********************************************************
+
+uint16_t TIM16_ReadTCNT1(void);
+
 //************************************************************
 // Interrupt vectors
 //************************************************************
 
 volatile bool Interrupted;			// Flag that RX packet completed
+volatile bool FirstInterrupted;		// Temporary copy of Interrupted flag
 volatile bool JitterFlag;			// Flag that interrupt occurred
 volatile bool JitterGate;			// Area when we care about JitterFlag
 
@@ -31,19 +38,12 @@ volatile uint8_t rcindex;			// Serial data buffer pointer
 volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
-volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
+volatile uint32_t RC_Period;		// Serial packet period timer
+volatile uint16_t PWM_Safe_Start;	// PWM generation safe period timestamp
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
-
-//************************************************************
-//* Timer 0 overflow handler
-//************************************************************
-ISR(TIMER0_OVF_vect)
-{
-	TMR0_counter++;
-}
 
 //************************************************************
 //* Standard PWM mode
@@ -52,7 +52,7 @@ ISR(TIMER0_OVF_vect)
 
 ISR(INT1_vect)
 {
-	// Log interrupts that iccur during PWM generation
+	// Log interrupts that occur during PWM generation
 	if (JitterGate)	JitterFlag = true;	
 
 	if (RX_ROLL)	// Rising
@@ -247,13 +247,16 @@ ISR(USART0_RX_vect)
 {
 	char temp = 0;			// RX characters
 	uint16_t temp16 = 0;	// Unsigned temp reg for mask etc
-	int16_t itemp16 = 0;	// Signed temp regemp 
+	int16_t itemp16 = 0;	// Signed temp reg 
 	uint8_t sindex = 0;		// Serial buffer index
 	uint8_t j = 0;			// GP counter and mask index
 
 	uint8_t chan_mask = 0;	// Common variables
 	uint8_t chan_shift = 0;
 	uint8_t data_mask = 0;
+	
+	uint16_t Save_TCNT1;
+	uint16_t CurrentPeriod;
 
 	//************************************************************
 	//* Common entry code
@@ -262,19 +265,30 @@ ISR(USART0_RX_vect)
 	// Read byte first
 	temp = UDR0;
 
+	// Save current time stamp
+	Save_TCNT1 = TIM16_ReadTCNT1();
+	CurrentPeriod = Save_TCNT1 - PPMSyncStart;
+
 	// Handle start of new packet
-	if ((TCNT1 - PPMSyncStart) > PACKET_TIMER)
+	if (CurrentPeriod > PACKET_TIMER)
 	{
+		// Reset variables
 		Interrupted = false;
 		rcindex = 0;
 		bytecount = 0;
 		ch_num = 0;
 		checksum = 0;
 		chanmask16 = 0;
+		
+		// Measure time between packets
+		RC_Period = CurrentPeriod;
+		
+		// Mark timestamp of end of serial data
+		PWM_Safe_Start = Save_TCNT1;
 	}
 
 	// Timestamp this interrupt
-	PPMSyncStart = TCNT1;
+	PPMSyncStart = Save_TCNT1;
 	
 	// Put received byte in buffer if space available
 	if (rcindex < SBUFFER_SIZE)
@@ -321,7 +335,8 @@ ISR(USART0_RX_vect)
 			if ((sBuffer[23] & 0x20) == 0)
 			{
 				// RC sync established
-				Interrupted = true;	
+				Interrupted = true;
+				FirstInterrupted = true;				
 
 				// Clear channel data
 				for (j = 0; j < MAX_RC_CHANNELS; j++)
@@ -338,7 +353,7 @@ ISR(USART0_RX_vect)
                 {
                     if (sBuffer[sindex] & (1<<chan_mask))
                     {
-						// Place the RC data into the correct channel order for the tranmitted system
+						// Place the RC data into the correct channel order for the transmitted system
 						RxChannel[Config.ChannelOrder[chan_shift]] |= (1<<data_mask);
                     }
 
@@ -446,6 +461,7 @@ ISR(USART0_RX_vect)
 		if (bytecount >= 15)
 		{
 			Interrupted = true;	
+			FirstInterrupted = true;
 
 			// Ahem... ah... just stick the last byte into the buffer manually...(hides)
 			sBuffer[15] = temp;
@@ -519,4 +535,29 @@ ISR(USART0_RX_vect)
 	// Increment byte count
 	bytecount++;
 }
+
+//***********************************************************
+//* TCNT1 atomic read subroutine
+//* from Atmel datasheet
+//***********************************************************
+
+uint16_t TIM16_ReadTCNT1(void)
+{
+	uint8_t sreg;
+	uint16_t i;
+	
+	/* Save global interrupt flag */
+	sreg = SREG;
+	
+	/* Disable interrupts */
+	cli();
+	
+	/* Read TCNTn into i */
+	i = TCNT1;
+	
+	/* Restore global interrupt flag */
+	SREG = sreg;
+	return i;
+}
+
 
