@@ -33,8 +33,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x2F		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x2E = Beta 40+
+#define MAGIC_NUMBER 0x30		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x30 = Beta 46+
 
 //************************************************************
 // Code
@@ -117,21 +117,23 @@ void Set_EEPROM_Default_Config(void)
 	{
 		Config.FlightMode[i].Roll_P_mult = 80;			// PID defaults		
 		Config.FlightMode[i].Roll_I_mult = 50;	
+		Config.FlightMode[i].Roll_Rate = 1;
 		Config.FlightMode[i].Pitch_P_mult = 80;
 		Config.FlightMode[i].Pitch_I_mult = 50;
+		Config.FlightMode[i].Pitch_Rate = 1;
 		Config.FlightMode[i].Yaw_P_mult = 80;
 		Config.FlightMode[i].Yaw_I_mult = 50;
+		Config.FlightMode[i].Yaw_Rate = 1;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
 
-	Config.Acc_LPF = 8;					// IMU CF defaults
-	Config.CF_factor = 4;
+	Config.Acc_LPF = 120;					// IMU CF defaults
+	Config.CF_factor = 7;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical etc.
 	Config.Contrast = 38;				// Contrast
 	Config.Disarm_timer = 30;			// Default to 30 seconds
-	Config.Stick_Lock_rate = 3;
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 
 	#ifdef KK21

@@ -116,13 +116,6 @@ void init(void)
 	//***********************************************************
 	// Timers
 	//***********************************************************
-
-	// Timer0 (8bit) - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
-	// Slow timer to extend Timer 1
-	TCCR0A = 0;								// Normal operation
-	TCCR0B = 0x05;							// Clk / 1024 = 19.531kHz or 51.2us - max 13.1ms
-	TIMSK0 |= (1 << TOIE0);					// Enable interrupts
-	TCNT0 = 0;								// Reset counter
 	
 	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	// Used to measure Rx Signals & control ESC/servo output rate
@@ -193,7 +186,8 @@ void init(void)
 	st7565_command(CMD_SET_COM_REVERSE); 	// For logo
 
 	// Make sure the LCD is blank
-	clear_screen();
+	clear_buffer(buffer);
+	write_buffer(buffer,1);
 
 	//***********************************************************
 	// ESC calibration

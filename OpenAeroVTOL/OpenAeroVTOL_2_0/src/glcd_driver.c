@@ -22,7 +22,7 @@
 //* License along with this library; if not, write to the Free Software
 //* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //* 
-//* Additional updates by David Thompson
+//* Additional updates and bugfixes by David Thompson
 //*
 //***********************************************************
 //* Includes
@@ -41,7 +41,6 @@ void glcd_delay(void);
 void glcd_delay_1us(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void write_buffer(uint8_t *buffer, uint8_t type);
-void clear_screen(void);
 
 //***********************************************************
 //* Low-level code
@@ -54,24 +53,21 @@ const uint8_t lcd_commmands[] PROGMEM	= { 0xA2,0xA0,0x40,0xA6,0xEE,0xC8,0x2C,0x2
 inline void spiwrite(uint8_t c) 
 {
 	int8_t i;
-	for (i=7; i>=0; i--) 
+	for (i = 7; i >= 0; i--) 
 	{
 		LCD_SCL = 0;
 		if (c & (1 << (i)))		// Bit set?
 		{
 			LCD_SI = 1;
-			//glcd_delay();		// 250ns - This seems not necessary?
-			LCD_SCL = 1;
 		}
 		else					// Bit clear?
 		{
 			LCD_SI = 0;
-			//glcd_delay();		// 250ns
-			LCD_SCL = 1;
 		}
-		//_delay_us(1);
-		glcd_delay();		// 250ns
-		//glcd_delay_1us(); - This seems not necessary?
+		
+		LCD_SCL = 1;
+
+		glcd_delay();			// 250ns
 	}
 }
 
@@ -123,7 +119,7 @@ void st7565_set_brightness(uint8_t val)
 	st7565_command(CMD_SET_VOLUME_SECOND | (val & 0x3f));
 }
 
-// Write LCD buffer if type = 1 normal, 0 = logo. Takes about 10ms
+// Write LCD buffer if type = 1 normal, 0 = logo.
 void write_buffer(uint8_t *buffer, uint8_t type) 
 {
 	uint8_t c, p;
@@ -153,23 +149,6 @@ void write_buffer(uint8_t *buffer, uint8_t type)
 void clear_buffer(uint8_t *buff) 
 {
 	memset(buff, 0, 1024);
-}
-
-// Clear screen (does not clear buffer)
-void clear_screen(void) 
-{
-	uint8_t p, c;
-
-	for(p = 0; p < 8; p++) 
-	{
-		st7565_command(CMD_SET_PAGE | p);								// Set page to p
-		for(c = 0; c < 128; c++) 										// Was 129, which I think is wrong...
-		{
-			st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
-			st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));	// Set column to c
-			st7565_data(0x00);											// Clear data
-		}     
-	}
 }
 
 //***********************************************************

@@ -51,24 +51,24 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 	{0,127,1,0,80},					// Roll gyro P
 	{0,127,1,0,50},					// Roll gyro I
 	{0,125,1,0,0},					// Roll gyro I-limits
-	{0,127,1,0,0},					// Roll gyro D
+	{0,4,1,0,1},					// Roll gyro rate
 	{0,127,1,0,60},					// Roll Acc gain
 	{-127,127,1,0,0}, 				// Roll Acc trim
 
 	{0,127,1,0,80},					// Pitch gyro P
 	{0,127,1,0,50}, 				// Pitch gyro I
 	{0,125,1,0,0},					// Pitch gyro I-limits
-	{0,127,1,0,0},					// Pitch gyro D
+	{0,4,1,0,1},					// Pitch gyro rate
 	{0,127,1,0,60},					// Pitch Acc gain			
 	{-127,127,1,0,0},				// Pitch Acc trim
 
 	{0,127,1,0,80},					// Yaw gyro P
 	{0,127,1,0,50},					// Yaw gyro I
 	{0,125,1,0,0},					// Yaw gyro I-limits
-	{0,127,1,0,0},					// Yaw gyro D
+	{0,4,1,0,1},					// Yaw gyro rate
 	{-127,127,1,0,0},				// Yaw trim
 
-	{0,127,1,0,0},					// Z Acc D gain
+	{0,127,1,0,0},					// Z Acc P gain
 };
 
 //************************************************************

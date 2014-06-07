@@ -36,8 +36,6 @@ void Display_balance(void);
 
 void Display_balance(void)
 {
-	uint16_t ticker_16 = 0;
-	uint16_t LoopTCNT1 = 0;
 	int16_t	x_pos, y_pos;
 
 	while(BUTTON1 != 0)
@@ -46,16 +44,9 @@ void Display_balance(void)
 		ReadGyros();
 		ReadAcc();
 
-		// Time the loop for the IMU
-		// ticker_16 is incremented at 2.5MHz (400ns) - max 26.2ms
-		ticker_16 = (uint16_t)((uint16_t)TCNT1 - LoopTCNT1);	
-		LoopTCNT1 = TCNT1;	
-
 		// Refresh accSmooth values
-		// Note that because it takes 10ms to refresh the whole GLCD this loop cannot run 
-		// faster than 100Hz, but that's close enough to the actual loop time so that the 
-		// actual Acc LPF effect is closely mirrored on the balance meter.
-		simple_imu_update(ticker_16);
+		// Fake the IMU period as accSmooth doesn't need that
+		simple_imu_update(0);
 		
 		// Convert acc signal to a pixel position
 		x_pos = accSmooth[PITCH] + 32;

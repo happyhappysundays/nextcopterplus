@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 45 - May 2014
+// Version: Beta 46 - June 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -190,7 +190,12 @@
 //			Reset the IMU at init and gyro cal. Changed gyro slow calibration method. "Hold steady" on all boards now.
 //			Board does a software reset if cal fails at startup.
 // Beta 45	Errors now show on the Idle screen
-//
+// Beta 46	Individual lock rates for RPY in both profiles. Stick rate values reversed. Default is now 1.
+//			More internal IMU regs added to reset. AccLPF values reversed. Default is now 120.
+//			High-speed PWM output for S.Bus and Satellite modes. Removed D-terms again.
+//			Basic bumpless I-term handling added. CF factor now "AL correct" and numbers reversed.
+//			High-speed PWM now locked to incoming RC.
+//			
 //***********************************************************
 //* Notes
 //***********************************************************
@@ -198,7 +203,7 @@
 // Bugs:
 //	
 //
-// Todo:
+// Todo: 
 //	
 //
 //***********************************************************
@@ -252,6 +257,9 @@
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
 #define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger arm. Currently one second.
 #define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger disarm. Currently three seconds.
+#define	PWM_GENERATION 8000			// Amount of time taken for PWM generation (3.2ms * 2500000) 8000/2500000 = 3.2ms
+#define SBUS_DATA_PERIOD 8000		// S.Bus data packet duration
+#define SYNC_TIMEOUT 976			// Number of T2 cycles before timeout will expire = 976 * 1/19531 = 50ms (20Hz)
 
 //***********************************************************
 //* Code and Data variables
@@ -302,6 +310,7 @@ int main(void)
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
 	uint32_t RC_Rate_Timer = 0;
+	uint32_t Safe_PWM_Timer = 0;
 
 	// 16-bit timers
 	uint16_t Status_timeout = 0;
@@ -311,12 +320,13 @@ int main(void)
 	uint16_t Servo_Rate = 0;
 	uint16_t Transition_timeout = 0;
 	uint16_t Disarm_timer = 0;
-	uint16_t Save_TCNT1 = 0;
-	uint16_t ticker_16 = 0;
+	uint16_t Sync_Timeout = 0;
 
 	// Timer incrementers
 	uint16_t LoopStartTCNT1 = 0;
 	uint16_t RC_Rate_TCNT1 = 0;
+	uint16_t Safe_PWM_TCNT1 = 0;
+	uint16_t Save_TCNT1 = 0;
 	uint8_t Transition_TCNT2 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
@@ -325,15 +335,18 @@ int main(void)
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
+	uint8_t Timeout_TCNT2 = 0;
 
 	// Locals
+	uint32_t PWM_Generation_OK = 0;
 	uint16_t InterruptCounter = 0;
 	uint8_t	Disarm_seconds = 0;
 	uint8_t Status_seconds = 0;
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 	int8_t	old_flight = 3;			// Old flight profile
 	int8_t	old_trans_mode = 0;		// Old transition mode
-	
+	int16_t temp1 = 0;
+		
 	init();							// Do all init tasks
 
 	// Main loop
@@ -363,16 +376,6 @@ int main(void)
 					Menu_mode = STATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
-					menu_beep(1);
-					
-					// Enable Timer0 interrupts as loop rate is slow
-					TIMSK0 |= (1 << TOIE0);	
-				}
-				// Idle mode - fast loop rate so don't need TMR0 hack
-				else
-				{
-					TIMSK0 = 0; 		// Disable Timer0 interrupts
-					TIFR0 = 1;			// Clear interrupt flag
 				}
 				break;
 
@@ -383,7 +386,7 @@ int main(void)
 				// Update status screen
 				Display_status();
 				// Force resync on next RC packet
-				Interrupted = false;	
+				Interrupted = false;
 				// Wait for timeout
 				Menu_mode = WAITING_TIMEOUT_BD;
 				break;
@@ -423,8 +426,11 @@ int main(void)
 				// Update status screen while waiting to time out
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
+					// Force resync on next RC packet
+					Interrupted = false;
 					Menu_mode = STATUS;
 				}
+			
 				break;
 
 			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
@@ -462,10 +468,6 @@ int main(void)
 		//* Status menu timing
 		//************************************************************
 
-		// Update status timeout
-		Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
-		Status_TCNT2 = TCNT2;
-
 		// Count elapsed seconds
 		if (Status_timeout > SECOND_TIMER)
 		{
@@ -477,19 +479,11 @@ int main(void)
 			InterruptCounter = 0;
 		}
 
-		// Status refresh timer
-		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
-		Refresh_TCNT2 = TCNT2;
-
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)
 		//* 
 		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (Disarm and LVA alarms)
 		//************************************************************
-
-		// Ticker_Count increments at 19.531 kHz, in loop cycle chunks
-		Ticker_Count += (uint8_t) (TCNT2 - Ticker_TCNT2);
-		Ticker_TCNT2 = TCNT2;
 
 		if ((Ticker_Count >> 8) &8) 
 		{
@@ -513,7 +507,6 @@ int main(void)
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
-				menu_beep(1);						// Signal that FC is now disarmed
 			}
 		}
 		else
@@ -535,9 +528,9 @@ int main(void)
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
 		if	(
 			 (
-			  (General_error & (1 << LVA_ALARM)) ||
-			  (General_error & (1 << NO_SIGNAL)) ||
-			  (General_error & (1 << THROTTLE_HIGH)) 
+			  (General_error & (1 << LVA_ALARM)) ||		// Low battery
+			  (General_error & (1 << NO_SIGNAL)) ||		// No signal
+			  (General_error & (1 << THROTTLE_HIGH))	// Throttle high
 			 ) && 
 			  (Alarm_flags & (1 << BUZZER_ON))
 			) 
@@ -556,10 +549,6 @@ int main(void)
 		if (Config.ArmMode == ARMABLE)
 		{
 			// Manual arm/disarm
-
-			// Increment timer only if Launch mode on to save cycles
-			Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); // TCNT2 runs at 19.531kHz. SECOND_TIMER amount of TCNT2 is 1 second
-			Arm_TCNT2 = TCNT2;
 
 			// If sticks not at extremes, reset manual arm/disarm timer
 			// Sticks down and centered = armed. Down and outside = disarmed
@@ -592,11 +581,6 @@ int main(void)
 			}
 
 			// Automatic disarm
-
-			// Auto-disarm timer
-			Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
-			Disarm_TCNT2 = TCNT2;
-
 			// Reset auto-disarm count if any RX activity or set to zero, or when curently armed
 			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
 			{														
@@ -616,7 +600,6 @@ int main(void)
 			{
 				// Disarm the FC
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
-				menu_beep(1);							// Signal that FC is now disarmed
 			}
 		}
 		// Arm when ArmMode is OFF
@@ -717,11 +700,26 @@ int main(void)
 		if (Config.TransitionSpeed == 0)
 		{
 			Transition_state = TRANSITIONING;
+			
+			// Manage I-terms for when externally controlled
+			// This is a bit of a hack - fix one day
+			temp1 = RCinputs[Config.FlightChan] + 1000;
+			if (temp1 < 0) temp1 = 0;
+			temp1 = (temp1 + 10) / 20;
+			if (temp1 > 100) temp1 = 100;
+					
+			if (temp1 == 0)
+			{
+				// Clear P2 I-term while fully in P1
+				memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * 3);
+			}
+			else if (temp1 == 100)
+			{
+		
+				// Clear P1 I-term while fully in P2
+				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 3);
+			}
 		}
-
-		// Update transition timer
-		Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
-		Transition_TCNT2 = TCNT2;
 
 		// Update transition state change when control value or flight mode changes
 		if (TransitionUpdated)
@@ -742,6 +740,9 @@ int main(void)
 			if (Transition_state == TRANS_P1)
 			{
 				transition_counter = 0;
+				
+				// Clear P2 I-term while fully in P1
+				memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * 3);			
 			}
 			else if (Transition_state == TRANS_P1n)
 			{
@@ -750,6 +751,9 @@ int main(void)
 			else if (Transition_state == TRANS_P2)
 			{
 				transition_counter = 100;
+				
+				// Clear P1 I-term while fully in P2
+				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 3);
 			}		
 
 			// Over-ride users requesting silly states
@@ -816,6 +820,59 @@ int main(void)
 		// Save current flight mode
 		old_flight = Config.FlightSel;
 
+
+		//************************************************************
+		//* Update timers
+		//************************************************************
+
+		Save_TCNT1 = TIM16_ReadTCNT1();
+	
+		// 32-bit timers (Max. 1718s measurement on T1, 220K seconds on T2)
+	
+		// interval will hold the most recent amount measured by TCNT1
+		interval +=  (Save_TCNT1 - LoopStartTCNT1);
+		LoopStartTCNT1 =  Save_TCNT1;
+
+		// Work out the current RC rate by measuring between incoming RC packets
+		RC_Rate_Timer += (Save_TCNT1 - RC_Rate_TCNT1);
+		RC_Rate_TCNT1 = Save_TCNT1;
+
+		// Arm timer for timing stick hold
+		Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2);
+		Arm_TCNT2 = TCNT2;
+	
+	
+		// 16-bit timers (Max. 3.35s measurement on T2)
+		// All TCNT2 timers increment at 19.531 kHz
+	
+		// Sets the desired SERVO_RATE by flagging ServoTick when PWM due
+		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
+		ServoRate_TCNT2 = TCNT2;
+	
+		// Signal RC overdue after RC_OVERDUE time (500ms)
+		RC_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
+		Servo_TCNT2 = TCNT2;
+	
+		// Update transition timer
+		Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
+		Transition_TCNT2 = TCNT2;
+
+		// Update status timeout
+		Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
+		Status_TCNT2 = TCNT2;
+
+		// Status refresh timer
+		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
+		Refresh_TCNT2 = TCNT2;
+	
+		// Auto-disarm timer
+		Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
+		Disarm_TCNT2 = TCNT2;
+
+		// Timer for audible alarms
+		Ticker_Count += (uint8_t) (TCNT2 - Ticker_TCNT2);
+		Ticker_TCNT2 = TCNT2;
+
 		//************************************************************
 		//* Update IMU
 		//************************************************************
@@ -824,45 +881,15 @@ int main(void)
 		ReadGyros();
 		ReadAcc();
 		
-		// Save current time stamp
-		Save_TCNT1 = (uint16_t)TCNT1;
+		// Provide accurate update of loop time just before calling
+		interval +=  TIM16_ReadTCNT1() - LoopStartTCNT1;
 		
-		// Reset Timer0 count
-		TCNT0 = 0;
-
-		// Handle TCNT1 overflow correctly - this actually seems necessary...
-		// ticker_16 will hold the most recent amount measured by TCNT1
-		if (Save_TCNT1 < LoopStartTCNT1)
-		{
-			ticker_16 = (65536 - LoopStartTCNT1) + Save_TCNT1;
-		}
-		else
-		{
-			ticker_16 = (Save_TCNT1 - LoopStartTCNT1);
-		}
-		
-		// Store old TCNT for next measurement
-		LoopStartTCNT1 = Save_TCNT1;
-		
-		// Handle both Timer1 under- and over-run cases
-		// If TMR0_counter is less than 2, ICNT1 has not overflowed
-		if (TMR0_counter < 2)
-		{
-			interval = ticker_16;
-		}
-		
-		// If TMR0_counter is 2 or more, then TCNT1 has overflowed
-		// So we use chunks of TCNT0, counted during the loop interval
-		// to work out the exact period.
-		else
-		{
-			interval = ticker_16 + (TMR0_counter * 32768);
-		}
-		
-		TMR0_counter = 0;		// Reset timer 0 counter
-				
 		// Simple IMU test code
 		simple_imu_update(interval);
+		
+		// Restart loop timer
+		LoopStartTCNT1 =  TIM16_ReadTCNT1();
+		interval = 0;
 
 		//************************************************************
 		//* Remaining loop tasks
@@ -878,25 +905,7 @@ int main(void)
 		UpdateServos();
 
 		//************************************************************
-		//* RC and servo timers
-		//************************************************************
-
-		// Work out the current RC rate by measuring between incoming RC packets
-		RC_Rate_Timer += (uint16_t) (TCNT1 - RC_Rate_TCNT1);
-		RC_Rate_TCNT1 = TCNT1;
-
-		// Sets the desired SERVO_RATE by flagging ServoTick when PWM due
-		// Servo_Rate increments at 19.531 kHz, in loop cycle chunks
-		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
-		ServoRate_TCNT2 = TCNT2;
-		
-		// Signal RC overdue after RC_OVERDUE time (500ms)
-		// RC_Timeout increments at 19.531 kHz, in loop cycle chunks
-		RC_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
-		Servo_TCNT2 = TCNT2;
-
-		//************************************************************
-		//* Check prescence of RC
+		//* Check presence of RC
 		//************************************************************
 
 		// Check to see if the RC input is overdue (500ms)
@@ -916,7 +925,7 @@ int main(void)
 			Overdue = false;				// And no longer overdue
 
 			// Measure incoming RC rate. Threshold is 60Hz.
-			// Slow RC rates are synched on every pulse, faster ones are limited to 50Hz
+			// Slow RC rates are synced on every pulse, faster ones are limited to 50Hz
 			if (RC_Rate_Timer > SLOW_RC_RATE)
 			{
 				SlowRC = true;
@@ -931,7 +940,7 @@ int main(void)
 
 		//************************************************************
 		//* Manage desired output update rate when limited by
-		//* the PWM rate set to "Normal"
+		//* the PWM rate set to "50Hz"
 		//************************************************************
 
 		// Flag update required based on SERVO_RATE_LOW
@@ -942,16 +951,95 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Synchronise output update rate to the RC interrupts
+		//* Calculate PWM generation margin from RC period - PWM 
+		//* generation time. RC_Period (32) and PWM_Safe_Start (16) 
+		//* are globals, calculated in isr.c after each data packet
+		//* Safe_PWM_Timer = 32 bits, PWM_Generation_OK = 32 bits
+		//*
+		//* Safe_PWM_Timer tells us how much time has progressed from the start of the data block.
+		//* PWM_Generation_OK tells us how much time is available to use
+		//* if Safe_PWM_Timer < PWM_Generation_OK then we can output PWM
+		//*
+		//************************************************************
+		
+		// FirstInterrupted becomes true after the last byte of data has come in.
+		if (FirstInterrupted)
+		{
+			// Subtract time needed for PWM generation from the maximum possible time available - RC period
+			// then add back the data packet period.
+			PWM_Generation_OK = (uint32_t)(RC_Period - PWM_GENERATION + SBUS_DATA_PERIOD);
+
+			// Actual time from start of data block (PWM_Safe_Start) to here	
+			Safe_PWM_Timer = (uint32_t)(TIM16_ReadTCNT1() - PWM_Safe_Start); 
+			
+			// Clear initial interrupt flag
+			FirstInterrupted = false;
+		}
+		else
+		{
+			// Add loop time to Safe_PWM_Timer
+			Safe_PWM_Timer += (uint32_t)(TIM16_ReadTCNT1() - Safe_PWM_TCNT1);
+		}
+		
+		Safe_PWM_TCNT1 = TIM16_ReadTCNT1();	
+		
+		//************************************************************
+		//* To increase performance in Fast mode, lock main loop
+		//* to RC input every time a packet is received to maximise 
+		//* the number of PWM blocks output.
+		//************************************************************
+	
+		// Wait until PWM generation no longer possible
+		if ((Config.Servo_rate == MAX) && (Config.RxMode > PWM) && (Safe_PWM_Timer > PWM_Generation_OK))
+		{
+			// Wait here for next Interrupt when all PWM done
+			// Interrupted will be cleared after each PWM output
+			// Times out in 20ms if no RC present
+			Sync_Timeout = 0;
+			Timeout_TCNT2 = 0;
+			
+			while(!Interrupted && (Sync_Timeout < SYNC_TIMEOUT))
+			{
+				// This loop breaks the "No signal" timeout, so disable it here
+				RC_Timeout = 0;
+				
+				// Sync_Timeout increments at 19.531 kHz
+				Sync_Timeout += (uint8_t) (TCNT2 - Timeout_TCNT2);
+				Timeout_TCNT2 = TCNT2;
+				
+				// Status refresh timer
+				UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
+				Refresh_TCNT2 = TCNT2;
+				
+				// Update status timeout
+				Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
+				Status_TCNT2 = TCNT2;
+							
+			}
+		}
+			
+		//************************************************************
+		//* Output PWM to ESCs/Servos where required, 
 		//* based on a specific set of conditions
 		//************************************************************
 
 		// Cases where we are ready to output
-		if	(Interrupted &&						// Only when interrupted (RC receive completed)
+		if	(
+				// Interrupted and LOW or SYNC
+				(Interrupted &&						// Only when interrupted (RC receive completed)
+					(
+					  (SlowRC && (Config.Servo_rate == LOW)) || 				// Plan A (Run as fast as the incoming RC if slow RC detected with LOW selected)
+					  (ServoTick && !SlowRC && (Config.Servo_rate == LOW)) ||	// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected with LOW selected)
+					  (Config.Servo_rate >= SYNC)								// Plan C (Run as fast as the incoming RC if in SYNC or MAX modes)
+					)
+				) 
+				
+				||
+				
+				// Plan D: If user has set the Servo Rate to Fast, keep generating PWM while PWM_Generation_OK still has time available.
+				// Disable if the RC mode is not S.Bus or Satellite
 				(
-				  (SlowRC) || 					// Plan A (Run as fast as the incoming RC if slow RC detected)
-				  (ServoTick && !SlowRC) ||		// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected)
-				  (Config.Servo_rate == HIGH) 	// Plan C (Run as fast as the incoming RC if in HIGH mode)
+					(Config.Servo_rate == MAX) && (Safe_PWM_Timer <= PWM_Generation_OK) && (Config.RxMode > PWM)
 				)
 			)
 		{
@@ -984,4 +1072,3 @@ int main(void)
 		
 	} // main loop
 } // main()
-

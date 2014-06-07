@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 159 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -69,7 +69,7 @@ void print_menu_frame(uint8_t style)
 		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
 		LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59); 	// Up
 		LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59); 	// Down
-		LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); 	// Right
+		LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); // Right
 	}
 	else
 	{
@@ -152,7 +152,7 @@ menu_range_t get_menu_range(const unsigned char* menu_ranges, uint8_t menuitem)
 }
 
 //************************************************************
-// Edit curent value according to limits and increment
+// Edit current value according to limits and increment
 // menuitem = Item reference
 // values = pointer to value to change
 // multiplier = display/actual
