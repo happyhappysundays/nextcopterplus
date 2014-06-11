@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 46 - June 2014
+// Version: Beta 47 - June 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -193,19 +193,18 @@
 // Beta 46	Individual lock rates for RPY in both profiles. Stick rate values reversed. Default is now 1.
 //			More internal IMU regs added to reset. AccLPF values reversed. Default is now 120.
 //			High-speed PWM output for S.Bus and Satellite modes. Removed D-terms again.
-//			Basic bumpless I-term handling added. CF factor now "AL correct" and numbers reversed.
-//			High-speed PWM now locked to incoming RC.
-//			Fixed broken slow gyro calibrate on KK2.0
+//			Basic bump-less I-term handling added. CF factor now "AL correct" and numbers reversed.
+//			High-speed PWM now locked to incoming RC. Fixed broken slow gyro calibrate on KK2.0
+// Beta 47	Gyro slow calibrate sped up for KK2.0 boards. Gyro cal on sensor screen changed to fast calibrate.
+//			High speed mode architecture altered to fix timer disruption.
+//			Checked that gyro behaviour same as B37 on KK2.0
 //			
+//
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs: "No signal" alarm doesn't work in High-speed mode. Disabled.
-//	
-//
-// Todo: 
-//	
+// Bugs:
 //
 //***********************************************************
 //* Includes
@@ -420,15 +419,11 @@ int main(void)
 				{
 					Menu_mode = MENU;
 					menu_beep(1);
-					// Force resync on next RC packet
-					Interrupted = false;
 				}
 
 				// Update status screen while waiting to time out
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
-					// Force resync on next RC packet
-					Interrupted = false;
 					Menu_mode = STATUS;
 				}
 			
@@ -582,7 +577,7 @@ int main(void)
 			}
 
 			// Automatic disarm
-			// Reset auto-disarm count if any RX activity or set to zero, or when curently armed
+			// Reset auto-disarm count if any RX activity or set to zero, or when currently disarmed
 			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
 			{														
 				Disarm_timer = 0;
@@ -821,7 +816,6 @@ int main(void)
 		// Save current flight mode
 		old_flight = Config.FlightSel;
 
-
 		//************************************************************
 		//* Update timers
 		//************************************************************
@@ -841,7 +835,6 @@ int main(void)
 		// Arm timer for timing stick hold
 		Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2);
 		Arm_TCNT2 = TCNT2;
-	
 	
 		// 16-bit timers (Max. 3.35s measurement on T2)
 		// All TCNT2 timers increment at 19.531 kHz
@@ -885,7 +878,7 @@ int main(void)
 		// Provide accurate update of loop time just before calling
 		interval +=  TIM16_ReadTCNT1() - LoopStartTCNT1;
 		
-		// Simple IMU test code
+		// Vector-based IMU test code
 		simple_imu_update(interval);
 		
 		// Restart loop timer
@@ -906,51 +899,33 @@ int main(void)
 		UpdateServos();
 
 		//************************************************************
-		//* Check presence of RC
+		//* To increase performance in Fast mode, lock main loop
+		//* to RC input every time a packet is received to maximise 
+		//* the number of PWM blocks output.
 		//************************************************************
+		
+		// Update Safe_PWM_Timer to include time taken to get here
+		Safe_PWM_Timer += (uint32_t)(TIM16_ReadTCNT1() - Safe_PWM_TCNT1);
+		Safe_PWM_TCNT1 = TIM16_ReadTCNT1();
 
-		// Check to see if the RC input is overdue (500ms)
-		if (RC_Timeout > RC_OVERDUE)
+		// Wait until PWM generation no longer possible
+		if ((Config.Servo_rate == MAX) && (Config.RxMode > PWM) && (Safe_PWM_Timer > PWM_Generation_OK))
 		{
-			Overdue = true;	// This results in a "No Signal" error
-		}
-
-		//************************************************************
-		//* Measure incoming RC rate
-		//************************************************************		
-
-		// RC input received
-		if (Interrupted)
-		{
-			RC_Timeout = 0;					// Reset RC timeout
-			Overdue = false;				// And no longer overdue
-
-			// Measure incoming RC rate. Threshold is 60Hz.
-			// Slow RC rates are synced on every pulse, faster ones are limited to 50Hz
-			if (RC_Rate_Timer > SLOW_RC_RATE)
+			// Wait here for next Interrupt when all PWM done
+			// Interrupted will be cleared after each PWM output
+			// Times out in 20ms if no RC present
+			Sync_Timeout = 0;
+			Timeout_TCNT2 = 0;
+			
+			// SYNC_TIMEOUT is currently 50ms or 20Hz
+			while(!Interrupted && (Sync_Timeout < SYNC_TIMEOUT))
 			{
-				SlowRC = true;
+				// Sync_Timeout increments at 19.531 kHz
+				Sync_Timeout += (uint8_t) (TCNT2 - Timeout_TCNT2);
+				Timeout_TCNT2 = TCNT2;
 			}
-			else
-			{
-				SlowRC = false;
-			}
-
-			RC_Rate_Timer = 0;
 		}
-
-		//************************************************************
-		//* Manage desired output update rate when limited by
-		//* the PWM rate set to "50Hz"
-		//************************************************************
-
-		// Flag update required based on SERVO_RATE_LOW
-		if (Servo_Rate > SERVO_RATE_LOW)
-		{
-			ServoTick = true; // Slow device is ready for output generation
-			Servo_Rate = 0;
-		}
-
+		
 		//************************************************************
 		//* Calculate PWM generation margin from RC period - PWM 
 		//* generation time. RC_Period (32) and PWM_Safe_Start (16) 
@@ -982,43 +957,48 @@ int main(void)
 			Safe_PWM_Timer += (uint32_t)(TIM16_ReadTCNT1() - Safe_PWM_TCNT1);
 		}
 		
-		Safe_PWM_TCNT1 = TIM16_ReadTCNT1();	
-		
+		Safe_PWM_TCNT1 = TIM16_ReadTCNT1();
+
 		//************************************************************
-		//* To increase performance in Fast mode, lock main loop
-		//* to RC input every time a packet is received to maximise 
-		//* the number of PWM blocks output.
+		//* Measure incoming RC rate and flag no signal
 		//************************************************************
-	
-		// Wait until PWM generation no longer possible
-		if ((Config.Servo_rate == MAX) && (Config.RxMode > PWM) && (Safe_PWM_Timer > PWM_Generation_OK))
+
+		// Check to see if the RC input is overdue (500ms)
+		if (RC_Timeout > RC_OVERDUE)
 		{
-			// Wait here for next Interrupt when all PWM done
-			// Interrupted will be cleared after each PWM output
-			// Times out in 20ms if no RC present
-			Sync_Timeout = 0;
-			Timeout_TCNT2 = 0;
-			
-			while(!Interrupted && (Sync_Timeout < SYNC_TIMEOUT))
-			{
-				// This loop breaks the "No signal" timeout, so disable it here
-				RC_Timeout = 0;
-				
-				// Sync_Timeout increments at 19.531 kHz
-				Sync_Timeout += (uint8_t) (TCNT2 - Timeout_TCNT2);
-				Timeout_TCNT2 = TCNT2;
-				
-				// Status refresh timer
-				UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
-				Refresh_TCNT2 = TCNT2;
-				
-				// Update status timeout
-				Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
-				Status_TCNT2 = TCNT2;
-							
-			}
+			Overdue = true;	// This results in a "No Signal" error
 		}
+
+		if (Interrupted)
+		{
+			RC_Timeout = 0;					// Reset RC timeout
+			Overdue = false;				// No longer overdue			
 			
+			// Measure incoming RC rate. Threshold is 60Hz.
+			if (RC_Rate_Timer > SLOW_RC_RATE)
+			{
+				SlowRC = true;
+			}
+			else
+			{
+				SlowRC = false;
+			}
+
+			RC_Rate_Timer = 0;
+		}
+
+		//************************************************************
+		//* Manage desired output update rate when limited by
+		//* the PWM rate set to "Low"
+		//************************************************************
+
+		// Flag update required based on SERVO_RATE_LOW (50Hz)
+		if (Servo_Rate > SERVO_RATE_LOW)
+		{
+			ServoTick = true; // Slow device is ready for output generation
+			Servo_Rate = 0;
+		}
+					
 		//************************************************************
 		//* Output PWM to ESCs/Servos where required, 
 		//* based on a specific set of conditions
@@ -1071,5 +1051,5 @@ int main(void)
 		// Save current alarm state into old_alarms
 		old_alarms = General_error;
 		
-	} // main loop
+	} // while loop
 } // main()

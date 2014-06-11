@@ -46,22 +46,15 @@ void Display_sensors(void)
 	{
 		if (BUTTON4 == 0)
 		{
+			// Wait until finger off button
 			_delay_ms(500);
+			
+			// Calibrate sensors
 #ifdef AIRSPEED
 			CalibrateAirspeed();
 #endif
-			// Calibrate sensors. Stop if gyro cal fails
-			if (!CalibrateGyrosSlow())
-			{
-				clear_buffer(buffer);
-				LCD_Display_Text(61,(const unsigned char*)Verdana14,25,25); // "Cal. failed"
-				write_buffer(buffer,1);
-				_delay_ms(1000);
-			}			
-			else
-			{
-				CalibrateAcc(NORMAL);
-			}
+			CalibrateGyrosFast();		
+			CalibrateAcc(NORMAL);
 		}
 
 		if (BUTTON3 == 0)

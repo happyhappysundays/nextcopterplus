@@ -702,7 +702,7 @@ void UpdateLimits(void)
 			Config.Raw_I_Limits[j][i] = temp32 * (int32_t)640;	// 80,000 / 125% = 640
 
 			// I-term source limits. These have to be different due to the I-term gain setting
-			// I-term = (gyro * gain) / 32, so the gyro count for a particular gain and limit are
+			// I-term = (gyro * gain) / 32, so the gyro count for a particular gain and limit is
 			// Gyro = (I-term * 32) / gain :) 
 
 			if (gains[j][i] != 0)
