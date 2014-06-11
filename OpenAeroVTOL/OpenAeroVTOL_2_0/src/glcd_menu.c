@@ -38,8 +38,8 @@ void idle_screen(void);
 //************************************************************
 // Text to print (non-menu)
 //************************************************************
-//																// Status menu
-const char StatusText0[]  PROGMEM = "Version: VTOL Beta 46";	// <-- Change version number here !!!
+//															// Status menu
+const char StatusText0[]  PROGMEM = "Version: Beta 47";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -90,19 +90,19 @@ const char StabMenuItem13[]  PROGMEM = "Acc Vert P:";
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
 const char StabMenuItem10[]  PROGMEM = "Roll I Limit:"; 
-const char StabMenuItem3[]  PROGMEM = "Roll rate:";
+const char StabMenuItem3[]  PROGMEM =  "Roll I rate:";
 const char AutoMenuItem20[]  PROGMEM = "Roll AutoLvl:";
 const char AutoMenuItem7[]  PROGMEM = "Roll trim:";
 const char AutoMenuItem4[]  PROGMEM = "Pitch P:";
 const char StabMenuItem5[]  PROGMEM = "Pitch I:";
 const char StabMenuItem11[]  PROGMEM = "Pitch I Limit:";
-const char StabMenuItem6[]  PROGMEM = "Pitch rate:"; 
+const char StabMenuItem6[]  PROGMEM =  "Pitch I rate:"; 
 const char AutoMenuItem21[]  PROGMEM = "Pitch AutoLvl:";
 const char AutoMenuItem8[]  PROGMEM = "Pitch trim:";
 const char StabMenuItem7[]  PROGMEM = "Yaw P:"; 
 const char StabMenuItem8[]  PROGMEM = "Yaw I:";
 const char StabMenuItem12[]  PROGMEM = "Yaw I Limit:";
-const char StabMenuItem9[]  PROGMEM = "Yaw rate:";
+const char StabMenuItem9[]  PROGMEM =  "Yaw I rate:";
 const char StabMenuItem30[]  PROGMEM = "Yaw trim:";
 //
 const char AutoMenuItem11[] PROGMEM = "OFF";
@@ -152,7 +152,7 @@ const char MixerItem35[] PROGMEM = "P1.n Offset:";
 const char MixerItem34[] PROGMEM = "P2 Offset:";
 const char MixerItem23[] PROGMEM = "P1 Thr. volume:";
 const char MixerItem33[] PROGMEM = "P2 Thr. volume:";
-const char Mixeritem50[] PROGMEM = "Thottle curve";
+const char Mixeritem50[] PROGMEM = "Throttle curve";
 //
 const char MixerItem51[] PROGMEM = "P1 Ail. volume:";
 const char MixerItem54[] PROGMEM = "P2 Ail. volume:";
@@ -223,7 +223,7 @@ const char PText4[]  PROGMEM = "Cal. failed";
 //
 const char WizardText0[] PROGMEM = "No RX signal"; 			// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
-const char WizardText2[] PROGMEM = "Done!";
+const char WizardText2[] PROGMEM = "Done";
 //
 const char Status0[] PROGMEM = "Press";						// Idle text
 const char Status2[] PROGMEM = "for status.";
@@ -487,14 +487,13 @@ void idle_screen(void)
 		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
 	}
 
-#else	
-	if ((General_error & (1 << THROTTLE_HIGH)) != 0)				// Throttle high
+#else
+	if ((General_error & (1 << THROTTLE_HIGH)) != 0)			// Throttle high
 	{
 		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
 		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
-	}
-
-	else if ((General_error & (1 << DISARMED)) != 0)				// Disarmed
+	}	
+	else if ((General_error & (1 << DISARMED)) != 0)						// Disarmed
 	{
 		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
 	}

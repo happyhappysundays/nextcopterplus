@@ -95,20 +95,18 @@ void Set_EEPROM_Default_Config(void)
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
 
-	// Default gyro zeros
-	Config.AccZero[ROLL] 	= 1;		// Uncalibrated signature
-	Config.AccZero[PITCH]	= 2;
-	Config.AccZero[YAW]		= 3;
-
+	for (i = 0; i < NUMBEROFAXIS; i++)
+	{
+		#ifdef KK21
+		Config.AccZero[i]	= 0;		// Analog inputs on KK2.1 average about 0.
+		#else
+		Config.AccZero[i]	= 625;		// Analog inputs on KK2.0 average about 625.
+		#endif
+	}
+	
 #ifdef KK21
-	Config.AccZero[ROLL] 	= 0;		// Acc calibration defaults for KK2.1
-	Config.AccZero[PITCH]	= 0;
-	Config.AccZero[YAW]		= 0;
 	Config.AccZeroNormZ		= 0;
 #else
-	Config.AccZero[ROLL] 	= 621;		// Acc calibration defaults for KK2.0
-	Config.AccZero[PITCH]	= 623;
-	Config.AccZero[YAW]		= 643; 		// 643 is the center
 	Config.AccZeroNormZ		= 765;
 #endif
 
@@ -136,9 +134,9 @@ void Set_EEPROM_Default_Config(void)
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 
-	#ifdef KK21
+#ifdef KK21
 	Config.MPU6050_LPF = 0;				// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-	#endif	
+#endif	
 }
 
 void Save_Config_to_EEPROM(void)
@@ -147,7 +145,7 @@ void Save_Config_to_EEPROM(void)
 	cli();
 	eeprom_write_block_changes((const void*) &Config, (void*) EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));	
 	sei();
-	menu_beep(1);
+
 	LED1 = !LED1;
 	_delay_ms(500);
 	LED1 = !LED1;

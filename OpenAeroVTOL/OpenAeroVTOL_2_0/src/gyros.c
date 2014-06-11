@@ -33,11 +33,8 @@ void get_raw_gyros(void);
 // Defines
 //************************************************************
 
-#ifdef KK21
-#define CAL_TIMEOUT	5				// Calibration timeout for KK2.1
-#else
-#define CAL_TIMEOUT	10				// Calibration timeout for KK2.0 (it's slower)
-#endif
+#define CAL_TIMEOUT	5				// Calibration timeout
+#define GYRODIV	4					// Divide by 16 for 2000 deg/s
 
 #define CAL_STABLE_TIME 200			// Calibration stable timeout
 #define GYROS_STABLE 1				// Minimum gyro error
@@ -112,15 +109,15 @@ void get_raw_gyros(void)
 	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
 	temp1 = Gyros[0] << 8;
 	temp2 = Gyros[1];
-	RawADC[PITCH] = (temp1 + temp2) >> 4; // Changed 6 to 4 to compensate for 500 -> 2000 deg/s change
+	RawADC[PITCH] = (temp1 + temp2) >> GYRODIV;
 
 	temp1 = Gyros[2] << 8;
 	temp2 = Gyros[3];
-	RawADC[ROLL] = (temp1 + temp2) >> 4;
+	RawADC[ROLL] = (temp1 + temp2) >> GYRODIV;
 
 	temp1 = Gyros[4] << 8;
 	temp2 = Gyros[5];
-	RawADC[YAW] = (temp1 + temp2) >> 4;
+	RawADC[YAW] = (temp1 + temp2) >> GYRODIV;
 
 #else
 	read_adc(AIN_Y_GYRO);				// Read roll gyro ADC1 (Roll)
@@ -176,31 +173,27 @@ void CalibrateGyrosFast(void)
 
 bool CalibrateGyrosSlow(void)
 {
-	uint8_t axis;
-	uint8_t Gyro_seconds = 0;
-	uint8_t Gyro_TCNT2 = 0;
-	uint16_t Gyro_timeout = 0;
-	bool	Gyros_Stable = false;
-	float 	GyroSmooth[NUMBEROFAXIS];
-	int16_t GyroOld[NUMBEROFAXIS];
-	bool	firsttime = false;
-	uint16_t Stable_counter = 0;
+	float 		GyroSmooth[NUMBEROFAXIS];
+	int16_t		GyroOld[NUMBEROFAXIS];
+	uint16_t	Stable_counter = 0;	
+	uint16_t	Gyro_timeout = 0;
+	uint8_t		axis;
+	uint8_t		Gyro_seconds = 0;
+	uint8_t		Gyro_TCNT2 = 0;
+	bool		Gyros_Stable = false;
 
-	// Force recalculation
-	for (axis = 0; axis < NUMBEROFAXIS; axis++) 
+	// Populate Config.gyroZero[] with ballpark figures
+	// This makes slow calibrate on KK2.0 much faster
+	CalibrateGyrosFast();	
+	
+	// Optimise starting point for each board
+	for (axis = 0; axis < NUMBEROFAXIS; axis++)
 	{
-		// Optimise starting point for each board
-		GyroSmooth[axis] = Config.gyroZero[axis];
-	}
-
-	// Is this the first ever calibration?
-	if ((Config.AccZero[ROLL] == 1) && (Config.AccZero[PITCH] == 2) && (Config.AccZero[YAW]	== 3))		// Uncalibrated signature
-	{
-		firsttime = true;
+		GyroSmooth[axis] = Config.gyroZero[axis];			
 	}
 	
-	// Wait until gyros stable. Timeout after CAL_TIMEOUT seconds or never if first calibrate
-	while (!Gyros_Stable && ((Gyro_seconds <= CAL_TIMEOUT) || firsttime))
+	// Wait until gyros stable. Timeout after CAL_TIMEOUT seconds
+	while (!Gyros_Stable && ((Gyro_seconds <= CAL_TIMEOUT)))
 	{
 		// Update status timeout
 		Gyro_timeout += (uint8_t) (TCNT2 - Gyro_TCNT2);
@@ -238,7 +231,6 @@ bool CalibrateGyrosSlow(void)
 		if (Stable_counter > CAL_STABLE_TIME)
 		{
 			Gyros_Stable = true;	
-			firsttime = false;		
 			CalibrateGyrosFast();		
 		}
 		
