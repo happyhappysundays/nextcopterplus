@@ -12,6 +12,9 @@
 #ifdef KK21
 // Comment out this line if no airspeed sensor used (only for KK2.1)
 //#define AIRSPEED
+
+// Uncomment out this for logging of gyro data on the sensor screen
+//#define DISPLAYLOG
 #endif
 
 // If defined, the min/max pulse range changes from 1.0ms to 2.0ms to 0.825 to 2.125ms

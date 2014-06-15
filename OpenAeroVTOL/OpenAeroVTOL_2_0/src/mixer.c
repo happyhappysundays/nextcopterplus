@@ -38,6 +38,12 @@ int16_t scale_percent_nooffset(int8_t value);
 // Defines
 //************************************************************
 
+#define MIX_OUTPUTS 8
+
+//************************************************************
+// Defines
+//************************************************************
+
 // Throttle volume curves
 // Why 101 steps? Well, both 0% and 100% transition values are valid...
 
@@ -98,7 +104,7 @@ void ProcessMixer(void)
 	// Main mix loop - sensors, RC inputs and other channels
 	//************************************************************
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		//************************************************************
 		// Zero each channel value to start
@@ -438,7 +444,7 @@ void ProcessMixer(void)
 		Config.Channel[i].P1_value = P1_solution;
 		Config.Channel[i].P2_value = P2_solution;
 
-	} // Mixer loop: for (i = 0; i < MAX_OUTPUTS; i++)
+	} // Mixer loop: for (i = 0; i < MIX_OUTPUTS; i++)
 
 	//************************************************************
 	// Mixer transition code
@@ -468,7 +474,7 @@ void ProcessMixer(void)
 	}
 
 	// Recalculate P1 values based on transition stage
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		// Speed up the easy ones :)
 		if (transition == 0)
@@ -502,7 +508,7 @@ void ProcessMixer(void)
 	// mixer. Linear or Sine curve. Reverse Sine done automatically
 	//************************************************************ 
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		// Ignore if both throttle volumes are 0% (no throttle)
 		if 	(!((Config.Channel[i].P1_throttle_volume == 0) && 
@@ -604,7 +610,7 @@ void ProcessMixer(void)
 	// loop as it is non-linear, unlike the transition.
 	//************************************************************ 
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		// Simplify if all are the same
 		if (!((Config.Channel[i].P1_offset == Config.Channel[i].P1n_offset) &&
@@ -718,7 +724,7 @@ void UpdateLimits(void)
 	}
 
 	// Update travel limits
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		Config.Limits[i].minimum = scale_percent(Config.min_travel[i]);
 		Config.Limits[i].maximum = scale_percent(Config.max_travel[i]);
@@ -739,13 +745,13 @@ void UpdateServos(void)
 	uint8_t i;
 	int16_t temp1 = 0; // Output value
 
-	for (i = 0; i < MAX_OUTPUTS; i++)
+	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
 		// Servo reverse and trim for the eight physical outputs
 		temp1 = Config.Channel[i].P1_value;
 
 		// Reverse this channel for the eight physical outputs
-		if ((i <= MAX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
+		if ((i <= MIX_OUTPUTS) && (Config.Servo_reverse[i] == ON))
 		{	
 			temp1 = -temp1;
 		}
@@ -770,6 +776,16 @@ void UpdateServos(void)
 			ServoOut[i] = temp1;
 		}
 	}
+/*	
+	// NULL unused outputs when only OUT1 to OUT4 are used
+	if (MIX_OUTPUTS == 4)
+	{
+		for (i = MIX_OUTPUTS; i < MAX_OUTPUTS; i++)
+		{		
+			ServoOut[i] = 3750;
+		}
+	}
+*/
 }
 
 // 32 bit multiply/scale for broken GCC
