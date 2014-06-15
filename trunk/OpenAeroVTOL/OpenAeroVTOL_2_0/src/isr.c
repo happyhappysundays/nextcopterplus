@@ -38,8 +38,6 @@ volatile uint8_t rcindex;			// Serial data buffer pointer
 volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
-volatile uint32_t RC_Period;		// Serial packet period timer
-volatile uint16_t PWM_Safe_Start;	// PWM generation safe period timestamp
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
@@ -279,12 +277,6 @@ ISR(USART0_RX_vect)
 		ch_num = 0;
 		checksum = 0;
 		chanmask16 = 0;
-		
-		// Measure time between packets
-		RC_Period = CurrentPeriod;
-		
-		// Mark timestamp of end of serial data
-		PWM_Safe_Start = Save_TCNT1;
 	}
 
 	// Timestamp this interrupt

@@ -86,7 +86,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,0},					// Low battery alarm voltage
-		{LOW,MAX,1,1,LOW},				// Servo rate
+		{LOW,SYNC,1,1,LOW},				// Servo rate
 		{1,127,1,0,120},				// Acc. LPF
 		{1,10,1,0,7},					// AL correction
 #ifdef KK21

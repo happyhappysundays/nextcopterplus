@@ -52,6 +52,7 @@
 // Prototypes
 //************************************************************
 
+void Sensor_PID(void);
 void Calculate_PID(void);
 
 //************************************************************
@@ -63,20 +64,17 @@ int16_t PID_Gyros[FLIGHT_MODES][NUMBEROFAXIS];
 int16_t PID_ACCs[FLIGHT_MODES][NUMBEROFAXIS];
 int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each axis
 
-void Calculate_PID(void)
+int32_t PID_AvgAccVert = 0;
+int32_t	PID_AvgGyros[NUMBEROFAXIS];
+	
+// Run each loop to average gyro data and also accVert data
+void Sensor_PID(void)
 {
-	int32_t PID_gyro_temp1 = 0;				// P1
-	int32_t PID_gyro_temp2 = 0;				// P2
-	int32_t PID_acc_temp1 = 0;				// P1
-	int32_t PID_acc_temp2 = 0;				// P2
-	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
-	int32_t PID_Gyro_I_actual2 = 0;			// P2
-
+	int8_t i = 0;
+	int8_t	axis = 0;	
 	int16_t	stick_P1 = 0;
 	int16_t	stick_P2 = 0;
-	int8_t i = 0;
-	int8_t	axis = 0;
-
+	
 	// Cross-reference table for actual RCinput elements
 	// Note that axes are reversed here with respect to their gyros
 	// So why is AILERON different? Well on the KK hardware the sensors are arranged such that
@@ -84,56 +82,17 @@ void Calculate_PID(void)
 	// However the way we have organised stick polarity, RIGHT roll and yaw are +ve, and DOWN elevator is too.
 	// When combining with the gyro signals, the sticks have to be in the opposite polarity as the gyros.
 	// As described above, pitch and yaw are already opposed, but roll needs to be reversed.
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]}; 
-
-	// Initialise arrays with gain values.
-	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
-		{
-			{Config.FlightMode[P1].Roll_P_mult, Config.FlightMode[P1].Pitch_P_mult, Config.FlightMode[P1].Yaw_P_mult},
-		 	{Config.FlightMode[P2].Roll_P_mult, Config.FlightMode[P2].Pitch_P_mult, Config.FlightMode[P2].Yaw_P_mult}
-		};
-
-	int8_t 	I_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
-		{
-			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
-			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
-		};
-
-	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
-		{
-			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
-			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
-		};
-
-	// Only for roll and pitch acc trim
-	int16_t	L_trim[FLIGHT_MODES][2] =
-		{
-			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
-			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
-		};
 	
-	int8_t Stick_rates[FLIGHT_MODES][NUMBEROFAXIS] = 
-		{
-			{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
-			{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
-		};
-
-	//************************************************************
-	// PID loop
-	//************************************************************
-
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]};
+	
+	int8_t Stick_rates[FLIGHT_MODES][NUMBEROFAXIS] =
+	{
+		{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
+		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
+	};
+		
 	for (axis = 0; axis <= YAW; axis ++)
 	{
-		//************************************************************
-		// Filter and calculate gyro error
-		//************************************************************
-
-		// Reduce Gyro drift noise before adding into I-term
-		if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
-		{
-			gyroADC[axis] = 0;
-		}
-		
 		//************************************************************
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
@@ -161,6 +120,81 @@ void Calculate_PID(void)
 			}
 		}
 
+		// Average gyro readings 
+		PID_AvgGyros[axis] += gyroADC[axis];
+
+	}
+	
+	// Average accVert prior to Calculate_PID()
+	PID_AvgAccVert += accVert;
+			
+}
+
+// Run just before PWM output, using averaged data
+void Calculate_PID(void)
+{
+	int32_t PID_gyro_temp1 = 0;				// P1
+	int32_t PID_gyro_temp2 = 0;				// P2
+	int32_t PID_acc_temp1 = 0;				// P1
+	int32_t PID_acc_temp2 = 0;				// P2
+	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
+	int32_t PID_Gyro_I_actual2 = 0;			// P2
+	int8_t	axis = 0;
+
+	// Initialise arrays with gain values.
+	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].Roll_P_mult, Config.FlightMode[P1].Pitch_P_mult, Config.FlightMode[P1].Yaw_P_mult},
+		 	{Config.FlightMode[P2].Roll_P_mult, Config.FlightMode[P2].Pitch_P_mult, Config.FlightMode[P2].Yaw_P_mult}
+		};
+
+	int8_t 	I_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
+			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
+		};
+
+	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
+		{
+			{Config.FlightMode[P1].A_Roll_P_mult, Config.FlightMode[P1].A_Pitch_P_mult, Config.FlightMode[P1].A_Zed_P_mult},
+			{Config.FlightMode[P2].A_Roll_P_mult, Config.FlightMode[P2].A_Pitch_P_mult, Config.FlightMode[P2].A_Zed_P_mult}
+		};
+
+	// Only for roll and pitch acc trim
+	int16_t	L_trim[FLIGHT_MODES][2] =
+		{
+			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
+			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
+		};
+
+	// Average accVert
+	accVert = (int16_t)(PID_AvgAccVert / LoopCount);
+	PID_AvgAccVert = 0;							// Reset average
+
+	//************************************************************
+	// PID loop
+	//************************************************************
+	for (axis = 0; axis <= YAW; axis ++)
+	{
+		//************************************************************
+		// Average gyro readings
+		//************************************************************
+		
+		gyroADC[axis] = (int16_t)(PID_AvgGyros[axis] / LoopCount);
+
+		// Reset average for this axis.
+		PID_AvgGyros[axis] = 0;
+				
+		//************************************************************
+		// Filter and calculate gyro error
+		//************************************************************
+
+		// Reduce Gyro drift noise before adding into I-term
+		if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
+		{
+			gyroADC[axis] = 0;
+		}
+		
 		//************************************************************
 		// Add in gyro Yaw trim
 		//************************************************************
@@ -243,7 +277,7 @@ void Calculate_PID(void)
 			PID_acc_temp2 *= L_gain[P2][axis];							// Same for P2
 			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 8);	
 		}
-
+		
 	} // PID loop
 
 	//************************************************************

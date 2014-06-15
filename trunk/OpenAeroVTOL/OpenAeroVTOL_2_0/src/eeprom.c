@@ -72,6 +72,33 @@ void Set_EEPROM_Default_Config(void)
 		Config.Channel[i].P2_source_b 	= NOMIX;
 		Config.min_travel[i] = -100;
 		Config.max_travel[i] = 100;
+/*
+// Debug - set up worst case mixer
+#ifdef KK21
+		Config.Channel[i].P1_offset = -100;				// All offsets non-linear
+		Config.Channel[i].P1n_offset = 50;
+		Config.Channel[i].P2_offset = 100;
+		Config.Channel[i].P1_sensors = 0xff;			// All sensors ON
+		Config.Channel[i].P1_throttle_volume = 10;		// Throttle curve
+		Config.Channel[i].P2_throttle_volume = 100;
+		Config.Channel[i].Throttle_curve = SINE;
+		Config.Channel[i].P1_aileron_volume = 50;		// All volumes set
+		Config.Channel[i].P2_aileron_volume = 50;
+		Config.Channel[i].P1_elevator_volume = 50;
+		Config.Channel[i].P2_elevator_volume = 50;
+		Config.Channel[i].P1_rudder_volume = 50;
+		Config.Channel[i].P2_rudder_volume = 50;
+		Config.Channel[i].P1_scale = 0xff;				// All scaled
+		Config.Channel[i].P2_scale = 0xff;	
+		Config.Channel[i].P1n_position	= 50;
+		Config.Channel[i].P1_source_a 	= SRC1;
+		Config.Channel[i].P1_source_b 	= SRC1;
+		Config.Channel[i].P2_source_a 	= SRC1;
+		Config.Channel[i].P2_source_b 	= SRC1;
+		Config.min_travel[i] = -100;
+		Config.max_travel[i] = 100;
+#endif
+*/
 	}
 
 	// Preset simple mixing for primary channels
@@ -115,13 +142,13 @@ void Set_EEPROM_Default_Config(void)
 	{
 		Config.FlightMode[i].Roll_P_mult = 80;			// PID defaults		
 		Config.FlightMode[i].Roll_I_mult = 50;	
-		Config.FlightMode[i].Roll_Rate = 1;
+		Config.FlightMode[i].Roll_Rate = 2;
 		Config.FlightMode[i].Pitch_P_mult = 80;
 		Config.FlightMode[i].Pitch_I_mult = 50;
-		Config.FlightMode[i].Pitch_Rate = 1;
+		Config.FlightMode[i].Pitch_Rate = 2;
 		Config.FlightMode[i].Yaw_P_mult = 80;
 		Config.FlightMode[i].Yaw_I_mult = 50;
-		Config.FlightMode[i].Yaw_Rate = 1;
+		Config.FlightMode[i].Yaw_Rate = 2;
 		Config.FlightMode[i].A_Roll_P_mult = 60;
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
