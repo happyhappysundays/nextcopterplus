@@ -46,26 +46,26 @@ void menu_rc_setup(uint8_t i);
 #define RCITEMS 9 		// Number of menu items
 
 #ifdef KK21
-#define GENERALITEMS 9
+#define GENERALITEMS 10
 #else
-#define GENERALITEMS 8
+#define GENERALITEMS 9
 #endif
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[2][RCITEMS] PROGMEM = 
+const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
 	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},			// RC setup
 #ifdef KK21
-	{GENERALTEXT, 0, 44, 0, 0, 118, 0, 0, 37},				// General
+	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General
 #else
-	{GENERALTEXT, 0, 44, 0, 0, 118, 0, 0},
+	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0},
 #endif
 };
 
-const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM = 
+const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
 {
 	{
 		// RC setup (9)				// Min, Max, Increment, Style, Default
@@ -80,17 +80,18 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (8/9)
+		// General (9/10)
 		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
 		{28,50,1,0,38}, 				// Contrast
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,0},					// Low battery alarm voltage
 		{LOW,SYNC,1,1,LOW},				// Servo rate
-		{1,127,1,0,120},				// Acc. LPF
+		{0,6,1,1,2},					// Acc. LPF 21Hz default
+		{0,6,1,1,6},					// Gyro LPF. No LPF default
 		{1,10,1,0,7},					// AL correction
 #ifdef KK21
-		{0,6,1,1,6},					// MPU6050 LPF
+		{0,6,1,1,6},					// MPU6050 LPF. Default is 260Hz
 #endif
 	}
 };
@@ -150,10 +151,10 @@ void menu_rc_setup(uint8_t section)
 			init_int();				// In case RC type has changed, reinitialise interrupts
 			init_uart();			// and UART
 			UpdateLimits();			// Update I-term limits and triggers based on percentages
-			
+
 #ifdef KK21
-			// Update MPU6050 LPF
-			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, Config.MPU6050_LPF);
+			// Update MPU6050 LPF and reverse sense of menu items
+			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
 #endif
 
 			// Update channel sequence

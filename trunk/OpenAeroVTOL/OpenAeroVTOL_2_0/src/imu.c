@@ -29,7 +29,7 @@
 // IMU Prototypes
 //************************************************************
 
-void simple_imu_update(uint32_t period);
+void imu_update(uint32_t period);
 void Rotate3dVector(void);
 void ExtractEulerAngles(void);
 
@@ -75,6 +75,8 @@ float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
 int16_t	angle[2]; 						// Attitude in degrees
 float	interval;						// Interval in seconds since the last loop
+
+const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
 	
 //************************************************************
 // Code
@@ -104,7 +106,7 @@ float	interval;						// Interval in seconds since the last loop
 //
 //************************************************************
 
-void simple_imu_update(uint32_t period)
+void imu_update(uint32_t period)
 {
 	float		tempf, accADCf;
 	int8_t		axis;
@@ -116,7 +118,7 @@ void simple_imu_update(uint32_t period)
 	tempf = period; // Promote int16_t to float
 	interval = tempf/2500000.0f;		
 
-	tempf = (128 - Config.Acc_LPF); // Promote and reverse scale from 1-127 to 127-1
+	tempf = pgm_read_byte(&LPF_lookup[Config.Acc_LPF]); // Lookup actual LPF value and promote
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
 	for (axis = 0; axis < NUMBEROFAXIS; axis++)
@@ -124,7 +126,7 @@ void simple_imu_update(uint32_t period)
 		accADCf = accADC[axis]; // Promote
 		
 		// Acc LPF
-		if (Config.Acc_LPF < 127)
+		if (tempf > 1)
 		{
 			// Acc LPF
 			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;

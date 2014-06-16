@@ -39,7 +39,6 @@ void output_servo_ppm(void)
 	{
 		temp = ServoOut[i];					// Promote to 32 bits
 
-#ifdef WIDE_PULSES		
 		// Check for motor marker and ignore if set
 		if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) == 0)
 		{
@@ -51,10 +50,6 @@ void output_servo_ppm(void)
 			// Scale servo from 2500~5000 to 1000~2000
 			temp = ((temp << 2) + 5) / 10; 	// Round and convert	
 		}
-#else
-		// Scale servo from 2500~5000 to 1000~2000
-		temp = ((temp << 2) + 5) / 10; 	// Round and convert
-#endif	
 		
 		ServoOut[i] = (uint16_t)temp;
 	}

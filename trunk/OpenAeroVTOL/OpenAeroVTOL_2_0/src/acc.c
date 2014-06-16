@@ -178,7 +178,7 @@ void CalibrateAcc(int8_t type)
 	if (type == NORMAL)
 	{
 		// Get average zero value (over 32 readings)
-		for (i=0; i<32; i++)
+		for (i = 0; i < 32; i++)
 		{
 			get_raw_accs();						// Updates accADC[] with signals reoriented into (RPY)
 
@@ -189,7 +189,7 @@ void CalibrateAcc(int8_t type)
 			_delay_ms(10);						// Get a better acc average over time
 		}
 
-		for (i=0; i<NUMBEROFAXIS; i++)			// For selected axis in RPY order
+		for (i = 0; i < NUMBEROFAXIS; i++)		// For selected axis in RPY order
 		{
 			// Round and divide by 32
 			accZero[i] = ((accZero[i] + 16) >> 5);
@@ -218,7 +218,7 @@ void CalibrateAcc(int8_t type)
 			// Get average zero value (over 32 readings)
 			Config.AccZeroInvZ = 0;
 
-			for (i=0; i<32; i++)
+			for (i = 0; i < 32; i++)
 			{
 				get_raw_accs();					// Updates gyroADC[] with reoriented vales
 				Config.AccZeroInvZ += accADC[YAW];		

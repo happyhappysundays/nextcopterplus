@@ -72,7 +72,6 @@ void Display_rcinput(void)
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-		_delay_ms(100);
 	}
 	// Exit
 }

@@ -7,6 +7,7 @@
 //***********************************************************
 
 #include "compiledefs.h"
+#include <avr/pgmspace.h> 
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
@@ -65,11 +66,13 @@ int16_t PID_ACCs[FLIGHT_MODES][NUMBEROFAXIS];
 int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each axis
 
 int32_t PID_AvgAccVert = 0;
-int32_t	PID_AvgGyros[NUMBEROFAXIS];
+float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
 	
 // Run each loop to average gyro data and also accVert data
 void Sensor_PID(void)
 {
+	float tempf = 0;
+	float gyroADCf = 0;
 	int8_t i = 0;
 	int8_t	axis = 0;	
 	int16_t	stick_P1 = 0;
@@ -90,7 +93,10 @@ void Sensor_PID(void)
 		{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
 		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 	};
-		
+	
+	// Gyro LPF scale
+	tempf = pgm_read_byte(&LPF_lookup[Config.Gyro_LPF]); // Lookup actual LPF value promote
+	
 	for (axis = 0; axis <= YAW; axis ++)
 	{
 		//************************************************************
@@ -120,9 +126,25 @@ void Sensor_PID(void)
 			}
 		}
 
-		// Average gyro readings 
-		PID_AvgGyros[axis] += gyroADC[axis];
+		//************************************************************
+		// Gyro LPF
+		//************************************************************	
+			
+		gyroADCf = gyroADC[axis]; // Promote
 
+		if (tempf > 1)
+		{
+			// Gyro LPF
+			gyroSmooth[axis] = (gyroSmooth[axis] * (tempf - 1.0f) + gyroADCf) / tempf;
+		}
+		else
+		{
+			// Use raw gyroADC[axis] as source for gyro values
+			gyroSmooth[axis] =  gyroADCf;
+		}		
+		
+		// Demote back to int16_t
+		gyroADC[axis] = (int16_t)gyroSmooth[axis];		
 	}
 	
 	// Average accVert prior to Calculate_PID()
@@ -176,15 +198,6 @@ void Calculate_PID(void)
 	//************************************************************
 	for (axis = 0; axis <= YAW; axis ++)
 	{
-		//************************************************************
-		// Average gyro readings
-		//************************************************************
-		
-		gyroADC[axis] = (int16_t)(PID_AvgGyros[axis] / LoopCount);
-
-		// Reset average for this axis.
-		PID_AvgGyros[axis] = 0;
-				
 		//************************************************************
 		// Filter and calculate gyro error
 		//************************************************************
