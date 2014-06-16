@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 48 - June 2014
+// Version: Beta 50 - June 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -198,9 +198,13 @@
 // Beta 47	Gyro slow calibrate sped up for KK2.0 boards. Gyro cal on sensor screen changed to fast calibrate.
 //			High speed mode architecture altered to fix timer disruption.
 //			Checked that gyro behaviour same as B37 on KK2.0.
-//			Added gyro data log build option for KK2.1. Increased loop rate by rebalancing code.
-// Beta 48	Removed high-speed mode. Added gyro-averaging code.	
-//			
+//			Added gyro data log build option for KK2.1. Increased loop rate by rebalancing the code.
+// Beta 48	Removed high-speed mode as it is unlikely to work well for everyone. Added gyro-averaging code.	
+// Beta 49	Added Gyro LPF and menu item to replace gyro averaging code. This seems to work better than B48.
+// Beta 50	Changed default MPU LPF to 21Hz instead of 5Hz. Now increments/decrements properly.
+//			Changed SW LPFs to have fixed, text-based values -  5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None. 
+//			Note that the 74Hz option is possibly not useful and may be removed later to save space.
+//			Removed WIDE_PULSES build option as this is now the norm.
 //
 //***********************************************************
 //* Notes
@@ -267,7 +271,7 @@
 //* Code and Data variables
 //***********************************************************
 
-#ifdef KK21
+#ifdef DISPLAYLOG
 // Data log
 int8_t		datalog[1024];
 uint16_t	data_pointer = 0;
@@ -893,7 +897,7 @@ int main(void)
 		} // Tock
 
 		//************************************************************
-		//* Update IMU
+		//* Every loop from here down
 		//************************************************************
 
 		// Read sensors
@@ -918,22 +922,24 @@ int main(void)
 			data_pointer = 0;
 		}
 #endif
+		//************************************************************
+		//* Measure interval and call IMU
+		//************************************************************
 		
 		// Provide accurate update of loop time just before calling
 		interval +=  TIM16_ReadTCNT1() - LoopStartTCNT1;
 		
 		// Vector-based IMU test code
-		simple_imu_update(interval);
+		imu_update(interval);
 		
 		// Restart loop timer
 		LoopStartTCNT1 =  TIM16_ReadTCNT1();
 		interval = 0;
 
 		//************************************************************
-		//* Remaining loop tasks
+		//* Update I-terms, average gyro values
 		//************************************************************
 
-		// Update I-terms, average gyro values
 		Sensor_PID();
 
 		//************************************************************
@@ -978,36 +984,30 @@ int main(void)
 					
 		//************************************************************
 		//* Output PWM to ESCs/Servos where required, 
-		//* based on a specific set of conditions
+		//* based on a very specific set of conditions
 		//************************************************************
 
 		// Cases where we are ready to output
 		if	(
 				// Interrupted and LOW or SYNC
-				Interrupted &&						// Only when interrupted (RC receive completed)
-					(
-					  (SlowRC && (Config.Servo_rate == LOW)) || 				// Plan A (Run as fast as the incoming RC if slow RC detected with LOW selected)
-					  (ServoTick && !SlowRC && (Config.Servo_rate == LOW)) ||	// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected with LOW selected)
-					  (Config.Servo_rate >= SYNC)								// Plan C (Run as fast as the incoming RC if in SYNC or MAX modes)
-					)
+				Interrupted &&												// Only when interrupted (RC receive completed)
+				(
+					(SlowRC && (Config.Servo_rate == LOW)) || 				// Plan A (Run as fast as the incoming RC if slow RC detected with LOW selected)
+					(ServoTick && !SlowRC && (Config.Servo_rate == LOW)) ||	// Plan B (Run no faster than the preset rate (ServoTick) if fast RC detected with LOW selected)
+					(Config.Servo_rate >= SYNC)								// Plan C (Run as fast as the incoming RC if in SYNC or MAX modes)
+				)
 			)
 		{
 			Interrupted = false;				// Reset interrupted flag
 			ServoTick = false;					// Reset output requested flag
 			Servo_Rate = 0;						// Reset servo rate timer
 
-			// Calculate PID values
-			Calculate_PID();
-			
-			// Do all the mixer tasks
-			ProcessMixer();
-
-			// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
-			UpdateServos();
-		
+			Calculate_PID();					// Calculate PID values
+			ProcessMixer();						// Do all the mixer tasks - can be very slow
+			UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
 			output_servo_ppm();					// Output servo signal
 			
-			LoopCount = 0;						// Reset loop counter
+			LoopCount = 0;						// Reset loop counter for averaging accVert
 		}
 
 		// Not ready for output, so cancel the current interrupt and wait for the next one

@@ -321,7 +321,7 @@ void init(void)
 		// Reset
 		cli();
 		wdt_enable(WDTO_15MS);				// Watchdog on, 15ms
-		while(1);
+		while(1);							// Wait for reboot
 	}
 
 	// Disarm on start-up if Armed setting is ARMABLE
@@ -339,11 +339,6 @@ void init(void)
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}
 	}
-
-	// Flash LED
-	LED1 = 1;
-	_delay_ms(150);
-	LED1 = 0;
 
 	// Reset IMU
 	reset_IMU();

@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: Beta 48";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: Beta 50";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -135,6 +135,7 @@ const char AutoMenuItem2[]  PROGMEM = "Safety:";
 const char GeneralText2[]  PROGMEM = "Disarm time:";
 const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
+const char GeneralText16[] PROGMEM =  "Gyro LPF:";
 const char GeneralText7[] PROGMEM =  "AL correct:";
 const char BattMenuItem2[]  PROGMEM = "Bat. LVA x10:";
 //
@@ -260,16 +261,19 @@ const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
 const char Random1[] PROGMEM =  "High";
 //
+const char SWLPF1[] PROGMEM =  "74Hz";						// Software LPFs
+const char SWLPF2[] PROGMEM =  "32Hz";
+//
 #ifdef KK21
 const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
-const char MPU6050LPF1[] PROGMEM =  "5Hz";
-const char MPU6050LPF2[] PROGMEM =  "10Hz";
-const char MPU6050LPF3[] PROGMEM =  "21Hz";
-const char MPU6050LPF4[] PROGMEM =  "44Hz";
 const char MPU6050LPF5[] PROGMEM =  "94Hz";
 const char MPU6050LPF6[] PROGMEM =  "184Hz";
 const char MPU6050LPF7[] PROGMEM =  "260Hz";
 #endif
+const char MPU6050LPF1[] PROGMEM =  "5Hz";
+const char MPU6050LPF2[] PROGMEM =  "10Hz";
+const char MPU6050LPF3[] PROGMEM =  "21Hz";
+const char MPU6050LPF4[] PROGMEM =  "44Hz";
 //
 const char Dummy0[] PROGMEM = "";
 //
@@ -295,8 +299,8 @@ const char* const text_menu[] PROGMEM =
 		ChannelRef1, ChannelRef2, ChannelRef0, ChannelRef3, ChannelRef4,					// 32 to 36 RC inputs
 		//
 #ifdef KK21
-		MPU6050LPF7, MPU6050LPF6, MPU6050LPF5, MPU6050LPF4,
-		MPU6050LPF3, MPU6050LPF2, MPU6050LPF1,												// 37 to 43  MPU6050 LPF
+		MPU6050LPF1, MPU6050LPF2, MPU6050LPF3, MPU6050LPF4,
+		MPU6050LPF5, MPU6050LPF6, MPU6050LPF7,												// 37 to 43  MPU6050 LPF
 #else
 		Dummy0,																				// 37 to 43  Spare
 		Dummy0,Dummy0,Dummy0,
@@ -342,11 +346,10 @@ const char* const text_menu[] PROGMEM =
 		MainMenuItem15,MainMenuItem16,MainMenuItem17,MainMenuItem18,		
 		MainMenuItem20,MainMenuItem22, MainMenuItem23, 
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0, Dummy0, 											// 96 to 100	
+		Dummy0, Dummy0,																		// 96, 97 - Spare
 		//
-		AutoMenuItem11, AutoMenuItem15, MixerItem12,										// 101 to 103 OFF/ON/REV
-		//
-		Dummy0, 																			// 104
+		MPU6050LPF1, MPU6050LPF2, MPU6050LPF3, SWLPF2, MPU6050LPF4,							// 98 to 104 SW LPF (7)
+		SWLPF1, ChannelRef8,
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
@@ -381,16 +384,16 @@ const char* const text_menu[] PROGMEM =
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 166 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
-		GeneralText6, GeneralText7, 
+		GeneralText6, GeneralText16, GeneralText7, 
 #ifdef KK21
 		GeneralText10,
 #else
 		Dummy0,
 #endif
 		//
-		Dummy0, Dummy0,Dummy0, Dummy0,Dummy0,
+		Dummy0, Dummy0,Dummy0, Dummy0,
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro

@@ -122,7 +122,6 @@ void Display_sticks(void)
 
 		// Update buffer
 		write_buffer(buffer,1);
-		_delay_ms(100);
 	}
 
 	// Save value and return

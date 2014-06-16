@@ -34,7 +34,7 @@ extern uint16_t InterruptCount;
 extern bool Overdue;
 extern uint8_t	LoopCount;
 
-#ifdef KK21
+#ifdef DISPLAYLOG
 extern int8_t datalog[1024];
 extern uint16_t	data_pointer;
 #endif

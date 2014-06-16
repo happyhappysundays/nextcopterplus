@@ -38,15 +38,11 @@ void Display_sensors(void);
 
 void Display_sensors(void)
 {
-#ifdef KK21
-	//uint8_t	test[2];
 #ifdef DISPLAYLOG
 	uint8_t i, y = 0;
 	int16_t index = 0;
 	data_pointer = 0;
 #endif
-#endif 
-
 		
 	while(BUTTON1 != 0)
 	{
@@ -128,13 +124,6 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[PITCH],pBuffer,10),(const unsigned char*)Verdana8,80,23);
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(const unsigned char*)Verdana8,80,33);
 #endif
-
-#ifdef KK21
-		// Use this for checking MPU6050 register values
-		//readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_ACCEL_CONFIG, (uint8_t *)test, 1);
-		//readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_INT_PIN_CFG, (uint8_t *)test, 1);
-		//mugui_lcd_puts(itoa(test[0],pBuffer,10),(const unsigned char*)Verdana8,40,45);
-#endif
 		
 #ifdef AIRSPEED
 		LCD_Display_Text(53,(const unsigned char*)Verdana8,5,45);		// Airspeed
@@ -155,6 +144,5 @@ void Display_sensors(void)
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-		_delay_ms(100);
 	}
 }
