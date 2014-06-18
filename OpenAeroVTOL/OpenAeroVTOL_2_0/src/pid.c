@@ -11,6 +11,7 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
+#include <stdlib.h>
 #include "io_cfg.h"
 #include "gyros.h"
 #include "main.h"
@@ -27,6 +28,7 @@
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
+#define RESET_ITERM_RC 50			// Stick position beyond which the relevant I-term is reset
 
 //************************************************************
 // Notes
@@ -85,7 +87,7 @@ void Sensor_PID(void)
 	// However the way we have organised stick polarity, RIGHT roll and yaw are +ve, and DOWN elevator is too.
 	// When combining with the gyro signals, the sticks have to be in the opposite polarity as the gyros.
 	// As described above, pitch and yaw are already opposed, but roll needs to be reversed.
-	
+
 	int16_t	RCinputsAxis[NUMBEROFAXIS] = {-RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]};
 	
 	int8_t Stick_rates[FLIGHT_MODES][NUMBEROFAXIS] =
@@ -112,6 +114,20 @@ void Sensor_PID(void)
 		// These may look similar, but they are constrained quite differently.
 		IntegralGyro[P1][axis] += (gyroADC[axis] + stick_P1);
 		IntegralGyro[P2][axis] += (gyroADC[axis] + stick_P2);
+
+#ifdef KK21			
+		// If Hands-free is enabled, reset I-term of 
+		// any axis whose control input is activated more than 5% (+/-20)
+		if (Config.Handsfree == ON)
+		{
+			// If axis-relevant stick input larger than limit 
+			if ((RCinputsAxis[axis] < -RESET_ITERM_RC) || (RCinputsAxis[axis] > RESET_ITERM_RC))
+			{
+				IntegralGyro[P1][axis] = 0;
+				IntegralGyro[P2][axis] = 0;
+			}
+		}
+#endif
 
 		// Limit the I-terms to the user-set limits
 		for (i = P1; i <= P2; i++)
@@ -163,6 +179,15 @@ void Calculate_PID(void)
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
 	int8_t	axis = 0;
 
+#ifdef KK21	
+	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
+	int32_t mult32 = 0;
+	int16_t temp16 = 0;
+	int32_t PID_Gyros_32;
+
+	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]};
+#endif
+
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
@@ -198,6 +223,20 @@ void Calculate_PID(void)
 	//************************************************************
 	for (axis = 0; axis <= YAW; axis ++)
 	{
+#ifdef KK21	
+		//************************************************************
+		// Set up dynamic gain variable once for each axis
+		//************************************************************
+
+		// Channel controlling the dynamic gain
+		temp16 = RCinputsAxis[axis]; // -1000 to 1000 range
+
+		// Scale 0 - 500 down to 0 - Config.Progressive. 
+		temp16 = abs(temp16) / Config.ProgressiveDiv;
+		
+		// Limit maximum value to 100
+		if (temp16 > 100) temp16 = 100;
+#endif			
 		//************************************************************
 		// Filter and calculate gyro error
 		//************************************************************
@@ -275,12 +314,52 @@ void Calculate_PID(void)
 		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE);  // PID_SCALE was 6, now 5
 		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> PID_SCALE);
 
+#ifdef KK21
+		//************************************************************
+		// Modify gains dynamically as required
+		// The gain is determined by the relevant stick position. 
+		// The maximum gain reduction is determined by Config.Progressive
+		// temp16 holds the current amount of gain reduction 
+		//************************************************************
+		// If progressive dynamic gain is set up 
+		if (Config.Progressive != 0)
+		{
+			temp32 = 0;
+			mult32 = 100 - temp16;					// Max (100%) - Current setting (0 to Config.Progressive)
+
+			// P1
+			temp32 = PID_Gyros[P1][axis];			// Promote to 32 bits
+			PID_Gyros_32 = temp32 * mult32;			// Multiply by suppression value (100% down to 0%)
+			temp32 = (PID_Gyros_32 / (int32_t)100);	// Scale back to 0-100%
+			PID_Gyros[P1][axis] = (int16_t)temp32;	// Cast back to native size
+
+			// P2
+			temp32 = PID_Gyros[P2][axis];			// Promote to 32 bits
+			PID_Gyros_32 = temp32 * mult32;			// Multiply by suppression value (100% down to 0%)
+			temp32 = (PID_Gyros_32 / (int32_t)100);	// Scale back to 0-100%
+			PID_Gyros[P2][axis] = (int16_t)temp32;	// Cast back to native size
+		}
+#endif
 		//************************************************************
 		// Calculate error from angle data and trim (roll and pitch only)
 		//************************************************************
 
 		if (axis < YAW)
 		{
+			
+#ifdef KK21
+			// If Hands-free is enabled, remove Autolevel reading of
+			// any axis whose control input is activated more than 5% (+/-20)
+			if (Config.Handsfree == ON)
+			{
+				// If axis-relevant stick input larger than limit
+				if ((RCinputsAxis[axis] < -RESET_ITERM_RC) || (RCinputsAxis[axis] > RESET_ITERM_RC))
+				{
+					angle[axis] = 0;
+				}
+			}
+#endif
+
 			PID_acc_temp1 = angle[axis] - L_trim[P1][axis];				// Offset angle with trim
 			PID_acc_temp2 = angle[axis] - L_trim[P2][axis];
 
@@ -290,7 +369,7 @@ void Calculate_PID(void)
 			PID_acc_temp2 *= L_gain[P2][axis];							// Same for P2
 			PID_ACCs[P2][axis] = (int16_t)(PID_acc_temp2 >> 8);	
 		}
-		
+
 	} // PID loop
 
 	//************************************************************

@@ -26,7 +26,7 @@ extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], uint8_t mult, const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
+extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc subroutines
 extern uint8_t poll_buttons(bool acceleration);

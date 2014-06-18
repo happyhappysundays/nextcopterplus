@@ -336,7 +336,7 @@ void menu_mixer(uint8_t i)
 		memcpy(&values[26],&Config.Channel[i].P1_source_a, 8);
 
 		// Print menu
-		print_menu_items(sub_top, MIXERSTART, value_ptr, 1, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const unsigned char*)MixerMenuText, cursor);
+		print_menu_items(sub_top, MIXERSTART, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const unsigned char*)MixerMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(MIXERITEMS, MIXERSTART, 0, button, &cursor, &sub_top, &menu_temp);

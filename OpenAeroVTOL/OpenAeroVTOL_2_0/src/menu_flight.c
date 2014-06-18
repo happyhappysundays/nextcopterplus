@@ -93,7 +93,7 @@ void menu_flight(uint8_t mode)
 		value_ptr = &Config.FlightMode[mode].Roll_P_mult;
 
 		// Print menu
-		print_menu_items(sub_top, FLIGHTSTART, value_ptr, 1, (const unsigned char*)flight_menu_ranges, 0, FLIGHTOFFSET, (const unsigned char*)FlightMenuText, cursor);
+		print_menu_items(sub_top, FLIGHTSTART, value_ptr, (const unsigned char*)flight_menu_ranges, 0, FLIGHTOFFSET, (const unsigned char*)FlightMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(FLIGHTITEMS, FLIGHTSTART, 0, button, &cursor, &sub_top, &menu_temp);

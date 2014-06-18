@@ -46,7 +46,7 @@ void menu_rc_setup(uint8_t i);
 #define RCITEMS 9 		// Number of menu items
 
 #ifdef KK21
-#define GENERALITEMS 10
+#define GENERALITEMS 12
 #else
 #define GENERALITEMS 9
 #endif
@@ -59,7 +59,7 @@ const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM =
 {
 	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},			// RC setup
 #ifdef KK21
-	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General
+	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37, 68, 68},			// General
 #else
 	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0},
 #endif
@@ -92,6 +92,8 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{1,10,1,0,7},					// AL correction
 #ifdef KK21
 		{0,6,1,1,6},					// MPU6050 LPF. Default is 260Hz
+		{OFF,ON,1,1,OFF},				// Hands-free mode
+		{0,100,1,0,0},					// Dynamic P mode (0 to 100%)
 #endif
 	}
 };
@@ -134,7 +136,7 @@ void menu_rc_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, 1, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const unsigned char*)RCMenuText[section - 1], cursor);
+		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const unsigned char*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &sub_top, &menu_temp);

@@ -722,7 +722,17 @@ void UpdateLimits(void)
 			}
 		}
 	}
-
+#ifdef KK21	
+	// Update dynamic gain divisor
+	if (Config.Progressive > 0)
+	{
+		Config.ProgressiveDiv = 500 / Config.Progressive; // 500 - 5
+	}
+	else
+	{
+		Config.ProgressiveDiv = 500;
+	}
+#endif
 	// Update travel limits
 	for (i = 0; i < MIX_OUTPUTS; i++)
 	{
@@ -776,16 +786,6 @@ void UpdateServos(void)
 			ServoOut[i] = temp1;
 		}
 	}
-/*	
-	// NULL unused outputs when only OUT1 to OUT4 are used
-	if (MIX_OUTPUTS == 4)
-	{
-		for (i = MIX_OUTPUTS; i < MAX_OUTPUTS; i++)
-		{		
-			ServoOut[i] = 3750;
-		}
-	}
-*/
 }
 
 // 32 bit multiply/scale for broken GCC

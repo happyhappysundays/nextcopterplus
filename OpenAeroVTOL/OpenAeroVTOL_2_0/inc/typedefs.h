@@ -145,7 +145,7 @@ typedef struct
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (9)
+	// General items (9/12)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
@@ -157,6 +157,8 @@ typedef struct
 	int8_t		CF_factor;				// Autolevel correction rate
 #ifdef KK21
 	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	int8_t		Handsfree;				// Hands-free flight mode
+	int8_t		Progressive;			// Progressive flight mode
 #endif
 
 	// Channel configuration
@@ -192,6 +194,11 @@ typedef struct
 	// Sticky flags
 	uint8_t		Main_flags;				// Non-volatile flags
 
+#ifdef KK21	
+	// Dynamic gain
+	int16_t		ProgressiveDiv;			// Progressive gain divisor
+#endif
+
 } CONFIG_STRUCT;
 
 typedef struct
@@ -199,7 +206,7 @@ typedef struct
 	int8_t lower;						// Lower limit for menu item
 	int8_t upper;						// Upper limit for menu item
 	uint8_t increment;					// Increment for menu item
-	uint8_t style;						// 0 = numeral, 1 = text, 2 = numeric * 4
+	uint8_t style;						// 0 = numeral, 1 = text
 	int8_t default_value;				// Default value for this item
 } menu_range_t; 
 
