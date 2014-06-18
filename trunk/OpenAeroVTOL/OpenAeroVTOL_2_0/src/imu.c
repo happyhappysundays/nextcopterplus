@@ -73,7 +73,7 @@ float GyroPitchVC, GyroRollVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
-int16_t	angle[2]; 						// Attitude in degrees
+int16_t	angle[NUMBEROFAXIS];			// Attitude in degrees
 float	interval;						// Interval in seconds since the last loop
 
 const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None

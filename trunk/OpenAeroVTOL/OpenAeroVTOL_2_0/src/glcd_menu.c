@@ -266,6 +266,8 @@ const char SWLPF2[] PROGMEM =  "32Hz";
 //
 #ifdef KK21
 const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
+const char GeneralText13[] PROGMEM =  "Hands-free:";
+const char GeneralText14[] PROGMEM =  "Dynamic P:";
 const char MPU6050LPF5[] PROGMEM =  "94Hz";
 const char MPU6050LPF6[] PROGMEM =  "184Hz";
 const char MPU6050LPF7[] PROGMEM =  "260Hz";
@@ -384,16 +386,18 @@ const char* const text_menu[] PROGMEM =
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 167 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 169 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText16, GeneralText7, 
 #ifdef KK21
 		GeneralText10,
+		GeneralText13, 
+		GeneralText14,
 #else
-		Dummy0,
+		Dummy0, Dummy0, Dummy0,
 #endif
 		//
-		Dummy0, Dummy0,Dummy0, Dummy0,
+		Dummy0, Dummy0,
 		//
 						 																	// 172 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro

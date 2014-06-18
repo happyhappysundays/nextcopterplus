@@ -3,8 +3,8 @@
 // ========================================
 // Version: Beta 50 - June 2014
 //
-// Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
-// OpenAero code by David Thompson, included open-source code as per quoted references
+// Some receiver format decoding code from Jim Drew of XPS, and the Paparazzi project
+// OpenAeroVTOL code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -205,6 +205,9 @@
 //			Changed SW LPFs to have fixed, text-based values -  5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None. 
 //			Note that the 74Hz option is possibly not useful and may be removed later to save space.
 //			Removed WIDE_PULSES build option as this is now the norm.
+//			Added Hands-free mode. I-terms and AL reset when sticks move past 5%.
+//			Added Progressive P-gain mode. Settable from 0 to 100%. At 50%, P gain reduced to zero at max stick.
+//			At 100%, P gain reduced to zero at 50% stick.
 //
 //***********************************************************
 //* Notes

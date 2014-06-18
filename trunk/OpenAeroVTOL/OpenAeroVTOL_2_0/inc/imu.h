@@ -6,7 +6,7 @@
 //* Externals
 //***********************************************************
 
-extern int16_t	angle[2];
+extern int16_t	angle[NUMBEROFAXIS];
 extern float accSmooth[NUMBEROFAXIS];
 
 extern void imu_update(uint32_t period);
