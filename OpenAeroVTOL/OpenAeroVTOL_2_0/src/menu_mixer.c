@@ -508,6 +508,7 @@ void menu_mixer(uint8_t i)
 		{
 			UpdateLimits();			 // Update travel limits based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
+			Wait_BUTTON4();			 // Wait for users finger off the button
 		}
 
 	} // while(button != BACK)

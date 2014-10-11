@@ -25,6 +25,8 @@
 // Menu items
 void menu_main(void);
 void do_main_menu_item(uint8_t menuitem);
+void Wait_BUTTON1(void);
+void Wait_BUTTON4(void);
 
 //************************************************************
 // Defines
@@ -50,11 +52,8 @@ void menu_main(void)
 	button = NONE;
 
 	// Wait until user's finger is off button 1
-	while(BUTTON1 == 0)
-	{
-		_delay_ms(50);
-	}
-
+	Wait_BUTTON1();
+	
 	while(button != BACK)
 	{
 		// Clear buffer before each update
@@ -94,10 +93,7 @@ void menu_main(void)
 			button = NONE;
 
 			// Wait until user's finger is off button 1
-			while(BUTTON1 == 0)
-			{
-				_delay_ms(50);
-			}
+			Wait_BUTTON1();
 		}
 	}
 
@@ -170,3 +166,18 @@ void do_main_menu_item(uint8_t menuitem)
 	} // Switch
 }
 
+void Wait_BUTTON1(void)
+{
+	while(BUTTON1 == 0)
+	{
+		_delay_ms(50);
+	}
+}
+
+void Wait_BUTTON4(void)
+{
+	while(BUTTON4 == 0)
+	{
+		_delay_ms(50);
+	}
+}

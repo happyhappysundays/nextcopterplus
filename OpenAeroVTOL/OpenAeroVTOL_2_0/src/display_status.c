@@ -77,7 +77,7 @@ void Display_status(void)
 	{
 		LCD_Display_Text(51,(const unsigned char*)Verdana8,45,27);
 	}
-	else if (transition > Config.Transition_P1n)
+	else
 	{
 		LCD_Display_Text(52,(const unsigned char*)Verdana8,45,27);
 	}

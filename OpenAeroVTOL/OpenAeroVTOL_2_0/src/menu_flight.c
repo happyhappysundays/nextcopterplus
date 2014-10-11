@@ -34,20 +34,30 @@ void menu_flight(uint8_t i);
 // Defines
 //************************************************************
 
-#define FLIGHTSTART 172 // Start of Menu text items
+#define FLIGHTSTART 170 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
+
+#if defined(KK21) && defined(ADVANCED)	
+#define FLIGHTITEMS 20 	// Number of menu items
+#else
 #define FLIGHTITEMS 18 	// Number of menu items
+#endif
 
 //************************************************************
 // RC menu items
 //************************************************************
-	 
+
+#if defined(KK21) && defined(ADVANCED)	 
+const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 68, 0};
+#else
 const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+#endif
+
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
-	// Flight (18)
+	// Flight (18/20)
 	{0,127,1,0,80},					// Roll gyro P
 	{0,127,1,0,50},					// Roll gyro I
 	{0,125,1,0,0},					// Roll gyro I-limits
@@ -69,6 +79,10 @@ const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM =
 	{-127,127,1,0,0},				// Yaw trim
 
 	{0,127,1,0,0},					// Z Acc P gain
+#if defined(KK21) && defined(ADVANCED)			
+	{OFF,ON,1,1,OFF},				// Hands-free mode
+	{0,100,1,0,0},					// Dynamic P mode (0 to 100%)		
+#endif
 };
 
 //************************************************************
@@ -110,6 +124,7 @@ void menu_flight(uint8_t mode)
 		{
 			UpdateLimits();			 // Update I-term limits and triggers based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
+			Wait_BUTTON4();			 // Wait for users finger off the button
 		}
 	}
 }

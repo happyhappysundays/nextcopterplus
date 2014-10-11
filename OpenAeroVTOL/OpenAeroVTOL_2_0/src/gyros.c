@@ -255,9 +255,10 @@ void init_i2c_gyros(void)
 	
 	// Make INT pin open-drain so that we can connect it straight to the MPU
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_INT_PIN_CFG, 0x40);			// INT output is open-drain
-
-	// Other regs cannot be written until the MPU6050 is out of sleep mode
-	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, MPU60X0_DLPF_BW_256);	// 0x00 = 256Hz
+	
+	// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	// Software's values are 0 to 6 = 5Hz to 260Hz, so numbering is reversed here.
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
 	
 	// Now configure gyros
 	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_GYRO_CONFIG, GYROFS2000DEG);	// 2000 deg/sec

@@ -32,7 +32,7 @@ void print_menu_frame(uint8_t style);
 
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
-void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
+void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc
@@ -152,7 +152,7 @@ menu_range_t get_menu_range(const unsigned char* menu_ranges, uint8_t menuitem)
 // servo_number = Servo number to update
 //************************************************************
 
-void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
+void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
 {
 	mugui_size16_t size;
 	int16_t temp16;

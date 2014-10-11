@@ -109,7 +109,7 @@ void ReadAcc()
 	// Recalculate current accVert using filtered acc value
 	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
 	// the zero back here so that Config.AccZeroNormZ subtracts the correct amount
-	 accVert = accSmooth[YAW] - Config.AccZero[YAW] + Config.AccZeroNormZ ;
+	 accVert = accSmooth[YAW] + (Config.AccZeroNormZ - Config.AccZero[YAW]);
 }
 
 //***************************************************************
@@ -199,7 +199,10 @@ void CalibrateAcc(int8_t type)
 		Config.AccZero[ROLL] = accZero[ROLL]; 
 		Config.AccZero[PITCH] = accZero[PITCH]; 
 		Config.AccZeroNormZ = accZero[YAW]; 
-
+			
+		// Correct polarity of AccZeroNormZ as per orientation
+		Config.AccZeroNormZ *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]);
+			
 		// Flag that normal cal done
 		Config.Main_flags |= (1 << normal_cal_done);
 	
@@ -212,7 +215,7 @@ void CalibrateAcc(int8_t type)
 	else
 	// Calibrate inverted acc
 	{
-		// Only update the inverted cal value if preceeded by a normal calibration
+		// Only update the inverted cal value if preceded by a normal calibration
 		if (Config.Main_flags & (1 << normal_cal_done))
 		{
 			// Get average zero value (over 32 readings)
@@ -227,14 +230,15 @@ void CalibrateAcc(int8_t type)
 
 			// Round and divide by 32
 			Config.AccZeroInvZ = ((Config.AccZeroInvZ + 16) >> 5);		// Inverted zero point
+			
+			// Correct polarity of AccZeroInvZ as per orientation
+			Config.AccZeroInvZ *= (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]);
 
 			// Test if board is actually inverted relative to board orientation.
-			// We have to do this as get_raw_accs() does not reorient the data
-#ifdef KK21 
-			if ((Config.AccZeroInvZ * (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW])) < 0) // Upside down
+#ifdef KK21
+			if (Config.AccZeroInvZ < 0)
 #else
-			if ((((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == 1) && (Config.AccZeroInvZ < Config.AccZero[YAW])) || // Forward, Aft and Sideways 
-			    (((int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation][YAW]) == -1) && (Config.AccZeroInvZ > Config.AccZero[YAW])))  // Vertical and Upside down
+			if (Config.AccZeroInvZ < Config.AccZero[YAW])
 #endif
 			{
 
