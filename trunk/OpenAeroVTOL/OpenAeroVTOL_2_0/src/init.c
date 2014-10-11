@@ -159,7 +159,7 @@ void init(void)
 	Config.Main_flags |= (1 << FirstTimeIMU);	// First time into IMU
 
 	// Load EEPROM settings
-	Initial_EEPROM_Config_Load();
+	Initial_EEPROM_Config_Load(); // Config now contains valid values
 
 	//***********************************************************
 	// RX channel defaults for when no RC connected
@@ -180,14 +180,18 @@ void init(void)
 
 	// Initialise the GLCD
 	st7565_init();
-	st7565_command(CMD_DISPLAY_ON);
-	st7565_command(CMD_SET_ALLPTS_NORMAL);
-	st7565_set_brightness(0x26);
-	st7565_command(CMD_SET_COM_REVERSE); 	// For logo
-
-	// Make sure the LCD is blank
-	clear_buffer(buffer);
+	// Set contrast to the previously saved value
+	//st7565_set_brightness((uint8_t)Config.Contrast);
+	
+#ifdef KK21
+	// Make sure the LCD is blank without clearing buffer
+	clear_screen();
+	//st7565_command(CMD_SET_COM_REVERSE); 		// For logo	0xC8
+#else
+	// Clear buffer
 	write_buffer(buffer,1);
+	clear_buffer(buffer);
+#endif
 
 	//***********************************************************
 	// ESC calibration
@@ -252,7 +256,7 @@ void init(void)
 	}
 
 	//***********************************************************
-	// Load or reset EEPROM settings
+	// Reset EEPROM settings
 	//***********************************************************
 
 	// This delay prevents the GLCD flashing up a ghost image of old data
@@ -271,18 +275,24 @@ void init(void)
 		// Reset EEPROM settings
 		Set_EEPROM_Default_Config();
 		Save_Config_to_EEPROM();
-	}
 
-	// Set contrast to the previously saved value
-	st7565_set_brightness((uint8_t)Config.Contrast);				
+		// Set contrast to the default value
+		st7565_set_brightness((uint8_t)Config.Contrast);
+
+		_delay_ms(500);		// Save is now too fast to show the "Reset" text long enough
+
+	}
 
 	// Display logo if KK2.1
 #ifdef KK21
 	// Write logo from buffer
-	write_buffer(buffer,0);
+	write_buffer(buffer,1);
 	_delay_ms(1000);
-#endif
 
+	// Debug
+	st7565_init(); // Seems necessary for KK2 mini
+#endif
+	
 	//***********************************************************
 	// i2c init for KK2.1
 	//***********************************************************	
@@ -298,16 +308,17 @@ void init(void)
 	//***********************************************************
 
 	// Display "Hold steady" message
-	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	clear_buffer(buffer);
+	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
+	//clear_buffer(buffer);
 	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
 	write_buffer(buffer,1);	
 	clear_buffer(buffer);
 		
 	// Do startup tasks
-	UpdateLimits();							// Update travel limts	
+	UpdateLimits();							// Update travel limits	
 	Init_ADC();
-	init_int();								// Intialise interrupts based on RC input mode
+	init_int();								// Initialise interrupts based on RC input mode
 	init_uart();							// Initialise UART
 
 	// Initial gyro calibration
@@ -345,11 +356,6 @@ void init(void)
 
 	// Beep that init is complete
 	menu_beep(1);
-
-#ifdef KK21
-	// Set text display mode back to normal (KK2.0 version has already done this)
-	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
-#endif
 
 } // init()
 

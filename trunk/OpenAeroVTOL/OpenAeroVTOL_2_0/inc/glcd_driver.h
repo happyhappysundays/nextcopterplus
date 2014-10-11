@@ -89,6 +89,9 @@ void st7565_set_brightness(uint8_t val);
 void write_buffer(uint8_t *buffer, uint8_t type);
 void clear_buffer(uint8_t *buff);
 void write_logo_buffer(uint8_t *buffer);
+#ifdef KK21
+void clear_screen(void);
+#endif
 
 void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color);
 void drawrect(uint8_t *buff, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color);

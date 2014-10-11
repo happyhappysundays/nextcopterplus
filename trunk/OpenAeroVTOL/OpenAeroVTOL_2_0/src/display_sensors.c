@@ -90,7 +90,13 @@ void Display_sensors(void)
 		if (BUTTON4 == 0)
 		{
 			// Wait until finger off button
-			_delay_ms(500);
+			while(BUTTON4 == 0)
+			{
+				_delay_ms(50);
+			}	
+			
+			// Pause until steady		
+			_delay_ms(250);
 			
 			// Calibrate sensors
 #ifdef AIRSPEED
@@ -103,7 +109,8 @@ void Display_sensors(void)
 #ifndef DISPLAYLOG
 		if (BUTTON3 == 0)
 		{
-			_delay_ms(500);
+			// Wait until button snap dissipated
+			_delay_ms(250);
 			CalibrateAcc(REVERSED);
 		}
 

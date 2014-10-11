@@ -22,6 +22,8 @@ extern void menu_mixer(uint8_t i);
 extern void	menu_camstab(void);
 extern void menu_servo_setup(uint8_t section);
 extern void menu_flight(uint8_t i);
+extern void Wait_BUTTON1(void);
+extern void Wait_BUTTON4(void);
 extern  uint8_t button;
 
 // Menu frames, items
@@ -35,7 +37,7 @@ extern void print_cursor(uint8_t line);
 
 // Menu management
 extern void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
-extern void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
+extern void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
 
 // Special print routine - prints either numeric or text
 extern void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);

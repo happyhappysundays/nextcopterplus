@@ -46,7 +46,13 @@ void menu_rc_setup(uint8_t i);
 #define RCITEMS 9 		// Number of menu items
 
 #ifdef KK21
-#define GENERALITEMS 12
+
+	#ifdef ADVANCED
+		#define GENERALITEMS 11
+	#else
+		#define GENERALITEMS 10
+	#endif
+
 #else
 #define GENERALITEMS 9
 #endif
@@ -57,9 +63,16 @@ void menu_rc_setup(uint8_t i);
 	 
 const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},			// RC setup
+	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},				// RC setup
+
 #ifdef KK21
-	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37, 68, 68},			// General
+
+	#ifdef ADVANCED
+		{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37, 105},	// General (Advanced)	
+	#else
+		{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General (Normal)
+	#endif
+	
 #else
 	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0},
 #endif
@@ -80,20 +93,26 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (9/10)
+		// General (9/11)
 		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
-		{28,50,1,0,38}, 				// Contrast
+		// Limit contrast range for KK2 Mini
+#ifdef KK2Mini
+		{26,34,1,0,30}, 				// Contrast (KK2 Mini)
+#else
+		{28,50,1,0,36}, 				// Contrast (Everything else)
+#endif			
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,0},					// Low battery alarm voltage
 		{LOW,SYNC,1,1,LOW},				// Servo rate
-		{0,6,1,1,2},					// Acc. LPF 21Hz default
-		{0,6,1,1,6},					// Gyro LPF. No LPF default
+		{0,6,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 32, 44, 74, None)
+		{0,6,1,1,6},					// Gyro LPF. No LPF default (5, 10, 21, 32, 44, 74, None)
 		{1,10,1,0,7},					// AL correction
 #ifdef KK21
-		{0,6,1,1,6},					// MPU6050 LPF. Default is 260Hz
-		{OFF,ON,1,1,OFF},				// Hands-free mode
-		{0,100,1,0,0},					// Dynamic P mode (0 to 100%)
+		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
+#ifdef ADVANCED
+		{GEAR,NOCHAN,1,1,NOCHAN},		// Autotrim save channel
+#endif
 #endif
 	}
 };
@@ -157,6 +176,12 @@ void menu_rc_setup(uint8_t section)
 #ifdef KK21
 			// Update MPU6050 LPF and reverse sense of menu items
 			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
+			
+			// Clear trims if Autotrim switched off
+			if (Config.TrimChan == NOCHAN)
+			{
+				memset(&Config.RC_Iterm_Offset[P1][ROLL], 0, sizeof(int16_t) * 18);
+			}			
 #endif
 
 			// Update channel sequence
@@ -173,6 +198,7 @@ void menu_rc_setup(uint8_t section)
 			}
 
 			Save_Config_to_EEPROM(); // Save value and return
+			Wait_BUTTON4();			 // Wait for users finger off the button
 		}
 	}
 }

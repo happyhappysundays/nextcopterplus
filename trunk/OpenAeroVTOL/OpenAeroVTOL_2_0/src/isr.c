@@ -42,6 +42,7 @@ volatile uint8_t bytecount;
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
+#define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
 //************************************************************
 //* Standard PWM mode
@@ -195,16 +196,16 @@ ISR(INT2_vect)
 			prevChannel = 0;
 		}
 
-		// Measure the channel data only for the first MAX_RC_CHANNELS (currently 8)
+		// Measure the channel data only for the first MAX_CPPM_CHANNELS (currently 8)
 		// Prevent code from over-running RxChannelStart[]
-        if (ch_num < MAX_RC_CHANNELS)
+        if (ch_num < MAX_CPPM_CHANNELS)
 		{
             RxChannelStart[curChannel] = tCount;
 		}
 
 		// When ch_num = 0, the first channel has not yet been measured.
 		// That only occurs at the second pulse. Prevent code from over-running RxChannel[]
-        if ((ch_num > 0) && (ch_num <= MAX_RC_CHANNELS))
+        if ((ch_num > 0) && (ch_num <= MAX_CPPM_CHANNELS))
         {
 		   RxChannel[prevChannel] = tCount - RxChannelStart[prevChannel];
 		}
@@ -292,14 +293,14 @@ ISR(USART0_RX_vect)
 	//* Futaba S-Bus format (8-E-2/100Kbps)
 	//*	S-Bus decoding algorithm borrowed in part from Arduino
 	//*
-	//* The protocol is 25 Bytes long and is sent every 14ms (analog mode) or 7ms (highspeed mode).
-	//* One Byte = 1 startbit + 8 data bit + 1 parity bit + 2 stopbit (8E2), baudrate = 100,000 bit/s
+	//* The protocol is 25 Bytes long and is sent every 14ms (analog mode) or 7ms (high speed mode).
+	//* One Byte = 1 start bit + 8 data bit + 1 parity bit + 2 stop bit (8E2), baud rate = 100,000 bit/s
 	//*
 	//* The highest bit is sent first. The logic is inverted :( Stupid Futaba.
 	//*
-	//* [startbyte] [data1] [data2] .... [data22] [flags][endbyte]
+	//* [start byte] [data1] [data2] .... [data22] [flags][end byte]
 	//* 
-	//* 0 startbyte = 11110000b (0xF0)
+	//* 0 start byte = 11110000b (0xF0)
 	//* 1-22 data = [ch1, 11bit][ch2, 11bit] .... [ch16, 11bit] (Values = 0 to 2047)
 	//* 	channel 1 uses 8 bits from data1 and 3 bits from data2
 	//* 	channel 2 uses last 5 bits from data2 and 6 bits from data3
@@ -314,14 +315,18 @@ ISR(USART0_RX_vect)
 	//* 	bit2 = n/a
 	//* 	bit1 = n/a
 	//* 	bit0 = n/a
-	//* 24 endbyte = 00000000b
+	//* 24 endbyte = 00000000b (SBUS) or variable (SBUS2)
 	//*
 	//************************************************************
 
 	if (Config.RxMode == SBUS)
 	{
 		// Flag that packet has completed
+#ifdef KK21
+		if ((bytecount == 24) && ((temp == 0x00) || ((temp % 0xCF) == 0x04)))
+#else
 		if ((bytecount == 24) && (temp == 0x00))
+#endif
 		{
 			// If frame lost, ignore packet
 			if ((sBuffer[23] & 0x20) == 0)
@@ -341,7 +346,7 @@ ISR(USART0_RX_vect)
 
                 // Deconstruct S-Bus data
 				// 8 channels * 11 bits = 88 bits
-                for (j=0; j<88; j++)
+                for (j = 0; j < 88; j++)
                 {
                     if (sBuffer[sindex] & (1<<chan_mask))
                     {

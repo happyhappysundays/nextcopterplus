@@ -27,7 +27,7 @@
 //************************************************************
 
 // Print an indexed text string from Program memory at a particular location
-void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y);
+void LCD_Display_Text (uint16_t menuitem, const unsigned char* font,uint16_t x, uint16_t y);
 
 // Print a string from at a particular location
 void gLCDprint_Menu_P(const char *s, const unsigned char* font,uint16_t x, uint16_t y);
@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: Beta 50";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: Beta 52";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -265,12 +265,26 @@ const char SWLPF1[] PROGMEM =  "74Hz";						// Software LPFs
 const char SWLPF2[] PROGMEM =  "32Hz";
 //
 #ifdef KK21
+const char RCMenuItem30[] PROGMEM = "Autotrim Ch.:";
 const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
-const char GeneralText13[] PROGMEM =  "Hands-free:";
+const char GeneralText13[] PROGMEM =  "Acro mode:";
 const char GeneralText14[] PROGMEM =  "Dynamic P:";
 const char MPU6050LPF5[] PROGMEM =  "94Hz";
 const char MPU6050LPF6[] PROGMEM =  "184Hz";
-const char MPU6050LPF7[] PROGMEM =  "260Hz";
+const char MPU6050LPF7[] PROGMEM =  "260Hz";//
+const char Trim_1[] PROGMEM =  "Erase";
+const char Trim_2[] PROGMEM =  "Xfer";
+const char Trim_3[] PROGMEM =  "-- Auto trim --";
+const char Trim_4[] PROGMEM =  "Erase trims";
+const char Trim_5[] PROGMEM =  "Are you sure?";
+const char Trim_6[] PROGMEM =  "Yes";
+const char Trim_7[] PROGMEM =  "Transfer TX";
+const char Trim_12[] PROGMEM =  "trims";
+const char Trim_8[] PROGMEM =  "OK"; //261
+const char Trim_9[] PROGMEM =  "Abort";
+const char Trim_10[] PROGMEM =  "Center TX trims";
+const char Trim_11[] PROGMEM =  "Press OK to continue";
+
 #endif
 const char MPU6050LPF1[] PROGMEM =  "5Hz";
 const char MPU6050LPF2[] PROGMEM =  "10Hz";
@@ -302,7 +316,7 @@ const char* const text_menu[] PROGMEM =
 		//
 #ifdef KK21
 		MPU6050LPF1, MPU6050LPF2, MPU6050LPF3, MPU6050LPF4,
-		MPU6050LPF5, MPU6050LPF6, MPU6050LPF7,												// 37 to 43  MPU6050 LPF
+		MPU6050LPF5, MPU6050LPF6, MPU6050LPF7,												// 37 to 43  MPU6050 LPF, 5Hz to 260Hz
 #else
 		Dummy0,																				// 37 to 43  Spare
 		Dummy0,Dummy0,Dummy0,
@@ -350,7 +364,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		Dummy0, Dummy0,																		// 96, 97 - Spare
 		//
-		MPU6050LPF1, MPU6050LPF2, MPU6050LPF3, SWLPF2, MPU6050LPF4,							// 98 to 104 SW LPF (7)
+		MPU6050LPF1, MPU6050LPF2, MPU6050LPF3, SWLPF2, MPU6050LPF4,							// 98 to 104 SW LPF (7) 5, 10, 21, 32, 44, 74, None
 		SWLPF1, ChannelRef8,
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
@@ -378,7 +392,12 @@ const char* const text_menu[] PROGMEM =
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
-		Dummy0, Dummy0, Dummy0,																// 143 to 145 spare
+#ifdef KK21		
+		Trim_1, Trim_2,	Trim_3,																// 143 to 145 spare
+#else		
+		Dummy0, Dummy0,	Dummy0,	 
+#endif
+															
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
@@ -386,26 +405,30 @@ const char* const text_menu[] PROGMEM =
 		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
 		Transition, Transition_P1n,
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 169 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 168 General
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText16, GeneralText7, 
 #ifdef KK21
-		GeneralText10,
-		GeneralText13, 
-		GeneralText14,
+		GeneralText10, RCMenuItem30,
 #else
-		Dummy0, Dummy0, Dummy0,
+		Dummy0, Dummy0,	
 #endif
+		Dummy0,																				// 169 Spare
+
 		//
-		Dummy0, Dummy0,
-		//
-						 																	// 172 to 189 Flight menu
+						 																	// 170 to 189 Flight menu
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro
 		AutoMenuItem20, AutoMenuItem7,														// Roll acc
 		AutoMenuItem4, StabMenuItem5, StabMenuItem11, StabMenuItem6, 						// Pitch gyro
 		AutoMenuItem21, AutoMenuItem8, 														// Pitch acc
 		StabMenuItem7, StabMenuItem8, StabMenuItem12, StabMenuItem9,	 					// Yaw gyro
-		StabMenuItem30,	StabMenuItem13,														// Z-Acc, Yaw trim
+		StabMenuItem30,	StabMenuItem13,														// Yaw trim, Z-Acc, 
+#ifdef KK21
+		GeneralText13,																		// Hands-free
+		GeneralText14,																		// Dynamic P
+#else
+		Dummy0, Dummy0,
+#endif
 		//
 		MixerItem1,																			// 190 Motor marker (34 mixer items in total)
 		MixerItem20, 																		// Offset for P1
@@ -438,6 +461,14 @@ const char* const text_menu[] PROGMEM =
 		MixerItem70, MixerItem71, MixerItem72, MixerItem73, MixerItem74,					// Roll gyro to pitch acc
 		ChannelRef8, 																		// + NONE 
 		//
+		Dummy0,Dummy0,																		// 252 to 256 - Spare
+		Dummy0,Dummy0,
+		Dummy0,
+		//
+#ifdef KK21		
+		Trim_4, Trim_5, Trim_6, Trim_7,	Trim_8, Trim_9,	Trim_10,							// 257 to 265 Auto trim messages
+		Trim_11,Trim_12,
+#endif
 	}; 
 
 //************************************************************
@@ -445,7 +476,7 @@ const char* const text_menu[] PROGMEM =
 //************************************************************
 
 // Print Menuitem from Program memory at a particular location
-void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y)
+void LCD_Display_Text (uint16_t menuitem, const unsigned char* font,uint16_t x, uint16_t y)
 {
 	gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), font, x, y);
 }
@@ -495,12 +526,12 @@ void idle_screen(void)
 	}
 
 #else
-	if ((General_error & (1 << THROTTLE_HIGH)) != 0)			// Throttle high
+	if ((General_error & (1 << THROTTLE_HIGH)) != 0)				// Throttle high
 	{
 		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
 		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
 	}	
-	else if ((General_error & (1 << DISARMED)) != 0)						// Disarmed
+	else if ((General_error & (1 << DISARMED)) != 0)				// Disarmed
 	{
 		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
 	}

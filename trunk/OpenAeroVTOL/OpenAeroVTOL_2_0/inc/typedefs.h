@@ -19,12 +19,14 @@
 #define NUMBEROFORIENTS 6				// Number board orientations
 #define	THROTTLEIDLE 50					// Throttle value below which is considered idle
 
-#define MOTOR_100 1900					// Value to produce a 1.9ms throttle pulse regardless of pulse width mode
-#define MOTOR_0	1100					// Value to produce a 1.1ms throttle pulse regardless of pulse width mode
-#define	MOTORMIN 1000					// Throttle cut output value. 1000 or 1.0ms regardless of pulse width mode
+#define MOTOR_100 1900					// PWM value to produce a 1.9ms throttle pulse regardless of pulse width mode
+#define MOTOR_0	1100					// PWM value to produce a 1.1ms throttle pulse regardless of pulse width mode
+#define	MOTORMIN 1000					// PWM value for throttle cut. 1000 or 1.0ms regardless of pulse width mode
+
 #define SERVO_CENTER 1500				// Servo center position. 1500us
-#define	THROTTLEMIN 1000				// Minimum throttle input offset value. 3750-1000 = 2750 or 1.1ms. 
+#define	THROTTLEMIN 1000				// Minimum throttle input offset value. 3750-1000 = 2750 or 1.1ms.
 										// Not to be confused with MOTORMIN which is a PWM value.
+#define THROTTLEOFFSET 1250				// Mixer offset needed to reduce the output center to MOTORMIN
 
 /*********************************************************************
  * Type definitions
@@ -81,7 +83,7 @@ typedef struct
 
 } channel_t;
 
-// Flight_control type (18)
+// Flight_control type (18/20)
 typedef struct
 {
 	int8_t		Roll_P_mult;			// Roll PI
@@ -106,6 +108,10 @@ typedef struct
 
 	int8_t		A_Zed_P_mult;
 
+#ifdef KK21	
+	int8_t		Acro;					// Acrobatic flight mode
+	int8_t		Progressive;			// Progressive flight mode
+#endif
 } flight_control_t;
 
 // Settings structure
@@ -145,7 +151,7 @@ typedef struct
 	// Triggers
 	int16_t		PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (9/12)
+	// General items (9/10)
 	int8_t		Orientation;			// Horizontal / vertical / upside-down / (others)
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
@@ -157,8 +163,7 @@ typedef struct
 	int8_t		CF_factor;				// Autolevel correction rate
 #ifdef KK21
 	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-	int8_t		Handsfree;				// Hands-free flight mode
-	int8_t		Progressive;			// Progressive flight mode
+	int8_t		TrimChan;				// Channel to store the current trims
 #endif
 
 	// Channel configuration
@@ -196,7 +201,16 @@ typedef struct
 
 #ifdef KK21	
 	// Dynamic gain
-	int16_t		ProgressiveDiv;			// Progressive gain divisor
+	int16_t		ProgressiveDiv[FLIGHT_MODES];		// Progressive gain divisor
+	
+	// I-term reset trigger zeros
+	int16_t		RC_Iterm_Offset[FLIGHT_MODES][NUMBEROFAXIS];
+	
+	// Current RC trim offset
+	int16_t		RCinputsOffset[FLIGHT_MODES][NUMBEROFAXIS];
+	
+	// Absorbed TX trim offset
+	int16_t		TXOffset[FLIGHT_MODES][NUMBEROFAXIS];	
 #endif
 
 } CONFIG_STRUCT;

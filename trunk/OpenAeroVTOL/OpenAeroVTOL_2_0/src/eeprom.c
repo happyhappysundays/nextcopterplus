@@ -25,6 +25,7 @@
 void Initial_EEPROM_Config_Load(void);
 void Save_Config_to_EEPROM(void);
 void Set_EEPROM_Default_Config(void);
+void Save_Config_to_EEPROM_fast(void);
 void eeprom_write_byte_changed( uint8_t * addr, uint8_t value );
 void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size );
 
@@ -33,8 +34,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x32		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x32 = Beta 50+
+#define MAGIC_NUMBER 0x33		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x33 = Beta 51+
 
 //************************************************************
 // Code
@@ -91,6 +92,58 @@ void Set_EEPROM_Default_Config(void)
 	Config.Channel[OUT4].P2_sensors |= (1 << YawGyro);
 #endif
 
+#ifdef QUADCOPTER
+	//**************************************
+	//* Quadcopter defaults for testing
+	//**************************************
+	for (i = 0; i <= OUT4; i++)
+	{
+		Config.Channel[i].P1_throttle_volume = 100;
+		Config.Channel[i].P2_throttle_volume = 100;
+		Config.Channel[i].P2_sensors |= (1 << MotorMarker);
+	}
+
+	// OUT1
+	Config.Channel[OUT1].P1_elevator_volume = -20;
+	Config.Channel[OUT1].P2_elevator_volume = -20;
+	Config.Channel[OUT1].P1_rudder_volume = -20;
+	Config.Channel[OUT1].P2_rudder_volume = -20;
+	Config.Channel[OUT1].P1_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT1].P2_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT1].P1_sensors |= (1 << YawGyro);
+	Config.Channel[OUT1].P2_sensors |= (1 << YawGyro);	
+	
+	// OUT2
+	Config.Channel[OUT2].P1_aileron_volume = -20;
+	Config.Channel[OUT2].P2_aileron_volume = -20;
+	Config.Channel[OUT2].P1_rudder_volume = 20;
+	Config.Channel[OUT2].P2_rudder_volume = 20;
+	Config.Channel[OUT2].P1_sensors |= (1 << RollGyro);
+	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
+	Config.Channel[OUT2].P1_sensors |= (1 << YawGyro);
+	Config.Channel[OUT2].P2_sensors |= (1 << YawGyro);
+	
+	// OUT3
+	Config.Channel[OUT3].P1_elevator_volume = 20;
+	Config.Channel[OUT3].P2_elevator_volume = 20;
+	Config.Channel[OUT3].P1_rudder_volume = -20;
+	Config.Channel[OUT3].P2_rudder_volume = -20;
+	Config.Channel[OUT3].P1_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT3].P2_sensors |= (1 << PitchGyro);
+	Config.Channel[OUT3].P1_sensors |= (1 << YawGyro);
+	Config.Channel[OUT3].P2_sensors |= (1 << YawGyro);
+		
+	// OUT4
+	Config.Channel[OUT2].P1_aileron_volume = 20;
+	Config.Channel[OUT2].P2_aileron_volume = 20;
+	Config.Channel[OUT2].P1_rudder_volume = 20;
+	Config.Channel[OUT2].P2_rudder_volume = 20;
+	Config.Channel[OUT2].P1_sensors |= (1 << RollGyro);
+	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
+	Config.Channel[OUT2].P1_sensors |= (1 << YawGyro);
+	Config.Channel[OUT2].P2_sensors |= (1 << YawGyro);
+#endif
+
 	// Misc settings
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
@@ -105,7 +158,7 @@ void Set_EEPROM_Default_Config(void)
 	}
 	
 #ifdef KK21
-	Config.AccZeroNormZ		= 0;
+	Config.AccZeroNormZ		= 128;
 #else
 	Config.AccZeroNormZ		= 765;
 #endif
@@ -126,19 +179,34 @@ void Set_EEPROM_Default_Config(void)
 		Config.FlightMode[i].A_Pitch_P_mult = 60;
 	}
 
-	Config.Acc_LPF = 2;					// Acc LPF around 21Hz
-	Config.Gyro_LPF = 5;				// Gyro LPF off
+	Config.Acc_LPF = 2;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
+	Config.Gyro_LPF = 6;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
 	Config.CF_factor = 7;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.Orientation = HORIZONTAL;	// Horizontal / vertical etc.
-	Config.Contrast = 38;				// Contrast
+#ifdef KK2Mini
+	Config.Contrast = 30;				// Contrast (KK2 Mini)
+#else
+	Config.Contrast = 36;				// Contrast (Everything else)
+#endif	
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 
 #ifdef KK21
-	Config.MPU6050_LPF = MPU60X0_DLPF_BW_256; // MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	Config.TrimChan = NOCHAN;			// Channel to activate autotrim
+	Config.MPU6050_LPF = 2;				// 6 - 2 = 4. MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz*, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
 #endif	
 }
+
+#ifdef KK21
+void Save_Config_to_EEPROM_fast(void)
+{
+	// Write to eeProm with no LED flash or pause
+	cli();
+	eeprom_write_block_changes((const void*) &Config, (void*) EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));
+	sei();
+}
+#endif
 
 void Save_Config_to_EEPROM(void)
 {
@@ -146,10 +214,6 @@ void Save_Config_to_EEPROM(void)
 	cli();
 	eeprom_write_block_changes((const void*) &Config, (void*) EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));	
 	sei();
-	
-	LED1 = !LED1;
-	_delay_ms(500);
-	LED1 = !LED1;	
 }
 
 void eeprom_write_byte_changed( uint8_t * addr, uint8_t value )

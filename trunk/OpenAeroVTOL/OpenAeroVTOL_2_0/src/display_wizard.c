@@ -81,13 +81,13 @@ void Display_sticks(void)
 			RxGetChannels();
 			
 			// Display warning if sticks not centered or no RC signal while not started calibrating
-			if ((RxChannel[AILERON] < 3250) && (RxChannel[AILERON] > 4250) && !CalibrateStarted)
+			if (((RCinputs[AILERON] < -2000) || (RCinputs[AILERON] > 2000)) && !CalibrateStarted)
 			{
-				LCD_Display_Text(135,(const unsigned char*)Verdana14,14,43); 	// "No RX signal?"
+				LCD_Display_Text(135,(const unsigned char*)Verdana14,16,43); 	// "No RX signal?"
 			}
 
 			// Sticks have not moved far enough but RC being received
-			else if ((RxChannel[AILERON] > 3000) && (RxChannel[AILERON] < 4500))
+			else if ((RCinputs[AILERON] < 500) && (RCinputs[AILERON] > -500))
 			{
 				CalibrateStarted = true;
 				LCD_Display_Text(136,(const unsigned char*)Verdana14,9,43); 	// "Hold as shown"
@@ -134,9 +134,6 @@ void Display_sticks(void)
 		clear_buffer(buffer);
 #endif
 		Save_Config_to_EEPROM();
-#ifdef KK21
-		_delay_ms(500);
-#endif
  	}
 	else
 	{

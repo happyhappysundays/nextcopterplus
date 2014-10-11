@@ -41,13 +41,17 @@ void glcd_delay(void);
 void glcd_delay_1us(void);
 void glcd_spiwrite_asm(uint8_t byte);
 void write_buffer(uint8_t *buffer, uint8_t type);
+#ifdef KK21
+void clear_screen(void);
+#endif
 
 //***********************************************************
 //* Low-level code
 //***********************************************************
 
 const uint8_t pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 
-const uint8_t lcd_commmands[] PROGMEM	= { 0xA2,0xA0,0x40,0xA6,0xEE,0xC8,0x2C,0x2E,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string
+const uint8_t lcd_commmands[] PROGMEM	= {0xAF,0x40,0xA0,0xA6,0xA4,0xA2,0xEE,0xC8,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string 14
+
 
 // Software SPI write
 inline void spiwrite(uint8_t c) 
@@ -91,32 +95,26 @@ void st7565_init(void)
 	// Toggle RST low to reset and CS low so it'll listen to us
 	LCD_CSI = 0;
 	LCD_RES = 0;
-	_delay_ms(500);
+	_delay_ms(1); // Datasheet says 1us for 3.3V operation
 	LCD_RES = 1;
 
 	// Send command sequence
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 14; i++)
 	{
 		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
 	}
-	_delay_ms(50);
-	st7565_command(0x2E);
-	_delay_ms(50);
-	st7565_command(0x2F);
-	_delay_ms(10);
 
-	for (int i = 9; i < 14; i++)
-	{
-		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
-	}
+	// Debug
+	st7565_set_brightness((uint8_t)Config.Contrast);	
+	st7565_command(CMD_SET_COM_REVERSE); 		// For logo	0xC8
 }
 
 
 // Set LCD brightness
 void st7565_set_brightness(uint8_t val) 
 {
-	st7565_command(CMD_SET_VOLUME_FIRST);
-	st7565_command(CMD_SET_VOLUME_SECOND | (val & 0x3f));
+	st7565_command(CMD_SET_VOLUME_FIRST);					// 0x81
+	st7565_command(val);
 }
 
 // Write LCD buffer if type = 1 normal, 0 = logo.
@@ -125,18 +123,10 @@ void write_buffer(uint8_t *buffer, uint8_t type)
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 
 	{
-		if (type)
-		{
-			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap[p]));		// Page 7 to 0
-		}
-		else
-		{
-			st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap[7-p]));	// Page 0 to 7
-		}
-
-		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));			// Column 0
-		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));	// Column 0
-		st7565_command(CMD_RMW);									// Sets auto-increment
+		st7565_command(CMD_SET_PAGE | (uint8_t)pgm_read_byte(&pagemap[p]));		// Page 7 to 0
+		st7565_command(CMD_SET_COLUMN_LOWER | (0x0 & 0xf));						// Column 0
+		st7565_command(CMD_SET_COLUMN_UPPER | ((0x0 >> 4) & 0xf));				// Column 0
+		st7565_command(CMD_RMW);												// Sets auto-increment
 
 		for(c = 0; c < 128; c++) 
 		{
@@ -150,6 +140,25 @@ void clear_buffer(uint8_t *buff)
 {
 	memset(buff, 0, 1024);
 }
+
+#ifdef KK21
+// Clear screen (does not clear buffer)
+void clear_screen(void)
+{
+	uint8_t p, c;
+
+	for(p = 0; p < 8; p++)
+	{
+		st7565_command(CMD_SET_PAGE | p);								// Set page to p
+		for(c = 0; c < 128; c++) 										// Was 129, which I think is wrong...
+		{
+			st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
+			st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));	// Set column to c
+			st7565_data(0x00);											// Clear data
+		}
+	}
+}
+#endif
 
 //***********************************************************
 //* Graphics API code

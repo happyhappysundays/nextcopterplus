@@ -79,8 +79,6 @@ const int8_t SQRTSIN[101] PROGMEM =
 // Code
 //************************************************************
 
-int16_t	transition = 0; // Global for transition value
-
 void ProcessMixer(void)
 {
 	uint8_t i = 0;
@@ -335,17 +333,30 @@ void ProcessMixer(void)
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P1_aileron_volume !=0) 					// Mix in dedicated aileron
 			{
+#ifdef KK21
+				temp2 = scale32(RCinputs[AILERON] - Config.RCinputsOffset[P1][ROLL] - Config.TXOffset[P1][ROLL], Config.Channel[i].P1_aileron_volume);
+#else
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P1_aileron_volume);
+#endif
 				P1_solution = P1_solution + temp2;
 			}
 			if (Config.Channel[i].P1_elevator_volume !=0) 					// Mix in dedicated elevator
 			{
+#ifdef KK21
+				temp2 = scale32(RCinputs[ELEVATOR] - Config.RCinputsOffset[P1][PITCH] - Config.TXOffset[P1][PITCH], Config.Channel[i].P1_elevator_volume);
+#else
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P1_elevator_volume);
+#endif
 				P1_solution = P1_solution + temp2;
 			}
 			if (Config.Channel[i].P1_rudder_volume !=0) 					// Mix in dedicated rudder
 			{
+
+#ifdef KK21
+				temp2 = scale32(RCinputs[RUDDER] - Config.RCinputsOffset[P1][YAW] - Config.TXOffset[P1][YAW], Config.Channel[i].P1_rudder_volume);
+#else
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P1_rudder_volume);
+#endif
 				P1_solution = P1_solution + temp2;
 			}
 
@@ -391,17 +402,29 @@ void ProcessMixer(void)
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P2_aileron_volume !=0) 					// Mix in dedicated aileron
 			{
+#ifdef KK21
+				temp2 = scale32(RCinputs[AILERON] - Config.RCinputsOffset[P2][ROLL] - Config.TXOffset[P2][ROLL], Config.Channel[i].P2_aileron_volume);
+#else
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P2_aileron_volume);
+#endif
 				P2_solution = P2_solution + temp2;
 			}
 			if (Config.Channel[i].P2_elevator_volume !=0) 					// Mix in dedicated elevator
 			{
+#ifdef KK21
+				temp2 = scale32(RCinputs[ELEVATOR] - Config.RCinputsOffset[P2][PITCH] - Config.TXOffset[P2][PITCH], Config.Channel[i].P2_elevator_volume);
+#else
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P2_elevator_volume);
+#endif
 				P2_solution = P2_solution + temp2;
 			}
 			if (Config.Channel[i].P2_rudder_volume !=0) 					// Mix in dedicated rudder
 			{
+#ifdef KK21
+				temp2 = scale32(RCinputs[RUDDER] - Config.RCinputsOffset[P2][YAW] - Config.TXOffset[P2][YAW], Config.Channel[i].P2_rudder_volume);
+#else
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P2_rudder_volume);
+#endif
 				P2_solution = P2_solution + temp2;
 			}
 
@@ -451,23 +474,7 @@ void ProcessMixer(void)
 	//************************************************************ 
 
 	// Convert number to percentage (0 to 100%)
-	if (Config.TransitionSpeed == 0) 
-	{
-		// Offset RC input to (approx) -250 to 2250
-		temp1 = RCinputs[Config.FlightChan] + 1000;
-
-		// Trim lower end to zero (0 to 2250)
-		if (temp1 < 0) temp1 = 0;
-
-		// Convert 0 to 2250 to 0 to 125. Divide by 20
-		// Round to avoid truncation errors
-		transition = (temp1 + 10) / 20;
-
-		// transition now has a range of 0 to 101 for 0 to 2000 input
-		// Limit extent of transition value 0 to 100 (101 steps)
-		if (transition > 100) transition = 100;
-	}
-	else 
+	if (Config.TransitionSpeed != 0) 
 	{
 		// transition_counter counts from 0 to 100 (101 steps)
 		transition = transition_counter;
@@ -596,13 +603,19 @@ void ProcessMixer(void)
 			// At this point, the throttle values are 0 to 2500 (+/-150%)
 			// Re-scale throttle values back to neutral-centered system values (+/-1250) 
 			// and set the minimum throttle point to 1.1ms.
-			// A THROTTLEMIN value of 1000 will result in 1.1ms
+			// A THROTTLEMIN value of 1000 will result in 2750, or 1.1ms
 			temp3 = temp3 - THROTTLEMIN;
 
 			// Add offset to channel value
 			Config.Channel[i].P1_value += temp3;
 
 		} // No throttle
+		
+		// No throttles, so clamp to THROTTLEMIN if flagged as a motor
+		else if ((Config.Channel[i].P1_sensors & (1 << MotorMarker)) != 0)
+		{
+			Config.Channel[i].P1_value = -THROTTLEOFFSET; // 3750-1250 = 2500 = 1.0ms
+		}
 	}
 
 	//************************************************************
@@ -721,18 +734,21 @@ void UpdateLimits(void)
 				Config.Raw_I_Constrain[j][i] = 0;
 			}
 		}
-	}
-#ifdef KK21	
-	// Update dynamic gain divisor
-	if (Config.Progressive > 0)
-	{
-		Config.ProgressiveDiv = 500 / Config.Progressive; // 500 - 5
-	}
-	else
-	{
-		Config.ProgressiveDiv = 500;
-	}
+
+#ifdef KK21
+		// Update dynamic gain divisor for each flight mode
+		if (Config.FlightMode[j].Progressive > 0)
+		{
+			Config.ProgressiveDiv[j] = 500 / Config.FlightMode[j].Progressive; 
+		}
+		else
+		{
+			Config.ProgressiveDiv[j] = 500;
+		}
 #endif
+
+	}
+
 	// Update travel limits
 	for (i = 0; i < MIX_OUTPUTS; i++)
 	{

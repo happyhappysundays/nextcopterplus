@@ -38,6 +38,10 @@ void Display_balance(void)
 {
 	int16_t	x_pos, y_pos;
 
+	#ifdef KK2Mini
+	st7565_set_brightness(28);
+	#endif
+
 	while(BUTTON1 != 0)
 	{
 		// Read accs
@@ -63,11 +67,18 @@ void Display_balance(void)
 		drawrect(buffer, 0, 0, 128, 64, 1);		// Border
 		drawrect(buffer, 54, 22, 21, 21, 1);	// Target
 		drawline(buffer, 64, 8, 64, 56, 1); 	// Crosshairs
-		drawline(buffer, 32, 32, 96, 32, 1); 
+		drawline(buffer, 32, 32, 96, 32, 1);
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
-		// Refresh GLCD 
+		// Refresh GLCD
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
+		_delay_ms(20);
 	}
+
+	#ifdef KK2Mini
+	clear_buffer(buffer);
+	write_buffer(buffer,1);
+	st7565_set_brightness((uint8_t)Config.Contrast);
+	#endif
 }

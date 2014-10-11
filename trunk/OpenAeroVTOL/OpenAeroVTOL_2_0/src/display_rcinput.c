@@ -41,7 +41,29 @@ void Display_rcinput(void)
 		{
 			CenterSticks();
 		}
-
+#if defined(KK21) && defined(ADVANCED)	
+		if (BUTTON3 == 0)
+		{
+			Transfer_Trims();
+			
+			// Wait until finger off the button
+			while((BUTTON1 == 0) || (BUTTON4 == 0))
+			{
+				_delay_ms(250);
+			}
+		}
+		
+		if (BUTTON2 == 0)
+		{
+			Erase_Trims();
+			
+			// Wait until finger off the button
+			while((BUTTON1 == 0) || (BUTTON4 == 0))
+			{
+				_delay_ms(250);
+			}
+		}
+#endif
 		RxGetChannels();
 
 		LCD_Display_Text(114,(const unsigned char*)Verdana8,0,0); // Throttle
@@ -66,9 +88,13 @@ void Display_rcinput(void)
 
 		// Print bottom text and markers
 		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(60, (const unsigned char*)Verdana8, 100, 55); 	// Cal.
-		LCD_Display_Text(9, (const unsigned char*)Wingdings, 119, 59); 	// Down
-
+		LCD_Display_Text(60, (const unsigned char*)Verdana8, 110, 55); 	// Cal.
+		
+#if defined(KK21) && defined(ADVANCED)				
+		LCD_Display_Text(143, (const unsigned char*)Verdana8, 28, 55); 	// Erase
+		LCD_Display_Text(144, (const unsigned char*)Verdana8, 75, 55); 	// Xfer
+		LCD_Display_Text(145, (const unsigned char*)Verdana8, 28, 44); 	// Auto trim
+#endif
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);

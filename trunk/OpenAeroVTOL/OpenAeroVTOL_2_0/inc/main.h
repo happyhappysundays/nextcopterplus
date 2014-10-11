@@ -7,7 +7,7 @@
 //* External defines
 //***********************************************************
 
-#define	PBUFFER_SIZE 16 // Print buffer
+#define	PBUFFER_SIZE 8 // Print buffer
 #define	SBUFFER_SIZE 25 // Serial input buffer (25 for S-Bus)
 
 //***********************************************************
@@ -23,6 +23,7 @@ extern bool	RefreshStatus;
 extern uint32_t ticker_32;	
 extern int16_t	transition_counter;	
 extern uint8_t	Transition_state;
+extern int16_t	transition;
 
 // Flags
 extern uint8_t	General_error;
