@@ -89,7 +89,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
 		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
-		{0,20,1,0,0},					// TransitionSpeed 0 to 20
+		{0,40,1,0,0},					// TransitionSpeed 0 to 40
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{

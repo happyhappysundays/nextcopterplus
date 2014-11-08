@@ -70,7 +70,7 @@ const int8_t Acc_Pol[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM =
 // Code
 //************************************************************
 
-int16_t accADC[NUMBEROFAXIS];	// Holds Acc ADC values - alwys in RPY order
+int16_t accADC[NUMBEROFAXIS];	// Holds Acc ADC values - always in RPY order
 int16_t accVert = 0;			// Holds the level-zeroed Z-acc value. Used for height damping in hover only.
 
 void ReadAcc()

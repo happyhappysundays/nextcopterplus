@@ -55,7 +55,10 @@ void reset_IMU(void);
 										
 										// Acc magnitude values - based on MultiWii 2.3 values
 #define acc_1_15G_SQ		21668.0f	// (1.15 * ACCSENSITIVITY) * (1.15 * ACCSENSITIVITY)
-#define acc_0_85G_SQ		11837.0f	// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)												
+#define acc_0_85G_SQ		11837.0f	// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)	
+#define acc_1_15G			(ACCSENSITIVITY * 1.15)
+#define	acc_0_85G			(ACCSENSITIVITY * 0.85)
+											
 
 //************************************************************
 // 	Globals
@@ -127,6 +130,7 @@ void imu_update(uint32_t period)
 		
 		// Acc LPF
 		if (tempf > 1)
+		
 		{
 			// Acc LPF
 			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;
@@ -152,16 +156,28 @@ void imu_update(uint32_t period)
 	yaw_sq = (accADC[YAW] * accADC[YAW]);
 	AccMag = roll_sq + pitch_sq + yaw_sq;
 
-	// Add acc correction if inside local acceleration bounds and not inverted according to VectorZ 
-	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5))
+	/*
+	// Add acc correction as per KK2 IMU. Just Acc Z within 15% of normal and
+	// Roll and Pitch less than 20 degrees. This does not wok very well.
+	if	(
+			(accADC[YAW] < acc_1_15G) && 
+			(accADC[YAW] > acc_0_85G) &&
+			((AccAngleRoll < 20.0) && (AccAngleRoll > -20.0)) &&
+			((AccAnglePitch < 20.0) && (AccAnglePitch > -20.0))
+		)
+	*/
+	
+	// Add acc correction if inside local acceleration bounds. This is a much better way of determining 
+	// when it is safe to trim the IMU with acc.	 
+	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ))
 	{
 		tempf = (EulerAngleRoll - AccAngleRoll) / (11 - Config.CF_factor); // Default Config.CF_factor is 7
-		GyroRollVC = GyroRollVC + tempf;
+		GyroRollVC = GyroRollVC + (tempf * 10);
 		
 		tempf = (EulerAnglePitch - AccAnglePitch) /(11 - Config.CF_factor);
-		GyroPitchVC = GyroPitchVC + tempf;
+		GyroPitchVC = GyroPitchVC + (tempf * 10);
 	}
-	
+
 	// Rotate up-direction 3D vector with gyro inputs
 	Rotate3dVector();
 	ExtractEulerAngles();
@@ -204,14 +220,11 @@ void RotateVector(float angle)
 	VectorNewB = VectorA * small_sine(angle) + VectorB * small_cos(angle);
 	
 	// Keep Vectors within manageable bounds. Can lock up otherwise.
-	// This seem to only affect operation via the sensor display screen.
 	// 1 = 90 degrees
-	/*	
 	if (VectorNewA < -2) VectorNewA = -2;
 	if (VectorNewA > 2)	VectorNewA = 2;
 	if (VectorNewB < -2) VectorNewB = -2;
 	if (VectorNewB > 2) VectorNewB = 2;
-	*/
 }
 
 void thetascale(float gyro, float interval)
@@ -252,22 +265,6 @@ float ext2(float Vector)
 	
 	// Rough translation to Euler
 	temp = Vector * 90;
-
-	// Change 0-90-0 to 0-90-180 so that 
-	// swap happens at 100% inverted
-	if (VectorZ < 0)
-	{
-		// CW rotations
-		if (temp > 0)
-		{
-			temp = 180 - temp;
-		}
-		// CCW rotations
-		else
-		{
-			temp = -180 - temp;
-		}
-	}
 
 	return (temp);
 }
