@@ -212,8 +212,8 @@
 //			Added very complicated auto-trim feature to allow independent mechanical trims for P1 and P2 
 //			to be set in flight. I-term neutral stick position resets after two seconds of no stick input
 //			if the Auto-trim feature is in use. S.Bus2 packets now supported for KK2.1+, thanks to OpenPilot code example.
-//			Speed up EEPROM saves, removed LED flash. Tweaked menus to suit different feel. Code size improvements.
-//			Auto-trim EEPROM save moved to throttle cut at end of flight. Dramatically reduce LCD startup time.
+//			Sped up EEPROM saves, removed LED flash. Tweaked menus to suit different feel. Code size improvements.
+//			Auto-trim EEPROM save moved to throttle cut at end of flight. Dramatically reduced LCD startup time.
 //			Improved code to stabilise FC when pressing calibrate button.
 //			Move eeprom save to throttle cut.
 // Beta 52	Now has "Quadcopter" compile option to assist rapid setup and testing.
@@ -222,15 +222,15 @@
 //			Improved default AccZeroNormZ setting. Fixed throttle offset change when volumes both zero.
 //			KK2 Mini compatibility tweaks. Change LCD initialisation and limit available contrast.
 //			Added ADVANCED compile option to hide/expose the new features (Acro, Progressive P and Auto-trim)
-//
+// Beta 53  Maximum automated transition time now 40 seconds.
+//			Factory defaults for lock rates now correctly set to 1.
+//			IMU tumble bug fix.
+//			
 //***********************************************************
 //* Notes
 //***********************************************************
 //
 // Bugs:	
-//
-// To do: - Find out what's making OUT8 jitter... if indeed it is.
-//			Try blocking interrupts
 //
 //***********************************************************
 //* Includes
