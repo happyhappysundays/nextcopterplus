@@ -7,7 +7,7 @@
 //* External defines
 //***********************************************************
 
-#define	PBUFFER_SIZE 8 // Print buffer
+#define	PBUFFER_SIZE 16 // Print buffer
 #define	SBUFFER_SIZE 25 // Serial input buffer (25 for S-Bus)
 
 //***********************************************************
@@ -32,10 +32,6 @@ extern uint8_t	Alarm_flags;
 
 // Misc
 extern uint16_t InterruptCount;
+extern uint16_t LoopStartTCNT1;
 extern bool Overdue;
 extern uint8_t	LoopCount;
-
-#ifdef DISPLAYLOG
-extern int8_t datalog[1024];
-extern uint16_t	data_pointer;
-#endif

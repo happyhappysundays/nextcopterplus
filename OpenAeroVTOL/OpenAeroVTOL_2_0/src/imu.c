@@ -24,12 +24,13 @@
 #include <avr/pgmspace.h> 
 #include "menu_ext.h"
 #include "rc.h"
+#include "isr.h"
 
 //************************************************************
 // IMU Prototypes
 //************************************************************
 
-void imu_update(uint32_t period);
+void simple_imu_update(uint32_t period);
 void Rotate3dVector(void);
 void ExtractEulerAngles(void);
 
@@ -56,9 +57,9 @@ void reset_IMU(void);
 										// Acc magnitude values - based on MultiWii 2.3 values
 #define acc_1_15G_SQ		21668.0f	// (1.15 * ACCSENSITIVITY) * (1.15 * ACCSENSITIVITY)
 #define acc_0_85G_SQ		11837.0f	// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)	
-#define acc_1_15G			(ACCSENSITIVITY * 1.15)
-#define	acc_0_85G			(ACCSENSITIVITY * 0.85)
-											
+
+#define maxdeltaangle		0.2618f		// Limit possible instantaneous change in angle to +/-15 degrees (720 deg/s)
+
 
 //************************************************************
 // 	Globals
@@ -76,7 +77,7 @@ float GyroPitchVC, GyroRollVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
-int16_t	angle[NUMBEROFAXIS];			// Attitude in degrees
+int16_t	angle[2];						// Attitude in degrees - pitch and roll
 float	interval;						// Interval in seconds since the last loop
 
 const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
@@ -109,7 +110,7 @@ const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conver
 //
 //************************************************************
 
-void imu_update(uint32_t period)
+void simple_imu_update(uint32_t period)
 {
 	float		tempf, accADCf;
 	int8_t		axis;
@@ -118,8 +119,8 @@ void imu_update(uint32_t period)
 		
 	// Work out interval in seconds
 	// Convert (period) from units of 400ns (1/2500000) to seconds (1s/400ns = 2500000)
-	tempf = period; // Promote int16_t to float
-	interval = tempf/2500000.0f;		
+	tempf = period;						// Promote int16_t to float
+	interval = tempf/2500000.0f;		// This gives the period in seconds
 
 	tempf = pgm_read_byte(&LPF_lookup[Config.Acc_LPF]); // Lookup actual LPF value and promote
 	
@@ -130,7 +131,6 @@ void imu_update(uint32_t period)
 		
 		// Acc LPF
 		if (tempf > 1)
-		
 		{
 			// Acc LPF
 			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;
@@ -155,27 +155,16 @@ void imu_update(uint32_t period)
 	pitch_sq = (accADC[PITCH] * accADC[PITCH]);
 	yaw_sq = (accADC[YAW] * accADC[YAW]);
 	AccMag = roll_sq + pitch_sq + yaw_sq;
-
-	/*
-	// Add acc correction as per KK2 IMU. Just Acc Z within 15% of normal and
-	// Roll and Pitch less than 20 degrees. This does not wok very well.
-	if	(
-			(accADC[YAW] < acc_1_15G) && 
-			(accADC[YAW] > acc_0_85G) &&
-			((AccAngleRoll < 20.0) && (AccAngleRoll > -20.0)) &&
-			((AccAnglePitch < 20.0) && (AccAnglePitch > -20.0))
-		)
-	*/
 	
-	// Add acc correction if inside local acceleration bounds. This is a much better way of determining 
-	// when it is safe to trim the IMU with acc.	 
-	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ))
+	// Add acc correction if inside local acceleration bounds and not inverted according to VectorZ
+	// This is actually a kind of Complementary Filter
+	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5))
 	{
 		tempf = (EulerAngleRoll - AccAngleRoll) / (11 - Config.CF_factor); // Default Config.CF_factor is 7
-		GyroRollVC = GyroRollVC + (tempf * 10);
+		GyroRollVC = GyroRollVC + tempf;
 		
 		tempf = (EulerAnglePitch - AccAnglePitch) /(11 - Config.CF_factor);
-		GyroPitchVC = GyroPitchVC + (tempf * 10);
+		GyroPitchVC = GyroPitchVC + tempf;
 	}
 
 	// Rotate up-direction 3D vector with gyro inputs
@@ -218,25 +207,33 @@ void RotateVector(float angle)
 {
 	VectorNewA = VectorA * small_cos(angle) - VectorB * small_sine(angle);
 	VectorNewB = VectorA * small_sine(angle) + VectorB * small_cos(angle);
-	
-	// Keep Vectors within manageable bounds. Can lock up otherwise.
-	// 1 = 90 degrees
-	if (VectorNewA < -2) VectorNewA = -2;
-	if (VectorNewA > 2)	VectorNewA = 2;
-	if (VectorNewB < -2) VectorNewB = -2;
-	if (VectorNewB > 2) VectorNewB = 2;
 }
 
 void thetascale(float gyro, float interval)
 {
 	// interval = time in seconds since last measurement
-	// GYROSENSRADIANS = conversion from raw gyro data to rad/s (0.06818f for my code)
+	// GYROSENSRADIANS = conversion from raw gyro data to rad/s
 	// theta = actual number of radians moved
 
 	theta = (gyro * GYROSENSRADIANS * interval);
+	
+	// The sin() and cos() functions don't appreciate large 
+	// input values. Limit the input values to +/-15 degrees. 
+	
+	if (theta > maxdeltaangle)
+	{
+		theta = maxdeltaangle;
+	}
+	
+	if (theta < -maxdeltaangle)
+	{
+		theta = -maxdeltaangle;
+	}
 }
 
 // Small angle approximations of Sine, Cosine
+// NB:	These *only* work for small input values.
+//		Larger values will produce fatal results
 float small_sine(float angle)
 {
 	// sin(angle) = angle
@@ -250,6 +247,7 @@ float small_cos(float angle)
 	
 	temp = (angle * angle) / 2;
 	temp = 1 - temp;
+
 	return temp;
 }
 
@@ -263,19 +261,43 @@ float ext2(float Vector)
 {
 	float temp;
 	
-	// Rough translation to Euler
+	// Rough translation to Euler angles
 	temp = Vector * 90;
+
+	// Change 0-90-0 to 0-90-180 so that
+	// swap happens at 100% inverted
+	if (VectorZ < 0)
+	{
+		// CW rotations
+		if (temp > 0)
+		{
+			temp = 180 - temp;
+		}
+		// CCW rotations
+		else
+		{
+			temp = -180 - temp;
+		}
+	}
 
 	return (temp);
 }
 
 void reset_IMU(void)
 {
-	VectorX = 0;						// Initialise the vector to point straight up
+	// Initialise the vector to point straight up
+	VectorX = 0;
 	VectorY = 0;
 	VectorZ = 1;
-	VectorA = 0;						// Initialise internal vectors and attitude
+	
+	// Initialise internal vectors and attitude	
+	VectorA = 0;
 	VectorB = 0;
 	EulerAngleRoll = 0;
 	EulerAnglePitch = 0;
+
+	// Reset loop count to zero
+	TMR0_counter = 0;	// TMR0 overflow counter
+	TCNT1 = 0;			// TCNT1 current time
+	LoopStartTCNT1 = 0;	// TCNT1 last loop time
 }

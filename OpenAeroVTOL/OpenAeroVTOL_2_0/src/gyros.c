@@ -1,5 +1,9 @@
 //***********************************************************
 //* gyros.c
+//* 
+//* Read and calibrate the gyroscopes.
+//* Manage the different board orientations.
+//* gyroADC[] holds the raw values
 //***********************************************************
 
 //***********************************************************
@@ -164,9 +168,6 @@ void CalibrateGyrosFast(void)
 	{
 		Config.gyroZero[i] 	= (Config.gyroZero[i] >> 5);	// Divide by 32	
 	}
-	
-	// Reset IMU on recalibration
-	reset_IMU();
 
 	Save_Config_to_EEPROM();
 }

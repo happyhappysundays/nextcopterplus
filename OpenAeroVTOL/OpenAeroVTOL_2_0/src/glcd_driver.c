@@ -52,7 +52,6 @@ void clear_screen(void);
 const uint8_t pagemap[] PROGMEM 		= { 7, 6, 5, 4, 3, 2, 1, 0 }; 
 const uint8_t lcd_commmands[] PROGMEM	= {0xAF,0x40,0xA0,0xA6,0xA4,0xA2,0xEE,0xC8,0x2F,0x24,0xAC,0x00,0xF8,0x00};	// LCD command string 14
 
-
 // Software SPI write
 inline void spiwrite(uint8_t c) 
 {
@@ -104,7 +103,6 @@ void st7565_init(void)
 		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
 	}
 
-	// Debug
 	st7565_set_brightness((uint8_t)Config.Contrast);	
 	st7565_command(CMD_SET_COM_REVERSE); 		// For logo	0xC8
 }
@@ -182,7 +180,7 @@ void setpixel(uint8_t *buff, uint8_t x, uint8_t y, uint8_t color)
 	}
 }
 
-// Bresenham's algorithm - From wikpedia
+// Bresenham's algorithm - From wikipedia
 void drawline(uint8_t *buff, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t color) 
 {
 	uint8_t steep = abs(y1 - y0) > abs(x1 - x0);

@@ -52,9 +52,10 @@ void Display_sticks(void)
 	Config.ElevatorPol =  NORMAL;
 	Config.RudderPol = NORMAL;
 
-	// Until exit button pressed
+	// Until exit button pressed or complete
 	while((BUTTON1 != 0) && (!CalibrateDone))
 	{
+		// Draw first stick on the left
 		offset = 0;
 
 		// Clear screen buffer
@@ -66,9 +67,10 @@ void Display_sticks(void)
 			drawrect(buffer, 17 + offset, 0, 40, 40, 1);			// Box
 			drawline(buffer, 38 + offset,20, 48 + offset,  3, 1); 	// Line 1
 			drawline(buffer, 41 + offset,21, 56 + offset,  6, 1); 	// Line 2
-			fillcircle(buffer, 38 + offset, 21, 2, 1);				// Centre
+			fillcircle(buffer, 38 + offset, 21, 2, 1);				// Center
 			fillcircle(buffer, 51 + offset, 5, 4, 1);				// End
 
+			// Draw second stick on the right
 			offset = 52;
 		}
 
@@ -127,12 +129,15 @@ void Display_sticks(void)
 	// Save value and return
 	if (CalibrateDone)
 	{
+		// We are too poor to have this tiny feature in KK2.0
 #ifdef KK21
 		LCD_Display_Text(137,(const unsigned char*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
 		write_buffer(buffer,1);
 		clear_buffer(buffer);
-#endif
+		// Pause so that the "Done!" text is readable
+		_delay_ms(500);
+#endif			
 		Save_Config_to_EEPROM();
  	}
 	else

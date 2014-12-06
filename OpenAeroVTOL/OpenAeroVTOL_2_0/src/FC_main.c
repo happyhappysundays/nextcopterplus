@@ -1,10 +1,10 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 52 - July 2014
+// Version: Beta 55.2 - December 2014
 //
-// Some receiver format decoding code from Jim Drew of XPS, the Paparazzi and OpenPilot projects
-// OpenAeroVTOL code by David Thompson, included open-source code as per quoted references
+// Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
+// OpenAero code by David Thompson, included open-source code as per quoted references
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -190,6 +190,7 @@
 //			Reset the IMU at init and gyro cal. Changed gyro slow calibration method. "Hold steady" on all boards now.
 //			Board does a software reset if cal fails at startup.
 // Beta 45	Errors now show on the Idle screen
+//			Fixed broken slow gyro calibrate on KK2.0
 // Beta 46	Individual lock rates for RPY in both profiles. Stick rate values reversed. Default is now 1.
 //			More internal IMU regs added to reset. AccLPF values reversed. Default is now 120.
 //			High-speed PWM output for S.Bus and Satellite modes. Removed D-terms again.
@@ -199,17 +200,17 @@
 //			High speed mode architecture altered to fix timer disruption.
 //			Checked that gyro behaviour same as B37 on KK2.0.
 //			Added gyro data log build option for KK2.1. Increased loop rate by rebalancing the code.
-// Beta 48	Removed high-speed mode as it is unlikely to work well for everyone. Added gyro-averaging code.	
+// Beta 48	Removed high-speed mode as it is unlikely to work well for everyone. Added gyro-averaging code.
 // Beta 49	Added Gyro LPF and menu item to replace gyro averaging code. This seems to work better than B48.
 // Beta 50	Changed default MPU LPF to 21Hz instead of 5Hz. Now increments/decrements properly.
-//			Changed SW LPFs to have fixed, text-based values -  5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None. 
+//			Changed SW LPFs to have fixed, text-based values -  5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None.
 //			Note that the 74Hz option is possibly not useful and may be removed later to save space.
 //			Removed WIDE_PULSES build option as this is now the norm.
 //			Added Acro mode. I-terms and AL reset when sticks move past 5%.
 //			Added Progressive P-gain mode. Settable from 0 to 100%. At 50%, P gain reduced to zero at max stick.
 //			At 100%, P gain reduced to zero at 50% stick.
 // Beta 51  Changed LCD_Display_Text() and do_menu_item() to index more than 256 items
-//			Added very complicated auto-trim feature to allow independent mechanical trims for P1 and P2 
+//			Added very complicated auto-trim feature to allow independent mechanical trims for P1 and P2
 //			to be set in flight. I-term neutral stick position resets after two seconds of no stick input
 //			if the Auto-trim feature is in use. S.Bus2 packets now supported for KK2.1+, thanks to OpenPilot code example.
 //			Sped up EEPROM saves, removed LED flash. Tweaked menus to suit different feel. Code size improvements.
@@ -224,13 +225,30 @@
 //			Added ADVANCED compile option to hide/expose the new features (Acro, Progressive P and Auto-trim)
 // Beta 53  Maximum automated transition time now 40 seconds.
 //			Factory defaults for lock rates now correctly set to 1.
-//			IMU tumble bug fix.
-//			
+// Beta 54	Revert to B46-era IMU. Read eeProm back into config structure.
+//			Made text-based values increment more slowly. LED flashes to show successful acc calibrations
+//			I-rates now default to 2. Checked that all defaults are the same as factory settings.
+//			Fixed pbuffer overrun which caused text to be centered off-screen.
+//			Removed advanced features to simplify debugging.
+//			Wound back LCD_Display_Text() indexing to B46, ServoOut[] no longer volatile
+// Beta 55	Bugfix release for IMU that could no longer handle tumbling.
+//			Had to reinstate the use of TMR0 to count the over-runs of TMR1 when measuring the loop interval.
+// Beta 55.1
+//			Still buggy for weird AL on existing the menu. Trying new loop interval handling.
+// Beta 55.2
+//			Bug fixed. Minor tweaks. Limit the instantaneous change in angle of the IMU to +/-15 degrees.
+//			Removed read-back of eeProm into config structure.
+//			Updated the default eeprom settings. Scrimped a few bytes to squeeze it into the KK2.0.
+//
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:	
+// Bugs: Not any more... I hope.
+//	
+//
+// Todo: Nada!
+//	
 //
 //***********************************************************
 //* Includes
@@ -239,6 +257,8 @@
 #include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h> 
+#include <avr/wdt.h>
+#include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -267,8 +287,8 @@
 //* Fonts
 //***********************************************************
 
-#include "Font_Verdana.h" 		// 8 (text) and 14 (titles) points
-#include "Font_WingdingsOE2.h"	// Cursor and markers
+#include "Font_Verdana.h" 			// 8 (text) and 14 (titles) points
+#include "Font_WingdingsOE2.h"		// Cursor and markers
 
 //***********************************************************
 //* Defines
@@ -278,25 +298,15 @@
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 41667
 #define	SERVO_RATE_LOW 390			// Requested servo rate when in Normal mode. 19531 / 50(Hz) = 390
 #define SECOND_TIMER 19531			// Unit of timing for seconds
-#define TWO_SECOND_TIMER 39062		// Two seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
 #define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger arm. Currently one second.
 #define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger disarm. Currently three seconds.
-#define	PWM_GENERATION 8000			// Amount of time taken for PWM generation (3.2ms * 2500000) 8000/2500000 = 3.2ms
-#define SBUS_DATA_PERIOD 8000		// S.Bus data packet duration
-#define SYNC_TIMEOUT 976			// Number of T2 cycles before timeout will expire = 976 * 1/19531 = 50ms (20Hz)
 
 //***********************************************************
 //* Code and Data variables
 //***********************************************************
-
-#ifdef DISPLAYLOG
-// Data log
-int8_t		datalog[1024];
-uint16_t	data_pointer = 0;
-#endif
 
 // Flight variables
 uint32_t interval;					// IMU interval
@@ -329,6 +339,7 @@ const int8_t Trans_Matrix[3][3] PROGMEM =
 
 // Misc globals
 uint16_t InterruptCount = 0;
+uint16_t LoopStartTCNT1 = 0;
 bool Overdue = false;
 uint8_t	LoopCount = 0;
 	
@@ -354,17 +365,11 @@ int main(void)
 	uint16_t Servo_Rate = 0;
 	uint16_t Transition_timeout = 0;
 	uint16_t Disarm_timer = 0;
-#ifdef KK21
-	uint16_t Recal_timer = 0;
-#endif
+	uint16_t Save_TCNT1 = 0;
+	uint16_t ticker_16 = 0;
 
 	// Timer incrementers
-	uint16_t LoopStartTCNT1 = 0;
 	uint16_t RC_Rate_TCNT1 = 0;
-	uint16_t Save_TCNT1 = 0;
-#ifdef KK21
-	uint16_t Recal_timer_TCNT2 = 0;
-#endif	
 	uint8_t Transition_TCNT2 = 0;
 	uint8_t Status_TCNT2 = 0;
 	uint8_t Refresh_TCNT2 = 0;
@@ -382,7 +387,7 @@ int main(void)
 	int8_t	old_flight = 3;			// Old flight profile
 	int8_t	old_trans_mode = 0;		// Old transition mode
 	int16_t temp1 = 0;
-		
+	
 	init();							// Do all init tasks
 
 	// Main loop
@@ -415,6 +420,18 @@ int main(void)
 					Menu_mode = STATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
+					menu_beep(1);
+					
+					// Enable Timer0 interrupts as loop rate is slow
+					// and we need TMR0 to fully measure it.
+					TIMSK0 |= (1 << TOIE0);	
+				}
+				// Idle mode - fast loop rate so don't need TMR0.
+				// We don't want TMR0 to interrupt PWM generation.
+				else
+				{
+					TIMSK0 = 0; 		// Disable Timer0 interrupts
+					TIFR0 = 1;			// Clear interrupt flag
 				}
 				break;
 
@@ -425,7 +442,7 @@ int main(void)
 				// Update status screen
 				Display_status();
 				// Force resync on next RC packet
-				Interrupted = false;
+				Interrupted = false;	
 				// Wait for timeout
 				Menu_mode = WAITING_TIMEOUT_BD;
 				break;
@@ -458,6 +475,8 @@ int main(void)
 				{
 					Menu_mode = MENU;
 					menu_beep(1);
+					// Force resync on next RC packet
+					Interrupted = false;
 				}
 
 				// Update status screen while waiting to time out
@@ -465,7 +484,6 @@ int main(void)
 				{
 					Menu_mode = STATUS;
 				}
-			
 				break;
 
 			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
@@ -485,6 +503,7 @@ int main(void)
 				General_error |= (1 << DISARMED);
 				// Start the menu system
 				menu_main();
+				
 				// Force resync on next RC packet
 				Interrupted = false;
 				// Switch back to status screen when leaving menu
@@ -514,49 +533,6 @@ int main(void)
 			InterruptCounter = 0;
 		}
 
-#ifdef KK21
-		//************************************************************
-		//* Trim recalibration timing
-		//* Execute when the user-set channel toggles off-on
-		//************************************************************
-			
-		// Count elapsed seconds, recenter I-term stick positions if Autotrim in use
-		if ((Recal_timer > TWO_SECOND_TIMER) && (Config.TrimChan != NOCHAN))
-		{
-			ResetItermNeutral();		// Reset I-term stick neutral
-			Recal_timer = 0;
-		}
-			
-		// Reset timer if RX activity
-		if (Flight_flags & (1 << HANDSFREE))
-		{
-			Recal_timer = 0;
-		}
-
-		// Check channel-based autotrim input
-		if ((RCinputs[Config.TrimChan] > 800) && !(Flight_flags & (1 << TRIMSET)))
-		{
-			Flight_flags |= (1 << AUTOTRIM);
-			Flight_flags |= (1 << TRIMSET);
-		}
-
-		if (RCinputs[Config.TrimChan] < 250)
-		{
-			Flight_flags &= ~(1 << TRIMSET);	// Clear autotrim flag
-		}
-			
-		// Update autotrim when Autotrim channel selected and the Autotrim channel has been toggled
-		if ((Config.TrimChan != NOCHAN) && (Flight_flags & (1 << AUTOTRIM)))
-		{
-			CenterRPYSticks();					// Recalibrate the RCinputs values
-			
-			Flight_flags |= (1 << TRIMSAVE);	// Set trim save request
-				
-			// Clear autotrim flag
-			Flight_flags &= ~(1 << AUTOTRIM);	
-		}
-#endif
-
 		//************************************************************
 		//* System ticker - based on TCNT2 (19.531kHz)
 		//* 
@@ -585,6 +561,7 @@ int main(void)
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
+				menu_beep(1);						// Signal that FC is now disarmed
 			}
 		}
 		else
@@ -605,12 +582,12 @@ int main(void)
 
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
 		if	(
-				(
+			 (
 				(General_error & (1 << LVA_ALARM)) ||		// Low battery
 				(General_error & (1 << NO_SIGNAL)) ||		// No signal
-				(General_error & (1 << THROTTLE_HIGH))	// Throttle high
-				) && 
-				(Alarm_flags & (1 << BUZZER_ON))
+				(General_error & (1 << THROTTLE_HIGH))		// Throttle high
+			 ) && 
+			  (Alarm_flags & (1 << BUZZER_ON))
 			) 
 		{
 			LVA = 1;
@@ -635,7 +612,7 @@ int main(void)
 				((-ARM_TIMER_RESET_1 < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[RUDDER]) && (RCinputs[RUDDER] < ARM_TIMER_RESET_1)) ||
 				(ARM_TIMER_RESET_2 < MonopolarThrottle)
-				)
+			   )
 			{
 				Arm_timer = 0;
 			}
@@ -647,8 +624,8 @@ int main(void)
 				Arm_timer = 0;
 				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
 				CalibrateGyrosSlow();					// Calibrate gyros
-				reset_IMU();							// Reset IMU just in case...
 				menu_beep(20);							// Signal that FC is ready
+				reset_IMU();							// Reset IMU just in case...
 			}
 			// Else, disarm the FC after DISARM_TIMER seconds if aileron at max
 			else if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
@@ -659,6 +636,7 @@ int main(void)
 			}
 
 			// Automatic disarm
+
 			// Reset auto-disarm count if any RX activity or set to zero, or when currently disarmed
 			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
 			{														
@@ -678,6 +656,7 @@ int main(void)
 			{
 				// Disarm the FC
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
+				menu_beep(1);							// Signal that FC is now disarmed
 			}
 		}
 		// Arm when ArmMode is OFF
@@ -701,17 +680,6 @@ int main(void)
 
 			// Reset I-terms at throttle cut. Using memset saves code space
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
-
-#ifdef KK21
-			// Save EEPROM on throttle cut if requested
-			if (Flight_flags & (1 << TRIMSAVE))
-			{
-				Flight_flags &= ~(1 << TRIMSAVE);	// Clear trim save request
-				Save_Config_to_EEPROM_fast();		// Save updated auto trim values		
-				
-				menu_beep(3);						// Debug - confirm that recalibration has been done
-			}
-#endif
 		}
 
 		//************************************************************
@@ -745,7 +713,7 @@ int main(void)
 		//************************************************************
 		//* Transition state setup/reset
 		//*
-		//* For the first startup, set up the right state for the current setup
+		//* Set up the correct state for the current setting.
 		//* Check for initial startup - the only time that old_flight should be "3".
 		//* Also, re-initialise if the transition setting is changed
 		//************************************************************
@@ -903,9 +871,9 @@ int main(void)
 				}
 			}
 
-		} // Increment transition_counter
+		} // Update transition_counter
 
-		// Zero the I-terms of the opposite state so as to ensure a bump-less transition	
+		// Zero the I-terms of the opposite state so as to ensure a bump-less transition
 		if ((Transition_state == TRANS_P1) || (transition == 0))
 		{
 			// Clear P2 I-term while fully in P1
@@ -916,7 +884,7 @@ int main(void)
 			// Clear P1 I-term while fully in P2
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
 		}
-
+		
 		// Save current flight mode
 		old_flight = Config.FlightSel;
 
@@ -924,33 +892,30 @@ int main(void)
 		//* Update timers
 		//************************************************************
 
+		// Safely get current value of TCNT1
 		Save_TCNT1 = TIM16_ReadTCNT1();
-	
+		
 		// 32-bit timers (Max. 1718s measurement on T1, 220K seconds on T2)
-	
-		// interval will hold the most recent amount measured by TCNT1
-		interval +=  (Save_TCNT1 - LoopStartTCNT1);
-		LoopStartTCNT1 =  Save_TCNT1;
 
 		// Work out the current RC rate by measuring between incoming RC packets
 		RC_Rate_Timer += (Save_TCNT1 - RC_Rate_TCNT1);
 		RC_Rate_TCNT1 = Save_TCNT1;
 
 		// Arm timer for timing stick hold
-		Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2);
+		Arm_timer += (uint8_t) (TCNT2 - Arm_TCNT2); 
 		Arm_TCNT2 = TCNT2;
-	
+
 		// 16-bit timers (Max. 3.35s measurement on T2)
 		// All TCNT2 timers increment at 19.531 kHz
-	
+
 		// Sets the desired SERVO_RATE by flagging ServoTick when PWM due
 		Servo_Rate += (uint8_t) (TCNT2 - ServoRate_TCNT2);
 		ServoRate_TCNT2 = TCNT2;
-	
+		
 		// Signal RC overdue after RC_OVERDUE time (500ms)
 		RC_Timeout += (uint8_t) (TCNT2 - Servo_TCNT2);
 		Servo_TCNT2 = TCNT2;
-	
+		
 		// Update transition timer
 		Transition_timeout += (uint8_t) (TCNT2 - Transition_TCNT2);
 		Transition_TCNT2 = TCNT2;
@@ -958,69 +923,80 @@ int main(void)
 		// Update status timeout
 		Status_timeout += (uint8_t) (TCNT2 - Status_TCNT2);
 		Status_TCNT2 = TCNT2;
-
+		
 		// Status refresh timer
 		UpdateStatus_timer += (uint8_t) (TCNT2 - Refresh_TCNT2);
 		Refresh_TCNT2 = TCNT2;
-	
+
 		// Auto-disarm timer
 		Disarm_timer += (uint8_t) (TCNT2 - Disarm_TCNT2);
 		Disarm_TCNT2 = TCNT2;
 
 		// Timer for audible alarms
 		Ticker_Count += (uint8_t) (TCNT2 - Ticker_TCNT2);
-		Ticker_TCNT2 = TCNT2;	
-		
-#ifdef KK21
-		// Timer for no stick input recalibrate (2s)
-		Recal_timer += (uint8_t) (TCNT2 - Recal_timer_TCNT2);
-		Recal_timer_TCNT2 = TCNT2;
-#endif
+		Ticker_TCNT2 = TCNT2;
+
 		//************************************************************
 		//* Read sensors
 		//************************************************************
 
 		ReadGyros();
 		ReadAcc();
+		
+		//************************************************************
+		//* Update IMU
+		// TMR1 is a 16-bit counter that counts at 2.5MHz. Max interval is 26.2ms
+		// TMR0 is an 8-bit counter that counts at 19.531kHz. Max interval is 13.1ms
+		// These two are concatenated to create a virtual timer that can measure up to 
+		// 256 x 26.2ms = 6.7072s at which point the "period" is 16,768,000, a 24-bit number
+		//************************************************************
+		
+		// Safely get current value of TCNT1
+		Save_TCNT1 = TIM16_ReadTCNT1();
+		
+		// Reset Timer0 count
+		TCNT0 = 0;
 
-		//************************************************************
-		//* Log gyro data to RAM
-		//************************************************************
-#ifdef DISPLAYLOG
-		if (Config.FlightSel == 2)
+		// Handle TCNT1 overflow correctly - this actually seems necessary...
+		// ticker_16 will hold the most recent amount measured by TCNT1
+		if (Save_TCNT1 < LoopStartTCNT1)
 		{
-			// datalog is an int8_t
-			datalog[data_pointer] = (int8_t)(gyroADC[ROLL] & 0xFF);
-			if (data_pointer < 1024)
-			{
-				data_pointer++;
-			}
+			ticker_16 = (65536 - LoopStartTCNT1) + Save_TCNT1;
 		}
 		else
 		{
-			data_pointer = 0;
+			ticker_16 = (Save_TCNT1 - LoopStartTCNT1);
 		}
-#endif
-		//************************************************************
-		//* Measure interval and call IMU
-		//************************************************************
 		
-		// Provide accurate update of loop time just before calling
-		interval +=  TIM16_ReadTCNT1() - LoopStartTCNT1;
+		// Store old TCNT for next measurement
+		LoopStartTCNT1 = Save_TCNT1;
 		
-		// Vector-based IMU test code
-		imu_update(interval);
+		// Handle both Timer1 under- and over-run cases
+		// If TMR0_counter is less than 2, ICNT1 has not overflowed
+		if (TMR0_counter < 2)
+		{
+			interval = ticker_16;
+		}
 		
-		// Restart loop timer
-		LoopStartTCNT1 =  TIM16_ReadTCNT1();
-		interval = 0;
+		// If TMR0_counter is 2 or more, then TCNT1 has overflowed
+		// So we use chunks of TCNT0, counted during the loop interval
+		// to work out the exact period.
+		else
+		{
+			interval = ticker_16 + (TMR0_counter * 32768);
+		}
+
+		TMR0_counter = 0;
+				
+		// Call IMU with interval
+		simple_imu_update(interval);
 
 		//************************************************************
 		//* Update I-terms, average gyro values
 		//************************************************************
 
 		Sensor_PID();
-
+		
 		//************************************************************
 		//* Measure incoming RC rate and flag no signal
 		//************************************************************
@@ -1080,7 +1056,7 @@ int main(void)
 			Interrupted = false;				// Reset interrupted flag
 			ServoTick = false;					// Reset output requested flag
 			Servo_Rate = 0;						// Reset servo rate timer
-
+			
 			Calculate_PID();					// Calculate PID values
 			ProcessMixer();						// Do all the mixer tasks - can be very slow
 			UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
@@ -1112,3 +1088,4 @@ int main(void)
 		
 	} // while loop
 } // main()
+

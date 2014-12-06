@@ -27,7 +27,7 @@ void output_servo_ppm_asm(volatile uint16_t	*ServoOut);
 // Code
 //************************************************************
 
-volatile uint16_t ServoOut[MAX_OUTPUTS]; // Hands off my servos!
+uint16_t ServoOut[MAX_OUTPUTS];
 
 void output_servo_ppm(void)
 {

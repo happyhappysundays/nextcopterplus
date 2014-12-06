@@ -25,7 +25,6 @@
 void Initial_EEPROM_Config_Load(void);
 void Save_Config_to_EEPROM(void);
 void Set_EEPROM_Default_Config(void);
-void Save_Config_to_EEPROM_fast(void);
 void eeprom_write_byte_changed( uint8_t * addr, uint8_t value );
 void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size );
 
@@ -34,8 +33,8 @@ void eeprom_write_block_changes( const uint8_t * src, void * dest, uint16_t size
 //************************************************************
 
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
-#define MAGIC_NUMBER 0x34		// eePROM signature - change for each eePROM structure change 
-								// to force factory reset. 0x34 = Beta 53
+#define MAGIC_NUMBER 0x35		// eePROM signature - change for each eePROM structure change 
+								// to force factory reset. 0x34 = Beta 54.2+
 
 //************************************************************
 // Code
@@ -54,12 +53,23 @@ void Set_EEPROM_Default_Config(void)
 	// Set magic number / setup byte
 	Config.setup = MAGIC_NUMBER;
 
+	// Misc settings
+	Config.RxMode = PWM;				// Default to PWM
+	Config.PWM_Sync = GEAR;
+	Config.Acc_LPF = 2;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
+	Config.Gyro_LPF = 6;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
+	Config.CF_factor = 7;
+	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
+	Config.Disarm_timer = 30;			// Default to 30 seconds
+	Config.Transition_P1n = 50;			// Set P1.n point to 50%
+
 	// Servo defaults
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
 		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 		Config.RxChannelZeroOffset[i] = 3750;
 	}
+		
 	// Monopolar throttle is a special case. Set to -100% or -1000
 	Config.RxChannelZeroOffset[THROTTLE] = 2750;
 
@@ -75,11 +85,20 @@ void Set_EEPROM_Default_Config(void)
 		Config.max_travel[i] = 100;
 	}
 
-	// Preset simple mixing for primary channels
+	// Preset simple mixing for primary channels - all models
 	Config.Channel[OUT1].P1_throttle_volume = 100;
 	Config.Channel[OUT2].P1_aileron_volume = 100;
 	Config.Channel[OUT3].P1_elevator_volume = 100;
 	Config.Channel[OUT4].P1_rudder_volume = 100;
+	
+	// Set up profile 1
+	Config.FlightMode[P1].Roll_P_mult = 60;			// PID defaults
+	Config.FlightMode[P1].A_Roll_P_mult = 5;
+	Config.FlightMode[P1].Pitch_P_mult = 60;
+	Config.FlightMode[P1].A_Pitch_P_mult = 5;
+	Config.FlightMode[P1].Yaw_P_mult = 80;
+	
+	// KK2.1-specific setup
 #ifdef KK21
 	Config.Channel[OUT1].P2_throttle_volume = 100;
 	Config.Channel[OUT2].P2_aileron_volume = 100;
@@ -90,123 +109,44 @@ void Set_EEPROM_Default_Config(void)
 	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
 	Config.Channel[OUT3].P2_sensors |= (1 << PitchGyro);
 	Config.Channel[OUT4].P2_sensors |= (1 << YawGyro);
-#endif
 
-#ifdef QUADCOPTER
-	//**************************************
-	//* Quadcopter defaults for testing
-	//**************************************
-	for (i = 0; i <= OUT4; i++)
-	{
-		Config.Channel[i].P1_throttle_volume = 100;
-		Config.Channel[i].P2_throttle_volume = 100;
-		Config.Channel[i].P2_sensors |= (1 << MotorMarker);
-	}
-
-	// OUT1
-	Config.Channel[OUT1].P1_elevator_volume = -20;
-	Config.Channel[OUT1].P2_elevator_volume = -20;
-	Config.Channel[OUT1].P1_rudder_volume = -20;
-	Config.Channel[OUT1].P2_rudder_volume = -20;
-	Config.Channel[OUT1].P1_sensors |= (1 << PitchGyro);
-	Config.Channel[OUT1].P2_sensors |= (1 << PitchGyro);
-	Config.Channel[OUT1].P1_sensors |= (1 << YawGyro);
-	Config.Channel[OUT1].P2_sensors |= (1 << YawGyro);	
+	Config.FlightMode[P1].Roll_I_mult = 40;
+	Config.FlightMode[P1].Roll_limit = 10;
+	Config.FlightMode[P1].Pitch_I_mult = 40;
+	Config.FlightMode[P1].Pitch_limit = 10;
+	Config.FlightMode[P1].Roll_Rate = 2;
+	Config.FlightMode[P1].Pitch_Rate = 2;
+	Config.FlightMode[P1].Yaw_Rate = 1;
 	
-	// OUT2
-	Config.Channel[OUT2].P1_aileron_volume = -20;
-	Config.Channel[OUT2].P2_aileron_volume = -20;
-	Config.Channel[OUT2].P1_rudder_volume = 20;
-	Config.Channel[OUT2].P2_rudder_volume = 20;
-	Config.Channel[OUT2].P1_sensors |= (1 << RollGyro);
-	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
-	Config.Channel[OUT2].P1_sensors |= (1 << YawGyro);
-	Config.Channel[OUT2].P2_sensors |= (1 << YawGyro);
+	// Set up profile 2
+	Config.FlightMode[P2].Roll_Rate = 2;
+	Config.FlightMode[P2].Pitch_Rate = 2;
+	Config.FlightMode[P2].Yaw_Rate = 1;
 	
-	// OUT3
-	Config.Channel[OUT3].P1_elevator_volume = 20;
-	Config.Channel[OUT3].P2_elevator_volume = 20;
-	Config.Channel[OUT3].P1_rudder_volume = -20;
-	Config.Channel[OUT3].P2_rudder_volume = -20;
-	Config.Channel[OUT3].P1_sensors |= (1 << PitchGyro);
-	Config.Channel[OUT3].P2_sensors |= (1 << PitchGyro);
-	Config.Channel[OUT3].P1_sensors |= (1 << YawGyro);
-	Config.Channel[OUT3].P2_sensors |= (1 << YawGyro);
-		
-	// OUT4
-	Config.Channel[OUT2].P1_aileron_volume = 20;
-	Config.Channel[OUT2].P2_aileron_volume = 20;
-	Config.Channel[OUT2].P1_rudder_volume = 20;
-	Config.Channel[OUT2].P2_rudder_volume = 20;
-	Config.Channel[OUT2].P1_sensors |= (1 << RollGyro);
-	Config.Channel[OUT2].P2_sensors |= (1 << RollGyro);
-	Config.Channel[OUT2].P1_sensors |= (1 << YawGyro);
-	Config.Channel[OUT2].P2_sensors |= (1 << YawGyro);
-#endif
+	// Set default sensor LPF
+	Config.MPU6050_LPF = 2;				// 6 - 2 = 4. MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz*, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
 
-	// Misc settings
-	Config.RxMode = PWM;				// Default to PWM
-	Config.PWM_Sync = GEAR;
+	// Preset AccZeroNormZ for KK2.1
+	Config.AccZeroNormZ		= 128;	
 
+	// KK2.0-specific setup
+#else
+	// Preset acc zeros
 	for (i = 0; i < NUMBEROFAXIS; i++)
 	{
-		#ifdef KK21
-		Config.AccZero[i]	= 0;		// Analog inputs on KK2.1 average about 0.
-		#else
 		Config.AccZero[i]	= 625;		// Analog inputs on KK2.0 average about 625.
-		#endif
 	}
 	
-#ifdef KK21
-	Config.AccZeroNormZ		= 128;
-#else
+	// Preset AccZeroNormZ for KK2.0
 	Config.AccZeroNormZ		= 765;
 #endif
 
-	// Set up all profiles the same initially
-	for (i = 0; i < FLIGHT_MODES; i++)
-	{
-		Config.FlightMode[i].Roll_P_mult = 80;			// PID defaults		
-		Config.FlightMode[i].Roll_I_mult = 50;	
-		Config.FlightMode[i].Roll_Rate = 1;
-		Config.FlightMode[i].Pitch_P_mult = 80;
-		Config.FlightMode[i].Pitch_I_mult = 50;
-		Config.FlightMode[i].Pitch_Rate = 1;
-		Config.FlightMode[i].Yaw_P_mult = 80;
-		Config.FlightMode[i].Yaw_I_mult = 50;
-		Config.FlightMode[i].Yaw_Rate = 1;
-		Config.FlightMode[i].A_Roll_P_mult = 60;
-		Config.FlightMode[i].A_Pitch_P_mult = 60;
-	}
-
-	Config.Acc_LPF = 2;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
-	Config.Gyro_LPF = 6;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
-	Config.CF_factor = 7;
-	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
-	Config.Orientation = HORIZONTAL;	// Horizontal / vertical etc.
 #ifdef KK2Mini
 	Config.Contrast = 30;				// Contrast (KK2 Mini)
 #else
 	Config.Contrast = 36;				// Contrast (Everything else)
 #endif	
-	Config.Disarm_timer = 30;			// Default to 30 seconds
-	Config.Transition_P1n = 50;			// Set P1.n point to 50%
-
-#ifdef KK21
-	Config.TrimChan = NOCHAN;			// Channel to activate autotrim
-	Config.MPU6050_LPF = 2;				// 6 - 2 = 4. MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz*, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-#endif	
 }
-
-#ifdef KK21
-void Save_Config_to_EEPROM_fast(void)
-{
-	// Write to eeProm with no LED flash or pause
-	cli();
-	eeprom_write_block_changes((const void*) &Config, (void*) EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));
-	sei();
-}
-#endif
 
 void Save_Config_to_EEPROM(void)
 {

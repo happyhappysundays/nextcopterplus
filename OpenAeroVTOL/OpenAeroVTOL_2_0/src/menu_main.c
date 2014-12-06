@@ -8,6 +8,7 @@
 
 #include <avr/pgmspace.h> 
 #include <avr/io.h>
+#include <avr/eeprom.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include "io_cfg.h"
@@ -76,8 +77,8 @@ void menu_main(void)
 		// Handle menu changes
 		update_menu(MAINITEMS, MAINSTART, 0, button, &main_cursor, &main_top, &main_temp);
 
-		// If main menu item has changed, reset submenu positions
-		// and flag to submenus that positions need to be reset
+		// If main menu item has changed, reset sub-menu positions
+		// and flag to sub-menus that positions need to be reset
 		if (main_temp != old_menu)
 		{
 			cursor = LINE0;
@@ -96,8 +97,6 @@ void menu_main(void)
 			Wait_BUTTON1();
 		}
 	}
-
-//	menu_beep(1);
 }
 
 void do_main_menu_item(uint8_t menuitem)

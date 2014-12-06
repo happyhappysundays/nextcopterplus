@@ -1,8 +1,10 @@
 //***********************************************************
 //* acc.c
 //*
-//* This fuction populates following vars:
-//* accADC[] holds the raw ADC values
+//* Read and calibrate the accelerometers.
+//* Manage the different board orientations.
+//* accADC[] holds the raw values
+//*
 //***********************************************************
 
 //***********************************************************
@@ -206,10 +208,11 @@ void CalibrateAcc(int8_t type)
 		// Flag that normal cal done
 		Config.Main_flags |= (1 << normal_cal_done);
 	
-		// Reset IMU on recalibration
-		reset_IMU();
-
+		// Save new calibration and flash LED for confirmation
 		Save_Config_to_EEPROM();
+		LED1 = 1;
+		_delay_ms(500);
+		LED1 = 0;
 	}
 
 	else
@@ -249,7 +252,11 @@ void CalibrateAcc(int8_t type)
 				// Flag that inverted cal done
 				Config.Main_flags |= (1 << inv_cal_done);
 
+				// Save new calibration and flash LED for confirmation
 				Save_Config_to_EEPROM();
+				LED1 = 1;
+				_delay_ms(500);
+				LED1 = 0;
 			}
 		}
 	}

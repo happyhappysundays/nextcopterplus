@@ -38,11 +38,21 @@ volatile uint8_t rcindex;			// Serial data buffer pointer
 volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
+volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
+
+//************************************************************
+//* Timer 0 overflow handler for extending TMR1
+//************************************************************
+
+ISR(TIMER0_OVF_vect)
+{
+	TMR0_counter++;
+}
 
 //************************************************************
 //* Standard PWM mode
@@ -159,6 +169,7 @@ ISR(INT2_vect)
 			}
 		}
 	}
+	
 	//************************************************************
 	// CPPM code:
 	// This code keeps track of the number of channels received
@@ -315,18 +326,14 @@ ISR(USART0_RX_vect)
 	//* 	bit2 = n/a
 	//* 	bit1 = n/a
 	//* 	bit0 = n/a
-	//* 24 endbyte = 00000000b (SBUS) or variable (SBUS2)
+	//* 24 endbyte = 00000000b (SBUS) or (data % 0xCF) (SBUS2)
 	//*
 	//************************************************************
 
 	if (Config.RxMode == SBUS)
 	{
 		// Flag that packet has completed
-#ifdef KK21
 		if ((bytecount == 24) && ((temp == 0x00) || ((temp % 0xCF) == 0x04)))
-#else
-		if ((bytecount == 24) && (temp == 0x00))
-#endif
 		{
 			// If frame lost, ignore packet
 			if ((sBuffer[23] & 0x20) == 0)
@@ -536,6 +543,7 @@ ISR(USART0_RX_vect)
 //***********************************************************
 //* TCNT1 atomic read subroutine
 //* from Atmel datasheet
+//* TCNT1 is the only 16-bit timer
 //***********************************************************
 
 uint16_t TIM16_ReadTCNT1(void)

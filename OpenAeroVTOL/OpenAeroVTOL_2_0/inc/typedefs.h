@@ -108,10 +108,6 @@ typedef struct
 
 	int8_t		A_Zed_P_mult;
 
-#ifdef KK21	
-	int8_t		Acro;					// Acrobatic flight mode
-	int8_t		Progressive;			// Progressive flight mode
-#endif
 } flight_control_t;
 
 // Settings structure
@@ -127,7 +123,7 @@ typedef struct
 										// AILERON will always return the correct data for the assigned aileron channel
 										// ELEVATOR will always return the correct data for the assigned elevator channel
 										// RUDDER will always return the correct data for the assigned rudder channel
-	// Servo travel limts
+	// Servo travel limits
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
 	// RC items (9)
@@ -163,7 +159,6 @@ typedef struct
 	int8_t		CF_factor;				// Autolevel correction rate
 #ifdef KK21
 	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
-	int8_t		TrimChan;				// Channel to store the current trims
 #endif
 
 	// Channel configuration
@@ -198,20 +193,6 @@ typedef struct
 
 	// Sticky flags
 	uint8_t		Main_flags;				// Non-volatile flags
-
-#ifdef KK21	
-	// Dynamic gain
-	int16_t		ProgressiveDiv[FLIGHT_MODES];		// Progressive gain divisor
-	
-	// I-term reset trigger zeros
-	int16_t		RC_Iterm_Offset[FLIGHT_MODES][NUMBEROFAXIS];
-	
-	// Current RC trim offset
-	int16_t		RCinputsOffset[FLIGHT_MODES][NUMBEROFAXIS];
-	
-	// Absorbed TX trim offset
-	int16_t		TXOffset[FLIGHT_MODES][NUMBEROFAXIS];	
-#endif
 
 } CONFIG_STRUCT;
 

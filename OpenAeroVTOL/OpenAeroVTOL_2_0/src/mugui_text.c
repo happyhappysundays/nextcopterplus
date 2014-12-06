@@ -144,19 +144,15 @@ void pgm_mugui_scopy(const char *s)
 {
 	int i = 0;
 
-	// Clear buffer first
-	// Actually two bytes smaller than using memset()
-	for (i = 0; i < PBUFFER_SIZE; i++)
-	{
-		pBuffer[i] = 0x00;
-	}
-
-	i = 0;
-	while(pgm_read_byte(s) != 0x00) 
+	// Copy string until terminator but don't over-write buffer
+	while((pgm_read_byte(s) != 0x00) && (i < (PBUFFER_SIZE - 1)))
 	{
 		pBuffer[i] = pgm_read_byte(s++);
 		i++;
 	}
+	
+	// Add the terminator regardless of the amount copied
+	pBuffer[i] = 0x00;
 }
 
 /*************************************************************************/
