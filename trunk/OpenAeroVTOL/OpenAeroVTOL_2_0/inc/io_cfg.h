@@ -101,7 +101,6 @@ extern CONFIG_STRUCT Config;
 //***********************************************************
 
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW};
-enum XYZArrayIndex 	{X = 0, Y, Z};
 enum RX_Modes		{CPPM_MODE = 0, PWM, SBUS, SPEKTRUM};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
 enum Polarity 		{NORMAL = 0, REVERSED};
@@ -126,8 +125,8 @@ enum Curve			{LINEAR = 0, SINE, SQRTSINE};
 //***********************************************************
 
 enum GlobalError	{THROTTLE_HIGH = 0, NO_SIGNAL, DISARMED, LVA_ALARM, BUZZER_ON};
-enum FlightFlags	{RxActivity = 0, HANDSFREE, AUTOTRIM, TRIMSET, TRIMSAVE};
-enum MainFlags		{inv_cal_done = 0, normal_cal_done, FirstTimeIMU, ServoTick};
+enum FlightFlags	{RxActivity = 0};
+enum MainFlags		{inv_cal_done = 0, normal_cal_done, ServoTick};
 enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};
 enum ScaleFlags		{RollScale = 0, PitchScale, YawScale, AccRollScale, AccPitchScale, AccZScale};
 enum ReverseFlags	{RollReverse = 0, PitchReverse, YawReverse, AccRollReverse, AccPitchReverse, AccZReverse};

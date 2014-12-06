@@ -37,52 +37,38 @@ void menu_flight(uint8_t i);
 #define FLIGHTSTART 170 // Start of Menu text items
 #define FLIGHTOFFSET 79	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
-
-#if defined(KK21) && defined(ADVANCED)	
-#define FLIGHTITEMS 20 	// Number of menu items
-#else
 #define FLIGHTITEMS 18 	// Number of menu items
-#endif
 
 //************************************************************
 // RC menu items
 //************************************************************
 
-#if defined(KK21) && defined(ADVANCED)	 
-const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 68, 0};
-#else
 const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-#endif
-
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
 	// Flight (18/20)
-	{0,127,1,0,80},					// Roll gyro P
-	{0,127,1,0,50},					// Roll gyro I
-	{0,125,1,0,0},					// Roll gyro I-limits
-	{0,4,1,0,1},					// Roll gyro rate
-	{0,127,1,0,60},					// Roll Acc gain
+	{0,127,1,0,60},					// Roll gyro P
+	{0,127,1,0,40},					// Roll gyro I
+	{0,125,1,0,10},					// Roll gyro I-limits
+	{0,4,1,0,2},					// Roll gyro rate
+	{0,127,1,0,5},					// Roll Acc gain
 	{-127,127,1,0,0}, 				// Roll Acc trim
 
-	{0,127,1,0,80},					// Pitch gyro P
-	{0,127,1,0,50}, 				// Pitch gyro I
-	{0,125,1,0,0},					// Pitch gyro I-limits
-	{0,4,1,0,1},					// Pitch gyro rate
-	{0,127,1,0,60},					// Pitch Acc gain			
+	{0,127,1,0,60},					// Pitch gyro P
+	{0,127,1,0,40}, 				// Pitch gyro I
+	{0,125,1,0,10},					// Pitch gyro I-limits
+	{0,4,1,0,2},					// Pitch gyro rate
+	{0,127,1,0,5},					// Pitch Acc gain			
 	{-127,127,1,0,0},				// Pitch Acc trim
 
 	{0,127,1,0,80},					// Yaw gyro P
-	{0,127,1,0,50},					// Yaw gyro I
+	{0,127,1,0,0},					// Yaw gyro I
 	{0,125,1,0,0},					// Yaw gyro I-limits
 	{0,4,1,0,1},					// Yaw gyro rate
 	{-127,127,1,0,0},				// Yaw trim
 
 	{0,127,1,0,0},					// Z Acc P gain
-#if defined(KK21) && defined(ADVANCED)			
-	{OFF,ON,1,1,OFF},				// Hands-free mode
-	{0,100,1,0,0},					// Dynamic P mode (0 to 100%)		
-#endif
 };
 
 //************************************************************
@@ -95,7 +81,7 @@ void menu_flight(uint8_t mode)
 	menu_range_t range;
 	uint8_t text_link;
 
-	// If submenu item has changed, reset submenu positions
+	// If sub-menu item has changed, reset sub-menu positions
 	if (menu_flag)
 	{
 		sub_top = FLIGHTSTART;
@@ -124,7 +110,7 @@ void menu_flight(uint8_t mode)
 		{
 			UpdateLimits();			 // Update I-term limits and triggers based on percentages
 			Save_Config_to_EEPROM(); // Save value and return
-			Wait_BUTTON4();			 // Wait for users finger off the button
+			Wait_BUTTON4();			 // Wait for user's finger off the button
 		}
 	}
 }

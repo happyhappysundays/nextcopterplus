@@ -32,7 +32,7 @@ void print_menu_frame(uint8_t style);
 
 // Menu management
 void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint8_t* temp);
-void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
+void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
 void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc
@@ -87,8 +87,8 @@ void print_menu_frame(uint8_t style)
 // Print menu items primary subroutine
 //
 // Usage:
-// top = position in submenu list
-// start = start of submenu text list. (top - start) gives the offset into the list.
+// top = position in sub-menu list
+// start = start of sub-menu text list. (top - start) gives the offset into the list.
 // values = pointer to array of values to change
 // menu_ranges = pointer to array of min/max/inc/style/defaults
 // rangetype = unique (0) all values are different, copied (1) all values are the same
@@ -152,7 +152,7 @@ menu_range_t get_menu_range(const unsigned char* menu_ranges, uint8_t menuitem)
 // servo_number = Servo number to update
 //************************************************************
 
-void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
+void do_menu_item(uint8_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
 {
 	mugui_size16_t size;
 	int16_t temp16;
@@ -189,7 +189,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		}
 		else
 		{
-			button_inc = 1;	// For everything else
+			button_inc = 1;	// For everything else (numbers)
 		}
 
 		// Increment button timer when pressed
@@ -234,6 +234,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			else // text
 			{
 				// Write text, centered on screen
+				// NB: pBuffer obviously has to be larger than the longest text string printed... duh...
 				pgm_mugui_scopy((char*)pgm_read_word(&text_menu[text_link + value])); // Copy string to pBuffer
 
 				mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana14, &size);
@@ -320,8 +321,17 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			sei();
 		}
 
-		// Loop rate = 5ms (200Hz)
-		_delay_ms(5);
+		// Slow the loop rate for text items		
+		 if (range.style == 1)
+		 {
+			// Loop rate = 100ms (10Hz)
+			_delay_ms(100);	
+		 }
+		 else
+		 {
+			// Loop rate = 5ms (200Hz)
+			_delay_ms(5);			 
+		 }
 
 	} // while (button != ENTER)
 

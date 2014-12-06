@@ -46,13 +46,7 @@ void menu_rc_setup(uint8_t i);
 #define RCITEMS 9 		// Number of menu items
 
 #ifdef KK21
-
-	#ifdef ADVANCED
-		#define GENERALITEMS 11
-	#else
-		#define GENERALITEMS 10
-	#endif
-
+#define GENERALITEMS 10
 #else
 #define GENERALITEMS 9
 #endif
@@ -66,13 +60,7 @@ const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM =
 	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},				// RC setup
 
 #ifdef KK21
-
-	#ifdef ADVANCED
-		{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37, 105},	// General (Advanced)	
-	#else
-		{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General (Normal)
-	#endif
-	
+	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},				// General 
 #else
 	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0},
 #endif
@@ -110,9 +98,6 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{1,10,1,0,7},					// AL correction
 #ifdef KK21
 		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
-#ifdef ADVANCED
-		{GEAR,NOCHAN,1,1,NOCHAN},		// Autotrim save channel
-#endif
 #endif
 	}
 };
@@ -176,12 +161,6 @@ void menu_rc_setup(uint8_t section)
 #ifdef KK21
 			// Update MPU6050 LPF and reverse sense of menu items
 			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
-			
-			// Clear trims if Autotrim switched off
-			if (Config.TrimChan == NOCHAN)
-			{
-				memset(&Config.RC_Iterm_Offset[P1][ROLL], 0, sizeof(int16_t) * 18);
-			}			
 #endif
 
 			// Update channel sequence
@@ -198,7 +177,7 @@ void menu_rc_setup(uint8_t section)
 			}
 
 			Save_Config_to_EEPROM(); // Save value and return
-			Wait_BUTTON4();			 // Wait for users finger off the button
+			Wait_BUTTON4();			 // Wait for user's finger off the button
 		}
 	}
 }

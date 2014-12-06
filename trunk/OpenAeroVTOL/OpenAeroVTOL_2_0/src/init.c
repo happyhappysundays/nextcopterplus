@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <string.h>
 #include "eeprom.h"
 #include "io_cfg.h"
 #include "isr.h"
@@ -94,7 +95,7 @@ void init(void)
 	PIND		= 0x0C;		// Set PD pull-ups (Don't pull up RX yet)
 
 	//***********************************************************
-	// Spektrum receiver binding
+	// Spektrum receiver binding. Must be done immediately on power-up
 	//***********************************************************
 
 	_delay_ms(63);				// Pause while satellite wakes up	
@@ -116,6 +117,13 @@ void init(void)
 	//***********************************************************
 	// Timers
 	//***********************************************************
+
+	// Timer0 (8bit) - run @ 20MHz / 1024 = 19.531kHz or 51.2us - max 13.1ms
+	// Slow timer to extend Timer 1
+	TCCR0A = 0;								// Normal operation
+	TCCR0B = 0x05;							// Clk / 1024 = 19.531kHz or 51.2us - max 13.1ms
+	TIMSK0 |= (1 << TOIE0);					// Enable interrupts
+	TCNT0 = 0;								// Reset counter
 	
 	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	// Used to measure Rx Signals & control ESC/servo output rate
@@ -156,7 +164,6 @@ void init(void)
 
 	// Preset important flags
 	Interrupted = false;						
-	Config.Main_flags |= (1 << FirstTimeIMU);	// First time into IMU
 
 	// Load EEPROM settings
 	Initial_EEPROM_Config_Load(); // Config now contains valid values
@@ -166,9 +173,10 @@ void init(void)
 	// Not doing this can result in the FC trying (unsuccessfully) to arm
 	// and makes entry into the menus very hard
 	//***********************************************************
-	
+
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
+		
 		RxChannel[i] = 3750;
 	}
 	
@@ -180,13 +188,10 @@ void init(void)
 
 	// Initialise the GLCD
 	st7565_init();
-	// Set contrast to the previously saved value
-	//st7565_set_brightness((uint8_t)Config.Contrast);
 	
 #ifdef KK21
 	// Make sure the LCD is blank without clearing buffer
 	clear_screen();
-	//st7565_command(CMD_SET_COM_REVERSE); 		// For logo	0xC8
 #else
 	// Clear buffer
 	write_buffer(buffer,1);
@@ -289,7 +294,6 @@ void init(void)
 	write_buffer(buffer,1);
 	_delay_ms(1000);
 
-	// Debug
 	st7565_init(); // Seems necessary for KK2 mini
 #endif
 	

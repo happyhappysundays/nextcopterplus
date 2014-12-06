@@ -49,7 +49,7 @@ void Display_balance(void)
 
 		// Refresh accSmooth values
 		// Fake the IMU period as accSmooth doesn't need that
-		imu_update(0);
+		simple_imu_update(0);
 		
 		// Convert acc signal to a pixel position
 		x_pos = accSmooth[PITCH] + 32;

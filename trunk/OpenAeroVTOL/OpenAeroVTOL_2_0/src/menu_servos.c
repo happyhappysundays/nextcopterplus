@@ -144,7 +144,7 @@ void menu_servo_setup(uint8_t section)
 		{
 			UpdateLimits();				// Update actual servo trims
 			Save_Config_to_EEPROM();	// Save value and return
-			Wait_BUTTON4();				// Wait for users finger off the button
+			Wait_BUTTON4();				// Wait for user's finger off the button
 		}
 	}
 }

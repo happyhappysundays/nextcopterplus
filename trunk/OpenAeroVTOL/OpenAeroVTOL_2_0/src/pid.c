@@ -28,7 +28,6 @@
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
-#define RESET_ITERM_RC 20			// Stick position beyond which the relevant I-term is reset
 
 //************************************************************
 // Notes
@@ -113,14 +112,9 @@ void Sensor_PID(void)
 		
 		// Work out stick rate divider. 0 is slowest, 4 is fastest.
 		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
-#if defined(KK21) && defined(ADVANCED)	
-		// Remove offset from I-term
-		stick_P1 = (RCinputsAxis[axis] - Config.RC_Iterm_Offset[P1][axis]) >> (4 - (Stick_rates[P1][axis] - 2));
-		stick_P2 = (RCinputsAxis[axis] - Config.RC_Iterm_Offset[P2][axis]) >> (4 - (Stick_rates[P2][axis] - 2));
-#else
 		stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
 		stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
-#endif
+
 		// Calculate I-term from gyro and stick data 
 		// These may look similar, but they are constrained quite differently.
 		IntegralGyro[P1][axis] += (gyroADC[axis] + stick_P1);
@@ -129,20 +123,6 @@ void Sensor_PID(void)
 		// Limit the I-terms to the user-set limits
 		for (i = P1; i <= P2; i++)
 		{
-
-#if defined(KK21) && defined(ADVANCED)
-			// If Hands-free is enabled, reset I-term of
-			// any axis whose control input is activated more than 5% (+/-20)
-			if (Config.FlightMode[i].Acro == ON)
-			{
-				// If axis-relevant stick input larger than limit
-				if (((RCinputsAxis[axis] - Config.RCinputsOffset[i][axis]) < -RESET_ITERM_RC) || ((RCinputsAxis[axis] - Config.RCinputsOffset[i][axis])  > RESET_ITERM_RC))
-				{
-					IntegralGyro[i][axis] = 0;
-				}
-			}
-#endif	
-	
 			if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])
 			{
 				IntegralGyro[i][axis] = Config.Raw_I_Constrain[i][axis];
@@ -191,15 +171,6 @@ void Calculate_PID(void)
 	int8_t	axis = 0;
 	int8_t i = 0;
 
-#if defined(KK21) && defined(ADVANCED)
-	int32_t temp32 = 0;						// Needed for 32-bit dynamic gain calculations
-	int32_t mult32 = 0;
-	int16_t P1_Dynamic, P2_Dynamic = 0;
-	int32_t PID_Gyros_32;
-
-	int16_t	RCinputsAxis[NUMBEROFAXIS] = {RCinputs[AILERON], RCinputs[ELEVATOR], RCinputs[RUDDER]};
-#endif
-
 	// Initialise arrays with gain values.
 	int8_t 	P_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
 		{
@@ -235,24 +206,6 @@ void Calculate_PID(void)
 	//************************************************************
 	for (axis = 0; axis <= YAW; axis ++)
 	{
-#if defined(KK21) && defined(ADVANCED)
-		//************************************************************
-		// Set up dynamic gain variable once for each axis per flight mode
-		//************************************************************
-
-		// Channel controlling the dynamic gain
-		P1_Dynamic = RCinputsAxis[axis]; // -1000 to 1000 range
-		P2_Dynamic = P1_Dynamic;
-
-		// Scale 0 - 500 down to 0 - Config.Progressive. 
-		P1_Dynamic = abs(P1_Dynamic) / Config.ProgressiveDiv[P1];
-		P2_Dynamic = abs(P2_Dynamic) / Config.ProgressiveDiv[P2];
-		
-		// Limit maximum value to 100
-		if (P1_Dynamic > 100) P1_Dynamic = 100;
-		if (P2_Dynamic > 100) P2_Dynamic = 100;
-#endif			
-		
 		//************************************************************
 		// Add in gyro Yaw trim
 		//************************************************************
@@ -320,32 +273,6 @@ void Calculate_PID(void)
 		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE);  // PID_SCALE was 6, now 5
 		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> PID_SCALE);
 
-#if defined(KK21) && defined(ADVANCED)
-		//************************************************************
-		// Modify gains dynamically as required
-		// The gain is determined by the relevant stick position. 
-		// The maximum gain reduction is determined by Config.Progressive
-		// temp16 holds the current amount of gain reduction 
-		//************************************************************
-			
-		if (Config.FlightMode[P1].Progressive != 0)
-		{
-			mult32 = 100 - P1_Dynamic;				// Max (100%) - Current setting (0 to Config.Progressive)
-			temp32 = PID_Gyros[P1][axis];			// Promote to 32 bits
-			PID_Gyros_32 = temp32 * mult32;			// Multiply by suppression value (100% down to 0%)
-			temp32 = (PID_Gyros_32 / (int32_t)100);	// Scale back to 0-100%
-			PID_Gyros[P1][axis] = (int16_t)temp32;	// Cast back to native size
-		}
-		
-		if (Config.FlightMode[P2].Progressive != 0)
-		{
-			mult32 = 100 - P2_Dynamic;				// Max (100%) - Current setting (0 to Config.Progressive)
-			temp32 = PID_Gyros[P2][axis];			// Promote to 32 bits
-			PID_Gyros_32 = temp32 * mult32;			// Multiply by suppression value (100% down to 0%)
-			temp32 = (PID_Gyros_32 / (int32_t)100);	// Scale back to 0-100%
-			PID_Gyros[P2][axis] = (int16_t)temp32;	// Cast back to native size
-		}
-#endif
 		//************************************************************
 		// Calculate error from angle data and trim (roll and pitch only)
 		//************************************************************
@@ -358,19 +285,6 @@ void Calculate_PID(void)
 				PID_acc_temp1 = angle[axis] - L_trim[i][axis];				// Offset angle with trim
 				PID_acc_temp1 *= L_gain[i][axis];							// P-term of accelerometer (Max gain of 127)
 				PID_ACCs[i][axis] = (int16_t)(PID_acc_temp1 >> 8);			// Reduce and convert to integer
-			
-#if defined(KK21) && defined(ADVANCED)
-				// If Hands-free is enabled, remove Autolevel component of
-				// any axis whose control input is activated more than 5% (+/-20)
-				if (Config.FlightMode[i].Acro == ON)
-				{
-					// If axis-relevant stick input larger than limit
-					if (((RCinputsAxis[axis] - Config.RCinputsOffset[i][axis]) < -RESET_ITERM_RC) || ((RCinputsAxis[axis] - Config.RCinputsOffset[i][axis])  > RESET_ITERM_RC))
-					{
-						PID_ACCs[i][axis] = 0;
-					}
-				}
-#endif
 			} // P1/P2 for loop
 		}
 
@@ -385,7 +299,7 @@ void Calculate_PID(void)
 	{
 		PID_acc_temp1 = -AvAccVert;				// Get and copy Z-acc value. Negate to oppose G
 
-		PID_acc_temp1 *= L_gain[i][Z];			// Multiply P-term (Max gain of 127)
+		PID_acc_temp1 *= L_gain[i][YAW];		// Multiply P-term (Max gain of 127)
 
 		PID_acc_temp1 = PID_acc_temp1 >> 4;		// Moderate Z-acc to reasonable values
 
@@ -398,6 +312,6 @@ void Calculate_PID(void)
 			PID_acc_temp1 = -MAX_ZGAIN;
 		}
 
-		PID_ACCs[i][Z] = (int16_t)PID_acc_temp1; // Copy to global values
+		PID_ACCs[i][YAW] = (int16_t)PID_acc_temp1; // Copy to global values
 	}
 }

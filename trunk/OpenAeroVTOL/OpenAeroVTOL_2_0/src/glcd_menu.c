@@ -27,7 +27,7 @@
 //************************************************************
 
 // Print an indexed text string from Program memory at a particular location
-void LCD_Display_Text (uint16_t menuitem, const unsigned char* font,uint16_t x, uint16_t y);
+void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y);
 
 // Print a string from at a particular location
 void gLCDprint_Menu_P(const char *s, const unsigned char* font,uint16_t x, uint16_t y);
@@ -39,7 +39,7 @@ void idle_screen(void);
 // Text to print (non-menu)
 //************************************************************
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: Beta 53";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: Beta 55.2";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -115,9 +115,6 @@ const char RCMenuItem2[]  PROGMEM = "Profile Chan.:";
 const char RCMenuItem8[]  PROGMEM = "Aileron pol.:";
 const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
 const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
-const char GeneralText9[] PROGMEM =  "Aileron rate:";			// Stick rate for gyro I-term in Axis-lock mode (Aileron)
-const char GeneralText11[] PROGMEM = "Elevator rate:";
-const char GeneralText12[] PROGMEM = "Rudder rate:";
 const char Transition[] PROGMEM = "Transition";
 const char Transition_P1n[] PROGMEM = "Trans. P1n:";
 //
@@ -253,9 +250,6 @@ const char MixerItem15[] PROGMEM = "Scaled";
 
 const char GeneralText5[] PROGMEM  =  "Sync RC";			// PWM output modes
 
-#ifdef AIRSPEED
-const char MiscText1[] PROGMEM =  "Pitot (Pa)";
-#endif
 //
 const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
@@ -265,26 +259,10 @@ const char SWLPF1[] PROGMEM =  "74Hz";						// Software LPFs
 const char SWLPF2[] PROGMEM =  "32Hz";
 //
 #ifdef KK21
-const char RCMenuItem30[] PROGMEM = "Autotrim Ch.:";
 const char GeneralText10[] PROGMEM =  "MPU6050 LPF:";
-const char GeneralText13[] PROGMEM =  "Acro mode:";
-const char GeneralText14[] PROGMEM =  "Dynamic P:";
 const char MPU6050LPF5[] PROGMEM =  "94Hz";
 const char MPU6050LPF6[] PROGMEM =  "184Hz";
-const char MPU6050LPF7[] PROGMEM =  "260Hz";//
-const char Trim_1[] PROGMEM =  "Erase";
-const char Trim_2[] PROGMEM =  "Xfer";
-const char Trim_3[] PROGMEM =  "-- Auto trim --";
-const char Trim_4[] PROGMEM =  "Erase trims";
-const char Trim_5[] PROGMEM =  "Are you sure?";
-const char Trim_6[] PROGMEM =  "Yes";
-const char Trim_7[] PROGMEM =  "Transfer TX";
-const char Trim_12[] PROGMEM =  "trims";
-const char Trim_8[] PROGMEM =  "OK"; //261
-const char Trim_9[] PROGMEM =  "Abort";
-const char Trim_10[] PROGMEM =  "Center TX trims";
-const char Trim_11[] PROGMEM =  "Press OK to continue";
-
+const char MPU6050LPF7[] PROGMEM =  "260Hz";
 #endif
 const char MPU6050LPF1[] PROGMEM =  "5Hz";
 const char MPU6050LPF2[] PROGMEM =  "10Hz";
@@ -329,12 +307,8 @@ const char* const text_menu[] PROGMEM =
 		// 
 		P1text, P2text, P3text, 															// 48 to 52 P1, P1.n, P2, P1 to P1.n, P1.n to P2
 		P4text, P5text, 
-
-#ifdef AIRSPEED
-		MiscText1,																			// 53 Airspeed 
-#else
+		
 		Dummy0, 																			// 53 Spare 
-#endif
 		Dummy0,																				// 54 Spare
 		//
 		Random1,  																			// 55 High
@@ -392,11 +366,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
-#ifdef KK21		
-		Trim_1, Trim_2,	Trim_3,																// 143 to 145 spare
-#else		
-		Dummy0, Dummy0,	Dummy0,	 
-#endif
+		Dummy0, Dummy0,	Dummy0,	 															// 143 to 145 spare
 															
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
@@ -409,11 +379,11 @@ const char* const text_menu[] PROGMEM =
 		GeneralText2, BattMenuItem2, GeneralText3, 
 		GeneralText6, GeneralText16, GeneralText7, 
 #ifdef KK21
-		GeneralText10, RCMenuItem30,
+		GeneralText10, 
 #else
-		Dummy0, Dummy0,	
+		Dummy0, 	
 #endif
-		Dummy0,																				// 169 Spare
+		Dummy0,	Dummy0,																		// 168 Spare
 
 		//
 						 																	// 170 to 189 Flight menu
@@ -423,12 +393,9 @@ const char* const text_menu[] PROGMEM =
 		AutoMenuItem21, AutoMenuItem8, 														// Pitch acc
 		StabMenuItem7, StabMenuItem8, StabMenuItem12, StabMenuItem9,	 					// Yaw gyro
 		StabMenuItem30,	StabMenuItem13,														// Yaw trim, Z-Acc, 
-#ifdef KK21
-		GeneralText13,																		// Hands-free
-		GeneralText14,																		// Dynamic P
-#else
+
 		Dummy0, Dummy0,
-#endif
+
 		//
 		MixerItem1,																			// 190 Motor marker (34 mixer items in total)
 		MixerItem20, 																		// Offset for P1
@@ -461,14 +428,9 @@ const char* const text_menu[] PROGMEM =
 		MixerItem70, MixerItem71, MixerItem72, MixerItem73, MixerItem74,					// Roll gyro to pitch acc
 		ChannelRef8, 																		// + NONE 
 		//
-		Dummy0,Dummy0,																		// 252 to 256 - Spare
+		Dummy0,Dummy0,																		// 252 to 255 - Spare
 		Dummy0,Dummy0,
-		Dummy0,
 		//
-#ifdef KK21		
-		Trim_4, Trim_5, Trim_6, Trim_7,	Trim_8, Trim_9,	Trim_10,							// 257 to 265 Auto trim messages
-		Trim_11,Trim_12,
-#endif
 	}; 
 
 //************************************************************
@@ -476,7 +438,7 @@ const char* const text_menu[] PROGMEM =
 //************************************************************
 
 // Print Menuitem from Program memory at a particular location
-void LCD_Display_Text (uint16_t menuitem, const unsigned char* font,uint16_t x, uint16_t y)
+void LCD_Display_Text (uint8_t menuitem, const unsigned char* font,uint16_t x, uint16_t y)
 {
 	gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), font, x, y);
 }

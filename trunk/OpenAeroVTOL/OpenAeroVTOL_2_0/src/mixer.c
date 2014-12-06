@@ -333,30 +333,17 @@ void ProcessMixer(void)
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P1_aileron_volume !=0) 					// Mix in dedicated aileron
 			{
-#ifdef KK21
-				temp2 = scale32(RCinputs[AILERON] - Config.RCinputsOffset[P1][ROLL] - Config.TXOffset[P1][ROLL], Config.Channel[i].P1_aileron_volume);
-#else
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P1_aileron_volume);
-#endif
 				P1_solution = P1_solution + temp2;
 			}
 			if (Config.Channel[i].P1_elevator_volume !=0) 					// Mix in dedicated elevator
 			{
-#ifdef KK21
-				temp2 = scale32(RCinputs[ELEVATOR] - Config.RCinputsOffset[P1][PITCH] - Config.TXOffset[P1][PITCH], Config.Channel[i].P1_elevator_volume);
-#else
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P1_elevator_volume);
-#endif
 				P1_solution = P1_solution + temp2;
 			}
 			if (Config.Channel[i].P1_rudder_volume !=0) 					// Mix in dedicated rudder
 			{
-
-#ifdef KK21
-				temp2 = scale32(RCinputs[RUDDER] - Config.RCinputsOffset[P1][YAW] - Config.TXOffset[P1][YAW], Config.Channel[i].P1_rudder_volume);
-#else
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P1_rudder_volume);
-#endif
 				P1_solution = P1_solution + temp2;
 			}
 
@@ -402,29 +389,17 @@ void ProcessMixer(void)
 			// Mix in dedicated RC sources - aileron, elevator and rudder
 			if (Config.Channel[i].P2_aileron_volume !=0) 					// Mix in dedicated aileron
 			{
-#ifdef KK21
-				temp2 = scale32(RCinputs[AILERON] - Config.RCinputsOffset[P2][ROLL] - Config.TXOffset[P2][ROLL], Config.Channel[i].P2_aileron_volume);
-#else
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P2_aileron_volume);
-#endif
 				P2_solution = P2_solution + temp2;
 			}
 			if (Config.Channel[i].P2_elevator_volume !=0) 					// Mix in dedicated elevator
 			{
-#ifdef KK21
-				temp2 = scale32(RCinputs[ELEVATOR] - Config.RCinputsOffset[P2][PITCH] - Config.TXOffset[P2][PITCH], Config.Channel[i].P2_elevator_volume);
-#else
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P2_elevator_volume);
-#endif
 				P2_solution = P2_solution + temp2;
 			}
 			if (Config.Channel[i].P2_rudder_volume !=0) 					// Mix in dedicated rudder
 			{
-#ifdef KK21
-				temp2 = scale32(RCinputs[RUDDER] - Config.RCinputsOffset[P2][YAW] - Config.TXOffset[P2][YAW], Config.Channel[i].P2_rudder_volume);
-#else
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P2_rudder_volume);
-#endif
 				P2_solution = P2_solution + temp2;
 			}
 
@@ -734,19 +709,6 @@ void UpdateLimits(void)
 				Config.Raw_I_Constrain[j][i] = 0;
 			}
 		}
-
-#ifdef KK21
-		// Update dynamic gain divisor for each flight mode
-		if (Config.FlightMode[j].Progressive > 0)
-		{
-			Config.ProgressiveDiv[j] = 500 / Config.FlightMode[j].Progressive; 
-		}
-		else
-		{
-			Config.ProgressiveDiv[j] = 500;
-		}
-#endif
-
 	}
 
 	// Update travel limits
