@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.0 & KK2.1
 // ========================================
-// Version: Beta 55.2 - December 2014
+// Version: V1.0 Release - December 2014
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -239,6 +239,7 @@
 //			Bug fixed. Minor tweaks. Limit the instantaneous change in angle of the IMU to +/-15 degrees.
 //			Removed read-back of eeProm into config structure.
 //			Updated the default eeprom settings. Scrimped a few bytes to squeeze it into the KK2.0.
+// V1.0		Released.
 //
 //***********************************************************
 //* Notes
