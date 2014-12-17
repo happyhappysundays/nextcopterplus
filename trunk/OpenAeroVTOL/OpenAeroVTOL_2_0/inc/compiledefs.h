@@ -13,6 +13,6 @@
 
 // Uncomment this for compatibility with the KK2 Mini
 // This limits the available LCD contrast
-//#define KK2Mini
+#define KK2Mini
 
 #endif
