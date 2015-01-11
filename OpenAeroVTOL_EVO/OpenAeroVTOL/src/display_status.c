@@ -140,6 +140,6 @@ void Display_status(void)
 	}
 
 	// Write buffer to complete
-	write_buffer(buffer,1);
+	write_buffer(buffer);
 	clear_buffer(buffer);
 }

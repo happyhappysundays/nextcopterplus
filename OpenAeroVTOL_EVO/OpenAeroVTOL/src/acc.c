@@ -95,7 +95,7 @@ void ReadAcc()
 		Config.AccZero[YAW] = Config.AccZeroNormZ - Config.AccZeroDiff;
 	}
 
-	for (i=0; i<NUMBEROFAXIS; i++)
+	for (i=0; i < NUMBEROFAXIS; i++)
 	{
 		// Remove offsets from acc outputs
 		accADC[i] -= Config.AccZero[i];

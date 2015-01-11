@@ -39,11 +39,11 @@ void CenterSticks(void);
 // Code
 //************************************************************
 
-int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
-int16_t MonopolarThrottle;				// Monopolar throttle
+volatile int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
+volatile int16_t MonopolarThrottle;				// Monopolar throttle
 
 // Get raw flight channel data (~2500 to 5000) and remove zero offset
-// Use channel mapping for configurability
+// Use channel mapping for reconfigurability
 void RxGetChannels(void)
 {
 	static	int16_t	OldRxSum;			// Sum of all major channels
@@ -51,7 +51,7 @@ void RxGetChannels(void)
 	int16_t	RxSum, i;
 
 	// Remove zero offsets
-	for (i=0;i<MAX_RC_CHANNELS;i++)
+	for (i=0; i < MAX_RC_CHANNELS; i++)
 	{
 		RCinputs[i]	= RxChannel[i] - Config.RxChannelZeroOffset[i];
 	}
@@ -60,7 +60,7 @@ void RxGetChannels(void)
 	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
 
 	// Bipolar throttle must use the nominal mid-point
-	RCinputs[THROTTLE] = RxChannel[THROTTLE] - 3750;
+	RCinputs[THROTTLE] = RxChannel[THROTTLE] - 3750; 
 
 	// Reverse primary channels as requested
 	if (Config.AileronPol == REVERSED)

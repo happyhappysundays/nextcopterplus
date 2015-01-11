@@ -21,13 +21,22 @@ void read_adc(uint8_t channel);
 
 void Init_ADC(void)
 {
-	DIDR0 	= 0b11111111;					// Digital Input Disable Register - ADC0~7 Digital Input Disable
-	ADCSRB 	= 0b00000000; 					// ADC Control and Status Register B - ADTS2:0
+	// Digital Input Disable Register - ADC0~7 Digital Input Disable
+	DIDR0 	= (1<<ADC0D)|(1<<ADC1D)|(1<<ADC2D)|(1<<ADC3D)|(1<<ADC4D)|(1<<ADC5D)|(1<<ADC6D)|(1<<ADC7D);
+	
+	// ADC Control and Status Register B - ADTS2:0
+	ADCSRB 	= 0x00;
 }
 
 void read_adc(uint8_t channel)
 {
-	ADMUX = channel;
-	ADCSRA 	= 0b11000110;					// ADEN, ADSC, ADPS1,2
-	while (ADCSRA & (1 << ADSC));			// Wait to complete. Result is in ADCW
+	ADMUX	= channel;
+	
+	// ADEN, ADSC, ADPS1,2
+	ADCSRA 	= (1<<ADEN)|(1<<ADSC)|(1<<ADPS1)|(1<<ADPS2);
+
+	// Wait to complete. Result is in ADCW
+	while (ADCSRA & (1 << ADSC));
 }
+
+

@@ -25,6 +25,7 @@
 #include "imu.h"
 #include "uart.h"
 #include "i2c.h"
+#include "isr.h"
 #include "MPU6050.h"
 
 //************************************************************
@@ -83,7 +84,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,127,1,0,0},					// Low battery alarm voltage
-		{LOW,SYNC,1,1,LOW},				// Servo rate
+		{LOW,FAST,1,1,LOW},				// Servo rate
 		{0,6,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 32, 44, 74, None)
 		{0,6,1,1,6},					// Gyro LPF. No LPF default (5, 10, 21, 32, 44, 74, None)
 		{1,10,1,0,7},					// AL correction
@@ -161,6 +162,13 @@ void menu_rc_setup(uint8_t section)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 				}
+			}
+
+			// Check validity of RX type and PWM speed selection
+			// If illegal setting, drop down to RC Sync
+			if ((Config.RxMode != SBUS) && (Config.Servo_rate == FAST))
+			{
+				Config.Servo_rate = SYNC;
 			}
 
 			Save_Config_to_EEPROM(); // Save value and return

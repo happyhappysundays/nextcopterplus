@@ -98,17 +98,17 @@ enum RX_Sequ		{JRSEQ = 0, FUTABASEQ};
 enum Polarity 		{NORMAL = 0, REVERSED};
 enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
-enum Availability	{OFF = 0, ON, REVERSE, SCALE, REVERSESCALE};
+enum Availability	{OFF = 0, ON, SCALE, REVERSE, REVERSESCALE};
 enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS, PITCHUP};
 enum KK21ADCInputs 	{AIN_VCC1 = 0, AIN_ADC1, AIN_ADC2, AIN_VBAT1, AIN_ADC4, AIN_ADC5, AIN_PITOT, AIN_ADC7};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, STATUS_TIMEOUT, MENU};
-enum Servo_rate		{LOW = 0, SYNC};
+enum Servo_rate		{LOW = 0, SYNC, FAST};
 enum TransitState	{TRANS_P1 = 0, TRANS_P1_to_P1n_start, TRANS_P1n_to_P1_start, TRANS_P1_to_P2_start, TRANS_P1n, TRANSITIONING, TRANS_P2_to_P1_start, TRANS_P1n_to_P2_start, TRANS_P2_to_P1n_start, TRANS_P2};
 //					THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, ROLLGYRO, PITCHGYO, YAWGYRO, ROLLACC, PITCHACC, NONE
 enum Sources 		{SRC1 = 0, SRC2, SRC3, SRC4, SRC5, SRC6, SRC7, SRC8, SRC9, SRC10, SRC11, SRC12, SRC13, SRC14, SRC15, NOMIX};
 enum Profiles		{P1 = 0, P2};
 enum Safety			{ARMED = 0, ARMABLE}; 
-enum Devices		{SERVO = 0, MOTOR}; 
+enum Devices		{ASERVO = 0, DSERVO, MOTOR}; 
 enum Curve			{LINEAR = 0, SINE, SQRTSINE}; 
 
 //***********************************************************
@@ -117,7 +117,7 @@ enum Curve			{LINEAR = 0, SINE, SQRTSINE};
 
 enum GlobalError	{THROTTLE_HIGH = 0, NO_SIGNAL, DISARMED, LVA_ALARM, BUZZER_ON};
 enum FlightFlags	{RxActivity = 0};
-enum MainFlags		{inv_cal_done = 0, normal_cal_done, ServoTick};
+enum MainFlags		{inv_cal_done = 0, normal_cal_done};
 enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};
 enum ScaleFlags		{RollScale = 0, PitchScale, YawScale, AccRollScale, AccPitchScale, AccZScale};
 enum ReverseFlags	{RollReverse = 0, PitchReverse, YawReverse, AccRollReverse, AccPitchReverse, AccZReverse};

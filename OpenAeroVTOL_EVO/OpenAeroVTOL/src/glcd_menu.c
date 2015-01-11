@@ -8,9 +8,11 @@
 
 #include "compiledefs.h"
 #include <avr/pgmspace.h> 
+#include <stdlib.h>
 #include <avr/io.h>
 #include <stdbool.h>
 #include <util/delay.h>
+#include <avr/io.h>
 #include "io_cfg.h"
 #include "vbat.h"
 #include "adc.h"
@@ -38,8 +40,9 @@ void idle_screen(void);
 //************************************************************
 // Text to print (non-menu)
 //************************************************************
+
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.1 B1";			// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.1 B2";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -188,8 +191,9 @@ const char MixerItem74[] PROGMEM = "AccPitch";
 const char MixerItem80[] PROGMEM = "AL Roll:";
 const char MixerItem81[] PROGMEM = "AL Pitch:";
 //
-const char MixerItem40[] PROGMEM = "Servo";
-const char MixerItem41[] PROGMEM = "Motor";
+const char MixerItem40[] PROGMEM = "A.Servo";
+const char MixerItem41[] PROGMEM = "D.Servo";
+const char MixerItem49[] PROGMEM = "Motor";
 const char MixerItem60[] PROGMEM = "Linear";
 const char MixerItem61[] PROGMEM = "Sine";
 const char MixerItem62[] PROGMEM = "SqrtSine";
@@ -220,6 +224,8 @@ const char PText1[]  PROGMEM = "Reset";
 const char PText2[]  PROGMEM = "Hold steady";
 const char PText3[]  PROGMEM = "ESC Calibrate";
 const char PText4[]  PROGMEM = "Cal. failed";
+const char PText5[]  PROGMEM = "Updating";
+const char PText6[]  PROGMEM = "settings";
 //
 const char WizardText0[] PROGMEM = "No RX signal"; 			// Wizard screen
 const char WizardText1[] PROGMEM = "Hold as shown";
@@ -411,21 +417,24 @@ const char* const text_menu[] PROGMEM =
 		MixerItem21, MixerItem2, 															// Source B and Volume P1
 		MixerItem31, MixerItem30, 															// Source B and Volume P2
 		Dummy0,Dummy0,  
-		Dummy0,Dummy0, 	
-		Dummy0,Dummy0,
+		
+		MixerItem40, MixerItem41, MixerItem49,												// 226 to 228 Device types - AServo/Dservo/Motor	
+		//
+		Dummy0,
 		//
 		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 230 to 237 Sources OUT1- OUT8, 
 		// SRC1 to 17
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,									// 238 to 251 THR to RUDDER, 
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,									// 238 to 252 THR to RUDDER, 
 		ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,									// GEAR to AUX3 
 		MixerItem70, MixerItem71, MixerItem72, MixerItem73, MixerItem74,					// Roll gyro to pitch acc
 		MixerItem80, MixerItem81,															// AL Roll, AL Pitch
 		
-		ChannelRef8, 																		// + NONE 
+		ChannelRef8, 																		// 253 + NONE 
 		//
-		Dummy0,Dummy0,
-		Dummy0,Dummy0,
+		MixerItem40, MixerItem41, MixerItem49,												// 254 to 256 Device types - AServo/Dservo/Motor	
+		Dummy0,Dummy0,																		// 257, 258
 		//
+		PText5, PText6,																		// 259, 260 Updating settings
 	}; 
 
 //************************************************************
@@ -453,6 +462,29 @@ void idle_screen(void)
 	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 	// "Press"
 	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
 
+	uint16_t dummy = 0;
+	dummy = (uint16_t)(RC_Master_Timer & 0xffff);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,25,43);
+	dummy = (uint16_t)(RC_Master_Timer >> 16);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,5,43);	
+
+	dummy = (uint16_t)(PWM_Available_Timer & 0xffff);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,25,53);
+	dummy = (uint16_t)(PWM_Available_Timer >> 16);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,5,53);
+
+
+	
+	if(SlowRC)
+	{
+		LCD_Display_Text(118,(const unsigned char*)Verdana8,60,43); // LOW
+	}
+	else
+	{
+		LCD_Display_Text(55,(const unsigned char*)Verdana8,60,43);  // HIGH
+	}
+
+/*
 	// Display most important error
 	if ((General_error & (1 << LVA_ALARM)) != 0)					// Low voltage
 	{
@@ -480,6 +512,6 @@ void idle_screen(void)
 	{
 		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
 	}
-
-	write_buffer(buffer,1);
-};
+*/	
+	write_buffer(buffer);
+}

@@ -42,7 +42,6 @@
 //************************************************************
 
 void init(void);
-void init_int(void);
 
 // WDT reset prototype. Placed before main() in code to prevent wdt re-firing
 void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
@@ -63,7 +62,8 @@ CONFIG_STRUCT Config;			// eeProm data configuration
 void init(void)
 {
 	uint8_t i;
-
+	bool	updated;
+	
 	//***********************************************************
 	// I/O setup
 	//***********************************************************
@@ -160,7 +160,7 @@ void init(void)
 	Interrupted = false;						
 
 	// Load EEPROM settings
-	Initial_EEPROM_Config_Load(); // Config now contains valid values
+	updated = Initial_EEPROM_Config_Load(); // Config now contains valid values
 
 	//***********************************************************
 	// RX channel defaults for when no RC connected
@@ -197,7 +197,7 @@ void init(void)
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 		clear_buffer(buffer);
 		LCD_Display_Text(59,(const unsigned char*)Verdana14,10,25);
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 				
 		// For each output
@@ -218,8 +218,8 @@ void init(void)
 		// Output HIGH pulse (1.9ms) until buttons released
 		while ((PINB & 0xf0) == 0x60)
 		{
-			// Pass address of ServoOut array
-			output_servo_ppm_asm(&ServoOut[0]);
+			// Pass address of ServoOut array and select all outputs
+			output_servo_ppm_asm(&ServoOut[0], 0xFF);
 
 			// Loop rate = 20ms (50Hz)
 			_delay_ms(20);			
@@ -240,8 +240,8 @@ void init(void)
 		// Loop forever here
 		while(1)
 		{
-			// Pass address of ServoOut array
-			output_servo_ppm_asm(&ServoOut[0]);
+			// Pass address of ServoOut array and select all outputs
+			output_servo_ppm_asm(&ServoOut[0], 0xFF);
 
 			// Loop rate = 20ms (50Hz)
 			_delay_ms(20);			
@@ -262,7 +262,7 @@ void init(void)
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 		clear_buffer(buffer);
 		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25); // "Reset"
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		
 		// Reset EEPROM settings
@@ -270,15 +270,33 @@ void init(void)
 		Save_Config_to_EEPROM();
 
 		// Set contrast to the default value
-		st7565_set_brightness((uint8_t)Config.Contrast);
+		st7565_set_brightness(Config.Contrast);
 
 		_delay_ms(500);		// Save is now too fast to show the "Reset" text long enough
 
 	}
 
-	// Write logo from buffer
-	write_buffer(buffer,1);
-	_delay_ms(1000);
+	// Display message in place of logo when updating eeprom structure
+	if (updated)
+	{
+		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
+		clear_buffer(buffer);
+		LCD_Display_Text(259,(const unsigned char*)Verdana14,30,13); // "Updating"
+		LCD_Display_Text(260,(const unsigned char*)Verdana14,33,37); // "settings"
+		write_buffer(buffer);
+		clear_buffer(buffer);		
+		_delay_ms(1000);	
+	}
+	else
+	{
+		// Write logo from buffer
+		write_buffer(buffer);
+		_delay_ms(1000);
+	}
+
+	clear_buffer(buffer);
+	write_buffer(buffer);
+	
 	st7565_init(); // Seems necessary for KK2 mini
 	
 	//***********************************************************
@@ -298,7 +316,7 @@ void init(void)
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	//clear_buffer(buffer);
 	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
-	write_buffer(buffer,1);	
+	write_buffer(buffer);	
 	clear_buffer(buffer);
 		
 	// Do startup tasks
@@ -312,7 +330,7 @@ void init(void)
 	{
 		clear_buffer(buffer);
 		LCD_Display_Text(61,(const unsigned char*)Verdana14,25,25); // "Cal. failed"
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		_delay_ms(1000);
 		
 		// Reset
@@ -345,45 +363,3 @@ void init(void)
 
 } // init()
 
-//***********************************************************
-// Reconfigure interrupts
-//***********************************************************
-
-void init_int(void)
-{
-	cli();	// Disable interrupts
-
-	switch (Config.RxMode)
-	{
-		case CPPM_MODE:
-			PCMSK1 = 0;							// Disable AUX
-			PCMSK3 = 0;							// Disable THR
-			EIMSK = 0x04;						// Enable INT2 (Rudder/CPPM input)
-			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
-			break;
-
-		case PWM:
-			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
-			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
-			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
-			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
-			break;
-
-		case SBUS:
-		case SPEKTRUM:
-			// Disable PWM input interrupts
-			PCMSK1 = 0;							// Disable AUX
-			PCMSK3 = 0;							// Disable THR
-			EIMSK  = 0;							// Disable INT0, 1 and 2 
-
-			// Enable serial interrupt
-			UCSR0B |= (1 << RXCIE0);
-			break;
-
-		default:
-			break;	
-	}	
-
-	sei(); // Re-enable interrupts
-
-} // init_int

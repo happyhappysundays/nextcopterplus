@@ -18,13 +18,14 @@
 //***********************************************************
 
 uint16_t TIM16_ReadTCNT1(void);
+void init_int(void);
+void Disable_RC_Interrupts(void);
 
 //************************************************************
 // Interrupt vectors
 //************************************************************
 
 volatile bool Interrupted;			// Flag that RX packet completed
-volatile bool FirstInterrupted;		// Temporary copy of Interrupted flag
 volatile bool JitterFlag;			// Flag that interrupt occurred
 volatile bool JitterGate;			// Area when we care about JitterFlag
 
@@ -39,10 +40,15 @@ volatile uint16_t chanmask16;
 volatile uint16_t checksum;
 volatile uint8_t bytecount;
 volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
+volatile uint16_t FrameRate;		// Updated frame rate for serial packets
+
 
 #define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum pulse is 300us
-#define PACKET_TIMER 2500			// Serial RC packet timer. 2500/2500000 = 1.0ms
+
+//#define PACKET_TIMER 12500			// Serial RC packet timer. 2500/2500000 = 5.0ms
+#define PACKET_TIMER 2500			// Serial RC packet timer. 500/2500000 = 1.0ms
+
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
 //************************************************************
@@ -250,9 +256,6 @@ ISR(INT2_vect)
 //* Serial receive interrupt
 //************************************************************
 
-// Interrupts from both UART0 and UART1 RX will come here
-ISR(USART1_RX_vect, ISR_ALIASOF(USART0_RX_vect));
-
 ISR(USART0_RX_vect)
 {
 	char temp = 0;			// RX characters
@@ -265,7 +268,7 @@ ISR(USART0_RX_vect)
 	uint8_t chan_shift = 0;
 	uint8_t data_mask = 0;
 	
-	uint16_t Save_TCNT1;
+	uint16_t Save_TCNT1;	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	uint16_t CurrentPeriod;
 
 	//************************************************************
@@ -277,18 +280,32 @@ ISR(USART0_RX_vect)
 
 	// Save current time stamp
 	Save_TCNT1 = TIM16_ReadTCNT1();
-	CurrentPeriod = Save_TCNT1 - PPMSyncStart;
+	
+	// Work out interval properly
+	// Note that CurrentPeriod cannot be larger than 26.2ms
+	
+	//CurrentPeriod = Save_TCNT1 - PPMSyncStart;
+	if (Save_TCNT1 < PPMSyncStart)
+	{
+		CurrentPeriod = (65536 - PPMSyncStart + Save_TCNT1);
+	}
+	else
+	{
+		CurrentPeriod = (Save_TCNT1 - PPMSyncStart);
+	}
 
 	// Handle start of new packet
-	if (CurrentPeriod > PACKET_TIMER)
+	if (CurrentPeriod > PACKET_TIMER) // 5.0ms
 	{
 		// Reset variables
-		Interrupted = false;
 		rcindex = 0;
 		bytecount = 0;
 		ch_num = 0;
 		checksum = 0;
 		chanmask16 = 0;
+
+		// Save frame rate to global
+		FrameRate = CurrentPeriod;
 	}
 
 	// Timestamp this interrupt
@@ -340,7 +357,6 @@ ISR(USART0_RX_vect)
 			{
 				// RC sync established
 				Interrupted = true;
-				FirstInterrupted = true;				
 
 				// Clear channel data
 				for (j = 0; j < MAX_RC_CHANNELS; j++)
@@ -394,7 +410,9 @@ ISR(USART0_RX_vect)
 					RxChannel[j] = itemp16 + 3750;				
 				} 	
 			} // Frame lost check
+			
 		} // Packet ended flag
+	
 	} // (Config.RxMode == SBUS)
 
 	//************************************************************
@@ -464,9 +482,6 @@ ISR(USART0_RX_vect)
 		// Process data when all packets received
 		if (bytecount >= 15)
 		{
-			Interrupted = true;	
-			FirstInterrupted = true;
-
 			// Ahem... ah... just stick the last byte into the buffer manually...(hides)
 			sBuffer[15] = temp;
 
@@ -529,7 +544,12 @@ ISR(USART0_RX_vect)
 				sindex += 2;
 
 			} // For each pair of bytes
+			
+			// RC sync established
+			Interrupted = true;
+
 		} // Check end of data
+		
 	} // (Config.RxMode == SPEKTRUM)
 
 	//************************************************************
@@ -565,4 +585,78 @@ uint16_t TIM16_ReadTCNT1(void)
 	return i;
 }
 
+//***********************************************************
+// Disable RC interrupts as required
+//***********************************************************
 
+void Disable_RC_Interrupts(void)
+{
+	cli();	// Disable interrupts
+
+	// Disable PWM input interrupts
+	PCMSK1 = 0;							// Disable AUX
+	PCMSK3 = 0;							// Disable THR
+	EIMSK  = 0;							// Disable INT0, 1 and 2
+
+	// Disable receiver (flushes buffer)
+	UCSR0B &= ~(1 << RXEN0);	
+
+	// Disable serial interrupt	
+	UCSR0B &= ~(1 << RXCIE0);
+	
+	// Clear interrupt flags
+	PCIFR	= 0x0F;						// Clear PCIF0~PCIF3 interrupt flags
+	EIFR	= 0x00; 					// Clear INT0~INT2 interrupt flags (Elevator, Aileron, Rudder/CPPM)
+	
+	sei(); // Re-enable interrupts
+}
+
+//***********************************************************
+// Reconfigure RC interrupts
+//***********************************************************
+
+void init_int(void)
+{
+	cli();	// Disable interrupts
+	
+	switch (Config.RxMode)
+	{
+		case CPPM_MODE:
+			PCMSK1 = 0;							// Disable AUX
+			PCMSK3 = 0;							// Disable THR
+			EIMSK = 0x04;						// Enable INT2 (Rudder/CPPM input)
+			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
+			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
+			break;
+
+		case PWM:
+			PCMSK1 |= (1 << PCINT8);			// PB0 (Aux pin change mask)
+			PCMSK3 |= (1 << PCINT24);			// PD0 (Throttle pin change mask)
+			EIMSK  = 0x07;						// Enable INT0, 1 and 2 
+			UCSR0B &= ~(1 << RXCIE0);			// Disable serial interrupt
+			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
+			break;
+
+		case SBUS:
+		case SPEKTRUM:
+			// Disable PWM input interrupts
+			PCMSK1 = 0;							// Disable AUX
+			PCMSK3 = 0;							// Disable THR
+			EIMSK  = 0;							// Disable INT0, 1 and 2 
+			
+			// Enable serial receiver and interrupts
+			UCSR0B |= (1 << RXCIE0);			// Enable serial interrupt
+			UCSR0B |= (1 << RXEN0);				// Enable receiver
+			break;
+
+		default:
+			break;	
+	}	
+
+	// Clear interrupt flags
+	PCIFR	= 0x0F;								// Clear PCIF0~PCIF3 interrupt flags
+	EIFR	= 0x00; 							// Clear INT0~INT2 interrupt flags (Elevator, Aileron, Rudder/CPPM)
+
+	sei(); // Re-enable interrupts
+
+} // init_int

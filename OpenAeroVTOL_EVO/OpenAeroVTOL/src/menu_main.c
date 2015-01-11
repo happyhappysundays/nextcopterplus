@@ -40,8 +40,8 @@ void Wait_BUTTON4(void);
 // Main menu-specific setup
 //************************************************************
 
-uint8_t main_top = MAINSTART;
-uint8_t sub_top = 0;
+uint16_t main_top = MAINSTART;
+uint16_t sub_top = 0;
 uint8_t menu_flag;
 
 void menu_main(void)
@@ -63,13 +63,13 @@ void menu_main(void)
 		// Print menu
 		print_menu_frame(0);													// Frame
 		
-		for (uint8_t i = 0; i < 4; i++)
+		for (uint16_t i = 0; i < 4; i++)
 		{
 			LCD_Display_Text(main_top+i,(const unsigned char*)Verdana8,ITEMOFFSET,(uint8_t)pgm_read_byte(&lines[i]));	// Lines
 		}
 
 		print_cursor(main_cursor);												// Cursor
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 
 		// Poll buttons when idle
 		poll_buttons(true);

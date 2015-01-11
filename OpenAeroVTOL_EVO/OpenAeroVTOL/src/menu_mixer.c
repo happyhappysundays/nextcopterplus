@@ -43,7 +43,7 @@ void menu_mixer(uint8_t i);
 	 
 const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = 
 {
-	46,0,0,0,0,0,0,56,						// Motor control and offsets (8)
+	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
 	0,0,0,0,0,0,							// Flight controls (6)
 	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
 	238,0,238,0,238,0,238,0					// Other sources (8)
@@ -52,7 +52,7 @@ const uint8_t MixerMenuText[MIXERITEMS] PROGMEM =
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
 {
 		// Motor control and offsets (8)
-		{SERVO,MOTOR,1,1,SERVO},		// Motor marker (0)
+		{ASERVO,MOTOR,1,1,ASERVO},		// Motor marker (0)
 		{-125,125,1,0,0},				// P1 Offset (%)
 		{1,99,1,0,50},					// P1.n Position (%)
 		{-125,125,1,0,0},				// P1.n Offset (%)
@@ -70,18 +70,18 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{-125,125,1,0,0},				// P2 Rudder volume
 
 		// Mixer ranges (12)
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 roll_gyro (14)
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 roll_gyro
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 pitch_gyro
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 pitch_gyro
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 yaw_gyro
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 yaw_gyro
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 roll_acc
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 roll_acc
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 pitch_acc
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 pitch_acc
-		{OFF, REVERSESCALE,1,1,OFF},	// P1 Z_delta_acc
-		{OFF, REVERSESCALE,1,1,OFF},	// P2 Z_delta_acc
+		{OFF, SCALE,1,1,OFF},			// P1 roll_gyro (14)
+		{OFF, SCALE,1,1,OFF},			// P2 roll_gyro
+		{OFF, SCALE,1,1,OFF},			// P1 pitch_gyro
+		{OFF, SCALE,1,1,OFF},			// P2 pitch_gyro
+		{OFF, SCALE,1,1,OFF},			// P1 yaw_gyro
+		{OFF, SCALE,1,1,OFF},			// P2 yaw_gyro
+		{OFF, SCALE,1,1,OFF},			// P1 roll_acc
+		{OFF, SCALE,1,1,OFF},			// P2 roll_acc
+		{OFF, SCALE,1,1,OFF},			// P1 pitch_acc
+		{OFF, SCALE,1,1,OFF},			// P2 pitch_acc
+		{OFF, SCALE,1,1,OFF},			// P1 Z_delta_acc
+		{OFF, SCALE,1,1,OFF},			// P2 Z_delta_acc
 
 		// Sources (8)
 		{SRC1,NOMIX,1,1,NOMIX},			// P1 Source A (26)

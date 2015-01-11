@@ -161,7 +161,7 @@ void CalibrateGyrosFast(void)
 bool CalibrateGyrosSlow(void)
 {
 	float 		GyroSmooth[NUMBEROFAXIS];
-	int16_t		GyroOld[NUMBEROFAXIS];
+	int16_t		GyroOld[NUMBEROFAXIS] = {0,0,0};
 	uint16_t	Stable_counter = 0;	
 	uint16_t	Gyro_timeout = 0;
 	uint8_t		axis;
@@ -183,7 +183,7 @@ bool CalibrateGyrosSlow(void)
 	while (!Gyros_Stable && ((Gyro_seconds <= CAL_TIMEOUT)))
 	{
 		// Update status timeout
-		Gyro_timeout += (uint8_t) (TCNT2 - Gyro_TCNT2);
+		Gyro_timeout += (uint8_t)(TCNT2 - Gyro_TCNT2);
 		Gyro_TCNT2 = TCNT2;
 
 		// Count elapsed seconds

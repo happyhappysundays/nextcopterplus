@@ -28,7 +28,7 @@ extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-extern void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
+extern void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc subroutines
 extern uint8_t poll_buttons(bool acceleration);
@@ -36,11 +36,11 @@ extern void menu_beep(uint8_t beeps);
 extern void print_cursor(uint8_t line);
 
 // Menu management
-extern void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint16_t* temp);
-extern void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
+extern void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint16_t* top, uint16_t* temp);
+extern void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
 
 // Special print routine - prints either numeric or text
-extern void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
+extern void print_menu_text(int16_t values, uint8_t style, uint16_t text_link, uint8_t x, uint8_t y);
 extern menu_range_t get_menu_range (const unsigned char* menu_ranges, uint8_t menuitem);
 
 // Externs
@@ -66,6 +66,6 @@ extern uint8_t cursor;
 extern uint16_t menu_temp;
 extern const uint8_t lines[4];
 extern uint8_t menu_flag;
-extern uint8_t sub_top;
+extern uint16_t sub_top;
 
 

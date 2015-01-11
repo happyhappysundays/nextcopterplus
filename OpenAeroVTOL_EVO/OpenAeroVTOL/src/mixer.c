@@ -91,6 +91,7 @@ void ProcessMixer(void)
 	int16_t	temp3 = 0;
 	int16_t	Step1 = 0;
 	int16_t	Step2 = 0;
+	int8_t	itemp8 = 0;
 
 	// Copy the sensor data to an array for easy indexing - acc data is from accSmooth, increased to reasonable rates
 	temp1 = (int16_t)accSmooth[ROLL] << 3;
@@ -691,9 +692,8 @@ void ProcessMixer(void)
 			}
 
 			// Reformat into a system-compatible value
-			temp3 = ((temp3 + 64) >> 7);							// Round then divide by 128
-			P1_solution = scale_percent_nooffset((int8_t)temp3);	
-
+			itemp8 = (int8_t)((temp3 + 64) >> 7);							// Round then divide by 128
+			P1_solution = scale_percent_nooffset(itemp8);	
 
 		} // No curve, so just use one point for offset
 		else
@@ -852,7 +852,7 @@ int16_t scale32(int16_t value16, int16_t multiplier16)
 
 		// Divide by 100 and round to get scaled value
 		temp32 = (temp32 + (int32_t)50) / (int32_t)100; // Constants need to be cast up to 32 bits
-		value16 = (int16_t) temp32;
+		value16 = (int16_t)temp32;
 	}
 
 	return value16;

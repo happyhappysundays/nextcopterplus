@@ -16,7 +16,7 @@
 
 // Buffers
 extern char pBuffer[PBUFFER_SIZE];
-extern uint8_t	buffer[];
+extern uint8_t	buffer[1024];
 extern char sBuffer[SBUFFER_SIZE];
 
 extern bool	RefreshStatus;
@@ -26,12 +26,16 @@ extern uint8_t	Transition_state;
 extern int16_t	transition;
 
 // Flags
-extern uint8_t	General_error;
-extern uint8_t	Flight_flags;
-extern uint8_t	Alarm_flags;
+extern volatile uint8_t	General_error;
+extern volatile uint8_t	Flight_flags;
+extern volatile uint8_t	Alarm_flags;
 
 // Misc
-extern uint16_t InterruptCount;
-extern uint16_t LoopStartTCNT1;
-extern bool Overdue;
-extern uint8_t	LoopCount;
+extern volatile uint16_t InterruptCount;
+extern volatile uint16_t LoopStartTCNT1;
+extern volatile bool Overdue;
+extern volatile uint8_t	LoopCount;
+extern volatile bool SlowRC;
+
+extern volatile uint32_t RC_Master_Timer; // debug
+extern volatile uint32_t PWM_Available_Timer; // debug
