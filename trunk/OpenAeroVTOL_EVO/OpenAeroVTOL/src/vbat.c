@@ -9,6 +9,7 @@
 #include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <util/delay.h>
 #include "io_cfg.h"
 #include "adc.h"

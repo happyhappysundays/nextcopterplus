@@ -12,5 +12,5 @@ extern void RC_Deadband(void);
 extern void CenterSticks(void);
 
 // RC input values
-extern int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
-extern int16_t MonopolarThrottle;			// Monopolar throttle
+extern volatile int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
+extern volatile int16_t MonopolarThrottle;			// Monopolar throttle

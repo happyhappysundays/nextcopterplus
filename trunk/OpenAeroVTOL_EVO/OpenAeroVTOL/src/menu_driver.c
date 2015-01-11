@@ -31,9 +31,9 @@
 void print_menu_frame(uint8_t style);
 
 // Menu management
-void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint16_t* temp);
-void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number);
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
+void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint16_t* top, uint16_t* temp);
+void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -43,7 +43,7 @@ void draw_expo(int16_t value);
 menu_range_t get_menu_range (const unsigned char* menu_ranges, uint8_t menuitem);
 
 // Special print routine - prints either numeric or text
-void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y);
+void print_menu_text(int16_t values, uint8_t style, uint16_t text_link, uint8_t x, uint8_t y);
 
 // Servo driver
 void output_servo_ppm_asm3(int16_t servo_number, int16_t value);
@@ -80,7 +80,7 @@ void print_menu_frame(uint8_t style)
 	}
 
 	// Write from buffer
-	write_buffer(buffer,1);
+	write_buffer(buffer);
 }
 
 //**********************************************************************
@@ -96,7 +96,7 @@ void print_menu_frame(uint8_t style)
 // text_link = pointer to the text list for the values if not numeric
 // cursor = cursor position
 //**********************************************************************
-void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor)
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor)
 {
 	menu_range_t	range1;
 		
@@ -125,7 +125,7 @@ void print_menu_items(uint8_t top, uint8_t start, int8_t values[], const unsigne
 	}
 
 	print_cursor(cursor);	// Cursor
-	write_buffer(buffer,1);
+	write_buffer(buffer);
 	poll_buttons(true);
 }
 
@@ -152,7 +152,7 @@ menu_range_t get_menu_range(const unsigned char* menu_ranges, uint8_t menuitem)
 // servo_number = Servo number to update
 //************************************************************
 
-void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint8_t text_link, bool servo_enable, int16_t servo_number)
+void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number)
 {
 	mugui_size16_t size;
 	int16_t temp16;
@@ -245,7 +245,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			print_menu_frame(1);
 
 			// Write from buffer
-			write_buffer(buffer,1);
+			write_buffer(buffer);
 		}
 
 		// Poll buttons when idle
@@ -308,7 +308,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		// Ignore if the output is marked as a motor
 		if	(
 			((servo_enable) && (servo_update >= 4)) &&
-			(Config.Channel[servo_number].Motor_marker == MOTOR)
+			(Config.Channel[servo_number].Motor_marker != MOTOR)
 			)
 		{
 			servo_update = 0;
@@ -316,7 +316,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
 
 			// Scale servo from 2500~5000 to 875~2125
-			temp16 = ((temp16 - (int16_t)3750) >> 1) + (int16_t)1500; 
+			temp16 = ((temp16 - 3750) >> 1) + 1500; 
 
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);
@@ -361,7 +361,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 // temp*	= Currently selected item number
 //************************************************************
 
-void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint8_t* top, uint16_t* temp)
+void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint16_t* top, uint16_t* temp)
 {
 	// Temporarily add in offset :(
 	*top = *top + offset;
@@ -444,12 +444,19 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 	if (*cursor == PREVLINE)								// Up				
 	{
 		*cursor  = LINE0;
-		if (*top > start) *top = *top - 1;					// Shuffle list up
+		if (*top > start) 
+		{
+			*top = *top - 1;								// Shuffle list up
+		}
 	}
+	
 	if (*cursor == NEXTLINE)								// Down
 	{
 		*cursor  = LINE3;
-		if ((*top+3) < ((start + items)-1)) *top = *top + 1;// Shuffle list down
+		if ((*top + 3) < (uint16_t)((start + items) - 1))	// Compiler throws a warning here without the cast. top is uint16_t, start is uint8_t, items = uint8_t
+		{
+			*top = *top + 1;								// Shuffle list down
+		}
 	}
 
 	// Remove temporary offset
@@ -465,7 +472,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 // y = vertical location on screen
 //************************************************************
 
-void print_menu_text(int16_t values, uint8_t style, uint8_t text_link, uint8_t x, uint8_t y)
+void print_menu_text(int16_t values, uint8_t style, uint16_t text_link, uint8_t x, uint8_t y)
 {
 	if (style == 0) // Numeral
 	{

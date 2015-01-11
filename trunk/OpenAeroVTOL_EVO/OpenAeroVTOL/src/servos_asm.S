@@ -8,6 +8,7 @@
  * Updated: 11/05/2013 - Discovered that M1 incapable of <900us and M8 of >2.04ms due to 128us stagger limitations.
  *						 Reduced stagger to 100us and recalibrated all offsets.
  * Updated: 30/11/2013 - Now compatible with KK2.1 board
+ * Updated: 22/12/2014 - Added conditional output based on the ServoFlag. Re-tweaked some of the output timing.
  */
 
 #include <avr/io.h>
@@ -33,20 +34,24 @@
 	.section .text
 
 ;*************************************************************************	
-; void output_servo_ppm_asm(&ServoOut[0]);
+; void output_servo_ppm_asm(&ServoOut[0], ServoFlag);
 ;
-; regs = r24,25 (&ServoOut[0])
+; regs = r24,25 (&ServoOut[0]), r22 (ServoFlag)
 ;
 ; Servo inputs are 16-bit, 1000 to 2000. 1000 bits cover 1ms or 1us per step
 ; Lower 3 bits are encoded using them as an offset into a jump table of 1us steps
 ; Pulses can be generated from below 900us to at least 2100us but unpredictable results
 ; can and will occur beyond this upper limit.
 ;
+; ServoFlag is used to suppress an output if that output's bit is cleared.
+;
 ;*************************************************************************
 
 	.global output_servo_ppm_asm
 	.func   output_servo_ppm_asm
 output_servo_ppm_asm:
+// Copy r22 (containing ServoFlag) into r15
+	mov		r15, r22	
 // Save regs
 	push	ZL			// 2			
 	push	ZH			// 2
@@ -77,7 +82,7 @@ output_servo_ppm_asm:
 // M1
 	ld		XL, Z+ 		// 2			Load XL with data at address in Z
 	ld		XH, Z+		// 2			Load XH with data at address in Z+1
-	subi	XL,	0x4a	// 1 			Trim servo pulse
+	subi	XL,	0x4b	// 1 			Trim servo pulse (was 4a)
 	sbci 	XH,	0x03	// 1
 	push	XL 			// 2			Save trimmed value to the stack
 	push	XH 			// 2
@@ -86,7 +91,7 @@ output_servo_ppm_asm:
 // M2
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xe6
+	subi	XL,	0xe6  // was e6
 	sbci 	XH,	0x02
 	push	XL 		
 	push	XH 		
@@ -113,7 +118,7 @@ output_servo_ppm_asm:
 // M5
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xb9
+	subi	XL,	0xba // was b9
 	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
@@ -122,7 +127,7 @@ output_servo_ppm_asm:
 // M6
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x55
+	subi	XL,	0x55 // was 55
 	sbci 	XH,	0x01
 	push	XL 	
 	push	XH 	
@@ -131,7 +136,7 @@ output_servo_ppm_asm:
 // M7
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xf1
+	subi	XL,	0xf1 // was f1
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 
@@ -140,7 +145,7 @@ output_servo_ppm_asm:
 // M8
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x8d
+	subi	XL,	0x8d // Was 8d
 	sbci 	XH,	0x00
 	push	XL
 	push	XH 
@@ -154,7 +159,8 @@ output_servo_ppm_asm:
 // M1
 	mov		r25,r23		// 1
 	call	DelayHigh	// 10 (where r25 = 7)
-	sbi 	M1			// 1
+	sbrc	r15,0		// 1 (False),	2 if true
+	sbi 	M1			// 1,			0
 	call	DelayLow	// 7 + 140 (where r25 = 0)
 	call    pwm_delay   // 100us
 	call    pwm_delay
@@ -162,6 +168,7 @@ output_servo_ppm_asm:
 // M2
 	mov		r25,r22
 	call	DelayHigh
+	sbrc	r15,1		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M2
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -170,6 +177,7 @@ output_servo_ppm_asm:
 // M3
 	mov		r25,r21
 	call	DelayHigh
+	sbrc	r15,2		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M3
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -178,6 +186,7 @@ output_servo_ppm_asm:
 // M4
 	mov		r25,r20
 	call	DelayHigh
+	sbrc	r15,3		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M4
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -186,6 +195,7 @@ output_servo_ppm_asm:
 // M5
 	mov		r25,r19
 	call	DelayHigh
+	sbrc	r15,4		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M5
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -194,6 +204,7 @@ output_servo_ppm_asm:
 // M6
 	mov		r25,r18
 	call	DelayHigh
+	sbrc	r15,5		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M6
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -202,6 +213,7 @@ output_servo_ppm_asm:
 // M7
 	mov		r25,r17
 	call	DelayHigh
+	sbrc	r15,6		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M7
 	call	DelayLow
 	call    pwm_delay   // 100us
@@ -210,7 +222,8 @@ output_servo_ppm_asm:
 // M8
 	mov		r25,r16
 	call	DelayHigh
-	sbi 	M8
+	sbrc	r15,7		// Don't switch on if if ServoFlag bit is cleared
+	sbi 	M8			// 1
 	call	DelayLow
 
 // At this point, the largest pulse that we can generate is 256 * 8 = 2.048ms

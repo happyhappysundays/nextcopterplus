@@ -40,7 +40,7 @@
 void glcd_delay(void);
 void glcd_delay_1us(void);
 void glcd_spiwrite_asm(uint8_t byte);
-void write_buffer(uint8_t *buffer, uint8_t type);
+void write_buffer(uint8_t *buffer);
 void clear_screen(void);
 
 //***********************************************************
@@ -101,7 +101,7 @@ void st7565_init(void)
 		st7565_command((uint8_t)pgm_read_byte(&lcd_commmands[i]));
 	}
 
-	st7565_set_brightness((uint8_t)Config.Contrast);	
+	st7565_set_brightness(Config.Contrast);	
 	st7565_command(CMD_SET_COM_REVERSE); 		// For logo	0xC8
 }
 
@@ -113,8 +113,8 @@ void st7565_set_brightness(uint8_t val)
 	st7565_command(val);
 }
 
-// Write LCD buffer if type = 1 normal, 0 = logo.
-void write_buffer(uint8_t *buffer, uint8_t type) 
+// Write LCD buffer
+void write_buffer(uint8_t *buffer) 
 {
 	uint8_t c, p;
 	for(p = 0; p < 8; p++) 

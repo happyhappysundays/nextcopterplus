@@ -9,6 +9,7 @@
 #include "compiledefs.h"
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "io_cfg.h"
 #include "glcd_driver.h"
 #include "mugui.h"
@@ -123,7 +124,7 @@ void Display_sticks(void)
 		}
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 	}
 
 	// Save value and return
@@ -131,7 +132,7 @@ void Display_sticks(void)
 	{
 		LCD_Display_Text(137,(const unsigned char*)Verdana14,40,43); 	// "Done!"
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		// Pause so that the "Done!" text is readable
 		_delay_ms(500);

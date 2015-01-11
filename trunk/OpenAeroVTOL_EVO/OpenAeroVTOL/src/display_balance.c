@@ -71,14 +71,14 @@ void Display_balance(void)
 		fillcircle(buffer, y_pos, x_pos, 8, 1);	// Bubble
 
 		// Refresh GLCD
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 		_delay_ms(20);
 	}
 
 	#ifdef KK2Mini
 	clear_buffer(buffer);
-	write_buffer(buffer,1);
-	st7565_set_brightness((uint8_t)Config.Contrast);
+	write_buffer(buffer);
+	st7565_set_brightness(Config.Contrast);
 	#endif
 }

@@ -89,7 +89,7 @@ void Display_sensors(void)
 		LCD_Display_Text(25, (const unsigned char*)Verdana8, 75, 55); 	// Inverted Calibrate		
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 	}
 }

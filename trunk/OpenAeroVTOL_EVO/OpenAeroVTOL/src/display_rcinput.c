@@ -8,6 +8,7 @@
 
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "io_cfg.h"
 #include "glcd_driver.h"
 #include "mugui.h"
@@ -35,6 +36,9 @@ void Display_rcinput(void);
 
 void Display_rcinput(void)
 {
+	// Re-enable interrupts. High seed mode may have left them off
+	init_int();
+	
 	while(BUTTON1 != 0)
 	{
 		if (BUTTON4 == 0)
@@ -69,7 +73,7 @@ void Display_rcinput(void)
 		LCD_Display_Text(60, (const unsigned char*)Verdana8, 110, 55); 	// Cal.
 
 		// Update buffer
-		write_buffer(buffer,1);
+		write_buffer(buffer);
 		clear_buffer(buffer);
 	}
 }
