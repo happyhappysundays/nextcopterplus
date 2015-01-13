@@ -21,6 +21,7 @@
 #include <avr/pgmspace.h> 
 #include "mixer.h"
 #include "imu.h"
+#include "init.h"
 
 //************************************************************
 // Prototypes
@@ -126,15 +127,9 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_Gyros[P1][ROLL];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_Gyros[P1][ROLL];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
 					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
-					break;				
 				default:
 					break;	
 			}
@@ -146,14 +141,8 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_Gyros[P1][PITCH];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_Gyros[P1][PITCH];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
-					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -166,14 +155,8 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_Gyros[P1][YAW];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_Gyros[P1][YAW];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
-					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
 					break;
 				default:
 					break;
@@ -186,61 +169,43 @@ void ProcessMixer(void)
 			switch (Config.Channel[i].P2_Roll_gyro)
 			{
 				case OFF:
-				break;
+					break;
 				case ON:
-				P2_solution = P2_solution - PID_Gyros[P2][ROLL];
-				break;
-				case REVERSE:
-				P2_solution = P2_solution + PID_Gyros[P2][ROLL];
-				break;
+					P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+					break;
 				case SCALE:
-				P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
-				break;
-				case REVERSESCALE:
-				P2_solution = P2_solution + scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
-				break;
+					P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
+					break;
 				default:
-				break;
+					break;
 			}
 
 			switch (Config.Channel[i].P2_Pitch_gyro)
 			{
 				case OFF:
-				break;
+					break;
 				case ON:
-				P2_solution = P2_solution - PID_Gyros[P2][PITCH];
-				break;
-				case REVERSE:
-				P2_solution = P2_solution + PID_Gyros[P2][PITCH];
-				break;
+					P2_solution = P2_solution - PID_Gyros[P2][PITCH];
+					break;
 				case SCALE:
-				P2_solution = P2_solution - scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
-				break;
-				case REVERSESCALE:
-				P2_solution = P2_solution + scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
-				break;
+					P2_solution = P2_solution - scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
+					break;
 				default:
-				break;
+					break;
 			}
 
 			switch (Config.Channel[i].P2_Yaw_gyro)
 			{
 				case OFF:
-				break;
+					break;
 				case ON:
-				P2_solution = P2_solution - PID_Gyros[P2][YAW];
-				break;
-				case REVERSE:
-				P2_solution = P2_solution + PID_Gyros[P2][YAW];
-				break;
+					P2_solution = P2_solution - PID_Gyros[P2][YAW];
+					break;
 				case SCALE:
-				P2_solution = P2_solution - scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
-				break;
-				case REVERSESCALE:
-				P2_solution = P2_solution + scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
-				break;
+					P2_solution = P2_solution - scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
+					break;
 				default:
-				break;
+					break;
 			}
 		}
 
@@ -257,14 +222,8 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_ACCs[P1][ROLL];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_ACCs[P1][ROLL];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5);
-					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5);
 					break;
 				default:
 					break;
@@ -277,14 +236,8 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_ACCs[P1][PITCH];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_ACCs[P1][PITCH];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
-					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -297,14 +250,8 @@ void ProcessMixer(void)
 				case ON:
 					P1_solution = P1_solution - PID_ACCs[P1][YAW];
 					break;
-				case REVERSE:
-					P1_solution = P1_solution + PID_ACCs[P1][YAW];
-					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][YAW], Config.Channel[i].P1_throttle_volume * 5);
-					break;
-				case REVERSESCALE:
-					P1_solution = P1_solution + scale32(PID_ACCs[P1][YAW], Config.Channel[i].P1_throttle_volume * 5);
 					break;
 				default:
 					break;
@@ -321,14 +268,8 @@ void ProcessMixer(void)
 				case ON:
 					P2_solution = P2_solution - PID_ACCs[P2][ROLL];
 					break;
-				case REVERSE:
-					P2_solution = P2_solution + PID_ACCs[P2][ROLL];
-					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
-					break;
-				case REVERSESCALE:
-					P2_solution = P2_solution + scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
 					break;
 				default:
 					break;
@@ -341,14 +282,8 @@ void ProcessMixer(void)
 				case ON:
 					P2_solution = P2_solution - PID_ACCs[P2][PITCH];
 					break;
-				case REVERSE:
-					P2_solution = P2_solution + PID_ACCs[P2][PITCH];
-					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
-					break;
-				case REVERSESCALE:
-					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -361,14 +296,8 @@ void ProcessMixer(void)
 				case ON:
 					P2_solution = P2_solution - PID_ACCs[P2][YAW];
 					break;
-				case REVERSE:
-					P2_solution = P2_solution + PID_ACCs[P2][YAW];
-					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][YAW], Config.Channel[i].P2_throttle_volume * 5);
-					break;
-				case REVERSESCALE:
-					P2_solution = P2_solution + scale32(PID_ACCs[P2][YAW], Config.Channel[i].P2_throttle_volume * 5);
 					break;
 				default:
 					break;
@@ -731,8 +660,54 @@ void UpdateLimits(void)
 			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
 		};
 
-	// Update triggers
-	Config.PowerTriggerActual = Config.PowerTrigger * 10;
+	// Update LVA trigger
+	// Vbat is measured in units of 10mV, so PowerTriggerActual of 1270 equates to 12.7V
+	switch (Config.PowerTrigger)
+	{
+		case 0:
+		Config.PowerTriggerActual = 0;			// Off
+		break;
+		case 1:
+		Config.PowerTriggerActual = 350; 		// 3.5V
+		break;
+		case 2:
+		Config.PowerTriggerActual = 360; 		// 3.6V
+		break;
+		case 3:
+		Config.PowerTriggerActual = 370; 		// 3.7V
+		break;
+		case 4:
+		Config.PowerTriggerActual = 380; 		// 3.8V
+		break;
+		case 5:
+		Config.PowerTriggerActual = 390; 		// 3.9V
+		break;
+		default:
+		Config.PowerTriggerActual = 0;
+		break;
+	}
+			
+	// Determine cell count and use to multiply trigger
+	if (SystemVoltage >= 2150)										// 6S - 21.5V or at least 3.58V per cell
+	{
+		Config.PowerTriggerActual *= 6;
+	}
+	else if ((SystemVoltage >= 1730) && (SystemVoltage < 2150))		// 5S 17.3V to 21.5V or 4.32V(4S) to 3.58V(6S) per cell
+	{
+		Config.PowerTriggerActual *= 5;
+	}
+	else if ((SystemVoltage >= 1300) && (SystemVoltage < 1730))		// 4S 13.0V to 17.3V or 4.33V(3S) to 3.46V(5S) per cell
+	{
+		Config.PowerTriggerActual *= 4;
+	}
+	else if ((SystemVoltage >= 900) && (SystemVoltage < 1300))		// 3S 9.0V to 13.0V or 4.5V(2S) to 3.25V(4S) per cell
+	{
+		Config.PowerTriggerActual *= 3;
+	}
+	else if (SystemVoltage < 900)									// 2S Under 9.0V or 3.0V(3S) per cell
+	{
+		Config.PowerTriggerActual *= 2;
+	}
 
 	// Update I_term input constraints for all profiles
 	for (j = 0; j < FLIGHT_MODES; j++)

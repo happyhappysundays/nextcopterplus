@@ -58,6 +58,7 @@ void wdt_init(void)
 //************************************************************
 
 CONFIG_STRUCT Config;			// eeProm data configuration
+uint16_t SystemVoltage = 0;		// Initial voltage measured.
 
 void init(void)
 {
@@ -183,7 +184,7 @@ void init(void)
 	// Initialise the GLCD
 	st7565_init();
 
-	// Make sure the LCD is blank without clearing buffer
+	// Make sure the LCD is blank without clearing buffer (and so no logo)
 	clear_screen();
 
 	//***********************************************************
@@ -261,7 +262,7 @@ void init(void)
 		// Display reset message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 		clear_buffer(buffer);
-		LCD_Display_Text(1,(const unsigned char*)Verdana14,40,25); // "Reset"
+		LCD_Display_Text(262,(const unsigned char*)Verdana14,40,25); // "Reset"
 		write_buffer(buffer);
 		clear_buffer(buffer);
 		
@@ -273,7 +274,6 @@ void init(void)
 		st7565_set_brightness(Config.Contrast);
 
 		_delay_ms(500);		// Save is now too fast to show the "Reset" text long enough
-
 	}
 
 	// Display message in place of logo when updating eeprom structure
@@ -314,13 +314,11 @@ void init(void)
 	// Display "Hold steady" message
 	clear_buffer(buffer);
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
-	//clear_buffer(buffer);
-	LCD_Display_Text(2,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
+	LCD_Display_Text(263,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
 	write_buffer(buffer);	
 	clear_buffer(buffer);
 		
 	// Do startup tasks
-	UpdateLimits();							// Update travel limits	
 	Init_ADC();
 	init_int();								// Initialise interrupts based on RC input mode
 	init_uart();							// Initialise UART
@@ -338,6 +336,10 @@ void init(void)
 		wdt_enable(WDTO_15MS);				// Watchdog on, 15ms
 		while(1);							// Wait for reboot
 	}
+
+	// Update voltage detection
+	SystemVoltage = GetVbat();				// Check power-up battery voltage
+	UpdateLimits();							// Update travel and trigger limits
 
 	// Disarm on start-up if Armed setting is ARMABLE
 	if (Config.ArmMode == ARMABLE)

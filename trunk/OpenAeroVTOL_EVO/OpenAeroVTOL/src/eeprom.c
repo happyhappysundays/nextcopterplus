@@ -134,7 +134,7 @@ void Update_V1_0_to_V1_1(void)
 	#define		OLDSIZE 29				// Old channel_t was 29 bytes
 	#define		NEWSIZE 38				// New channel_t is 38 bytes
 
-	uint8_t		i, j;
+	uint8_t		i, j, temp;
 	uint8_t		*src;
 	uint8_t		*dst;
 	uint8_t		mixer_buffer[NEWSIZE * 8]; // 304 bytes
@@ -144,24 +144,27 @@ void Update_V1_0_to_V1_1(void)
 	int8_t		P1_scale;				// P1 sensor scale flags (6)
 	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
+	// Save old P2 Source B volume
+	memcpy((void*)&temp,(void*)1836,1); // Ugly - fix this properly.
+	 
 	// Move data that exists after the channel mixer to new location
-	// Hard-coded to V1.0 RAM location
-	memmove(Config.Servo_reverse, (void*)1832, 74);	// (29 * 8) + 1600 = 1832. This works perfectly.
+	// Hard-coded to V1.0 RAM location	
+	memmove((void*)&Config.Servo_reverse, (void*)1837, 74);	// RAM location determined empirically
 	
 	// Copy the old channel[] structure into buffer, spaced out to match the new structure
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		src = (void*)Config.Channel;
+		src = (void*)Config.Channel;	// Same location as old one
 		dst = (void*)mixer_buffer;
 		src += (i * OLDSIZE);			// Step to next old data in (corrupted) config structure
 		dst += (i * NEWSIZE);			// Step to next location for new data in the buffer
-		memmove(dst, src, OLDSIZE);		// Move only the old (smaller) data
+		memcpy(dst, src, OLDSIZE);		// Move only the old (smaller) data
 	}
 
 	// Rearrange one output at a time	
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Move all bytes from P1_offset up by one to make space for the Motor_marker byte
+		// Move all bytes from the OLD P1_offset [4] up by one to make space for the Motor_marker byte
 		src = &mixer_buffer[4 + (i * NEWSIZE)];	// The old P1_offset byte
 		dst = &mixer_buffer[5 + (i * NEWSIZE)];
 		memmove(dst, src, (OLDSIZE - 4));// Move all but P1_value, P2_value
@@ -187,7 +190,8 @@ void Update_V1_0_to_V1_1(void)
 		src = &mixer_buffer[22 + (i * NEWSIZE)]; // 21 + 1
 		dst = &mixer_buffer[30 + (i * NEWSIZE)];
 		memmove(dst, src, 8);
-	
+
+		
 		// Convert old "None" settings to new ones
 		// Skip every second byte
 		for (j = 0; j < 8; j += 2)
@@ -407,8 +411,11 @@ void Update_V1_0_to_V1_1(void)
 	// Copy buffer back into new structure
 	src = (void*)mixer_buffer;
 	dst = (void*)Config.Channel;
-	memmove(dst, src, sizeof(mixer_buffer));
-		
+	memcpy(dst, src, sizeof(mixer_buffer) - 1); // This appears to be spot on.
+
+	// Restore corrupted byte manually
+	Config.Channel[7].P2_source_b_volume = temp; // Ugly - fix this properly.
+
 	// Set magic number to V1.1 signature
 	Config.setup = MAGIC_NUMBER;
 }

@@ -43,12 +43,9 @@ volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
 volatile uint16_t FrameRate;		// Updated frame rate for serial packets
 
 
-#define SYNCPULSEWIDTH 6750			// Sync pulse must be more than 2.7ms
-#define MINPULSEWIDTH 750			// Minimum pulse is 300us
-
-//#define PACKET_TIMER 12500			// Serial RC packet timer. 2500/2500000 = 5.0ms
-#define PACKET_TIMER 2500			// Serial RC packet timer. 500/2500000 = 1.0ms
-
+#define SYNCPULSEWIDTH 6750			// CPPM sync pulse must be more than 2.7ms
+#define MINPULSEWIDTH 750			// Minimum CPPM pulse is 300us
+#define PACKET_TIMER 2500			// Serial RC packet start timer. Minimum gap 500/2500000 = 1.0ms
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
 //************************************************************
