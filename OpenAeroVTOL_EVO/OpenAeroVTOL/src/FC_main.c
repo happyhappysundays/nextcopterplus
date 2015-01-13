@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 1 - January 2015
+// Version: Release V1.1 Beta 4 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -9,7 +9,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2014 David Thompson
+// * Copyright (C) 2015 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,15 @@
 //			Analog servo output synced to ServoTick to better regulate slow PWM generation.
 //
 // Beta 2	Real-time adjustment of servo limits working again.
+//			Mixer SCALE and REV mixed up in menus - fixed.
+//			FAST mode frame rate detection updated once per second 
+//			Servo settings reset on update from V1.0 for now.
+//
+// Beta 3	LVA changed to "OFF, 3.5, 3.6, 3.7, 3.8V" and nominal voltage auto-calculated
+//			Battery voltage accuracy improved.
+//			Fixed the V1.0 to V1.1 Beta1 eeprom update corruption
+//
+// Beta 4	
 //
 //
 //
@@ -54,12 +63,11 @@
 //***********************************************************
 //
 // Bugs: 
-//		V1.0 to V1.1B1 update screws up RC and sensor zeros
+//
 //
 // Todo: 
 //		
-
-
+//
 //
 //***********************************************************
 //* Includes
@@ -175,6 +183,7 @@ int main(void)
 	bool RCInterruptsON = false;
 	bool ServoTick = false;
 	bool PWM_Last_Call = false;
+	bool ResampleRCRate = false;
 
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
@@ -227,7 +236,8 @@ int main(void)
 		
 		//************************************************************
 		//* Check for interruption of PWM generation
-		//* The "JitterFlag" flag was reset just before PWM generation
+		//* The "JitterFlag" flag was reset just before PWM generation.
+		//* Being set here means that an interrupt has occurred.
 		//************************************************************
 
 		if (JitterFlag == true)
@@ -253,6 +263,7 @@ int main(void)
 					
 					// When not in idle mode, enable Timer0 interrupts as loop rate 
 					// is slow and we need TMR0 to fully measure it.
+					// This may cause PWM generation interruption
 					TIMSK0 |= (1 << TOIE0);	
 				}
 				// Idle mode - fast loop rate so don't need TMR0.
@@ -273,11 +284,12 @@ int main(void)
 				Display_status();
 				
 				// Force code to wait for a new packet
+				// Note that FAST mode won't care about this
 				Interrupted = false;
 
-				// Debug
+				// FAST mode needs to block PWM generation manually
 				PWMBlocked = true;	
-				init_int();
+				init_int(); // Re-enable interrupts so that PWM is unblocked after the next data
 
 				// Wait for timeout
 				Menu_mode = WAITING_TIMEOUT_BD;
@@ -301,7 +313,7 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				if (Status_seconds >= 2)
+				if (Status_seconds >= 3)
 				//if (Status_seconds >= 10) // debug
 				{
 					Menu_mode = STATUS_TIMEOUT;
@@ -321,7 +333,7 @@ int main(void)
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
 					Menu_mode = STATUS;
-					Disable_RC_Interrupts(); // Debug
+					Disable_RC_Interrupts(); // Debug - probably unnecessary
 				}
 
 				break;
@@ -337,6 +349,7 @@ int main(void)
 				// Force code to wait for a new packet
 				Interrupted = false;
 				PWMBlocked = false;	
+				//PWMBlocked = true;	
 
 				break;
 
@@ -356,6 +369,7 @@ int main(void)
 				
 				// Force code to wait for a new packet
 				Interrupted = false;
+				//PWMBlocked = true;	
 								
 				break;
 
@@ -376,6 +390,13 @@ int main(void)
 			// Update the interrupt count each second
 			InterruptCount = InterruptCounter;
 			InterruptCounter = 0;
+			
+			// Re-measure the frame rate in FAST mode every second
+			if (Config.Servo_rate == FAST)
+			{
+				ResampleRCRate = true;
+				//LED1 = !LED1; // Debug
+			}
 		}
 
 		//************************************************************
@@ -414,8 +435,7 @@ int main(void)
 			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
 		}
 
-		// Beep buzzer if Vbat lower than trigger
-		// Vbat is measured in units of 10mV, so a PowerTrigger of 127 equates to 12.7V
+		// Beep buzzer if Vbat lower than trigger		
 		if (GetVbat() < Config.PowerTriggerActual)
 		{
 			General_error |= (1 << LVA_ALARM);	// Set LVA_Alarm flag
@@ -889,9 +909,8 @@ int main(void)
 		if (Interrupted)
 		{
 			// Measure incoming RC rate. Threshold is 60Hz.
-			// In high-speed mode, the RC rate will be unfairly marked as "slow" once measured and interrupt blocking starts.
-			// To stop this being a problem, only set SlowRC prior to RCrateMeasured becoming true in this mode
-			if (((Config.Servo_rate == FAST) && (!RCrateMeasured)) || (Config.Servo_rate < FAST))
+
+			if (Config.Servo_rate < FAST)
 			{
 				if (RC_Rate_Timer > SLOW_RC_RATE)
 				{
@@ -900,12 +919,57 @@ int main(void)
 				else
 				{
 					SlowRC = false;
-				}		
-				
+				}
+			}
+			
+			if ((!RCrateMeasured) && (Config.Servo_rate == FAST))
+			{
+				//LED1 = !LED1; // Debug
+
+				// In high-speed mode, the RC rate will be unfairly marked as "slow" once measured and interrupt blocking starts.
+				// To stop this being a problem, only set SlowRC prior to RCrateMeasured becoming true in this mode
+				// Debug - or when re-measuring the rate...
+				if (RC_Rate_Timer > SLOW_RC_RATE)
+				{
+					SlowRC = true;
+				}
+				else
+				{
+					SlowRC = false;
+				}	
+					
 				// If RC rate not measured yet keep refreshing RC_Master_Timer		
 				// This is only valid for high speed mode. Other modes just use the SlowRC flag.
-				// Note that Framerate is only valid for serial data
+				// Note that FrameRate is only valid for serial data
 				RC_Master_Timer = FrameRate; 
+			}
+
+			//************************************************************
+			//* Work out the high speed mode RC blocking period when requested. 
+			//* Only relevant for high speed mode.
+			//************************************************************
+				
+			// Work out the exact amount of time that we must wait before
+			// signalling "last call" and re-enabling interrupts
+
+			if (RC_Master_Timer > 0) // Debug - don't calculate until a valid measurement is available
+			{
+				// RC rate is 22ms
+				if (SlowRC)
+				{
+					// 41ms (8 cycles)
+					PWM_Available_Timer = (2 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD;
+				}
+
+				// RC rate is 11ms
+				else
+				{
+					// 30ms (6 cycles)
+					PWM_Available_Timer = (3 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD - (PWM_PERIOD >> 1);
+				}
+				
+				// Once the high speed rate has been calculated, signal that PWM is good to go.
+				RCrateMeasured = true;
 			}
 			
 			// Reset RC timeout
@@ -923,39 +987,24 @@ int main(void)
 			// Block RC interrupts until timeout if period has been calculated
 			if ((Config.Servo_rate == FAST) && RCrateMeasured)
 			{
-				Interrupted = false;		// Cancel pending interruots
-				Disable_RC_Interrupts();	// Disable RC interrupts
-				RCInterruptsON = false;		// Flag it for the rest of the code
-				PWMBlocked = false;			// Enable PWM generation
+				// If it's time to resample the RC rate, do it now
+				// so as not to disturb PWM generation.
+				// This will result in a double gap
+				if (ResampleRCRate)
+				{
+					RCrateMeasured = false;		// Force remeasure of RC rate
+					PWMBlocked = true;			// Disable Fast-mode PWM generation		
+					ResampleRCRate = false;		// Reset resample request
+					
+				}
+				else
+				{
+					Interrupted = false;		// Cancel pending interrupts
+					Disable_RC_Interrupts();	// Disable RC interrupts
+					RCInterruptsON = false;		// Flag it for the rest of the code
+					PWMBlocked = false;			// Enable PWM generation					
+				}
 			}
-		}
-		
-		//************************************************************
-		//* Work out the high speed mode RC blocking period once only. Only relevant for high speed mode.
-		//* Wait for at least five interrupt cycles before measuring.
-		//************************************************************
-
-		if(!RCrateMeasured && (RC_Interrupts > 5))
-		{
-			// Work out the exact amount of time, at the current loop rate that we must wait before
-			// signalling "last call" and re-enabling interrupts
-
-			// RC rate is 22ms
-			if (SlowRC)
-			{
-				// 41ms (8 cycles)
-				PWM_Available_Timer = (2 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD;
-			}
-
-			// RC rate is 11ms
-			else
-			{
-				// 30ms (6 cycles)
-				PWM_Available_Timer = (3 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD;
-			}
-			
-			// Once the high speed rate has been calculated, signal that PWM is good to go.
-			RCrateMeasured = true;			
 		}
 	
 		//************************************************************
@@ -980,8 +1029,8 @@ int main(void)
 
 		// Cases where we are ready to output
 		if	(
-				// Interrupted and LOW or SYNC
-				((Config.Servo_rate != FAST) && (Interrupted)) ||			// Run at RC rate
+				// Interrupted in any mode
+				(Interrupted) ||											// Run at RC rate
 
 				// Every loop in FAST mode unless blocked
 				((Config.Servo_rate == FAST) && (!PWMBlocked))				// Run at full loop rate if allowed
@@ -995,7 +1044,7 @@ int main(void)
 			//* High speed in FAST mode
 			//******************************************************************
 
-			if (Config.Servo_rate != FAST)
+			if (Interrupted)
 			{
 				Interrupted = false;		// Reset interrupted flag if that was the cause of entry			
 			}

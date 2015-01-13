@@ -20,7 +20,7 @@ src/mixer.d src/mixer.o: ../src/mixer.c ../inc/compiledefs.h \
  ../inc/rc.h ../inc/isr.h ../inc/io_cfg.h ../inc/servos.h ../inc/pid.h \
  ../inc/main.h \
  c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1051\avr8-gnu-toolchain\avr\include\avr\pgmspace.h \
- ../inc/mixer.h ../inc/imu.h
+ ../inc/mixer.h ../inc/imu.h ../inc/init.h
 
 ../inc/compiledefs.h:
 
@@ -83,3 +83,5 @@ c:\program\ files\ (x86)\atmel\atmel\ toolchain\avr8\ gcc\native\3.4.1051\avr8-g
 ../inc/mixer.h:
 
 ../inc/imu.h:
+
+../inc/init.h:

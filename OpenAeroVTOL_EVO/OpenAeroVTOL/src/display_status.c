@@ -40,9 +40,9 @@ void Display_status(void)
 	clear_buffer(buffer);
 
 	// Display text
-	LCD_Display_Text(3,(const unsigned char*)Verdana8,0,0); 	// Version text
-	LCD_Display_Text(5,(const unsigned char*)Verdana8,0,16); 	// RX sync
-	LCD_Display_Text(6,(const unsigned char*)Verdana8,0,27); 	// Profile
+	LCD_Display_Text(264,(const unsigned char*)Verdana8,0,0); 	// Version text
+	LCD_Display_Text(266,(const unsigned char*)Verdana8,0,16); 	// RX sync
+	LCD_Display_Text(267,(const unsigned char*)Verdana8,0,27); 	// Profile
 	LCD_Display_Text(23,(const unsigned char*)Verdana8,88,27); 	// Pos
 	LCD_Display_Text(133,(const unsigned char*)Verdana8,0,38); 	// Battery
 	
@@ -94,7 +94,7 @@ void Display_status(void)
 
 	vbat_temp = vbat_temp - (temp * 100); // Now display the parts to the right of the decimal point
 
-	LCD_Display_Text(7,(const unsigned char*)Verdana8,(x_loc + pos1),y_loc);
+	LCD_Display_Text(268,(const unsigned char*)Verdana8,(x_loc + pos1),y_loc);
 	mugui_text_sizestring(".", (const unsigned char*)Verdana8, &size);
 	pos3 = size.x;
 	mugui_text_sizestring("0", (const unsigned char*)Verdana8, &size);
@@ -106,7 +106,7 @@ void Display_status(void)
 	}
 	else
 	{
-		LCD_Display_Text(8,(const unsigned char*)Verdana8,(x_loc + pos1 + pos3),y_loc);
+		LCD_Display_Text(269,(const unsigned char*)Verdana8,(x_loc + pos1 + pos3),y_loc);
 		mugui_lcd_puts(itoa(vbat_temp,pBuffer,10),(const unsigned char*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 	}
 

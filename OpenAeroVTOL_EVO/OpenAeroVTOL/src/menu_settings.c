@@ -33,7 +33,7 @@
 //************************************************************
 
 // Menu items
-void menu_rc_setup(uint8_t i);
+void menu_rc_setup(uint8_t section);
 
 //************************************************************
 // Defines
@@ -55,7 +55,7 @@ void menu_rc_setup(uint8_t i);
 const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
 	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},				// General 
+	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General 
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
@@ -83,7 +83,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 #endif			
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
-		{0,127,1,0,0},					// Low battery alarm voltage
+		{0,5,1,1,0},					// Low battery cell voltage
 		{LOW,FAST,1,1,LOW},				// Servo rate
 		{0,6,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 32, 44, 74, None)
 		{0,6,1,1,6},					// Gyro LPF. No LPF default (5, 10, 21, 32, 44, 74, None)

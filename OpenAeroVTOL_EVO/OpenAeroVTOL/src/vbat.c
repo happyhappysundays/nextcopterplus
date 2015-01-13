@@ -38,9 +38,10 @@ uint16_t GetVbat(void)				// Get battery voltage (VBAT on ADC3)
 
 	vBat = ADCW;
 
-	// Multiply by 2.500
-	// 2 + 1/2
-	vBat = (vBat << 1) + (vBat >> 1); // Multiply by 2.500
+	// Multiply by 2.578125
+	// 2 + 1/2 + 1/16 + 1/64
+	vBat = (vBat << 1) + (vBat >> 1) + (vBat >> 4) + (vBat >> 6); // Multiply by 2.578125
 
 	return vBat;
 }
+

@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.1 B2";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.1 B3";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -137,7 +137,7 @@ const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText16[] PROGMEM =  "Gyro LPF:";
 const char GeneralText7[] PROGMEM =  "AL correct:";
-const char BattMenuItem2[]  PROGMEM = "Bat. LVA x10:";
+const char BattMenuItem2[]  PROGMEM = "Min. cell (V):";
 //
 const char P1text[] PROGMEM = "P1";
 const char P2text[] PROGMEM = "P1.n";
@@ -278,11 +278,18 @@ const char MPU6050LPF4[] PROGMEM =  "44Hz";
 const char Dummy0[] PROGMEM = "";
 //
 
+const char VBAT35[] PROGMEM =  "3.5V";
+const char VBAT36[] PROGMEM =  "3.6V";
+const char VBAT37[] PROGMEM =  "3.7V";
+const char VBAT38[] PROGMEM =  "3.8V";
+const char VBAT39[] PROGMEM =  "3.9V";
+//
+
 const char* const text_menu[] PROGMEM = 
 	{
-		PText0,	PText1, PText2, 															// 0 Logo 1 to 2 Reset															
+		AutoMenuItem11, VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,								// 0 to 5 Vbat cell voltages
 		//
-		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 3 to 8 Status menu
+		Dummy0, Dummy0, Dummy0,																// 6 to 8 Spare
 		//
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17 Menu frame text
 		MenuFrame6, MenuFrame7, MenuFrame8, 
@@ -326,7 +333,7 @@ const char* const text_menu[] PROGMEM =
 		RXMode0, RXMode1, RXMode2, RXMode3,													// 62 to 65 RX mode
 		Dummy0, Dummy0, 
 		//
-		AutoMenuItem11, AutoMenuItem15, MixerItem12, MixerItem15, MixerItem16,				// 68 to 71 off/on/rev/scale/revscale 
+		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//
 		Dummy0, Dummy0, 
 		//
@@ -435,6 +442,12 @@ const char* const text_menu[] PROGMEM =
 		Dummy0,Dummy0,																		// 257, 258
 		//
 		PText5, PText6,																		// 259, 260 Updating settings
+		//
+		PText0,	PText1, PText2, 															// 261 Logo 262 Reset 263 Hold steady
+		//
+		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu		
+		
+
 	}; 
 
 //************************************************************
@@ -461,7 +474,7 @@ void idle_screen(void)
 	// Change Status screen depending on arm mode
 	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 	// "Press"
 	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
-
+/*
 	uint16_t dummy = 0;
 	dummy = (uint16_t)(RC_Master_Timer & 0xffff);
 	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,25,43);
@@ -483,8 +496,94 @@ void idle_screen(void)
 	{
 		LCD_Display_Text(55,(const unsigned char*)Verdana8,60,43);  // HIGH
 	}
-
+*/
 /*
+	uint8_t *p;
+	uint16_t dummy = 0;
+
+	//	p = (uint8_t *)1832; // old servo
+		p = (uint8_t *)1837; // ???
+	//	p = (uint8_t *)1904;// new servo
+	//	p = (uint8_t *)1629;// channel[1] data
+	//	p = (uint8_t *)1600;// channel[0] data
+	//	p = (uint8_t *)1828;// channel[6] data (new)
+	//  p = (uint8_t *)1866;// channel[7] data (new)
+	//	p = (uint8_t *)1803;// channel[7] data (old)
+	
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,0,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,15,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,30,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,45,0);
+	p++	;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,60,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,75,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,90,0);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,105,0);
+	
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,0,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,15,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,30,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,45,15);
+	p++	;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,60,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,75,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,90,15);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,105,15);
+	
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,0,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,15,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,30,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,45,30);
+	p++	;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,60,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,75,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,90,30);
+	p++;
+	dummy = (uint16_t)*p;
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,105,30);
+*/
 	// Display most important error
 	if ((General_error & (1 << LVA_ALARM)) != 0)					// Low voltage
 	{
@@ -512,6 +611,6 @@ void idle_screen(void)
 	{
 		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
 	}
-*/	
+
 	write_buffer(buffer);
 }
