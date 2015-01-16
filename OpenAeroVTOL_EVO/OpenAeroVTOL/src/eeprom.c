@@ -144,8 +144,8 @@ void Update_V1_0_to_V1_1(void)
 	int8_t		P1_scale;				// P1 sensor scale flags (6)
 	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
-	// Save old P2 Source B volume
-	memcpy((void*)&temp,(void*)1836,1); // Ugly - fix this properly.
+	// Save old P2 Source B volume. For some reason it gets clobbered.
+	memcpy((void*)&temp,(void*)1836,1);
 	 
 	// Move data that exists after the channel mixer to new location
 	// Hard-coded to V1.0 RAM location	
@@ -414,7 +414,7 @@ void Update_V1_0_to_V1_1(void)
 	memcpy(dst, src, sizeof(mixer_buffer) - 1); // This appears to be spot on.
 
 	// Restore corrupted byte manually
-	Config.Channel[7].P2_source_b_volume = temp; // Ugly - fix this properly.
+	Config.Channel[7].P2_source_b_volume = temp; 
 
 	// Set magic number to V1.1 signature
 	Config.setup = MAGIC_NUMBER;
@@ -457,7 +457,33 @@ void Set_EEPROM_Default_Config(void)
 	
 	// Monopolar throttle is a special case. Set to -100% or -1000
 	Config.RxChannelZeroOffset[THROTTLE] = 2750;
-
+/*
+	// Debug - worst case settings
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		Config.Channel[i].P1_offset = 55;
+		Config.Channel[i].P1n_position = 45;
+		Config.Channel[i].P1n_offset = 66;
+		Config.Channel[i].P2_offset = 77;
+		Config.Channel[i].P1_throttle_volume = 67;
+		Config.Channel[i].P1_aileron_volume = 67;
+		Config.Channel[i].P1_elevator_volume = 67;
+		Config.Channel[i].P1_rudder_volume = 67;
+		Config.Channel[i].P1n_position	= 67;
+		Config.Channel[i].P1_source_a 	= SRC1;
+		Config.Channel[i].P1_source_a_volume = 67;
+		Config.Channel[i].P1_source_b 	= SRC1;
+		Config.Channel[i].P1_source_b_volume = 67;
+		Config.min_travel[i] = -67;
+		Config.max_travel[i] = 67;
+		Config.Channel[i].P1_Roll_gyro = ON;
+		Config.Channel[i].P1_Pitch_gyro = ON;
+		Config.Channel[i].P1_Yaw_gyro = ON;
+		Config.Channel[i].P1_Roll_acc = ON;
+		Config.Channel[i].P1_Pitch_acc = ON;
+		Config.Channel[i].P1_Z_delta_acc = ON;
+	}
+*/	
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{

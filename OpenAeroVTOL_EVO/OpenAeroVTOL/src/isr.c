@@ -152,7 +152,8 @@ ISR(INT2_vect)
 
     // Backup TCNT1
     uint16_t tCount;
-    tCount = TCNT1;
+	
+    tCount = TIM16_ReadTCNT1();
 
 	uint8_t curChannel;
 	uint8_t prevChannel;
@@ -272,13 +273,16 @@ ISR(USART0_RX_vect)
 	//* Common entry code
 	//************************************************************
 
+	// Log interrupts that occur during PWM generation
+	if (JitterGate)	JitterFlag = true;
+
 	// Read byte first
 	temp = UDR0;
 
 	// Save current time stamp
 	Save_TCNT1 = TIM16_ReadTCNT1();
 	
-	// Work out interval properly
+	// Work out frame rate properly
 	// Note that CurrentPeriod cannot be larger than 26.2ms
 	
 	//CurrentPeriod = Save_TCNT1 - PPMSyncStart;
@@ -292,7 +296,7 @@ ISR(USART0_RX_vect)
 	}
 
 	// Handle start of new packet
-	if (CurrentPeriod > PACKET_TIMER) // 5.0ms
+	if (CurrentPeriod > PACKET_TIMER) // 1.0ms
 	{
 		// Reset variables
 		rcindex = 0;
