@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.1 B3";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.1 B5";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -476,17 +476,17 @@ void idle_screen(void)
 	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
 /*
 	uint16_t dummy = 0;
-	dummy = (uint16_t)(RC_Master_Timer & 0xffff);
-	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,25,43);
-	dummy = (uint16_t)(RC_Master_Timer >> 16);
-	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,5,43);	
+	mugui_lcd_puts(itoa(PWM_pulses_global,pBuffer,10),(const unsigned char*)Verdana8,5,43);
 
-	dummy = (uint16_t)(PWM_Available_Timer & 0xffff);
-	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,25,53);
-	dummy = (uint16_t)(PWM_Available_Timer >> 16);
-	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,5,53);
+	dummy = (uint16_t)(interval & 0xffff);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,95,43);
+	dummy = (uint16_t)(interval >> 16);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,65,43);
 
-
+	dummy = (uint16_t)(PWM_interval & 0xffff);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,95,53);
+	dummy = (uint16_t)(PWM_interval >> 16);
+	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,65,53);
 	
 	if(SlowRC)
 	{
@@ -584,6 +584,7 @@ void idle_screen(void)
 	dummy = (uint16_t)*p;
 	mugui_lcd_puts(utoa(dummy,pBuffer,10),(const unsigned char*)Verdana8,105,30);
 */
+
 	// Display most important error
 	if ((General_error & (1 << LVA_ALARM)) != 0)					// Low voltage
 	{

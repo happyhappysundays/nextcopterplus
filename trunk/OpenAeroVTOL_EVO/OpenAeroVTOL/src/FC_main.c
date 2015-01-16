@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 4 - January 2015
+// Version: Release V1.1 Beta 5 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -54,15 +54,16 @@
 //			Battery voltage accuracy improved.
 //			Fixed the V1.0 to V1.1 Beta1 eeprom update corruption
 //
-// Beta 4	
+// Beta 4	Loop interval integrated into the "PWM_Available_Timer" to counter PWM jitter issues in FAST mode.
+//			It should dynamically change to suit any mixer loading and loop cycle.
 //
-//
+// Beta 5	Trying new FAST PWM generation method
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs: 
+// Bugs:
 //
 //
 // Todo: 
@@ -125,15 +126,19 @@
 #define TRANSITION_TIMER 195		// Transition timer units (10ms * 100) (1 to 10 = 1s to 10s)
 #define ARM_TIMER 19531				// Amount of time the sticks must be held to trigger arm. Currently one second.
 #define DISARM_TIMER 58593			// Amount of time the sticks must be held to trigger disarm. Currently three seconds.
-#define SBUS_PERIOD	8750			// Period for S.Bus data to be transmitted + margin (3.5ms)
-#define PWM_PERIOD 12500			// PWM generation period (5ms)
+#define SBUS_PERIOD	6250			// Period for S.Bus data to be transmitted (no margin) (2.5ms)
+#define SBUS_MARGIN	8750			// Period for S.Bus data to be transmitted (+ 1ms margin) (3.5ms)
+#define PWM_PERIOD 12500			// Average PWM generation period (5ms)
+#define PWM_PERIOD_WORST 20833		// PWM generation period (8.3ms - 120Hz)
+#define PWM_PERIOD_BEST 10000		// PWM generation period (4ms - 250Hz)
 
 //***********************************************************
 //* Code and Data variables
 //***********************************************************
 
 // Flight variables
-uint32_t interval;					// IMU interval
+volatile uint32_t interval = 0;				// IMU interval
+volatile uint32_t PWM_interval = PWM_PERIOD_WORST;	// Loop period when generating PWM. Initialise with worst case until updated.
 int16_t transition_counter = 0;
 uint8_t Transition_state = TRANS_P1;
 int16_t	transition = 0; 
@@ -167,9 +172,11 @@ volatile bool Overdue = false;
 volatile uint8_t	LoopCount = 0;
 volatile bool SlowRC = true;
 
-volatile uint32_t RC_Master_Timer = 0; // debug
-volatile uint32_t PWM_Available_Timer = 0; // debug
-		
+volatile uint32_t PWM_Available_Timer = PWM_PERIOD_WORST; // debug - Initialise with worst case until measured
+volatile uint32_t RC_Rate_Timer = 0;
+volatile int16_t PWM_pulses_global = 0; 
+
+			
 //************************************************************
 //* Main loop
 //************************************************************
@@ -182,13 +189,11 @@ int main(void)
 	bool PWMBlocked = false;
 	bool RCInterruptsON = false;
 	bool ServoTick = false;
-	bool PWM_Last_Call = false;
 	bool ResampleRCRate = false;
 
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
-	uint32_t RC_Rate_Timer = 0;
-//	uint32_t RC_Master_Timer = 0;
+	//uint32_t RC_Rate_Timer = 0;
 
 	// 16-bit timers
 	uint16_t Status_timeout = 0;
@@ -221,10 +226,11 @@ int main(void)
 	int8_t	old_trans_mode = 0;		// Old transition mode
 	int16_t temp1 = 0;
 	uint16_t transition_time = 0;
-	uint16_t RC_Interrupts = 0;
 	uint8_t	old_alarms = 0;
 	uint8_t ServoFlag = 0;
 	uint8_t i = 0;
+	int16_t PWM_pulses = 3; 
+	uint16_t RC_Interrupts = 0;
 	
 	init();							// Do all init tasks
 
@@ -395,7 +401,6 @@ int main(void)
 			if (Config.Servo_rate == FAST)
 			{
 				ResampleRCRate = true;
-				//LED1 = !LED1; // Debug
 			}
 		}
 
@@ -879,7 +884,7 @@ int main(void)
 		// If TMR0_counter is less than 2, ICNT1 has not overflowed
 		if (TMR0_counter < 2)
 		{
-			interval = ticker_16;
+			interval = ticker_16; // uint16_t
 		}
 		
 		// If TMR0_counter is 2 or more, then TCNT1 has overflowed
@@ -897,14 +902,14 @@ int main(void)
 		simple_imu_update(interval);
 
 		//************************************************************
-		//* Update I-terms, average gyro values
+		//* Update I-terms, average gyro values each loop
 		//************************************************************
 
 		Sensor_PID();
 		
-		//************************************************************
+		//*****************************************************************
 		//* Measure incoming RC. Result in SlowRC state and RC_Rate_Timer
-		//************************************************************
+		//*****************************************************************
 
 		if (Interrupted)
 		{
@@ -922,14 +927,12 @@ int main(void)
 				}
 			}
 			
+			//if ((RC_Interrupts > 2) && (!RCrateMeasured) && (Config.Servo_rate == FAST))
 			if ((!RCrateMeasured) && (Config.Servo_rate == FAST))
 			{
-				//LED1 = !LED1; // Debug
-
 				// In high-speed mode, the RC rate will be unfairly marked as "slow" once measured and interrupt blocking starts.
 				// To stop this being a problem, only set SlowRC prior to RCrateMeasured becoming true in this mode
-				// Debug - or when re-measuring the rate...
-				if (RC_Rate_Timer > SLOW_RC_RATE)
+				if (FrameRate > SLOW_RC_RATE)
 				{
 					SlowRC = true;
 				}
@@ -937,41 +940,82 @@ int main(void)
 				{
 					SlowRC = false;
 				}	
-					
-				// If RC rate not measured yet keep refreshing RC_Master_Timer		
-				// This is only valid for high speed mode. Other modes just use the SlowRC flag.
-				// Note that FrameRate is only valid for serial data
-				RC_Master_Timer = FrameRate; 
-			}
 
-			//************************************************************
-			//* Work out the high speed mode RC blocking period when requested. 
-			//* Only relevant for high speed mode.
-			//************************************************************
-				
-			// Work out the exact amount of time that we must wait before
-			// signalling "last call" and re-enabling interrupts
-
-			if (RC_Master_Timer > 0) // Debug - don't calculate until a valid measurement is available
-			{
-				// RC rate is 22ms
-				if (SlowRC)
-				{
-					// 41ms (8 cycles)
-					PWM_Available_Timer = (2 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD;
-				}
-
-				// RC rate is 11ms
-				else
-				{
-					// 30ms (6 cycles)
-					PWM_Available_Timer = (3 * (RC_Master_Timer + SBUS_PERIOD)) - SBUS_PERIOD - PWM_PERIOD - PWM_PERIOD - (PWM_PERIOD >> 1);
-				}
-				
 				// Once the high speed rate has been calculated, signal that PWM is good to go.
 				RCrateMeasured = true;
 			}
+
+			// Increment interrupt counter just enough for accurate frame rate measurement
+			if (RC_Interrupts < 3)
+			{
+				RC_Interrupts++;
+			}
+
+			//***********************************************************************
+			//* Work out the high speed mode RC blocking period when requested. 
+			//* Only relevant for high speed mode.
+			//***********************************************************************
+			//
+
+			if (RCrateMeasured && (Config.Servo_rate == FAST))
+			{
+				// Set minimal pulses doable
+				if (SlowRC)
+				{
+					PWM_pulses = 4;				// Four pulses will fit if interval faster than 98.8Hz
+				
+					if (PWM_interval < 20250)	// 20250 = 8.1ms
+					{
+						PWM_pulses += 1;		// Five pulses will fit if interval faster than 123Hz
+					}
+				
+					if (PWM_interval < 16875)	// 16875 = 6.75ms
+					{
+						PWM_pulses += 1;		// Six pulses will fit if interval faster than 148Hz
+					}
+				
+					if (PWM_interval < 14464)	// 14464 = 5.79ms
+					{
+						PWM_pulses += 1;		// Seven pulses will fit if interval faster than 173Hz
+					}
+				
+					if (PWM_interval < 12656)	// 12656 = 5.06ms
+					{
+						PWM_pulses += 1;		// Eight pulses will fit if interval faster than 198Hz
+					}
+
+				}
+				else
+				{
+					PWM_pulses = 3;				// Three pulses will fit if interval faster than 101Hz
+				
+					if (PWM_interval < 18437)	// 18437 = 7.37ms
+					{
+						PWM_pulses += 1;		// Four pulses will fit if interval faster than 135Hz
+					}
+				
+					if (PWM_interval < 14750)	// 14750 = 5.9ms
+					{
+						PWM_pulses += 1;		// Five pulses will fit if interval faster than 169Hz
+					}
+				
+					if (PWM_interval < 11886)	// 11886 = 4.75ms
+					{
+						PWM_pulses += 1;		// Six pulses will fit if interval faster than 210Hz
+					}
+				}
+			}
 			
+			// Rate not measured or re-calibrating or not FAST mode
+			else
+			{
+				PWM_pulses = 1;
+			}
+			
+			
+			// Copy to global when determined
+			PWM_pulses_global = PWM_pulses;
+
 			// Reset RC timeout
 			RC_Timeout = 0;
 
@@ -980,9 +1024,8 @@ int main(void)
 			
 			// Reset rate timer once data received
 			RC_Rate_Timer = 0;
-							
-			// Increment interrupt counter
-			RC_Interrupts++;		
+			Save_TCNT1 = TIM16_ReadTCNT1();
+			RC_Rate_TCNT1 = Save_TCNT1;
 
 			// Block RC interrupts until timeout if period has been calculated
 			if ((Config.Servo_rate == FAST) && RCrateMeasured)
@@ -1002,25 +1045,10 @@ int main(void)
 					Interrupted = false;		// Cancel pending interrupts
 					Disable_RC_Interrupts();	// Disable RC interrupts
 					RCInterruptsON = false;		// Flag it for the rest of the code
-					PWMBlocked = false;			// Enable PWM generation					
+					PWMBlocked = false;			// Enable PWM generation	
 				}
 			}
-		}
-	
-		//************************************************************
-		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)
-		//* and set PWM last call made
-		//************************************************************
-
-		if ((RC_Rate_Timer > PWM_Available_Timer) && RCrateMeasured && !RCInterruptsON)
-		{
-			// Re-enable interrupts
-			init_int();
-			RCInterruptsON = true;
-			
-			// Signal last PWM generation
-			PWM_Last_Call = true;
-		}
+		} // Interrupted
 
 		//************************************************************
 		//* Output PWM to ESCs/Servos where required, 
@@ -1077,19 +1105,50 @@ int main(void)
 				ServoTick = false;
 			}
 
-			// Block PWM generation after last call called
-			if (PWM_Last_Call)
+			// Block PWM generation after last PWM pulse
+			if ((PWM_pulses == 1) && (Config.Servo_rate == FAST))
 			{
-				PWMBlocked = true;				// Block PWM generation on notification of last call
-				PWM_Last_Call = false;			// Reset last call flag	
+				PWMBlocked = true;					// Block PWM generation on notification of last call
+				
+				// Refresh PWM_interval with the actual interval when generating PWM
+				// if it lies within believable ranges of 120Hz to 250Hz
+				// This is located here to make sure the interval measured
+				// is during PWM generation cycles
+				if ((interval < PWM_PERIOD_WORST) && (interval > PWM_PERIOD_BEST))
+				{
+					PWM_interval = interval;
+				}
+				else
+				{
+					PWM_interval = PWM_PERIOD_WORST; // 120Hz
+				}	
+			
+				
 			}
 			
 			Calculate_PID();					// Calculate PID values
 			ProcessMixer();						// Do all the mixer tasks - can be very slow
 			UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
 			output_servo_ppm(ServoFlag);		// Output servo signal
+
+			// Decrement PWM pulse sum
+			if ((Config.Servo_rate == FAST) && (PWM_pulses > 0))
+			{
+				PWM_pulses--;
+			}
 			
 			LoopCount = 0;						// Reset loop counter for averaging accVert
+		}
+	
+		//************************************************************
+		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)
+		//* and just one PWM remains
+		//************************************************************
+
+		if ((PWM_pulses < 1) && RCrateMeasured && !RCInterruptsON && (Config.Servo_rate == FAST))
+		{
+			init_int();					// Re-enable interrupts
+			RCInterruptsON = true;
 		}
 		
 		// Not ready to output PWM, but should clear Interrupted as all code that needs it has seen it already

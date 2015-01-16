@@ -31,12 +31,12 @@
 //************************************************************
 
 void simple_imu_update(uint32_t period);
-void Rotate3dVector(void);
+void Rotate3dVector(float intervalf);
 void ExtractEulerAngles(void);
 
 float small_sine(float angle);
 float small_cos(float angle);
-void thetascale(float gyro, float interval);
+float thetascale(float gyro, float intervalf);
 void RotateVector(float angle);
 float ext2(float Vector);
 void reset_IMU(void);
@@ -72,13 +72,11 @@ float VectorY = 0;
 float VectorZ = 1;
 
 float VectorNewA, VectorNewB;
-float theta;
 float GyroPitchVC, GyroRollVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
 int16_t	angle[2];						// Attitude in degrees - pitch and roll
-float	interval;						// Interval in seconds since the last loop
 
 const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
 	
@@ -113,6 +111,7 @@ const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conver
 void simple_imu_update(uint32_t period)
 {
 	float		tempf, accADCf;
+	float		intervalf;						// Interval in seconds since the last loop
 	int8_t		axis;
 	uint32_t	roll_sq, pitch_sq, yaw_sq;
 	uint32_t 	AccMag = 0;
@@ -120,7 +119,7 @@ void simple_imu_update(uint32_t period)
 	// Work out interval in seconds
 	// Convert (period) from units of 400ns (1/2500000) to seconds (1s/400ns = 2500000)
 	tempf = period;						// Promote int16_t to float
-	interval = tempf/2500000.0f;		// This gives the period in seconds
+	intervalf = tempf/2500000.0f;		// This gives the period in seconds
 
 	tempf = pgm_read_byte(&LPF_lookup[Config.Acc_LPF]); // Lookup actual LPF value and promote
 	
@@ -168,7 +167,7 @@ void simple_imu_update(uint32_t period)
 	}
 
 	// Rotate up-direction 3D vector with gyro inputs
-	Rotate3dVector();
+	Rotate3dVector(intervalf);
 	ExtractEulerAngles();
 	
 	// Upscale to 0.01 degrees resolution and copy to angle[] for display
@@ -176,10 +175,12 @@ void simple_imu_update(uint32_t period)
 	angle[PITCH] = (int16_t)(EulerAnglePitch * -100);
 }
 
-void Rotate3dVector(void)
+void Rotate3dVector(float intervalf)
 {
+	float theta;
+	
 	// Rotate around X axis (pitch)
-	thetascale(GyroPitchVC, interval);
+	theta = thetascale(GyroPitchVC, intervalf);
 	VectorA = VectorY;
 	VectorB = VectorZ;
 	RotateVector(theta);
@@ -187,7 +188,7 @@ void Rotate3dVector(void)
 	VectorZ = VectorNewB;
 
 	// Rotate around Y axis (roll)
-	thetascale (GyroRollVC, interval);
+	theta = thetascale (GyroRollVC, intervalf);
 	VectorA = VectorX;
 	VectorB = VectorZ;
 	RotateVector(theta);
@@ -195,7 +196,7 @@ void Rotate3dVector(void)
 	VectorZ = VectorNewB;
 
 	// Rotate around Z axis (yaw)
-	thetascale(gyroADC[YAW], interval);
+	theta = thetascale(gyroADC[YAW], intervalf);
 	VectorA = VectorX;
 	VectorB = VectorY;
 	RotateVector(theta);
@@ -209,13 +210,15 @@ void RotateVector(float angle)
 	VectorNewB = VectorA * small_sine(angle) + VectorB * small_cos(angle);
 }
 
-void thetascale(float gyro, float interval)
+float thetascale(float gyro, float intervalf)
 {
-	// interval = time in seconds since last measurement
+	float theta;
+	
+	// intervalf = time in seconds since last measurement
 	// GYROSENSRADIANS = conversion from raw gyro data to rad/s
 	// theta = actual number of radians moved
 
-	theta = (gyro * GYROSENSRADIANS * interval);
+	theta = (gyro * GYROSENSRADIANS * intervalf);
 	
 	// The sin() and cos() functions don't appreciate large 
 	// input values. Limit the input values to +/-15 degrees. 
@@ -229,6 +232,8 @@ void thetascale(float gyro, float interval)
 	{
 		theta = -maxdeltaangle;
 	}
+	
+	return theta;
 }
 
 // Small angle approximations of Sine, Cosine
