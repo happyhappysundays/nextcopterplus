@@ -57,10 +57,10 @@ const menu_range_t servo_menu_ranges[3][1] PROGMEM =
 		{OFF, ON,1,1,OFF},				// Reverse
 	},
 	{
-		{-125,0,1,0,-100}, 				// Min travel
+		{-125,0,1,3,-100}, 				// Min travel
 	},
 	{
-		{0,125,1,0,100}, 				// Max travel
+		{0,125,1,3,100}, 				// Max travel
 	},
 };
 

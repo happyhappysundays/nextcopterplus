@@ -37,17 +37,21 @@ void output_servo_ppm(uint8_t ServoFlag)
 	// Re-span numbers from internal values to microseconds
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
+		// Debug - test limits
+		//ServoOut[i] = 2500; //2500 to 5000
+		//ServoOut[i] = 5000;
+		
 		temp = ServoOut[i];					// Promote to 32 bits
 
 		// Check for motor marker and ignore if set
-		if (Config.Channel[i].Motor_marker == MOTOR)
+		if (Config.Channel[i].Motor_marker != MOTOR)
 		{
 			// Scale servo from 2500~5000 to 875~2125
 			temp = ((temp - 3750) >> 1) + 1500;
 		}
 		else
 		{
-			// Scale servo from 2500~5000 to 1000~2000
+			// Scale motor from 2500~5000 to 1000~2000
 			temp = ((temp << 2) + 5) / 10; 	// Round and convert	
 		}
 		
