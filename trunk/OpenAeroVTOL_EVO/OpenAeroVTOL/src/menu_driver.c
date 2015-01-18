@@ -185,7 +185,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		// Vary the button increment delay depending on the function
 		if (servo_enable)
 		{
-			button_inc = 20; // For servos
+			button_inc = 5; // For servos
 		}
 		else
 		{
@@ -213,7 +213,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 		// Display update
 		if 	(!servo_enable || 									// Non-servo value or
-			((display_update >= 32) && (button != NONE)) || 	// Servo value and 32 cycles passed but only with a button pressed or...
+			((display_update >= 8) && (button != NONE)) || 		// Servo value and 8 cycles passed but only with a button pressed or...
 			 (first_time))										// First time into routine
 		{
 			display_update = 0;
@@ -225,7 +225,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (const unsigned char*)Verdana14, 0, 0);
 
 			// Print value
-			if ((range.style == 0) || (range.style == 2)) // numeric and numeric * 4
+			if ((range.style == 0) || (range.style == 2) || (range.style == 3)) // numeric, numeric * 4, servo limits
 			{
 				// Write numeric value, centered on screen
 				mugui_text_sizestring(itoa(value,pBuffer,10), (const unsigned char*)Verdana14, &size);
@@ -247,6 +247,24 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			// Write from buffer
 			write_buffer(buffer);
 		}
+		
+		// Debug
+		// Slow the loop rate for text items
+		if (range.style == 1)
+		{
+			// Loop rate = 250ms (4Hz)
+			_delay_ms(250);
+		}
+		else if (range.style == 3)
+		{
+			// Loop rate = 20ms (50Hz)
+			_delay_ms(20);
+		}
+		else if ((range.style == 0) || (range.style == 2))
+		{
+			// Loop rate = 50ms (10Hz)
+			_delay_ms(100);
+		}
 
 		// Poll buttons when idle
 		// Don't use button acceleration when moving servos
@@ -261,6 +279,13 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			poll_buttons(true);
 		}
 
+		// Debug - release button lock when pressed
+		// unless a servo
+		if ((button != NONE) && (!servo_enable))
+		{
+				button_lock = false;
+		}
+		
 		// Handle cursor Up/Down limits
 		if (button == DOWN)
 		{
@@ -304,10 +329,10 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			st7565_set_brightness(value);
 		}
 
-		// Set servo position if required and update every 4 * 5ms = 20ms
+		// Set servo position if required
 		// Ignore if the output is marked as a motor
 		if	(
-			((servo_enable) && (servo_update >= 4)) &&
+			(servo_enable) &&
 			(Config.Channel[servo_number].Motor_marker != MOTOR)
 			)
 		{
@@ -322,18 +347,6 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			output_servo_ppm_asm3(servo_number, temp16);
 			sei();
 		}
-
-		// Slow the loop rate for text items		
-		 if (range.style == 1)
-		 {
-			// Loop rate = 100ms (10Hz)
-			_delay_ms(100);	
-		 }
-		 else
-		 {
-			// Loop rate = 5ms (200Hz)
-			_delay_ms(5);			 
-		 }
 
 	} // while (button != ENTER)
 
@@ -474,7 +487,7 @@ void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, u
 
 void print_menu_text(int16_t values, uint8_t style, uint16_t text_link, uint8_t x, uint8_t y)
 {
-	if (style == 0) // Numeral
+	if ((style == 0) || (style == 2) || (style == 3)) // Numeral
 	{
 		mugui_lcd_puts(itoa(values,pBuffer,10),(const unsigned char*)Verdana8,x,y);
 	}
@@ -499,7 +512,7 @@ uint8_t poll_buttons(bool acceleration)
 	while (button == NONE)					
 	{
 		buttons = (PINB & 0xf0);	
-		_delay_ms(10);
+		_delay_ms(5);
 
 		if (buttons != (PINB & 0xf0))
 		{

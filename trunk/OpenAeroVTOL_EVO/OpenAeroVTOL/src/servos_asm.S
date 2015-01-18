@@ -9,6 +9,7 @@
  *						 Reduced stagger to 100us and recalibrated all offsets.
  * Updated: 30/11/2013 - Now compatible with KK2.1 board
  * Updated: 22/12/2014 - Added conditional output based on the ServoFlag. Re-tweaked some of the output timing.
+ * Updated: 18/01/2015 - Removed stagger and max loop to reduce PWM generation time
  */
 
 #include <avr/io.h>
@@ -82,8 +83,8 @@ output_servo_ppm_asm:
 // M1
 	ld		XL, Z+ 		// 2			Load XL with data at address in Z
 	ld		XH, Z+		// 2			Load XH with data at address in Z+1
-	subi	XL,	0x4b	// 1 			Trim servo pulse (was 4a)
-	sbci 	XH,	0x03	// 1
+	subi	XL,	0xc6	// 1 			Trim servo pulse (was 34a)
+	sbci 	XH,	0x00	// 1
 	push	XL 			// 2			Save trimmed value to the stack
 	push	XH 			// 2
 	andi	XL,	0x07	// 1			And all but first 3 bits
@@ -91,8 +92,8 @@ output_servo_ppm_asm:
 // M2
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xe6  // was e6
-	sbci 	XH,	0x02
+	subi	XL,	0xbe  // was 2e6
+	sbci 	XH,	0x00
 	push	XL 		
 	push	XH 		
 	andi	XL,	0x07
@@ -100,8 +101,8 @@ output_servo_ppm_asm:
 // M3
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x82
-	sbci 	XH,	0x02
+	subi	XL,	0xb6 // was 282
+	sbci 	XH,	0x00
 	push	XL 		
 	push	XH 		
 	andi	XL,	0x07
@@ -109,8 +110,8 @@ output_servo_ppm_asm:
 // M4
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x1e
-	sbci 	XH,	0x02
+	subi	XL,	0xae // was 21e
+	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -118,8 +119,8 @@ output_servo_ppm_asm:
 // M5
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xba // was b9
-	sbci 	XH,	0x01
+	subi	XL,	0xa5 // was 1ba
+	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -127,8 +128,8 @@ output_servo_ppm_asm:
 // M6
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0x55 // was 55
-	sbci 	XH,	0x01
+	subi	XL,	0x9D // was 155
+	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 	
 	andi	XL,	0x07
@@ -136,7 +137,7 @@ output_servo_ppm_asm:
 // M7
 	ld		XL, Z+
 	ld		XH, Z+
-	subi	XL,	0xf1 // was f1
+	subi	XL,	0x95 // was f1
 	sbci 	XH,	0x00
 	push	XL 	
 	push	XH 
@@ -162,8 +163,8 @@ output_servo_ppm_asm:
 	sbrc	r15,0		// 1 (False),	2 if true
 	sbi 	M1			// 1,			0
 	call	DelayLow	// 7 + 140 (where r25 = 0)
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M2
 	mov		r25,r22
@@ -171,8 +172,8 @@ output_servo_ppm_asm:
 	sbrc	r15,1		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M2
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M3
 	mov		r25,r21
@@ -180,8 +181,8 @@ output_servo_ppm_asm:
 	sbrc	r15,2		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M3
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M4
 	mov		r25,r20
@@ -189,8 +190,8 @@ output_servo_ppm_asm:
 	sbrc	r15,3		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M4
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M5
 	mov		r25,r19
@@ -198,8 +199,8 @@ output_servo_ppm_asm:
 	sbrc	r15,4		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M5
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M6
 	mov		r25,r18
@@ -207,8 +208,8 @@ output_servo_ppm_asm:
 	sbrc	r15,5		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M6
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M7
 	mov		r25,r17
@@ -216,8 +217,8 @@ output_servo_ppm_asm:
 	sbrc	r15,6		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M7
 	call	DelayLow
-	call    pwm_delay   // 100us
-	call    pwm_delay
+	//call    pwm_delay   // 100us
+	//call    pwm_delay
 
 // M8
 	mov		r25,r16
@@ -271,8 +272,8 @@ output_servo_ppm_asm:
 	mov		r23,XL
 
 // Loop prep
-	ldi 	YL,0x13		// 1			Set loop count to 113h or 275 (275 * 8us = 2200us)
-	ldi		YH,0x01		// 1
+	ldi 	YL,0xFF		// 1			Set loop count to ffh or 255 (255 * 8us = 2040us + 150us = 2190us)
+	ldi		YH,0x00		// 1
 	clr		0			// 1 (7)
 
 // Ninja loop - 7 cycles each side (8 x 7 = 56 + 6 to loop + 98 pad = 160 cycles)

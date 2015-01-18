@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 5 - January 2015
+// Version: Release V1.1 Beta 7 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -58,6 +58,11 @@
 //			It should dynamically change to suit any mixer loading and loop cycle.
 //
 // Beta 5	Trying new FAST PWM generation method
+// Beta 6	Remove test defaults
+// Beta 7	Fixed servo travel volumes.
+//			Increased FAST mode to ~250Hz.
+//			Smoothed A.Servo variation in FAST mode to about 18-23ms.
+//			Improved button feel for all data types.
 //
 //***********************************************************
 //* Notes
@@ -119,7 +124,7 @@
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 16ms
 #define RC_LOW_REJECT_RATE 62500	// 25ms = 62500/2500 = 40Hz 
 #define RC_HIGH_REJECT_RATE 20000	// 8ms = 20000/2500000 = 125Hz
-#define	SERVO_RATE_LOW 390			// Requested servo rate when in Normal mode. 19531 / 50(Hz) = 390 - 19.97ms
+#define	SERVO_RATE_LOW 352			// Requested servo rate when in Normal mode. 19531 / 55.5(Hz) = 352 - 18ms
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
@@ -959,31 +964,40 @@ int main(void)
 
 			if (RCrateMeasured && (Config.Servo_rate == FAST))
 			{
-				// Set minimal pulses doable
+				// Set minimal pulses doable (39.2 - n * cycletime)
 				if (SlowRC)
 				{
-					PWM_pulses = 4;				// Four pulses will fit if interval faster than 98.8Hz
+					PWM_pulses = 4;				// Four pulses will fit if interval faster than 102Hz
 				
-					if (PWM_interval < 20250)	// 20250 = 8.1ms
+					if (PWM_interval < 19600)	// 19600 = 7.84ms
 					{
-						PWM_pulses += 1;		// Five pulses will fit if interval faster than 123Hz
+						PWM_pulses += 1;		// Five pulses will fit if interval faster than 127Hz
 					}
 				
-					if (PWM_interval < 16875)	// 16875 = 6.75ms
+					if (PWM_interval < 16333)	// 16333 = 6.53ms
 					{
-						PWM_pulses += 1;		// Six pulses will fit if interval faster than 148Hz
+						PWM_pulses += 1;		// Six pulses will fit if interval faster than 153Hz
 					}
 				
-					if (PWM_interval < 14464)	// 14464 = 5.79ms
+					if (PWM_interval < 14000)	// 14000 = 5.6ms
 					{
-						PWM_pulses += 1;		// Seven pulses will fit if interval faster than 173Hz
+						PWM_pulses += 1;		// Seven pulses will fit if interval faster than 179Hz
 					}
 				
-					if (PWM_interval < 12656)	// 12656 = 5.06ms
+					if (PWM_interval < 12250)	// 12250 = 4.9ms
 					{
-						PWM_pulses += 1;		// Eight pulses will fit if interval faster than 198Hz
+						PWM_pulses += 1;		// Eight pulses will fit if interval faster than 204Hz
 					}
-
+				
+					if (PWM_interval < 10888)	// 10888 = 4.35ms
+					{
+						PWM_pulses += 1;		// Nine pulses will fit if interval faster than 230Hz
+					}
+				
+					if (PWM_interval < 9800)	// 9800 = 3.92ms
+					{
+						PWM_pulses += 1;		// Ten pulses will fit if interval faster than 255Hz
+					}
 				}
 				else
 				{
@@ -1002,6 +1016,16 @@ int main(void)
 					if (PWM_interval < 11886)	// 11886 = 4.75ms
 					{
 						PWM_pulses += 1;		// Six pulses will fit if interval faster than 210Hz
+					}
+				
+					if (PWM_interval < 10142)	// 10142 = 4.05ms
+					{
+						PWM_pulses += 1;		// Five pulses will fit if interval faster than 246Hz
+					}
+				
+					if (PWM_interval < 8859)	// 8859 = 3.5ms
+					{
+						PWM_pulses += 1;		// Six pulses will fit if interval faster than 282Hz
 					}
 				}
 			}
@@ -1103,6 +1127,7 @@ int main(void)
 			if (ServoTick)
 			{
 				ServoTick = false;
+				Servo_Rate = 0;
 			}
 
 			// Block PWM generation after last PWM pulse
