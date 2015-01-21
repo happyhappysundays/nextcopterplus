@@ -125,7 +125,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+					if (Config.Channel[i].P1_aileron_volume < 0 )
+					{
+						P1_solution = P1_solution + PID_Gyros[P1][ROLL];		// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution - PID_Gyros[P1][ROLL];
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
@@ -139,7 +146,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_Gyros[P1][PITCH];
+					if (Config.Channel[i].P1_elevator_volume < 0 )
+					{
+						P1_solution = P1_solution - PID_Gyros[P1][PITCH];		// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution + PID_Gyros[P1][PITCH];
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
@@ -153,7 +167,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_Gyros[P1][YAW];
+					if (Config.Channel[i].P1_rudder_volume < 0 )
+					{
+						P1_solution = P1_solution - PID_Gyros[P1][YAW];			// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution + PID_Gyros[P1][YAW];
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
@@ -171,7 +192,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+					if (Config.Channel[i].P2_aileron_volume < 0 )
+					{
+						P2_solution = P2_solution + PID_Gyros[P2][ROLL];		// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution - PID_Gyros[P2][ROLL];
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_Gyros[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
@@ -185,7 +213,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_Gyros[P2][PITCH];
+					if (Config.Channel[i].P2_elevator_volume < 0 )
+					{
+						P2_solution = P2_solution - PID_Gyros[P2][PITCH];		// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution + PID_Gyros[P2][PITCH];
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
@@ -199,7 +234,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_Gyros[P2][YAW];
+					if (Config.Channel[i].P2_rudder_volume < 0 )
+					{
+						P2_solution = P2_solution - PID_Gyros[P2][YAW];			// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution + PID_Gyros[P2][YAW];
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
@@ -220,7 +262,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_ACCs[P1][ROLL];
+					if (Config.Channel[i].P1_aileron_volume < 0 )
+					{
+						P1_solution = P1_solution + PID_ACCs[P1][ROLL];			// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution - PID_ACCs[P1][ROLL];			// or simply add
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5);
@@ -234,7 +283,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_ACCs[P1][PITCH];
+					if (Config.Channel[i].P1_elevator_volume < 0 )
+					{
+						P1_solution = P1_solution - PID_ACCs[P1][PITCH];		// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution + PID_ACCs[P1][PITCH];
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
@@ -248,7 +304,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P1_solution = P1_solution - PID_ACCs[P1][YAW];
+					if (Config.Channel[i].P1_throttle_volume < 0 )
+					{
+						P1_solution = P1_solution + PID_ACCs[P1][YAW];			// Reverse if volume negative
+					}
+					else
+					{
+						P1_solution = P1_solution - PID_ACCs[P1][YAW];
+					}
 					break;
 				case SCALE:
 					P1_solution = P1_solution - scale32(PID_ACCs[P1][YAW], Config.Channel[i].P1_throttle_volume * 5);
@@ -266,7 +329,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_ACCs[P2][ROLL];
+					if (Config.Channel[i].P2_aileron_volume < 0 )
+					{
+						P2_solution = P2_solution + PID_ACCs[P2][ROLL];			// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution - PID_ACCs[P2][ROLL];			// or simply add
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][ROLL], Config.Channel[i].P2_aileron_volume * 5);
@@ -280,7 +350,15 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_ACCs[P2][PITCH];
+					if (Config.Channel[i].P2_elevator_volume < 0 )
+					{
+
+						P2_solution = P2_solution - PID_ACCs[P2][PITCH];		// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution + PID_ACCs[P2][PITCH];
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
@@ -294,7 +372,14 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					P2_solution = P2_solution - PID_ACCs[P2][YAW];
+					if (Config.Channel[i].P2_throttle_volume < 0 )
+					{
+						P2_solution = P2_solution + PID_ACCs[P2][YAW];			// Reverse if volume negative
+					}
+					else
+					{
+						P2_solution = P2_solution - PID_ACCs[P2][YAW];
+					}
 					break;
 				case SCALE:
 					P2_solution = P2_solution - scale32(PID_ACCs[P2][YAW], Config.Channel[i].P2_throttle_volume * 5);

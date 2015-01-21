@@ -44,8 +44,9 @@ void menu_rc_setup(uint8_t section);
 
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
-#define RCITEMS 9 		// Number of menu items
-#define GENERALITEMS 10
+#define RCITEMS 7 		// Number of menu items displayed
+#define RCITEMSOFFSET 9 // Actual number of menu items
+#define GENERALITEMS 9
 
 
 //************************************************************
@@ -54,26 +55,24 @@ void menu_rc_setup(uint8_t section);
 	 
 const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 105, 116, 105, 141, 141, 141, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 44, 0, 0, 118, 98, 98, 0, 37},			// General 
+	{RCTEXT, 118, 105, 116, 105, 0, 0},				// RC setup
+	{GENERALTEXT, 0, 44, 0, 0, 37, 98, 98, 0},		// General 
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (9)				// Min, Max, Increment, Style, Default
+		// RC setup (7)					// Min, Max, Increment, Style, Default
 		{CPPM_MODE,SPEKTRUM,1,1,PWM},	// Receiver type
+		{LOW,FAST,1,1,LOW},				// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
-		{THROTTLE,NOCHAN,1,1,GEAR},		// Profile select channel
-		{NORMAL,REVERSED,1,1,NORMAL},	// Aileron reverse
-		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator reverse
-		{NORMAL,REVERSED,1,1,NORMAL},	// Rudder reverse
+		{THROTTLE,AUX3,1,1,GEAR},		// Profile select channel
 		{0,40,1,0,0},					// TransitionSpeed 0 to 40
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (9/11)
+		// General (9)
 		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
 		// Limit contrast range for KK2 Mini
 #ifdef KK2Mini
@@ -84,11 +83,10 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,5,1,1,0},					// Low battery cell voltage
-		{LOW,FAST,1,1,LOW},				// Servo rate
+		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
 		{0,6,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 32, 44, 74, None)
 		{0,6,1,1,6},					// Gyro LPF. No LPF default (5, 10, 21, 32, 44, 74, None)
 		{1,10,1,0,7},					// AL correction
-		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
 	}
 };
 //************************************************************
@@ -121,7 +119,7 @@ void menu_rc_setup(uint8_t section)
 			case 1:				// RC setup menu
 				break;
 			case 2:				// General menu
-				offset = RCITEMS;
+				offset = RCITEMSOFFSET;
 				items = GENERALITEMS;
 				value_ptr = &Config.Orientation;
 				break;
@@ -169,6 +167,12 @@ void menu_rc_setup(uint8_t section)
 			if ((Config.RxMode != SBUS) && (Config.Servo_rate == FAST))
 			{
 				Config.Servo_rate = SYNC;
+			}
+			
+			if (Config.ArmMode == ARMABLE)
+			{
+				General_error |= (1 << DISARMED);	// Set flags to disarmed
+				LED1 = 0;
 			}
 
 			Save_Config_to_EEPROM(); // Save value and return

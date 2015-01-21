@@ -134,15 +134,15 @@ typedef struct
 
 	// RC items (9)
 	int8_t		RxMode;					// PWM, CPPM or serial types
+	int8_t		Servo_rate;				// PWM rate for (Low = ~50Hz, RCSync = as per RX, High = ~200Hz)
 	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
-	int8_t		AileronPol;				// Aileron RC input polarity
-	int8_t		ElevatorPol;			// Elevator RC input polarity
-	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
 	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
-
+	int8_t		AileronPol;				// Aileron RC input polarity
+	int8_t		ElevatorPol;			// Elevator RC input polarity
+	
 	// Flight mode settings (36)
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
 
@@ -159,11 +159,11 @@ typedef struct
 	int8_t		ArmMode;				// Arming mode on/off
 	int8_t		Disarm_timer;			// Auto-disarm setting
 	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
-	int8_t		Servo_rate;				// PWM rate for (Low = ~50Hz, RCSync = as per RX, High = ~200Hz)
+	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		Gyro_LPF;				// LPF for gyros
 	int8_t		CF_factor;				// Autolevel correction rate
-	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
+	int8_t		RudderPol;				// Rudder RC input polarity
 
 	// Channel configuration (304)
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	

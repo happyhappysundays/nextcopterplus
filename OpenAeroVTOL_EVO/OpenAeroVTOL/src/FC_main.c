@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 7 - January 2015
+// Version: Release V1.1 Beta 8 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -59,19 +59,27 @@
 //
 // Beta 5	Trying new FAST PWM generation method
 // Beta 6	Remove test defaults
-// Beta 7	Fixed servo travel volumes.
-//			Increased FAST mode to ~250Hz.
+// Beta 7	Fixed servo travel volumes.Increased FAST mode to ~250Hz.
 //			Smoothed A.Servo variation in FAST mode to about 18-23ms.
 //			Improved button feel for all data types.
+// Beta 8	Suggested menu layout changes from Ran.
+//			Fixes for output glitches in/out of screens
+//			V1.1 B8 auto update code. No beeps on initial screens. 
+//			LED indicates ARMED. Fixed V1.0 to V1.1 eeprom update code to automatically track
+//			Config structure location. Acc LPF default changed to "None".
+//			Status screen error messages now just text.
+//			Change in error status no longer jumps from Status screen to Idle.
+//			Status timeout restored to 10s. 
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:
-//
+// Bugs: 
+//	
 //
 // Todo: 
+//
 //		
 //
 //
@@ -135,7 +143,7 @@
 #define SBUS_MARGIN	8750			// Period for S.Bus data to be transmitted (+ 1ms margin) (3.5ms)
 #define PWM_PERIOD 12500			// Average PWM generation period (5ms)
 #define PWM_PERIOD_WORST 20833		// PWM generation period (8.3ms - 120Hz)
-#define PWM_PERIOD_BEST 10000		// PWM generation period (4ms - 250Hz)
+#define PWM_PERIOD_BEST 8333		// PWM generation period (3.333ms - 300Hz)
 
 //***********************************************************
 //* Code and Data variables
@@ -195,6 +203,8 @@ int main(void)
 	bool RCInterruptsON = false;
 	bool ServoTick = false;
 	bool ResampleRCRate = false;
+	bool PWMOverride = false;
+	bool Interrupted_Clone = false;
 
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
@@ -260,6 +270,8 @@ int main(void)
 		//* State machine for switching between screens safely
 		//************************************************************
 
+		PWMOverride = false; // Assume PWM is OK until through the state machine
+
 		switch(Menu_mode) 
 		{
 			// In IDLE mode, the text "Press for status" is displayed ONCE.
@@ -267,10 +279,12 @@ int main(void)
 			case IDLE:
 				if((PINB & 0xf0) != 0xf0)
 				{
-					Menu_mode = STATUS;
+					Menu_mode = PRESTATUS;
 					// Reset the status screen timeout
 					Status_seconds = 0;
-					menu_beep(1);
+					
+					// Allow PWM output
+					PWMOverride = false;
 					
 					// When not in idle mode, enable Timer0 interrupts as loop rate 
 					// is slow and we need TMR0 to fully measure it.
@@ -286,6 +300,25 @@ int main(void)
 				}
 				break;
 
+			// Waiting to safely enter Status screen
+			// PWM activity must stop or have never started
+			// or even just about to start.
+			case PRESTATUS:
+				// If interrupted, or if currently "No signal"
+				if (Interrupted || Interrupted_Clone || Overdue)
+				{
+					// Ready to move on
+					Menu_mode = STATUS;
+							
+					// Prevent PWM output
+					PWMOverride = true;		
+					
+					// Clear Interrupted_Clone
+					Interrupted_Clone = false;
+				}
+
+				break;
+
 			// Status screen first display
 			case STATUS:
 				// Reset the status screen period
@@ -294,13 +327,8 @@ int main(void)
 				// Update status screen
 				Display_status();
 				
-				// Force code to wait for a new packet
-				// Note that FAST mode won't care about this
-				Interrupted = false;
-
-				// FAST mode needs to block PWM generation manually
-				PWMBlocked = true;	
-				init_int(); // Re-enable interrupts so that PWM is unblocked after the next data
+				// Prevent PWM output
+				PWMOverride = true;
 
 				// Wait for timeout
 				Menu_mode = WAITING_TIMEOUT_BD;
@@ -324,29 +352,61 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				if (Status_seconds >= 3)
-				//if (Status_seconds >= 10) // debug
+				//if (Status_seconds >= 3)
+				if (Status_seconds >= 10) // debug
 				{
-					Menu_mode = STATUS_TIMEOUT;
+					Menu_mode = PRESTATUS_TIMEOUT;
+					
+					// Enable PWM output
+					PWMOverride = false;
 				}
 
 				// Jump to menu if button pressed
 				else if(BUTTON1 == 0)
 				{
 					Menu_mode = MENU;
-					menu_beep(1);
 					
-					// Force code to wait for a new packet
-					Interrupted = false;
+					// Prevent PWM output
+					PWMOverride = true;
 				}
 
 				// Update status screen while waiting to time out
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
-					Menu_mode = STATUS;
-					Disable_RC_Interrupts(); // Debug - probably unnecessary
+					Menu_mode = PRESTATUS;
+
+					// Prevent PWM output
+					PWMOverride = true;
+				}
+				
+				else
+				{
+					// Enable PWM output
+					PWMOverride = false;					
 				}
 
+				break;
+
+			// Attempting to leave Status gracefully while PWM stopped.
+			case PRESTATUS_TIMEOUT:
+				// If interrupted, or if currently "No signal"
+				if (Interrupted || Interrupted_Clone || Overdue)
+				{
+					// Switch to STATUS_TIMEOUT mode
+					Menu_mode = STATUS_TIMEOUT;
+				
+					// Enable PWM output
+					PWMOverride = false;
+					
+					// Clear Interrupted_Clone
+					Interrupted_Clone = false;
+				}
+				else
+				{
+					// Prevent PWM output
+					PWMOverride = true;
+				}
+				
 				break;
 
 			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
@@ -355,13 +415,33 @@ int main(void)
 				idle_screen();
 
 				// Switch to IDLE mode
-				Menu_mode = IDLE;
+				Menu_mode = POSTSTATUS_TIMEOUT;
 
-				// Force code to wait for a new packet
-				Interrupted = false;
-				PWMBlocked = false;	
-				//PWMBlocked = true;	
+				// Prevent PWM output
+				PWMOverride = true;
 
+				break;
+
+			// In POSTSTATUS_TIMEOUT mode, we wait for a PWM cycle to complete
+			case POSTSTATUS_TIMEOUT:
+				// If interrupted, or if currently "No signal"
+				if (Interrupted || Interrupted_Clone || Overdue)
+				{
+					// Switch to IDLE mode
+					Menu_mode = IDLE;
+					
+					// Prevent PWM output
+					PWMOverride = false;
+					
+					// Clear Interrupted_Clone
+					Interrupted_Clone = false;
+				}
+				else
+				{
+					// Enable PWM output
+					PWMOverride = true;			
+				}
+				
 				break;
 
 			// In MENU mode, 
@@ -369,6 +449,7 @@ int main(void)
 				LVA = 0;	// Make sure buzzer is off :)
 				// Disarm the FC
 				General_error |= (1 << DISARMED);
+				LED1 = 0;
 				// Start the menu system
 				menu_main();
 				// Switch back to status screen when leaving menu
@@ -378,9 +459,8 @@ int main(void)
 				// Reset IMU on return from menu
 				reset_IMU();
 				
-				// Force code to wait for a new packet
-				Interrupted = false;
-				//PWMBlocked = true;	
+				// Prevent PWM output
+				PWMOverride = true;
 								
 				break;
 
@@ -437,7 +517,7 @@ int main(void)
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
-				menu_beep(1);						// Signal that FC is now disarmed
+				LED1 = 0;							// Signal that FC is now disarmed
 			}
 		}
 		else
@@ -499,7 +579,7 @@ int main(void)
 				Arm_timer = 0;
 				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
 				CalibrateGyrosSlow();					// Calibrate gyros
-				menu_beep(20);							// Signal that FC is ready
+				LED1 = 1;								// Signal that FC is ready
 				reset_IMU();							// Reset IMU just in case...
 			}
 			// Else, disarm the FC after DISARM_TIMER seconds if aileron at max
@@ -507,7 +587,7 @@ int main(void)
 			{
 				Arm_timer = 0;
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
-				menu_beep(1);							// Signal that FC is now disarmed
+				LED1 = 0;								// Signal that FC is now disarmed
 			}
 
 			// Automatic disarm
@@ -531,13 +611,14 @@ int main(void)
 			{
 				// Disarm the FC
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
-				menu_beep(1);							// Signal that FC is now disarmed
+				LED1 = 0;								// Signal that FC is now disarmed
 			}
 		}
 		// Arm when ArmMode is OFF
 		else 
 		{
 			General_error &= ~(1 << DISARMED);			// Set flags to armed
+			LED1 = 1;
 		}
 
 		//************************************************************
@@ -962,6 +1043,7 @@ int main(void)
 			//***********************************************************************
 			//
 
+			//if (RCrateMeasured && (Config.Servo_rate == FAST) && !PWMOverride)
 			if (RCrateMeasured && (Config.Servo_rate == FAST))
 			{
 				// Set minimal pulses doable (39.2 - n * cycletime)
@@ -1066,6 +1148,10 @@ int main(void)
 				}
 				else
 				{
+					if (Interrupted)
+					{
+						Interrupted_Clone = true;	// Hand "Interrupted" baton on to its clone
+					}
 					Interrupted = false;		// Cancel pending interrupts
 					Disable_RC_Interrupts();	// Disable RC interrupts
 					RCInterruptsON = false;		// Flag it for the rest of the code
@@ -1082,7 +1168,9 @@ int main(void)
 		// Cases where we are ready to output
 		if	(
 				// Interrupted in any mode
-				(Interrupted) ||											// Run at RC rate
+				//(Interrupted && !PWMOverride) ||							// Run at RC rate
+
+				(Interrupted) ||
 
 				// Every loop in FAST mode unless blocked
 				((Config.Servo_rate == FAST) && (!PWMBlocked))				// Run at full loop rate if allowed
@@ -1098,6 +1186,7 @@ int main(void)
 
 			if (Interrupted)
 			{
+				Interrupted_Clone = true;	// Hand "Interrupted" baton on to its clone
 				Interrupted = false;		// Reset interrupted flag if that was the cause of entry			
 			}
 
@@ -1154,7 +1243,19 @@ int main(void)
 			Calculate_PID();					// Calculate PID values
 			ProcessMixer();						// Do all the mixer tasks - can be very slow
 			UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
-			output_servo_ppm(ServoFlag);		// Output servo signal
+			
+			// If, for some reason, a higher power has banned PWM output for this cycle, 
+			// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary.
+			if (PWMOverride)
+			{
+				_delay_us(2300);
+			}
+			// Otherwise just output PWM normally
+			else
+			{
+				output_servo_ppm(ServoFlag);		// Output servo signal			
+			}
+
 
 			// Decrement PWM pulse sum
 			if ((Config.Servo_rate == FAST) && (PWM_pulses > 0))
@@ -1164,6 +1265,14 @@ int main(void)
 			
 			LoopCount = 0;						// Reset loop counter for averaging accVert
 		}
+
+		// Not ready to output PWM, but should clear Interrupted as all code that needs it has seen it already
+		// Cases are: FAST mode and PWM blocked, or SLOW, SYNC but not interrupted
+		else
+		{
+			//Interrupted = false;					// Reset interrupted flag
+		}
+
 	
 		//************************************************************
 		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)
@@ -1176,23 +1285,16 @@ int main(void)
 			RCInterruptsON = true;
 		}
 		
-		// Not ready to output PWM, but should clear Interrupted as all code that needs it has seen it already
-		// Cases are: FAST mode and PWM blocked, or SLOW, SYNC but not interrupted
-		else 
-		{
-		//	Interrupted = false;					// Reset interrupted flag
-		}
-
 		//************************************************************
 		//* Carefully update idle screen if error level changed
 		//************************************************************	
 
 		// Only update idle when error state has changed.
 		// This prevents the continual updating of the LCD disrupting the FC
-		if (old_alarms != General_error)
+		if ((old_alarms != General_error) && (Menu_mode == IDLE))
 		{
-			// Force update of idle screen
-			Menu_mode = STATUS_TIMEOUT;
+			// Force safe update of idle screen
+			Menu_mode = PRESTATUS_TIMEOUT;
 		}
 			
 		// Save current alarm state into old_alarms

@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.1 B7";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.1 B8";		// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -137,7 +137,8 @@ const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText16[] PROGMEM =  "Gyro LPF:";
 const char GeneralText7[] PROGMEM =  "AL correct:";
-const char BattMenuItem2[]  PROGMEM = "Min. cell (V):";
+//const char BattMenuItem2[]  PROGMEM = "Min. cell (V):";
+const char BattMenuItem2[]  PROGMEM = "Low V Alarm:";
 //
 const char P1text[] PROGMEM = "P1";
 const char P2text[] PROGMEM = "P1.n";
@@ -188,8 +189,8 @@ const char MixerItem71[] PROGMEM = "GyroPitch";
 const char MixerItem72[] PROGMEM = "GyroYaw";
 const char MixerItem73[] PROGMEM = "AccRoll";
 const char MixerItem74[] PROGMEM = "AccPitch";
-const char MixerItem80[] PROGMEM = "AL Roll:";
-const char MixerItem81[] PROGMEM = "AL Pitch:";
+const char MixerItem80[] PROGMEM = "AL Roll";
+const char MixerItem81[] PROGMEM = "AL Pitch";
 //
 const char MixerItem40[] PROGMEM = "A.Servo";
 const char MixerItem41[] PROGMEM = "D.Servo";
@@ -262,6 +263,10 @@ const char GeneralText5[] PROGMEM  =  "Sync RC";			// PWM output modes
 const char Safety1[] PROGMEM =  "Armed";
 const char Safety2[] PROGMEM =  "Armable";
 const char Random1[] PROGMEM =  "High";
+const char Random10[] PROGMEM =  "high";
+const char Random11[] PROGMEM =  "low";
+const char Random12[] PROGMEM =  "signal";
+//
 //
 const char SWLPF1[] PROGMEM =  "74Hz";						// Software LPFs
 const char SWLPF2[] PROGMEM =  "32Hz";
@@ -380,12 +385,12 @@ const char* const text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, RCMenuItem20, RCMenuItem0, RCMenuItem2, 								// 149 to 157 RC menu
-		RCMenuItem8, RCMenuItem9, RCMenuItem10, 
+		RCMenuItem1, GeneralText3, RCMenuItem20, RCMenuItem0, RCMenuItem2, 					// 149 to 157 RC menu
 		Transition, Transition_P1n,
+		Dummy0, Dummy0,	 
 		//
 		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 168 General
-		GeneralText2, BattMenuItem2, GeneralText3, 
+		GeneralText2, BattMenuItem2, GeneralText10, 
 		GeneralText6, GeneralText16, GeneralText7, 
 		GeneralText10, 
 		Dummy0,	Dummy0,																		// 168 Spare
@@ -445,7 +450,9 @@ const char* const text_menu[] PROGMEM =
 		//
 		PText0,	PText1, PText2, 															// 261 Logo 262 Reset 263 Hold steady
 		//
-		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu		
+		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu	
+		Random10, Random11, Random12,														// 270
+		//	
 		
 
 	}; 
