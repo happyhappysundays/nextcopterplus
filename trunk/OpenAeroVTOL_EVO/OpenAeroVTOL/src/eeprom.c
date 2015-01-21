@@ -29,7 +29,7 @@ void Set_EEPROM_Default_Config(void);
 void eeprom_write_byte_changed(uint8_t *addr, uint8_t value);
 void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size);
 void Update_V1_0_to_V1_1(void);
-void Update_V1_1_to_V1_2(void);
+void Update_V1_1_to_V1_1_B8(void);
 
 //************************************************************
 // Defines
@@ -39,10 +39,10 @@ void Update_V1_1_to_V1_2(void);
 
 // eePROM signature - change for each eePROM structure change to force factory reset or upgrade
 #define V1_0_SIGNATURE 0x35		// EEPROM signature for V1.0 (old version)
-#define V1_1_SIGNATURE 0x36		// EEPROM signature for V1.1
-#define V1_2_SIGNATURE 0x37		// EEPROM signature for V1.2
+#define V1_1_SIGNATURE 0x36		// EEPROM signature for V1.1 to Beta 7
+#define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8
 
-#define MAGIC_NUMBER V1_1_SIGNATURE // Set current signature to that of V1.1
+#define MAGIC_NUMBER V1_1_B8_SIGNATURE // Set current signature to that of V1.1 Beta 8
 
 //************************************************************
 // Code
@@ -94,7 +94,6 @@ bool Initial_EEPROM_Config_Load(void)
 	bool	updated = false;
 	
 	// Read eeProm data into RAM
-	// void eeprom_read_block (void *pointer_ram, const void *pointer_eeprom, size_t n)
 	eeprom_read_block((void*)&Config, (const void*)EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));
 	
 	// See if we know what to do with the current eeprom data
@@ -103,11 +102,14 @@ bool Initial_EEPROM_Config_Load(void)
 	{
 		case V1_0_SIGNATURE:				// V1.0 detected
 			Update_V1_0_to_V1_1();
-			updated = true;
 			// Fall through...
 
-		case V1_1_SIGNATURE:				// V1.1 detected
-			//Update_V1_1_to_V1_2();		
+		case V1_1_SIGNATURE:				// V1.1 Beta 7 (or below) detected
+			Update_V1_1_to_V1_1_B8();	
+			updated = true;	
+			// Fall through...
+
+		case V1_1_B8_SIGNATURE:				// V1.1 Beta 8 (or above) detected
 			// Fall through...
 			break;
 
@@ -145,11 +147,13 @@ void Update_V1_0_to_V1_1(void)
 	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
 	// Save old P2 Source B volume. For some reason it gets clobbered.
-	memcpy((void*)&temp,(void*)1836,1);
+	// We mustn't use hard-coded values are these change each version.
+	// Use an offset from the current Config structure address
+	memcpy((void*)&temp,(void*)((&Config.setup) + (377)),1);
 	 
 	// Move data that exists after the channel mixer to new location
-	// Hard-coded to V1.0 RAM location	
-	memmove((void*)&Config.Servo_reverse, (void*)1837, 74);	// RAM location determined empirically
+	// Hard-coded to V1.0 RAM offset	
+	memmove((void*)&Config.Servo_reverse, (void*)((&Config.setup) + (378)), 74);	// RAM location determined empirically
 	
 	// Copy the old channel[] structure into buffer, spaced out to match the new structure
 	for (i = 0; i < MAX_OUTPUTS; i++)
@@ -417,14 +421,38 @@ void Update_V1_0_to_V1_1(void)
 	Config.Channel[7].P2_source_b_volume = temp; 
 
 	// Set magic number to V1.1 signature
-	Config.setup = MAGIC_NUMBER;
+	Config.setup = V1_1_SIGNATURE;
 }
 
-// Upgrade V1.1 structure to V1.2 structure
-void Update_V1_1_to_V1_2(void)
+// Upgrade V1.1 structure to V1.1 Beta 8 structure
+void Update_V1_1_to_V1_1_B8(void)
 {
-	// Set magic number to V1.0 signature
-	Config.setup = MAGIC_NUMBER;
+	int8_t	buffer[8];
+	
+	// Swap old settings into new
+	buffer[0] = Config.RxMode;
+	buffer[1] = Config.MPU6050_LPF;
+	buffer[2] = Config.Servo_rate;
+	buffer[3] = Config.PWM_Sync;
+	buffer[4] = Config.TxSeq;
+	buffer[5] = Config.AileronPol;
+	buffer[6] = Config.ElevatorPol;
+	buffer[7] = Config.RudderPol;
+	
+	// Copy back to RC items structure
+	memcpy(&Config.RxMode, &buffer,7);
+	
+	// Copy back to General items structure
+	Config.MPU6050_LPF = buffer[7];
+	
+	// "None" no longer an option for this channel
+	if (Config.FlightChan == NOCHAN)
+	{
+		Config.FlightChan = AUX3;
+	}
+	
+	// Set magic number to V1.1 Beta 8 signature
+	Config.setup = V1_1_B8_SIGNATURE;
 }
 
 // Force a factory reset
@@ -441,7 +469,7 @@ void Set_EEPROM_Default_Config(void)
 	// Misc settings
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
-	Config.Acc_LPF = 2;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
+	Config.Acc_LPF = 6;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
 	Config.Gyro_LPF = 6;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
 	Config.CF_factor = 7;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
