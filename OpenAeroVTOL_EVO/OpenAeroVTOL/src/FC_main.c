@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 8 - January 2015
+// Version: Release V1.1 Beta 9 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -44,25 +44,22 @@
 //			Added high-speed mode. Only works with S.Bus selected. 
 //			Quadcopter compile option updated.
 //			Analog servo output synced to ServoTick to better regulate slow PWM generation.
-//
 // Beta 2	Real-time adjustment of servo limits working again.
 //			Mixer SCALE and REV mixed up in menus - fixed.
 //			FAST mode frame rate detection updated once per second 
 //			Servo settings reset on update from V1.0 for now.
-//
 // Beta 3	LVA changed to "OFF, 3.5, 3.6, 3.7, 3.8V" and nominal voltage auto-calculated
 //			Battery voltage accuracy improved.
 //			Fixed the V1.0 to V1.1 Beta1 eeprom update corruption
-//
 // Beta 4	Loop interval integrated into the "PWM_Available_Timer" to counter PWM jitter issues in FAST mode.
 //			It should dynamically change to suit any mixer loading and loop cycle.
-//
 // Beta 5	Trying new FAST PWM generation method
 // Beta 6	Remove test defaults
 // Beta 7	Fixed servo travel volumes.Increased FAST mode to ~250Hz.
 //			Smoothed A.Servo variation in FAST mode to about 18-23ms.
 //			Improved button feel for all data types.
-// Beta 8	Suggested menu layout changes from Ran.
+// Beta 8	Fixed missing mixer volume polarity checking
+//			Suggested menu layout changes from Ran.
 //			Fixes for output glitches in/out of screens
 //			V1.1 B8 auto update code. No beeps on initial screens. 
 //			LED indicates ARMED. Fixed V1.0 to V1.1 eeprom update code to automatically track
@@ -70,6 +67,10 @@
 //			Status screen error messages now just text.
 //			Change in error status no longer jumps from Status screen to Idle.
 //			Status timeout restored to 10s. 
+// Beta 9	Made level meter show more representative feel for AccLPF.
+//			Changed AccLPF settings and text to better match each other.
+//			AccLPF settings now identical to MPU6050 settings and are now floating point numbers.
+//			Target A.Servo rate changed to 65Hz~70Hz to reduce variation.
 //
 //***********************************************************
 //* Notes
@@ -79,9 +80,6 @@
 //	
 //
 // Todo: 
-//
-//		
-//
 //
 //***********************************************************
 //* Includes
@@ -130,9 +128,14 @@
 
 #define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 16ms
-#define RC_LOW_REJECT_RATE 62500	// 25ms = 62500/2500 = 40Hz 
-#define RC_HIGH_REJECT_RATE 20000	// 8ms = 20000/2500000 = 125Hz
-#define	SERVO_RATE_LOW 352			// Requested servo rate when in Normal mode. 19531 / 55.5(Hz) = 352 - 18ms
+/*
+#define	SERVO_RATE_LOW 355			// A.servo rate. 19531/55(Hz) = 355
+#define	SERVO_RATE_LOW 391			// A.servo rate. 19531/50(Hz) = 391
+#define	SERVO_RATE_LOW 434			// A.servo rate. 19531/45(Hz) = 434
+#define	SERVO_RATE_LOW 488			// A.servo rate. 19531/40(Hz) = 488
+*/
+#define	SERVO_RATE_LOW 300			// A.servo rate. 19531/65(Hz) = 300
+
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
@@ -150,8 +153,6 @@
 //***********************************************************
 
 // Flight variables
-volatile uint32_t interval = 0;				// IMU interval
-volatile uint32_t PWM_interval = PWM_PERIOD_WORST;	// Loop period when generating PWM. Initialise with worst case until updated.
 int16_t transition_counter = 0;
 uint8_t Transition_state = TRANS_P1;
 int16_t	transition = 0; 
@@ -179,16 +180,10 @@ const int8_t Trans_Matrix[3][3] PROGMEM =
 	};
 
 // Misc globals
-volatile uint16_t InterruptCount = 0;
-volatile uint16_t LoopStartTCNT1 = 0;
-volatile bool Overdue = false;
+volatile uint16_t	InterruptCount = 0;
+volatile uint16_t	LoopStartTCNT1 = 0;
+volatile bool		Overdue = false;
 volatile uint8_t	LoopCount = 0;
-volatile bool SlowRC = true;
-
-volatile uint32_t PWM_Available_Timer = PWM_PERIOD_WORST; // debug - Initialise with worst case until measured
-volatile uint32_t RC_Rate_Timer = 0;
-volatile int16_t PWM_pulses_global = 0; 
-
 			
 //************************************************************
 //* Main loop
@@ -205,11 +200,13 @@ int main(void)
 	bool ResampleRCRate = false;
 	bool PWMOverride = false;
 	bool Interrupted_Clone = false;
+	bool SlowRC = true;
 
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
-	//uint32_t RC_Rate_Timer = 0;
-
+	uint32_t RC_Rate_Timer = 0;
+	uint32_t PWM_interval = PWM_PERIOD_WORST;	// Loop period when generating PWM. Initialise with worst case until updated.
+	
 	// 16-bit timers
 	uint16_t Status_timeout = 0;
 	uint16_t UpdateStatus_timer = 0;
@@ -245,9 +242,10 @@ int main(void)
 	uint8_t ServoFlag = 0;
 	uint8_t i = 0;
 	int16_t PWM_pulses = 3; 
-	uint16_t RC_Interrupts = 0;
+	uint32_t interval = 0;			// IMU interval
 	
-	init();							// Do all init tasks
+	// Do all init tasks
+	init();
 
 	// Main loop
 	while (1)
@@ -267,16 +265,50 @@ int main(void)
 		}
 
 		//************************************************************
-		//* State machine for switching between screens safely
+		//* Status menu timing
+		//* Increment Status_seconds every second and trigger
+		//* a RC rate resample every second
 		//************************************************************
 
-		PWMOverride = false; // Assume PWM is OK until through the state machine
+		// Count elapsed seconds
+		if (Status_timeout > SECOND_TIMER)
+		{
+			Status_seconds++;
+			Status_timeout = 0;
+
+			// Update the interrupt count each second
+			InterruptCount = InterruptCounter;
+			InterruptCounter = 0;
+			
+			// Re-measure the frame rate in FAST mode every second
+			if (Config.Servo_rate == FAST)
+			{
+				ResampleRCRate = true;
+			}
+		}
+
+		//************************************************************
+		//* State machine for switching between screens safely
+		//* Particularly in FAST mode, if anything slows down the loop
+		//* time significantly (beeps, LCD updates) the PWM generation
+		//* is at risk of corruption. To get around that, entry and exit
+		//* from special states must be handled in stages.
+		//* In the state machine, once a state changes, the new state 
+		//* will be process in the next loop.
+		//************************************************************
+
+		// Assume PWM is OK until through the state machine
+		// If the state machine requires PWM to be blocked, 
+		// it will set this flag
+		PWMOverride = false; 
 
 		switch(Menu_mode) 
 		{
 			// In IDLE mode, the text "Press for status" is displayed ONCE.
-			// If a button is pressed the mode changes to STATUS
+			// If a button is pressed the mode changes to PRESTATUS, where
+			// it will wait for the right time to proceed.
 			case IDLE:
+				// If any button is pressed
 				if((PINB & 0xf0) != 0xf0)
 				{
 					Menu_mode = PRESTATUS;
@@ -301,8 +333,9 @@ int main(void)
 				break;
 
 			// Waiting to safely enter Status screen
-			// PWM activity must stop or have never started
-			// or even just about to start.
+			// If Interrupted or Interrupted_Clone is true, data must have just completed.
+			// If Overdue is true, there is no data to interrupt.
+			// PWM activity must stop before we attempt to pop up the status screen.
 			case PRESTATUS:
 				// If interrupted, or if currently "No signal"
 				if (Interrupted || Interrupted_Clone || Overdue)
@@ -327,7 +360,7 @@ int main(void)
 				// Update status screen
 				Display_status();
 				
-				// Prevent PWM output
+				// Prevent PWM output just after updating the LCD
 				PWMOverride = true;
 
 				// Wait for timeout
@@ -336,7 +369,7 @@ int main(void)
 
 			// Status screen up, but button still down ;)
 			// This is designed to stop the menu appearing instead of the status screen
-			// as it will stay here until the button is released
+			// as it will stay in this state until the button is released
 			case WAITING_TIMEOUT_BD:
 				if(BUTTON1 == 0)
 				{
@@ -352,8 +385,7 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				//if (Status_seconds >= 3)
-				if (Status_seconds >= 10) // debug
+				if (Status_seconds >= 10)
 				{
 					Menu_mode = PRESTATUS_TIMEOUT;
 					
@@ -367,16 +399,16 @@ int main(void)
 					Menu_mode = MENU;
 					
 					// Prevent PWM output
-					PWMOverride = true;
+					PWMOverride = true; // Debug - not needed yet?
 				}
 
-				// Update status screen while waiting to time out
+				// Update status screen four times/sec while waiting to time out
 				else if (UpdateStatus_timer > (SECOND_TIMER >> 2))
 				{
 					Menu_mode = PRESTATUS;
 
 					// Prevent PWM output
-					PWMOverride = true;
+					PWMOverride = true; // Debug - not needed yet?
 				}
 				
 				else
@@ -388,6 +420,9 @@ int main(void)
 				break;
 
 			// Attempting to leave Status gracefully while PWM stopped.
+			// If Interrupted or Interrupted_Clone is true, data must have just completed.
+			// If Overdue is true, there is no data to interrupt.
+			// PWM activity must stop before we attempt to pop up the status screen.
 			case PRESTATUS_TIMEOUT:
 				// If interrupted, or if currently "No signal"
 				if (Interrupted || Interrupted_Clone || Overdue)
@@ -409,7 +444,8 @@ int main(void)
 				
 				break;
 
-			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode changed to IDLE
+			// In STATUS_TIMEOUT mode, the idle screen is displayed and the mode 
+			// changed to POSTSTATUS_TIMEOUT. 
 			case STATUS_TIMEOUT:
 				// Pop up the Idle screen
 				idle_screen();
@@ -423,6 +459,7 @@ int main(void)
 				break;
 
 			// In POSTSTATUS_TIMEOUT mode, we wait for a PWM cycle to complete
+			// The idle screen has been refreshed and we need to wait.
 			case POSTSTATUS_TIMEOUT:
 				// If interrupted, or if currently "No signal"
 				if (Interrupted || Interrupted_Clone || Overdue)
@@ -469,42 +506,6 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Status menu timing
-		//************************************************************
-
-		// Count elapsed seconds
-		if (Status_timeout > SECOND_TIMER)
-		{
-			Status_seconds++;
-			Status_timeout = 0;
-
-			// Update the interrupt count each second
-			InterruptCount = InterruptCounter;
-			InterruptCounter = 0;
-			
-			// Re-measure the frame rate in FAST mode every second
-			if (Config.Servo_rate == FAST)
-			{
-				ResampleRCRate = true;
-			}
-		}
-
-		//************************************************************
-		//* System ticker - based on TCNT2 (19.531kHz)
-		//* 
-		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (Disarm and LVA alarms)
-		//************************************************************
-
-		if ((Ticker_Count >> 8) &8) 
-		{
-			Alarm_flags |= (1 << BUZZER_ON);	// 4.77Hz beep
-		}
-		else 
-		{
-			Alarm_flags &= ~(1 << BUZZER_ON);
-		}
-
-		//************************************************************
 		//* Alarms
 		//************************************************************
 
@@ -520,9 +521,10 @@ int main(void)
 				LED1 = 0;							// Signal that FC is now disarmed
 			}
 		}
+		// RC signal received normally
 		else
 		{
-			General_error &= ~(1 << NO_SIGNAL);	// Clear NO_SIGNAL bit
+			General_error &= ~(1 << NO_SIGNAL);		// Clear NO_SIGNAL bit
 		}
 
 		// Beep buzzer if Vbat lower than trigger		
@@ -559,7 +561,6 @@ int main(void)
 		if (Config.ArmMode == ARMABLE)
 		{
 			// Manual arm/disarm
-
 			// If sticks not at extremes, reset manual arm/disarm timer
 			// Sticks down and centered = armed. Down and outside = disarmed
 			if (
@@ -591,7 +592,6 @@ int main(void)
 			}
 
 			// Automatic disarm
-
 			// Reset auto-disarm count if any RX activity or set to zero, or when currently disarmed
 			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
 			{														
@@ -607,6 +607,7 @@ int main(void)
 			}
 
 			// Auto-disarm model if timeout enabled and due
+			// Don't allow disarms less than 30 seconds. That's just silly...
 			if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))	
 			{
 				// Disarm the FC
@@ -644,7 +645,7 @@ int main(void)
 		//* When transitioning, the flight profile is a moving blend of 
 		//* Flight profiles P1 to P2. The transition speed is controlled 
 		//* by the Config.TransitionSpeed setting.
-		//* The transition will hold at P1n position if directed to
+		//* The transition will hold at P1n position if directed to.
 		//************************************************************
 
 		// P2 transition point hard-coded to 50% above center
@@ -749,7 +750,7 @@ int main(void)
 		// Calculate transition time from user's setting
 		transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
 		
-		// Update state, values and transition_counter every Config.TransitionSpeed if not zero. 195 = 10ms
+		// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
 		if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
 			// Update immediately
 			TransitionUpdated)
@@ -856,10 +857,6 @@ int main(void)
 		
 		// 32-bit timers (Max. 1718s measurement on T1, 220K seconds on T2)
 
-		// Work out the current RC rate by measuring between incoming RC packets
-		//RC_Rate_Timer += (Save_TCNT1 - RC_Rate_TCNT1);
-		//RC_Rate_TCNT1 = Save_TCNT1;
-		
 		// Handle TCNT1-based timer correctly - this actually seems necessary...
 		// Work out the current RC rate by measuring between incoming RC packets
 		if (Save_TCNT1 < RC_Rate_TCNT1)
@@ -907,16 +904,31 @@ int main(void)
 		// Timer for audible alarms
 		Ticker_Count += (uint8_t)(TCNT2 - Ticker_TCNT2);
 		Ticker_TCNT2 = TCNT2;
+
+		//************************************************************
+		//* System ticker - based on TCNT2 (19.531kHz)
+		//* 
+		//* ((Ticker_Count >> 8) &8) 	= 4.77Hz (Disarm and LVA alarms)
+		//************************************************************
+
+		if ((Ticker_Count >> 8) &8) 
+		{
+			Alarm_flags |= (1 << BUZZER_ON);	// 4.77Hz beep
+		}
+		else 
+		{
+			Alarm_flags &= ~(1 << BUZZER_ON);
+		}
 		
 		//************************************************************
 		//* Manage desired output update rate when limited by
 		//* the PWM rate set to "Low"
 		//************************************************************
 
-		// Flag update required based on SERVO_RATE_LOW (50Hz) - 19.97ms
+		// Flag update required based on the variable Servo_Match
 		if (Servo_Rate > SERVO_RATE_LOW)
 		{
-			ServoTick = true; // Slow device is ready for output generation
+			ServoTick = true;	// Slow device is ready for output generation
 			Servo_Rate = 0;
 		}
 		
@@ -993,14 +1005,21 @@ int main(void)
 
 		Sensor_PID();
 		
-		//*****************************************************************
-		//* Measure incoming RC. Result in SlowRC state and RC_Rate_Timer
-		//*****************************************************************
+		//************************************************************
+		//* This is where things start getting really tricky... 
+		//* Use the Interrupted state to measure the RC rate.
+		//* Result in SlowRC state.
+		//* 
+		//* RCrateMeasured = Gap between two interrupts successfully measured.
+		//* FrameRate = S.Bus frame gap as measured by the isr.
+		//* PWM_interval = Copied from Interval, is the current loop rate.
+		//* 
+		//* 
+		//************************************************************
 
 		if (Interrupted)
 		{
-			// Measure incoming RC rate. Threshold is 60Hz.
-
+			// Measure incoming RC rate. Threshold is SLOW_RC_RATE.
 			if (Config.Servo_rate < FAST)
 			{
 				if (RC_Rate_Timer > SLOW_RC_RATE)
@@ -1013,7 +1032,6 @@ int main(void)
 				}
 			}
 			
-			//if ((RC_Interrupts > 2) && (!RCrateMeasured) && (Config.Servo_rate == FAST))
 			if ((!RCrateMeasured) && (Config.Servo_rate == FAST))
 			{
 				// In high-speed mode, the RC rate will be unfairly marked as "slow" once measured and interrupt blocking starts.
@@ -1031,19 +1049,12 @@ int main(void)
 				RCrateMeasured = true;
 			}
 
-			// Increment interrupt counter just enough for accurate frame rate measurement
-			if (RC_Interrupts < 3)
-			{
-				RC_Interrupts++;
-			}
-
 			//***********************************************************************
 			//* Work out the high speed mode RC blocking period when requested. 
-			//* Only relevant for high speed mode.
+			//* Only relevant for high speed mode. The slower the PWM rate the fewer
+			//* PWM pulses will fit in the S.Bus gap.
 			//***********************************************************************
-			//
 
-			//if (RCrateMeasured && (Config.Servo_rate == FAST) && !PWMOverride)
 			if (RCrateMeasured && (Config.Servo_rate == FAST))
 			{
 				// Set minimal pulses doable (39.2 - n * cycletime)
@@ -1113,39 +1124,47 @@ int main(void)
 			}
 			
 			// Rate not measured or re-calibrating or not FAST mode
+			// In all these other modes, just output one pulse
 			else
 			{
 				PWM_pulses = 1;
 			}
-			
-			
-			// Copy to global when determined
-			PWM_pulses_global = PWM_pulses;
 
-			// Reset RC timeout
+			// Reset RC timeout now that Interrupt has been received.
 			RC_Timeout = 0;
 
-			// No longer overdue
+			// No longer overdue. This will cancel the "No signal" alarm
 			Overdue = false;
 			
-			// Reset rate timer once data received
+			// Reset rate timer once data received. Reset to current time.
 			RC_Rate_Timer = 0;
 			Save_TCNT1 = TIM16_ReadTCNT1();
 			RC_Rate_TCNT1 = Save_TCNT1;
 
-			// Block RC interrupts until timeout if period has been calculated
+			//************************************************************
+			//* Beyond here lies dragons... proceed with caution
+			//*
+			//* This is the special FAST mode code which allows >250Hz 
+			//* output when S.Bus is used.
+			//************************************************************
+
+			// Block RC interrupts if period has been calculated
+			// and PWM mode is FAST.
 			if ((Config.Servo_rate == FAST) && RCrateMeasured)
 			{
 				// If it's time to resample the RC rate, do it now
 				// so as not to disturb PWM generation.
-				// This will result in a double gap
+				// This will result in a double gap with just one PWM.
 				if (ResampleRCRate)
 				{
 					RCrateMeasured = false;		// Force remeasure of RC rate
 					PWMBlocked = true;			// Disable Fast-mode PWM generation		
 					ResampleRCRate = false;		// Reset resample request
-					
 				}
+
+				// If not, block the RC interrupts until we run out of pulses
+				// We need to cancel the Interrupted flag but have to make a copy until 
+				// the status screen state machine has seen it.
 				else
 				{
 					if (Interrupted)
@@ -1167,12 +1186,7 @@ int main(void)
 
 		// Cases where we are ready to output
 		if	(
-				// Interrupted in any mode
-				//(Interrupted && !PWMOverride) ||							// Run at RC rate
-
-				(Interrupted) ||
-
-				// Every loop in FAST mode unless blocked
+				(Interrupted) ||											// Run at RC rate
 				((Config.Servo_rate == FAST) && (!PWMBlocked))				// Run at full loop rate if allowed
 			)
 		{
@@ -1212,10 +1226,12 @@ int main(void)
 				}
 			}
 								
-			// Reset slow PWM flag if it was just set. It will automatically set again at around 50Hz
+			// Reset slow PWM flag if it was just set. It will automatically set again at around 19531/SERVO_RATE_LOW (Hz)
 			if (ServoTick)
 			{
 				ServoTick = false;
+				
+				// Reset the Servo rate counter here so that it doesn't force an unusually small gap next time
 				Servo_Rate = 0;
 			}
 
@@ -1265,14 +1281,6 @@ int main(void)
 			
 			LoopCount = 0;						// Reset loop counter for averaging accVert
 		}
-
-		// Not ready to output PWM, but should clear Interrupted as all code that needs it has seen it already
-		// Cases are: FAST mode and PWM blocked, or SLOW, SYNC but not interrupted
-		else
-		{
-			//Interrupted = false;					// Reset interrupted flag
-		}
-
 	
 		//************************************************************
 		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)

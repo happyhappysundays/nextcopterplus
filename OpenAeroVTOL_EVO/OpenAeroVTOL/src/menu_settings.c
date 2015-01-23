@@ -56,7 +56,7 @@ void menu_rc_setup(uint8_t section);
 const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
 	{RCTEXT, 118, 105, 116, 105, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 44, 0, 0, 37, 98, 98, 0},		// General 
+	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0},		// General 
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
@@ -84,8 +84,8 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,5,1,1,0},					// Low battery cell voltage
 		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
-		{0,6,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 32, 44, 74, None)
-		{0,6,1,1,6},					// Gyro LPF. No LPF default (5, 10, 21, 32, 44, 74, None)
+		{0,7,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
+		{0,7,1,1,7},					// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{1,10,1,0,7},					// AL correction
 	}
 };

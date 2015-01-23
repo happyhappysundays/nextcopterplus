@@ -469,8 +469,8 @@ void Set_EEPROM_Default_Config(void)
 	// Misc settings
 	Config.RxMode = PWM;				// Default to PWM
 	Config.PWM_Sync = GEAR;
-	Config.Acc_LPF = 6;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
-	Config.Gyro_LPF = 6;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
+	Config.Acc_LPF = 2;					// Acc LPF around 21Hz (5, 10, 21, 32, 44, 74, None)
+	Config.Gyro_LPF = 7;				// Gyro LPF off "None" (5, 10, 21, 32, 44, 74, None)
 	Config.CF_factor = 7;
 	Config.FlightChan = GEAR;			// Channel GEAR switches flight mode by default
 	Config.Disarm_timer = 30;			// Default to 30 seconds
@@ -511,7 +511,7 @@ void Set_EEPROM_Default_Config(void)
 		Config.Channel[i].P1_Pitch_acc = ON;
 		Config.Channel[i].P1_Z_delta_acc = ON;
 	}
-*/	
+*/
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{

@@ -35,11 +35,5 @@ extern volatile uint16_t InterruptCount;
 extern volatile uint16_t LoopStartTCNT1;
 extern volatile bool Overdue;
 extern volatile uint8_t	LoopCount;
-extern volatile bool SlowRC;
 
-extern volatile uint32_t PWM_Available_Timer;	// debug
-extern volatile uint32_t interval;				// IMU interval
-extern volatile uint32_t RC_Rate_Timer;
-extern volatile int16_t PWM_pulses_global;
 
-extern volatile uint32_t PWM_interval;

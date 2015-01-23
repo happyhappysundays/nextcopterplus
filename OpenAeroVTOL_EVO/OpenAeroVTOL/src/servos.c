@@ -37,10 +37,6 @@ void output_servo_ppm(uint8_t ServoFlag)
 	// Re-span numbers from internal values to microseconds
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		// Debug - test limits
-		//ServoOut[i] = 2500; //2500 to 5000
-		//ServoOut[i] = 5000;
-		
 		temp = ServoOut[i];					// Promote to 32 bits
 
 		// Check for motor marker and ignore if set

@@ -151,8 +151,6 @@ Discarded input sections
  .bss           0x00000000        0x0 src/eeprom.o
  .text          0x00000000        0x0 src/FC_main.o
  .bss           0x00000000        0x0 src/FC_main.o
- .data.PWM_Available_Timer
-                0x00000000        0x4 src/FC_main.o
  .text          0x00000000        0x0 src/glcd_driver.o
  .bss           0x00000000        0x0 src/glcd_driver.o
  .text.fillrect
@@ -604,7 +602,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000     0x930a
+.text           0x00000000     0x923e
  *(.vectors)
  .vectors       0x00000000       0x7c c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
                 0x00000000                __vector_default
@@ -673,686 +671,694 @@ END GROUP
  .progmem.data.Dummy0
                 0x0000102f        0x1 src/glcd_menu.o
                 0x0000102f                Dummy0
- .progmem.data.MPU6050LPF4
-                0x00001030        0x5 src/glcd_menu.o
-                0x00001030                MPU6050LPF4
- .progmem.data.MPU6050LPF3
-                0x00001035        0x5 src/glcd_menu.o
-                0x00001035                MPU6050LPF3
- .progmem.data.MPU6050LPF2
-                0x0000103a        0x5 src/glcd_menu.o
-                0x0000103a                MPU6050LPF2
- .progmem.data.MPU6050LPF1
-                0x0000103f        0x4 src/glcd_menu.o
-                0x0000103f                MPU6050LPF1
  .progmem.data.MPU6050LPF7
-                0x00001043        0x6 src/glcd_menu.o
-                0x00001043                MPU6050LPF7
+                0x00001030        0x6 src/glcd_menu.o
+                0x00001030                MPU6050LPF7
  .progmem.data.MPU6050LPF6
-                0x00001049        0x6 src/glcd_menu.o
-                0x00001049                MPU6050LPF6
+                0x00001036        0x6 src/glcd_menu.o
+                0x00001036                MPU6050LPF6
  .progmem.data.MPU6050LPF5
-                0x0000104f        0x5 src/glcd_menu.o
-                0x0000104f                MPU6050LPF5
+                0x0000103c        0x5 src/glcd_menu.o
+                0x0000103c                MPU6050LPF5
+ .progmem.data.MPU6050LPF4
+                0x00001041        0x5 src/glcd_menu.o
+                0x00001041                MPU6050LPF4
+ .progmem.data.MPU6050LPF3
+                0x00001046        0x5 src/glcd_menu.o
+                0x00001046                MPU6050LPF3
+ .progmem.data.MPU6050LPF2
+                0x0000104b        0x5 src/glcd_menu.o
+                0x0000104b                MPU6050LPF2
+ .progmem.data.MPU6050LPF1
+                0x00001050        0x4 src/glcd_menu.o
+                0x00001050                MPU6050LPF1
  .progmem.data.GeneralText10
                 0x00001054        0xd src/glcd_menu.o
                 0x00001054                GeneralText10
- .progmem.data.SWLPF2
+ .progmem.data.SWLPF4
                 0x00001061        0x5 src/glcd_menu.o
-                0x00001061                SWLPF2
- .progmem.data.SWLPF1
+                0x00001061                SWLPF4
+ .progmem.data.SWLPF3
                 0x00001066        0x5 src/glcd_menu.o
-                0x00001066                SWLPF1
+                0x00001066                SWLPF3
+ .progmem.data.SWLPF2
+                0x0000106b        0x5 src/glcd_menu.o
+                0x0000106b                SWLPF2
+ .progmem.data.SWLPF1
+                0x00001070        0x5 src/glcd_menu.o
+                0x00001070                SWLPF1
  .progmem.data.Random12
-                0x0000106b        0x7 src/glcd_menu.o
-                0x0000106b                Random12
+                0x00001075        0x7 src/glcd_menu.o
+                0x00001075                Random12
  .progmem.data.Random11
-                0x00001072        0x4 src/glcd_menu.o
-                0x00001072                Random11
+                0x0000107c        0x4 src/glcd_menu.o
+                0x0000107c                Random11
  .progmem.data.Random10
-                0x00001076        0x5 src/glcd_menu.o
-                0x00001076                Random10
+                0x00001080        0x5 src/glcd_menu.o
+                0x00001080                Random10
  .progmem.data.Random1
-                0x0000107b        0x5 src/glcd_menu.o
-                0x0000107b                Random1
+                0x00001085        0x5 src/glcd_menu.o
+                0x00001085                Random1
  .progmem.data.Safety2
-                0x00001080        0x8 src/glcd_menu.o
-                0x00001080                Safety2
+                0x0000108a        0x8 src/glcd_menu.o
+                0x0000108a                Safety2
  .progmem.data.Safety1
-                0x00001088        0x6 src/glcd_menu.o
-                0x00001088                Safety1
+                0x00001092        0x6 src/glcd_menu.o
+                0x00001092                Safety1
  .progmem.data.GeneralText5
-                0x0000108e        0x8 src/glcd_menu.o
-                0x0000108e                GeneralText5
+                0x00001098        0x8 src/glcd_menu.o
+                0x00001098                GeneralText5
  .progmem.data.MixerItem16
-                0x00001096        0xa src/glcd_menu.o
-                0x00001096                MixerItem16
+                0x000010a0        0xa src/glcd_menu.o
+                0x000010a0                MixerItem16
  .progmem.data.MixerItem15
-                0x000010a0        0x7 src/glcd_menu.o
-                0x000010a0                MixerItem15
+                0x000010aa        0x7 src/glcd_menu.o
+                0x000010aa                MixerItem15
  .progmem.data.MixerItem12
-                0x000010a7        0x9 src/glcd_menu.o
-                0x000010a7                MixerItem12
+                0x000010b1        0x9 src/glcd_menu.o
+                0x000010b1                MixerItem12
  .progmem.data.MixerItem11
-                0x000010b0        0x7 src/glcd_menu.o
-                0x000010b0                MixerItem11
+                0x000010ba        0x7 src/glcd_menu.o
+                0x000010ba                MixerItem11
  .progmem.data.MixerMenuItem7
-                0x000010b7        0x8 src/glcd_menu.o
-                0x000010b7                MixerMenuItem7
+                0x000010c1        0x8 src/glcd_menu.o
+                0x000010c1                MixerMenuItem7
  .progmem.data.MixerMenuItem6
-                0x000010bf        0x9 src/glcd_menu.o
-                0x000010bf                MixerMenuItem6
+                0x000010c9        0x9 src/glcd_menu.o
+                0x000010c9                MixerMenuItem6
  .progmem.data.MixerMenuItem5
-                0x000010c8        0x4 src/glcd_menu.o
-                0x000010c8                MixerMenuItem5
+                0x000010d2        0x4 src/glcd_menu.o
+                0x000010d2                MixerMenuItem5
  .progmem.data.MixerMenuItem4
-                0x000010cc        0x9 src/glcd_menu.o
-                0x000010cc                MixerMenuItem4
+                0x000010d6        0x9 src/glcd_menu.o
+                0x000010d6                MixerMenuItem4
  .progmem.data.MixerMenuItem3
-                0x000010d5        0x9 src/glcd_menu.o
-                0x000010d5                MixerMenuItem3
+                0x000010df        0x9 src/glcd_menu.o
+                0x000010df                MixerMenuItem3
  .progmem.data.MixerMenuItem2
-                0x000010de        0x8 src/glcd_menu.o
-                0x000010de                MixerMenuItem2
+                0x000010e8        0x8 src/glcd_menu.o
+                0x000010e8                MixerMenuItem2
  .progmem.data.MOUT8
-                0x000010e6        0x5 src/glcd_menu.o
-                0x000010e6                MOUT8
- .progmem.data.MOUT7
-                0x000010eb        0x5 src/glcd_menu.o
-                0x000010eb                MOUT7
- .progmem.data.MOUT6
                 0x000010f0        0x5 src/glcd_menu.o
-                0x000010f0                MOUT6
- .progmem.data.MOUT5
+                0x000010f0                MOUT8
+ .progmem.data.MOUT7
                 0x000010f5        0x5 src/glcd_menu.o
-                0x000010f5                MOUT5
- .progmem.data.MOUT4
+                0x000010f5                MOUT7
+ .progmem.data.MOUT6
                 0x000010fa        0x5 src/glcd_menu.o
-                0x000010fa                MOUT4
- .progmem.data.MOUT3
+                0x000010fa                MOUT6
+ .progmem.data.MOUT5
                 0x000010ff        0x5 src/glcd_menu.o
-                0x000010ff                MOUT3
- .progmem.data.MOUT2
+                0x000010ff                MOUT5
+ .progmem.data.MOUT4
                 0x00001104        0x5 src/glcd_menu.o
-                0x00001104                MOUT2
- .progmem.data.MOUT1
+                0x00001104                MOUT4
+ .progmem.data.MOUT3
                 0x00001109        0x5 src/glcd_menu.o
-                0x00001109                MOUT1
+                0x00001109                MOUT3
+ .progmem.data.MOUT2
+                0x0000110e        0x5 src/glcd_menu.o
+                0x0000110e                MOUT2
+ .progmem.data.MOUT1
+                0x00001113        0x5 src/glcd_menu.o
+                0x00001113                MOUT1
  .progmem.data.Status5
-                0x0000110e        0xb src/glcd_menu.o
-                0x0000110e                Status5
+                0x00001118        0xb src/glcd_menu.o
+                0x00001118                Status5
  .progmem.data.Status4
-                0x00001119        0x8 src/glcd_menu.o
-                0x00001119                Status4
+                0x00001123        0x8 src/glcd_menu.o
+                0x00001123                Status4
  .progmem.data.Status2
-                0x00001121        0xc src/glcd_menu.o
-                0x00001121                Status2
+                0x0000112b        0xc src/glcd_menu.o
+                0x0000112b                Status2
  .progmem.data.Status0
-                0x0000112d        0x6 src/glcd_menu.o
-                0x0000112d                Status0
+                0x00001137        0x6 src/glcd_menu.o
+                0x00001137                Status0
  .progmem.data.WizardText2
-                0x00001133        0x5 src/glcd_menu.o
-                0x00001133                WizardText2
+                0x0000113d        0x5 src/glcd_menu.o
+                0x0000113d                WizardText2
  .progmem.data.WizardText1
-                0x00001138        0xe src/glcd_menu.o
-                0x00001138                WizardText1
+                0x00001142        0xe src/glcd_menu.o
+                0x00001142                WizardText1
  .progmem.data.WizardText0
-                0x00001146        0xd src/glcd_menu.o
-                0x00001146                WizardText0
+                0x00001150        0xd src/glcd_menu.o
+                0x00001150                WizardText0
  .progmem.data.PText6
-                0x00001153        0x9 src/glcd_menu.o
-                0x00001153                PText6
+                0x0000115d        0x9 src/glcd_menu.o
+                0x0000115d                PText6
  .progmem.data.PText5
-                0x0000115c        0x9 src/glcd_menu.o
-                0x0000115c                PText5
+                0x00001166        0x9 src/glcd_menu.o
+                0x00001166                PText5
  .progmem.data.PText4
-                0x00001165        0xc src/glcd_menu.o
-                0x00001165                PText4
+                0x0000116f        0xc src/glcd_menu.o
+                0x0000116f                PText4
  .progmem.data.PText3
-                0x00001171        0xe src/glcd_menu.o
-                0x00001171                PText3
+                0x0000117b        0xe src/glcd_menu.o
+                0x0000117b                PText3
  .progmem.data.PText2
-                0x0000117f        0xc src/glcd_menu.o
-                0x0000117f                PText2
+                0x00001189        0xc src/glcd_menu.o
+                0x00001189                PText2
  .progmem.data.PText1
-                0x0000118b        0x6 src/glcd_menu.o
-                0x0000118b                PText1
+                0x00001195        0x6 src/glcd_menu.o
+                0x00001195                PText1
  .progmem.data.PText0
-                0x00001191        0xa src/glcd_menu.o
-                0x00001191                PText0
+                0x0000119b        0xa src/glcd_menu.o
+                0x0000119b                PText0
  .progmem.data.Disarmed
-                0x0000119b        0x9 src/glcd_menu.o
-                0x0000119b                Disarmed
+                0x000011a5        0x9 src/glcd_menu.o
+                0x000011a5                Disarmed
  .progmem.data.ErrorText10
-                0x000011a4        0x4 src/glcd_menu.o
-                0x000011a4                ErrorText10
+                0x000011ae        0x4 src/glcd_menu.o
+                0x000011ae                ErrorText10
  .progmem.data.Status3
-                0x000011a8        0x8 src/glcd_menu.o
-                0x000011a8                Status3
+                0x000011b2        0x8 src/glcd_menu.o
+                0x000011b2                Status3
  .progmem.data.ErrorText7
-                0x000011b0        0x6 src/glcd_menu.o
-                0x000011b0                ErrorText7
+                0x000011ba        0x6 src/glcd_menu.o
+                0x000011ba                ErrorText7
  .progmem.data.ErrorText6
-                0x000011b6        0x5 src/glcd_menu.o
-                0x000011b6                ErrorText6
+                0x000011c0        0x5 src/glcd_menu.o
+                0x000011c0                ErrorText6
  .progmem.data.ErrorText5
-                0x000011bb        0x6 src/glcd_menu.o
-                0x000011bb                ErrorText5
+                0x000011c5        0x6 src/glcd_menu.o
+                0x000011c5                ErrorText5
  .progmem.data.ErrorText4
-                0x000011c1        0x7 src/glcd_menu.o
-                0x000011c1                ErrorText4
+                0x000011cb        0x7 src/glcd_menu.o
+                0x000011cb                ErrorText4
  .progmem.data.ErrorText3
-                0x000011c8        0x3 src/glcd_menu.o
-                0x000011c8                ErrorText3
+                0x000011d2        0x3 src/glcd_menu.o
+                0x000011d2                ErrorText3
  .progmem.data.ChannelRef12
-                0x000011cb        0x6 src/glcd_menu.o
-                0x000011cb                ChannelRef12
+                0x000011d5        0x6 src/glcd_menu.o
+                0x000011d5                ChannelRef12
  .progmem.data.ChannelRef10
-                0x000011d1        0x7 src/glcd_menu.o
-                0x000011d1                ChannelRef10
+                0x000011db        0x7 src/glcd_menu.o
+                0x000011db                ChannelRef10
  .progmem.data.ChannelRef8
-                0x000011d8        0x5 src/glcd_menu.o
-                0x000011d8                ChannelRef8
- .progmem.data.ChannelRef7
-                0x000011dd        0x5 src/glcd_menu.o
-                0x000011dd                ChannelRef7
- .progmem.data.ChannelRef6
                 0x000011e2        0x5 src/glcd_menu.o
-                0x000011e2                ChannelRef6
- .progmem.data.ChannelRef5
+                0x000011e2                ChannelRef8
+ .progmem.data.ChannelRef7
                 0x000011e7        0x5 src/glcd_menu.o
-                0x000011e7                ChannelRef5
- .progmem.data.ChannelRef4
+                0x000011e7                ChannelRef7
+ .progmem.data.ChannelRef6
                 0x000011ec        0x5 src/glcd_menu.o
-                0x000011ec                ChannelRef4
+                0x000011ec                ChannelRef6
+ .progmem.data.ChannelRef5
+                0x000011f1        0x5 src/glcd_menu.o
+                0x000011f1                ChannelRef5
+ .progmem.data.ChannelRef4
+                0x000011f6        0x5 src/glcd_menu.o
+                0x000011f6                ChannelRef4
  .progmem.data.ChannelRef3
-                0x000011f1        0x7 src/glcd_menu.o
-                0x000011f1                ChannelRef3
+                0x000011fb        0x7 src/glcd_menu.o
+                0x000011fb                ChannelRef3
  .progmem.data.ChannelRef2
-                0x000011f8        0x9 src/glcd_menu.o
-                0x000011f8                ChannelRef2
+                0x00001202        0x9 src/glcd_menu.o
+                0x00001202                ChannelRef2
  .progmem.data.ChannelRef1
-                0x00001201        0x8 src/glcd_menu.o
-                0x00001201                ChannelRef1
+                0x0000120b        0x8 src/glcd_menu.o
+                0x0000120b                ChannelRef1
  .progmem.data.ChannelRef0
-                0x00001209        0x9 src/glcd_menu.o
-                0x00001209                ChannelRef0
+                0x00001213        0x9 src/glcd_menu.o
+                0x00001213                ChannelRef0
  .progmem.data.MixerItem62
-                0x00001212        0x9 src/glcd_menu.o
-                0x00001212                MixerItem62
+                0x0000121c        0x9 src/glcd_menu.o
+                0x0000121c                MixerItem62
  .progmem.data.MixerItem61
-                0x0000121b        0x5 src/glcd_menu.o
-                0x0000121b                MixerItem61
+                0x00001225        0x5 src/glcd_menu.o
+                0x00001225                MixerItem61
  .progmem.data.MixerItem60
-                0x00001220        0x7 src/glcd_menu.o
-                0x00001220                MixerItem60
+                0x0000122a        0x7 src/glcd_menu.o
+                0x0000122a                MixerItem60
  .progmem.data.MixerItem49
-                0x00001227        0x6 src/glcd_menu.o
-                0x00001227                MixerItem49
+                0x00001231        0x6 src/glcd_menu.o
+                0x00001231                MixerItem49
  .progmem.data.MixerItem41
-                0x0000122d        0x8 src/glcd_menu.o
-                0x0000122d                MixerItem41
+                0x00001237        0x8 src/glcd_menu.o
+                0x00001237                MixerItem41
  .progmem.data.MixerItem40
-                0x00001235        0x8 src/glcd_menu.o
-                0x00001235                MixerItem40
+                0x0000123f        0x8 src/glcd_menu.o
+                0x0000123f                MixerItem40
  .progmem.data.MixerItem81
-                0x0000123d        0x9 src/glcd_menu.o
-                0x0000123d                MixerItem81
+                0x00001247        0x9 src/glcd_menu.o
+                0x00001247                MixerItem81
  .progmem.data.MixerItem80
-                0x00001246        0x8 src/glcd_menu.o
-                0x00001246                MixerItem80
+                0x00001250        0x8 src/glcd_menu.o
+                0x00001250                MixerItem80
  .progmem.data.MixerItem74
-                0x0000124e        0x9 src/glcd_menu.o
-                0x0000124e                MixerItem74
+                0x00001258        0x9 src/glcd_menu.o
+                0x00001258                MixerItem74
  .progmem.data.MixerItem73
-                0x00001257        0x8 src/glcd_menu.o
-                0x00001257                MixerItem73
+                0x00001261        0x8 src/glcd_menu.o
+                0x00001261                MixerItem73
  .progmem.data.MixerItem72
-                0x0000125f        0x8 src/glcd_menu.o
-                0x0000125f                MixerItem72
+                0x00001269        0x8 src/glcd_menu.o
+                0x00001269                MixerItem72
  .progmem.data.MixerItem71
-                0x00001267        0xa src/glcd_menu.o
-                0x00001267                MixerItem71
+                0x00001271        0xa src/glcd_menu.o
+                0x00001271                MixerItem71
  .progmem.data.MixerItem70
-                0x00001271        0x9 src/glcd_menu.o
-                0x00001271                MixerItem70
+                0x0000127b        0x9 src/glcd_menu.o
+                0x0000127b                MixerItem70
  .progmem.data.MixerItem31
-                0x0000127a        0xd src/glcd_menu.o
-                0x0000127a                MixerItem31
+                0x00001284        0xd src/glcd_menu.o
+                0x00001284                MixerItem31
  .progmem.data.MixerItem21
-                0x00001287        0xd src/glcd_menu.o
-                0x00001287                MixerItem21
+                0x00001291        0xd src/glcd_menu.o
+                0x00001291                MixerItem21
  .progmem.data.MixerItem30
-                0x00001294        0xb src/glcd_menu.o
-                0x00001294                MixerItem30
+                0x0000129e        0xb src/glcd_menu.o
+                0x0000129e                MixerItem30
  .progmem.data.MixerItem29
-                0x0000129f        0xd src/glcd_menu.o
-                0x0000129f                MixerItem29
+                0x000012a9        0xd src/glcd_menu.o
+                0x000012a9                MixerItem29
  .progmem.data.MixerItem2
-                0x000012ac        0xb src/glcd_menu.o
-                0x000012ac                MixerItem2
+                0x000012b6        0xb src/glcd_menu.o
+                0x000012b6                MixerItem2
  .progmem.data.MixerItem0
-                0x000012b7        0xd src/glcd_menu.o
-                0x000012b7                MixerItem0
+                0x000012c1        0xd src/glcd_menu.o
+                0x000012c1                MixerItem0
  .progmem.data.MixerItem43
-                0x000012c4        0xa src/glcd_menu.o
-                0x000012c4                MixerItem43
- .progmem.data.MixerItem42
                 0x000012ce        0xa src/glcd_menu.o
-                0x000012ce                MixerItem42
+                0x000012ce                MixerItem43
+ .progmem.data.MixerItem42
+                0x000012d8        0xa src/glcd_menu.o
+                0x000012d8                MixerItem42
  .progmem.data.MixerItem28
-                0x000012d8        0xd src/glcd_menu.o
-                0x000012d8                MixerItem28
+                0x000012e2        0xd src/glcd_menu.o
+                0x000012e2                MixerItem28
  .progmem.data.MixerItem3
-                0x000012e5        0xc src/glcd_menu.o
-                0x000012e5                MixerItem3
+                0x000012ef        0xc src/glcd_menu.o
+                0x000012ef                MixerItem3
  .progmem.data.MixerItem27
-                0x000012f1        0xc src/glcd_menu.o
-                0x000012f1                MixerItem27
+                0x000012fb        0xc src/glcd_menu.o
+                0x000012fb                MixerItem27
  .progmem.data.MixerItem7
-                0x000012fd        0xc src/glcd_menu.o
-                0x000012fd                MixerItem7
+                0x00001307        0xc src/glcd_menu.o
+                0x00001307                MixerItem7
  .progmem.data.MixerItem26
-                0x00001309        0xd src/glcd_menu.o
-                0x00001309                MixerItem26
+                0x00001313        0xd src/glcd_menu.o
+                0x00001313                MixerItem26
  .progmem.data.MixerItem6
-                0x00001316        0xd src/glcd_menu.o
-                0x00001316                MixerItem6
+                0x00001320        0xd src/glcd_menu.o
+                0x00001320                MixerItem6
  .progmem.data.MixerItem25
-                0x00001323        0xf src/glcd_menu.o
-                0x00001323                MixerItem25
+                0x0000132d        0xf src/glcd_menu.o
+                0x0000132d                MixerItem25
  .progmem.data.MixerItem5
-                0x00001332        0xf src/glcd_menu.o
-                0x00001332                MixerItem5
+                0x0000133c        0xf src/glcd_menu.o
+                0x0000133c                MixerItem5
  .progmem.data.MixerItem24
-                0x00001341        0xe src/glcd_menu.o
-                0x00001341                MixerItem24
+                0x0000134b        0xe src/glcd_menu.o
+                0x0000134b                MixerItem24
  .progmem.data.MixerItem4
-                0x0000134f        0xe src/glcd_menu.o
-                0x0000134f                MixerItem4
+                0x00001359        0xe src/glcd_menu.o
+                0x00001359                MixerItem4
  .progmem.data.MixerItem56
-                0x0000135d       0x10 src/glcd_menu.o
-                0x0000135d                MixerItem56
+                0x00001367       0x10 src/glcd_menu.o
+                0x00001367                MixerItem56
  .progmem.data.MixerItem53
-                0x0000136d       0x10 src/glcd_menu.o
-                0x0000136d                MixerItem53
+                0x00001377       0x10 src/glcd_menu.o
+                0x00001377                MixerItem53
  .progmem.data.MixerItem55
-                0x0000137d       0x10 src/glcd_menu.o
-                0x0000137d                MixerItem55
+                0x00001387       0x10 src/glcd_menu.o
+                0x00001387                MixerItem55
  .progmem.data.MixerItem52
-                0x0000138d       0x10 src/glcd_menu.o
-                0x0000138d                MixerItem52
+                0x00001397       0x10 src/glcd_menu.o
+                0x00001397                MixerItem52
  .progmem.data.MixerItem54
-                0x0000139d       0x10 src/glcd_menu.o
-                0x0000139d                MixerItem54
+                0x000013a7       0x10 src/glcd_menu.o
+                0x000013a7                MixerItem54
  .progmem.data.MixerItem51
-                0x000013ad       0x10 src/glcd_menu.o
-                0x000013ad                MixerItem51
+                0x000013b7       0x10 src/glcd_menu.o
+                0x000013b7                MixerItem51
  .progmem.data.Mixeritem50
-                0x000013bd        0xf src/glcd_menu.o
-                0x000013bd                Mixeritem50
+                0x000013c7        0xf src/glcd_menu.o
+                0x000013c7                Mixeritem50
  .progmem.data.MixerItem33
-                0x000013cc       0x10 src/glcd_menu.o
-                0x000013cc                MixerItem33
+                0x000013d6       0x10 src/glcd_menu.o
+                0x000013d6                MixerItem33
  .progmem.data.MixerItem23
-                0x000013dc       0x10 src/glcd_menu.o
-                0x000013dc                MixerItem23
+                0x000013e6       0x10 src/glcd_menu.o
+                0x000013e6                MixerItem23
  .progmem.data.MixerItem34
-                0x000013ec        0xb src/glcd_menu.o
-                0x000013ec                MixerItem34
+                0x000013f6        0xb src/glcd_menu.o
+                0x000013f6                MixerItem34
  .progmem.data.MixerItem35
-                0x000013f7        0xd src/glcd_menu.o
-                0x000013f7                MixerItem35
+                0x00001401        0xd src/glcd_menu.o
+                0x00001401                MixerItem35
  .progmem.data.MixerItem36
-                0x00001404       0x11 src/glcd_menu.o
-                0x00001404                MixerItem36
+                0x0000140e       0x11 src/glcd_menu.o
+                0x0000140e                MixerItem36
  .progmem.data.MixerItem20
-                0x00001415        0xb src/glcd_menu.o
-                0x00001415                MixerItem20
+                0x0000141f        0xb src/glcd_menu.o
+                0x0000141f                MixerItem20
  .progmem.data.MixerItem1
-                0x00001420        0x8 src/glcd_menu.o
-                0x00001420                MixerItem1
+                0x0000142a        0x8 src/glcd_menu.o
+                0x0000142a                MixerItem1
  .progmem.data.P5text
-                0x00001428        0xa src/glcd_menu.o
-                0x00001428                P5text
- .progmem.data.P4text
                 0x00001432        0xa src/glcd_menu.o
-                0x00001432                P4text
+                0x00001432                P5text
+ .progmem.data.P4text
+                0x0000143c        0xa src/glcd_menu.o
+                0x0000143c                P4text
  .progmem.data.P3text
-                0x0000143c        0x3 src/glcd_menu.o
-                0x0000143c                P3text
+                0x00001446        0x3 src/glcd_menu.o
+                0x00001446                P3text
  .progmem.data.P2text
-                0x0000143f        0x5 src/glcd_menu.o
-                0x0000143f                P2text
+                0x00001449        0x5 src/glcd_menu.o
+                0x00001449                P2text
  .progmem.data.P1text
-                0x00001444        0x3 src/glcd_menu.o
-                0x00001444                P1text
+                0x0000144e        0x3 src/glcd_menu.o
+                0x0000144e                P1text
  .progmem.data.BattMenuItem2
-                0x00001447        0xd src/glcd_menu.o
-                0x00001447                BattMenuItem2
+                0x00001451        0xd src/glcd_menu.o
+                0x00001451                BattMenuItem2
  .progmem.data.GeneralText7
-                0x00001454        0xc src/glcd_menu.o
-                0x00001454                GeneralText7
+                0x0000145e        0xc src/glcd_menu.o
+                0x0000145e                GeneralText7
  .progmem.data.GeneralText16
-                0x00001460        0xa src/glcd_menu.o
-                0x00001460                GeneralText16
- .progmem.data.GeneralText6
                 0x0000146a        0xa src/glcd_menu.o
-                0x0000146a                GeneralText6
- .progmem.data.GeneralText3
+                0x0000146a                GeneralText16
+ .progmem.data.GeneralText6
                 0x00001474        0xa src/glcd_menu.o
-                0x00001474                GeneralText3
+                0x00001474                GeneralText6
+ .progmem.data.GeneralText3
+                0x0000147e        0xa src/glcd_menu.o
+                0x0000147e                GeneralText3
  .progmem.data.GeneralText2
-                0x0000147e        0xd src/glcd_menu.o
-                0x0000147e                GeneralText2
+                0x00001488        0xd src/glcd_menu.o
+                0x00001488                GeneralText2
  .progmem.data.AutoMenuItem2
-                0x0000148b        0x8 src/glcd_menu.o
-                0x0000148b                AutoMenuItem2
+                0x00001495        0x8 src/glcd_menu.o
+                0x00001495                AutoMenuItem2
  .progmem.data.Contrast
-                0x00001493        0xa src/glcd_menu.o
-                0x00001493                Contrast
+                0x0000149d        0xa src/glcd_menu.o
+                0x0000149d                Contrast
  .progmem.data.MixerMenuItem0
-                0x0000149d        0xd src/glcd_menu.o
-                0x0000149d                MixerMenuItem0
+                0x000014a7        0xd src/glcd_menu.o
+                0x000014a7                MixerMenuItem0
  .progmem.data.RCMenuItem7
-                0x000014aa        0x7 src/glcd_menu.o
-                0x000014aa                RCMenuItem7
+                0x000014b4        0x7 src/glcd_menu.o
+                0x000014b4                RCMenuItem7
  .progmem.data.RCMenuItem6
-                0x000014b1        0x9 src/glcd_menu.o
-                0x000014b1                RCMenuItem6
+                0x000014bb        0x9 src/glcd_menu.o
+                0x000014bb                RCMenuItem6
  .progmem.data.RXMode3
-                0x000014ba        0x9 src/glcd_menu.o
-                0x000014ba                RXMode3
+                0x000014c4        0x9 src/glcd_menu.o
+                0x000014c4                RXMode3
  .progmem.data.RXMode2
-                0x000014c3        0x6 src/glcd_menu.o
-                0x000014c3                RXMode2
+                0x000014cd        0x6 src/glcd_menu.o
+                0x000014cd                RXMode2
  .progmem.data.RXMode1
-                0x000014c9        0x4 src/glcd_menu.o
-                0x000014c9                RXMode1
+                0x000014d3        0x4 src/glcd_menu.o
+                0x000014d3                RXMode1
  .progmem.data.RXMode0
-                0x000014cd        0x5 src/glcd_menu.o
-                0x000014cd                RXMode0
+                0x000014d7        0x5 src/glcd_menu.o
+                0x000014d7                RXMode0
  .progmem.data.Transition_P1n
-                0x000014d2        0xc src/glcd_menu.o
-                0x000014d2                Transition_P1n
+                0x000014dc        0xc src/glcd_menu.o
+                0x000014dc                Transition_P1n
  .progmem.data.Transition
-                0x000014de        0xb src/glcd_menu.o
-                0x000014de                Transition
+                0x000014e8        0xb src/glcd_menu.o
+                0x000014e8                Transition
  .progmem.data.RCMenuItem2
-                0x000014e9        0xf src/glcd_menu.o
-                0x000014e9                RCMenuItem2
+                0x000014f3        0xf src/glcd_menu.o
+                0x000014f3                RCMenuItem2
  .progmem.data.RCMenuItem0
-                0x000014f8        0xb src/glcd_menu.o
-                0x000014f8                RCMenuItem0
+                0x00001502        0xb src/glcd_menu.o
+                0x00001502                RCMenuItem0
  .progmem.data.RCMenuItem20
-                0x00001503        0xa src/glcd_menu.o
-                0x00001503                RCMenuItem20
+                0x0000150d        0xa src/glcd_menu.o
+                0x0000150d                RCMenuItem20
  .progmem.data.RCMenuItem1
-                0x0000150d        0x9 src/glcd_menu.o
-                0x0000150d                RCMenuItem1
+                0x00001517        0x9 src/glcd_menu.o
+                0x00001517                RCMenuItem1
  .progmem.data.AutoMenuItem15
-                0x00001516        0x3 src/glcd_menu.o
-                0x00001516                AutoMenuItem15
+                0x00001520        0x3 src/glcd_menu.o
+                0x00001520                AutoMenuItem15
  .progmem.data.AutoMenuItem11
-                0x00001519        0x4 src/glcd_menu.o
-                0x00001519                AutoMenuItem11
+                0x00001523        0x4 src/glcd_menu.o
+                0x00001523                AutoMenuItem11
  .progmem.data.StabMenuItem30
-                0x0000151d        0xa src/glcd_menu.o
-                0x0000151d                StabMenuItem30
+                0x00001527        0xa src/glcd_menu.o
+                0x00001527                StabMenuItem30
  .progmem.data.StabMenuItem9
-                0x00001527        0xc src/glcd_menu.o
-                0x00001527                StabMenuItem9
+                0x00001531        0xc src/glcd_menu.o
+                0x00001531                StabMenuItem9
  .progmem.data.StabMenuItem12
-                0x00001533        0xd src/glcd_menu.o
-                0x00001533                StabMenuItem12
+                0x0000153d        0xd src/glcd_menu.o
+                0x0000153d                StabMenuItem12
  .progmem.data.StabMenuItem8
-                0x00001540        0x7 src/glcd_menu.o
-                0x00001540                StabMenuItem8
+                0x0000154a        0x7 src/glcd_menu.o
+                0x0000154a                StabMenuItem8
  .progmem.data.StabMenuItem7
-                0x00001547        0x7 src/glcd_menu.o
-                0x00001547                StabMenuItem7
+                0x00001551        0x7 src/glcd_menu.o
+                0x00001551                StabMenuItem7
  .progmem.data.AutoMenuItem8
-                0x0000154e        0xc src/glcd_menu.o
-                0x0000154e                AutoMenuItem8
+                0x00001558        0xc src/glcd_menu.o
+                0x00001558                AutoMenuItem8
  .progmem.data.AutoMenuItem21
-                0x0000155a        0xf src/glcd_menu.o
-                0x0000155a                AutoMenuItem21
+                0x00001564        0xf src/glcd_menu.o
+                0x00001564                AutoMenuItem21
  .progmem.data.StabMenuItem6
-                0x00001569        0xe src/glcd_menu.o
-                0x00001569                StabMenuItem6
+                0x00001573        0xe src/glcd_menu.o
+                0x00001573                StabMenuItem6
  .progmem.data.StabMenuItem11
-                0x00001577        0xf src/glcd_menu.o
-                0x00001577                StabMenuItem11
+                0x00001581        0xf src/glcd_menu.o
+                0x00001581                StabMenuItem11
  .progmem.data.StabMenuItem5
-                0x00001586        0x9 src/glcd_menu.o
-                0x00001586                StabMenuItem5
+                0x00001590        0x9 src/glcd_menu.o
+                0x00001590                StabMenuItem5
  .progmem.data.AutoMenuItem4
-                0x0000158f        0x9 src/glcd_menu.o
-                0x0000158f                AutoMenuItem4
+                0x00001599        0x9 src/glcd_menu.o
+                0x00001599                AutoMenuItem4
  .progmem.data.AutoMenuItem7
-                0x00001598        0xb src/glcd_menu.o
-                0x00001598                AutoMenuItem7
+                0x000015a2        0xb src/glcd_menu.o
+                0x000015a2                AutoMenuItem7
  .progmem.data.AutoMenuItem20
-                0x000015a3        0xe src/glcd_menu.o
-                0x000015a3                AutoMenuItem20
+                0x000015ad        0xe src/glcd_menu.o
+                0x000015ad                AutoMenuItem20
  .progmem.data.StabMenuItem3
-                0x000015b1        0xd src/glcd_menu.o
-                0x000015b1                StabMenuItem3
+                0x000015bb        0xd src/glcd_menu.o
+                0x000015bb                StabMenuItem3
  .progmem.data.StabMenuItem10
-                0x000015be        0xe src/glcd_menu.o
-                0x000015be                StabMenuItem10
+                0x000015c8        0xe src/glcd_menu.o
+                0x000015c8                StabMenuItem10
  .progmem.data.StabMenuItem2
-                0x000015cc        0x8 src/glcd_menu.o
-                0x000015cc                StabMenuItem2
+                0x000015d6        0x8 src/glcd_menu.o
+                0x000015d6                StabMenuItem2
  .progmem.data.AutoMenuItem1
-                0x000015d4        0x8 src/glcd_menu.o
-                0x000015d4                AutoMenuItem1
+                0x000015de        0x8 src/glcd_menu.o
+                0x000015de                AutoMenuItem1
  .progmem.data.StabMenuItem13
-                0x000015dc        0xc src/glcd_menu.o
-                0x000015dc                StabMenuItem13
+                0x000015e6        0xc src/glcd_menu.o
+                0x000015e6                StabMenuItem13
  .progmem.data.SensorMenuItem2
-                0x000015e8        0x5 src/glcd_menu.o
-                0x000015e8                SensorMenuItem2
+                0x000015f2        0x5 src/glcd_menu.o
+                0x000015f2                SensorMenuItem2
  .progmem.data.SensorMenuItem1
-                0x000015ed        0x5 src/glcd_menu.o
-                0x000015ed                SensorMenuItem1
+                0x000015f7        0x5 src/glcd_menu.o
+                0x000015f7                SensorMenuItem1
  .progmem.data.PText19
-                0x000015f2        0x4 src/glcd_menu.o
-                0x000015f2                PText19
+                0x000015fc        0x4 src/glcd_menu.o
+                0x000015fc                PText19
  .progmem.data.PText18
-                0x000015f6        0x4 src/glcd_menu.o
-                0x000015f6                PText18
+                0x00001600        0x4 src/glcd_menu.o
+                0x00001600                PText18
  .progmem.data.PText17
-                0x000015fa        0x6 src/glcd_menu.o
-                0x000015fa                PText17
+                0x00001604        0x6 src/glcd_menu.o
+                0x00001604                PText17
  .progmem.data.PText16
-                0x00001600        0x5 src/glcd_menu.o
-                0x00001600                PText16
+                0x0000160a        0x5 src/glcd_menu.o
+                0x0000160a                PText16
  .progmem.data.PText15
-                0x00001605        0x5 src/glcd_menu.o
-                0x00001605                PText15
+                0x0000160f        0x5 src/glcd_menu.o
+                0x0000160f                PText15
  .progmem.data.MainMenuItem23
-                0x0000160a       0x19 src/glcd_menu.o
-                0x0000160a                MainMenuItem23
+                0x00001614       0x19 src/glcd_menu.o
+                0x00001614                MainMenuItem23
  .progmem.data.MainMenuItem22
-                0x00001623       0x19 src/glcd_menu.o
-                0x00001623                MainMenuItem22
+                0x0000162d       0x19 src/glcd_menu.o
+                0x0000162d                MainMenuItem22
  .progmem.data.MainMenuItem20
-                0x0000163c       0x14 src/glcd_menu.o
-                0x0000163c                MainMenuItem20
+                0x00001646       0x14 src/glcd_menu.o
+                0x00001646                MainMenuItem20
  .progmem.data.MainMenuItem18
-                0x00001650        0xf src/glcd_menu.o
-                0x00001650                MainMenuItem18
+                0x0000165a        0xf src/glcd_menu.o
+                0x0000165a                MainMenuItem18
  .progmem.data.MainMenuItem17
-                0x0000165f        0xf src/glcd_menu.o
-                0x0000165f                MainMenuItem17
+                0x00001669        0xf src/glcd_menu.o
+                0x00001669                MainMenuItem17
  .progmem.data.MainMenuItem16
-                0x0000166e        0xf src/glcd_menu.o
-                0x0000166e                MainMenuItem16
+                0x00001678        0xf src/glcd_menu.o
+                0x00001678                MainMenuItem16
  .progmem.data.MainMenuItem15
-                0x0000167d        0xf src/glcd_menu.o
-                0x0000167d                MainMenuItem15
+                0x00001687        0xf src/glcd_menu.o
+                0x00001687                MainMenuItem15
  .progmem.data.MainMenuItem14
-                0x0000168c        0xf src/glcd_menu.o
-                0x0000168c                MainMenuItem14
+                0x00001696        0xf src/glcd_menu.o
+                0x00001696                MainMenuItem14
  .progmem.data.MainMenuItem13
-                0x0000169b        0xf src/glcd_menu.o
-                0x0000169b                MainMenuItem13
+                0x000016a5        0xf src/glcd_menu.o
+                0x000016a5                MainMenuItem13
  .progmem.data.MainMenuItem12
-                0x000016aa        0xf src/glcd_menu.o
-                0x000016aa                MainMenuItem12
+                0x000016b4        0xf src/glcd_menu.o
+                0x000016b4                MainMenuItem12
  .progmem.data.MainMenuItem11
-                0x000016b9        0xe src/glcd_menu.o
-                0x000016b9                MainMenuItem11
+                0x000016c3        0xe src/glcd_menu.o
+                0x000016c3                MainMenuItem11
  .progmem.data.MainMenuItem3
-                0x000016c7       0x14 src/glcd_menu.o
-                0x000016c7                MainMenuItem3
+                0x000016d1       0x14 src/glcd_menu.o
+                0x000016d1                MainMenuItem3
  .progmem.data.MainMenuItem2
-                0x000016db       0x14 src/glcd_menu.o
-                0x000016db                MainMenuItem2
+                0x000016e5       0x14 src/glcd_menu.o
+                0x000016e5                MainMenuItem2
  .progmem.data.MainMenuItem10
-                0x000016ef        0xf src/glcd_menu.o
-                0x000016ef                MainMenuItem10
+                0x000016f9        0xf src/glcd_menu.o
+                0x000016f9                MainMenuItem10
  .progmem.data.MainMenuItem8
-                0x000016fe       0x16 src/glcd_menu.o
-                0x000016fe                MainMenuItem8
+                0x00001708       0x16 src/glcd_menu.o
+                0x00001708                MainMenuItem8
  .progmem.data.MainMenuItem7
-                0x00001714       0x12 src/glcd_menu.o
-                0x00001714                MainMenuItem7
+                0x0000171e       0x12 src/glcd_menu.o
+                0x0000171e                MainMenuItem7
  .progmem.data.MainMenuItem9
-                0x00001726       0x13 src/glcd_menu.o
-                0x00001726                MainMenuItem9
+                0x00001730       0x13 src/glcd_menu.o
+                0x00001730                MainMenuItem9
  .progmem.data.MainMenuItem1
-                0x00001739       0x12 src/glcd_menu.o
-                0x00001739                MainMenuItem1
+                0x00001743       0x12 src/glcd_menu.o
+                0x00001743                MainMenuItem1
  .progmem.data.MainMenuItem0
-                0x0000174b        0xb src/glcd_menu.o
-                0x0000174b                MainMenuItem0
+                0x00001755        0xb src/glcd_menu.o
+                0x00001755                MainMenuItem0
  .progmem.data.MenuFrame8
-                0x00001756        0x5 src/glcd_menu.o
-                0x00001756                MenuFrame8
- .progmem.data.MenuFrame7
-                0x0000175b        0x5 src/glcd_menu.o
-                0x0000175b                MenuFrame7
- .progmem.data.MenuFrame6
                 0x00001760        0x5 src/glcd_menu.o
-                0x00001760                MenuFrame6
- .progmem.data.MenuFrame5
+                0x00001760                MenuFrame8
+ .progmem.data.MenuFrame7
                 0x00001765        0x5 src/glcd_menu.o
-                0x00001765                MenuFrame5
+                0x00001765                MenuFrame7
+ .progmem.data.MenuFrame6
+                0x0000176a        0x5 src/glcd_menu.o
+                0x0000176a                MenuFrame6
+ .progmem.data.MenuFrame5
+                0x0000176f        0x5 src/glcd_menu.o
+                0x0000176f                MenuFrame5
  .progmem.data.MenuFrame1
-                0x0000176a        0x2 src/glcd_menu.o
-                0x0000176a                MenuFrame1
+                0x00001774        0x2 src/glcd_menu.o
+                0x00001774                MenuFrame1
  .progmem.data.MenuFrame4
-                0x0000176c        0x2 src/glcd_menu.o
-                0x0000176c                MenuFrame4
+                0x00001776        0x2 src/glcd_menu.o
+                0x00001776                MenuFrame4
  .progmem.data.MenuFrame3
-                0x0000176e        0x2 src/glcd_menu.o
-                0x0000176e                MenuFrame3
+                0x00001778        0x2 src/glcd_menu.o
+                0x00001778                MenuFrame3
  .progmem.data.MenuFrame2
-                0x00001770        0x2 src/glcd_menu.o
-                0x00001770                MenuFrame2
+                0x0000177a        0x2 src/glcd_menu.o
+                0x0000177a                MenuFrame2
  .progmem.data.MenuFrame0
-                0x00001772        0x2 src/glcd_menu.o
-                0x00001772                MenuFrame0
+                0x0000177c        0x2 src/glcd_menu.o
+                0x0000177c                MenuFrame0
  .progmem.data.StatusText9
-                0x00001774        0x8 src/glcd_menu.o
-                0x00001774                StatusText9
+                0x0000177e        0x8 src/glcd_menu.o
+                0x0000177e                StatusText9
  .progmem.data.StatusText8
-                0x0000177c        0x5 src/glcd_menu.o
-                0x0000177c                StatusText8
+                0x00001786        0x5 src/glcd_menu.o
+                0x00001786                StatusText8
  .progmem.data.StatusText7
-                0x00001781        0x9 src/glcd_menu.o
-                0x00001781                StatusText7
+                0x0000178b        0x9 src/glcd_menu.o
+                0x0000178b                StatusText7
  .progmem.data.StatusText5
-                0x0000178a        0x2 src/glcd_menu.o
-                0x0000178a                StatusText5
+                0x00001794        0x2 src/glcd_menu.o
+                0x00001794                StatusText5
  .progmem.data.StatusText4
-                0x0000178c        0x2 src/glcd_menu.o
-                0x0000178c                StatusText4
+                0x00001796        0x2 src/glcd_menu.o
+                0x00001796                StatusText4
  .progmem.data.StatusText3
-                0x0000178e        0x9 src/glcd_menu.o
-                0x0000178e                StatusText3
+                0x00001798        0x9 src/glcd_menu.o
+                0x00001798                StatusText3
  .progmem.data.StatusText1
-                0x00001797        0x6 src/glcd_menu.o
-                0x00001797                StatusText1
+                0x000017a1        0x6 src/glcd_menu.o
+                0x000017a1                StatusText1
  .progmem.data.StatusText0
-                0x0000179d       0x10 src/glcd_menu.o
-                0x0000179d                StatusText0
+                0x000017a7       0x10 src/glcd_menu.o
+                0x000017a7                StatusText0
  .progmem.data.Gyro_Pol
-                0x000017ad       0x12 src/gyros.o
-                0x000017ad                Gyro_Pol
+                0x000017b7       0x12 src/gyros.o
+                0x000017b7                Gyro_Pol
  .progmem.data.Gyro_RPY_Order
-                0x000017bf       0x12 src/gyros.o
-                0x000017bf                Gyro_RPY_Order
+                0x000017c9       0x12 src/gyros.o
+                0x000017c9                Gyro_RPY_Order
+ .progmem.data.LPF_lookup_HS
+                0x000017db       0x20 src/imu.o
+                0x000017db                LPF_lookup_HS
  .progmem.data.LPF_lookup
-                0x000017d1        0x7 src/imu.o
-                0x000017d1                LPF_lookup
+                0x000017fb       0x20 src/imu.o
+                0x000017fb                LPF_lookup
  .progmem.data.lines
-                0x000017d8        0x4 src/menu_driver.o
-                0x000017d8                lines
+                0x0000181b        0x4 src/menu_driver.o
+                0x0000181b                lines
  .progmem.data.flight_menu_ranges
-                0x000017dc       0x5a src/menu_flight.o
-                0x000017dc                flight_menu_ranges
+                0x0000181f       0x5a src/menu_flight.o
+                0x0000181f                flight_menu_ranges
  .progmem.data.FlightMenuText
-                0x00001836       0x12 src/menu_flight.o
-                0x00001836                FlightMenuText
+                0x00001879       0x12 src/menu_flight.o
+                0x00001879                FlightMenuText
  .progmem.data.mixer_menu_ranges
-                0x00001848       0xaa src/menu_mixer.o
-                0x00001848                mixer_menu_ranges
+                0x0000188b       0xaa src/menu_mixer.o
+                0x0000188b                mixer_menu_ranges
  .progmem.data.MixerMenuText
-                0x000018f2       0x22 src/menu_mixer.o
-                0x000018f2                MixerMenuText
+                0x00001935       0x22 src/menu_mixer.o
+                0x00001935                MixerMenuText
  .progmem.data.servo_menu_ranges
-                0x00001914        0xf src/menu_servos.o
-                0x00001914                servo_menu_ranges
+                0x00001957        0xf src/menu_servos.o
+                0x00001957                servo_menu_ranges
  .progmem.data.ServoMenuText
-                0x00001923       0x18 src/menu_servos.o
-                0x00001923                ServoMenuText
+                0x00001966       0x18 src/menu_servos.o
+                0x00001966                ServoMenuText
  .progmem.data.rc_menu_ranges
-                0x0000193b       0x5a src/menu_settings.o
-                0x0000193b                rc_menu_ranges
+                0x0000197e       0x5a src/menu_settings.o
+                0x0000197e                rc_menu_ranges
  .progmem.data.RCMenuText
-                0x00001995       0x12 src/menu_settings.o
-                0x00001995                RCMenuText
+                0x000019d8       0x12 src/menu_settings.o
+                0x000019d8                RCMenuText
  .progmem.data.SQRTSIN
-                0x000019a7       0x65 src/mixer.o
-                0x000019a7                SQRTSIN
+                0x000019ea       0x65 src/mixer.o
+                0x000019ea                SQRTSIN
  .progmem.data.SIN
-                0x00001a0c       0x65 src/mixer.o
-                0x00001a0c                SIN
-                0x00001a72                . = ALIGN (0x2)
- *fill*         0x00001a71        0x1 
+                0x00001a4f       0x65 src/mixer.o
+                0x00001a4f                SIN
+                0x00001ab4                . = ALIGN (0x2)
  *(.jumptables)
  *(.jumptables*)
  *(.lowtext)
  *(.lowtext*)
-                0x00001a72                __ctors_start = .
+                0x00001ab4                __ctors_start = .
  *(.ctors)
-                0x00001a72                __ctors_end = .
-                0x00001a72                __dtors_start = .
+                0x00001ab4                __ctors_end = .
+                0x00001ab4                __dtors_start = .
  *(.dtors)
-                0x00001a72                __dtors_end = .
+                0x00001ab4                __dtors_end = .
  SORT(*)(.ctors)
  SORT(*)(.dtors)
  *(.init0)
- .init0         0x00001a72        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
-                0x00001a72                __init
+ .init0         0x00001ab4        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
+                0x00001ab4                __init
  *(.init0)
  *(.init1)
  *(.init1)
  *(.init2)
- .init2         0x00001a72        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
+ .init2         0x00001ab4        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
  *(.init2)
  *(.init3)
- .init3         0x00001a7e       0x12 src/init.o
-                0x00001a7e                wdt_init
+ .init3         0x00001ac0       0x12 src/init.o
+                0x00001ac0                wdt_init
  *(.init3)
  *(.init4)
- .init4         0x00001a90       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_copy_data.o)
-                0x00001a90                __do_copy_data
- .init4         0x00001aa6       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_clear_bss.o)
-                0x00001aa6                __do_clear_bss
+ .init4         0x00001ad2       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_copy_data.o)
+                0x00001ad2                __do_copy_data
+ .init4         0x00001ae8       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_clear_bss.o)
+                0x00001ae8                __do_clear_bss
  *(.init4)
  *(.init5)
  *(.init5)
@@ -1363,480 +1369,480 @@ END GROUP
  *(.init8)
  *(.init8)
  *(.init9)
- .init9         0x00001ab6        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
+ .init9         0x00001af8        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
  *(.init9)
  *(.text)
- .text          0x00001abe        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
-                0x00001abe                __vector_22
-                0x00001abe                __vector_28
-                0x00001abe                __vector_24
-                0x00001abe                __vector_12
-                0x00001abe                __bad_interrupt
-                0x00001abe                __vector_6
-                0x00001abe                __vector_23
-                0x00001abe                __vector_30
-                0x00001abe                __vector_25
-                0x00001abe                __vector_11
-                0x00001abe                __vector_13
-                0x00001abe                __vector_17
-                0x00001abe                __vector_19
-                0x00001abe                __vector_27
-                0x00001abe                __vector_4
-                0x00001abe                __vector_9
-                0x00001abe                __vector_21
-                0x00001abe                __vector_15
-                0x00001abe                __vector_29
-                0x00001abe                __vector_8
-                0x00001abe                __vector_26
-                0x00001abe                __vector_14
-                0x00001abe                __vector_10
-                0x00001abe                __vector_16
- .text          0x00001ac2       0x46 src/misc_asm.o
-                0x00001ac2                glcd_delay
-                0x00001ac6                glcd_delay_1us
-                0x00001ad0                bind_master
- .text          0x00001b08      0x308 src/servos_asm.o
-                0x00001b08                output_servo_ppm_asm
-                0x00001d20                output_servo_ppm_asm3
-                0x00001e10                . = ALIGN (0x2)
+ .text          0x00001b00        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
+                0x00001b00                __vector_22
+                0x00001b00                __vector_28
+                0x00001b00                __vector_24
+                0x00001b00                __vector_12
+                0x00001b00                __bad_interrupt
+                0x00001b00                __vector_6
+                0x00001b00                __vector_23
+                0x00001b00                __vector_30
+                0x00001b00                __vector_25
+                0x00001b00                __vector_11
+                0x00001b00                __vector_13
+                0x00001b00                __vector_17
+                0x00001b00                __vector_19
+                0x00001b00                __vector_27
+                0x00001b00                __vector_4
+                0x00001b00                __vector_9
+                0x00001b00                __vector_21
+                0x00001b00                __vector_15
+                0x00001b00                __vector_29
+                0x00001b00                __vector_8
+                0x00001b00                __vector_26
+                0x00001b00                __vector_14
+                0x00001b00                __vector_10
+                0x00001b00                __vector_16
+ .text          0x00001b04       0x46 src/misc_asm.o
+                0x00001b04                glcd_delay
+                0x00001b08                glcd_delay_1us
+                0x00001b12                bind_master
+ .text          0x00001b4a      0x308 src/servos_asm.o
+                0x00001b4a                output_servo_ppm_asm
+                0x00001d62                output_servo_ppm_asm3
+                0x00001e52                . = ALIGN (0x2)
  *(.text.*)
  .text.get_raw_accs
-                0x00001e10       0xd0 src/acc.o
-                0x00001e10                get_raw_accs
- .text.ReadAcc  0x00001ee0       0xc8 src/acc.o
-                0x00001ee0                ReadAcc
+                0x00001e52       0xd0 src/acc.o
+                0x00001e52                get_raw_accs
+ .text.ReadAcc  0x00001f22       0xc8 src/acc.o
+                0x00001f22                ReadAcc
  .text.CalibrateAcc
-                0x00001fa8      0x1e6 src/acc.o
-                0x00001fa8                CalibrateAcc
+                0x00001fea      0x1e6 src/acc.o
+                0x00001fea                CalibrateAcc
  .text.init_i2c_accs
-                0x0000218e       0x14 src/acc.o
-                0x0000218e                init_i2c_accs
+                0x000021d0       0x14 src/acc.o
+                0x000021d0                init_i2c_accs
  .text.Init_ADC
-                0x000021a2        0xc src/adc.o
-                0x000021a2                Init_ADC
+                0x000021e4        0xc src/adc.o
+                0x000021e4                Init_ADC
  .text.read_adc
-                0x000021ae       0x14 src/adc.o
-                0x000021ae                read_adc
+                0x000021f0       0x14 src/adc.o
+                0x000021f0                read_adc
  .text.Display_balance
-                0x000021c2      0x128 src/display_balance.o
-                0x000021c2                Display_balance
+                0x00002204      0x120 src/display_balance.o
+                0x00002204                Display_balance
  .text.Display_rcinput
-                0x000022ea      0x1fe src/display_rcinput.o
-                0x000022ea                Display_rcinput
+                0x00002324      0x1fe src/display_rcinput.o
+                0x00002324                Display_rcinput
  .text.Display_sensors
-                0x000024e8      0x1e0 src/display_sensors.o
-                0x000024e8                Display_sensors
+                0x00002522      0x1e0 src/display_sensors.o
+                0x00002522                Display_sensors
  .text.Display_status
-                0x000026c8      0x38a src/display_status.o
-                0x000026c8                Display_status
+                0x00002702      0x38a src/display_status.o
+                0x00002702                Display_status
  .text.Display_sticks
-                0x00002a52      0x214 src/display_wizard.o
-                0x00002a52                Display_sticks
+                0x00002a8c      0x214 src/display_wizard.o
+                0x00002a8c                Display_sticks
  .text.eeprom_write_byte_changed
-                0x00002c66       0x38 src/eeprom.o
-                0x00002c66                eeprom_write_byte_changed
+                0x00002ca0       0x38 src/eeprom.o
+                0x00002ca0                eeprom_write_byte_changed
  .text.eeprom_write_block_changes
-                0x00002c9e       0x38 src/eeprom.o
-                0x00002c9e                eeprom_write_block_changes
+                0x00002cd8       0x38 src/eeprom.o
+                0x00002cd8                eeprom_write_block_changes
  .text.Save_Config_to_EEPROM
-                0x00002cd6       0x16 src/eeprom.o
-                0x00002cd6                Save_Config_to_EEPROM
+                0x00002d10       0x16 src/eeprom.o
+                0x00002d10                Save_Config_to_EEPROM
  .text.Update_V1_0_to_V1_1
-                0x00002cec      0x46a src/eeprom.o
-                0x00002cec                Update_V1_0_to_V1_1
+                0x00002d26      0x46a src/eeprom.o
+                0x00002d26                Update_V1_0_to_V1_1
  .text.Update_V1_1_to_V1_1_B8
-                0x00003156       0x7c src/eeprom.o
-                0x00003156                Update_V1_1_to_V1_1_B8
+                0x00003190       0x7c src/eeprom.o
+                0x00003190                Update_V1_1_to_V1_1_B8
  .text.Set_EEPROM_Default_Config
-                0x000031d2      0x14e src/eeprom.o
-                0x000031d2                Set_EEPROM_Default_Config
+                0x0000320c      0x14e src/eeprom.o
+                0x0000320c                Set_EEPROM_Default_Config
  .text.Initial_EEPROM_Config_Load
-                0x00003320       0x4c src/eeprom.o
-                0x00003320                Initial_EEPROM_Config_Load
+                0x0000335a       0x4c src/eeprom.o
+                0x0000335a                Initial_EEPROM_Config_Load
  .text.startup.main
-                0x0000336c      0xce4 src/FC_main.o
-                0x0000336c                main
+                0x000033a6      0xbc2 src/FC_main.o
+                0x000033a6                main
  .text.spiwrite
-                0x00004050       0x3e src/glcd_driver.o
-                0x00004050                spiwrite
+                0x00003f68       0x3e src/glcd_driver.o
+                0x00003f68                spiwrite
  .text.st7565_command
-                0x0000408e        0x6 src/glcd_driver.o
-                0x0000408e                st7565_command
+                0x00003fa6        0x6 src/glcd_driver.o
+                0x00003fa6                st7565_command
  .text.st7565_data
-                0x00004094        0x6 src/glcd_driver.o
-                0x00004094                st7565_data
+                0x00003fac        0x6 src/glcd_driver.o
+                0x00003fac                st7565_data
  .text.st7565_set_brightness
-                0x0000409a       0x12 src/glcd_driver.o
-                0x0000409a                st7565_set_brightness
+                0x00003fb2       0x12 src/glcd_driver.o
+                0x00003fb2                st7565_set_brightness
  .text.st7565_init
-                0x000040ac       0x3e src/glcd_driver.o
-                0x000040ac                st7565_init
+                0x00003fc4       0x3e src/glcd_driver.o
+                0x00003fc4                st7565_init
  .text.write_buffer
-                0x000040ea       0x64 src/glcd_driver.o
-                0x000040ea                write_buffer
+                0x00004002       0x64 src/glcd_driver.o
+                0x00004002                write_buffer
  .text.clear_buffer
-                0x0000414e       0x12 src/glcd_driver.o
-                0x0000414e                clear_buffer
+                0x00004066       0x12 src/glcd_driver.o
+                0x00004066                clear_buffer
  .text.clear_screen
-                0x00004160       0x3c src/glcd_driver.o
-                0x00004160                clear_screen
+                0x00004078       0x3c src/glcd_driver.o
+                0x00004078                clear_screen
  .text.setpixel
-                0x0000419c       0x72 src/glcd_driver.o
-                0x0000419c                setpixel
+                0x000040b4       0x72 src/glcd_driver.o
+                0x000040b4                setpixel
  .text.drawline
-                0x0000420e       0xd4 src/glcd_driver.o
-                0x0000420e                drawline
+                0x00004126       0xd4 src/glcd_driver.o
+                0x00004126                drawline
  .text.drawrect
-                0x000042e2       0xa4 src/glcd_driver.o
-                0x000042e2                drawrect
+                0x000041fa       0xa4 src/glcd_driver.o
+                0x000041fa                drawrect
  .text.fillcircle
-                0x00004386      0x122 src/glcd_driver.o
-                0x00004386                fillcircle
+                0x0000429e      0x122 src/glcd_driver.o
+                0x0000429e                fillcircle
  .text.LCD_Display_Text
-                0x000044a8       0x12 src/glcd_menu.o
-                0x000044a8                LCD_Display_Text
+                0x000043c0       0x12 src/glcd_menu.o
+                0x000043c0                LCD_Display_Text
  .text.gLCDprint_Menu_P
-                0x000044ba        0x4 src/glcd_menu.o
-                0x000044ba                gLCDprint_Menu_P
+                0x000043d2        0x4 src/glcd_menu.o
+                0x000043d2                gLCDprint_Menu_P
  .text.idle_screen
-                0x000044be       0xec src/glcd_menu.o
-                0x000044be                idle_screen
+                0x000043d6       0xec src/glcd_menu.o
+                0x000043d6                idle_screen
  .text.get_raw_gyros
-                0x000045aa       0xca src/gyros.o
-                0x000045aa                get_raw_gyros
+                0x000044c2       0xca src/gyros.o
+                0x000044c2                get_raw_gyros
  .text.ReadGyros
-                0x00004674       0x5a src/gyros.o
-                0x00004674                ReadGyros
+                0x0000458c       0x5a src/gyros.o
+                0x0000458c                ReadGyros
  .text.CalibrateGyrosFast
-                0x000046ce       0xaa src/gyros.o
-                0x000046ce                CalibrateGyrosFast
+                0x000045e6       0xaa src/gyros.o
+                0x000045e6                CalibrateGyrosFast
  .text.CalibrateGyrosSlow
-                0x00004778      0x1be src/gyros.o
-                0x00004778                CalibrateGyrosSlow
+                0x00004690      0x1be src/gyros.o
+                0x00004690                CalibrateGyrosSlow
  .text.init_i2c_gyros
-                0x00004936       0x2e src/gyros.o
-                0x00004936                init_i2c_gyros
+                0x0000484e       0x2e src/gyros.o
+                0x0000484e                init_i2c_gyros
  .text.writeI2Cbyte
-                0x00004964       0x2e src/i2c.o
-                0x00004964                writeI2Cbyte
+                0x0000487c       0x2e src/i2c.o
+                0x0000487c                writeI2Cbyte
  .text.readI2CbyteArray
-                0x00004992       0x84 src/i2c.o
-                0x00004992                readI2CbyteArray
+                0x000048aa       0x84 src/i2c.o
+                0x000048aa                readI2CbyteArray
  .text.RotateVector
-                0x00004a16      0x122 src/imu.o
-                0x00004a16                RotateVector
+                0x0000492e      0x122 src/imu.o
+                0x0000492e                RotateVector
  .text.thetascale
-                0x00004b38       0x78 src/imu.o
-                0x00004b38                thetascale
+                0x00004a50       0x78 src/imu.o
+                0x00004a50                thetascale
  .text.Rotate3dVector
-                0x00004bb0      0x1e6 src/imu.o
-                0x00004bb0                Rotate3dVector
- .text.ext2     0x00004d96       0x74 src/imu.o
-                0x00004d96                ext2
+                0x00004ac8      0x1e6 src/imu.o
+                0x00004ac8                Rotate3dVector
+ .text.ext2     0x00004cae       0x74 src/imu.o
+                0x00004cae                ext2
  .text.ExtractEulerAngles
-                0x00004e0a       0x4a src/imu.o
-                0x00004e0a                ExtractEulerAngles
+                0x00004d22       0x4a src/imu.o
+                0x00004d22                ExtractEulerAngles
  .text.simple_imu_update
-                0x00004e54      0x39e src/imu.o
-                0x00004e54                simple_imu_update
+                0x00004d6c      0x3ac src/imu.o
+                0x00004d6c                simple_imu_update
  .text.reset_IMU
-                0x000051f2       0x92 src/imu.o
-                0x000051f2                reset_IMU
- .text.init     0x00005284      0x39a src/init.o
-                0x00005284                init
+                0x00005118       0x92 src/imu.o
+                0x00005118                reset_IMU
+ .text.init     0x000051aa      0x39a src/init.o
+                0x000051aa                init
  .text.__vector_18
-                0x0000561e       0x2e src/isr.o
-                0x0000561e                __vector_18
+                0x00005544       0x2e src/isr.o
+                0x00005544                __vector_18
  .text.__vector_2
-                0x0000564c       0x70 src/isr.o
-                0x0000564c                __vector_2
+                0x00005572       0x70 src/isr.o
+                0x00005572                __vector_2
  .text.__vector_1
-                0x000056bc       0x72 src/isr.o
-                0x000056bc                __vector_1
+                0x000055e2       0x72 src/isr.o
+                0x000055e2                __vector_1
  .text.__vector_7
-                0x0000572e       0x72 src/isr.o
-                0x0000572e                __vector_7
+                0x00005654       0x72 src/isr.o
+                0x00005654                __vector_7
  .text.__vector_5
-                0x000057a0       0x72 src/isr.o
-                0x000057a0                __vector_5
+                0x000056c6       0x72 src/isr.o
+                0x000056c6                __vector_5
  .text.TIM16_ReadTCNT1
-                0x00005812       0x10 src/isr.o
-                0x00005812                TIM16_ReadTCNT1
+                0x00005738       0x10 src/isr.o
+                0x00005738                TIM16_ReadTCNT1
  .text.__vector_3
-                0x00005822      0x178 src/isr.o
-                0x00005822                __vector_3
+                0x00005748      0x178 src/isr.o
+                0x00005748                __vector_3
  .text.__vector_20
-                0x0000599a      0x2dc src/isr.o
-                0x0000599a                __vector_20
+                0x000058c0      0x2dc src/isr.o
+                0x000058c0                __vector_20
  .text.Disable_RC_Interrupts
-                0x00005c76       0x26 src/isr.o
-                0x00005c76                Disable_RC_Interrupts
+                0x00005b9c       0x26 src/isr.o
+                0x00005b9c                Disable_RC_Interrupts
  .text.init_int
-                0x00005c9c       0x72 src/isr.o
-                0x00005c9c                init_int
+                0x00005bc2       0x72 src/isr.o
+                0x00005bc2                init_int
  .text.print_menu_frame
-                0x00005d0e       0xaa src/menu_driver.o
-                0x00005d0e                print_menu_frame
+                0x00005c34       0xaa src/menu_driver.o
+                0x00005c34                print_menu_frame
  .text.get_menu_range
-                0x00005db8       0x60 src/menu_driver.o
-                0x00005db8                get_menu_range
+                0x00005cde       0x60 src/menu_driver.o
+                0x00005cde                get_menu_range
  .text.print_menu_text
-                0x00005e18       0x4e src/menu_driver.o
-                0x00005e18                print_menu_text
+                0x00005d3e       0x4e src/menu_driver.o
+                0x00005d3e                print_menu_text
  .text.poll_buttons
-                0x00005e66       0x6a src/menu_driver.o
-                0x00005e66                poll_buttons
+                0x00005d8c       0x6a src/menu_driver.o
+                0x00005d8c                poll_buttons
  .text.do_menu_item
-                0x00005ed0      0x338 src/menu_driver.o
-                0x00005ed0                do_menu_item
+                0x00005df6      0x338 src/menu_driver.o
+                0x00005df6                do_menu_item
  .text.menu_beep
-                0x00006208       0x34 src/menu_driver.o
-                0x00006208                menu_beep
+                0x0000612e       0x34 src/menu_driver.o
+                0x0000612e                menu_beep
  .text.update_menu
-                0x0000623c      0x180 src/menu_driver.o
-                0x0000623c                update_menu
+                0x00006162      0x180 src/menu_driver.o
+                0x00006162                update_menu
  .text.print_cursor
-                0x000063bc       0x14 src/menu_driver.o
-                0x000063bc                print_cursor
+                0x000062e2       0x14 src/menu_driver.o
+                0x000062e2                print_cursor
  .text.print_menu_items
-                0x000063d0      0x14a src/menu_driver.o
-                0x000063d0                print_menu_items
+                0x000062f6      0x14a src/menu_driver.o
+                0x000062f6                print_menu_items
  .text.menu_flight
-                0x0000651a      0x136 src/menu_flight.o
-                0x0000651a                menu_flight
+                0x00006440      0x136 src/menu_flight.o
+                0x00006440                menu_flight
  .text.do_main_menu_item
-                0x00006650       0x6c src/menu_main.o
-                0x00006650                do_main_menu_item
+                0x00006576       0x6c src/menu_main.o
+                0x00006576                do_main_menu_item
  .text.Wait_BUTTON1
-                0x000066bc       0x1a src/menu_main.o
-                0x000066bc                Wait_BUTTON1
+                0x000065e2       0x1a src/menu_main.o
+                0x000065e2                Wait_BUTTON1
  .text.menu_main
-                0x000066d6       0xfc src/menu_main.o
-                0x000066d6                menu_main
+                0x000065fc       0xfc src/menu_main.o
+                0x000065fc                menu_main
  .text.Wait_BUTTON4
-                0x000067d2       0x1a src/menu_main.o
-                0x000067d2                Wait_BUTTON4
+                0x000066f8       0x1a src/menu_main.o
+                0x000066f8                Wait_BUTTON4
  .text.menu_mixer
-                0x000067ec      0x136 src/menu_mixer.o
-                0x000067ec                menu_mixer
+                0x00006712      0x136 src/menu_mixer.o
+                0x00006712                menu_mixer
  .text.menu_servo_setup
-                0x00006922      0x1da src/menu_servos.o
-                0x00006922                menu_servo_setup
+                0x00006848      0x1da src/menu_servos.o
+                0x00006848                menu_servo_setup
  .text.menu_rc_setup
-                0x00006afc      0x218 src/menu_settings.o
-                0x00006afc                menu_rc_setup
+                0x00006a22      0x218 src/menu_settings.o
+                0x00006a22                menu_rc_setup
  .text.UpdateLimits
-                0x00006d14      0x2a4 src/mixer.o
-                0x00006d14                UpdateLimits
+                0x00006c3a      0x2a4 src/mixer.o
+                0x00006c3a                UpdateLimits
  .text.UpdateServos
-                0x00006fb8       0x7a src/mixer.o
-                0x00006fb8                UpdateServos
- .text.scale32  0x00007032       0x46 src/mixer.o
-                0x00007032                scale32
+                0x00006ede       0x7a src/mixer.o
+                0x00006ede                UpdateServos
+ .text.scale32  0x00006f58       0x46 src/mixer.o
+                0x00006f58                scale32
  .text.ProcessMixer
-                0x00007078      0xa62 src/mixer.o
-                0x00007078                ProcessMixer
+                0x00006f9e      0xa62 src/mixer.o
+                0x00006f9e                ProcessMixer
  .text.scale_percent
-                0x00007ada        0xe src/mixer.o
-                0x00007ada                scale_percent
+                0x00007a00        0xe src/mixer.o
+                0x00007a00                scale_percent
  .text.mugui_text_sizestring
-                0x00007ae8       0x9c src/mugui_text.o
-                0x00007ae8                mugui_text_sizestring
+                0x00007a0e       0x9c src/mugui_text.o
+                0x00007a0e                mugui_text_sizestring
  .text.pgm_mugui_scopy
-                0x00007b84       0x2e src/mugui_text.o
-                0x00007b84                pgm_mugui_scopy
+                0x00007aaa       0x2e src/mugui_text.o
+                0x00007aaa                pgm_mugui_scopy
  .text.mugui_lcd_putc
-                0x00007bb2      0x178 src/mugui_text.o
-                0x00007bb2                mugui_lcd_putc
+                0x00007ad8      0x178 src/mugui_text.o
+                0x00007ad8                mugui_lcd_putc
  .text.pgm_mugui_lcd_puts
-                0x00007d2a       0x5c src/mugui_text.o
-                0x00007d2a                pgm_mugui_lcd_puts
+                0x00007c50       0x5c src/mugui_text.o
+                0x00007c50                pgm_mugui_lcd_puts
  .text.mugui_lcd_puts
-                0x00007d86       0x6a src/mugui_text.o
-                0x00007d86                mugui_lcd_puts
+                0x00007cac       0x6a src/mugui_text.o
+                0x00007cac                mugui_lcd_puts
  .text.Sensor_PID
-                0x00007df0      0x372 src/pid.o
-                0x00007df0                Sensor_PID
+                0x00007d16      0x380 src/pid.o
+                0x00007d16                Sensor_PID
  .text.Calculate_PID
-                0x00008162      0x55e src/pid.o
-                0x00008162                Calculate_PID
+                0x00008096      0x55e src/pid.o
+                0x00008096                Calculate_PID
  .text.RxGetChannels
-                0x000086c0      0x12a src/rc.o
-                0x000086c0                RxGetChannels
+                0x000085f4      0x12a src/rc.o
+                0x000085f4                RxGetChannels
  .text.CenterSticks
-                0x000087ea       0xaa src/rc.o
-                0x000087ea                CenterSticks
+                0x0000871e       0xaa src/rc.o
+                0x0000871e                CenterSticks
  .text.output_servo_ppm
-                0x00008894      0x136 src/servos.o
-                0x00008894                output_servo_ppm
+                0x000087c8      0x136 src/servos.o
+                0x000087c8                output_servo_ppm
  .text.i2c_init
-                0x000089ca        0xc src/twimastertimeout.o
-                0x000089ca                i2c_init
+                0x000088fe        0xc src/twimastertimeout.o
+                0x000088fe                i2c_init
  .text.i2c_start
-                0x000089d6       0x7a src/twimastertimeout.o
-                0x000089d6                i2c_start
+                0x0000890a       0x7a src/twimastertimeout.o
+                0x0000890a                i2c_start
  .text.i2c_start_wait
-                0x00008a50       0x7e src/twimastertimeout.o
-                0x00008a50                i2c_start_wait
+                0x00008984       0x7e src/twimastertimeout.o
+                0x00008984                i2c_start_wait
  .text.i2c_rep_start
-                0x00008ace        0x4 src/twimastertimeout.o
-                0x00008ace                i2c_rep_start
+                0x00008a02        0x4 src/twimastertimeout.o
+                0x00008a02                i2c_rep_start
  .text.i2c_stop
-                0x00008ad2       0x1e src/twimastertimeout.o
-                0x00008ad2                i2c_stop
+                0x00008a06       0x1e src/twimastertimeout.o
+                0x00008a06                i2c_stop
  .text.i2c_write
-                0x00008af0       0x40 src/twimastertimeout.o
-                0x00008af0                i2c_write
+                0x00008a24       0x40 src/twimastertimeout.o
+                0x00008a24                i2c_write
  .text.i2c_readAck
-                0x00008b30       0x32 src/twimastertimeout.o
-                0x00008b30                i2c_readAck
+                0x00008a64       0x32 src/twimastertimeout.o
+                0x00008a64                i2c_readAck
  .text.i2c_readNak
-                0x00008b62       0x32 src/twimastertimeout.o
-                0x00008b62                i2c_readNak
+                0x00008a96       0x32 src/twimastertimeout.o
+                0x00008a96                i2c_readNak
  .text.init_uart
-                0x00008b94       0xc0 src/uart.o
-                0x00008b94                init_uart
- .text.GetVbat  0x00008c54       0x3e src/vbat.o
-                0x00008c54                GetVbat
+                0x00008ac8       0xc0 src/uart.o
+                0x00008ac8                init_uart
+ .text.GetVbat  0x00008b88       0x3e src/vbat.o
+                0x00008b88                GetVbat
  .text.avr-libc.fplib
-                0x00008c92        0xa c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(addsf3.o)
-                0x00008c92                __subsf3
-                0x00008c94                __addsf3
+                0x00008bc6        0xa c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(addsf3.o)
+                0x00008bc6                __subsf3
+                0x00008bc8                __addsf3
  .text.avr-libc.fplib
-                0x00008c9c       0xc0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(addsf3x.o)
-                0x00008cb6                __addsf3x
+                0x00008bd0       0xc0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(addsf3x.o)
+                0x00008bea                __addsf3x
  .text.avr-libc.fplib
-                0x00008d5c        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(cmpsf2.o)
-                0x00008d5c                __nesf2
-                0x00008d5c                __eqsf2
-                0x00008d5c                __cmpsf2
-                0x00008d5c                __ltsf2
-                0x00008d5c                __lesf2
+                0x00008c90        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(cmpsf2.o)
+                0x00008c90                __nesf2
+                0x00008c90                __eqsf2
+                0x00008c90                __cmpsf2
+                0x00008c90                __ltsf2
+                0x00008c90                __lesf2
  .text.avr-libc.fplib
-                0x00008d64        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(divsf3.o)
-                0x00008d64                __divsf3
+                0x00008c98        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(divsf3.o)
+                0x00008c98                __divsf3
  .text.avr-libc.fplib
-                0x00008d68       0xcc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(divsf3x.o)
-                0x00008d7e                __divsf3x
-                0x00008d82                __divsf3_pse
+                0x00008c9c       0xcc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(divsf3x.o)
+                0x00008cb2                __divsf3x
+                0x00008cb6                __divsf3_pse
  .text.avr-libc.fplib
-                0x00008e34        0xa c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fixsfsi.o)
-                0x00008e34                __fixsfsi
+                0x00008d68        0xa c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fixsfsi.o)
+                0x00008d68                __fixsfsi
  .text.avr-libc.fplib
-                0x00008e3e       0x58 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fixunssfsi.o)
-                0x00008e3e                __fixunssfsi
+                0x00008d72       0x58 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fixunssfsi.o)
+                0x00008d72                __fixunssfsi
  .text.avr-libc.fplib
-                0x00008e96       0x7a c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(floatsisf.o)
-                0x00008e96                __floatunsisf
-                0x00008e9a                __floatsisf
+                0x00008dca       0x7a c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(floatsisf.o)
+                0x00008dca                __floatunsisf
+                0x00008dce                __floatsisf
  .text.avr-libc.fplib
-                0x00008f10       0x48 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_cmp.o)
-                0x00008f10                __fp_cmp
+                0x00008e44       0x48 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_cmp.o)
+                0x00008e44                __fp_cmp
  .text.avr-libc.fplib
-                0x00008f58        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_inf.o)
-                0x00008f58                __fp_inf
+                0x00008e8c        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_inf.o)
+                0x00008e8c                __fp_inf
  .text.avr-libc.fplib
-                0x00008f64        0x6 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_nan.o)
-                0x00008f64                __fp_nan
+                0x00008e98        0x6 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_nan.o)
+                0x00008e98                __fp_nan
  .text.avr-libc.fplib
-                0x00008f6a        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_pscA.o)
-                0x00008f6a                __fp_pscA
+                0x00008e9e        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_pscA.o)
+                0x00008e9e                __fp_pscA
  .text.avr-libc.fplib
-                0x00008f78        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_pscB.o)
-                0x00008f78                __fp_pscB
+                0x00008eac        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_pscB.o)
+                0x00008eac                __fp_pscB
  .text.avr-libc.fplib
-                0x00008f86       0x22 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_round.o)
-                0x00008f86                __fp_round
+                0x00008eba       0x22 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_round.o)
+                0x00008eba                __fp_round
  .text.avr-libc.fplib
-                0x00008fa8       0x44 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_split3.o)
-                0x00008fa8                __fp_split3
-                0x00008fb8                __fp_splitA
+                0x00008edc       0x44 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_split3.o)
+                0x00008edc                __fp_split3
+                0x00008eec                __fp_splitA
  .text.avr-libc.fplib
-                0x00008fec        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_zero.o)
-                0x00008fec                __fp_zero
-                0x00008fee                __fp_szero
+                0x00008f20        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(fp_zero.o)
+                0x00008f20                __fp_zero
+                0x00008f22                __fp_szero
  .text.avr-libc.fplib
-                0x00008ffa        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(gesf2.o)
-                0x00008ffa                __gesf2
-                0x00008ffa                __gtsf2
+                0x00008f2e        0x8 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(gesf2.o)
+                0x00008f2e                __gesf2
+                0x00008f2e                __gtsf2
  .text.avr-libc.fplib
-                0x00009002        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(mulsf3.o)
-                0x00009002                __mulsf3
+                0x00008f36        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(mulsf3.o)
+                0x00008f36                __mulsf3
  .text.avr-libc.fplib
-                0x00009006       0xc2 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(mulsf3x.o)
-                0x0000901a                __mulsf3x
-                0x0000901e                __mulsf3_pse
+                0x00008f3a       0xc2 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libm.a(mulsf3x.o)
+                0x00008f4e                __mulsf3x
+                0x00008f52                __mulsf3_pse
  .text.libgcc.div
-                0x000090c8       0x28 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_udivmodhi4.o)
-                0x000090c8                __udivmodhi4
+                0x00008ffc       0x28 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_udivmodhi4.o)
+                0x00008ffc                __udivmodhi4
  .text.libgcc.div
-                0x000090f0       0x28 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_divmodhi4.o)
-                0x000090f0                _div
-                0x000090f0                __divmodhi4
+                0x00009024       0x28 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_divmodhi4.o)
+                0x00009024                _div
+                0x00009024                __divmodhi4
  .text.libgcc.div
-                0x00009118       0x44 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_udivmodsi4.o)
-                0x00009118                __udivmodsi4
+                0x0000904c       0x44 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_udivmodsi4.o)
+                0x0000904c                __udivmodsi4
  .text.libgcc.div
-                0x0000915c       0x2e c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_divmodsi4.o)
-                0x0000915c                __divmodsi4
+                0x00009090       0x2e c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_divmodsi4.o)
+                0x00009090                __divmodsi4
  .text.libgcc.div
-                0x0000918a       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_negsi2.o)
-                0x0000918a                __negsi2
- .text.libgcc   0x0000919a        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_tablejump.o)
-                0x0000919a                __tablejump2__
-                0x0000919e                __tablejump__
+                0x000090be       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_negsi2.o)
+                0x000090be                __negsi2
+ .text.libgcc   0x000090ce        0xc c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_tablejump.o)
+                0x000090ce                __tablejump2__
+                0x000090d2                __tablejump__
  .text.libgcc.mul
-                0x000091a6       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_mulhisi3.o)
-                0x000091a6                __mulhisi3
+                0x000090da       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_mulhisi3.o)
+                0x000090da                __mulhisi3
  .text.libgcc.mul
-                0x000091b6       0x1e c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_umulhisi3.o)
-                0x000091b6                __umulhisi3
+                0x000090ea       0x1e c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_umulhisi3.o)
+                0x000090ea                __umulhisi3
  .text.libgcc.mul
-                0x000091d4        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_usmulhisi3.o)
-                0x000091d4                __usmulhisi3
-                0x000091d8                __usmulhisi3_tail
+                0x00009108        0xe c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_usmulhisi3.o)
+                0x00009108                __usmulhisi3
+                0x0000910c                __usmulhisi3_tail
  .text.libgcc.mul
-                0x000091e2       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_muluhisi3.o)
-                0x000091e2                __muluhisi3
+                0x00009116       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_muluhisi3.o)
+                0x00009116                __muluhisi3
  .text.libgcc.mul
-                0x000091f8       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_mulshisi3.o)
-                0x000091f8                __mulshisi3
-                0x000091fe                __mulohisi3
+                0x0000912c       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_mulshisi3.o)
+                0x0000912c                __mulshisi3
+                0x00009132                __mulohisi3
  .text.avr-libc
-                0x00009208       0x12 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memcpy_P.o)
-                0x00009208                memcpy_P
+                0x0000913c       0x12 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memcpy_P.o)
+                0x0000913c                memcpy_P
  .text.avr-libc
-                0x0000921a       0x24 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memmove.o)
-                0x0000921a                memmove
+                0x0000914e       0x24 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memmove.o)
+                0x0000914e                memmove
  .text.avr-libc
-                0x0000923e       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(itoa_ncheck.o)
-                0x0000923e                __itoa_ncheck
+                0x00009172       0x16 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(itoa_ncheck.o)
+                0x00009172                __itoa_ncheck
  .text.avr-libc
-                0x00009254       0x34 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(utoa_ncheck.o)
-                0x00009254                __utoa_ncheck
-                0x00009256                __utoa_common
+                0x00009188       0x34 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(utoa_ncheck.o)
+                0x00009188                __utoa_ncheck
+                0x0000918a                __utoa_common
  .text.avr-libc
-                0x00009288       0x20 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eerd_block_atmega644pa.o)
-                0x00009288                __eerd_block_m644pa
-                0x0000928c                __eerd_blraw_m644pa
+                0x000091bc       0x20 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eerd_block_atmega644pa.o)
+                0x000091bc                __eerd_block_m644pa
+                0x000091c0                __eerd_blraw_m644pa
  .text.avr-libc
-                0x000092a8       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eerd_byte_atmega644pa.o)
-                0x000092a8                __eerd_byte_m644pa
+                0x000091dc       0x10 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eerd_byte_atmega644pa.o)
+                0x000091dc                __eerd_byte_m644pa
  .text.avr-libc
-                0x000092b8       0x1c c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eewr_byte_atmega644pa.o)
-                0x000092b8                __eewr_byte_m644pa
-                0x000092ba                __eewr_r18_m644pa
+                0x000091ec       0x1c c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(eewr_byte_atmega644pa.o)
+                0x000091ec                __eewr_byte_m644pa
+                0x000091ee                __eewr_r18_m644pa
  .text.avr-libc
-                0x000092d4       0x12 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memcpy.o)
-                0x000092d4                memcpy
+                0x00009208       0x12 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memcpy.o)
+                0x00009208                memcpy
  .text.avr-libc
-                0x000092e6       0x20 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(strrev.o)
-                0x000092e6                strrev
-                0x00009306                . = ALIGN (0x2)
+                0x0000921a       0x20 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(strrev.o)
+                0x0000921a                strrev
+                0x0000923a                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x00009306        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_exit.o)
-                0x00009306                _exit
-                0x00009306                exit
+ .fini9         0x0000923a        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_exit.o)
+                0x0000923a                _exit
+                0x0000923a                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -1855,11 +1861,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x00009306        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_exit.o)
+ .fini0         0x0000923a        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr5\libgcc.a(_exit.o)
  *(.fini0)
-                0x0000930a                _etext = .
+                0x0000923e                _etext = .
 
-.data           0x00800100      0x412 load address 0x0000930a
+.data           0x00800100      0x40c load address 0x0000923e
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5/crtm644pa.o
@@ -1938,161 +1944,147 @@ END GROUP
  .data          0x00800100        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(memcpy.o)
  .data          0x00800100        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1051/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr5\libc.a(strrev.o)
  *(.data*)
- .data.SlowRC   0x00800100        0x1 src/FC_main.o
-                0x00800100                SlowRC
- .data.PWM_interval
-                0x00800101        0x4 src/FC_main.o
-                0x00800101                PWM_interval
- .data.buffer   0x00800105      0x400 src/FC_main.o
-                0x00800105                buffer
- .data.VectorZ  0x00800505        0x4 src/imu.o
-                0x00800505                VectorZ
- .data.cursor   0x00800509        0x1 src/menu_driver.o
-                0x00800509                cursor
- .data.main_cursor.2271
-                0x0080050a        0x1 src/menu_main.o
+ .data.buffer   0x00800100      0x400 src/FC_main.o
+                0x00800100                buffer
+ .data.VectorZ  0x00800500        0x4 src/imu.o
+                0x00800500                VectorZ
+ .data.cursor   0x00800504        0x1 src/menu_driver.o
+                0x00800504                cursor
+ .data.main_cursor.2265
+                0x00800505        0x1 src/menu_main.o
  .data.main_top
-                0x0080050b        0x2 src/menu_main.o
-                0x0080050b                main_top
+                0x00800506        0x2 src/menu_main.o
+                0x00800506                main_top
  *(.rodata)
  *(.rodata*)
  .rodata.str1.1
-                0x0080050d        0x4 src/display_status.o
+                0x00800508        0x4 src/display_status.o
  *(.gnu.linkonce.d*)
-                0x00800512                . = ALIGN (0x2)
- *fill*         0x00800511        0x1 
-                0x00800512                _edata = .
-                0x00800512                PROVIDE (__data_end, .)
+                0x0080050c                . = ALIGN (0x2)
+                0x0080050c                _edata = .
+                0x0080050c                PROVIDE (__data_end, .)
 
-.bss            0x00800512      0x33b
-                0x00800512                PROVIDE (__bss_start, .)
+.bss            0x0080050c      0x331
+                0x0080050c                PROVIDE (__bss_start, .)
  *(.bss)
  *(.bss*)
- .bss.accVert   0x00800512        0x2 src/acc.o
-                0x00800512                accVert
- .bss.PWM_pulses_global
-                0x00800514        0x2 src/FC_main.o
-                0x00800514                PWM_pulses_global
- .bss.RC_Rate_Timer
-                0x00800516        0x4 src/FC_main.o
-                0x00800516                RC_Rate_Timer
+ .bss.accVert   0x0080050c        0x2 src/acc.o
+                0x0080050c                accVert
  .bss.LoopCount
-                0x0080051a        0x1 src/FC_main.o
-                0x0080051a                LoopCount
- .bss.Overdue   0x0080051b        0x1 src/FC_main.o
-                0x0080051b                Overdue
+                0x0080050e        0x1 src/FC_main.o
+                0x0080050e                LoopCount
+ .bss.Overdue   0x0080050f        0x1 src/FC_main.o
+                0x0080050f                Overdue
  .bss.LoopStartTCNT1
-                0x0080051c        0x2 src/FC_main.o
-                0x0080051c                LoopStartTCNT1
+                0x00800510        0x2 src/FC_main.o
+                0x00800510                LoopStartTCNT1
  .bss.InterruptCount
-                0x0080051e        0x2 src/FC_main.o
-                0x0080051e                InterruptCount
+                0x00800512        0x2 src/FC_main.o
+                0x00800512                InterruptCount
  .bss.Alarm_flags
-                0x00800520        0x1 src/FC_main.o
-                0x00800520                Alarm_flags
+                0x00800514        0x1 src/FC_main.o
+                0x00800514                Alarm_flags
  .bss.Flight_flags
-                0x00800521        0x1 src/FC_main.o
-                0x00800521                Flight_flags
+                0x00800515        0x1 src/FC_main.o
+                0x00800515                Flight_flags
  .bss.General_error
-                0x00800522        0x1 src/FC_main.o
-                0x00800522                General_error
+                0x00800516        0x1 src/FC_main.o
+                0x00800516                General_error
  .bss.transition
-                0x00800523        0x2 src/FC_main.o
-                0x00800523                transition
+                0x00800517        0x2 src/FC_main.o
+                0x00800517                transition
  .bss.Transition_state
-                0x00800525        0x1 src/FC_main.o
-                0x00800525                Transition_state
+                0x00800519        0x1 src/FC_main.o
+                0x00800519                Transition_state
  .bss.transition_counter
-                0x00800526        0x2 src/FC_main.o
-                0x00800526                transition_counter
- .bss.interval  0x00800528        0x4 src/FC_main.o
-                0x00800528                interval
- .bss.VectorY   0x0080052c        0x4 src/imu.o
-                0x0080052c                VectorY
- .bss.VectorX   0x00800530        0x4 src/imu.o
-                0x00800530                VectorX
+                0x0080051a        0x2 src/FC_main.o
+                0x0080051a                transition_counter
+ .bss.VectorY   0x0080051c        0x4 src/imu.o
+                0x0080051c                VectorY
+ .bss.VectorX   0x00800520        0x4 src/imu.o
+                0x00800520                VectorX
  .bss.SystemVoltage
-                0x00800534        0x2 src/init.o
-                0x00800534                SystemVoltage
- .bss.button_count.2536
-                0x00800536        0x1 src/menu_driver.o
+                0x00800524        0x2 src/init.o
+                0x00800524                SystemVoltage
+ .bss.button_count.2530
+                0x00800526        0x1 src/menu_driver.o
  .bss.menu_temp
-                0x00800537        0x2 src/menu_driver.o
-                0x00800537                menu_temp
- .bss.old_menu.2273
-                0x00800539        0x1 src/menu_main.o
- .bss.main_temp.2272
-                0x0080053a        0x2 src/menu_main.o
- .bss.sub_top   0x0080053c        0x2 src/menu_main.o
-                0x0080053c                sub_top
+                0x00800527        0x2 src/menu_driver.o
+                0x00800527                menu_temp
+ .bss.old_menu.2267
+                0x00800529        0x1 src/menu_main.o
+ .bss.main_temp.2266
+                0x0080052a        0x2 src/menu_main.o
+ .bss.sub_top   0x0080052c        0x2 src/menu_main.o
+                0x0080052c                sub_top
  .bss.PID_AvgAccVert
-                0x0080053e        0x4 src/pid.o
-                0x0080053e                PID_AvgAccVert
- .bss.OldRxSum.2255
-                0x00800542        0x2 src/rc.o
+                0x0080052e        0x4 src/pid.o
+                0x0080052e                PID_AvgAccVert
+ .bss.OldRxSum.2249
+                0x00800532        0x2 src/rc.o
  *(COMMON)
- COMMON         0x00800544        0x6 src/acc.o
-                0x00800544                accADC
- COMMON         0x0080054a       0x29 src/FC_main.o
-                0x0080054a                sBuffer
-                0x00800563                pBuffer
- COMMON         0x00800573        0x6 src/gyros.o
-                0x00800573                gyroADC
- COMMON         0x00800579       0x38 src/imu.o
-                0x00800579                VectorNewB
-                0x0080057d                EulerAnglePitch
-                0x00800581                AccAngleRoll
-                0x00800585                AccAnglePitch
-                0x00800589                GyroPitchVC
-                0x0080058d                GyroRollVC
-                0x00800591                angle
-                0x00800595                VectorNewA
-                0x00800599                accSmooth
-                0x008005a5                EulerAngleRoll
-                0x008005a9                VectorA
-                0x008005ad                VectorB
- COMMON         0x008005b1      0x208 src/init.o
-                0x008005b1                Config
- COMMON         0x008007b9       0x31 src/isr.o
-                0x008007b9                rcindex
-                0x008007ba                RxChannel
-                0x008007ca                Interrupted
-                0x008007cb                max_chan
-                0x008007cc                bytecount
-                0x008007cd                TMR0_counter
-                0x008007cf                RxChannelStart
-                0x008007df                chanmask16
-                0x008007e1                ch_num
-                0x008007e2                PPMSyncStart
-                0x008007e4                JitterGate
-                0x008007e5                JitterFlag
-                0x008007e6                checksum
-                0x008007e8                FrameRate
- COMMON         0x008007ea        0x2 src/menu_driver.o
-                0x008007ea                button
-                0x008007eb                button_multiplier
- COMMON         0x008007ec        0x1 src/menu_main.o
-                0x008007ec                menu_flag
- COMMON         0x008007ed       0x3c src/pid.o
-                0x008007ed                IntegralGyro
-                0x00800805                gyroSmooth
-                0x00800811                PID_Gyros
-                0x0080081d                PID_ACCs
- COMMON         0x00800829       0x14 src/rc.o
-                0x00800829                MonopolarThrottle
-                0x0080082b                RCinputs
- COMMON         0x0080083d       0x10 src/servos.o
-                0x0080083d                ServoOut
-                0x0080084d                PROVIDE (__bss_end, .)
-                0x0000930a                __data_load_start = LOADADDR (.data)
-                0x0000971c                __data_load_end = (__data_load_start + SIZEOF (.data))
+ COMMON         0x00800534        0x6 src/acc.o
+                0x00800534                accADC
+ COMMON         0x0080053a       0x29 src/FC_main.o
+                0x0080053a                sBuffer
+                0x00800553                pBuffer
+ COMMON         0x00800563        0x6 src/gyros.o
+                0x00800563                gyroADC
+ COMMON         0x00800569       0x38 src/imu.o
+                0x00800569                VectorNewB
+                0x0080056d                EulerAnglePitch
+                0x00800571                AccAngleRoll
+                0x00800575                AccAnglePitch
+                0x00800579                GyroPitchVC
+                0x0080057d                GyroRollVC
+                0x00800581                angle
+                0x00800585                VectorNewA
+                0x00800589                accSmooth
+                0x00800595                EulerAngleRoll
+                0x00800599                VectorA
+                0x0080059d                VectorB
+ COMMON         0x008005a1      0x208 src/init.o
+                0x008005a1                Config
+ COMMON         0x008007a9       0x31 src/isr.o
+                0x008007a9                rcindex
+                0x008007aa                RxChannel
+                0x008007ba                Interrupted
+                0x008007bb                max_chan
+                0x008007bc                bytecount
+                0x008007bd                TMR0_counter
+                0x008007bf                RxChannelStart
+                0x008007cf                chanmask16
+                0x008007d1                ch_num
+                0x008007d2                PPMSyncStart
+                0x008007d4                JitterGate
+                0x008007d5                JitterFlag
+                0x008007d6                checksum
+                0x008007d8                FrameRate
+ COMMON         0x008007da        0x2 src/menu_driver.o
+                0x008007da                button
+                0x008007db                button_multiplier
+ COMMON         0x008007dc        0x1 src/menu_main.o
+                0x008007dc                menu_flag
+ COMMON         0x008007dd       0x3c src/pid.o
+                0x008007dd                IntegralGyro
+                0x008007f5                gyroSmooth
+                0x00800801                PID_Gyros
+                0x0080080d                PID_ACCs
+ COMMON         0x00800819       0x14 src/rc.o
+                0x00800819                MonopolarThrottle
+                0x0080081b                RCinputs
+ COMMON         0x0080082d       0x10 src/servos.o
+                0x0080082d                ServoOut
+                0x0080083d                PROVIDE (__bss_end, .)
+                0x0000923e                __data_load_start = LOADADDR (.data)
+                0x0000964a                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x0080084d        0x0
-                0x0080084d                PROVIDE (__noinit_start, .)
+.noinit         0x0080083d        0x0
+                0x0080083d                PROVIDE (__noinit_start, .)
  *(.noinit*)
-                0x0080084d                PROVIDE (__noinit_end, .)
-                0x0080084d                _end = .
-                0x0080084d                PROVIDE (__heap_start, .)
+                0x0080083d                PROVIDE (__noinit_end, .)
+                0x0080083d                _end = .
+                0x0080083d                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
  *(.eeprom*)
@@ -2250,110 +2242,110 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000    0x140f8
+.debug_info     0x00000000    0x1413f
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0xc14 src/acc.o
  .debug_info    0x00000c14       0xa9 src/adc.o
- .debug_info    0x00000cbd      0x488 src/display_balance.o
- .debug_info    0x00001145      0x886 src/display_rcinput.o
- .debug_info    0x000019cb      0x869 src/display_sensors.o
- .debug_info    0x00002234      0xf93 src/display_status.o
- .debug_info    0x000031c7      0xc1a src/display_wizard.o
- .debug_info    0x00003de1      0xce5 src/eeprom.o
- .debug_info    0x00004ac6     0x10cd src/FC_main.o
- .debug_info    0x00005b93     0x10b9 src/glcd_driver.o
- .debug_info    0x00006c4c     0x18b1 src/glcd_menu.o
- .debug_info    0x000084fd      0xaee src/gyros.o
- .debug_info    0x00008feb      0x20e src/i2c.o
- .debug_info    0x000091f9      0xc18 src/imu.o
- .debug_info    0x00009e11      0xf71 src/init.o
- .debug_info    0x0000ad82      0xb3c src/isr.o
- .debug_info    0x0000b8be     0x1684 src/menu_driver.o
- .debug_info    0x0000cf42      0xa4a src/menu_flight.o
- .debug_info    0x0000d98c      0x5d1 src/menu_main.o
- .debug_info    0x0000df5d      0xb1e src/menu_mixer.o
- .debug_info    0x0000ea7b      0xb10 src/menu_servos.o
- .debug_info    0x0000f58b      0xcee src/menu_settings.o
- .debug_info    0x00010279       0x64 src/misc_asm.o
- .debug_info    0x000102dd     0x1010 src/mixer.o
- .debug_info    0x000112ed      0x778 src/mugui_text.o
- .debug_info    0x00011a65      0xa25 src/pid.o
- .debug_info    0x0001248a      0x904 src/rc.o
- .debug_info    0x00012d8e      0x88f src/servos.o
- .debug_info    0x0001361d       0x66 src/servos_asm.o
- .debug_info    0x00013683      0x235 src/twimastertimeout.o
- .debug_info    0x000138b8      0x737 src/uart.o
- .debug_info    0x00013fef      0x109 src/vbat.o
+ .debug_info    0x00000cbd      0x41e src/display_balance.o
+ .debug_info    0x000010db      0x886 src/display_rcinput.o
+ .debug_info    0x00001961      0x869 src/display_sensors.o
+ .debug_info    0x000021ca      0xf93 src/display_status.o
+ .debug_info    0x0000315d      0xc1a src/display_wizard.o
+ .debug_info    0x00003d77      0xce5 src/eeprom.o
+ .debug_info    0x00004a5c     0x109f src/FC_main.o
+ .debug_info    0x00005afb     0x10b9 src/glcd_driver.o
+ .debug_info    0x00006bb4     0x18e1 src/glcd_menu.o
+ .debug_info    0x00008495      0xaee src/gyros.o
+ .debug_info    0x00008f83      0x20e src/i2c.o
+ .debug_info    0x00009191      0xc77 src/imu.o
+ .debug_info    0x00009e08      0xf71 src/init.o
+ .debug_info    0x0000ad79      0xb3c src/isr.o
+ .debug_info    0x0000b8b5     0x1683 src/menu_driver.o
+ .debug_info    0x0000cf38      0xa4a src/menu_flight.o
+ .debug_info    0x0000d982      0x5d1 src/menu_main.o
+ .debug_info    0x0000df53      0xb1e src/menu_mixer.o
+ .debug_info    0x0000ea71      0xb10 src/menu_servos.o
+ .debug_info    0x0000f581      0xcee src/menu_settings.o
+ .debug_info    0x0001026f       0x64 src/misc_asm.o
+ .debug_info    0x000102d3     0x1010 src/mixer.o
+ .debug_info    0x000112e3      0x778 src/mugui_text.o
+ .debug_info    0x00011a5b      0xa76 src/pid.o
+ .debug_info    0x000124d1      0x904 src/rc.o
+ .debug_info    0x00012dd5      0x88f src/servos.o
+ .debug_info    0x00013664       0x66 src/servos_asm.o
+ .debug_info    0x000136ca      0x235 src/twimastertimeout.o
+ .debug_info    0x000138ff      0x737 src/uart.o
+ .debug_info    0x00014036      0x109 src/vbat.o
 
-.debug_abbrev   0x00000000     0x356f
+.debug_abbrev   0x00000000     0x355f
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x25b src/acc.o
  .debug_abbrev  0x0000025b       0x78 src/adc.o
- .debug_abbrev  0x000002d3      0x19f src/display_balance.o
- .debug_abbrev  0x00000472      0x1e0 src/display_rcinput.o
- .debug_abbrev  0x00000652      0x227 src/display_sensors.o
- .debug_abbrev  0x00000879      0x233 src/display_status.o
- .debug_abbrev  0x00000aac      0x1d4 src/display_wizard.o
- .debug_abbrev  0x00000c80      0x279 src/eeprom.o
- .debug_abbrev  0x00000ef9      0x1f9 src/FC_main.o
- .debug_abbrev  0x000010f2      0x2c1 src/glcd_driver.o
- .debug_abbrev  0x000013b3      0x1cf src/glcd_menu.o
- .debug_abbrev  0x00001582      0x250 src/gyros.o
- .debug_abbrev  0x000017d2       0xff src/i2c.o
- .debug_abbrev  0x000018d1      0x23a src/imu.o
- .debug_abbrev  0x00001b0b      0x24d src/init.o
- .debug_abbrev  0x00001d58      0x1a9 src/isr.o
- .debug_abbrev  0x00001f01      0x3e9 src/menu_driver.o
- .debug_abbrev  0x000022ea      0x15c src/menu_flight.o
- .debug_abbrev  0x00002446      0x20b src/menu_main.o
- .debug_abbrev  0x00002651      0x17d src/menu_mixer.o
- .debug_abbrev  0x000027ce      0x199 src/menu_servos.o
- .debug_abbrev  0x00002967      0x1cb src/menu_settings.o
- .debug_abbrev  0x00002b32       0x14 src/misc_asm.o
- .debug_abbrev  0x00002b46      0x21d src/mixer.o
- .debug_abbrev  0x00002d63      0x19c src/mugui_text.o
- .debug_abbrev  0x00002eff      0x12f src/pid.o
- .debug_abbrev  0x0000302e      0x1a6 src/rc.o
- .debug_abbrev  0x000031d4      0x136 src/servos.o
- .debug_abbrev  0x0000330a       0x14 src/servos_asm.o
- .debug_abbrev  0x0000331e       0xe8 src/twimastertimeout.o
- .debug_abbrev  0x00003406       0xbe src/uart.o
- .debug_abbrev  0x000034c4       0xab src/vbat.o
+ .debug_abbrev  0x000002d3      0x153 src/display_balance.o
+ .debug_abbrev  0x00000426      0x1e0 src/display_rcinput.o
+ .debug_abbrev  0x00000606      0x227 src/display_sensors.o
+ .debug_abbrev  0x0000082d      0x233 src/display_status.o
+ .debug_abbrev  0x00000a60      0x1d4 src/display_wizard.o
+ .debug_abbrev  0x00000c34      0x279 src/eeprom.o
+ .debug_abbrev  0x00000ead      0x212 src/FC_main.o
+ .debug_abbrev  0x000010bf      0x2c1 src/glcd_driver.o
+ .debug_abbrev  0x00001380      0x1cf src/glcd_menu.o
+ .debug_abbrev  0x0000154f      0x250 src/gyros.o
+ .debug_abbrev  0x0000179f       0xff src/i2c.o
+ .debug_abbrev  0x0000189e      0x247 src/imu.o
+ .debug_abbrev  0x00001ae5      0x24d src/init.o
+ .debug_abbrev  0x00001d32      0x1a9 src/isr.o
+ .debug_abbrev  0x00001edb      0x3e9 src/menu_driver.o
+ .debug_abbrev  0x000022c4      0x15c src/menu_flight.o
+ .debug_abbrev  0x00002420      0x20b src/menu_main.o
+ .debug_abbrev  0x0000262b      0x17d src/menu_mixer.o
+ .debug_abbrev  0x000027a8      0x199 src/menu_servos.o
+ .debug_abbrev  0x00002941      0x1cb src/menu_settings.o
+ .debug_abbrev  0x00002b0c       0x14 src/misc_asm.o
+ .debug_abbrev  0x00002b20      0x21d src/mixer.o
+ .debug_abbrev  0x00002d3d      0x19c src/mugui_text.o
+ .debug_abbrev  0x00002ed9      0x145 src/pid.o
+ .debug_abbrev  0x0000301e      0x1a6 src/rc.o
+ .debug_abbrev  0x000031c4      0x136 src/servos.o
+ .debug_abbrev  0x000032fa       0x14 src/servos_asm.o
+ .debug_abbrev  0x0000330e       0xe8 src/twimastertimeout.o
+ .debug_abbrev  0x000033f6       0xbe src/uart.o
+ .debug_abbrev  0x000034b4       0xab src/vbat.o
 
-.debug_line     0x00000000     0x3e2a
+.debug_line     0x00000000     0x3db3
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x24e src/acc.o
  .debug_line    0x0000024e       0xc3 src/adc.o
- .debug_line    0x00000311      0x1b6 src/display_balance.o
- .debug_line    0x000004c7      0x1a7 src/display_rcinput.o
- .debug_line    0x0000066e      0x21c src/display_sensors.o
- .debug_line    0x0000088a      0x1a6 src/display_status.o
- .debug_line    0x00000a30      0x210 src/display_wizard.o
- .debug_line    0x00000c40      0x35c src/eeprom.o
- .debug_line    0x00000f9c      0x4b7 src/FC_main.o
- .debug_line    0x00001453      0x31f src/glcd_driver.o
- .debug_line    0x00001772      0x122 src/glcd_menu.o
- .debug_line    0x00001894      0x226 src/gyros.o
- .debug_line    0x00001aba       0xe5 src/i2c.o
- .debug_line    0x00001b9f      0x1ed src/imu.o
- .debug_line    0x00001d8c      0x2ea src/init.o
- .debug_line    0x00002076      0x27e src/isr.o
- .debug_line    0x000022f4      0x4da src/menu_driver.o
- .debug_line    0x000027ce      0x114 src/menu_flight.o
- .debug_line    0x000028e2      0x20a src/menu_main.o
- .debug_line    0x00002aec      0x113 src/menu_mixer.o
- .debug_line    0x00002bff      0x140 src/menu_servos.o
- .debug_line    0x00002d3f      0x164 src/menu_settings.o
- .debug_line    0x00002ea3       0x64 src/misc_asm.o
- .debug_line    0x00002f07      0x3ba src/mixer.o
- .debug_line    0x000032c1      0x1ac src/mugui_text.o
- .debug_line    0x0000346d      0x1ad src/pid.o
- .debug_line    0x0000361a      0x1ba src/rc.o
- .debug_line    0x000037d4      0x114 src/servos.o
- .debug_line    0x000038e8      0x19a src/servos_asm.o
- .debug_line    0x00003a82      0x1e7 src/twimastertimeout.o
- .debug_line    0x00003c69       0xf5 src/uart.o
- .debug_line    0x00003d5e       0xcc src/vbat.o
+ .debug_line    0x00000311      0x142 src/display_balance.o
+ .debug_line    0x00000453      0x1a7 src/display_rcinput.o
+ .debug_line    0x000005fa      0x21c src/display_sensors.o
+ .debug_line    0x00000816      0x1a6 src/display_status.o
+ .debug_line    0x000009bc      0x210 src/display_wizard.o
+ .debug_line    0x00000bcc      0x35c src/eeprom.o
+ .debug_line    0x00000f28      0x4b3 src/FC_main.o
+ .debug_line    0x000013db      0x31f src/glcd_driver.o
+ .debug_line    0x000016fa      0x11f src/glcd_menu.o
+ .debug_line    0x00001819      0x226 src/gyros.o
+ .debug_line    0x00001a3f       0xe5 src/i2c.o
+ .debug_line    0x00001b24      0x1ee src/imu.o
+ .debug_line    0x00001d12      0x2ea src/init.o
+ .debug_line    0x00001ffc      0x27e src/isr.o
+ .debug_line    0x0000227a      0x4d9 src/menu_driver.o
+ .debug_line    0x00002753      0x114 src/menu_flight.o
+ .debug_line    0x00002867      0x20a src/menu_main.o
+ .debug_line    0x00002a71      0x113 src/menu_mixer.o
+ .debug_line    0x00002b84      0x140 src/menu_servos.o
+ .debug_line    0x00002cc4      0x164 src/menu_settings.o
+ .debug_line    0x00002e28       0x64 src/misc_asm.o
+ .debug_line    0x00002e8c      0x3ba src/mixer.o
+ .debug_line    0x00003246      0x1ac src/mugui_text.o
+ .debug_line    0x000033f2      0x1b1 src/pid.o
+ .debug_line    0x000035a3      0x1ba src/rc.o
+ .debug_line    0x0000375d      0x114 src/servos.o
+ .debug_line    0x00003871      0x19a src/servos_asm.o
+ .debug_line    0x00003a0b      0x1e7 src/twimastertimeout.o
+ .debug_line    0x00003bf2       0xf5 src/uart.o
+ .debug_line    0x00003ce7       0xcc src/vbat.o
 
 .debug_frame    0x00000000     0x1440
  *(.debug_frame)
@@ -2388,14 +2380,14 @@ END GROUP
  .debug_frame   0x000013f8       0x24 src/uart.o
  .debug_frame   0x0000141c       0x24 src/vbat.o
 
-.debug_str      0x00000000     0x2793
+.debug_str      0x00000000     0x2789
  *(.debug_str)
  .debug_str     0x00000000      0x774 src/acc.o
                                 0x805 (size before relaxing)
  .debug_str     0x00000774       0x27 src/adc.o
                                 0x158 (size before relaxing)
  .debug_str     0x0000079b       0x99 src/display_balance.o
-                                0x297 (size before relaxing)
+                                0x25b (size before relaxing)
  .debug_str     0x00000834       0xe3 src/display_rcinput.o
                                 0x2b3 (size before relaxing)
  .debug_str     0x00000917       0x4e src/display_sensors.o
@@ -2406,82 +2398,82 @@ END GROUP
                                 0x839 (size before relaxing)
  .debug_str     0x00000afa      0x273 src/eeprom.o
                                 0x9b7 (size before relaxing)
- .debug_str     0x00000d6d      0x506 src/FC_main.o
-                                0xdad (size before relaxing)
- .debug_str     0x00001273       0xbe src/glcd_driver.o
+ .debug_str     0x00000d6d      0x4e0 src/FC_main.o
+                                0xd79 (size before relaxing)
+ .debug_str     0x0000124d       0xbe src/glcd_driver.o
                                 0x7dd (size before relaxing)
- .debug_str     0x00001331      0x9b1 src/glcd_menu.o
-                                0xbba (size before relaxing)
- .debug_str     0x00001ce2       0x9d src/gyros.o
+ .debug_str     0x0000130b      0x9bf src/glcd_menu.o
+                                0xbc8 (size before relaxing)
+ .debug_str     0x00001cca       0x9d src/gyros.o
                                 0x7f8 (size before relaxing)
- .debug_str     0x00001d7f       0x64 src/i2c.o
+ .debug_str     0x00001d67       0x64 src/i2c.o
                                 0x1cf (size before relaxing)
- .debug_str     0x00001de3      0x140 src/imu.o
-                                0x83a (size before relaxing)
- .debug_str     0x00001f23       0x83 src/init.o
+ .debug_str     0x00001dcb      0x14e src/imu.o
+                                0x852 (size before relaxing)
+ .debug_str     0x00001f19       0x83 src/init.o
                                 0x971 (size before relaxing)
- .debug_str     0x00001fa6      0x111 src/isr.o
+ .debug_str     0x00001f9c      0x111 src/isr.o
                                 0x89d (size before relaxing)
- .debug_str     0x000020b7      0x1ca src/menu_driver.o
+ .debug_str     0x000020ad      0x1ca src/menu_driver.o
                                 0xa35 (size before relaxing)
- .debug_str     0x00002281       0x6c src/menu_flight.o
+ .debug_str     0x00002277       0x6c src/menu_flight.o
                                 0x798 (size before relaxing)
- .debug_str     0x000022ed       0x84 src/menu_main.o
+ .debug_str     0x000022e3       0x84 src/menu_main.o
                                 0x367 (size before relaxing)
- .debug_str     0x00002371       0x4a src/menu_mixer.o
+ .debug_str     0x00002367       0x4a src/menu_mixer.o
                                 0x84d (size before relaxing)
- .debug_str     0x000023bb       0x4a src/menu_servos.o
+ .debug_str     0x000023b1       0x4a src/menu_servos.o
                                 0x848 (size before relaxing)
- .debug_str     0x00002405       0x79 src/menu_settings.o
+ .debug_str     0x000023fb       0x79 src/menu_settings.o
                                 0x919 (size before relaxing)
- .debug_str     0x0000247e       0xdd src/mixer.o
+ .debug_str     0x00002474       0xdd src/mixer.o
                                 0x9db (size before relaxing)
- .debug_str     0x0000255b       0x8a src/mugui_text.o
+ .debug_str     0x00002551       0x8a src/mugui_text.o
                                 0x276 (size before relaxing)
- .debug_str     0x000025e5       0xd3 src/pid.o
-                                0x820 (size before relaxing)
- .debug_str     0x000026b8       0x1f src/rc.o
+ .debug_str     0x000025db       0xd3 src/pid.o
+                                0x838 (size before relaxing)
+ .debug_str     0x000026ae       0x1f src/rc.o
                                 0x79e (size before relaxing)
- .debug_str     0x000026d7       0x10 src/servos.o
+ .debug_str     0x000026cd       0x10 src/servos.o
                                 0x795 (size before relaxing)
- .debug_str     0x000026e7       0x33 src/twimastertimeout.o
+ .debug_str     0x000026dd       0x33 src/twimastertimeout.o
                                 0x1d4 (size before relaxing)
- .debug_str     0x0000271a        0xe src/uart.o
+ .debug_str     0x00002710        0xe src/uart.o
                                 0x68d (size before relaxing)
- .debug_str     0x00002728       0x6b src/vbat.o
+ .debug_str     0x0000271e       0x6b src/vbat.o
                                 0x1bf (size before relaxing)
 
-.debug_loc      0x00000000     0x8cb9
+.debug_loc      0x00000000     0x90d3
  *(.debug_loc)
  .debug_loc     0x00000000      0x3e2 src/acc.o
  .debug_loc     0x000003e2       0x2d src/adc.o
- .debug_loc     0x0000040f       0xab src/display_balance.o
- .debug_loc     0x000004ba      0x160 src/display_rcinput.o
- .debug_loc     0x0000061a      0x150 src/display_sensors.o
- .debug_loc     0x0000076a      0x244 src/display_status.o
- .debug_loc     0x000009ae      0x21c src/display_wizard.o
- .debug_loc     0x00000bca      0x66d src/eeprom.o
- .debug_loc     0x00001237      0xeee src/FC_main.o
- .debug_loc     0x00002125      0xd3f src/glcd_driver.o
- .debug_loc     0x00002e64      0x1d2 src/glcd_menu.o
- .debug_loc     0x00003036      0x4f1 src/gyros.o
- .debug_loc     0x00003527      0x221 src/i2c.o
- .debug_loc     0x00003748      0x7f5 src/imu.o
- .debug_loc     0x00003f3d      0x1e9 src/init.o
- .debug_loc     0x00004126      0x750 src/isr.o
- .debug_loc     0x00004876     0x10d8 src/menu_driver.o
- .debug_loc     0x0000594e      0x14e src/menu_flight.o
- .debug_loc     0x00005a9c      0x38b src/menu_main.o
- .debug_loc     0x00005e27      0x16d src/menu_mixer.o
- .debug_loc     0x00005f94      0x25b src/menu_servos.o
- .debug_loc     0x000061ef      0x249 src/menu_settings.o
- .debug_loc     0x00006438      0xd72 src/mixer.o
- .debug_loc     0x000071aa      0xe1b src/mugui_text.o
- .debug_loc     0x00007fc5      0x78e src/pid.o
- .debug_loc     0x00008753      0x12a src/rc.o
- .debug_loc     0x0000887d      0x169 src/servos.o
- .debug_loc     0x000089e6      0x29b src/twimastertimeout.o
- .debug_loc     0x00008c81       0x38 src/vbat.o
+ .debug_loc     0x0000040f       0xbf src/display_balance.o
+ .debug_loc     0x000004ce      0x160 src/display_rcinput.o
+ .debug_loc     0x0000062e      0x150 src/display_sensors.o
+ .debug_loc     0x0000077e      0x244 src/display_status.o
+ .debug_loc     0x000009c2      0x21c src/display_wizard.o
+ .debug_loc     0x00000bde      0x66d src/eeprom.o
+ .debug_loc     0x0000124b     0x12de src/FC_main.o
+ .debug_loc     0x00002529      0xd3f src/glcd_driver.o
+ .debug_loc     0x00003268      0x1d2 src/glcd_menu.o
+ .debug_loc     0x0000343a      0x4f1 src/gyros.o
+ .debug_loc     0x0000392b      0x221 src/i2c.o
+ .debug_loc     0x00003b4c      0x7fa src/imu.o
+ .debug_loc     0x00004346      0x1e9 src/init.o
+ .debug_loc     0x0000452f      0x750 src/isr.o
+ .debug_loc     0x00004c7f     0x10d8 src/menu_driver.o
+ .debug_loc     0x00005d57      0x14e src/menu_flight.o
+ .debug_loc     0x00005ea5      0x38b src/menu_main.o
+ .debug_loc     0x00006230      0x16d src/menu_mixer.o
+ .debug_loc     0x0000639d      0x25b src/menu_servos.o
+ .debug_loc     0x000065f8      0x249 src/menu_settings.o
+ .debug_loc     0x00006841      0xd72 src/mixer.o
+ .debug_loc     0x000075b3      0xe1b src/mugui_text.o
+ .debug_loc     0x000083ce      0x79f src/pid.o
+ .debug_loc     0x00008b6d      0x12a src/rc.o
+ .debug_loc     0x00008c97      0x169 src/servos.o
+ .debug_loc     0x00008e00      0x29b src/twimastertimeout.o
+ .debug_loc     0x0000909b       0x38 src/vbat.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -2501,7 +2493,7 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000      0x500
+.debug_ranges   0x00000000      0x518
  *(.debug_ranges)
  .debug_ranges  0x00000000       0x40 src/acc.o
  .debug_ranges  0x00000040       0x18 src/adc.o
@@ -2527,12 +2519,12 @@ END GROUP
  .debug_ranges  0x00000380       0x10 src/menu_settings.o
  .debug_ranges  0x00000390       0x98 src/mixer.o
  .debug_ranges  0x00000428       0x30 src/mugui_text.o
- .debug_ranges  0x00000458       0x18 src/pid.o
- .debug_ranges  0x00000470       0x18 src/rc.o
- .debug_ranges  0x00000488       0x10 src/servos.o
- .debug_ranges  0x00000498       0x48 src/twimastertimeout.o
- .debug_ranges  0x000004e0       0x10 src/uart.o
- .debug_ranges  0x000004f0       0x10 src/vbat.o
+ .debug_ranges  0x00000458       0x30 src/pid.o
+ .debug_ranges  0x00000488       0x18 src/rc.o
+ .debug_ranges  0x000004a0       0x10 src/servos.o
+ .debug_ranges  0x000004b0       0x48 src/twimastertimeout.o
+ .debug_ranges  0x000004f8       0x10 src/uart.o
+ .debug_ranges  0x00000508       0x10 src/vbat.o
 
 .debug_macro
  *(.debug_macro)

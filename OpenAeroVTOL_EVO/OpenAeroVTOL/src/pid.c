@@ -94,10 +94,18 @@ void Sensor_PID(void)
 		{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
 		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 	};
-	
-	// Gyro LPF scale
-	tempf = pgm_read_byte(&LPF_lookup[Config.Gyro_LPF]); // Lookup actual LPF value and promote
-	
+
+	// Lookup actual LPF value and promote
+	// Note: Two sets of values for normal and high-speed mode
+	if (Config.Servo_rate != FAST)
+	{	
+		tempf = pgm_read_byte(&LPF_lookup[Config.Gyro_LPF]); 
+	}
+	else
+	{
+		tempf = pgm_read_byte(&LPF_lookup_HS[Config.Gyro_LPF]);
+	}
+
 	for (axis = 0; axis <= YAW; axis ++)
 	{
 		//************************************************************
