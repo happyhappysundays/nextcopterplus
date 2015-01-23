@@ -248,7 +248,6 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			write_buffer(buffer);
 		}
 		
-		// Debug
 		// Slow the loop rate for text items
 		if (range.style == 1)
 		{
@@ -279,7 +278,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			poll_buttons(true);
 		}
 
-		// Debug - release button lock when pressed
+		// Release button lock when pressed
 		// unless a servo
 		if ((button != NONE) && (!servo_enable))
 		{

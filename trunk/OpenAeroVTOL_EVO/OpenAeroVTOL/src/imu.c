@@ -78,7 +78,12 @@ float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
 int16_t	angle[2];						// Attitude in degrees - pitch and roll
 
-const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
+// Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
+//const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // 700Hz
+	
+// Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None	
+const float LPF_lookup[8] PROGMEM		= {18.9,9.7,4.9,2.7,1.64,1.28,1.21,1};	// 580Hz
+const float LPF_lookup_HS[8] PROGMEM	= {11.5,6,3.15,1.87,1.33,1.2,1.18,1};	// 343Hz
 	
 //************************************************************
 // Code
@@ -121,7 +126,16 @@ void simple_imu_update(uint32_t period)
 	tempf = period;						// Promote int16_t to float
 	intervalf = tempf/2500000.0f;		// This gives the period in seconds
 
-	tempf = pgm_read_byte(&LPF_lookup[Config.Acc_LPF]); // Lookup actual LPF value and promote
+	// Lookup actual LPF value and promote
+	// Note: Two sets of values for normal and high-speed mode
+	if (Config.Servo_rate != FAST)
+	{
+		tempf = pgm_read_float(&LPF_lookup[Config.Acc_LPF]); 
+	}
+	else
+	{
+		tempf = pgm_read_float(&LPF_lookup_HS[Config.Acc_LPF]); 
+	}
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
 	for (axis = 0; axis < NUMBEROFAXIS; axis++)
