@@ -83,9 +83,9 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,5,1,1,0},					// Low battery cell voltage
-		{0,6,1,1,2},					// MPU6050 LPF. Default is (6 - 2 = 4) 21Hz
-		{0,7,1,1,2},					// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
-		{0,7,1,1,7},					// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
+		{HZ5,HZ260,1,1,HZ21},			// MPU6050 LPF. Default is 21Hz
+		{HZ5,NOFILTER,1,1,HZ21},		// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
+		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{1,10,1,0,7},					// AL correction
 	}
 };
@@ -168,7 +168,23 @@ void menu_rc_setup(uint8_t section)
 			{
 				Config.Servo_rate = SYNC;
 			}
-			
+/*
+			// Check validity of filter setting and PWM speed selection
+			// If too fast for FAST mode, cap at 94Hz
+			if (Config.Servo_rate == FAST)
+			{
+				if ((Config.Acc_LPF > HZ94) && (Config.Acc_LPF < NOFILTER))
+				{
+					Config.Acc_LPF = HZ94;
+				}
+				
+				if ((Config.Gyro_LPF > HZ94) && (Config.Gyro_LPF < NOFILTER))
+				{
+					Config.Gyro_LPF = HZ94;
+				}
+			}
+*/						
+						
 			if (Config.ArmMode == ARMABLE)
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed

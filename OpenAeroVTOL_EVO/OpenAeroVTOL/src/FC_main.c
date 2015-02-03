@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 9 - January 2015
+// Version: Release V1.1 Beta 10 - January 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
 // OpenAero code by David Thompson, included open-source code as per quoted references
@@ -64,22 +64,29 @@
 //			V1.1 B8 auto update code. No beeps on initial screens. 
 //			LED indicates ARMED. Fixed V1.0 to V1.1 eeprom update code to automatically track
 //			Config structure location. Acc LPF default changed to "None".
-//			Status screen error messages now just text.
+//			Status screen error messages are now just text.
 //			Change in error status no longer jumps from Status screen to Idle.
 //			Status timeout restored to 10s. 
 // Beta 9	Made level meter show more representative feel for AccLPF.
 //			Changed AccLPF settings and text to better match each other.
 //			AccLPF settings now identical to MPU6050 settings and are now floating point numbers.
 //			Target A.Servo rate changed to 65Hz~70Hz to reduce variation.
+// Beta 10	Fix up the upgrade path to the new filters.
+//			Fixed bug with new gyro filter. Acc LPF default changed back to 21Hz.
+//			Fixed bugs with both filters where they may not have been turned off when set to "None".
+//			Quadcopter settings updated. Status screen shows "Quad P" or "Quad X" if preset in use.
+//			Software filter settings above 94Hz disabled in high-speed mode. Quadcopter X defaults updated.
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs: 
+// Bugs:	
 //	
 //
-// Todo: 
+// Todo:	
+//	
+//			
 //
 //***********************************************************
 //* Includes
@@ -87,6 +94,7 @@
 
 #include "compiledefs.h"
 #include <avr/io.h>
+
 #include <avr/pgmspace.h> 
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
@@ -995,9 +1003,12 @@ int main(void)
 		}
 
 		TMR0_counter = 0;
+	
+		//************************************************************
+		//* Update attitude, average acc values each loop
+		//************************************************************
 				
-		// Call IMU with interval
-		simple_imu_update(interval);
+		imu_update(interval);
 
 		//************************************************************
 		//* Update I-terms, average gyro values each loop
@@ -1020,6 +1031,7 @@ int main(void)
 		if (Interrupted)
 		{
 			// Measure incoming RC rate. Threshold is SLOW_RC_RATE.
+			// Use RC_Rate_Timer is not in FAST mode.
 			if (Config.Servo_rate < FAST)
 			{
 				if (RC_Rate_Timer > SLOW_RC_RATE)
@@ -1032,6 +1044,7 @@ int main(void)
 				}
 			}
 			
+			// Use Framerate in FAST mode, but only when NOT skipping frames
 			if ((!RCrateMeasured) && (Config.Servo_rate == FAST))
 			{
 				// In high-speed mode, the RC rate will be unfairly marked as "slow" once measured and interrupt blocking starts.
@@ -1262,6 +1275,7 @@ int main(void)
 			
 			// If, for some reason, a higher power has banned PWM output for this cycle, 
 			// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary.
+			// This keeps the cycle time more constant.
 			if (PWMOverride)
 			{
 				_delay_us(2300);

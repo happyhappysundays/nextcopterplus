@@ -45,6 +45,14 @@ void Display_status(void)
 	LCD_Display_Text(267,(const unsigned char*)Verdana8,0,24); 	// Profile
 	LCD_Display_Text(23,(const unsigned char*)Verdana8,88,24); 	// Pos
 	
+	#ifdef QUADCOPTERPLUS
+	LCD_Display_Text(273,(const unsigned char*)Verdana8,94,0); // Quad +
+	#endif
+	
+	#ifdef QUADCOPTERX
+	LCD_Display_Text(274,(const unsigned char*)Verdana8,93,0); // Quad X
+	#endif
+	
 	// Display menu and markers
 	LCD_Display_Text(9, (const unsigned char*)Wingdings, 0, 59);// Down
 	LCD_Display_Text(14,(const unsigned char*)Verdana8,10,55);	// Menu

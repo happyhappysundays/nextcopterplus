@@ -50,7 +50,7 @@ void Display_balance(void)
 
 		// Refresh accSmooth values
 		// Fake the IMU period as accSmooth doesn't need that
-		simple_imu_update(0);
+		imu_update(0);
 
 		count++;
 		

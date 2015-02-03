@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.1 B9";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.1 B10";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -286,13 +286,15 @@ const char MPU6050LPF7[] PROGMEM =  "260Hz";
 //
 const char Dummy0[] PROGMEM = "";
 //
-
 const char VBAT35[] PROGMEM =  "3.5V";
 const char VBAT36[] PROGMEM =  "3.6V";
 const char VBAT37[] PROGMEM =  "3.7V";
 const char VBAT38[] PROGMEM =  "3.8V";
 const char VBAT39[] PROGMEM =  "3.9V";
 //
+// Preset names
+const char PRESET_1[] PROGMEM =  "Quad P";
+const char PRESET_2[] PROGMEM =  "Quad X";
 
 const char* const text_menu[] PROGMEM = 
 	{
@@ -455,8 +457,9 @@ const char* const text_menu[] PROGMEM =
 		PText0,	PText1, PText2, 															// 261 Logo 262 Reset 263 Hold steady
 		//
 		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu	
-		Random10, Random11, Random12,														// 270
+		Random10, Random11, Random12,														// 270 - 272
 		//	
+		PRESET_1, PRESET_2,																	// 273, 274 - Preset names
 		
 
 	}; 

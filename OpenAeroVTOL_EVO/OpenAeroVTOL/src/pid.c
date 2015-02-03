@@ -99,11 +99,13 @@ void Sensor_PID(void)
 	// Note: Two sets of values for normal and high-speed mode
 	if (Config.Servo_rate != FAST)
 	{	
-		tempf = pgm_read_byte(&LPF_lookup[Config.Gyro_LPF]); 
+		//tempf = pgm_read_float(&LPF_lookup[Config.Gyro_LPF]); 
+		memcpy_P(&tempf, &LPF_lookup[Config.Gyro_LPF], sizeof(float)); 
 	}
 	else
 	{
-		tempf = pgm_read_byte(&LPF_lookup_HS[Config.Gyro_LPF]);
+		//tempf = pgm_read_float(&LPF_lookup_HS[Config.Gyro_LPF]);
+		memcpy_P(&tempf, &LPF_lookup_HS[Config.Gyro_LPF], sizeof(float)); 
 	}
 
 	for (axis = 0; axis <= YAW; axis ++)
@@ -147,7 +149,7 @@ void Sensor_PID(void)
 			
 		gyroADCf = gyroADC[axis]; // Promote
 
-		if (tempf > 1)
+		if (Config.Gyro_LPF != NOFILTER)
 		{
 			// Gyro LPF
 			gyroSmooth[axis] = (gyroSmooth[axis] * (tempf - 1.0f) + gyroADCf) / tempf;
@@ -278,7 +280,7 @@ void Calculate_PID(void)
 		// Sum Gyro P, I and D terms and rescale
 		//************************************************************
 
-		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE);  // PID_SCALE was 6, now 5
+		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE);
 		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> PID_SCALE);
 
 		//************************************************************
