@@ -30,7 +30,7 @@
 // IMU Prototypes
 //************************************************************
 
-void simple_imu_update(uint32_t period);
+void imu_update(uint32_t period);
 void Rotate3dVector(float intervalf);
 void ExtractEulerAngles(void);
 
@@ -82,8 +82,8 @@ int16_t	angle[2];						// Attitude in degrees - pitch and roll
 //const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // 700Hz
 	
 // Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None	
-const float LPF_lookup[8] PROGMEM		= {18.9,9.7,4.9,2.7,1.64,1.28,1.21,1};	// 580Hz
-const float LPF_lookup_HS[8] PROGMEM	= {11.5,6,3.15,1.87,1.33,1.2,1.18,1};	// 343Hz
+const float LPF_lookup[8] PROGMEM		= {23.0,11.58,5.85,3.1,1.82,1.35,1.24,1.0};	// 700Hz (All settings usable)
+const float LPF_lookup_HS[8] PROGMEM	= {8.53,4.53,2.49,1.58,1.24,1.0,1.0,1.0};	// 250Hz (Cannot use 184Hz, 260Hz settings)
 	
 //************************************************************
 // Code
@@ -112,8 +112,21 @@ const float LPF_lookup_HS[8] PROGMEM	= {11.5,6,3.15,1.87,1.33,1.2,1.18,1};	// 34
 //		* = swapped axis
 //
 //************************************************************
+//
+//  Interesting code snippet for reading floats from PROGMEM
+//  
+//  union 
+//  {
+//  	float flt;
+//  	long lng;
+//  } both;
+//  
+//  both.lng = pgm_read_dword(&HTFN2[5]);
+//  float_var = both.flt;
+//
+//
 
-void simple_imu_update(uint32_t period)
+void imu_update(uint32_t period)
 {
 	float		tempf, accADCf;
 	float		intervalf;						// Interval in seconds since the last loop
@@ -130,11 +143,13 @@ void simple_imu_update(uint32_t period)
 	// Note: Two sets of values for normal and high-speed mode
 	if (Config.Servo_rate != FAST)
 	{
-		tempf = pgm_read_float(&LPF_lookup[Config.Acc_LPF]); 
+		//tempf = pgm_read_float(&LPF_lookup[Config.Acc_LPF]); 
+		memcpy_P(&tempf, &LPF_lookup[Config.Acc_LPF], sizeof(float)); 
 	}
 	else
 	{
-		tempf = pgm_read_float(&LPF_lookup_HS[Config.Acc_LPF]); 
+		//tempf = pgm_read_float(&LPF_lookup_HS[Config.Acc_LPF]); 
+		memcpy_P(&tempf, &LPF_lookup_HS[Config.Acc_LPF], sizeof(float)); 
 	}
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
@@ -143,7 +158,7 @@ void simple_imu_update(uint32_t period)
 		accADCf = accADC[axis]; // Promote
 		
 		// Acc LPF
-		if (tempf > 1)
+		if (Config.Acc_LPF != NOFILTER)
 		{
 			// Acc LPF
 			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;

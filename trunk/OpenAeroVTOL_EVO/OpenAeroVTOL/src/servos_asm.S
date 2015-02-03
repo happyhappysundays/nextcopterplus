@@ -9,7 +9,7 @@
  *						 Reduced stagger to 100us and recalibrated all offsets.
  * Updated: 30/11/2013 - Now compatible with KK2.1 board
  * Updated: 22/12/2014 - Added conditional output based on the ServoFlag. Re-tweaked some of the output timing.
- * Updated: 18/01/2015 - Removed stagger and max loop to reduce PWM generation time
+ * Updated: 18/01/2015 - Removed stagger and reduced max loop to speed up PWM generation time
  */
 
 #include <avr/io.h>
