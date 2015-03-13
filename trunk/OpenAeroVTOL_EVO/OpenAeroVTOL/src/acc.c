@@ -23,6 +23,7 @@
 #include "i2c.h"
 #include "MPU6050.h"
 #include "imu.h"
+#include "menu_ext.h"
 
 //************************************************************
 // Prototypes
@@ -235,6 +236,9 @@ void CalibrateAcc(int8_t type)
 				LED1 = 1;
 				_delay_ms(500);
 				LED1 = 0;
+				
+				// Chirp as well. The LED might be hard to see.
+				menu_beep(5);
 			}
 		}
 	}

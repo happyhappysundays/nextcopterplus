@@ -361,7 +361,9 @@ void init(void)
 	reset_IMU();
 
 	// Beep that init is complete
-	menu_beep(1);
+	LVA = 1;
+	_delay_ms(25);
+	LVA = 0;
 
 } // init()
 

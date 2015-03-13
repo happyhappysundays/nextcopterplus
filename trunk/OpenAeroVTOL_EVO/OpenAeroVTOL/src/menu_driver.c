@@ -553,9 +553,9 @@ void menu_beep(uint8_t beeps)
 	for (i=0; i < beeps; i++)
 	{ 
 		LVA = 1;
-		_delay_ms(25);
+		_delay_ms(2);
 		LVA = 0;
-		_delay_ms(25);
+		_delay_ms(2);
 	}
 }
 

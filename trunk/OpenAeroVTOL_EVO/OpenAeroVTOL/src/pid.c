@@ -28,6 +28,7 @@
 
 #define GYRO_DEADBAND	5			// Region where no gyro input is added to I-term
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
+#define STANDARDLOOP 3571.0			// T1 counts of 700Hz cycle time (2500000/700)
 
 //************************************************************
 // Notes
@@ -54,7 +55,7 @@
 // Prototypes
 //************************************************************
 
-void Sensor_PID(void);
+void Sensor_PID(uint32_t period);
 void Calculate_PID(void);
 
 //************************************************************
@@ -70,14 +71,17 @@ int32_t PID_AvgAccVert = 0;
 float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
 	
 // Run each loop to average gyro data and also accVert data
-void Sensor_PID(void)
+void Sensor_PID(uint32_t period)
 {
 	float tempf = 0;
+	float factor = 0;						// Interval in seconds since the last loop
 	float gyroADCf = 0;
 	int8_t i = 0;
 	int8_t	axis = 0;	
 	int16_t	stick_P1 = 0;
 	int16_t	stick_P2 = 0;
+	int32_t P1_temp = 0;
+	int32_t P2_temp = 0;
 	
 	// Cross-reference table for actual RCinput elements
 	// Note that axes are reversed here with respect to their gyros
@@ -125,12 +129,35 @@ void Sensor_PID(void)
 		stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
 		stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
 
+		//************************************************************
+		// Magically correlate the I-term value with the loop rate.
+		// This keeps the I-term and stick input constant over varying 
+		// loop rates 
+		//************************************************************
+		P1_temp = gyroADC[axis] + stick_P1;
+		P2_temp = gyroADC[axis] + stick_P2;
+		
+		// Work out multiplication factor compared to standard loop time
+		tempf = period;								// Promote int32_t to float
+		factor = period/STANDARDLOOP;
+		
+		// Adjust gyro and stick values based on factor		
+		tempf = P1_temp;							// Promote int32_t to float
+		tempf = tempf * factor;
+		P1_temp = (int32_t)tempf;					// Demote to int32_t
+		
+		tempf = P2_temp;
+		tempf = tempf * factor;
+		P2_temp = (int32_t)tempf;
+		
 		// Calculate I-term from gyro and stick data 
 		// These may look similar, but they are constrained quite differently.
-		IntegralGyro[P1][axis] += (gyroADC[axis] + stick_P1);
-		IntegralGyro[P2][axis] += (gyroADC[axis] + stick_P2);
+		IntegralGyro[P1][axis] += P1_temp;
+		IntegralGyro[P2][axis] += P2_temp;
 
+		//************************************************************
 		// Limit the I-terms to the user-set limits
+		//************************************************************
 		for (i = P1; i <= P2; i++)
 		{
 			if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])

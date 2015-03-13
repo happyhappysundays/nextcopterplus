@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.1 B10";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.1 B11";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -286,6 +286,9 @@ const char MPU6050LPF7[] PROGMEM =  "260Hz";
 //
 const char Dummy0[] PROGMEM = "";
 //
+const char VBAT32[] PROGMEM =  "3.2V";
+const char VBAT33[] PROGMEM =  "3.3V";
+const char VBAT34[] PROGMEM =  "3.4V";
 const char VBAT35[] PROGMEM =  "3.5V";
 const char VBAT36[] PROGMEM =  "3.6V";
 const char VBAT37[] PROGMEM =  "3.7V";
@@ -298,9 +301,7 @@ const char PRESET_2[] PROGMEM =  "Quad X";
 
 const char* const text_menu[] PROGMEM = 
 	{
-		AutoMenuItem11, VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,								// 0 to 5 Vbat cell voltages
-		//
-		Dummy0, Dummy0, Dummy0,																// 6 to 8 Spare
+		AutoMenuItem11, VBAT32, VBAT33, VBAT34,	VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,		// 0 to 8 Vbat cell voltages
 		//
 		MenuFrame0, MenuFrame1, MenuFrame2, MenuFrame3, MenuFrame4, MenuFrame5, 			// 9 to 17 Menu frame text
 		MenuFrame6, MenuFrame7, MenuFrame8, 
