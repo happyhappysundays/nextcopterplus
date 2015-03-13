@@ -136,7 +136,7 @@ void imu_update(uint32_t period)
 		
 	// Work out interval in seconds
 	// Convert (period) from units of 400ns (1/2500000) to seconds (1s/400ns = 2500000)
-	tempf = period;						// Promote int16_t to float
+	tempf = period;						// Promote uint32_t to float
 	intervalf = tempf/2500000.0f;		// This gives the period in seconds
 
 	// Lookup actual LPF value and promote

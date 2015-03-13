@@ -750,26 +750,35 @@ void UpdateLimits(void)
 	switch (Config.PowerTrigger)
 	{
 		case 0:
-		Config.PowerTriggerActual = 0;			// Off
-		break;
+			Config.PowerTriggerActual = 0;			// Off
+			break;
 		case 1:
-		Config.PowerTriggerActual = 350; 		// 3.5V
-		break;
+			Config.PowerTriggerActual = 320; 		// 3.2V
+			break;
 		case 2:
-		Config.PowerTriggerActual = 360; 		// 3.6V
-		break;
+			Config.PowerTriggerActual = 330; 		// 3.3V
+			break;
 		case 3:
-		Config.PowerTriggerActual = 370; 		// 3.7V
-		break;
+			Config.PowerTriggerActual = 340;		// 3.4V
+			break;
 		case 4:
-		Config.PowerTriggerActual = 380; 		// 3.8V
-		break;
+			Config.PowerTriggerActual = 350; 		// 3.5V
+			break;
 		case 5:
-		Config.PowerTriggerActual = 390; 		// 3.9V
-		break;
+			Config.PowerTriggerActual = 360; 		// 3.6V
+			break;
+		case 6:
+			Config.PowerTriggerActual = 370; 		// 3.7V
+			break;
+		case 7:
+			Config.PowerTriggerActual = 380; 		// 3.8V
+			break;
+		case 8:
+			Config.PowerTriggerActual = 390; 		// 3.9V
+			break;
 		default:
-		Config.PowerTriggerActual = 0;
-		break;
+			Config.PowerTriggerActual = 0;			// Off
+			break;
 	}
 			
 	// Determine cell count and use to multiply trigger

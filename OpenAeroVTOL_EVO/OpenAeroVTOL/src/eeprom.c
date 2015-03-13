@@ -722,43 +722,45 @@ void Set_EEPROM_Default_Config(void)
 	Config.Servo_rate = FAST;
 	Config.MPU6050_LPF = HZ94;
 	
-	// Profile 1
+	// Profile 1 (Baseline)
 	Config.FlightMode[P1].Roll_P_mult = 60;		// Gyro P-terms
 	Config.FlightMode[P1].Pitch_P_mult = 60;	
 	Config.FlightMode[P1].Yaw_P_mult = 40;
 
-	Config.FlightMode[P1].A_Roll_P_mult = 0;	// AL P-terms
-	Config.FlightMode[P1].A_Pitch_P_mult = 0;
-
+	Config.FlightMode[P1].A_Roll_P_mult = 5;	// AL P-terms
+	Config.FlightMode[P1].A_Pitch_P_mult = 5;
+	Config.FlightMode[P1].A_Zed_P_mult = 10;
+	
 	Config.FlightMode[P1].Roll_I_mult = 40;		// I-terms
-	Config.FlightMode[P1].Roll_limit = 20;
 	Config.FlightMode[P1].Pitch_I_mult = 40;
+	Config.FlightMode[P1].Yaw_I_mult = 60;
+	Config.FlightMode[P1].Roll_limit = 20;		// I-term limits
 	Config.FlightMode[P1].Pitch_limit = 20;
-	Config.FlightMode[P1].Yaw_I_mult = 40;
 	Config.FlightMode[P1].Yaw_limit = 50;
 		
-	Config.FlightMode[P1].Roll_Rate = 2;		// Stick rates (into I-terms)
-	Config.FlightMode[P1].Pitch_Rate = 2;
-	Config.FlightMode[P1].Yaw_Rate = 2;			// 0 is slowest, 4 is fastest.
+	Config.FlightMode[P1].Roll_Rate = 1;		// Stick rates (into I-terms) 0 is slowest, 4 is fastest.
+	Config.FlightMode[P1].Pitch_Rate = 1;
+	Config.FlightMode[P1].Yaw_Rate = 1;
 	
-	// Profile 2
+	// Profile 2 (For comparison)
 	Config.FlightMode[P2].Roll_P_mult = 60;		// Gyro P-terms
 	Config.FlightMode[P2].Pitch_P_mult = 60;
 	Config.FlightMode[P2].Yaw_P_mult = 40;
 	
-	Config.FlightMode[P2].A_Roll_P_mult = 0;	// AL P-terms
-	Config.FlightMode[P2].A_Pitch_P_mult = 0;
-	
-	Config.FlightMode[P2].Roll_I_mult = 0;		// I-terms
-	Config.FlightMode[P2].Roll_limit = 0;
-	Config.FlightMode[P2].Pitch_I_mult = 0;
+	Config.FlightMode[P2].A_Roll_P_mult = 5;	// AL P-terms
+	Config.FlightMode[P2].A_Pitch_P_mult = 5;
+	Config.FlightMode[P2].A_Zed_P_mult = 0;
+		
+	Config.FlightMode[P2].Roll_I_mult = 60;		// I-terms
+	Config.FlightMode[P2].Pitch_I_mult = 60;
+	Config.FlightMode[P2].Yaw_I_mult = 40;
+	Config.FlightMode[P2].Roll_limit = 0;		// I-term limits
 	Config.FlightMode[P2].Pitch_limit = 0;
-	Config.FlightMode[P2].Yaw_I_mult = 0;
 	Config.FlightMode[P2].Yaw_limit = 0;
 	
-	Config.FlightMode[P2].Roll_Rate = 2;		// Stick rates (into I-terms)
-	Config.FlightMode[P2].Pitch_Rate = 2;
-	Config.FlightMode[P2].Yaw_Rate = 2;	
+	Config.FlightMode[P2].Roll_Rate = 1;		// Stick rates (into I-terms)
+	Config.FlightMode[P2].Pitch_Rate = 1;
+	Config.FlightMode[P2].Yaw_Rate = 1;	
 	
 	for (i = 0; i <= OUT4; i++)
 	{

@@ -1,10 +1,10 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 10 - January 2015
+// Version: Release V1.1 Beta 11 - February 2015
 //
-// Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project
-// OpenAero code by David Thompson, included open-source code as per quoted references
+// Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
+// OpenAero code by David Thompson, included open-source code as per quoted references.
 //
 // **************************************************************************
 // * 						GNU GPL V3 notice
@@ -76,15 +76,23 @@
 //			Fixed bugs with both filters where they may not have been turned off when set to "None".
 //			Quadcopter settings updated. Status screen shows "Quad P" or "Quad X" if preset in use.
 //			Software filter settings above 94Hz disabled in high-speed mode. Quadcopter X defaults updated.
+//			Removed start-up beep. Menu beeps less annoying.
+//			Added LVA settings down to 3.2V. 
+// Beta 11	Made I-terms vary with loop period.
+//			Added more code to stabilise loop period in high-speed mode.
+//			FAST mode now allowable for Satellite RXs.
+//			Tweaked menu beeps. Inverted cal audio confirmation.
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:	
+// Bugs:
 //	
 //
-// Todo:	
+// To do:	Check that new loop leveling code does not lead to PWM jitter. Adjust if necessary.
+//		
+//			
 //	
 //			
 //
@@ -94,7 +102,6 @@
 
 #include "compiledefs.h"
 #include <avr/io.h>
-
 #include <avr/pgmspace.h> 
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
@@ -136,14 +143,7 @@
 
 #define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 16ms
-/*
-#define	SERVO_RATE_LOW 355			// A.servo rate. 19531/55(Hz) = 355
-#define	SERVO_RATE_LOW 391			// A.servo rate. 19531/50(Hz) = 391
-#define	SERVO_RATE_LOW 434			// A.servo rate. 19531/45(Hz) = 434
-#define	SERVO_RATE_LOW 488			// A.servo rate. 19531/40(Hz) = 488
-*/
 #define	SERVO_RATE_LOW 300			// A.servo rate. 19531/65(Hz) = 300
-
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
@@ -1014,7 +1014,7 @@ int main(void)
 		//* Update I-terms, average gyro values each loop
 		//************************************************************
 
-		Sensor_PID();
+		Sensor_PID(interval);
 		
 		//************************************************************
 		//* This is where things start getting really tricky... 
@@ -1073,7 +1073,17 @@ int main(void)
 				// Set minimal pulses doable (39.2 - n * cycletime)
 				if (SlowRC)
 				{
-					PWM_pulses = 4;				// Four pulses will fit if interval faster than 102Hz
+					if (Config.RxMode == SBUS)
+					{
+						//PWM_pulses = 4;				// Four pulses will fit if interval faster than 102Hz
+						PWM_pulses = 3; // Debug
+					}
+					else
+					{
+						//PWM_pulses = 3;		// Three pulses will fit if interval faster than 101Hz
+						PWM_pulses = 2; // Debug
+					}
+
 				
 					if (PWM_interval < 19600)	// 19600 = 7.84ms
 					{
@@ -1107,7 +1117,16 @@ int main(void)
 				}
 				else
 				{
-					PWM_pulses = 3;				// Three pulses will fit if interval faster than 101Hz
+					if (Config.RxMode == SBUS)
+					{
+						//PWM_pulses = 3;		// Three pulses will fit if interval faster than 101Hz
+						PWM_pulses = 2; // Debug						
+					}
+					else
+					{
+						//PWM_pulses = 2;		// Two pulses will fit if interval faster than 101Hz
+						PWM_pulses = 1; // Debug						
+					}
 				
 					if (PWM_interval < 18437)	// 18437 = 7.37ms
 					{
@@ -1294,6 +1313,14 @@ int main(void)
 			}
 			
 			LoopCount = 0;						// Reset loop counter for averaging accVert
+		}
+		
+		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
+		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also 
+		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
+		else if ((Config.Servo_rate == FAST) && (PWMBlocked))
+		{
+			_delay_us(2600);
 		}
 	
 		//************************************************************

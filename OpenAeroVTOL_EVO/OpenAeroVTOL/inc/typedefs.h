@@ -158,7 +158,7 @@ typedef struct
 	int8_t		Contrast;				// Contrast setting
 	int8_t		ArmMode;				// Arming mode on/off
 	int8_t		Disarm_timer;			// Auto-disarm setting
-	int8_t		PowerTrigger;			// LVA voltage (0 to 127 = 0 to 12.7V)
+	int8_t		PowerTrigger;			// LVA cell voltage (0 to 5 for  = 3.5V to 3.9V)
 	int8_t		MPU6050_LPF;			// MPU6050's internal LPF. Values are 0x06 = 5Hz, (5)10Hz, (4)21Hz, (3)44Hz, (2)94Hz, (1)184Hz LPF, (0)260Hz
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		Gyro_LPF;				// LPF for gyros
