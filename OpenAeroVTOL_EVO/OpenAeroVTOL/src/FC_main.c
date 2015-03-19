@@ -1,4 +1,4 @@
-//**************************************************************************
+ //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
 // Version: Release V1.1 Beta 11 - February 2015
@@ -80,8 +80,10 @@
 //			Added LVA settings down to 3.2V. 
 // Beta 11	Made I-terms vary with loop period.
 //			Added more code to stabilise loop period in high-speed mode.
-//			FAST mode now allowable for Satellite RXs.
+//			FAST mode now allowable for Satellite and XPS Xtreme RXs.
 //			Tweaked menu beeps. Inverted cal audio confirmation.
+//			Xtreme support restored.
+//			Serial buffer increased to 38 bytes to handle maximum size of Xtreme packets.
 //
 //***********************************************************
 //* Notes
@@ -90,7 +92,7 @@
 // Bugs:
 //	
 //
-// To do:	Check that new loop leveling code does not lead to PWM jitter. Adjust if necessary.
+// To do:	
 //		
 //			
 //	
@@ -174,7 +176,7 @@ volatile uint8_t	Alarm_flags = 0;
 char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
 
 // Serial buffer
-char sBuffer[SBUFFER_SIZE];			// Serial buffer (25 bytes)
+char sBuffer[SBUFFER_SIZE];			// Serial buffer (38 bytes)
 
 // Transition matrix
 // Usage: Transition_state = Trans_Matrix[Config.FlightSel][old_flight]
@@ -1070,87 +1072,81 @@ int main(void)
 
 			if (RCrateMeasured && (Config.Servo_rate == FAST))
 			{
-				// Set minimal pulses doable (39.2 - n * cycletime)
+				//
+				// Slow packets (19.7ms gap). Pulse spans just two input packets.
+				// It may take at worst case 2.6ms before the PWM starts so that too must be subtracted.
+				// (2 x 22ms) - 2.6 - 2.5 = 38.9ms available space for S.Bus, 40ms for Satellite and 39.92ms for Xtreme.
+				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
+				// It is easiest to assume that say 38ms is safe for all formats.
+				//
 				if (SlowRC)
 				{
-					if (Config.RxMode == SBUS)
-					{
-						//PWM_pulses = 4;				// Four pulses will fit if interval faster than 102Hz
-						PWM_pulses = 3; // Debug
-					}
-					else
-					{
-						//PWM_pulses = 3;		// Three pulses will fit if interval faster than 101Hz
-						PWM_pulses = 2; // Debug
-					}
-
+					PWM_pulses = 3;				// Three pulses will fit if interval faster than 102Hz
 				
 					if (PWM_interval < 19600)	// 19600 = 7.84ms
 					{
-						PWM_pulses += 1;		// Five pulses will fit if interval faster than 127Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 127Hz
 					}
 				
 					if (PWM_interval < 16333)	// 16333 = 6.53ms
 					{
-						PWM_pulses += 1;		// Six pulses will fit if interval faster than 153Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 153Hz
 					}
 				
 					if (PWM_interval < 14000)	// 14000 = 5.6ms
 					{
-						PWM_pulses += 1;		// Seven pulses will fit if interval faster than 179Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 179Hz
 					}
 				
 					if (PWM_interval < 12250)	// 12250 = 4.9ms
 					{
-						PWM_pulses += 1;		// Eight pulses will fit if interval faster than 204Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 204Hz
 					}
 				
 					if (PWM_interval < 10888)	// 10888 = 4.35ms
 					{
-						PWM_pulses += 1;		// Nine pulses will fit if interval faster than 230Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 230Hz
 					}
 				
 					if (PWM_interval < 9800)	// 9800 = 3.92ms
 					{
-						PWM_pulses += 1;		// Ten pulses will fit if interval faster than 255Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 255Hz
 					}
 				}
+				//
+				// Fast packets (9ms gap). Pulse spans three input packets.
+				// It may take at worst case 2.6ms before the PWM starts so that too must be subtracted.
+				// (3 x 11ms) - 2.6 - 2.5 = 27.9ms available space for S.Bus, 29ms for Satellite and 28.9ms for Xtreme.
+				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
+				// It is easiest to assume that say 27ms is safe for all formats.
+				// 
 				else
 				{
-					if (Config.RxMode == SBUS)
-					{
-						//PWM_pulses = 3;		// Three pulses will fit if interval faster than 101Hz
-						PWM_pulses = 2; // Debug						
-					}
-					else
-					{
-						//PWM_pulses = 2;		// Two pulses will fit if interval faster than 101Hz
-						PWM_pulses = 1; // Debug						
-					}
+					PWM_pulses = 2;				// Two pulses will fit if interval faster than 101Hz
 				
 					if (PWM_interval < 18437)	// 18437 = 7.37ms
 					{
-						PWM_pulses += 1;		// Four pulses will fit if interval faster than 135Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 135Hz
 					}
 				
 					if (PWM_interval < 14750)	// 14750 = 5.9ms
 					{
-						PWM_pulses += 1;		// Five pulses will fit if interval faster than 169Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 169Hz
 					}
 				
 					if (PWM_interval < 11886)	// 11886 = 4.75ms
 					{
-						PWM_pulses += 1;		// Six pulses will fit if interval faster than 210Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 210Hz
 					}
 				
 					if (PWM_interval < 10142)	// 10142 = 4.05ms
 					{
-						PWM_pulses += 1;		// Five pulses will fit if interval faster than 246Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 246Hz
 					}
 				
 					if (PWM_interval < 8859)	// 8859 = 3.5ms
 					{
-						PWM_pulses += 1;		// Six pulses will fit if interval faster than 282Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 282Hz
 					}
 				}
 			}
@@ -1177,7 +1173,7 @@ int main(void)
 			//* Beyond here lies dragons... proceed with caution
 			//*
 			//* This is the special FAST mode code which allows >250Hz 
-			//* output when S.Bus is used.
+			//* output when serial RC formats are used.
 			//************************************************************
 
 			// Block RC interrupts if period has been calculated
@@ -1273,7 +1269,7 @@ int main(void)
 				PWMBlocked = true;					// Block PWM generation on notification of last call
 				
 				// Refresh PWM_interval with the actual interval when generating PWM
-				// if it lies within believable ranges of 120Hz to 250Hz
+				// if it lies within believable ranges of 120Hz to 300Hz
 				// This is located here to make sure the interval measured
 				// is during PWM generation cycles
 				if ((interval < PWM_PERIOD_WORST) && (interval > PWM_PERIOD_BEST))
@@ -1284,8 +1280,6 @@ int main(void)
 				{
 					PWM_interval = PWM_PERIOD_WORST; // 120Hz
 				}	
-			
-				
 			}
 			
 			Calculate_PID();					// Calculate PID values

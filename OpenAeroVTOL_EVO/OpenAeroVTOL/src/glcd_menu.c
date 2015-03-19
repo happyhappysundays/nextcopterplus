@@ -125,6 +125,7 @@ const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "PWM";
 const char RXMode2[]  PROGMEM = "S-Bus";
 const char RXMode3[]  PROGMEM = "Spektrum";
+const char RXMode4[]  PROGMEM = "Xtreme";
 //
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 			// Channel order
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
@@ -343,7 +344,7 @@ const char* const text_menu[] PROGMEM =
 		PText4, 																			// 61 Failed
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3,													// 62 to 65 RX mode
-		Dummy0, Dummy0, 
+		RXMode4, Dummy0, 
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//

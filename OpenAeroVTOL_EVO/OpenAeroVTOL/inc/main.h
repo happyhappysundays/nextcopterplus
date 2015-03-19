@@ -8,7 +8,7 @@
 //***********************************************************
 
 #define	PBUFFER_SIZE 16 // Print buffer
-#define	SBUFFER_SIZE 25 // Serial input buffer (25 for S-Bus)
+#define	SBUFFER_SIZE 38 // Serial input buffer (Xtreme maximum is 37 bytes)
 
 //***********************************************************
 //* Externals

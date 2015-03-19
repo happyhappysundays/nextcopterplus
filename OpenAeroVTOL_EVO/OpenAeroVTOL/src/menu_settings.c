@@ -63,7 +63,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 {
 	{
 		// RC setup (7)					// Min, Max, Increment, Style, Default
-		{CPPM_MODE,SPEKTRUM,1,1,PWM},	// Receiver type
+		{CPPM_MODE,XTREME,1,1,PWM},		// Receiver type
 		{LOW,FAST,1,1,LOW},				// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
@@ -164,7 +164,7 @@ void menu_rc_setup(uint8_t section)
 
 			// Check validity of RX type and PWM speed selection
 			// If illegal setting, drop down to RC Sync
-			if ((!(Config.RxMode == SBUS) || (Config.RxMode == SPEKTRUM)) && (Config.Servo_rate == FAST))
+			if ((Config.RxMode < SBUS) && (Config.Servo_rate == FAST))
 			{
 				Config.Servo_rate = SYNC;
 			}

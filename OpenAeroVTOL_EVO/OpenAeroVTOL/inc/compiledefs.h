@@ -10,4 +10,4 @@
 
 // Uncomment this line to have the factory setup default to a quad "+" setup on OUT1 to OUT4
 //#define QUADCOPTERPLUS
-#define QUADCOPTERX
+//#define QUADCOPTERX

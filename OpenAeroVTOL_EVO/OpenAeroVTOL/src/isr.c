@@ -319,7 +319,113 @@ ISR(USART0_RX_vect)
 	}
 
 	//************************************************************
-	//* Futaba S-Bus format (8-E-2/100Kbps)
+	//* XPS Xtreme format (8-N-1/250Kbps) (1480us for a 37 bytes packet)
+	//*
+	//* Byte 0: Bit 3 should always be 0 unless there really is a lost packet.
+	//* Byte 1: RSS
+	//* Byte 2: Mask 
+ 	//* 		The mask value determines the number of channels in the stream. 
+	//*			A 6 channel stream is going to have a mask of 0x003F (00000000 00111111) 
+	//*			if outputting all 6 channels.  It is possible to ouput only channels 2 
+	//*			and 4 in the stream (00000000 00001010).  In which case the first word 
+	//*			of data will be channel 2 and the 2nd word will be channel.
+ 	//*  
+	//*  0x00   0x23   0x000A   0x5DC   0x5DD   0xF0
+	//*  ^^^^   ^^^^   ^^^^^^   ^^^^^   ^^^^^   ^^^^
+	//*  Flags  dBm     Mask    CH 2    CH 4    ChkSum
+	//*
+	//************************************************************
+
+	if (Config.RxMode == XTREME)
+	{
+		// Look at flag byte to see if the data is meant for us
+		if (bytecount == 0)
+		{
+			// Check top 3 bits for channel bank
+			// Trash checksum if not clear
+			if (temp & 0xE0)
+			{
+				checksum +=	0x55;
+			}
+		}
+
+		// Get MSB of mask byte
+		if (bytecount == 2)
+		{
+			chanmask16 = 0;
+			chanmask16 = temp << 8;		// High byte of Mask
+		}
+
+		// Combine with LSB of mask byte
+		// Work out how many channels there are supposed to be
+		if (bytecount == 3)
+		{
+			chanmask16 += (uint16_t)temp;	// Low byte of Mask
+			temp16 = chanmask16;			// Need to keep a copy od chanmask16
+
+			// Count bits set (number of active channels)				 
+			for (ch_num = 0; temp16; ch_num++)
+			{
+				temp16 &= temp16 - 1;
+			}
+		}
+
+		// Add up checksum up until final packet
+		if (bytecount < ((ch_num << 1) + 4))
+		{
+			checksum +=	temp;
+		}
+	
+		// Process data when all packets received
+		else
+		{
+			// Check checksum 
+			checksum &= 0xff;
+
+			// Ignore packet if checksum wrong
+			if (checksum != temp) // temp holds the transmitted checksum byte
+			{
+				Interrupted = false;
+				ch_num = 0;
+				checksum = 0;
+			}
+			else
+			{
+				// RC sync established
+				Interrupted = true;	
+
+				// Set start of channel data per format
+				sindex = 4; // Channel data from byte 5
+
+				// Work out which channel the data is intended for from the mask bit position
+				// Channels can be anywhere in the lower 16 channels of the Xtreme format
+				for (j = 0; j < 16; j++)
+				{
+					// If there is a bit set, allocate channel data for it
+					if (chanmask16 & (1 << j))
+					{
+						// Reconstruct word
+						temp16 = (sBuffer[sindex] << 8) + sBuffer[sindex + 1];
+
+						// Expand to OpenAero2 units if a valid channel
+						if (j < MAX_RC_CHANNELS)
+						{
+							RxChannel[Config.ChannelOrder[j]] = ((temp16 * 10) >> 2);
+						} 		
+
+						// Within the bounds of the buffer
+						if (sindex < SBUFFER_SIZE)
+						{
+							sindex += 2;
+						}
+					}
+				} // For each mask bit	
+			} // Checksum
+		} // Check end of data
+	} // (Config.RxMode == XTREME)
+
+	//************************************************************
+	//* Futaba S-Bus format (8-E-2/100Kbps) (2500us for a 25 byte packet)
 	//*	S-Bus decoding algorithm borrowed in part from Arduino
 	//*
 	//* The protocol is 25 Bytes long and is sent every 14ms (analog mode) or 7ms (high speed mode).
@@ -417,7 +523,7 @@ ISR(USART0_RX_vect)
 	} // (Config.RxMode == SBUS)
 
 	//************************************************************
-	//* Spektrum Satellite format (8-N-1/115Kbps) MSB sent first
+	//* Spektrum Satellite format (8-N-1/115Kbps) MSB sent first (1391us for a 16 byte packet)
 	//* DX7/DX6i: One data-frame at 115200 baud every 22ms.
 	//* DX7se:    One data-frame at 115200 baud every 11ms.
 	//*
@@ -638,6 +744,7 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
 			break;
 
+		case XTREME:
 		case SBUS:
 		case SPEKTRUM:
 			// Disable PWM input interrupts
