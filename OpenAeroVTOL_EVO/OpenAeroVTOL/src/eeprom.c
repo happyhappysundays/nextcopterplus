@@ -31,7 +31,11 @@ void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size);
 void Update_V1_0_to_V1_1(void);
 void Update_V1_1_to_V1_1_B8(void);
 void Update_V1_1B8_to_V1_1_B10(void);
+void Update_V1_1B10_to_V1_1_B12(void);
+
 uint8_t convert_filter_B8_B10(uint8_t);
+
+void Load_eeprom_preset(uint8_t preset);
 
 //************************************************************
 // Defines
@@ -44,8 +48,9 @@ uint8_t convert_filter_B8_B10(uint8_t);
 #define V1_1_SIGNATURE 0x36		// EEPROM signature for V1.1 to Beta 7
 #define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8-9
 #define V1_1_B10_SIGNATURE 0x38	// EEPROM signature for V1.1 Beta 10
+#define V1_1_B12_SIGNATURE 0x39	// EEPROM signature for V1.1 Beta 11
 
-#define MAGIC_NUMBER V1_1_B10_SIGNATURE // Set current signature to that of V1.1 Beta 8
+#define MAGIC_NUMBER V1_1_B12_SIGNATURE // Set current signature to that of V1.1 Beta 11
 
 //************************************************************
 // Code
@@ -117,6 +122,10 @@ bool Initial_EEPROM_Config_Load(void)
 			// Fall through...
 
 		case V1_1_B10_SIGNATURE:			// V1.1 Beta 10+ detected
+			Update_V1_1B10_to_V1_1_B12();
+			updated = true;
+
+		case V1_1_B12_SIGNATURE:			// V1.1 Beta 12 detected
 			// Fall through...
 			break;
 
@@ -473,6 +482,20 @@ void Update_V1_1B8_to_V1_1_B10(void)
 	Config.setup = V1_1_B10_SIGNATURE;
 }
 
+
+// Upgrade V1.1 B10+ settings to V1.1 Beta 12 settings
+void Update_V1_1B10_to_V1_1_B12(void)
+{
+	// Copy old RudderPol value to new location
+	Config.RudderPol = Config.Preset;
+	
+	// Set preset to default and load it
+	Config.Preset = MANUAL;
+
+	// Set magic number to V1.1 Beta 11 signature
+	Config.setup = V1_1_B12_SIGNATURE;
+}
+
 // Convert pre-V1.1 B10 filter settings
 uint8_t convert_filter_B8_B10(uint8_t old_filter)
 {
@@ -570,277 +593,284 @@ void Set_EEPROM_Default_Config(void)
 		Config.max_travel[i] = 100;
 	}
 
-	// Preset simple mixing for primary channels - all models
-	Config.Channel[OUT1].P1_throttle_volume = 100;
-	Config.Channel[OUT2].P1_aileron_volume = 100;
-	Config.Channel[OUT3].P1_elevator_volume = 100;
-	Config.Channel[OUT4].P1_rudder_volume = 100;
-	
-	// Set up profile 1
-	Config.FlightMode[P1].Roll_P_mult = 60;			// PID defaults
-	Config.FlightMode[P1].A_Roll_P_mult = 5;
-	Config.FlightMode[P1].Pitch_P_mult = 60;
-	Config.FlightMode[P1].A_Pitch_P_mult = 5;
-	Config.FlightMode[P1].Yaw_P_mult = 80;
-	Config.FlightMode[P1].Roll_I_mult = 40;
-	Config.FlightMode[P1].Roll_limit = 10;
-	Config.FlightMode[P1].Pitch_I_mult = 40;
-	Config.FlightMode[P1].Pitch_limit = 10;
-	Config.FlightMode[P1].Roll_Rate = 2;
-	Config.FlightMode[P1].Pitch_Rate = 2;
-	Config.FlightMode[P1].Yaw_Rate = 1;
+	// Load manual defaults
+	Load_eeprom_preset(MANUAL);
 
-	// Set up profile 2
-	Config.FlightMode[P2].Roll_P_mult = 60;			// PID defaults
-	Config.FlightMode[P2].A_Roll_P_mult = 5;
-	Config.FlightMode[P2].Pitch_P_mult = 60;
-	Config.FlightMode[P2].A_Pitch_P_mult = 5;
-	Config.FlightMode[P2].Yaw_P_mult = 80;
-	Config.FlightMode[P2].Roll_I_mult = 40;
-	Config.FlightMode[P2].Roll_limit = 10;
-	Config.FlightMode[P2].Pitch_I_mult = 40;
-	Config.FlightMode[P2].Pitch_limit = 10;
-	Config.FlightMode[P2].Roll_Rate = 2;
-	Config.FlightMode[P2].Pitch_Rate = 2;
-	Config.FlightMode[P2].Yaw_Rate = 1;
-	
-	// Preset stick volumes
-	Config.Channel[OUT1].P2_throttle_volume = 100;
-	Config.Channel[OUT2].P2_aileron_volume = 100;
-	Config.Channel[OUT3].P2_elevator_volume = 100;
-	Config.Channel[OUT4].P2_rudder_volume = 100;
-
-	// Preset basic axis gyros in P2
-	Config.Channel[OUT2].P2_Roll_gyro = ON;
-	Config.Channel[OUT3].P2_Pitch_gyro = ON;
-	Config.Channel[OUT4].P2_Yaw_gyro = ON;
-
-#ifdef QUADCOPTERPLUS
 	//**************************************
-	//* Quadcopter+ defaults for testing
+	//* Debug - simplify testing
 	//**************************************
 
-	// General
-	Config.RxMode = SBUS;
-	Config.FlightChan = AUX1;
-	Config.ArmMode = ARMABLE;
-	Config.Servo_rate = FAST;
-		
-	// Profile 1
-	Config.FlightMode[P1].Roll_P_mult = 60;
-	Config.FlightMode[P1].A_Roll_P_mult = 5;
-	Config.FlightMode[P1].Pitch_P_mult = 60;
-	Config.FlightMode[P1].A_Pitch_P_mult = 5;
-	Config.FlightMode[P1].Yaw_P_mult = 80;
-	Config.FlightMode[P1].Roll_I_mult = 40;
-	Config.FlightMode[P1].Roll_limit = 10;
-	Config.FlightMode[P1].Pitch_I_mult = 40;
-	Config.FlightMode[P1].Pitch_limit = 10;
-	Config.FlightMode[P1].Roll_Rate = 2;
-	Config.FlightMode[P1].Pitch_Rate = 2;
-	Config.FlightMode[P1].Yaw_Rate = 1;	
-	
-	// Profile 2
-	Config.FlightMode[P2].Roll_P_mult = 60;
-	Config.FlightMode[P2].A_Roll_P_mult = 5;
-	Config.FlightMode[P2].Pitch_P_mult = 60;
-	Config.FlightMode[P2].A_Pitch_P_mult = 5;
-	Config.FlightMode[P2].Yaw_P_mult = 80;
-	Config.FlightMode[P2].Roll_I_mult = 0;
-	Config.FlightMode[P2].Roll_limit = 0;
-	Config.FlightMode[P2].Pitch_I_mult = 0;
-	Config.FlightMode[P2].Pitch_limit = 0;
-	Config.FlightMode[P2].Roll_Rate = 2;
-	Config.FlightMode[P2].Pitch_Rate = 2;
-	Config.FlightMode[P2].Yaw_Rate = 1;	
-	
-	for (i = 0; i <= OUT4; i++)
-	{
-		Config.Channel[i].P1_throttle_volume = 100;
-		Config.Channel[i].P2_throttle_volume = 100;
-		Config.Channel[i].Motor_marker = MOTOR;
-	}
-
-	// OUT1
-	Config.Channel[OUT1].P1_elevator_volume = -20;
-	Config.Channel[OUT1].P2_elevator_volume = -20;
-	Config.Channel[OUT1].P1_rudder_volume = -20;
-	Config.Channel[OUT1].P2_rudder_volume = -20;
-	Config.Channel[OUT1].P1_Pitch_gyro = ON;
-	Config.Channel[OUT1].P1_Pitch_acc = ON;
-	Config.Channel[OUT1].P2_Pitch_gyro = ON;
-	Config.Channel[OUT1].P2_Pitch_acc = ON;
-	Config.Channel[OUT1].P1_Yaw_gyro = ON;
-	Config.Channel[OUT1].P2_Yaw_gyro = ON;	
-	
-	// OUT2
-	Config.Channel[OUT2].P1_aileron_volume = -20;
-	Config.Channel[OUT2].P2_aileron_volume = -20;
-	Config.Channel[OUT2].P1_rudder_volume = 20;
-	Config.Channel[OUT2].P2_rudder_volume = 20;
-	Config.Channel[OUT2].P1_Roll_gyro = ON;
-	Config.Channel[OUT2].P1_Roll_acc = ON;
-	Config.Channel[OUT2].P2_Roll_gyro = ON;
-	Config.Channel[OUT2].P2_Roll_acc = ON;
-	Config.Channel[OUT2].P1_Yaw_gyro = ON;
-	Config.Channel[OUT2].P2_Yaw_gyro = ON;
-	
-	// OUT3
-	Config.Channel[OUT3].P1_elevator_volume = 20;
-	Config.Channel[OUT3].P2_elevator_volume = 20;
-	Config.Channel[OUT3].P1_rudder_volume = -20;
-	Config.Channel[OUT3].P2_rudder_volume = -20;
-	Config.Channel[OUT3].P1_Pitch_gyro = ON;
-	Config.Channel[OUT3].P1_Pitch_acc = ON;
-	Config.Channel[OUT3].P2_Pitch_gyro = ON;
-	Config.Channel[OUT3].P2_Pitch_acc = ON;
-	Config.Channel[OUT3].P1_Yaw_gyro = ON;
-	Config.Channel[OUT3].P2_Yaw_gyro = ON;
-		
-	// OUT4
-	Config.Channel[OUT4].P1_aileron_volume = 20;
-	Config.Channel[OUT4].P2_aileron_volume = 20;
-	Config.Channel[OUT4].P1_rudder_volume = 20;
-	Config.Channel[OUT4].P2_rudder_volume = 20;
-	Config.Channel[OUT4].P1_Roll_gyro = ON;
-	Config.Channel[OUT4].P1_Roll_acc = ON;
-	Config.Channel[OUT4].P2_Roll_gyro = ON;
-	Config.Channel[OUT4].P2_Roll_acc = ON;
-	Config.Channel[OUT4].P1_Yaw_gyro = ON;
-	Config.Channel[OUT4].P2_Yaw_gyro = ON;
-#endif
-
-#ifdef QUADCOPTERX
-	//**************************************
-	//* Quadcopter X defaults for testing
-	//**************************************
-	
 	// General
 	Config.RxMode = SBUS;
 	Config.FlightChan = GEAR;
 	Config.ArmMode = ARMABLE;
 	Config.Servo_rate = FAST;
-	Config.MPU6050_LPF = HZ94;
-	
-	// Profile 1 (Baseline)
-	Config.FlightMode[P1].Roll_P_mult = 60;		// Gyro P-terms
-	Config.FlightMode[P1].Pitch_P_mult = 60;	
-	Config.FlightMode[P1].Yaw_P_mult = 40;
-
-	Config.FlightMode[P1].A_Roll_P_mult = 5;	// AL P-terms
-	Config.FlightMode[P1].A_Pitch_P_mult = 5;
-	Config.FlightMode[P1].A_Zed_P_mult = 10;
-	
-	Config.FlightMode[P1].Roll_I_mult = 40;		// I-terms
-	Config.FlightMode[P1].Pitch_I_mult = 40;
-	Config.FlightMode[P1].Yaw_I_mult = 60;
-	Config.FlightMode[P1].Roll_limit = 20;		// I-term limits
-	Config.FlightMode[P1].Pitch_limit = 20;
-	Config.FlightMode[P1].Yaw_limit = 50;
-		
-	Config.FlightMode[P1].Roll_Rate = 1;		// Stick rates (into I-terms) 0 is slowest, 4 is fastest.
-	Config.FlightMode[P1].Pitch_Rate = 1;
-	Config.FlightMode[P1].Yaw_Rate = 1;
-	
-	// Profile 2 (For comparison)
-	Config.FlightMode[P2].Roll_P_mult = 60;		// Gyro P-terms
-	Config.FlightMode[P2].Pitch_P_mult = 60;
-	Config.FlightMode[P2].Yaw_P_mult = 40;
-	
-	Config.FlightMode[P2].A_Roll_P_mult = 5;	// AL P-terms
-	Config.FlightMode[P2].A_Pitch_P_mult = 5;
-	Config.FlightMode[P2].A_Zed_P_mult = 0;
-		
-	Config.FlightMode[P2].Roll_I_mult = 60;		// I-terms
-	Config.FlightMode[P2].Pitch_I_mult = 60;
-	Config.FlightMode[P2].Yaw_I_mult = 40;
-	Config.FlightMode[P2].Roll_limit = 0;		// I-term limits
-	Config.FlightMode[P2].Pitch_limit = 0;
-	Config.FlightMode[P2].Yaw_limit = 0;
-	
-	Config.FlightMode[P2].Roll_Rate = 1;		// Stick rates (into I-terms)
-	Config.FlightMode[P2].Pitch_Rate = 1;
-	Config.FlightMode[P2].Yaw_Rate = 1;	
-	
-	for (i = 0; i <= OUT4; i++)
-	{
-		Config.Channel[i].P1_throttle_volume = 100;
-		Config.Channel[i].P2_throttle_volume = 100;
-		Config.Channel[i].Motor_marker = MOTOR;
-	}
-
-	// OUT1
-	Config.Channel[OUT1].P1_elevator_volume = -5;
-	Config.Channel[OUT1].P2_elevator_volume = -10;
-	Config.Channel[OUT1].P1_aileron_volume = 5;
-	Config.Channel[OUT1].P2_aileron_volume = 10;
-	Config.Channel[OUT1].P1_rudder_volume = -10;
-	Config.Channel[OUT1].P2_rudder_volume = -20;
-	Config.Channel[OUT1].P1_Roll_gyro = ON;
-	Config.Channel[OUT1].P1_Roll_acc = ON;
-	Config.Channel[OUT1].P2_Roll_gyro = ON;
-	Config.Channel[OUT1].P2_Roll_acc = ON;
-	Config.Channel[OUT1].P1_Pitch_gyro = ON;
-	Config.Channel[OUT1].P1_Pitch_acc = ON;
-	Config.Channel[OUT1].P2_Pitch_gyro = ON;
-	Config.Channel[OUT1].P2_Pitch_acc = ON;
-	Config.Channel[OUT1].P1_Yaw_gyro = ON;
-	Config.Channel[OUT1].P2_Yaw_gyro = ON;	
-	
-	// OUT2
-	Config.Channel[OUT2].P1_elevator_volume = -5;
-	Config.Channel[OUT2].P2_elevator_volume = -10;	
-	Config.Channel[OUT2].P1_aileron_volume = -5;
-	Config.Channel[OUT2].P2_aileron_volume = -10;
-	Config.Channel[OUT2].P1_rudder_volume = 10;
-	Config.Channel[OUT2].P2_rudder_volume = 20;
-	Config.Channel[OUT2].P1_Roll_gyro = ON;
-	Config.Channel[OUT2].P1_Roll_acc = ON;
-	Config.Channel[OUT2].P2_Roll_gyro = ON;
-	Config.Channel[OUT2].P2_Roll_acc = ON;
-	Config.Channel[OUT2].P1_Pitch_gyro = ON;
-	Config.Channel[OUT2].P1_Pitch_acc = ON;
-	Config.Channel[OUT2].P2_Pitch_gyro = ON;
-	Config.Channel[OUT2].P2_Pitch_acc = ON;
-	Config.Channel[OUT2].P1_Yaw_gyro = ON;
-	Config.Channel[OUT2].P2_Yaw_gyro = ON;
-	
-	// OUT3
-	Config.Channel[OUT3].P1_elevator_volume = 5;
-	Config.Channel[OUT3].P2_elevator_volume = 10;
-	Config.Channel[OUT3].P1_aileron_volume = -5;
-	Config.Channel[OUT3].P2_aileron_volume = -10;
-	Config.Channel[OUT3].P1_rudder_volume = -10;
-	Config.Channel[OUT3].P2_rudder_volume = -20;
-	Config.Channel[OUT3].P1_Roll_gyro = ON;
-	Config.Channel[OUT3].P1_Roll_acc = ON;
-	Config.Channel[OUT3].P2_Roll_gyro = ON;
-	Config.Channel[OUT3].P2_Roll_acc = ON;
-	Config.Channel[OUT3].P1_Pitch_gyro = ON;
-	Config.Channel[OUT3].P1_Pitch_acc = ON;
-	Config.Channel[OUT3].P2_Pitch_gyro = ON;
-	Config.Channel[OUT3].P2_Pitch_acc = ON;
-	Config.Channel[OUT3].P1_Yaw_gyro = ON;
-	Config.Channel[OUT3].P2_Yaw_gyro = ON;
-		
-	// OUT4
-	Config.Channel[OUT4].P1_elevator_volume = 5;
-	Config.Channel[OUT4].P2_elevator_volume = 10;
-	Config.Channel[OUT4].P1_aileron_volume = 5;
-	Config.Channel[OUT4].P2_aileron_volume = 10;
-	Config.Channel[OUT4].P1_rudder_volume = 10;
-	Config.Channel[OUT4].P2_rudder_volume = 20;
-	Config.Channel[OUT4].P1_Roll_gyro = ON;
-	Config.Channel[OUT4].P1_Roll_acc = ON;
-	Config.Channel[OUT4].P2_Roll_gyro = ON;
-	Config.Channel[OUT4].P2_Roll_acc = ON;
-	Config.Channel[OUT4].P1_Pitch_gyro = ON;
-	Config.Channel[OUT4].P1_Pitch_acc = ON;
-	Config.Channel[OUT4].P2_Pitch_gyro = ON;
-	Config.Channel[OUT4].P2_Pitch_acc = ON;
-	Config.Channel[OUT4].P1_Yaw_gyro = ON;
-	Config.Channel[OUT4].P2_Yaw_gyro = ON;
-#endif
-
+	Config.MPU6050_LPF = HZ44;
+	Config.Acc_LPF = HZ21;
+	Config.Gyro_LPF = NOFILTER;
 }
 
+void Load_eeprom_preset(uint8_t preset)
+{
+	uint8_t i;
+
+	switch (preset)
+	{
+		case MANUAL:
+			// Preset simple mixing for primary channels
+			Config.Channel[OUT1].P1_throttle_volume = 100;
+			Config.Channel[OUT2].P1_aileron_volume = 100;
+			Config.Channel[OUT3].P1_elevator_volume = 100;
+			Config.Channel[OUT4].P1_rudder_volume = 100;
+	
+			// Set up profile 1
+			Config.FlightMode[P1].Roll_P_mult = 60;			// PID defaults
+			Config.FlightMode[P1].A_Roll_P_mult = 5;
+			Config.FlightMode[P1].Pitch_P_mult = 60;
+			Config.FlightMode[P1].A_Pitch_P_mult = 5;
+			Config.FlightMode[P1].Yaw_P_mult = 80;
+			Config.FlightMode[P1].Roll_I_mult = 40;
+			Config.FlightMode[P1].Roll_limit = 10;
+			Config.FlightMode[P1].Pitch_I_mult = 40;
+			Config.FlightMode[P1].Pitch_limit = 10;
+			Config.FlightMode[P1].Roll_Rate = 2;
+			Config.FlightMode[P1].Pitch_Rate = 2;
+			Config.FlightMode[P1].Yaw_Rate = 1;
+
+			// Set up profile 2
+			Config.FlightMode[P2].Roll_P_mult = 60;			// PID defaults
+			Config.FlightMode[P2].A_Roll_P_mult = 5;
+			Config.FlightMode[P2].Pitch_P_mult = 60;
+			Config.FlightMode[P2].A_Pitch_P_mult = 5;
+			Config.FlightMode[P2].Yaw_P_mult = 80;
+			Config.FlightMode[P2].Roll_I_mult = 40;
+			Config.FlightMode[P2].Roll_limit = 10;
+			Config.FlightMode[P2].Pitch_I_mult = 40;
+			Config.FlightMode[P2].Pitch_limit = 10;
+			Config.FlightMode[P2].Roll_Rate = 2;
+			Config.FlightMode[P2].Pitch_Rate = 2;
+			Config.FlightMode[P2].Yaw_Rate = 1;
+	
+			// Preset stick volumes
+			Config.Channel[OUT1].P2_throttle_volume = 100;
+			Config.Channel[OUT2].P2_aileron_volume = 100;
+			Config.Channel[OUT3].P2_elevator_volume = 100;
+			Config.Channel[OUT4].P2_rudder_volume = 100;
+
+			// Preset basic axis gyros in P2
+			Config.Channel[OUT2].P2_Roll_gyro = ON;
+			Config.Channel[OUT3].P2_Pitch_gyro = ON;
+			Config.Channel[OUT4].P2_Yaw_gyro = ON;		
+			
+			break;
+		
+		case QUADP:
+			// Profile 1
+			Config.FlightMode[P1].Roll_P_mult = 60;
+			Config.FlightMode[P1].A_Roll_P_mult = 5;
+			Config.FlightMode[P1].Pitch_P_mult = 60;
+			Config.FlightMode[P1].A_Pitch_P_mult = 5;
+			Config.FlightMode[P1].Yaw_P_mult = 60;
+			Config.FlightMode[P1].Roll_I_mult = 40;
+			Config.FlightMode[P1].Roll_limit = 20;
+			Config.FlightMode[P1].Pitch_I_mult = 40;
+			Config.FlightMode[P1].Pitch_limit = 20;
+			Config.FlightMode[P1].Roll_Rate = 1;
+			Config.FlightMode[P1].Pitch_Rate = 1;
+			Config.FlightMode[P1].Yaw_Rate = 1;
+	
+			// Profile 2
+			Config.FlightMode[P2].Roll_P_mult = 60;
+			Config.FlightMode[P2].A_Roll_P_mult = 5;
+			Config.FlightMode[P2].Pitch_P_mult = 60;
+			Config.FlightMode[P2].A_Pitch_P_mult = 5;
+			Config.FlightMode[P2].Yaw_P_mult = 40;
+			Config.FlightMode[P2].Roll_I_mult = 0;
+			Config.FlightMode[P2].Roll_limit = 0;
+			Config.FlightMode[P2].Pitch_I_mult = 0;
+			Config.FlightMode[P2].Pitch_limit = 0;
+			Config.FlightMode[P2].Roll_Rate = 1;
+			Config.FlightMode[P2].Pitch_Rate = 1;
+			Config.FlightMode[P2].Yaw_Rate = 1;
+	
+			for (i = 0; i <= OUT4; i++)
+			{
+				Config.Channel[i].P1_throttle_volume = 100;
+				Config.Channel[i].P2_throttle_volume = 100;
+				Config.Channel[i].Motor_marker = MOTOR;
+			}
+
+			// OUT1
+			Config.Channel[OUT1].P1_elevator_volume = -20;
+			Config.Channel[OUT1].P2_elevator_volume = -20;
+			Config.Channel[OUT1].P1_rudder_volume = -50;
+			Config.Channel[OUT1].P2_rudder_volume = -50;
+			Config.Channel[OUT1].P1_Pitch_gyro = ON;
+			Config.Channel[OUT1].P1_Pitch_acc = ON;
+			Config.Channel[OUT1].P2_Pitch_gyro = ON;
+			Config.Channel[OUT1].P2_Pitch_acc = ON;
+			Config.Channel[OUT1].P1_Yaw_gyro = ON;
+			Config.Channel[OUT1].P2_Yaw_gyro = ON;
+	
+			// OUT2
+			Config.Channel[OUT2].P1_aileron_volume = -20;
+			Config.Channel[OUT2].P2_aileron_volume = -20;
+			Config.Channel[OUT2].P1_rudder_volume = 50;
+			Config.Channel[OUT2].P2_rudder_volume = 50;
+			Config.Channel[OUT2].P1_Roll_gyro = ON;
+			Config.Channel[OUT2].P1_Roll_acc = ON;
+			Config.Channel[OUT2].P2_Roll_gyro = ON;
+			Config.Channel[OUT2].P2_Roll_acc = ON;
+			Config.Channel[OUT2].P1_Yaw_gyro = ON;
+			Config.Channel[OUT2].P2_Yaw_gyro = ON;
+	
+			// OUT3
+			Config.Channel[OUT3].P1_elevator_volume = 20;
+			Config.Channel[OUT3].P2_elevator_volume = 20;
+			Config.Channel[OUT3].P1_rudder_volume = -50;
+			Config.Channel[OUT3].P2_rudder_volume = -50;
+			Config.Channel[OUT3].P1_Pitch_gyro = ON;
+			Config.Channel[OUT3].P1_Pitch_acc = ON;
+			Config.Channel[OUT3].P2_Pitch_gyro = ON;
+			Config.Channel[OUT3].P2_Pitch_acc = ON;
+			Config.Channel[OUT3].P1_Yaw_gyro = ON;
+			Config.Channel[OUT3].P2_Yaw_gyro = ON;
+	
+			// OUT4
+			Config.Channel[OUT4].P1_aileron_volume = 20;
+			Config.Channel[OUT4].P2_aileron_volume = 20;
+			Config.Channel[OUT4].P1_rudder_volume = 50;
+			Config.Channel[OUT4].P2_rudder_volume = 50;
+			Config.Channel[OUT4].P1_Roll_gyro = ON;
+			Config.Channel[OUT4].P1_Roll_acc = ON;
+			Config.Channel[OUT4].P2_Roll_gyro = ON;
+			Config.Channel[OUT4].P2_Roll_acc = ON;
+			Config.Channel[OUT4].P1_Yaw_gyro = ON;
+			Config.Channel[OUT4].P2_Yaw_gyro = ON;		
+		
+			break;
+				
+		case QUADX:
+			// Profile 1 (Baseline)
+			Config.FlightMode[P1].Roll_P_mult = 40;
+			Config.FlightMode[P1].Roll_I_mult = 10;
+			Config.FlightMode[P1].Roll_limit = 10;
+			Config.FlightMode[P1].Roll_Rate = 3;
+			Config.FlightMode[P1].A_Roll_P_mult = 10;
+	
+			Config.FlightMode[P1].Pitch_P_mult = 40;
+			Config.FlightMode[P1].Pitch_I_mult = 10;
+			Config.FlightMode[P1].Pitch_limit = 10;
+			Config.FlightMode[P1].Pitch_Rate = 3;
+			Config.FlightMode[P1].A_Pitch_P_mult = 10;
+	
+			Config.FlightMode[P1].Yaw_P_mult = 60;
+			Config.FlightMode[P1].Yaw_I_mult = 40;
+			Config.FlightMode[P1].Yaw_limit = 25;
+			Config.FlightMode[P1].Yaw_Rate = 3;
+			Config.FlightMode[P1].A_Zed_P_mult = 50;
+	
+			// Profile 2 (For comparison)
+			Config.FlightMode[P2].Roll_P_mult = 40;
+			Config.FlightMode[P2].Roll_I_mult = 20;
+			Config.FlightMode[P2].Roll_limit = 15;
+			Config.FlightMode[P2].Roll_Rate = 3;
+			Config.FlightMode[P2].A_Roll_P_mult = 0;
+	
+			Config.FlightMode[P2].Pitch_P_mult = 40;
+			Config.FlightMode[P2].Pitch_I_mult = 20;
+			Config.FlightMode[P2].Pitch_limit = 15;
+			Config.FlightMode[P2].Pitch_Rate = 3;
+			Config.FlightMode[P2].A_Pitch_P_mult = 0;
+	
+			Config.FlightMode[P2].Yaw_P_mult = 60;
+			Config.FlightMode[P2].Yaw_I_mult = 40;
+			Config.FlightMode[P2].Yaw_limit = 25;
+			Config.FlightMode[P2].Yaw_Rate = 3;
+			Config.FlightMode[P2].A_Zed_P_mult = 50;
+	
+			for (i = 0; i <= OUT4; i++)
+			{
+				Config.Channel[i].P1_throttle_volume = 100;
+				Config.Channel[i].P2_throttle_volume = 100;
+				Config.Channel[i].Motor_marker = MOTOR;
+			}
+
+			// OUT1
+			Config.Channel[OUT1].P1_elevator_volume = -20;
+			Config.Channel[OUT1].P2_elevator_volume = -20;
+			Config.Channel[OUT1].P1_aileron_volume = 20;
+			Config.Channel[OUT1].P2_aileron_volume = 20;
+			Config.Channel[OUT1].P1_rudder_volume = -50;
+			Config.Channel[OUT1].P2_rudder_volume = -50;
+			Config.Channel[OUT1].P1_Roll_gyro = ON;
+			Config.Channel[OUT1].P1_Roll_acc = ON;
+			Config.Channel[OUT1].P2_Roll_gyro = ON;
+			Config.Channel[OUT1].P2_Roll_acc = ON;
+			Config.Channel[OUT1].P1_Pitch_gyro = ON;
+			Config.Channel[OUT1].P1_Pitch_acc = ON;
+			Config.Channel[OUT1].P2_Pitch_gyro = ON;
+			Config.Channel[OUT1].P2_Pitch_acc = ON;
+			Config.Channel[OUT1].P1_Yaw_gyro = ON;
+			Config.Channel[OUT1].P2_Yaw_gyro = ON;
+	
+			// OUT2
+			Config.Channel[OUT2].P1_elevator_volume = -20;
+			Config.Channel[OUT2].P2_elevator_volume = -20;
+			Config.Channel[OUT2].P1_aileron_volume = -20;
+			Config.Channel[OUT2].P2_aileron_volume = -20;
+			Config.Channel[OUT2].P1_rudder_volume = 50;
+			Config.Channel[OUT2].P2_rudder_volume = 50;
+			Config.Channel[OUT2].P1_Roll_gyro = ON;
+			Config.Channel[OUT2].P1_Roll_acc = ON;
+			Config.Channel[OUT2].P2_Roll_gyro = ON;
+			Config.Channel[OUT2].P2_Roll_acc = ON;
+			Config.Channel[OUT2].P1_Pitch_gyro = ON;
+			Config.Channel[OUT2].P1_Pitch_acc = ON;
+			Config.Channel[OUT2].P2_Pitch_gyro = ON;
+			Config.Channel[OUT2].P2_Pitch_acc = ON;
+			Config.Channel[OUT2].P1_Yaw_gyro = ON;
+			Config.Channel[OUT2].P2_Yaw_gyro = ON;
+	
+			// OUT3
+			Config.Channel[OUT3].P1_elevator_volume = 20;
+			Config.Channel[OUT3].P2_elevator_volume = 20;
+			Config.Channel[OUT3].P1_aileron_volume = -20;
+			Config.Channel[OUT3].P2_aileron_volume = -20;
+			Config.Channel[OUT3].P1_rudder_volume = -50;
+			Config.Channel[OUT3].P2_rudder_volume = -50;
+			Config.Channel[OUT3].P1_Roll_gyro = ON;
+			Config.Channel[OUT3].P1_Roll_acc = ON;
+			Config.Channel[OUT3].P2_Roll_gyro = ON;
+			Config.Channel[OUT3].P2_Roll_acc = ON;
+			Config.Channel[OUT3].P1_Pitch_gyro = ON;
+			Config.Channel[OUT3].P1_Pitch_acc = ON;
+			Config.Channel[OUT3].P2_Pitch_gyro = ON;
+			Config.Channel[OUT3].P2_Pitch_acc = ON;
+			Config.Channel[OUT3].P1_Yaw_gyro = ON;
+			Config.Channel[OUT3].P2_Yaw_gyro = ON;
+	
+			// OUT4
+			Config.Channel[OUT4].P1_elevator_volume = 20;
+			Config.Channel[OUT4].P2_elevator_volume = 20;
+			Config.Channel[OUT4].P1_aileron_volume = 20;
+			Config.Channel[OUT4].P2_aileron_volume = 20;
+			Config.Channel[OUT4].P1_rudder_volume = 50;
+			Config.Channel[OUT4].P2_rudder_volume = 50;
+			Config.Channel[OUT4].P1_Roll_gyro = ON;
+			Config.Channel[OUT4].P1_Roll_acc = ON;
+			Config.Channel[OUT4].P2_Roll_gyro = ON;
+			Config.Channel[OUT4].P2_Roll_acc = ON;
+			Config.Channel[OUT4].P1_Pitch_gyro = ON;
+			Config.Channel[OUT4].P1_Pitch_acc = ON;
+			Config.Channel[OUT4].P2_Pitch_gyro = ON;
+			Config.Channel[OUT4].P2_Pitch_acc = ON;
+			Config.Channel[OUT4].P1_Yaw_gyro = ON;
+			Config.Channel[OUT4].P2_Yaw_gyro = ON;
+					
+			break;
+			
+		default:
+			break;
+	}
+}

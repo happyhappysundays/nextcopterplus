@@ -139,17 +139,18 @@ void imu_update(uint32_t period)
 	tempf = period;						// Promote uint32_t to float
 	intervalf = tempf/2500000.0f;		// This gives the period in seconds
 
-	// Lookup actual LPF value and promote
+	//************************************************************
+	// Acc LPF
+	//************************************************************	
+
 	// Note: Two sets of values for normal and high-speed mode
 	if (Config.Servo_rate != FAST)
 	{
-		//tempf = pgm_read_float(&LPF_lookup[Config.Acc_LPF]); 
-		memcpy_P(&tempf, &LPF_lookup[Config.Acc_LPF], sizeof(float)); 
+		memcpy_P(&tempf, &LPF_lookup[Config.Acc_LPF], sizeof(float));
 	}
 	else
 	{
-		//tempf = pgm_read_float(&LPF_lookup_HS[Config.Acc_LPF]); 
-		memcpy_P(&tempf, &LPF_lookup_HS[Config.Acc_LPF], sizeof(float)); 
+		memcpy_P(&tempf, &LPF_lookup_HS[Config.Acc_LPF], sizeof(float));
 	}
 	
 	// Smooth Acc signals - note that accSmooth is in [ROLL, PITCH, YAW] order
@@ -160,12 +161,11 @@ void imu_update(uint32_t period)
 		// Acc LPF
 		if (Config.Acc_LPF != NOFILTER)
 		{
-			// Acc LPF
-			accSmooth[axis] = (accSmooth[axis] * (tempf - 1.0f) - accADCf) / tempf;
+			accSmooth[axis] = ((accSmooth[axis] * (tempf - 1.0f)) - accADCf) / tempf;
 		}
 		else
 		{
-			// Use raw accADC[axis] as source for acc values
+			// Use raw accADC[axis] as source for acc values when filter off
 			accSmooth[axis] =  -accADCf;
 		}
 	}

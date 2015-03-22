@@ -163,7 +163,7 @@ typedef struct
 	int8_t		Acc_LPF;				// LPF for accelerometers
 	int8_t		Gyro_LPF;				// LPF for gyros
 	int8_t		CF_factor;				// Autolevel correction rate
-	int8_t		RudderPol;				// Rudder RC input polarity
+	int8_t		Preset;					// Mixer preset
 
 	// Channel configuration (304)
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
@@ -197,6 +197,9 @@ typedef struct
 
 	// Sticky flags (1)
 	uint8_t		Main_flags;				// Non-volatile flags
+
+	// Misc
+	int8_t		RudderPol;				// Rudder RC input polarity
 
 } CONFIG_STRUCT;
 

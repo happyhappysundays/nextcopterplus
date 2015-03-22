@@ -46,11 +46,13 @@ uint8_t menu_flag;
 
 void menu_main(void)
 {
-	static uint8_t main_cursor = LINE0;	// These are now static so as to remember the main menu position
+	static uint16_t main_cursor = LINE0;	// These are now static so as to remember the main menu position
 	static uint16_t main_temp = 0;
 	static uint8_t old_menu = 0;
 
 	button = NONE;
+
+	menu_beep(1); // debug
 
 	// Wait until user's finger is off button 1
 	Wait_BUTTON1();

@@ -111,6 +111,7 @@ enum Safety			{ARMED = 0, ARMABLE};
 enum Devices		{ASERVO = 0, DSERVO, MOTOR}; 
 enum Curve			{LINEAR = 0, SINE, SQRTSINE}; 
 enum Filters		{HZ5 = 0, HZ10, HZ21, HZ44, HZ94, HZ184, HZ260, NOFILTER};
+enum Presets		{MANUAL = 0, QUADX, QUADP};
 
 //***********************************************************
 // Flags

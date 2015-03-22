@@ -31,9 +31,9 @@
 void print_menu_frame(uint8_t style);
 
 // Menu management
-void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint16_t* top, uint16_t* temp);
+void update_menu(uint16_t items, uint16_t start, uint16_t offset, uint8_t button, uint16_t* cursor, uint16_t* top, uint16_t* temp);
 void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
-void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor);
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const uint16_t* text_link, uint16_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -54,7 +54,7 @@ const uint8_t lines[4] PROGMEM = {LINE0, LINE1, LINE2, LINE3};
 // Menu globals
 uint8_t button_multiplier;
 uint8_t button;
-uint8_t cursor = LINE0;
+uint16_t cursor = LINE0;
 uint16_t menu_temp = 0;
 
 //************************************************************
@@ -96,9 +96,12 @@ void print_menu_frame(uint8_t style)
 // text_link = pointer to the text list for the values if not numeric
 // cursor = cursor position
 //**********************************************************************
-void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint8_t MenuOffsets, const unsigned char* text_link, uint8_t cursor)
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const uint16_t* text_link, uint16_t cursor)
 {
 	menu_range_t	range1;
+	uint16_t base = 0;
+	uint16_t offset = 0;
+	uint16_t text = 0;
 		
 	// Clear buffer before each update
 	clear_buffer(buffer);
@@ -121,7 +124,12 @@ void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsig
 			memcpy_P(&range1, &menu_ranges[0], sizeof(range1));
 		}
 
-		print_menu_text((values[top+i - start]), range1.style, (pgm_read_byte(&text_link[top+i - start]) + values[top+i - start]), MenuOffsets, (uint8_t)pgm_read_byte(&lines[i]));
+		// Calculate location of text to display
+		base = pgm_read_word(&text_link[top + i - start]);
+		offset = values[top + i - start];
+		text = base + offset;
+		
+		print_menu_text((values[top+i - start]), range1.style, text, MenuOffsets, (uint8_t)pgm_read_byte(&lines[i]));
 	}
 
 	print_cursor(cursor);	// Cursor
@@ -373,7 +381,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 // temp*	= Currently selected item number
 //************************************************************
 
-void update_menu(uint8_t items, uint8_t start, uint8_t offset, uint8_t button, uint8_t* cursor, uint16_t* top, uint16_t* temp)
+void update_menu(uint16_t items, uint16_t start, uint16_t offset, uint8_t button, uint16_t* cursor, uint16_t* top, uint16_t* temp)
 {
 	// Temporarily add in offset :(
 	*top = *top + offset;

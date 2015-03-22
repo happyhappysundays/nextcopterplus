@@ -41,7 +41,7 @@ void menu_mixer(uint8_t i);
 // RC menu items
 //************************************************************
 	 
-const uint8_t MixerMenuText[MIXERITEMS] PROGMEM = 
+const uint16_t MixerMenuText[MIXERITEMS] PROGMEM = 
 {
 	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
 	0,0,0,0,0,0,							// Flight controls (6)
@@ -116,7 +116,7 @@ void menu_mixer(uint8_t i)
 		value_ptr = &Config.Channel[i].Motor_marker;
 
 		// Print menu
-		print_menu_items(sub_top, MIXERSTART, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const unsigned char*)MixerMenuText, cursor);
+		print_menu_items(sub_top, MIXERSTART, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const uint16_t*)MixerMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(MIXERITEMS, MIXERSTART, 0, button, &cursor, &sub_top, &menu_temp);
@@ -124,7 +124,7 @@ void menu_mixer(uint8_t i)
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&MixerMenuText[menu_temp - MIXERSTART]);
+			text_link = pgm_read_word(&MixerMenuText[menu_temp - MIXERSTART]);
 			do_menu_item(menu_temp, value_ptr + (menu_temp - MIXERSTART), 1, range, 0, text_link, false, 0);
 		}
 

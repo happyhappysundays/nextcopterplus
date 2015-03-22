@@ -43,7 +43,7 @@ void menu_flight(uint8_t i);
 // RC menu items
 //************************************************************
 
-const uint8_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint16_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
@@ -93,7 +93,7 @@ void menu_flight(uint8_t mode)
 		value_ptr = &Config.FlightMode[mode].Roll_P_mult;
 
 		// Print menu
-		print_menu_items(sub_top, FLIGHTSTART, value_ptr, (const unsigned char*)flight_menu_ranges, 0, FLIGHTOFFSET, (const unsigned char*)FlightMenuText, cursor);
+		print_menu_items(sub_top, FLIGHTSTART, value_ptr, (const unsigned char*)flight_menu_ranges, 0, FLIGHTOFFSET, (const uint16_t*)FlightMenuText, cursor);
 
 		// Handle menu changes
 		update_menu(FLIGHTITEMS, FLIGHTSTART, 0, button, &cursor, &sub_top, &menu_temp);
@@ -101,7 +101,7 @@ void menu_flight(uint8_t mode)
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&FlightMenuText[menu_temp - FLIGHTSTART]);
+			text_link = pgm_read_word(&FlightMenuText[menu_temp - FLIGHTSTART]);
 			do_menu_item(menu_temp, value_ptr + (menu_temp - FLIGHTSTART), 1, range, 0, text_link, false, 0);
 		}
 

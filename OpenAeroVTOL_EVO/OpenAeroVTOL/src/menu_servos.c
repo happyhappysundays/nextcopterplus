@@ -42,7 +42,7 @@ void menu_servo_setup(uint8_t section);
 // Servo menu items
 //************************************************************
 	 
-const uint8_t ServoMenuText[3][SERVOITEMS] PROGMEM = 
+const uint16_t ServoMenuText[3][SERVOITEMS] PROGMEM = 
 {
 	{141,141,141,141,141,141,141,141},
 	{0,0,0,0,0,0,0,0},
@@ -112,7 +112,7 @@ void menu_servo_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(sub_top, SERVOSTART, value_ptr, (const unsigned char*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (const unsigned char*)ServoMenuText[section - 1], cursor);
+		print_menu_items(sub_top, SERVOSTART, value_ptr, (const unsigned char*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (const uint16_t*)ServoMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &sub_top, &menu_temp);
@@ -120,7 +120,7 @@ void menu_servo_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&ServoMenuText[section - 1][menu_temp - SERVOSTART]);
+			text_link = pgm_read_word(&ServoMenuText[section - 1][menu_temp - SERVOSTART]);
 
 			// Zero limits if adjusting
 			if (zero_setting)

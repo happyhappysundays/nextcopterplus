@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.1 B11";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.1 B12";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -138,8 +138,8 @@ const char GeneralText3[]  PROGMEM = "PWM rate:";
 const char GeneralText6[] PROGMEM =  "Acc. LPF:";
 const char GeneralText16[] PROGMEM =  "Gyro LPF:";
 const char GeneralText7[] PROGMEM =  "AL correct:";
-//const char BattMenuItem2[]  PROGMEM = "Min. cell (V):";
 const char BattMenuItem2[]  PROGMEM = "Low V Alarm:";
+const char GeneralText20[] PROGMEM =  "Preset:";
 //
 const char P1text[] PROGMEM = "P1";
 const char P2text[] PROGMEM = "P1.n";
@@ -297,8 +297,9 @@ const char VBAT38[] PROGMEM =  "3.8V";
 const char VBAT39[] PROGMEM =  "3.9V";
 //
 // Preset names
-const char PRESET_1[] PROGMEM =  "Quad P";
-const char PRESET_2[] PROGMEM =  "Quad X";
+const char PRESET_0[] PROGMEM =  "Manual";
+const char PRESET_1[] PROGMEM =  "Quad X";
+const char PRESET_2[] PROGMEM =  "Quad P";
 
 const char* const text_menu[] PROGMEM = 
 	{
@@ -388,8 +389,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
-		Dummy0, Dummy0,	Dummy0,	 															// 143 to 145 spare
-															
+		PRESET_0, PRESET_1, PRESET_2,														// 143 to 145 Mixer presets
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
@@ -397,11 +397,13 @@ const char* const text_menu[] PROGMEM =
 		Transition, Transition_P1n,
 		Dummy0, Dummy0,	 
 		//
-		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 168 General
+		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText10, 
 		GeneralText6, GeneralText16, GeneralText7, 
-		GeneralText10, 
-		Dummy0,	Dummy0,																		// 168 Spare
+		GeneralText20,
+		
+		Dummy0,
+		Dummy0,																				// 168-169 Spare
 
 		//
 						 																	// 170 to 189 Flight menu
@@ -461,9 +463,7 @@ const char* const text_menu[] PROGMEM =
 		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu	
 		Random10, Random11, Random12,														// 270 - 272
 		//	
-		PRESET_1, PRESET_2,																	// 273, 274 - Preset names
-		
-
+		PRESET_0, PRESET_1, PRESET_2,														// 273 to 275 Mixer presets (debug)
 	}; 
 
 //************************************************************

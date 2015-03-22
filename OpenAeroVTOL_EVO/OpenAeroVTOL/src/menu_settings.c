@@ -46,17 +46,18 @@ void menu_rc_setup(uint8_t section);
 #define GENERALTEXT	124
 #define RCITEMS 7 		// Number of menu items displayed
 #define RCITEMSOFFSET 9 // Actual number of menu items
-#define GENERALITEMS 9
+#define GENERALITEMS 10
 
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint8_t RCMenuText[2][GENERALITEMS] PROGMEM = 
+const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
 	{RCTEXT, 118, 105, 116, 105, 0, 0},				// RC setup
-	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0},		// General 
+	//{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 143},	// General 
+	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 273},	// General 
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
@@ -72,7 +73,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{1,99,1,0,50},					// Transition P1n point
 	},
 	{
-		// General (9)
+		// General (10)
 		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
 		// Limit contrast range for KK2 Mini
 #ifdef KK2Mini
@@ -87,6 +88,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{HZ5,NOFILTER,1,1,HZ21},		// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
 		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{1,10,1,0,7},					// AL correction
+		{MANUAL,QUADP,1,1,MANUAL},		// Mixer preset
 	}
 };
 //************************************************************
@@ -96,12 +98,13 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 void menu_rc_setup(uint8_t section)
 {
 	int8_t *value_ptr = &Config.RxMode;
+	int8_t old_mixer = Config.Preset;	// Note old mixer setting
 
 	menu_range_t range;
-	uint8_t text_link;
-	uint8_t i;
-	uint8_t offset = 0;			// Index into channel structure
-	uint8_t	items= RCITEMS;		// Items in group
+	uint16_t	text_link;
+	uint8_t		i;
+	uint16_t	offset = 0;			// Index into channel structure
+	uint16_t	items= RCITEMS;		// Items in group
 	
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
@@ -128,7 +131,7 @@ void menu_rc_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const unsigned char*)RCMenuText[section - 1], cursor);
+		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const uint16_t*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &sub_top, &menu_temp);
@@ -136,7 +139,7 @@ void menu_rc_setup(uint8_t section)
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_byte(&RCMenuText[section - 1][menu_temp - RCSTART - offset]);
+			text_link = pgm_read_word(&RCMenuText[section - 1][menu_temp - RCSTART - offset]);
 			do_menu_item(menu_temp, value_ptr + (menu_temp - RCSTART - offset), 1, range, 0, text_link, false, 0);
 		}
 
@@ -145,6 +148,13 @@ void menu_rc_setup(uint8_t section)
 			init_int();				// In case RC type has changed, reinitialise interrupts
 			init_uart();			// and UART
 			UpdateLimits();			// Update I-term limits and triggers based on percentages
+			
+			
+			// See if mixer preset has changed
+			if (old_mixer != Config.Preset)
+			{
+				Load_eeprom_preset(Config.Preset);
+			}
 
 			// Update MPU6050 LPF and reverse sense of menu items
 			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));

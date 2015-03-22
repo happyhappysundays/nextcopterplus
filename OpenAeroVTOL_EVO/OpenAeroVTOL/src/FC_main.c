@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 11 - February 2015
+// Version: Release V1.1 Beta 12 - March 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -84,6 +84,10 @@
 //			Tweaked menu beeps. Inverted cal audio confirmation.
 //			Xtreme support restored.
 //			Serial buffer increased to 38 bytes to handle maximum size of Xtreme packets.
+//			Fixed previously unknown gyro LPF bug.
+//			Removed gyro noise gate in PID loop.
+// Beta 12	Added user selectable presets (Manual, QuadX, QuadP).
+//			FINALLY made the menu system correctly index beyond 256 items.
 //
 //***********************************************************
 //* Notes
@@ -1081,7 +1085,7 @@ int main(void)
 				//
 				if (SlowRC)
 				{
-					PWM_pulses = 3;				// Three pulses will fit if interval faster than 102Hz
+					PWM_pulses = 4;				// Three pulses will fit if interval faster than 102Hz
 				
 					if (PWM_interval < 19600)	// 19600 = 7.84ms
 					{
@@ -1122,7 +1126,7 @@ int main(void)
 				// 
 				else
 				{
-					PWM_pulses = 2;				// Two pulses will fit if interval faster than 101Hz
+					PWM_pulses = 3;				// Two pulses will fit if interval faster than 101Hz
 				
 					if (PWM_interval < 18437)	// 18437 = 7.37ms
 					{
@@ -1312,7 +1316,8 @@ int main(void)
 		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
 		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also 
 		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
-		else if ((Config.Servo_rate == FAST) && (PWMBlocked))
+		//else if ((Config.Servo_rate == FAST) && (PWMBlocked)) // denug
+		else if (PWMBlocked)
 		{
 			_delay_us(2600);
 		}
@@ -1342,6 +1347,9 @@ int main(void)
 			
 		// Save current alarm state into old_alarms
 		old_alarms = General_error;
+		
+		// Debug
+		//LED1 = ~LED1;
 		
 	} // while loop
 } // main()

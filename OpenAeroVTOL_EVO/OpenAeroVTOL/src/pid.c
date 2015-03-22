@@ -73,7 +73,8 @@ float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
 // Run each loop to average gyro data and also accVert data
 void Sensor_PID(uint32_t period)
 {
-	float tempf = 0;
+	float tempf1 = 0;
+	float tempf2 = 0;
 	float factor = 0;						// Interval in seconds since the last loop
 	float gyroADCf = 0;
 	int8_t i = 0;
@@ -99,19 +100,6 @@ void Sensor_PID(uint32_t period)
 		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 	};
 
-	// Lookup actual LPF value and promote
-	// Note: Two sets of values for normal and high-speed mode
-	if (Config.Servo_rate != FAST)
-	{	
-		//tempf = pgm_read_float(&LPF_lookup[Config.Gyro_LPF]); 
-		memcpy_P(&tempf, &LPF_lookup[Config.Gyro_LPF], sizeof(float)); 
-	}
-	else
-	{
-		//tempf = pgm_read_float(&LPF_lookup_HS[Config.Gyro_LPF]);
-		memcpy_P(&tempf, &LPF_lookup_HS[Config.Gyro_LPF], sizeof(float)); 
-	}
-
 	for (axis = 0; axis <= YAW; axis ++)
 	{
 		//************************************************************
@@ -119,15 +107,46 @@ void Sensor_PID(uint32_t period)
 		//************************************************************
 
 		// Reduce Gyro drift noise before adding into I-term
-		if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
+		/*if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
 		{
 			gyroADC[axis] = 0;
-		}
+		}*/ //Debug
 		
 		// Work out stick rate divider. 0 is slowest, 4 is fastest.
 		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
 		stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
 		stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
+
+		//************************************************************
+		// Gyro LPF
+		//************************************************************	
+
+		// Lookup LPF value
+		// Note: Two sets of values for normal and high-speed mode
+		if (Config.Servo_rate != FAST)
+		{
+			memcpy_P(&tempf1, &LPF_lookup[Config.Gyro_LPF], sizeof(float));
+		}
+		else
+		{
+			memcpy_P(&tempf1, &LPF_lookup_HS[Config.Gyro_LPF], sizeof(float));
+		}		
+			
+		gyroADCf = gyroADC[axis]; // Promote gyro signal to suit
+
+		if (Config.Gyro_LPF != NOFILTER)
+		{
+			// Gyro LPF
+			gyroSmooth[axis] = ((gyroSmooth[axis] * (tempf1 - 1.0f)) + gyroADCf) / tempf1;
+		}
+		else
+		{
+			// Use raw gyroADC[axis] as source for gyro values when filter off
+			gyroSmooth[axis] = gyroADCf;
+		}		
+		
+		// Demote back to int16_t
+		gyroADC[axis] = (int16_t)gyroSmooth[axis];	
 
 		//************************************************************
 		// Magically correlate the I-term value with the loop rate.
@@ -138,17 +157,17 @@ void Sensor_PID(uint32_t period)
 		P2_temp = gyroADC[axis] + stick_P2;
 		
 		// Work out multiplication factor compared to standard loop time
-		tempf = period;								// Promote int32_t to float
+		tempf2 = period;								// Promote int32_t to float
 		factor = period/STANDARDLOOP;
 		
 		// Adjust gyro and stick values based on factor		
-		tempf = P1_temp;							// Promote int32_t to float
-		tempf = tempf * factor;
-		P1_temp = (int32_t)tempf;					// Demote to int32_t
+		tempf2 = P1_temp;							// Promote int32_t to float
+		tempf2 = tempf2 * factor;
+		P1_temp = (int32_t)tempf2;					// Demote to int32_t
 		
-		tempf = P2_temp;
-		tempf = tempf * factor;
-		P2_temp = (int32_t)tempf;
+		tempf2 = P2_temp;
+		tempf2 = tempf2 * factor;
+		P2_temp = (int32_t)tempf2;
 		
 		// Calculate I-term from gyro and stick data 
 		// These may look similar, but they are constrained quite differently.
@@ -164,36 +183,16 @@ void Sensor_PID(uint32_t period)
 			{
 				IntegralGyro[i][axis] = Config.Raw_I_Constrain[i][axis];
 			}
+			
 			if (IntegralGyro[i][axis] < -Config.Raw_I_Constrain[i][axis])
 			{
 				IntegralGyro[i][axis] = -Config.Raw_I_Constrain[i][axis];
 			}
 		}
-
-		//************************************************************
-		// Gyro LPF
-		//************************************************************	
-			
-		gyroADCf = gyroADC[axis]; // Promote
-
-		if (Config.Gyro_LPF != NOFILTER)
-		{
-			// Gyro LPF
-			gyroSmooth[axis] = (gyroSmooth[axis] * (tempf - 1.0f) + gyroADCf) / tempf;
-		}
-		else
-		{
-			// Use raw gyroADC[axis] as source for gyro values
-			gyroSmooth[axis] =  gyroADCf;
-		}		
-		
-		// Demote back to int16_t
-		gyroADC[axis] = (int16_t)gyroSmooth[axis];		
 	}
 	
 	// Average accVert prior to Calculate_PID()
 	PID_AvgAccVert += accVert;
-			
 }
 
 // Run just before PWM output, using averaged data
