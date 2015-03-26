@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.1 B12";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.1 B14";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -60,6 +60,7 @@ const char MenuFrame5[] PROGMEM = "Menu";					// Menu
 const char MenuFrame6[] PROGMEM = "Back";					// Back
 const char MenuFrame7[] PROGMEM = "Def.";					// Default
 const char MenuFrame8[] PROGMEM = "Save";					// Save
+const char MenuFrame9[] PROGMEM = "Abort";					// Abort
 //
 const char MainMenuItem0[]  PROGMEM = "1. General"; 		// Main menu list text
 const char MainMenuItem1[]  PROGMEM = "2. Receiver setup"; 
@@ -297,9 +298,14 @@ const char VBAT38[] PROGMEM =  "3.8V";
 const char VBAT39[] PROGMEM =  "3.9V";
 //
 // Preset names
-const char PRESET_0[] PROGMEM =  "Manual";
+const char PRESET_0[] PROGMEM =  "Blank";
 const char PRESET_1[] PROGMEM =  "Quad X";
 const char PRESET_2[] PROGMEM =  "Quad P";
+const char PRESET_3[] PROGMEM =  "Tricopter";
+const char PRESET_4[] PROGMEM =  "Options";
+
+const char WARNING_0[] PROGMEM =  "WARNING - Erases settings";
+const char WARNING_1[] PROGMEM =  "REMOVE PROPS";
 
 const char* const text_menu[] PROGMEM = 
 	{
@@ -389,7 +395,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		MixerItem11,MixerItem12,															// 141 to 142 Norm/Rev
 		//
-		PRESET_0, PRESET_1, PRESET_2,														// 143 to 145 Mixer presets
+		Dummy0,Dummy0,Dummy0,																// 143 to 145 Spare
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
@@ -454,7 +460,7 @@ const char* const text_menu[] PROGMEM =
 		ChannelRef8, 																		// 253 + NONE 
 		//
 		MixerItem40, MixerItem41, MixerItem49,												// 254 to 256 Device types - AServo/Dservo/Motor	
-		Dummy0,Dummy0,																		// 257, 258
+		Dummy0, Dummy0,																		// 257, 258
 		//
 		PText5, PText6,																		// 259, 260 Updating settings
 		//
@@ -463,7 +469,11 @@ const char* const text_menu[] PROGMEM =
 		StatusText0, StatusText1, RCMenuItem1, StatusText3, StatusText4, StatusText5,		// 264 to 269 Status menu	
 		Random10, Random11, Random12,														// 270 - 272
 		//	
-		PRESET_0, PRESET_1, PRESET_2,														// 273 to 275 Mixer presets (debug)
+		PRESET_1, PRESET_2,																	// 273 to 279 Mixer presets
+		PRESET_3, PRESET_0, PRESET_4, Dummy0, Dummy0,	
+		//
+		MenuFrame9,																			// 280 Abort
+		WARNING_0,	WARNING_1,																// 281 Warnings
 	}; 
 
 //************************************************************

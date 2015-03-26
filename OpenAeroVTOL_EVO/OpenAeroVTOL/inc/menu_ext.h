@@ -61,6 +61,7 @@ extern const char *text_menu[];
 #define DOWN	0xd0 	// S3 pressed
 #define ENTER	0xe0 	// S4 pressed
 #define NONE	0xf0 	// No button pressed
+#define ABORT	0xa0 	// Abort button pressed
 
 // Global menu variables
 extern uint16_t cursor;

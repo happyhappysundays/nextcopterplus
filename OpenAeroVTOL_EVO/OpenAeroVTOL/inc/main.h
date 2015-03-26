@@ -7,7 +7,7 @@
 //* External defines
 //***********************************************************
 
-#define	PBUFFER_SIZE 16 // Print buffer
+#define	PBUFFER_SIZE 25 // Print buffer
 #define	SBUFFER_SIZE 38 // Serial input buffer (Xtreme maximum is 37 bytes)
 
 //***********************************************************

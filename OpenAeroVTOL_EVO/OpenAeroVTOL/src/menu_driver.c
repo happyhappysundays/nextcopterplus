@@ -59,24 +59,35 @@ uint16_t menu_temp = 0;
 
 //************************************************************
 // Print basic menu frame
-// style = menu style (0 = main, 1 = sub)
+// style = menu style (0 = main, 1 = sub, 2 = alt)
 //************************************************************
 void print_menu_frame(uint8_t style)
 {
-	// Print bottom markers
-	if (style == 0)
+	LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59); 	// Up
+	LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59); 	// Down
+
+	switch (style)
 	{
-		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
-		LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59); 	// Up
-		LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59); 	// Down
-		LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); // Right
-	}
-	else
-	{
-		LCD_Display_Text(16, (const unsigned char*)Verdana8, 0, 54); 	// Clear
-		LCD_Display_Text(10, (const unsigned char*)Wingdings, 38, 59);	// Up
-		LCD_Display_Text(9, (const unsigned char*)Wingdings, 80, 59);	// Down
-		LCD_Display_Text(17, (const unsigned char*)Verdana8, 103, 54);	// Save
+		case BASIC:
+			// Print bottom markers
+			LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
+			LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); // Right
+			break;
+			
+		case EDIT:
+			// For editing items
+			LCD_Display_Text(16, (const unsigned char*)Verdana8, 0, 54); 	// Def.
+			LCD_Display_Text(17, (const unsigned char*)Verdana8, 103, 54);	// Save
+			break;
+			
+		case ABORT:
+			// Save or abort
+			LCD_Display_Text(280, (const unsigned char*)Verdana8, 0, 54); 	// Abort
+			LCD_Display_Text(17, (const unsigned char*)Verdana8, 103, 54);	// Save
+			break;
+			
+		default:
+			break;
 	}
 
 	// Write from buffer
@@ -105,7 +116,7 @@ void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsig
 		
 	// Clear buffer before each update
 	clear_buffer(buffer);
-	print_menu_frame(0);
+	print_menu_frame(BASIC);
 	
 	// Print each line
 	for (uint8_t i = 0; i < 4; i++)
@@ -171,6 +182,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 	uint8_t button_inc = 0;
 	bool	button_lock = false;
 	bool	first_time = true;
+	bool	tick = true;
 
 	// Multiply value for display only if style is 2
 	if (range.style == 2)
@@ -181,12 +193,12 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 	button = NONE;
 
-	// This is a loop that cycles until Button 4 is pressed (Save)
+	// This is a loop that cycles until Button 4 is pressed (Save) or an Abort button
 	// The GLCD updating slows servo updates down too much so only update the GLCD periodically
 	// When not updating the GLCD the servo should be updated at 50Hz (20ms)
-	while (button != ENTER)
+	while ((button != ENTER) && (button != ABORT))
 	{
-		// Increment loopcount so that we can time various things
+		// Increment loop count so that we can time various things
 		display_update++;
 		servo_update++;
 
@@ -229,8 +241,21 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 			clear_buffer(buffer);
 
+			// Print warning - flash every second loop (2Hz)
+			if (range.style == 4)
+			{
+				if (tick)
+				{
+					LCD_Display_Text(281,(const unsigned char*)Verdana8,0,0);	// Warning
+					LCD_Display_Text(282,(const unsigned char*)Verdana8,25,12);
+				}
+				tick = !tick; // Flip tick toggle
+			}
 			// Print title
-			gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (const unsigned char*)Verdana14, 0, 0);
+			else
+			{
+				gLCDprint_Menu_P((char*)pgm_read_word(&text_menu[menuitem]), (const unsigned char*)Verdana14, 0, 0);				
+			}
 
 			// Print value
 			if ((range.style == 0) || (range.style == 2) || (range.style == 3)) // numeric, numeric * 4, servo limits
@@ -239,7 +264,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 				mugui_text_sizestring(itoa(value,pBuffer,10), (const unsigned char*)Verdana14, &size);
 				mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana14,((128-size.x)/2)+offset,25);
 			}
-			else // text
+			else // text (style 1 or 4)
 			{
 				// Write text, centered on screen
 				// NB: pBuffer obviously has to be larger than the longest text string printed... duh...
@@ -249,34 +274,53 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 				LCD_Display_Text(text_link + value, (const unsigned char*)Verdana14,((128-size.x)/2),25);
 			}
 
-			// Print bottom markers
-			print_menu_frame(1);
+			// Print appropriate menu frame
+			// Save/Abort screen
+			if (range.style == 4)
+			{
+				// Print bottom markers
+				print_menu_frame(ABORT);				
+			}
+			// Save/default screen
+			else
+			{
+				// Print bottom markers
+				print_menu_frame(EDIT);				
+			}
 
 			// Write from buffer
 			write_buffer(buffer);
 		}
-		
-		// Slow the loop rate for text items
-		if (range.style == 1)
+	
+		// Slow the loop rate more for text items (1 and 4) less for servos (3)
+		switch (range.style)
 		{
-			// Loop rate = 250ms (4Hz)
-			_delay_ms(250);
-		}
-		else if (range.style == 3)
-		{
-			// Loop rate = 20ms (50Hz)
-			_delay_ms(20);
-		}
-		else if ((range.style == 0) || (range.style == 2))
-		{
-			// Loop rate = 50ms (10Hz)
-			_delay_ms(100);
+			case 0:
+				// Loop rate = 50ms (10Hz)
+				_delay_ms(100);
+				break;
+			case 1:
+				// Loop rate = 250ms (4Hz)
+				_delay_ms(250);		
+				break;
+			case 2:
+				// Loop rate = 50ms (10Hz)
+				_delay_ms(100);
+				break;
+			case 3:				
+				// Loop rate = 20ms (50Hz)
+				_delay_ms(20);		
+				break;		
+			case 4:
+				// Loop rate = 250ms (4Hz)
+				_delay_ms(250);	
+				break;		
 		}
 
-		// Poll buttons when idle
+		// Poll buttons when idle.
 		// Don't use button acceleration when moving servos
 		// And don't block the code with poll_buttons()
-		if (servo_enable)
+		if (servo_enable || (range.style == 4))
 		{
 			button = (PINB & 0xf0);	
 			button_multiplier = 1;
@@ -290,7 +334,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		// unless a servo
 		if ((button != NONE) && (!servo_enable))
 		{
-				button_lock = false;
+			button_lock = false;
 		}
 		
 		// Handle cursor Up/Down limits
@@ -314,9 +358,18 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			}
 		}
 
+		// Handle button 1
 		if (button == BACK)	
 		{
-			value = (range.default_value * mult);
+			// Save/Abort screen
+			if (range.style == 4)
+			{
+				button = ABORT;
+			}
+			else
+			{
+				value = (range.default_value * mult);				
+			}
 		}
 
 		// Limit values to set ranges
@@ -355,11 +408,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 			sei();
 		}
 
-	} // while (button != ENTER)
-
-
-	// Exit
-	button = ENTER;
+	} // while ((button != ENTER) && (button != ABORT))
 
 	// Divide value from that displayed if style = 2
 	if (range.style == 2)

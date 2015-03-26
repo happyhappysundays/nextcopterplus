@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 12 - March 2015
+// Version: Release V1.1 Beta 14 - March 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -88,6 +88,12 @@
 //			Removed gyro noise gate in PID loop.
 // Beta 12	Added user selectable presets (Manual, QuadX, QuadP).
 //			FINALLY made the menu system correctly index beyond 256 items.
+// Beta 13	Updated the presets to Ran's suggestions and added a Tricopter preset.
+//			Changed the preset screen to have an "Abort" option. Also flashes a warning.
+//			pBuffer increased to 25 bytes.
+// Beta 14	Menu wording and functionality updates from Ran.
+//			Rudder volume reversed for Quad-X. 
+//			Default preset now Quad-X. Added "Blank" preset to zero profile and mixer settings.
 //
 //***********************************************************
 //* Notes
@@ -96,8 +102,7 @@
 // Bugs:
 //	
 //
-// To do:	
-//		
+// To do:	More flight testing
 //			
 //	
 //			
@@ -177,7 +182,7 @@ volatile uint8_t	Flight_flags = 0;
 volatile uint8_t	Alarm_flags = 0;
 
 // Global buffers
-char pBuffer[PBUFFER_SIZE];			// Print buffer (16 bytes)
+char pBuffer[PBUFFER_SIZE];			// Print buffer (25 bytes)
 
 // Serial buffer
 char sBuffer[SBUFFER_SIZE];			// Serial buffer (38 bytes)
@@ -413,7 +418,7 @@ int main(void)
 					Menu_mode = MENU;
 					
 					// Prevent PWM output
-					PWMOverride = true; // Debug - not needed yet?
+					PWMOverride = true;
 				}
 
 				// Update status screen four times/sec while waiting to time out
@@ -422,7 +427,7 @@ int main(void)
 					Menu_mode = PRESTATUS;
 
 					// Prevent PWM output
-					PWMOverride = true; // Debug - not needed yet?
+					PWMOverride = true;
 				}
 				
 				else
@@ -1347,10 +1352,7 @@ int main(void)
 			
 		// Save current alarm state into old_alarms
 		old_alarms = General_error;
-		
-		// Debug
-		//LED1 = ~LED1;
-		
+	
 	} // while loop
 } // main()
 

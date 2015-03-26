@@ -36,6 +36,7 @@ void Display_status(void)
 	uint16_t vbat_temp; 
 	int8_t	pos1, pos2, pos3;
 	mugui_size16_t size;
+	//uint16_t x_text = 0;
 
 	clear_buffer(buffer);
 
@@ -44,11 +45,7 @@ void Display_status(void)
 	LCD_Display_Text(266,(const unsigned char*)Verdana8,0,12); 	// RX sync
 	LCD_Display_Text(267,(const unsigned char*)Verdana8,0,24); 	// Profile
 	LCD_Display_Text(23,(const unsigned char*)Verdana8,88,24); 	// Pos
-	
-	//LCD_Display_Text((143 + Config.Preset),(const unsigned char*)Verdana8,94,0); // Preset
-	print_menu_text(0, 1, (143 + Config.Preset), 94, 0); // Preset
-
-	
+		
 	// Display menu and markers
 	LCD_Display_Text(9, (const unsigned char*)Wingdings, 0, 59);// Down
 	LCD_Display_Text(14,(const unsigned char*)Verdana8,10,55);	// Menu

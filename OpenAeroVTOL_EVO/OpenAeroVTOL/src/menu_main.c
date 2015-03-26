@@ -52,7 +52,7 @@ void menu_main(void)
 
 	button = NONE;
 
-	menu_beep(1); // debug
+	menu_beep(1);
 
 	// Wait until user's finger is off button 1
 	Wait_BUTTON1();
@@ -63,7 +63,7 @@ void menu_main(void)
 		clear_buffer(buffer);	
 
 		// Print menu
-		print_menu_frame(0);													// Frame
+		print_menu_frame(BASIC);													// Frame
 		
 		for (uint16_t i = 0; i < 4; i++)
 		{

@@ -48,6 +48,7 @@ void menu_rc_setup(uint8_t section);
 #define RCITEMSOFFSET 9 // Actual number of menu items
 #define GENERALITEMS 10
 
+#define PRESETITEM 167	// Location of Preset menu item in list
 
 //************************************************************
 // RC menu items
@@ -56,7 +57,6 @@ void menu_rc_setup(uint8_t section);
 const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
 	{RCTEXT, 118, 105, 116, 105, 0, 0},				// RC setup
-	//{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 143},	// General 
 	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 273},	// General 
 };
 
@@ -88,7 +88,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{HZ5,NOFILTER,1,1,HZ21},		// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
 		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{1,10,1,0,7},					// AL correction
-		{MANUAL,QUADP,1,1,MANUAL},		// Mixer preset
+		{QUADX,BLANK,1,4,QUADX},		// Mixer preset (note: style 4)
 	}
 };
 //************************************************************
@@ -98,7 +98,6 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 void menu_rc_setup(uint8_t section)
 {
 	int8_t *value_ptr = &Config.RxMode;
-	int8_t old_mixer = Config.Preset;	// Note old mixer setting
 
 	menu_range_t range;
 	uint16_t	text_link;
@@ -130,17 +129,36 @@ void menu_rc_setup(uint8_t section)
 				break;
 		}
 
-		// Print menu
+		// Always show preset text as "Options", regardless of actual setting
+		Config.Preset = OPTIONS;
+
+		// Print menu - note that print_menu_items() updates button variable.
 		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const uint16_t*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &sub_top, &menu_temp);
 		range = get_menu_range ((const unsigned char*)rc_menu_ranges[section - 1], (menu_temp - RCSTART - offset)); 
 
+		// If actually editing the preset, show the default setting
+		if (menu_temp == PRESETITEM)
+		{
+			Config.Preset = QUADX;			
+		}
+
 		if (button == ENTER)
 		{
 			text_link = pgm_read_word(&RCMenuText[section - 1][menu_temp - RCSTART - offset]);
 			do_menu_item(menu_temp, value_ptr + (menu_temp - RCSTART - offset), 1, range, 0, text_link, false, 0);
+		}
+
+		// Handle abort neatly
+		if (button == ABORT)
+		{
+			Wait_BUTTON1();			 // Wait for user's finger off the button
+			button = NONE;
+			
+			// Reset the mixer preset if unchanged
+			Config.Preset = OPTIONS;
 		}
 
 		if (button == ENTER)
@@ -149,9 +167,8 @@ void menu_rc_setup(uint8_t section)
 			init_uart();			// and UART
 			UpdateLimits();			// Update I-term limits and triggers based on percentages
 			
-			
-			// See if mixer preset has changed
-			if (old_mixer != Config.Preset)
+			// See if mixer preset has changed. Load new preset only if so
+			if ((Config.Preset != OPTIONS) && (menu_temp == PRESETITEM))
 			{
 				Load_eeprom_preset(Config.Preset);
 			}
@@ -185,7 +202,11 @@ void menu_rc_setup(uint8_t section)
 				LED1 = 0;
 			}
 
+			// Return the preset to "Options" when going back to the General menu
+			Config.Preset = OPTIONS;
+
 			Save_Config_to_EEPROM(); // Save value and return
+			
 			Wait_BUTTON4();			 // Wait for user's finger off the button
 		}
 	}
