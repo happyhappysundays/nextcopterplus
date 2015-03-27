@@ -38,34 +38,13 @@ void Display_sensors(void);
 
 void Display_sensors(void)
 {
+	bool	first_time = true;
+	
+	clear_buffer(buffer);
+	
+	// While BACK not pressed
 	while(BUTTON1 != 0)
 	{
-	
-		// Normal calibrate button pressed
-		if (BUTTON4 == 0)
-		{
-			// Wait until finger off button
-			while(BUTTON4 == 0)
-			{
-				_delay_ms(50);
-			}	
-			
-			// Pause until steady		
-			_delay_ms(250);
-			
-			// Calibrate sensors
-			CalibrateGyrosFast();		
-			CalibrateAcc(NORMAL);
-		}
-
-		// Inverted calibrate button pressed
-		if (BUTTON3 == 0)
-		{
-			// Wait until button snap dissipated
-			_delay_ms(250);
-			CalibrateAcc(REVERSED);
-		}
-
 		ReadGyros();
 		ReadAcc();
 
@@ -91,5 +70,35 @@ void Display_sensors(void)
 		// Update buffer
 		write_buffer(buffer);
 		clear_buffer(buffer);
+	
+		if (first_time)
+		{
+			// Wait until finger off button
+			Wait_BUTTON4();
+			
+			first_time = false;
+		}
+		
+		// Normal calibrate button pressed
+		if (BUTTON4 == 0)
+		{
+			// Wait until finger off button
+			Wait_BUTTON4();
+			
+			// Pause until steady
+			_delay_ms(250);
+			
+			// Calibrate sensors
+			CalibrateGyrosFast();
+			CalibrateAcc(NORMAL);
+		}
+
+		// Inverted calibrate button pressed
+		if (BUTTON3 == 0)
+		{
+			// Wait until button snap dissipated
+			_delay_ms(250);
+			CalibrateAcc(REVERSED);
+		}		
 	}
 }

@@ -52,7 +52,7 @@ const uint16_t MixerMenuText[MIXERITEMS] PROGMEM =
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
 {
 		// Motor control and offsets (8)
-		{ASERVO,MOTOR,1,1,ASERVO},		// Motor marker (0)
+		{ASERVO,MOTOR,1,1,MOTOR},		// Motor marker (0)
 		{-125,125,1,0,0},				// P1 Offset (%)
 		{1,99,1,0,50},					// P1.n Position (%)
 		{-125,125,1,0,0},				// P1.n Offset (%)

@@ -629,13 +629,13 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.ArmMode = ARMABLE;
 			
 			// Profile 1 (Baseline)
-			Config.FlightMode[P1].Roll_P_mult = 40;
+			Config.FlightMode[P1].Roll_P_mult = 50;
 			Config.FlightMode[P1].Roll_I_mult = 10;
 			Config.FlightMode[P1].Roll_limit = 10;
 			Config.FlightMode[P1].Roll_Rate = 2;
 			Config.FlightMode[P1].A_Roll_P_mult = 10;
 			
-			Config.FlightMode[P1].Pitch_P_mult = 40;
+			Config.FlightMode[P1].Pitch_P_mult = 50;
 			Config.FlightMode[P1].Pitch_I_mult = 10;
 			Config.FlightMode[P1].Pitch_limit = 10;
 			Config.FlightMode[P1].Pitch_Rate = 2;
@@ -663,7 +663,7 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P2].Yaw_P_mult = 60;
 			Config.FlightMode[P2].Yaw_I_mult = 40;
 			Config.FlightMode[P2].Yaw_limit = 25;
-			Config.FlightMode[P2].Yaw_Rate = 2;
+			Config.FlightMode[P2].Yaw_Rate = 3;
 			Config.FlightMode[P2].A_Zed_P_mult = 30;
 	
 			for (i = 0; i <= OUT4; i++)
@@ -678,8 +678,8 @@ void Load_eeprom_preset(uint8_t preset)
 			// OUT1
 			Config.Channel[OUT1].P1_aileron_volume = 0;
 			Config.Channel[OUT1].P2_aileron_volume = 0;
-			Config.Channel[OUT1].P1_elevator_volume = -30;
-			Config.Channel[OUT1].P2_elevator_volume = -40;
+			Config.Channel[OUT1].P1_elevator_volume = -20;
+			Config.Channel[OUT1].P2_elevator_volume = -30;
 			Config.Channel[OUT1].P1_rudder_volume = -30;
 			Config.Channel[OUT1].P2_rudder_volume = -40;
 			Config.Channel[OUT1].P1_Pitch_gyro = ON;
@@ -690,8 +690,8 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.Channel[OUT1].P2_Yaw_gyro = ON;
 	
 			// OUT2
-			Config.Channel[OUT2].P1_aileron_volume = -30;
-			Config.Channel[OUT2].P2_aileron_volume = -40;
+			Config.Channel[OUT2].P1_aileron_volume = -20;
+			Config.Channel[OUT2].P2_aileron_volume = -30;
 			Config.Channel[OUT2].P1_elevator_volume = 0;
 			Config.Channel[OUT2].P2_elevator_volume = 0;
 			Config.Channel[OUT2].P1_rudder_volume = 30;
@@ -706,8 +706,8 @@ void Load_eeprom_preset(uint8_t preset)
 			// OUT3
 			Config.Channel[OUT3].P1_aileron_volume = 0;
 			Config.Channel[OUT3].P2_aileron_volume = 0;
-			Config.Channel[OUT3].P1_elevator_volume = 30;
-			Config.Channel[OUT3].P2_elevator_volume = 40;
+			Config.Channel[OUT3].P1_elevator_volume = 20;
+			Config.Channel[OUT3].P2_elevator_volume = 30;
 			Config.Channel[OUT3].P1_rudder_volume = -30;
 			Config.Channel[OUT3].P2_rudder_volume = -40;
 			Config.Channel[OUT3].P1_Pitch_gyro = ON;
@@ -718,8 +718,8 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.Channel[OUT3].P2_Yaw_gyro = ON;
 	
 			// OUT4
-			Config.Channel[OUT4].P1_aileron_volume = 30;
-			Config.Channel[OUT4].P2_aileron_volume = 40;
+			Config.Channel[OUT4].P1_aileron_volume = 20;
+			Config.Channel[OUT4].P2_aileron_volume = 30;
 			Config.Channel[OUT4].P1_elevator_volume = 0;
 			Config.Channel[OUT4].P2_elevator_volume = 0;
 			Config.Channel[OUT4].P1_rudder_volume = 30;

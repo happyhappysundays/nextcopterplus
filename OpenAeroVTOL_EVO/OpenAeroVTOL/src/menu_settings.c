@@ -64,8 +64,8 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 {
 	{
 		// RC setup (7)					// Min, Max, Increment, Style, Default
-		{CPPM_MODE,XTREME,1,1,PWM},		// Receiver type
-		{LOW,FAST,1,1,LOW},				// Servo rate
+		{CPPM_MODE,XTREME,1,1,SBUS},	// Receiver type
+		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
 		{THROTTLE,AUX3,1,1,GEAR},		// Profile select channel
@@ -84,7 +84,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{ARMED,ARMABLE,1,1,ARMABLE},	// Arming mode Armable/Armed
 		{0,127,1,0,30},					// Auto-disarm enable
 		{0,8,1,1,0},					// Low battery cell voltage
-		{HZ5,HZ260,1,1,HZ21},			// MPU6050 LPF. Default is 21Hz
+		{HZ5,HZ260,1,1,HZ44},			// MPU6050 LPF. Default is 44Hz
 		{HZ5,NOFILTER,1,1,HZ21},		// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
 		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{1,10,1,0,7},					// AL correction

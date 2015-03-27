@@ -182,7 +182,6 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 	uint8_t button_inc = 0;
 	bool	button_lock = false;
 	bool	first_time = true;
-	bool	tick = true;
 
 	// Multiply value for display only if style is 2
 	if (range.style == 2)
@@ -241,15 +240,11 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 			clear_buffer(buffer);
 
-			// Print warning - flash every second loop (2Hz)
+			// Print warning
 			if (range.style == 4)
 			{
-				if (tick)
-				{
-					LCD_Display_Text(281,(const unsigned char*)Verdana8,0,0);	// Warning
-					LCD_Display_Text(282,(const unsigned char*)Verdana8,25,12);
-				}
-				tick = !tick; // Flip tick toggle
+				LCD_Display_Text(281,(const unsigned char*)Verdana8,0,0);	// Warning
+				LCD_Display_Text(282,(const unsigned char*)Verdana8,25,12);
 			}
 			// Print title
 			else
@@ -320,7 +315,7 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		// Poll buttons when idle.
 		// Don't use button acceleration when moving servos
 		// And don't block the code with poll_buttons()
-		if (servo_enable || (range.style == 4))
+		if (servo_enable)
 		{
 			button = (PINB & 0xf0);	
 			button_multiplier = 1;

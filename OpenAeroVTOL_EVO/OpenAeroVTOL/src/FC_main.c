@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 14 - March 2015
+// Version: Release V1.1 Beta 15 - March 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -94,6 +94,10 @@
 // Beta 14	Menu wording and functionality updates from Ran.
 //			Rudder volume reversed for Quad-X. 
 //			Default preset now Quad-X. Added "Blank" preset to zero profile and mixer settings.
+// Beta 15	Removed flashing warning to tighten up menu response.
+//			Updated calibrate logic to be more robust.
+//			Updated the menu defaults to match the new actual defaults. 
+//			Updated defaults as per Ran's input.
 //
 //***********************************************************
 //* Notes

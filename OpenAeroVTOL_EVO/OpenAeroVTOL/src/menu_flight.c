@@ -47,28 +47,28 @@ const uint16_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
-	// Flight (18/20)
-	{0,127,1,0,60},					// Roll gyro P
-	{0,127,1,0,40},					// Roll gyro I
+	// Flight (18)
+	{0,127,1,0,40},					// Roll gyro P
+	{0,127,1,0,10},					// Roll gyro I
 	{0,125,1,0,10},					// Roll gyro I-limits
 	{0,4,1,0,2},					// Roll gyro rate
-	{0,127,1,0,5},					// Roll Acc gain
+	{0,127,1,0,10},					// Roll Acc gain
 	{-127,127,1,0,0}, 				// Roll Acc trim
 
-	{0,127,1,0,60},					// Pitch gyro P
-	{0,127,1,0,40}, 				// Pitch gyro I
+	{0,127,1,0,40},					// Pitch gyro P
+	{0,127,1,0,10}, 				// Pitch gyro I
 	{0,125,1,0,10},					// Pitch gyro I-limits
 	{0,4,1,0,2},					// Pitch gyro rate
-	{0,127,1,0,5},					// Pitch Acc gain			
+	{0,127,1,0,10},					// Pitch Acc gain			
 	{-127,127,1,0,0},				// Pitch Acc trim
 
-	{0,127,1,0,80},					// Yaw gyro P
-	{0,127,1,0,0},					// Yaw gyro I
-	{0,125,1,0,0},					// Yaw gyro I-limits
-	{0,4,1,0,1},					// Yaw gyro rate
+	{0,127,1,0,60},					// Yaw gyro P
+	{0,127,1,0,40},					// Yaw gyro I
+	{0,125,1,0,25},					// Yaw gyro I-limits
+	{0,4,1,0,2},					// Yaw gyro rate
 	{-127,127,1,0,0},				// Yaw trim
 
-	{0,127,1,0,0},					// Z Acc P gain
+	{0,127,1,0,50},					// Z Acc P gain
 };
 
 //************************************************************
