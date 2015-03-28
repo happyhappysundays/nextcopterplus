@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 15 - March 2015
+// Version: Release V1.1 Beta 16 - March 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -98,6 +98,8 @@
 //			Updated calibrate logic to be more robust.
 //			Updated the menu defaults to match the new actual defaults. 
 //			Updated defaults as per Ran's input.
+// Beta 16	Tweaked the PWM burst generation to be more consistent.
+//			Fixed mixer bypass logic to speed up calculation.
 //
 //***********************************************************
 //* Notes
@@ -1087,79 +1089,77 @@ int main(void)
 			{
 				//
 				// Slow packets (19.7ms gap). Pulse spans just two input packets.
-				// It may take at worst case 2.6ms before the PWM starts so that too must be subtracted.
-				// (2 x 22ms) - 2.6 - 2.5 = 38.9ms available space for S.Bus, 40ms for Satellite and 39.92ms for Xtreme.
+				// 38.8s available space for S.Bus, 40ms for Satellite and 39.92ms for Xtreme.
 				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
 				// It is easiest to assume that say 38ms is safe for all formats.
 				//
 				if (SlowRC)
 				{
-					PWM_pulses = 4;				// Three pulses will fit if interval faster than 102Hz
+					PWM_pulses = 4;				// Four pulses will fit if interval faster than 103Hz
 				
-					if (PWM_interval < 19600)	// 19600 = 7.84ms
+					if (PWM_interval < 19400)	// 19600 = 7.76ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 127Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 129Hz
 					}
 				
-					if (PWM_interval < 16333)	// 16333 = 6.53ms
+					if (PWM_interval < 16166)	// 16333 = 6.46ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 153Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 154Hz
 					}
 				
-					if (PWM_interval < 14000)	// 14000 = 5.6ms
+					if (PWM_interval < 13857)	// 14000 = 5.5ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 179Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 180Hz
 					}
 				
-					if (PWM_interval < 12250)	// 12250 = 4.9ms
+					if (PWM_interval < 12125)	// 12250 = 4.85ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 204Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 206Hz
 					}
 				
-					if (PWM_interval < 10888)	// 10888 = 4.35ms
+					if (PWM_interval < 10700)	// 10888 = 4.3ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 230Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 232Hz
 					}
 				
-					if (PWM_interval < 9800)	// 9800 = 3.92ms
+					if (PWM_interval < 9700)	// 9800 = 3.88ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 255Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 257Hz
 					}
 				}
 				//
 				// Fast packets (9ms gap). Pulse spans three input packets.
-				// It may take at worst case 2.6ms before the PWM starts so that too must be subtracted.
-				// (3 x 11ms) - 2.6 - 2.5 = 27.9ms available space for S.Bus, 29ms for Satellite and 28.9ms for Xtreme.
+				// 30ms available space for S.Bus, 31.5ms for Satellite and Xtreme.
 				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
-				// It is easiest to assume that say 27ms is safe for all formats.
+				// It is easiest to assume that say 29ms is safe for all formats.
 				// 
 				else
 				{
-					PWM_pulses = 3;				// Two pulses will fit if interval faster than 101Hz
+					PWM_pulses = 3;				// Three pulses will fit if interval faster than 103Hz
 				
-					if (PWM_interval < 18437)	// 18437 = 7.37ms
+					if (PWM_interval < 18125)	// 18125 = 7.25ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 135Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 138Hz
 					}
 				
-					if (PWM_interval < 14750)	// 14750 = 5.9ms
+					if (PWM_interval < 14500)	// 14500 = 5.8ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 169Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 172Hz
 					}
 				
-					if (PWM_interval < 11886)	// 11886 = 4.75ms
+					if (PWM_interval < 12083)	// 12083 = 4.83ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 210Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 206Hz
 					}
 				
-					if (PWM_interval < 10142)	// 10142 = 4.05ms
+					if (PWM_interval < 10357)	// 10357 = 4.14ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 246Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 241Hz
 					}
 				
-					if (PWM_interval < 8859)	// 8859 = 3.5ms
+					if (PWM_interval < 9062)	// 9062 = 3.62ms
 					{
-						PWM_pulses += 1;		// One more pulse will fit if interval faster than 282Hz
+						PWM_pulses += 1;		// One more pulse will fit if interval faster than 275Hz
 					}
 				}
 			}
@@ -1295,9 +1295,13 @@ int main(void)
 				}	
 			}
 			
-			Calculate_PID();					// Calculate PID values
-			ProcessMixer();						// Do all the mixer tasks - can be very slow
-			UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits
+			// Don't bother with mixer calculations if blocked or overridden
+		//	if (!(PWMBlocked || PWMOverride))
+		//	{
+				Calculate_PID();					// Calculate PID values
+				ProcessMixer();						// Do all the mixer tasks - can be very slow
+				UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits				
+		//	}
 			
 			// If, for some reason, a higher power has banned PWM output for this cycle, 
 			// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary.
@@ -1325,11 +1329,21 @@ int main(void)
 		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
 		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also 
 		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
-		//else if ((Config.Servo_rate == FAST) && (PWMBlocked)) // denug
-		else if (PWMBlocked)
+		
+		else if ((Config.Servo_rate == FAST) && (PWMBlocked == true) && (RCrateMeasured == true) && (RCInterruptsON == true) && (Overdue == false)) // debug
+		{
+			// Wait here until interrupted
+			while (Interrupted == false)
+			{
+			}
+			
+			Interrupted_Clone = false;
+		}
+		
+		/*else if (PWMBlocked)
 		{
 			_delay_us(2600);
-		}
+		}*/
 	
 		//************************************************************
 		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)
