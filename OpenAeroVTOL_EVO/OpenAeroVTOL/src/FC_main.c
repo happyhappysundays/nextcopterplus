@@ -100,6 +100,8 @@
 //			Updated defaults as per Ran's input.
 // Beta 16	Tweaked the PWM burst generation to be more consistent.
 //			Fixed mixer bypass logic to speed up calculation.
+//			Fixed eeprom upgrade bugs for MPU6050LPF and stick polarities
+//			Fixed SCALED polarity errors - oops
 //
 //***********************************************************
 //* Notes
@@ -108,7 +110,7 @@
 // Bugs:
 //	
 //
-// To do:	More flight testing
+// To do:	
 //			
 //	
 //			

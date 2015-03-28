@@ -156,7 +156,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution - scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -177,7 +177,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution - scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
 					break;
 				default:
 					break;
@@ -223,7 +223,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P2_solution = P2_solution - scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -244,7 +244,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P2_solution = P2_solution - scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
+					P2_solution = P2_solution + scale32(PID_Gyros[P2][YAW], Config.Channel[i].P2_rudder_volume * 5);
 					break;
 				default:
 					break;
@@ -293,7 +293,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution - scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
+					P1_solution = P1_solution + scale32(PID_ACCs[P1][PITCH], Config.Channel[i].P1_elevator_volume * 5);
 					break;
 				default:
 					break;
@@ -361,7 +361,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P2_solution = P2_solution - scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
+					P2_solution = P2_solution + scale32(PID_ACCs[P2][PITCH], Config.Channel[i].P2_elevator_volume * 5);
 					break;
 				default:
 					break;

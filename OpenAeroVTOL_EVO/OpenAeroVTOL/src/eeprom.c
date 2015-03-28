@@ -28,7 +28,7 @@ void Save_Config_to_EEPROM(void);
 void Set_EEPROM_Default_Config(void);
 void eeprom_write_byte_changed(uint8_t *addr, uint8_t value);
 void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size);
-void Update_V1_0_to_V1_1(void);
+void Update_V1_0_to_V1_1_B7(void);
 void Update_V1_1_to_V1_1_B8(void);
 void Update_V1_1B8_to_V1_1_B10(void);
 void Update_V1_1B10_to_V1_1_B12(void);
@@ -45,7 +45,7 @@ void Load_eeprom_preset(uint8_t preset);
 
 // eePROM signature - change for each eePROM structure change to force factory reset or upgrade
 #define V1_0_SIGNATURE 0x35		// EEPROM signature for V1.0 (old version)
-#define V1_1_SIGNATURE 0x36		// EEPROM signature for V1.1 to Beta 7
+#define V1_1_B7_SIGNATURE 0x36	// EEPROM signature for V1.1 to Beta 7
 #define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8-9
 #define V1_1_B10_SIGNATURE 0x38	// EEPROM signature for V1.1 Beta 10-11
 #define V1_1_B12_SIGNATURE 0x39	// EEPROM signature for V1.1 Beta 12+
@@ -109,16 +109,15 @@ bool Initial_EEPROM_Config_Load(void)
 	switch(Config.setup)
 	{
 		case V1_0_SIGNATURE:				// V1.0 detected
-			Update_V1_0_to_V1_1();
+			Update_V1_0_to_V1_1_B7();
 			// Fall through...
 
-		case V1_1_SIGNATURE:				// V1.1 Beta 7 (or below) detected
+		case V1_1_B7_SIGNATURE:				// V1.1 Beta 7 (or below) detected
 			Update_V1_1_to_V1_1_B8();	
 			// Fall through...
 
 		case V1_1_B8_SIGNATURE:				// V1.1 Beta 8-9 detected
 			Update_V1_1B8_to_V1_1_B10();
-			updated = true;
 			// Fall through...
 
 		case V1_1_B10_SIGNATURE:			// V1.1 Beta 10+ detected
@@ -146,8 +145,8 @@ bool Initial_EEPROM_Config_Load(void)
 // Config data restructure code
 //************************************************************
 
-// Upgrade V1.0 structure to V1.1 structure
-void Update_V1_0_to_V1_1(void)
+// Upgrade V1.0 structure to V1.1 Beta 7 structure
+void Update_V1_0_to_V1_1_B7(void)
 {
 	#define		OLDSIZE 29				// Old channel_t was 29 bytes
 	#define		NEWSIZE 38				// New channel_t is 38 bytes
@@ -436,30 +435,39 @@ void Update_V1_0_to_V1_1(void)
 	// Restore corrupted byte manually
 	Config.Channel[7].P2_source_b_volume = temp; 
 
-	// Set magic number to V1.1 signature
-	Config.setup = V1_1_SIGNATURE;
+	// Set magic number to V1.1 Beta 7 signature
+	Config.setup = V1_1_B7_SIGNATURE;
 }
 
-// Upgrade V1.1 structure to V1.1 Beta 8 structure
+// Upgrade V1.1 beta 7 structure to V1.1 Beta 8 structure
 void Update_V1_1_to_V1_1_B8(void)
 {
-	int8_t	buffer[8];
+	int8_t	buffer[12];
+	int8_t	temp = 0;
 	
-	// Swap old settings into new
-	buffer[0] = Config.RxMode;
-	buffer[1] = Config.MPU6050_LPF;
-	buffer[2] = Config.Servo_rate;
-	buffer[3] = Config.PWM_Sync;
-	buffer[4] = Config.TxSeq;
-	buffer[5] = Config.AileronPol;
-	buffer[6] = Config.ElevatorPol;
-	buffer[7] = Config.RudderPol;
+	// RC items - working perfectly
+	buffer[0] = Config.RxMode;			// RxMode. Same as old RxMode
+	buffer[1] = Config.MPU6050_LPF;		// Servo_rate
+	buffer[2] = Config.Servo_rate;		// PWM_Sync
+	buffer[3] = Config.PWM_Sync;		// TxSeq
+	buffer[4] = Config.TxSeq;			// FlightChan
+	buffer[5] = Config.AileronPol;		// TransitionSpeed
+	buffer[6] = Config.ElevatorPol;		// Transition_P1n
+	buffer[7] = Config.FlightChan;		// AileronPol
+	buffer[8] = Config.TransitionSpeed;	// ElevatorPol
 	
+	// General items
+	memcpy((void*)&temp,(void*)((&Config.CF_factor) + (1)),1);
+	buffer[9] = temp;					// Old MPU6050LPF value
+	buffer[10] = Config.Transition_P1n; // Old RudderPol value
+		
 	// Copy back to RC items structure
-	memcpy(&Config.RxMode, &buffer,7);
+	memcpy(&Config.RxMode, &buffer,9);
 	
 	// Copy back to General items structure
-	Config.MPU6050_LPF = buffer[7];
+	Config.MPU6050_LPF = buffer[9];
+	temp = buffer[10];					// Pass through the RudderPol value
+	memcpy((void*)((&Config.CF_factor) + (1)), (void*)&temp,1);
 	
 	// "None" no longer an option for this channel
 	if (Config.FlightChan == NOCHAN)
