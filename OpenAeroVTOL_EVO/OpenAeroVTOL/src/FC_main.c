@@ -102,6 +102,8 @@
 //			Fixed mixer bypass logic to speed up calculation.
 //			Fixed eeprom upgrade bugs for MPU6050LPF and stick polarities
 //			Fixed SCALED polarity errors - oops
+// Beta 17	Changed BIND logic to hopefully remove unbinding issues.
+//			Tightened up stick polarity testing.
 //
 //***********************************************************
 //* Notes

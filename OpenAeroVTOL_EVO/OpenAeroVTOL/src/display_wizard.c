@@ -90,7 +90,11 @@ void Display_sticks(void)
 			}
 
 			// Sticks have not moved far enough but RC being received
-			else if ((RCinputs[AILERON] < 500) && (RCinputs[AILERON] > -500))
+			else if (
+						((RCinputs[AILERON] < 500) && (RCinputs[AILERON] > -500)) ||
+						((RCinputs[ELEVATOR] < 500) && (RCinputs[ELEVATOR] > -500)) ||
+						((RCinputs[RUDDER] < 500) && (RCinputs[RUDDER] > -500)) 
+					)
 			{
 				CalibrateStarted = true;
 				LCD_Display_Text(136,(const unsigned char*)Verdana14,9,43); 	// "Hold as shown"
