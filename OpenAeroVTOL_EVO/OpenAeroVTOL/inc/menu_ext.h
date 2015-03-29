@@ -24,6 +24,9 @@ extern void menu_servo_setup(uint8_t section);
 extern void menu_flight(uint8_t i);
 extern void Wait_BUTTON1(void);
 extern void Wait_BUTTON4(void);
+extern void menu_log(void);
+extern void add_log(uint8_t error);
+
 extern  uint8_t button;
 
 // Menu frames, items

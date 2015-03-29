@@ -33,7 +33,7 @@ void Wait_BUTTON4(void);
 // Defines
 //************************************************************
 
-#define MAINITEMS 19	// Number of menu items
+#define MAINITEMS 20	// Number of menu items
 #define MAINSTART 77	// Start of Menu text items
 
 //************************************************************
@@ -161,6 +161,9 @@ void do_main_menu_item(uint8_t menuitem)
 			break;
 		case MAINSTART+18:
 			menu_servo_setup(3); 	// 19.Pos. Servo trvl. (%)
+			break;
+		case MAINSTART+19:
+			menu_log();				// 20. Error log
 			break;
 		default:
 			break;

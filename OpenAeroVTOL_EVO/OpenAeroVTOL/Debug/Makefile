@@ -41,6 +41,7 @@ C_SRCS +=  \
 ../src/acc.c \
 ../src/adc.c \
 ../src/display_balance.c \
+../src/display_log.c \
 ../src/display_rcinput.c \
 ../src/display_sensors.c \
 ../src/display_status.c \
@@ -82,6 +83,7 @@ OBJS +=  \
 src/acc.o \
 src/adc.o \
 src/display_balance.o \
+src/display_log.o \
 src/display_rcinput.o \
 src/display_sensors.o \
 src/display_status.o \
@@ -116,6 +118,7 @@ OBJS_AS_ARGS +=  \
 src/acc.o \
 src/adc.o \
 src/display_balance.o \
+src/display_log.o \
 src/display_rcinput.o \
 src/display_sensors.o \
 src/display_status.o \
@@ -150,6 +153,7 @@ C_DEPS +=  \
 src/acc.d \
 src/adc.d \
 src/display_balance.d \
+src/display_log.d \
 src/display_rcinput.d \
 src/display_sensors.d \
 src/display_status.d \
@@ -184,6 +188,7 @@ C_DEPS_AS_ARGS +=  \
 src/acc.d \
 src/adc.d \
 src/display_balance.d \
+src/display_log.d \
 src/display_rcinput.d \
 src/display_sensors.d \
 src/display_status.d \
@@ -225,6 +230,8 @@ OUTPUT_FILE_DEP:= ./makedep.mk
 LIB_DEP+= 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

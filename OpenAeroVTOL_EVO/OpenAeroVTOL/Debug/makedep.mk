@@ -8,6 +8,8 @@ src\adc.c
 
 src\display_balance.c
 
+src\display_log.c
+
 src\display_rcinput.c
 
 src\display_sensors.c

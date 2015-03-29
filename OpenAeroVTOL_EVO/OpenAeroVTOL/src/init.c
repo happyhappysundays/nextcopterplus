@@ -360,6 +360,9 @@ void init(void)
 	LVA = 1;
 	_delay_ms(25);
 	LVA = 0;
+	
+	// Log reboot
+	add_log(REBOOT);
 
 } // init()
 

@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 16 - March 2015
+// Version: Release V1.1 Beta 18 - March 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -104,6 +104,8 @@
 //			Fixed SCALED polarity errors - oops
 // Beta 17	Changed BIND logic to hopefully remove unbinding issues.
 //			Tightened up stick polarity testing.
+//			Added persistent error log.
+// Beta 18	Timeout for high-speed mode wait loop
 //
 //***********************************************************
 //* Notes
@@ -112,7 +114,7 @@
 // Bugs:
 //	
 //
-// To do:	
+// To do:	Timeout for high-speed mode wait loop
 //			
 //	
 //			
@@ -548,6 +550,9 @@ int main(void)
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
 				LED1 = 0;							// Signal that FC is now disarmed
+				
+				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
+				add_log(NOSIGNAL); // Debug
 			}
 		}
 		// RC signal received normally
@@ -618,6 +623,9 @@ int main(void)
 				Arm_timer = 0;
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
 				LED1 = 0;								// Signal that FC is now disarmed
+				
+				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
+				add_log(MANUAL); // Debug				
 			}
 
 			// Automatic disarm
@@ -642,6 +650,9 @@ int main(void)
 				// Disarm the FC
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
 				LED1 = 0;								// Signal that FC is now disarmed
+				
+				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
+				add_log(TIMER); // Debug				
 			}
 		}
 		// Arm when ArmMode is OFF

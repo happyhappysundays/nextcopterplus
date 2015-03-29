@@ -86,6 +86,12 @@ void print_menu_frame(uint8_t style)
 			LCD_Display_Text(17, (const unsigned char*)Verdana8, 103, 54);	// Save
 			break;
 			
+		case LOG:
+			// Clear or exit
+			LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
+			LCD_Display_Text(291, (const unsigned char*)Verdana8, 100, 54);	// Clear
+			break;			
+		
 		default:
 			break;
 	}

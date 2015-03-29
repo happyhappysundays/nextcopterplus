@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.1 B17";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.1 B18";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -81,6 +81,7 @@ const char MainMenuItem18[] PROGMEM = "16. OUT8 Mixer";
 const char MainMenuItem20[] PROGMEM = "17. Servo direction";
 const char MainMenuItem22[] PROGMEM = "18. Neg. Servo trvl. (%)";
 const char MainMenuItem23[] PROGMEM = "19. Pos. Servo trvl. (%)";
+const char MainMenuItem24[] PROGMEM = "20. Error log";
 //
 const char PText15[] PROGMEM = "Gyro";		 				// Sensors text
 const char PText16[] PROGMEM = "Roll";
@@ -307,6 +308,14 @@ const char PRESET_4[] PROGMEM =  "Options";
 const char WARNING_0[] PROGMEM =  "WARNING - Erases settings";
 const char WARNING_1[] PROGMEM =  "REMOVE PROPS";
 
+const char ERROR_0[] PROGMEM =  "Reboot";
+const char ERROR_1[] PROGMEM =  "Manual disarm";
+const char ERROR_2[] PROGMEM =  "No signal disarm";
+const char ERROR_3[] PROGMEM =  "Disarm timer";
+
+const char ERROR_MSG_0[] PROGMEM =  "Clear";
+
+
 const char* const text_menu[] PROGMEM = 
 	{
 		AutoMenuItem11, VBAT32, VBAT33, VBAT34,	VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,		// 0 to 8 Vbat cell voltages
@@ -360,12 +369,12 @@ const char* const text_menu[] PROGMEM =
 		ErrorText3, ErrorText4,																// 75 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem7, MainMenuItem8, 
-		MainMenuItem10, MainMenuItem2, MainMenuItem3,  										// 77 to 95 Main menu
+		MainMenuItem10, MainMenuItem2, MainMenuItem3,  										// 77 to 96 Main menu
 		MainMenuItem11,MainMenuItem12,MainMenuItem13,MainMenuItem14,
 		MainMenuItem15,MainMenuItem16,MainMenuItem17,MainMenuItem18,		
-		MainMenuItem20,MainMenuItem22, MainMenuItem23, 
+		MainMenuItem20,MainMenuItem22, MainMenuItem23, MainMenuItem24, 
 		//
-		Dummy0, Dummy0,																		// 96, 97 - Spare
+		Dummy0,																				// 97 - Spare
 		//
 		MPU6050LPF1, MPU6050LPF2, SWLPF4, SWLPF3, SWLPF2,									// 98 to 104 SW LPF (7) 5, 10, 17, 27, 38, 67, None
 		SWLPF1, ChannelRef8,
@@ -474,6 +483,11 @@ const char* const text_menu[] PROGMEM =
 		//
 		MenuFrame9,																			// 280 Abort
 		WARNING_0,	WARNING_1,																// 281 Warnings
+		
+		Dummy0,ERROR_0,ERROR_1,ERROR_2,ERROR_3,												// 283 Error messages
+		Dummy0, Dummy0, Dummy0, 	
+		
+		ERROR_MSG_0,																		// 291 Log menu
 	}; 
 
 //************************************************************

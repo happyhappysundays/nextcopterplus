@@ -28,6 +28,8 @@
 										// Not to be confused with MOTORMIN which is a PWM value.
 #define THROTTLEOFFSET 1250				// Mixer offset needed to reduce the output center to MOTORMIN
 
+#define LOGLENGTH	20
+
 /*********************************************************************
  * Type definitions
  ********************************************************************/
@@ -200,6 +202,10 @@ typedef struct
 
 	// Misc
 	int8_t		RudderPol;				// Rudder RC input polarity
+	
+	// Error log
+	int8_t		log_pointer;
+	int8_t		Log[LOGLENGTH];
 
 } CONFIG_STRUCT;
 
