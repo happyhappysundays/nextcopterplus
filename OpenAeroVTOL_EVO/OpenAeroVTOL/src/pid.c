@@ -105,12 +105,6 @@ void Sensor_PID(uint32_t period)
 		//************************************************************
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
-
-		// Reduce Gyro drift noise before adding into I-term
-		/*if ((gyroADC[axis] > -GYRO_DEADBAND) && (gyroADC[axis] < GYRO_DEADBAND)) 
-		{
-			gyroADC[axis] = 0;
-		}*/ //Debug
 		
 		// Work out stick rate divider. 0 is slowest, 4 is fastest.
 		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)

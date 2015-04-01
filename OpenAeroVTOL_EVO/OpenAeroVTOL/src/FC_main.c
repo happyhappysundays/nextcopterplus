@@ -104,8 +104,9 @@
 //			Fixed SCALED polarity errors - oops
 // Beta 17	Changed BIND logic to hopefully remove unbinding issues.
 //			Tightened up stick polarity testing.
-//			Added persistent error log.
-// Beta 18	Timeout for high-speed mode wait loop
+//			Added persistent error log. Uncomment "ERROR_LOG" in compiledefs.h to use.
+// Beta 18	Timeout for high-speed mode wait loop.
+//			Motor behaviour on loss of signal changed - now goes to idle where possible.
 //
 //***********************************************************
 //* Notes
@@ -114,9 +115,7 @@
 // Bugs:
 //	
 //
-// To do:	Timeout for high-speed mode wait loop
-//			
-//	
+// To do: Test Beta 18 PWM output for all modes.
 //			
 //
 //***********************************************************
@@ -178,6 +177,7 @@
 #define PWM_PERIOD 12500			// Average PWM generation period (5ms)
 #define PWM_PERIOD_WORST 20833		// PWM generation period (8.3ms - 120Hz)
 #define PWM_PERIOD_BEST 8333		// PWM generation period (3.333ms - 300Hz)
+#define FASTSYNCLIMIT 293			// Max time from end of PWM to next interrupt (15ms)
 
 //***********************************************************
 //* Code and Data variables
@@ -248,6 +248,7 @@ int main(void)
 	uint16_t Disarm_timer = 0;
 	uint16_t Save_TCNT1 = 0;
 	uint16_t ticker_16 = 0;
+	uint16_t fast_sync_timer = 0;
 
 	// Timer incrementers
 	uint16_t RC_Rate_TCNT1 = 0;
@@ -259,6 +260,7 @@ int main(void)
 	uint8_t Ticker_TCNT2 = 0;
 	uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
+	uint8_t fast_sync_TCNT2 = 0;
 
 	// Locals
 	uint16_t InterruptCounter = 0;
@@ -540,20 +542,18 @@ int main(void)
 		//* Alarms
 		//************************************************************
 
-		// If RC signal is overdue, signal RX error message and disarm
+		// If RC signal is overdue, signal RX error message
 		if (Overdue)
 		{
 			General_error |= (1 << NO_SIGNAL);		// Set NO_SIGNAL bit
-			
+
 			// If FC is set to "armable" and is currently armed, disarm the FC
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
 				LED1 = 0;							// Signal that FC is now disarmed
-				
-				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
-				add_log(NOSIGNAL); // Debug
 			}
+
 		}
 		// RC signal received normally
 		else
@@ -624,8 +624,9 @@ int main(void)
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
 				LED1 = 0;								// Signal that FC is now disarmed
 				
-				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
-				add_log(MANUAL); // Debug				
+#ifdef ERROR_LOG
+				add_log(MANUAL);
+#endif			
 			}
 
 			// Automatic disarm
@@ -651,8 +652,9 @@ int main(void)
 				General_error |= (1 << DISARMED);		// Set flags to disarmed
 				LED1 = 0;								// Signal that FC is now disarmed
 				
-				// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
-				add_log(TIMER); // Debug				
+#ifdef ERROR_LOG
+				add_log(TIMER);	
+#endif		
 			}
 		}
 		// Arm when ArmMode is OFF
@@ -979,6 +981,14 @@ int main(void)
 		// Check to see if the RC input is overdue (500ms)
 		if (RC_Timeout > RC_OVERDUE)
 		{
+#ifdef ERROR_LOG
+			// Log the no signal event if previously NOT overdue, armable and armed
+			// This makes sure we only get one log per event
+			if ((!Overdue) && (Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
+			{
+				add_log(NOSIGNAL);
+			}
+#endif			
 			Overdue = true;	// This results in a "No Signal" error
 		}
 	
@@ -1054,16 +1064,15 @@ int main(void)
 		//* Result in SlowRC state.
 		//* 
 		//* RCrateMeasured = Gap between two interrupts successfully measured.
-		//* FrameRate = S.Bus frame gap as measured by the isr.
+		//* FrameRate = Serial frame gap as measured by the ISR.
 		//* PWM_interval = Copied from Interval, is the current loop rate.
-		//* 
 		//* 
 		//************************************************************
 
 		if (Interrupted)
 		{
 			// Measure incoming RC rate. Threshold is SLOW_RC_RATE.
-			// Use RC_Rate_Timer is not in FAST mode.
+			// Use RC_Rate_Timer if not in FAST mode.
 			if (Config.Servo_rate < FAST)
 			{
 				if (RC_Rate_Timer > SLOW_RC_RATE)
@@ -1097,17 +1106,16 @@ int main(void)
 			//***********************************************************************
 			//* Work out the high speed mode RC blocking period when requested. 
 			//* Only relevant for high speed mode. The slower the PWM rate the fewer
-			//* PWM pulses will fit in the S.Bus gap.
+			//* PWM pulses will fit in the serial data gap.
 			//***********************************************************************
 
 			if (RCrateMeasured && (Config.Servo_rate == FAST))
 			{
-				//
 				// Slow packets (19.7ms gap). Pulse spans just two input packets.
 				// 38.8s available space for S.Bus, 40ms for Satellite and 39.92ms for Xtreme.
 				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
 				// It is easiest to assume that say 38ms is safe for all formats.
-				//
+
 				if (SlowRC)
 				{
 					PWM_pulses = 4;				// Four pulses will fit if interval faster than 103Hz
@@ -1142,12 +1150,12 @@ int main(void)
 						PWM_pulses += 1;		// One more pulse will fit if interval faster than 257Hz
 					}
 				}
-				//
+
 				// Fast packets (9ms gap). Pulse spans three input packets.
 				// 30ms available space for S.Bus, 31.5ms for Satellite and Xtreme.
 				// Each PWM period is about 2.6ms so we need to see how many will fit before the next packet.
 				// It is easiest to assume that say 29ms is safe for all formats.
-				// 
+
 				else
 				{
 					PWM_pulses = 3;				// Three pulses will fit if interval faster than 103Hz
@@ -1310,13 +1318,24 @@ int main(void)
 				}	
 			}
 			
-			// Don't bother with mixer calculations if blocked or overridden
-		//	if (!(PWMBlocked || PWMOverride))
-		//	{
-				Calculate_PID();					// Calculate PID values
-				ProcessMixer();						// Do all the mixer tasks - can be very slow
-				UpdateServos();						// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits				
-		//	}
+			Calculate_PID();						// Calculate PID values
+			ProcessMixer();							// Do all the mixer tasks - can be very slow
+			UpdateServos();							// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits				
+
+			// Set motors to idle on loss of signal.
+			// Output LOW pulse (1.1ms) for each output that is set to MOTOR
+			if (Overdue)
+			{
+				for (i = 0; i < MAX_OUTPUTS; i++)
+				{
+					// Check for motor marker
+					if (Config.Channel[i].Motor_marker == MOTOR)
+					{
+						// Set output to maximum pulse width
+						ServoOut[i] = MOTOR_0;
+					}
+				}
+			}
 			
 			// If, for some reason, a higher power has banned PWM output for this cycle, 
 			// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary.
@@ -1341,21 +1360,28 @@ int main(void)
 			LoopCount = 0;						// Reset loop counter for averaging accVert
 		}
 		
-		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
-		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also 
-		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
-		
-		else if ((Config.Servo_rate == FAST) && (PWMBlocked == true) && (RCrateMeasured == true) && (RCInterruptsON == true) && (Overdue == false)) // debug
+		// In FAST mode and in-between bursts, sync up with the RC so that the time from Interrupt to PWM is constant.
+		// This helps tighten up the number of pulses allowable
+		else if ((Config.Servo_rate == FAST) && (PWMBlocked == true) && (RCrateMeasured == true) && (RCInterruptsON == true) && (Overdue == false))
 		{
-			// Wait here until interrupted
-			while (Interrupted == false)
+			fast_sync_timer = 0;
+			
+			// Wait here until interrupted or timed out (15ms)
+			while ((Interrupted == false) && (fast_sync_timer < FASTSYNCLIMIT))
 			{
+				fast_sync_timer += (uint8_t)(TCNT2 - fast_sync_TCNT2);
+				fast_sync_TCNT2 = TCNT2;
 			}
 			
+			// Debug - Whhaaaat? - delete this unless I recall why it is even here.
 			Interrupted_Clone = false;
 		}
 		
-		/*else if (PWMBlocked)
+		/*
+		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
+		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also
+		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
+		else if (PWMBlocked)
 		{
 			_delay_us(2600);
 		}*/

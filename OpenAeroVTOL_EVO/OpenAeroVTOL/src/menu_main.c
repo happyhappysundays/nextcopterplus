@@ -33,7 +33,12 @@ void Wait_BUTTON4(void);
 // Defines
 //************************************************************
 
+#ifdef ERROR_LOG
 #define MAINITEMS 20	// Number of menu items
+#else
+#define MAINITEMS 19	// Number of menu items
+#endif
+
 #define MAINSTART 77	// Start of Menu text items
 
 //************************************************************
