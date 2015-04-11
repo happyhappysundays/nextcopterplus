@@ -28,7 +28,7 @@
 										// Not to be confused with MOTORMIN which is a PWM value.
 #define THROTTLEOFFSET 1250				// Mixer offset needed to reduce the output center to MOTORMIN
 
-#define LOGLENGTH	20
+#define LOGLENGTH	20					// Debug log length
 
 /*********************************************************************
  * Type definitions
@@ -142,8 +142,10 @@ typedef struct
 	int8_t		FlightChan;				// Channel number to select flight mode
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
 	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
-	int8_t		AileronPol;				// Aileron RC input polarity
-	int8_t		ElevatorPol;			// Elevator RC input polarity
+	int8_t		D_mult_roll;			// Roll D-term
+	int8_t		D_mult_pitch;			// Pitch D-term
+	//int8_t		AileronPol;				// Aileron RC input polarity
+	//int8_t		ElevatorPol;			// Elevator RC input polarity
 	
 	// Flight mode settings (36)
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
@@ -202,7 +204,9 @@ typedef struct
 
 	// Misc
 	int8_t		RudderPol;				// Rudder RC input polarity
-	
+	int8_t		AileronPol;				// Aileron RC input polarity
+	int8_t		ElevatorPol;			// Elevator RC input polarity
+		
 	// Error log
 	int8_t		log_pointer;
 	int8_t		Log[LOGLENGTH];

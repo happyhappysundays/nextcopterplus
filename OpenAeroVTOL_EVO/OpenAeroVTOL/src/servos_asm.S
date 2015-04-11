@@ -163,68 +163,47 @@ output_servo_ppm_asm:
 	sbrc	r15,0		// 1 (False),	2 if true
 	sbi 	M1			// 1,			0
 	call	DelayLow	// 7 + 140 (where r25 = 0)
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M2
 	mov		r25,r22
 	call	DelayHigh
 	sbrc	r15,1		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M2
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M3
 	mov		r25,r21
 	call	DelayHigh
 	sbrc	r15,2		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M3
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M4
 	mov		r25,r20
 	call	DelayHigh
 	sbrc	r15,3		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M4
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M5
 	mov		r25,r19
 	call	DelayHigh
 	sbrc	r15,4		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M5
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M6
 	mov		r25,r18
 	call	DelayHigh
 	sbrc	r15,5		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M6
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M7
 	mov		r25,r17
 	call	DelayHigh
 	sbrc	r15,6		// Don't switch on if if ServoFlag bit is cleared
 	sbi 	M7
 	call	DelayLow
-	//call    pwm_delay   // 100us
-	//call    pwm_delay
-
 // M8
 	mov		r25,r16
 	call	DelayHigh
 	sbrc	r15,7		// Don't switch on if if ServoFlag bit is cleared
-	sbi 	M8			// 1
+	sbi 	M8
 	call	DelayLow
 
 // At this point, the largest pulse that we can generate is 256 * 8 = 2.048ms
@@ -384,7 +363,6 @@ output_servo_ppm_asm3:
 	push	17
 	push	18
 
-	//ldi 	16,0x34		// 1			Set loop count to 834h or 2100
 	ldi 	16,0xFC		// 1			Set loop count to 8FCh or 2300(us)
 	ldi		17,0x08	
 	clr		0

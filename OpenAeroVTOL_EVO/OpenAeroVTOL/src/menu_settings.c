@@ -44,7 +44,7 @@ void menu_rc_setup(uint8_t section);
 
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
-#define RCITEMS 7 		// Number of menu items displayed
+#define RCITEMS 9 		// Number of menu items displayed
 #define RCITEMSOFFSET 9 // Actual number of menu items
 #define GENERALITEMS 10
 
@@ -56,14 +56,14 @@ void menu_rc_setup(uint8_t section);
 	 
 const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 118, 105, 116, 105, 0, 0},				// RC setup
+	{RCTEXT, 118, 105, 116, 105, 0, 0, 0, 0},		// RC setup
 	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 273},	// General 
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (7)					// Min, Max, Increment, Style, Default
+		// RC setup (9)					// Min, Max, Increment, Style, Default
 		{CPPM_MODE,XTREME,1,1,SBUS},	// Receiver type
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
@@ -71,6 +71,8 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{THROTTLE,AUX3,1,1,GEAR},		// Profile select channel
 		{0,40,1,0,0},					// TransitionSpeed 0 to 40
 		{1,99,1,0,50},					// Transition P1n point
+		{-127,127,1,0,0},				// Roll D-term - Debug
+		{-127,127,1,0,0},				// Pitch D-term - Debug
 	},
 	{
 		// General (10)

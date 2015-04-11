@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.1 Beta 18 - March 2015
+// Version: Release V1.2 Beta 2 - April 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -102,11 +102,17 @@
 //			Fixed mixer bypass logic to speed up calculation.
 //			Fixed eeprom upgrade bugs for MPU6050LPF and stick polarities
 //			Fixed SCALED polarity errors - oops
-// Beta 17	Changed BIND logic to hopefully remove unbinding issues.
+//
+// V1.2	Based on OpenAeroVTOL V1.1 code.
+//
+// Beta 1	Originally B17. Changed BIND logic to hopefully remove unbinding issues.
 //			Tightened up stick polarity testing.
 //			Added persistent error log. Uncomment "ERROR_LOG" in compiledefs.h to use.
-// Beta 18	Timeout for high-speed mode wait loop.
+// Beta 2	Originally B18. Timeout for high-speed mode wait loop.
 //			Motor behaviour on loss of signal changed - now goes to idle where possible.
+//			Tweaks to optimise loop speed. Average gyro readings for P-terms.
+//			Experimental D-terms for roll/pitch.
+//
 //
 //***********************************************************
 //* Notes
@@ -115,7 +121,7 @@
 // Bugs:
 //	
 //
-// To do: Test Beta 18 PWM output for all modes.
+// To do: Test the averaged P-terms and the new D-term modes
 //			
 //
 //***********************************************************
@@ -298,9 +304,10 @@ int main(void)
 		}
 
 		//************************************************************
-		//* Status menu timing
-		//* Increment Status_seconds every second and trigger
-		//* a RC rate resample every second
+		//* Once per second events
+		//* - Increment Status_seconds
+		//* - Do an RC rate resample
+		//* - Check the battery voltage
 		//************************************************************
 
 		// Count elapsed seconds
@@ -318,6 +325,16 @@ int main(void)
 			{
 				ResampleRCRate = true;
 			}
+	
+			// Check if Vbat lower than trigger
+			if (GetVbat() < Config.PowerTriggerActual)
+			{
+				General_error |= (1 << LVA_ALARM);	// Set LVA_Alarm flag
+			}
+			else
+			{
+				General_error &= ~(1 << LVA_ALARM);	// Clear LVA_Alarm flag
+			}		
 		}
 
 		//************************************************************
@@ -327,7 +344,7 @@ int main(void)
 		//* is at risk of corruption. To get around that, entry and exit
 		//* from special states must be handled in stages.
 		//* In the state machine, once a state changes, the new state 
-		//* will be process in the next loop.
+		//* will be processed in the next loop.
 		//************************************************************
 
 		// Assume PWM is OK until through the state machine
@@ -561,16 +578,6 @@ int main(void)
 			General_error &= ~(1 << NO_SIGNAL);		// Clear NO_SIGNAL bit
 		}
 
-		// Beep buzzer if Vbat lower than trigger		
-		if (GetVbat() < Config.PowerTriggerActual)
-		{
-			General_error |= (1 << LVA_ALARM);	// Set LVA_Alarm flag
-		}
-		else 
-		{
-			General_error &= ~(1 << LVA_ALARM);	// Clear LVA_Alarm flag
-		}
-
 		// Turn on buzzer if in alarm state (BUZZER_ON is oscillating)
 		if	(
 			 (
@@ -592,6 +599,7 @@ int main(void)
 		//* Arm/disarm handling
 		//************************************************************
 
+		// All cases - reset arm timer
 		if (Config.ArmMode == ARMABLE)
 		{
 			// Manual arm/disarm
@@ -606,57 +614,69 @@ int main(void)
 			{
 				Arm_timer = 0;
 			}
-
-			// If arm timer times out, the sticks must have been at extremes for ARM_TIMER seconds
-			// If aileron is at min, arm the FC
-			if ((Arm_timer > ARM_TIMER) && (RCinputs[AILERON] < -ARM_TIMER_RESET_1))
+			
+			// If disarmed
+			if ((General_error & (1 << DISARMED)) != 0)
 			{
-				Arm_timer = 0;
-				General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
-				CalibrateGyrosSlow();					// Calibrate gyros
-				LED1 = 1;								// Signal that FC is ready
-				reset_IMU();							// Reset IMU just in case...
-			}
-			// Else, disarm the FC after DISARM_TIMER seconds if aileron at max
-			else if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
-			{
-				Arm_timer = 0;
-				General_error |= (1 << DISARMED);		// Set flags to disarmed
-				LED1 = 0;								// Signal that FC is now disarmed
-				
-#ifdef ERROR_LOG
-				add_log(MANUAL);
-#endif			
-			}
-
-			// Automatic disarm
-			// Reset auto-disarm count if any RX activity or set to zero, or when currently disarmed
-			if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0) || (General_error & (1 << DISARMED)))
-			{														
+				// Reset auto-disarm count
 				Disarm_timer = 0;
 				Disarm_seconds = 0;
+								
+				// If arm timer times out, the sticks must have been at extremes for ARM_TIMER seconds
+				// If aileron is at min, arm the FC
+				if ((Arm_timer > ARM_TIMER) && (RCinputs[AILERON] < -ARM_TIMER_RESET_1))
+				{
+					Arm_timer = 0;
+					General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
+					CalibrateGyrosSlow();					// Calibrate gyros
+					LED1 = 1;								// Signal that FC is ready
+					reset_IMU();							// Reset IMU just in case...
+				}				
 			}
 		
-			// Increment disarm timer (seconds) if armed
-			if (Disarm_timer > SECOND_TIMER)
+			// If armed
+			else 
 			{
-				Disarm_seconds++;
-				Disarm_timer = 0;
-			}
-
-			// Auto-disarm model if timeout enabled and due
-			// Don't allow disarms less than 30 seconds. That's just silly...
-			if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))	
-			{
-				// Disarm the FC
-				General_error |= (1 << DISARMED);		// Set flags to disarmed
-				LED1 = 0;								// Signal that FC is now disarmed
-				
+				// Disarm the FC after DISARM_TIMER seconds if aileron at max
+				if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
+				{
+					Arm_timer = 0;
+					General_error |= (1 << DISARMED);		// Set flags to disarmed
+					LED1 = 0;								// Signal that FC is now disarmed
 #ifdef ERROR_LOG
-				add_log(TIMER);	
-#endif		
+add_log(MANUAL);
+#endif			
+				}
+
+				// Automatic disarm
+				// Reset auto-disarm count if any RX activity or set to zero
+				if ((Flight_flags & (1 << RxActivity)) || (Config.Disarm_timer == 0))
+				{
+					Disarm_timer = 0;
+					Disarm_seconds = 0;
+				}
+		
+				// Increment disarm timer (seconds) if armed
+				if (Disarm_timer > SECOND_TIMER)
+				{
+					Disarm_seconds++;
+					Disarm_timer = 0;
+				}
+
+				// Auto-disarm model if timeout enabled and due
+				// Don't allow disarms less than 30 seconds. That's just silly...
+				if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))
+				{
+					// Disarm the FC
+					General_error |= (1 << DISARMED);		// Set flags to disarmed
+					LED1 = 0;								// Signal that FC is now disarmed
+#ifdef ERROR_LOG
+add_log(TIMER);
+#endif
+				}
 			}
 		}
+		
 		// Arm when ArmMode is OFF
 		else 
 		{
@@ -664,232 +684,238 @@ int main(void)
 			LED1 = 1;
 		}
 
-		//************************************************************
-		//* Get RC data
-		//************************************************************
-
-		// Update zeroed RC channel data
-		RxGetChannels();
-
-		// Check for throttle reset
-		if (MonopolarThrottle < THROTTLEIDLE)
+		// All code based on RC inputs is redundant until new RC data is ready,
+		// otherwise the same data will be read back each and every time.
+		if (Interrupted)
 		{
-			// Clear throttle high error
-			General_error &= ~(1 << THROTTLE_HIGH);	
+			//************************************************************
+			//* Get RC data
+			//************************************************************
 
-			// Reset I-terms at throttle cut. Using memset saves code space
-			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
-		}
+			// Update zeroed RC channel data
+			RxGetChannels();
 
-		//************************************************************
-		//* Flight profile / transition state selection
-		//*
-		//* When transitioning, the flight profile is a moving blend of 
-		//* Flight profiles P1 to P2. The transition speed is controlled 
-		//* by the Config.TransitionSpeed setting.
-		//* The transition will hold at P1n position if directed to.
-		//************************************************************
-
-		// P2 transition point hard-coded to 50% above center
-		if 	(RCinputs[Config.FlightChan] > 500)
-		{
-			Config.FlightSel = 2;			// Flight mode 2 (P2)
-		}
-		// P1.n transition point hard-coded to 50% below center
-		else if (RCinputs[Config.FlightChan] > -500)
-		{
-			Config.FlightSel = 1;			// Flight mode 1 (P1.n)
-		}
-		// Otherwise the default is P1
-		else
-		{
-			Config.FlightSel = 0;			// Flight mode 0 (P1)
-		}
-
-		// Reset update request each loop
-		TransitionUpdated = false;
-
-		//************************************************************
-		//* Transition state setup/reset
-		//*
-		//* Set up the correct state for the current setting.
-		//* Check for initial startup - the only time that old_flight should be "3".
-		//* Also, re-initialise if the transition setting is changed
-		//************************************************************
-
-		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
-		{
-			switch(Config.FlightSel)
+			// Check for throttle reset
+			if (MonopolarThrottle < THROTTLEIDLE)
 			{
-				case 0:
-					Transition_state = TRANS_P1;
-					transition_counter = 0;
-					break;
-				case 1:
-					Transition_state = TRANS_P1n;
-					transition_counter = Config.Transition_P1n; // Set transition point to the user-selected point
-					break;
-				case 2:
-					Transition_state = TRANS_P2;
-					transition_counter = 100;
-					break;
-				default:
-					break;
-			}		 
-			old_flight = Config.FlightSel;
-			old_trans_mode = Config.TransitionSpeed;
-		}
+				// Clear throttle high error
+				General_error &= ~(1 << THROTTLE_HIGH);	
 
-		//************************************************************
-		//* Transition state handling
-		//************************************************************
+				// Reset I-terms at throttle cut. Using memset saves code space
+				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
+			}
 
-		// Update timed transition when changing flight modes
-		if (Config.FlightSel != old_flight)
-		{
-			// Flag that update is required if mode changed
-			TransitionUpdated = true;
-		}
+			//************************************************************
+			//* Flight profile / transition state selection
+			//*
+			//* When transitioning, the flight profile is a moving blend of 
+			//* Flight profiles P1 to P2. The transition speed is controlled 
+			//* by the Config.TransitionSpeed setting.
+			//* The transition will hold at P1n position if directed to.
+			//************************************************************
 
-		// Work out transition number when manually transitioning
-		// Convert number to percentage (0 to 100%)
-		if (Config.TransitionSpeed == 0)
-		{
-			// Offset RC input to (approx) -250 to 2250
-			temp1 = RCinputs[Config.FlightChan] + 1000;
+			// P2 transition point hard-coded to 50% above center
+			if 	(RCinputs[Config.FlightChan] > 500)
+			{
+				Config.FlightSel = 2;			// Flight mode 2 (P2)
+			}
+			// P1.n transition point hard-coded to 50% below center
+			else if (RCinputs[Config.FlightChan] > -500)
+			{
+				Config.FlightSel = 1;			// Flight mode 1 (P1.n)
+			}
+			// Otherwise the default is P1
+			else
+			{
+				Config.FlightSel = 0;			// Flight mode 0 (P1)
+			}
 
-			// Trim lower end to zero (0 to 2250)
-			if (temp1 < 0) temp1 = 0;
-
-			// Convert 0 to 2250 to 0 to 125. Divide by 20
-			// Round to avoid truncation errors
-			transition = (temp1 + 10) / 20;
-
-			// transition now has a range of 0 to 101 for 0 to 2000 input
-			// Limit extent of transition value 0 to 100 (101 steps)
-			if (transition > 100) transition = 100;
-		}
-		else
-		{
-			// transition_counter counts from 0 to 100 (101 steps)
-			transition = transition_counter;
-		}
-
-		// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
-		// This prevents state changes when controlled by a channel
-		if (Config.TransitionSpeed == 0)
-		{
-			Transition_state = TRANSITIONING;
-		}
-
-		// Update transition state change when control value or flight mode changes
-		if (TransitionUpdated)
-		{
-			// Update transition state from matrix
-			Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
-		}
-
-		// Calculate transition time from user's setting
-		transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
-		
-		// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
-		if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
-			// Update immediately
-			TransitionUpdated)
-		{
-			Transition_timeout = 0;
+			// Reset update request each loop
 			TransitionUpdated = false;
 
-			// Fixed, end-point states
-			if (Transition_state == TRANS_P1)
-			{
-				transition_counter = 0;
-			}
-			else if (Transition_state == TRANS_P1n)
-			{
-				transition_counter = Config.Transition_P1n;
-			}
-			else if (Transition_state == TRANS_P2)
-			{
-				transition_counter = 100;
-			}		
+			//************************************************************
+			//* Transition state setup/reset
+			//*
+			//* Set up the correct state for the current setting.
+			//* Check for initial startup - the only time that old_flight should be "3".
+			//* Also, re-initialise if the transition setting is changed
+			//************************************************************
 
-			// Over-ride users requesting silly states
-			// If transition_counter is above P1.n but request is P1 to P1.n or 
-			// if transition_counter is below P1.n but request is P2 to P1.n...
-			if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
+			if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
 			{
-				// Reset state to a more appropriate one
-				Transition_state = TRANS_P2_to_P1n_start;
+				switch(Config.FlightSel)
+				{
+					case 0:
+						Transition_state = TRANS_P1;
+						transition_counter = 0;
+						break;
+					case 1:
+						Transition_state = TRANS_P1n;
+						transition_counter = Config.Transition_P1n; // Set transition point to the user-selected point
+						break;
+					case 2:
+						Transition_state = TRANS_P2;
+						transition_counter = 100;
+						break;
+					default:
+						break;
+				}		 
+				old_flight = Config.FlightSel;
+				old_trans_mode = Config.TransitionSpeed;
 			}
 
-			if ((Transition_state == TRANS_P2_to_P1n_start) && (transition_counter < Config.Transition_P1n))
+			//************************************************************
+			//* Transition state handling
+			//************************************************************
+
+			// Update timed transition when changing flight modes
+			if (Config.FlightSel != old_flight)
 			{
-				// Reset state to a more appropriate one
-				Transition_state = TRANS_P1_to_P1n_start;
+				// Flag that update is required if mode changed
+				TransitionUpdated = true;
 			}
 
-			// Handle timed transition towards P1
-			if ((Transition_state == TRANS_P1n_to_P1_start) || (Transition_state == TRANS_P2_to_P1_start))
+			// Work out transition number when manually transitioning
+			// Convert number to percentage (0 to 100%)
+			if (Config.TransitionSpeed == 0)
 			{
-				transition_counter--;
-				if (transition_counter <= 0)
+				// Offset RC input to (approx) -250 to 2250
+				temp1 = RCinputs[Config.FlightChan] + 1000;
+
+				// Trim lower end to zero (0 to 2250)
+				if (temp1 < 0) temp1 = 0;
+
+				// Convert 0 to 2250 to 0 to 125. Divide by 20
+				// Round to avoid truncation errors
+				transition = (temp1 + 10) / 20;
+
+				// transition now has a range of 0 to 101 for 0 to 2000 input
+				// Limit extent of transition value 0 to 100 (101 steps)
+				if (transition > 100) transition = 100;
+			}
+			else
+			{
+				// transition_counter counts from 0 to 100 (101 steps)
+				transition = transition_counter;
+			}
+
+			// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
+			// This prevents state changes when controlled by a channel
+			if (Config.TransitionSpeed == 0)
+			{
+				Transition_state = TRANSITIONING;
+			}
+
+			// Update transition state change when control value or flight mode changes
+			if (TransitionUpdated)
+			{
+				// Update transition state from matrix
+				Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
+			}
+
+			// Calculate transition time from user's setting
+			transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
+		
+			// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
+			if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
+				// Update immediately
+				TransitionUpdated)
+			{
+				Transition_timeout = 0;
+				TransitionUpdated = false;
+
+				// Fixed, end-point states
+				if (Transition_state == TRANS_P1)
 				{
 					transition_counter = 0;
-					Transition_state = TRANS_P1;
 				}
-			}
-
-			// Handle timed transition between P1.n and P1
-			if (Transition_state == TRANS_P1_to_P1n_start)
-			{
-				transition_counter++;
-				if (transition_counter >= Config.Transition_P1n)
+				else if (Transition_state == TRANS_P1n)
 				{
 					transition_counter = Config.Transition_P1n;
-					Transition_state = TRANS_P1n;
 				}
-			}			
-				
-			// Handle timed transition between P1.n and P2
-			if (Transition_state == TRANS_P2_to_P1n_start)
-			{
-				transition_counter--;
-				if (transition_counter <= Config.Transition_P1n)
-				{
-					transition_counter = Config.Transition_P1n;
-					Transition_state = TRANS_P1n;
-				}
-			}
-
-			// Handle timed transition towards P2
-			if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
-			{
-				transition_counter++;
-				if (transition_counter >= 100)
+				else if (Transition_state == TRANS_P2)
 				{
 					transition_counter = 100;
-					Transition_state = TRANS_P2;
+				}		
+
+				// Over-ride users requesting silly states
+				// If transition_counter is above P1.n but request is P1 to P1.n or 
+				// if transition_counter is below P1.n but request is P2 to P1.n...
+				if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
+				{
+					// Reset state to a more appropriate one
+					Transition_state = TRANS_P2_to_P1n_start;
 				}
+
+				if ((Transition_state == TRANS_P2_to_P1n_start) && (transition_counter < Config.Transition_P1n))
+				{
+					// Reset state to a more appropriate one
+					Transition_state = TRANS_P1_to_P1n_start;
+				}
+
+				// Handle timed transition towards P1
+				if ((Transition_state == TRANS_P1n_to_P1_start) || (Transition_state == TRANS_P2_to_P1_start))
+				{
+					transition_counter--;
+					if (transition_counter <= 0)
+					{
+						transition_counter = 0;
+						Transition_state = TRANS_P1;
+					}
+				}
+
+				// Handle timed transition between P1.n and P1
+				if (Transition_state == TRANS_P1_to_P1n_start)
+				{
+					transition_counter++;
+					if (transition_counter >= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
+				}			
+				
+				// Handle timed transition between P1.n and P2
+				if (Transition_state == TRANS_P2_to_P1n_start)
+				{
+					transition_counter--;
+					if (transition_counter <= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
+				}
+
+				// Handle timed transition towards P2
+				if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
+				{
+					transition_counter++;
+					if (transition_counter >= 100)
+					{
+						transition_counter = 100;
+						Transition_state = TRANS_P2;
+					}
+				}
+
+			} // Update transition_counter
+
+			// Zero the I-terms of the opposite state so as to ensure a bump-less transition
+			if ((Transition_state == TRANS_P1) || (transition == 0))
+			{
+				// Clear P2 I-term while fully in P1
+				memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
 			}
-
-		} // Update transition_counter
-
-		// Zero the I-terms of the opposite state so as to ensure a bump-less transition
-		if ((Transition_state == TRANS_P1) || (transition == 0))
-		{
-			// Clear P2 I-term while fully in P1
-			memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
-		}
-		else if ((Transition_state == TRANS_P2) || (transition == 100))
-		{
-			// Clear P1 I-term while fully in P2
-			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
-		}
+			else if ((Transition_state == TRANS_P2) || (transition == 100))
+			{
+				// Clear P1 I-term while fully in P2
+				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
+			}
 		
-		// Save current flight mode
-		old_flight = Config.FlightSel;
+			// Save current flight mode
+			old_flight = Config.FlightSel;
 
+		} // Interrupted
+				
 		//************************************************************
 		//* Update timers
 		//************************************************************
@@ -1235,6 +1261,7 @@ int main(void)
 					{
 						Interrupted_Clone = true;	// Hand "Interrupted" baton on to its clone
 					}
+					
 					Interrupted = false;		// Cancel pending interrupts
 					Disable_RC_Interrupts();	// Disable RC interrupts
 					RCInterruptsON = false;		// Flag it for the rest of the code
@@ -1308,14 +1335,18 @@ int main(void)
 				// if it lies within believable ranges of 120Hz to 300Hz
 				// This is located here to make sure the interval measured
 				// is during PWM generation cycles
-				if ((interval < PWM_PERIOD_WORST) && (interval > PWM_PERIOD_BEST))
+				if (interval < PWM_PERIOD_BEST)		// Faster than 300Hz
 				{
-					PWM_interval = interval;
+					PWM_interval = PWM_PERIOD_BEST;
+				}
+				else if (interval > PWM_PERIOD_WORST)
+				{
+					PWM_interval = PWM_PERIOD_WORST; // Slower than 120Hz
 				}
 				else
 				{
-					PWM_interval = PWM_PERIOD_WORST; // 120Hz
-				}	
+					PWM_interval = interval;		// Actual interval
+				}
 			}
 			
 			Calculate_PID();						// Calculate PID values
@@ -1376,15 +1407,6 @@ int main(void)
 			// Debug - Whhaaaat? - delete this unless I recall why it is even here.
 			Interrupted_Clone = false;
 		}
-		
-		/*
-		// In FAST mode and while remeasuring the RC rate, to keep the loop rate at the approximate PWM rate,
-		// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary, but we have to also
-		// fake the Calculate_PID() and ProcessMixer() times. This keeps the cycle time more constant.
-		else if (PWMBlocked)
-		{
-			_delay_us(2600);
-		}*/
 	
 		//************************************************************
 		//* Enable RC interrupts when ready (RC rate measured and RC interrupts OFF)

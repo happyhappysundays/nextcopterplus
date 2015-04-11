@@ -397,24 +397,24 @@ void ProcessMixer(void)
 		if (transition < 100)
 		{
 			// Mix in dedicated RC sources - aileron, elevator and rudder
-			if (Config.Channel[i].P1_aileron_volume !=0) 					// Mix in dedicated aileron
+			if (Config.Channel[i].P1_aileron_volume != 0) 					// Mix in dedicated aileron
 			{
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P1_aileron_volume);
 				P1_solution = P1_solution + temp2;
 			}
-			if (Config.Channel[i].P1_elevator_volume !=0) 					// Mix in dedicated elevator
+			if (Config.Channel[i].P1_elevator_volume != 0) 					// Mix in dedicated elevator
 			{
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P1_elevator_volume);
 				P1_solution = P1_solution + temp2;
 			}
-			if (Config.Channel[i].P1_rudder_volume !=0) 					// Mix in dedicated rudder
+			if (Config.Channel[i].P1_rudder_volume != 0) 					// Mix in dedicated rudder
 			{
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P1_rudder_volume);
 				P1_solution = P1_solution + temp2;
 			}
 
 			// Other sources
-			if ((Config.Channel[i].P1_source_a_volume !=0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
+			if ((Config.Channel[i].P1_source_a_volume != 0) && (Config.Channel[i].P1_source_a != NOMIX)) // Mix in first extra source
 			{
 				// Is the source a sensor?
 				if (Config.Channel[i].P1_source_a > (MAX_RC_CHANNELS - 1))
@@ -431,7 +431,7 @@ void ProcessMixer(void)
 				temp2 = scale32(temp2, Config.Channel[i].P1_source_a_volume);
 				P1_solution = P1_solution + temp2;
 			}
-			if ((Config.Channel[i].P1_source_b_volume !=0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
+			if ((Config.Channel[i].P1_source_b_volume != 0) && (Config.Channel[i].P1_source_b != NOMIX)) // Mix in second extra source
 			{
 				// Is the source a sensor?
 				if (Config.Channel[i].P1_source_b > (MAX_RC_CHANNELS - 1))
@@ -453,24 +453,24 @@ void ProcessMixer(void)
 		if (transition > 0)	
 		{
 			// Mix in dedicated RC sources - aileron, elevator and rudder
-			if (Config.Channel[i].P2_aileron_volume !=0) 					// Mix in dedicated aileron
+			if (Config.Channel[i].P2_aileron_volume != 0) 					// Mix in dedicated aileron
 			{
 				temp2 = scale32(RCinputs[AILERON], Config.Channel[i].P2_aileron_volume);
 				P2_solution = P2_solution + temp2;
 			}
-			if (Config.Channel[i].P2_elevator_volume !=0) 					// Mix in dedicated elevator
+			if (Config.Channel[i].P2_elevator_volume != 0) 					// Mix in dedicated elevator
 			{
 				temp2 = scale32(RCinputs[ELEVATOR], Config.Channel[i].P2_elevator_volume);
 				P2_solution = P2_solution + temp2;
 			}
-			if (Config.Channel[i].P2_rudder_volume !=0) 					// Mix in dedicated rudder
+			if (Config.Channel[i].P2_rudder_volume != 0) 					// Mix in dedicated rudder
 			{
 				temp2 = scale32(RCinputs[RUDDER], Config.Channel[i].P2_rudder_volume);
 				P2_solution = P2_solution + temp2;
 			}
 
 			// Other sources
-			if ((Config.Channel[i].P2_source_a_volume !=0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
+			if ((Config.Channel[i].P2_source_a_volume != 0) && (Config.Channel[i].P2_source_a != NOMIX)) // Mix in first extra source
 			{
 				// Is the source a sensor?
 				if (Config.Channel[i].P2_source_a > (MAX_RC_CHANNELS - 1))
@@ -486,7 +486,7 @@ void ProcessMixer(void)
 				temp2 = scale32(temp2, Config.Channel[i].P2_source_a_volume);
 				P2_solution = P2_solution + temp2;
 			}
-			if ((Config.Channel[i].P2_source_b_volume !=0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
+			if ((Config.Channel[i].P2_source_b_volume != 0) && (Config.Channel[i].P2_source_b != NOMIX)) // Mix in second extra source
 			{
 				// Is the source a sensor?
 				if (Config.Channel[i].P2_source_b > (MAX_RC_CHANNELS - 1))

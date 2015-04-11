@@ -32,6 +32,7 @@ void Update_V1_0_to_V1_1_B7(void);
 void Update_V1_1_to_V1_1_B8(void);
 void Update_V1_1B8_to_V1_1_B10(void);
 void Update_V1_1B10_to_V1_1_B12(void);
+void Update_V1_1B12_to_V1_1_B18(void);
 
 uint8_t convert_filter_B8_B10(uint8_t);
 
@@ -49,8 +50,9 @@ void Load_eeprom_preset(uint8_t preset);
 #define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8-9
 #define V1_1_B10_SIGNATURE 0x38	// EEPROM signature for V1.1 Beta 10-11
 #define V1_1_B12_SIGNATURE 0x39	// EEPROM signature for V1.1 Beta 12+
+#define V1_1_B18_SIGNATURE 0x3A	// EEPROM signature for V1.1 Beta 18+
 
-#define MAGIC_NUMBER V1_1_B12_SIGNATURE // Set current signature to that of V1.1 Beta 12
+#define MAGIC_NUMBER V1_1_B18_SIGNATURE // Set current signature to that of V1.1 Beta 18+
 
 //************************************************************
 // Code
@@ -122,9 +124,13 @@ bool Initial_EEPROM_Config_Load(void)
 
 		case V1_1_B10_SIGNATURE:			// V1.1 Beta 10+ detected
 			Update_V1_1B10_to_V1_1_B12();
-			updated = true;
+			// Fall through...
 
 		case V1_1_B12_SIGNATURE:			// V1.1 Beta 12 detected
+			Update_V1_1B12_to_V1_1_B18();
+			updated = true;
+
+		case V1_1_B18_SIGNATURE:			// V1.1 Beta 18+ detected
 			// Fall through...
 			break;
 
@@ -445,14 +451,15 @@ void Update_V1_1_to_V1_1_B8(void)
 	int8_t	buffer[12];
 	int8_t	temp = 0;
 	
-	// RC items - working perfectly
+	// RC items - working perfectly, but really mustn't use variable names 
+	// here as they MIGHT CHANGE LOCATION. Use an offset from the start instead
 	buffer[0] = Config.RxMode;			// RxMode. Same as old RxMode
 	buffer[1] = Config.MPU6050_LPF;		// Servo_rate
 	buffer[2] = Config.Servo_rate;		// PWM_Sync
 	buffer[3] = Config.PWM_Sync;		// TxSeq
 	buffer[4] = Config.TxSeq;			// FlightChan
-	buffer[5] = Config.AileronPol;		// TransitionSpeed
-	buffer[6] = Config.ElevatorPol;		// Transition_P1n
+	buffer[5] = Config.D_mult_roll;		// TransitionSpeed
+	buffer[6] = Config.D_mult_pitch;	// Transition_P1n
 	buffer[7] = Config.FlightChan;		// AileronPol
 	buffer[8] = Config.TransitionSpeed;	// ElevatorPol
 	
@@ -502,6 +509,20 @@ void Update_V1_1B10_to_V1_1_B12(void)
 
 	// Set magic number to V1.1 Beta 11 signature
 	Config.setup = V1_1_B12_SIGNATURE;
+}
+
+
+// Upgrade V1.1 B12+ settings to V1.1 Beta 18 settings
+void Update_V1_1B12_to_V1_1_B18(void)
+{
+	// Copy old AileronPol value (now in D_mult_roll) to new location
+	Config.AileronPol = Config.D_mult_roll;
+
+	// Copy old ElevatorPol value (now in D_mult_pitch) to new location
+	Config.ElevatorPol = Config.D_mult_pitch;
+
+	// Set magic number to V1.1 Beta 18 signature
+	Config.setup = V1_1_B18_SIGNATURE;
 }
 
 // Convert pre-V1.1 B10 filter settings

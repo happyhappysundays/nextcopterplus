@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.1 B18";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.2 B2";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -315,6 +315,9 @@ const char ERROR_3[] PROGMEM =  "Disarm timer";
 
 const char ERROR_MSG_0[] PROGMEM =  "Clear";
 
+// Debug
+const char Debug_1[] PROGMEM =  "Roll D:";
+const char Debug_2[] PROGMEM =  "Pitch D:";
 
 const char* const text_menu[] PROGMEM = 
 	{
@@ -410,7 +413,7 @@ const char* const text_menu[] PROGMEM =
 		//
 		RCMenuItem1, GeneralText3, RCMenuItem20, RCMenuItem0, RCMenuItem2, 					// 149 to 157 RC menu
 		Transition, Transition_P1n,
-		Dummy0, Dummy0,	 
+		Debug_1, Debug_2,	 
 		//
 		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText10, 
