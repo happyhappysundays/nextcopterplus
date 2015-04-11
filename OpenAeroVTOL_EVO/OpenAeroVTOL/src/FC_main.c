@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 Beta 2 - April 2015
+// Version: Release V1.2 Beta 3 - April 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -112,7 +112,7 @@
 //			Motor behaviour on loss of signal changed - now goes to idle where possible.
 //			Tweaks to optimise loop speed. Average gyro readings for P-terms.
 //			Experimental D-terms for roll/pitch.
-//
+// Beta 3	Changed D-term weight
 //
 //***********************************************************
 //* Notes

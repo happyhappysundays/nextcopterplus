@@ -320,7 +320,7 @@ void Calculate_PID(void)
 		PID_Gyro_I_actual2 = PID_Gyro_I_actual2 >> 5;
 
 		// Gyro D-terms
-		PID_gyro_D = GyroDTerm[axis] * D_gain[axis] * 5;				// Debug
+		PID_gyro_D = GyroDTerm[axis] * D_gain[axis] * 2;				// Debug
 
 		//************************************************************
 		// I-term output limits
