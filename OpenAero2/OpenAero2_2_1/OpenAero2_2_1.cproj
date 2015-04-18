@@ -1,0 +1,356 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>6.2</ProjectVersion>
+    <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
+    <ProjectGuid>{8a9b727e-8cbb-4f8c-8390-c73c6f5c7a1b}</ProjectGuid>
+    <avrdevice>ATmega644P</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>C</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>OpenAero2_2_1</AssemblyName>
+    <Name>OpenAero2_2_1</Name>
+    <RootNamespace>OpenAero2_2_1</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <AsfFrameworkConfig>
+      <framework-data xmlns="">
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.15.0" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <preserveEEPROM>true</preserveEEPROM>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <AvrGcc>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+          </ListValues>
+        </avrgcc.compiler.symbols.DefSymbols>
+        <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+      </AvrGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <AvrGcc>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>KK21=true</Value>
+            <Value>F_CPU=20000000UL</Value>
+          </ListValues>
+        </avrgcc.compiler.symbols.DefSymbols>
+        <avrgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>../../OpenAero2_2_0/inc</Value>
+          </ListValues>
+        </avrgcc.compiler.directories.IncludePaths>
+        <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.compiler.warnings.Undefined>True</avrgcc.compiler.warnings.Undefined>
+        <avrgcc.compiler.warnings.Pedantic>True</avrgcc.compiler.warnings.Pedantic>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm.a</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+        <avrgcc.linker.miscellaneous.LinkerFlags>-gdwarf-2 -std=gnu99</avrgcc.linker.miscellaneous.LinkerFlags>
+        <avrgcc.assembler.general.AssemblerFlags>-DKK21=true</avrgcc.assembler.general.AssemblerFlags>
+        <avrgcc.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>../../OpenAero2_2_0/inc</Value>
+          </ListValues>
+        </avrgcc.assembler.general.IncludePaths>
+        <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
+      </AvrGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="inc" />
+    <Folder Include="src" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\OpenAero2_2_0\inc\acc.h">
+      <SubType>compile</SubType>
+      <Link>inc\acc.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\adc.h">
+      <SubType>compile</SubType>
+      <Link>inc\adc.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\compiledefs.h">
+      <SubType>compile</SubType>
+      <Link>inc\compiledefs.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\eeprom.h">
+      <SubType>compile</SubType>
+      <Link>inc\eeprom.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\Font_Verdana.h">
+      <SubType>compile</SubType>
+      <Link>inc\Font_Verdana.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\Font_WingdingsOE2.h">
+      <SubType>compile</SubType>
+      <Link>inc\Font_WingdingsOE2.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\glcd_buffer.h">
+      <SubType>compile</SubType>
+      <Link>inc\glcd_buffer.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\glcd_driver.h">
+      <SubType>compile</SubType>
+      <Link>inc\glcd_driver.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\glcd_menu.h">
+      <SubType>compile</SubType>
+      <Link>inc\glcd_menu.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\gyros.h">
+      <SubType>compile</SubType>
+      <Link>inc\gyros.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\i2c.h">
+      <SubType>compile</SubType>
+      <Link>inc\i2c.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\i2cmaster.h">
+      <SubType>compile</SubType>
+      <Link>inc\i2cmaster.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\imu.h">
+      <SubType>compile</SubType>
+      <Link>inc\imu.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\init.h">
+      <SubType>compile</SubType>
+      <Link>inc\init.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\io_cfg.h">
+      <SubType>compile</SubType>
+      <Link>inc\io_cfg.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\isr.h">
+      <SubType>compile</SubType>
+      <Link>inc\isr.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\main.h">
+      <SubType>compile</SubType>
+      <Link>inc\main.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\menu_ext.h">
+      <SubType>compile</SubType>
+      <Link>inc\menu_ext.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\mixer.h">
+      <SubType>compile</SubType>
+      <Link>inc\mixer.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\MPU6050.h">
+      <SubType>compile</SubType>
+      <Link>inc\MPU6050.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\mugui.h">
+      <SubType>compile</SubType>
+      <Link>inc\mugui.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\pid.h">
+      <SubType>compile</SubType>
+      <Link>inc\pid.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\rc.h">
+      <SubType>compile</SubType>
+      <Link>inc\rc.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\servos.h">
+      <SubType>compile</SubType>
+      <Link>inc\servos.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\typedefs.h">
+      <SubType>compile</SubType>
+      <Link>inc\typedefs.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\uart.h">
+      <SubType>compile</SubType>
+      <Link>inc\uart.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\inc\vbat.h">
+      <SubType>compile</SubType>
+      <Link>inc\vbat.h</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\acc.c">
+      <SubType>compile</SubType>
+      <Link>src\acc.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\adc.c">
+      <SubType>compile</SubType>
+      <Link>src\adc.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\display_balance.c">
+      <SubType>compile</SubType>
+      <Link>src\display_balance.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\display_rcinput.c">
+      <SubType>compile</SubType>
+      <Link>src\display_rcinput.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\display_sensors.c">
+      <SubType>compile</SubType>
+      <Link>src\display_sensors.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\display_status.c">
+      <SubType>compile</SubType>
+      <Link>src\display_status.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\display_wizard.c">
+      <SubType>compile</SubType>
+      <Link>src\display_wizard.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\eeprom.c">
+      <SubType>compile</SubType>
+      <Link>src\eeprom.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\FC_main.c">
+      <SubType>compile</SubType>
+      <Link>src\FC_main.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\glcd_driver.c">
+      <SubType>compile</SubType>
+      <Link>src\glcd_driver.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\glcd_menu.c">
+      <SubType>compile</SubType>
+      <Link>src\glcd_menu.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\gyros.c">
+      <SubType>compile</SubType>
+      <Link>src\gyros.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\i2c.c">
+      <SubType>compile</SubType>
+      <Link>src\i2c.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\imu.c">
+      <SubType>compile</SubType>
+      <Link>src\imu.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\init.c">
+      <SubType>compile</SubType>
+      <Link>src\init.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\isr.c">
+      <SubType>compile</SubType>
+      <Link>src\isr.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_driver.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_driver.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_flight.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_flight.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_main.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_main.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_mixer.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_mixer.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_servos.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_servos.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\menu_settings.c">
+      <SubType>compile</SubType>
+      <Link>src\menu_settings.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\misc_asm.S">
+      <SubType>compile</SubType>
+      <Link>src\misc_asm.S</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\mixer.c">
+      <SubType>compile</SubType>
+      <Link>src\mixer.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\mugui_text.c">
+      <SubType>compile</SubType>
+      <Link>src\mugui_text.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\pid.c">
+      <SubType>compile</SubType>
+      <Link>src\pid.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\rc.c">
+      <SubType>compile</SubType>
+      <Link>src\rc.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\servos.c">
+      <SubType>compile</SubType>
+      <Link>src\servos.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\servos_asm.S">
+      <SubType>compile</SubType>
+      <Link>src\servos_asm.S</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\twimastertimeout.c">
+      <SubType>compile</SubType>
+      <Link>src\twimastertimeout.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\uart.c">
+      <SubType>compile</SubType>
+      <Link>src\uart.c</Link>
+    </Compile>
+    <Compile Include="..\OpenAero2_2_0\src\vbat.c">
+      <SubType>compile</SubType>
+      <Link>src\vbat.c</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>

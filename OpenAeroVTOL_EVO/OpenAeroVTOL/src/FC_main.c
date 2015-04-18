@@ -686,7 +686,7 @@ add_log(TIMER);
 
 		// All code based on RC inputs is redundant until new RC data is ready,
 		// otherwise the same data will be read back each and every time.
-		if (Interrupted)
+		if (Interrupted || Interrupted_Clone)
 		{
 			//************************************************************
 			//* Get RC data
