@@ -117,11 +117,9 @@ const char RCMenuItem1[]  PROGMEM = "RX type:";				// RC setup text
 const char RCMenuItem20[] PROGMEM = "PWM sync:"; 	
 const char RCMenuItem0[]  PROGMEM = "Ch. order:"; 	
 const char RCMenuItem2[]  PROGMEM = "Profile Chan.:";
-const char RCMenuItem8[]  PROGMEM = "Aileron pol.:";
-const char RCMenuItem9[]  PROGMEM = "Elevator pol.:";
-const char RCMenuItem10[] PROGMEM = "Rudder pol.:";
 const char Transition[] PROGMEM = "Transition";
 const char Transition_P1n[] PROGMEM = "Trans. P1n:";
+const char RCMenuItem30[] PROGMEM = "Vibe display:";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "PWM";
@@ -315,10 +313,6 @@ const char ERROR_3[] PROGMEM =  "Disarm timer";
 
 const char ERROR_MSG_0[] PROGMEM =  "Clear";
 
-// Debug
-const char Debug_1[] PROGMEM =  "Roll D:";
-const char Debug_2[] PROGMEM =  "Pitch D:";
-
 const char* const text_menu[] PROGMEM = 
 	{
 		AutoMenuItem11, VBAT32, VBAT33, VBAT34,	VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,		// 0 to 8 Vbat cell voltages
@@ -412,8 +406,8 @@ const char* const text_menu[] PROGMEM =
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
 		RCMenuItem1, GeneralText3, RCMenuItem20, RCMenuItem0, RCMenuItem2, 					// 149 to 157 RC menu
-		Transition, Transition_P1n,
-		Debug_1, Debug_2,	 
+		Transition, Transition_P1n,RCMenuItem30,
+		Dummy0, 
 		//
 		MixerMenuItem0, Contrast, AutoMenuItem2,											// 158 to 167 General
 		GeneralText2, BattMenuItem2, GeneralText10, 
@@ -519,25 +513,25 @@ void idle_screen(void)
 	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
 
 	// Display most important error
-	if ((General_error & (1 << LVA_ALARM)) != 0)					// Low voltage
+	if (General_error & (1 << LVA_ALARM))							// Low voltage
 	{
 		LCD_Display_Text(134,(const unsigned char*)Verdana14,12,43);// "Battery"
 		LCD_Display_Text(118,(const unsigned char*)Verdana14,80,43); // "Low"
 	}
 	
-	else if ((General_error & (1 << NO_SIGNAL)) != 0)				// No signal
+	else if (General_error & (1 << NO_SIGNAL))						// No signal
 	{
 		LCD_Display_Text(75,(const unsigned char*)Verdana14,28,43); // "No"
 		LCD_Display_Text(76,(const unsigned char*)Verdana14,54,43); // "Signal"
 	}
 	
-	else if ((General_error & (1 << THROTTLE_HIGH)) != 0)			// Throttle high
+	else if (General_error & (1 << THROTTLE_HIGH))					// Throttle high
 	{
 		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
 		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
 	}
 	
-	else if ((General_error & (1 << DISARMED)) != 0)				// Disarmed
+	else if (General_error & (1 << DISARMED))						// Disarmed
 	{
 		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
 	}

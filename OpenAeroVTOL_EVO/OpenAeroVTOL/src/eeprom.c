@@ -50,9 +50,9 @@ void Load_eeprom_preset(uint8_t preset);
 #define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8-9
 #define V1_1_B10_SIGNATURE 0x38	// EEPROM signature for V1.1 Beta 10-11
 #define V1_1_B12_SIGNATURE 0x39	// EEPROM signature for V1.1 Beta 12+
-#define V1_1_B18_SIGNATURE 0x3A	// EEPROM signature for V1.1 Beta 18+
+#define V1_2_B3_SIGNATURE 0x3A	// EEPROM signature for V1.2 Beta 3+
 
-#define MAGIC_NUMBER V1_1_B18_SIGNATURE // Set current signature to that of V1.1 Beta 18+
+#define MAGIC_NUMBER V1_2_B3_SIGNATURE // Set current signature to that of V1.3 Beta 3+
 
 //************************************************************
 // Code
@@ -130,7 +130,7 @@ bool Initial_EEPROM_Config_Load(void)
 			Update_V1_1B12_to_V1_1_B18();
 			updated = true;
 
-		case V1_1_B18_SIGNATURE:			// V1.1 Beta 18+ detected
+		case V1_2_B3_SIGNATURE:				// V1.2 Beta 3+ detected
 			// Fall through...
 			break;
 
@@ -201,7 +201,7 @@ void Update_V1_0_to_V1_1_B7(void)
 		P2_scale = mixer_buffer[21 + (i * NEWSIZE)];
 		
 		// Take old motor marker switch and convert
-		if ((P1_sensors & (1 << MotorMarker)) != 0)
+		if (P1_sensors & (1 << MotorMarker))
 		{
 			// Set the new value in the right place
 			mixer_buffer[4 + (i * NEWSIZE)] = MOTOR;
@@ -229,9 +229,9 @@ void Update_V1_0_to_V1_1_B7(void)
 
 		// Expand the old switches into new bytes
 		// P1 roll gyro
-		if ((P1_sensors & (1 << RollGyro)) != 0)
+		if (P1_sensors & (1 << RollGyro))
 		{
-			if ((P1_scale & (1 << RollScale)) != 0)
+			if (P1_scale & (1 << RollScale))
 			{
 				mixer_buffer[18 + (i * NEWSIZE)] = SCALE;
 			}
@@ -246,9 +246,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 roll gyro
-		if ((P2_sensors & (1 << RollGyro)) != 0)
+		if (P2_sensors & (1 << RollGyro))
 		{
-			if ((P2_scale & (1 << RollScale)) != 0)
+			if (P2_scale & (1 << RollScale))
 			{
 				mixer_buffer[19 + (i * NEWSIZE)] = SCALE;
 			}
@@ -263,9 +263,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P1 pitch gyro
-		if ((P1_sensors & (1 << PitchGyro)) != 0)
+		if (P1_sensors & (1 << PitchGyro))
 		{
-			if ((P1_scale & (1 << PitchScale)) != 0)
+			if (P1_scale & (1 << PitchScale))
 			{
 				mixer_buffer[20 + (i * NEWSIZE)] = SCALE;
 			}
@@ -280,9 +280,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 pitch gyro
-		if ((P2_sensors & (1 << PitchGyro)) != 0)
+		if (P2_sensors & (1 << PitchGyro))
 		{
-			if ((P2_scale & (1 << PitchScale)) != 0)
+			if (P2_scale & (1 << PitchScale))
 			{
 				mixer_buffer[21 + (i * NEWSIZE)] = SCALE;
 			}
@@ -297,9 +297,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P1 yaw_gyro
-		if ((P1_sensors & (1 << YawGyro)) != 0)
+		if (P1_sensors & (1 << YawGyro))
 		{
-			if ((P1_scale & (1 << YawScale)) != 0)
+			if (P1_scale & (1 << YawScale))
 			{
 				mixer_buffer[22 + (i * NEWSIZE)] = SCALE;
 			}
@@ -314,9 +314,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 yaw gyro
-		if ((P2_sensors & (1 << YawGyro)) != 0)
+		if (P2_sensors & (1 << YawGyro))
 		{
-			if ((P2_scale & (1 << YawScale)) != 0)
+			if (P2_scale & (1 << YawScale))
 			{
 				mixer_buffer[23 + (i * NEWSIZE)] = SCALE;
 			}
@@ -331,9 +331,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P1 roll acc
-		if ((P1_sensors & (1 << RollAcc)) != 0)
+		if (P1_sensors & (1 << RollAcc))
 		{
-			if ((P1_scale & (1 << AccRollScale)) != 0)
+			if (P1_scale & (1 << AccRollScale))
 			{
 				mixer_buffer[24 + (i * NEWSIZE)] = SCALE;
 			}
@@ -348,9 +348,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 roll acc
-		if ((P2_sensors & (1 << RollAcc)) != 0)
+		if (P2_sensors & (1 << RollAcc))
 		{
-			if ((P2_scale & (1 << AccRollScale)) != 0)
+			if (P2_scale & (1 << AccRollScale))
 			{
 				mixer_buffer[25 + (i * NEWSIZE)] = SCALE;
 			}
@@ -365,9 +365,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P1 pitch acc
-		if ((P1_sensors & (1 << PitchAcc)) != 0)
+		if (P1_sensors & (1 << PitchAcc))
 		{
-			if ((P1_scale & (1 << AccPitchScale)) != 0)
+			if (P1_scale & (1 << AccPitchScale))
 			{
 				mixer_buffer[26 + (i * NEWSIZE)] = SCALE;
 			}
@@ -382,9 +382,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 pitch acc
-		if ((P2_sensors & (1 << PitchAcc)) != 0)
+		if (P2_sensors & (1 << PitchAcc))
 		{
-			if ((P2_scale & (1 << AccPitchScale)) != 0)
+			if (P2_scale & (1 << AccPitchScale))
 			{
 				mixer_buffer[27 + (i * NEWSIZE)] = SCALE;
 			}
@@ -399,9 +399,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P1 Z delta acc
-		if ((P1_sensors & (1 << ZDeltaAcc)) != 0)
+		if (P1_sensors & (1 << ZDeltaAcc))
 		{
-			if ((P1_scale & (1 << AccZScale)) != 0)
+			if (P1_scale & (1 << AccZScale))
 			{
 				mixer_buffer[28 + (i * NEWSIZE)] = SCALE;
 			}
@@ -416,9 +416,9 @@ void Update_V1_0_to_V1_1_B7(void)
 		}
 
 		// P2 Z delta acc
-		if ((P2_sensors & (1 << ZDeltaAcc)) != 0)
+		if (P2_sensors & (1 << ZDeltaAcc))
 		{
-			if ((P2_scale & (1 << AccZScale)) != 0)
+			if (P2_scale & (1 << AccZScale))
 			{
 				mixer_buffer[29 + (i * NEWSIZE)] = SCALE;
 			}
@@ -458,8 +458,8 @@ void Update_V1_1_to_V1_1_B8(void)
 	buffer[2] = Config.Servo_rate;		// PWM_Sync
 	buffer[3] = Config.PWM_Sync;		// TxSeq
 	buffer[4] = Config.TxSeq;			// FlightChan
-	buffer[5] = Config.D_mult_roll;		// TransitionSpeed
-	buffer[6] = Config.D_mult_pitch;	// Transition_P1n
+	buffer[5] = Config.AileronPol;		// TransitionSpeed
+	buffer[6] = Config.ElevatorPol;		// Transition_P1n
 	buffer[7] = Config.FlightChan;		// AileronPol
 	buffer[8] = Config.TransitionSpeed;	// ElevatorPol
 	
@@ -502,7 +502,7 @@ void Update_V1_1B8_to_V1_1_B10(void)
 void Update_V1_1B10_to_V1_1_B12(void)
 {
 	// Copy old RudderPol value to new location
-	Config.RudderPol = Config.Preset;
+	Config.AileronPol = Config.Preset;
 	
 	// Set preset to default and load it
 	Config.Preset = QUADX;
@@ -512,17 +512,14 @@ void Update_V1_1B10_to_V1_1_B12(void)
 }
 
 
-// Upgrade V1.1 B12+ settings to V1.1 Beta 18 settings
+// Upgrade V1.1 B12+ settings to V1.2 Beta 3 settings
 void Update_V1_1B12_to_V1_1_B18(void)
 {
-	// Copy old AileronPol value (now in D_mult_roll) to new location
-	Config.AileronPol = Config.D_mult_roll;
-
-	// Copy old ElevatorPol value (now in D_mult_pitch) to new location
-	Config.ElevatorPol = Config.D_mult_pitch;
-
+	// Copy old RudderPol value to new location
+	Config.RudderPol = Config.Preset;
+	
 	// Set magic number to V1.1 Beta 18 signature
-	Config.setup = V1_1_B18_SIGNATURE;
+	Config.setup = V1_2_B3_SIGNATURE;
 }
 
 // Convert pre-V1.1 B10 filter settings

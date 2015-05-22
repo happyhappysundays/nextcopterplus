@@ -19,7 +19,15 @@
 #include "menu_ext.h"
 #include "mixer.h"
 #include "main.h"
+#include "pid.h"
+#include "gyros.h"
 
+//************************************************************
+// Globals
+//************************************************************
+
+float 		GyroAvg;
+	
 //************************************************************
 // Prototypes
 //************************************************************
@@ -36,7 +44,6 @@ void Display_status(void)
 	uint16_t vbat_temp; 
 	int8_t	pos1, pos2, pos3;
 	mugui_size16_t size;
-	//uint16_t x_text = 0;
 
 	clear_buffer(buffer);
 
@@ -82,7 +89,6 @@ void Display_status(void)
 		LCD_Display_Text(52,(const unsigned char*)Verdana8,45,24);
 	}
 
-
 	// Don't display battery text if there are error messages
 	if (General_error == 0)
 	{
@@ -115,28 +121,52 @@ void Display_status(void)
 			LCD_Display_Text(269,(const unsigned char*)Verdana8,(x_loc + pos1 + pos3),y_loc);
 			mugui_lcd_puts(itoa(vbat_temp,pBuffer,10),(const unsigned char*)Verdana8,(x_loc + pos1 + pos2 + pos3),y_loc);
 		}
+	
+		// Display vibration info is set to "ON"
+		if (Config.Vibration == ON)
+		{
+			// Create message box
+			fillrect(buffer, 29,11, 70, 42, 0);	// White box
+			drawrect(buffer, 29,11, 70, 42, 1); 	// Outline
+
+			// Work out quick average of all gyros and take the absolute value
+			temp = abs((gyroADC[ROLL] + gyroADC[PITCH] + gyroADC[YAW])/3);
+			
+			// LPF filter the readings so that they are more persistent
+			GyroAvg = ((GyroAvg * (float)9) + (float)temp) / (float)10;
+			
+			// Display vibration data
+			temp = (int16_t)GyroAvg;
+			
+			// Work out pixel size of number to display
+			mugui_text_sizestring(itoa(temp,pBuffer,10), (const unsigned char*)Verdana22, &size);
+			
+			// Center the number in the box automatically
+			mugui_lcd_puts(itoa(temp,pBuffer,10),(const unsigned char*)Verdana22,64 - (size.x / 2),20);
+			
+		} // if (Config.Vibration == ON)	
 	}
 	
 	// Display error messages
-	if (General_error != 0)
+	else
 	{
 		// Prioritise error from top to bottom
-		if((General_error & (1 << LVA_ALARM)) != 0)
+		if(General_error & (1 << LVA_ALARM))
 		{
 			LCD_Display_Text(134,(const unsigned char*)Verdana14,15,37);	// Battery
 			LCD_Display_Text(271,(const unsigned char*)Verdana14,79,37);	// low
 		}
-		else if((General_error & (1 << NO_SIGNAL)) != 0)
+		else if(General_error & (1 << NO_SIGNAL))
 		{
 			LCD_Display_Text(75,(const unsigned char*)Verdana14,30,37); 	// No
 			LCD_Display_Text(272,(const unsigned char*)Verdana14,55,37);	// signal
 		}
-		else if((General_error & (1 << THROTTLE_HIGH)) != 0)
+		else if(General_error & (1 << THROTTLE_HIGH))
 		{
 			LCD_Display_Text(105,(const unsigned char*)Verdana14,11,37);	// Throttle
 			LCD_Display_Text(270,(const unsigned char*)Verdana14,82,37);	// high
 		}
-		else if((General_error & (1 << DISARMED)) != 0)
+		else if(General_error & (1 << DISARMED))
 		{
 			LCD_Display_Text(18,(const unsigned char*)Verdana14,25,37); 	// Disarmed
 		}

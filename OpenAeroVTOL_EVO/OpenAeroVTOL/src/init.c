@@ -70,8 +70,8 @@ void init(void)
 	//***********************************************************
 	// Set port directions
 	DDRA		= 0x30;		// Port A
-	DDRC		= 0xFC;		// Port C
 	DDRB		= 0x0A;		// Port B
+	DDRC		= 0xFC;		// Port C
 	DDRD		= 0xF2;		// Port D
 
 	// Hold all PWM outputs low to stop glitches
@@ -87,23 +87,53 @@ void init(void)
 
 	// Set/clear pull-ups (1 = set, 0 = clear)
 	PINB		= 0xF5;		// Set PB pull-ups
+	PIND		= 0x0C;		// Set PD pull-ups (Don't pull up RX yet)
 
 	//***********************************************************
 	// Spektrum receiver binding. Must be done immediately on power-up
+	// 
+	// 3 low pulses: DSM2 1024/22ms
+	// 5 low pulses: DSM2 2048/11ms
+	// 7 low pulses: DSMX 1024/22ms
+	// 9 low pulses: DSMX 2048/11ms
 	//***********************************************************
-	// Bind as master if ONLY button 4 pressed
-	if (BUTTON4 == 0)
-	{
-		PIND	= 0x0C;		// Release RX pull up
-		_delay_ms(63);		// Pause while satellite wakes up
+
+	PIND	= 0x0C;			// Release RX pull up on PD0
+	_delay_ms(63);			// Pause while satellite wakes up
 							// and pull-ups have time to rise.
 							// Tweak until bind pulses about 68ms after power-up		
+		
+	// Bind as master if any single button pressed.
+	// NB: Have to wait until the button pull-ups rise before testing for a button press.
+	// Button 1
+	if ((PINB & 0xf0) == 0x70)
+	{
 		DDRD	= 0xF3;		// Switch PD0 to output
-		bind_master();
-		DDRD	= 0xF2;		// Reset Port D directions		
+		bind_master(3);
+		
 	}
-
-	PIND	= 0x0D;			// Set PD pull-ups (now pull up RX as well)	
+	// Button 2	
+	if ((PINB & 0xf0) == 0xb0)
+	{
+		DDRD	= 0xF3;		// Switch PD0 to output
+		bind_master(5);
+	}
+	// Button 3	
+	if ((PINB & 0xf0) == 0xd0)
+	{
+		DDRD	= 0xF3;		// Switch PD0 to output
+		bind_master(7);
+	}
+	
+	// Button 4
+	if ((PINB & 0xf0) == 0xE0)
+	{
+		DDRD	= 0xF3;		// Switch PD0 to output
+		bind_master(9);
+	}
+	
+	DDRD	= 0xF2;			// Reset Port D directions
+	PIND	= 0x0D;			// Set PD pull-ups (now pull up RX as well)
 
 	//***********************************************************
 	// Timers

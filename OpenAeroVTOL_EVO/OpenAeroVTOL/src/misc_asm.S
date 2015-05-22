@@ -44,16 +44,15 @@ glcd_delay_1us:
 	.endfunc
 
 ;*************************************************************************	
-; Do master binding timing
+; Do master binding timing	bind_master(pulses)
+; regs = r24
 ;*************************************************************************
 
 	.global bind_master
 	.func   bind_master
 bind_master:
 	push	YL			//	1
-	push	XL			//	1
 
-	ldi		XL,0x5		// 	1 Master is 5 pulses
 master_loop:
 	cbi 	BIND		//	2
 	ldi		YL,0x76		// 	1 		118us
@@ -61,10 +60,9 @@ master_loop:
 	sbi		BIND		//	2
 	ldi		YL,0x7A		// 	1 		122us
 	call	VarDelay	//	4
-	dec		XL			//	1
+	dec		r24
 	brne	master_loop	//  2 1
 
-	pop		XL			//	  1
 	pop		YL			//	  1
 	ret					//	  4 
 	.endfunc

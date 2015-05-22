@@ -61,7 +61,7 @@ void output_servo_ppm(uint8_t ServoFlag)
 	// and set all motors to minimum throttle if so
 	if 	(
 			(MonopolarThrottle < THROTTLEIDLE) || 
-			((General_error & (1 << DISARMED)) != 0)
+			(General_error & (1 << DISARMED))
 		)
 	{
 		// For each output

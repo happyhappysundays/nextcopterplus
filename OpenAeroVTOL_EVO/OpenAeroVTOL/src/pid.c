@@ -70,10 +70,6 @@ int32_t	GyroDTerm[NUMBEROFAXIS];					// Gyro D-terms for each axis
 int32_t PID_AvgAccVert = 0;							// Averaged Acc Z
 float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
 int32_t PID_AvgGyro[NUMBEROFAXIS];					// Averaged gyro data
-int32_t PID_OldAvgGyro[NUMBEROFAXIS];				// Old averaged gyro data - debug
-int32_t	PID_AvgGyroDTerm[NUMBEROFAXIS];				// Averaged gyro D-terms for each axis
-
-int16_t OldgyroADC[NUMBEROFAXIS];					// Holds previous Gyro values
 	
 // Run each loop to average gyro data and also accVert data
 void Sensor_PID(uint32_t period)
@@ -195,14 +191,7 @@ void Sensor_PID(uint32_t period)
 
 		PID_AvgGyro[axis] += gyroADC[axis];
 				
-		//************************************************************
-		// Apply a D-term to each axis (use raw gyro as error)
-		//************************************************************		
-		
-		// Debug use 1/factor to normalise the D-term with the loop rate 
-		PID_AvgGyroDTerm[axis] += (gyroADC[axis] - OldgyroADC[axis]);
-		OldgyroADC[axis] = gyroADC[axis];
-		
+	
 	} // for (axis = 0; axis <= YAW; axis ++)
 	
 	// Average accVert prior to Calculate_PID()
@@ -217,7 +206,6 @@ void Calculate_PID(void)
 	int32_t PID_acc_temp1 = 0;				// P1
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
-	int32_t PID_gyro_D = 0;					// D-terms
 	int16_t AvAccVert = 0;
 	int8_t	axis = 0;
 	int8_t i = 0;
@@ -248,12 +236,6 @@ void Calculate_PID(void)
 			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
 		};
 
-	// D-terms (same for all profiles for now)
-	int16_t	D_gain[NUMBEROFAXIS] =
-		{
-			Config.D_mult_roll, Config.D_mult_pitch, 0
-		};
-
 	// Average accVert
 	AvAccVert = (int16_t)(PID_AvgAccVert / LoopCount);
 	PID_AvgAccVert = 0;							// Reset average
@@ -271,18 +253,6 @@ void Calculate_PID(void)
 		gyroADC[axis] = (int16_t)(PID_AvgGyro[axis] / LoopCount);
 		PID_AvgGyro[axis] = 0;					// Reset average
 
-		//************************************************************
-		// Get average gyro readings for D-terms
-		//************************************************************
-#ifdef D_METHOD
-		// Average the D-terms previously generated from raw gyro differences
-		GyroDTerm[axis] = (PID_AvgGyroDTerm[axis] / LoopCount);
-		PID_AvgGyroDTerm[axis] = 0;				// Reset average
-#else
-		// Measure differences in already-averaged gyro data (in previous step above)
-		GyroDTerm[axis] = (gyroADC[axis] - PID_OldAvgGyro[axis]);
-		PID_OldAvgGyro[axis] = gyroADC[axis];
-#endif
 		//************************************************************
 		// Add in gyro Yaw trim
 		//************************************************************
@@ -319,9 +289,6 @@ void Calculate_PID(void)
 		PID_Gyro_I_actual2 = IntegralGyro[P2][axis] * I_gain[P2][axis];
 		PID_Gyro_I_actual2 = PID_Gyro_I_actual2 >> 5;
 
-		// Gyro D-terms
-		PID_gyro_D = GyroDTerm[axis] * D_gain[axis] * 2;				// Debug
-
 		//************************************************************
 		// I-term output limits
 		//************************************************************
@@ -350,8 +317,8 @@ void Calculate_PID(void)
 		// Sum Gyro P, I and D terms and rescale
 		//************************************************************
 
-		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1 + PID_gyro_D) >> PID_SCALE); // Currently PID_SCALE = 6 so /64
-		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2 + PID_gyro_D) >> PID_SCALE);
+		PID_Gyros[P1][axis] = (int16_t)((PID_gyro_temp1 + PID_Gyro_I_actual1) >> PID_SCALE); // Currently PID_SCALE = 6 so /64
+		PID_Gyros[P2][axis] = (int16_t)((PID_gyro_temp2 + PID_Gyro_I_actual2) >> PID_SCALE);
 
 		//************************************************************
 		// Calculate error from angle data and trim (roll and pitch only)

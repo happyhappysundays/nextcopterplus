@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 Beta 3 - April 2015
+// Version: Release V1.2 Beta 3 - May 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -105,14 +105,22 @@
 //
 // V1.2	Based on OpenAeroVTOL V1.1 code.
 //
-// Beta 1	Originally B17. Changed BIND logic to hopefully remove unbinding issues.
+// Beta 1	Changed BIND logic to hopefully remove unbinding issues.
 //			Tightened up stick polarity testing.
 //			Added persistent error log. Uncomment "ERROR_LOG" in compiledefs.h to use.
-// Beta 2	Originally B18. Timeout for high-speed mode wait loop.
+// Beta 2	Timeout for high-speed mode wait loop.
 //			Motor behaviour on loss of signal changed - now goes to idle where possible.
 //			Tweaks to optimise loop speed. Average gyro readings for P-terms.
 //			Experimental D-terms for roll/pitch.
-// Beta 3	Changed D-term weight
+// Beta 3	Updated S.Bus and Spektrum data conversion factors.
+//			Remove D-terms. Handles serial data errors properly.
+//			Fixed unintentional bind mode on power-up for Satellite RXs.
+//			Add binding modes for all DSM2/DSMX 1024/2048 receivers.
+//			Button 1 = DSM2 1024/22ms, Button 2 = DSM2 2048/11ms,
+//			Button 3 = DSMX 2048/22ms, Button 4 = DSMX 2048/11ms.
+//			Fixed S.Bus2 only recognising 1 in 4 packets.
+//			Experimental vibration test screen.
+//			Display jumps immediately to IDLE once armed.
 //
 //***********************************************************
 //* Notes
@@ -121,7 +129,7 @@
 // Bugs:
 //	
 //
-// To do: Test the averaged P-terms and the new D-term modes
+// To do: 
 //			
 //
 //***********************************************************
@@ -435,7 +443,8 @@ int main(void)
 			// but button is back up
 			case WAITING_TIMEOUT:
 				// In status screen, change back to idle after timing out
-				if (Status_seconds >= 10)
+				// If in vibration test mode, stay in Status
+				if ((Status_seconds >= 10) && (Config.Vibration == OFF))
 				{
 					Menu_mode = PRESTATUS_TIMEOUT;
 					
@@ -615,8 +624,8 @@ int main(void)
 				Arm_timer = 0;
 			}
 			
-			// If disarmed
-			if ((General_error & (1 << DISARMED)) != 0)
+			// If disarmed, arm if sticks held
+			if (General_error & (1 << DISARMED))
 			{
 				// Reset auto-disarm count
 				Disarm_timer = 0;
@@ -631,10 +640,16 @@ int main(void)
 					CalibrateGyrosSlow();					// Calibrate gyros
 					LED1 = 1;								// Signal that FC is ready
 					reset_IMU();							// Reset IMU just in case...
-				}				
+
+					// Force Menu to IDLE immediately unless in vibration test mode
+					if (Config.Vibration == OFF)
+					{
+						Menu_mode = IDLE;
+					}
+				}
 			}
 		
-			// If armed
+			// If armed, disarm if sticks held
 			else 
 			{
 				// Disarm the FC after DISARM_TIMER seconds if aileron at max
@@ -675,7 +690,7 @@ add_log(TIMER);
 #endif
 				}
 			}
-		}
+		} // if (Config.ArmMode == ARMABLE)
 		
 		// Arm when ArmMode is OFF
 		else 
@@ -686,7 +701,7 @@ add_log(TIMER);
 
 		// All code based on RC inputs is redundant until new RC data is ready,
 		// otherwise the same data will be read back each and every time.
-		if (Interrupted || Interrupted_Clone)
+		if (Interrupted)
 		{
 			//************************************************************
 			//* Get RC data

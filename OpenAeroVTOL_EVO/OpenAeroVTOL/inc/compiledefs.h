@@ -10,8 +10,3 @@
 
 // Uncomment this to enable the error log
 #define ERROR_LOG
-
-// Debug - choose D-term method
-// Uncommented = average differences in gyros
-// Commented = measure differences in averaged gyros
-#define D_METHOD

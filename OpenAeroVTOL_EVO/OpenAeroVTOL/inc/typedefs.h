@@ -134,7 +134,7 @@ typedef struct
 	// Servo travel limits (32)
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (9)
+	// RC items (8/9)
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		Servo_rate;				// PWM rate for (Low = ~50Hz, RCSync = as per RX, High = ~200Hz)
 	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
@@ -142,10 +142,8 @@ typedef struct
 	int8_t		FlightChan;				// Channel number to select flight mode
 	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
 	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
-	int8_t		D_mult_roll;			// Roll D-term
-	int8_t		D_mult_pitch;			// Pitch D-term
-	//int8_t		AileronPol;				// Aileron RC input polarity
-	//int8_t		ElevatorPol;			// Elevator RC input polarity
+	int8_t		Vibration;				// Vibration test mode on/off
+	int8_t		ElevatorPol;			// Elevator RC input polarity (old location)
 	
 	// Flight mode settings (36)
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
@@ -205,7 +203,7 @@ typedef struct
 	// Misc
 	int8_t		RudderPol;				// Rudder RC input polarity
 	int8_t		AileronPol;				// Aileron RC input polarity
-	int8_t		ElevatorPol;			// Elevator RC input polarity
+//	int8_t		ElevatorPol;			// Elevator RC input polarity
 		
 	// Error log
 	int8_t		log_pointer;
