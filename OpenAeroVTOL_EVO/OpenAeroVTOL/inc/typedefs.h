@@ -28,7 +28,7 @@
 										// Not to be confused with MOTORMIN which is a PWM value.
 #define THROTTLEOFFSET 1250				// Mixer offset needed to reduce the output center to MOTORMIN
 
-#define LOGLENGTH	20					// Debug log length
+#define LOGLENGTH	20					// Error log length
 
 /*********************************************************************
  * Type definitions

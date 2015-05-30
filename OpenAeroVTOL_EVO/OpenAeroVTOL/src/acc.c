@@ -122,31 +122,21 @@ void get_raw_accs(void)
 
 	// Get data from MPU6050
 	uint8_t Accs[6];
-	int16_t temp1, temp2;
 
 	// Get the i2c data from the MPU6050
 	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_ACCEL_XOUT_H,(uint8_t *)Accs,6);
 
 	// Reassemble data into accADC array and down sample to reduce resolution and noise
 	// This notation is true to the chip, but not the board orientation
-
-	temp1 = Accs[0] << 8;					// Accel X
-	temp2 = Accs[1];
-	RawADC[ROLL] = (temp1 + temp2) >> 6;
-
-	temp1 = Accs[2] << 8;					// Accel Y
-	temp2 = Accs[3];
-	RawADC[PITCH] = -((temp1 + temp2) >> 6);
-
-	temp1 = Accs[4] << 8;					// Accel Z
-	temp2 = Accs[5];
-	RawADC[YAW] = (temp1 + temp2) >> 6;
+	RawADC[ROLL] = (Accs[0] << 8) + Accs[1];
+	RawADC[PITCH] = -((Accs[2] << 8) + Accs[3]);
+	RawADC[YAW] = (Accs[4] << 8) + Accs[5];
 
 	// Reorient the data as per the board orientation	
 	for (i=0; i<NUMBEROFAXIS; i++)
 	{
 		// Rearrange the sensors
-		accADC[i] = RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][i])];
+		accADC[i] = RawADC[(int8_t)pgm_read_byte(&ACC_RPY_Order[Config.Orientation][i])] >> 6;
 	}
 }
 

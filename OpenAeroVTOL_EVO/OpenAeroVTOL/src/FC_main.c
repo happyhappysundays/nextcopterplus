@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 Beta 3 - May 2015
+// Version: Release V1.2 Beta 6 - May 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -121,6 +121,10 @@
 //			Fixed S.Bus2 only recognising 1 in 4 packets.
 //			Experimental vibration test screen.
 //			Display jumps immediately to IDLE once armed.
+// Beta 4	Updated vibration display calculation with HPF.
+// Beta 5	Fixed loss of control in RC Sync mode.
+//			Vibration screen persistence reduced.
+// Beta 6	Changed vibration mode HPF to 50Hz.
 //
 //***********************************************************
 //* Notes
@@ -699,237 +703,231 @@ add_log(TIMER);
 			LED1 = 1;
 		}
 
-		// All code based on RC inputs is redundant until new RC data is ready,
-		// otherwise the same data will be read back each and every time.
-		if (Interrupted)
+		//************************************************************
+		//* Get RC data
+		//************************************************************
+
+		// Update zeroed RC channel data
+		RxGetChannels();
+
+		// Check for throttle reset
+		if (MonopolarThrottle < THROTTLEIDLE)
 		{
-			//************************************************************
-			//* Get RC data
-			//************************************************************
+			// Clear throttle high error
+			General_error &= ~(1 << THROTTLE_HIGH);	
 
-			// Update zeroed RC channel data
-			RxGetChannels();
+			// Reset I-terms at throttle cut. Using memset saves code space
+			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
+		}
 
-			// Check for throttle reset
-			if (MonopolarThrottle < THROTTLEIDLE)
+		//************************************************************
+		//* Flight profile / transition state selection
+		//*
+		//* When transitioning, the flight profile is a moving blend of 
+		//* Flight profiles P1 to P2. The transition speed is controlled 
+		//* by the Config.TransitionSpeed setting.
+		//* The transition will hold at P1n position if directed to.
+		//************************************************************
+
+		// P2 transition point hard-coded to 50% above center
+		if 	(RCinputs[Config.FlightChan] > 500)
+		{
+			Config.FlightSel = 2;			// Flight mode 2 (P2)
+		}
+		// P1.n transition point hard-coded to 50% below center
+		else if (RCinputs[Config.FlightChan] > -500)
+		{
+			Config.FlightSel = 1;			// Flight mode 1 (P1.n)
+		}
+		// Otherwise the default is P1
+		else
+		{
+			Config.FlightSel = 0;			// Flight mode 0 (P1)
+		}
+
+		// Reset update request each loop
+		TransitionUpdated = false;
+
+		//************************************************************
+		//* Transition state setup/reset
+		//*
+		//* Set up the correct state for the current setting.
+		//* Check for initial startup - the only time that old_flight should be "3".
+		//* Also, re-initialise if the transition setting is changed
+		//************************************************************
+
+		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
+		{
+			switch(Config.FlightSel)
 			{
-				// Clear throttle high error
-				General_error &= ~(1 << THROTTLE_HIGH);	
+				case 0:
+					Transition_state = TRANS_P1;
+					transition_counter = 0;
+					break;
+				case 1:
+					Transition_state = TRANS_P1n;
+					transition_counter = Config.Transition_P1n; // Set transition point to the user-selected point
+					break;
+				case 2:
+					Transition_state = TRANS_P2;
+					transition_counter = 100;
+					break;
+				default:
+					break;
+			}		 
+			old_flight = Config.FlightSel;
+			old_trans_mode = Config.TransitionSpeed;
+		}
 
-				// Reset I-terms at throttle cut. Using memset saves code space
-				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
-			}
+		//************************************************************
+		//* Transition state handling
+		//************************************************************
 
-			//************************************************************
-			//* Flight profile / transition state selection
-			//*
-			//* When transitioning, the flight profile is a moving blend of 
-			//* Flight profiles P1 to P2. The transition speed is controlled 
-			//* by the Config.TransitionSpeed setting.
-			//* The transition will hold at P1n position if directed to.
-			//************************************************************
+		// Update timed transition when changing flight modes
+		if (Config.FlightSel != old_flight)
+		{
+			// Flag that update is required if mode changed
+			TransitionUpdated = true;
+		}
 
-			// P2 transition point hard-coded to 50% above center
-			if 	(RCinputs[Config.FlightChan] > 500)
-			{
-				Config.FlightSel = 2;			// Flight mode 2 (P2)
-			}
-			// P1.n transition point hard-coded to 50% below center
-			else if (RCinputs[Config.FlightChan] > -500)
-			{
-				Config.FlightSel = 1;			// Flight mode 1 (P1.n)
-			}
-			// Otherwise the default is P1
-			else
-			{
-				Config.FlightSel = 0;			// Flight mode 0 (P1)
-			}
+		// Work out transition number when manually transitioning
+		// Convert number to percentage (0 to 100%)
+		if (Config.TransitionSpeed == 0)
+		{
+			// Offset RC input to (approx) -250 to 2250
+			temp1 = RCinputs[Config.FlightChan] + 1000;
 
-			// Reset update request each loop
+			// Trim lower end to zero (0 to 2250)
+			if (temp1 < 0) temp1 = 0;
+
+			// Convert 0 to 2250 to 0 to 125. Divide by 20
+			// Round to avoid truncation errors
+			transition = (temp1 + 10) / 20;
+
+			// transition now has a range of 0 to 101 for 0 to 2000 input
+			// Limit extent of transition value 0 to 100 (101 steps)
+			if (transition > 100) transition = 100;
+		}
+		else
+		{
+			// transition_counter counts from 0 to 100 (101 steps)
+			transition = transition_counter;
+		}
+
+		// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
+		// This prevents state changes when controlled by a channel
+		if (Config.TransitionSpeed == 0)
+		{
+			Transition_state = TRANSITIONING;
+		}
+
+		// Update transition state change when control value or flight mode changes
+		if (TransitionUpdated)
+		{
+			// Update transition state from matrix
+			Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
+		}
+
+		// Calculate transition time from user's setting
+		transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
+		
+		// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
+		if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
+			// Update immediately
+			TransitionUpdated)
+		{
+			Transition_timeout = 0;
 			TransitionUpdated = false;
 
-			//************************************************************
-			//* Transition state setup/reset
-			//*
-			//* Set up the correct state for the current setting.
-			//* Check for initial startup - the only time that old_flight should be "3".
-			//* Also, re-initialise if the transition setting is changed
-			//************************************************************
-
-			if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
+			// Fixed, end-point states
+			if (Transition_state == TRANS_P1)
 			{
-				switch(Config.FlightSel)
-				{
-					case 0:
-						Transition_state = TRANS_P1;
-						transition_counter = 0;
-						break;
-					case 1:
-						Transition_state = TRANS_P1n;
-						transition_counter = Config.Transition_P1n; // Set transition point to the user-selected point
-						break;
-					case 2:
-						Transition_state = TRANS_P2;
-						transition_counter = 100;
-						break;
-					default:
-						break;
-				}		 
-				old_flight = Config.FlightSel;
-				old_trans_mode = Config.TransitionSpeed;
+				transition_counter = 0;
+			}
+			else if (Transition_state == TRANS_P1n)
+			{
+				transition_counter = Config.Transition_P1n;
+			}
+			else if (Transition_state == TRANS_P2)
+			{
+				transition_counter = 100;
+			}		
+
+			// Over-ride users requesting silly states
+			// If transition_counter is above P1.n but request is P1 to P1.n or 
+			// if transition_counter is below P1.n but request is P2 to P1.n...
+			if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
+			{
+				// Reset state to a more appropriate one
+				Transition_state = TRANS_P2_to_P1n_start;
 			}
 
-			//************************************************************
-			//* Transition state handling
-			//************************************************************
-
-			// Update timed transition when changing flight modes
-			if (Config.FlightSel != old_flight)
+			if ((Transition_state == TRANS_P2_to_P1n_start) && (transition_counter < Config.Transition_P1n))
 			{
-				// Flag that update is required if mode changed
-				TransitionUpdated = true;
+				// Reset state to a more appropriate one
+				Transition_state = TRANS_P1_to_P1n_start;
 			}
 
-			// Work out transition number when manually transitioning
-			// Convert number to percentage (0 to 100%)
-			if (Config.TransitionSpeed == 0)
+			// Handle timed transition towards P1
+			if ((Transition_state == TRANS_P1n_to_P1_start) || (Transition_state == TRANS_P2_to_P1_start))
 			{
-				// Offset RC input to (approx) -250 to 2250
-				temp1 = RCinputs[Config.FlightChan] + 1000;
-
-				// Trim lower end to zero (0 to 2250)
-				if (temp1 < 0) temp1 = 0;
-
-				// Convert 0 to 2250 to 0 to 125. Divide by 20
-				// Round to avoid truncation errors
-				transition = (temp1 + 10) / 20;
-
-				// transition now has a range of 0 to 101 for 0 to 2000 input
-				// Limit extent of transition value 0 to 100 (101 steps)
-				if (transition > 100) transition = 100;
-			}
-			else
-			{
-				// transition_counter counts from 0 to 100 (101 steps)
-				transition = transition_counter;
-			}
-
-			// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
-			// This prevents state changes when controlled by a channel
-			if (Config.TransitionSpeed == 0)
-			{
-				Transition_state = TRANSITIONING;
-			}
-
-			// Update transition state change when control value or flight mode changes
-			if (TransitionUpdated)
-			{
-				// Update transition state from matrix
-				Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
-			}
-
-			// Calculate transition time from user's setting
-			transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
-		
-			// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
-			if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
-				// Update immediately
-				TransitionUpdated)
-			{
-				Transition_timeout = 0;
-				TransitionUpdated = false;
-
-				// Fixed, end-point states
-				if (Transition_state == TRANS_P1)
+				transition_counter--;
+				if (transition_counter <= 0)
 				{
 					transition_counter = 0;
+					Transition_state = TRANS_P1;
 				}
-				else if (Transition_state == TRANS_P1n)
+			}
+
+			// Handle timed transition between P1.n and P1
+			if (Transition_state == TRANS_P1_to_P1n_start)
+			{
+				transition_counter++;
+				if (transition_counter >= Config.Transition_P1n)
 				{
 					transition_counter = Config.Transition_P1n;
+					Transition_state = TRANS_P1n;
 				}
-				else if (Transition_state == TRANS_P2)
+			}			
+				
+			// Handle timed transition between P1.n and P2
+			if (Transition_state == TRANS_P2_to_P1n_start)
+			{
+				transition_counter--;
+				if (transition_counter <= Config.Transition_P1n)
+				{
+					transition_counter = Config.Transition_P1n;
+					Transition_state = TRANS_P1n;
+				}
+			}
+
+			// Handle timed transition towards P2
+			if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
+			{
+				transition_counter++;
+				if (transition_counter >= 100)
 				{
 					transition_counter = 100;
-				}		
-
-				// Over-ride users requesting silly states
-				// If transition_counter is above P1.n but request is P1 to P1.n or 
-				// if transition_counter is below P1.n but request is P2 to P1.n...
-				if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
-				{
-					// Reset state to a more appropriate one
-					Transition_state = TRANS_P2_to_P1n_start;
+					Transition_state = TRANS_P2;
 				}
-
-				if ((Transition_state == TRANS_P2_to_P1n_start) && (transition_counter < Config.Transition_P1n))
-				{
-					// Reset state to a more appropriate one
-					Transition_state = TRANS_P1_to_P1n_start;
-				}
-
-				// Handle timed transition towards P1
-				if ((Transition_state == TRANS_P1n_to_P1_start) || (Transition_state == TRANS_P2_to_P1_start))
-				{
-					transition_counter--;
-					if (transition_counter <= 0)
-					{
-						transition_counter = 0;
-						Transition_state = TRANS_P1;
-					}
-				}
-
-				// Handle timed transition between P1.n and P1
-				if (Transition_state == TRANS_P1_to_P1n_start)
-				{
-					transition_counter++;
-					if (transition_counter >= Config.Transition_P1n)
-					{
-						transition_counter = Config.Transition_P1n;
-						Transition_state = TRANS_P1n;
-					}
-				}			
-				
-				// Handle timed transition between P1.n and P2
-				if (Transition_state == TRANS_P2_to_P1n_start)
-				{
-					transition_counter--;
-					if (transition_counter <= Config.Transition_P1n)
-					{
-						transition_counter = Config.Transition_P1n;
-						Transition_state = TRANS_P1n;
-					}
-				}
-
-				// Handle timed transition towards P2
-				if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
-				{
-					transition_counter++;
-					if (transition_counter >= 100)
-					{
-						transition_counter = 100;
-						Transition_state = TRANS_P2;
-					}
-				}
-
-			} // Update transition_counter
-
-			// Zero the I-terms of the opposite state so as to ensure a bump-less transition
-			if ((Transition_state == TRANS_P1) || (transition == 0))
-			{
-				// Clear P2 I-term while fully in P1
-				memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
 			}
-			else if ((Transition_state == TRANS_P2) || (transition == 100))
-			{
-				// Clear P1 I-term while fully in P2
-				memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
-			}
+
+		} // Update transition_counter
+
+		// Zero the I-terms of the opposite state so as to ensure a bump-less transition
+		if ((Transition_state == TRANS_P1) || (transition == 0))
+		{
+			// Clear P2 I-term while fully in P1
+			memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
+		}
+		else if ((Transition_state == TRANS_P2) || (transition == 100))
+		{
+			// Clear P1 I-term while fully in P2
+			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
+		}
 		
-			// Save current flight mode
-			old_flight = Config.FlightSel;
-
-		} // Interrupted
+		// Save current flight mode
+		old_flight = Config.FlightSel;
 				
 		//************************************************************
 		//* Update timers
@@ -1420,7 +1418,7 @@ add_log(TIMER);
 			}
 			
 			// Debug - Whhaaaat? - delete this unless I recall why it is even here.
-			Interrupted_Clone = false;
+			//Interrupted_Clone = false;
 		}
 	
 		//************************************************************

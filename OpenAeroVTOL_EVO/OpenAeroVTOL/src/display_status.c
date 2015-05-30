@@ -21,12 +21,6 @@
 #include "main.h"
 #include "pid.h"
 #include "gyros.h"
-
-//************************************************************
-// Globals
-//************************************************************
-
-float 		GyroAvg;
 	
 //************************************************************
 // Prototypes
@@ -126,17 +120,11 @@ void Display_status(void)
 		if (Config.Vibration == ON)
 		{
 			// Create message box
-			fillrect(buffer, 29,11, 70, 42, 0);	// White box
+			fillrect(buffer, 29,11, 70, 42, 0);		// White box
 			drawrect(buffer, 29,11, 70, 42, 1); 	// Outline
 
-			// Work out quick average of all gyros and take the absolute value
-			temp = abs((gyroADC[ROLL] + gyroADC[PITCH] + gyroADC[YAW])/3);
-			
-			// LPF filter the readings so that they are more persistent
-			GyroAvg = ((GyroAvg * (float)9) + (float)temp) / (float)10;
-			
 			// Display vibration data
-			temp = (int16_t)GyroAvg;
+			temp = (int16_t)GyroAvgNoise;
 			
 			// Work out pixel size of number to display
 			mugui_text_sizestring(itoa(temp,pBuffer,10), (const unsigned char*)Verdana22, &size);

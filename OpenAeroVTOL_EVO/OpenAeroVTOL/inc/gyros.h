@@ -12,3 +12,4 @@ extern bool CalibrateGyrosSlow(void);
 extern void get_raw_gyros(void);
 
 extern int16_t gyroADC[NUMBEROFAXIS];		// Holds 16-bit gyro values
+extern int16_t gyroADC_raw[NUMBEROFAXIS];	// Holds raw Gyro ADCs

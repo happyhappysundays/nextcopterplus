@@ -29,6 +29,14 @@
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
 #define STANDARDLOOP 3571.0			// T1 counts of 700Hz cycle time (2500000/700)
 
+#define SAMPLE_RATE 500				// Sample rate for high-pass filter (HPF)
+#define HPF_FC	50					// HPF cut-off frequency
+#define HPF_Q	1					// Q (Quality) factor of the HPF
+#define HPF_O	(2 * M_PI * HPF_FC / SAMPLE_RATE)
+#define HPF_C	(HPF_Q / HPF_O)
+#define HPF_L	(1 / HPF_Q / HPF_O)
+
+
 //************************************************************
 // Notes
 //************************************************************
@@ -69,7 +77,13 @@ int32_t	GyroDTerm[NUMBEROFAXIS];					// Gyro D-terms for each axis
 
 int32_t PID_AvgAccVert = 0;							// Averaged Acc Z
 float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
-int32_t PID_AvgGyro[NUMBEROFAXIS];					// Averaged gyro data
+int32_t PID_AvgGyro[NUMBEROFAXIS];					// Averaged gyro data over last x loops
+float 	GyroAvgNoise;								// Gyro noise value	
+
+float HPF_V = 0;
+float HPF_T = 0;
+float HPF_I = 0;
+float fsample = 0;
 	
 // Run each loop to average gyro data and also accVert data
 void Sensor_PID(uint32_t period)
@@ -100,6 +114,35 @@ void Sensor_PID(uint32_t period)
 		{Config.FlightMode[P1].Roll_Rate, Config.FlightMode[P1].Pitch_Rate, Config.FlightMode[P1].Yaw_Rate},
 		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 	};
+
+
+	//************************************************************
+	// Create a measure of gyro noise
+	//************************************************************
+
+	// Only bother when display vibration info is set to "ON"
+	if (Config.Vibration == ON)
+	{
+		// Work out quick average of all raw gyros and take the absolute value
+		fsample = (float)(gyroADC_raw[ROLL] + gyroADC_raw[PITCH] + gyroADC_raw[YAW]);
+
+		// HPF example from http://www.codeproject.com/Tips/681745/Csharp-Discrete-Time-RLC-Low-High-Pass-Filter-Rout
+		// Some values preset for a 50Hz cutoff at 500Hz sample rate
+		HPF_T = (fsample * HPF_O) - HPF_V;
+		HPF_V += (HPF_I + HPF_T) / HPF_C;
+		HPF_I += HPF_T / HPF_L;
+		fsample -= HPF_V / HPF_O;
+
+		// LPF filter the readings so that they are more persistent
+		GyroAvgNoise = ((GyroAvgNoise * 99.0f) + abs(fsample)) / 100.0f;
+
+		// Limit noise reading to 999
+		if (GyroAvgNoise > 999.0f)
+		{
+			GyroAvgNoise = 999.0f;
+		}
+
+	}
 
 	for (axis = 0; axis <= YAW; axis ++)
 	{
@@ -190,7 +233,6 @@ void Sensor_PID(uint32_t period)
 		//************************************************************
 
 		PID_AvgGyro[axis] += gyroADC[axis];
-				
 	
 	} // for (axis = 0; axis <= YAW; axis ++)
 	

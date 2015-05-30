@@ -80,6 +80,7 @@ const int8_t Gyro_Pol[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM =
 //************************************************************
 
 int16_t gyroADC[NUMBEROFAXIS];			// Holds Gyro ADCs
+int16_t gyroADC_raw[NUMBEROFAXIS];		// Holds raw Gyro ADCs
 
 void ReadGyros(void)					// Conventional orientation
 {
@@ -99,32 +100,22 @@ void ReadGyros(void)					// Conventional orientation
 
 void get_raw_gyros(void)
 {
-	int16_t RawADC[NUMBEROFAXIS];
 	uint8_t i;
 	uint8_t Gyros[6];
-	int16_t temp1, temp2;
 
 	// Get the i2c data from the MPU6050
 	readI2CbyteArray(MPU60X0_DEFAULT_ADDRESS,MPU60X0_RA_GYRO_XOUT_H,(uint8_t *)Gyros,6);
 
 	// Reassemble data into gyroADC array and down-sample to reduce resolution and noise
-	temp1 = Gyros[0] << 8;
-	temp2 = Gyros[1];
-	RawADC[PITCH] = (temp1 + temp2) >> GYRODIV;
-
-	temp1 = Gyros[2] << 8;
-	temp2 = Gyros[3];
-	RawADC[ROLL] = (temp1 + temp2) >> GYRODIV;
-
-	temp1 = Gyros[4] << 8;
-	temp2 = Gyros[5];
-	RawADC[YAW] = (temp1 + temp2) >> GYRODIV;
+	gyroADC_raw[PITCH] = (Gyros[0] << 8) + Gyros[1];
+	gyroADC_raw[ROLL] = (Gyros[2] << 8) + Gyros[3];
+	gyroADC_raw[YAW] = (Gyros[4] << 8) + Gyros[5];
 
 	// Reorient the data as per the board orientation	
 	for (i=0; i<NUMBEROFAXIS; i++)
 	{
 		// Rearrange the sensors
-		gyroADC[i] 	= RawADC[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][i])];
+		gyroADC[i] 	= gyroADC_raw[(int8_t)pgm_read_byte(&Gyro_RPY_Order[Config.Orientation][i])] >> GYRODIV;
 	}
 }
 
