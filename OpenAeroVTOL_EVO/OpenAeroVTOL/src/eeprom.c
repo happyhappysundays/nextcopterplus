@@ -60,7 +60,8 @@ void Load_eeprom_preset(uint8_t preset);
 
 const uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
 const uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
-
+const uint8_t	MPX[MAX_RC_CHANNELS] PROGMEM	= {1,2,3,5,0,4,6,7}; 	// Multiplex channel sequence (AER1TG23)
+	
 void Save_Config_to_EEPROM(void)
 {
 	// Write to eeProm

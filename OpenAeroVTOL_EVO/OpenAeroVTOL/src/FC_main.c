@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 Beta 6 - May 2015
+// Version: Release V1.2 Beta 7 - June 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -125,6 +125,8 @@
 // Beta 5	Fixed loss of control in RC Sync mode.
 //			Vibration screen persistence reduced.
 // Beta 6	Changed vibration mode HPF to 50Hz.
+// Beta 7	Added Multiplex channel order, SRXL/UDI (Mode B) serial input format.
+//
 //
 //***********************************************************
 //* Notes
@@ -1416,9 +1418,6 @@ add_log(TIMER);
 				fast_sync_timer += (uint8_t)(TCNT2 - fast_sync_TCNT2);
 				fast_sync_TCNT2 = TCNT2;
 			}
-			
-			// Debug - Whhaaaat? - delete this unless I recall why it is even here.
-			//Interrupted_Clone = false;
 		}
 	
 		//************************************************************

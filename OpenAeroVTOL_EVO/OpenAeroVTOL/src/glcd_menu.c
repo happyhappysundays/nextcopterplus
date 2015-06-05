@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.2 B6";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version:   1.2 B7";	// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -126,9 +126,11 @@ const char RXMode1[]  PROGMEM = "PWM";
 const char RXMode2[]  PROGMEM = "S-Bus";
 const char RXMode3[]  PROGMEM = "Spektrum";
 const char RXMode4[]  PROGMEM = "Xtreme";
+const char RXMode5[]  PROGMEM = "SRXL";
 //
 const char RCMenuItem6[]  PROGMEM = "JR,Spktm"; 			// Channel order
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
+const char RCMenuItem8[]  PROGMEM = "MPX"; 
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
 const char Contrast[]  PROGMEM = "Contrast:";
@@ -357,7 +359,7 @@ const char* const text_menu[] PROGMEM =
 		PText4, 																			// 61 Failed
 		//
 		RXMode0, RXMode1, RXMode2, RXMode3,													// 62 to 65 RX mode
-		RXMode4, Dummy0, 
+		RXMode4, RXMode5, 
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//
@@ -380,7 +382,7 @@ const char* const text_menu[] PROGMEM =
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
 		ChannelRef10, ChannelRef12, 														// 114, 115 Ch.ref abbreviations
 		//
-		RCMenuItem6, RCMenuItem7, 															// 116 to 117 JR/Futaba
+		Dummy0, Dummy0, 																	// 116 to 117 Spare
 		//
 		ErrorText10, GeneralText5, Random1,													// 118 to 120 Low, Sync RC, High
 		//
@@ -389,7 +391,7 @@ const char* const text_menu[] PROGMEM =
 		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,										// 124 to 129 H/V/UD/Aft/Sideways/PitchUp
 		MixerMenuItem5, MixerMenuItem6,	MixerMenuItem7,
 		//																
-		Dummy0,Dummy0,Dummy0,																// 130 to 132 Spare
+		RCMenuItem6, RCMenuItem7, RCMenuItem8,												// 130 to 132 JR/Futaba/MPX
 		//
 		StatusText7,																		// 133 Battery:
 		//

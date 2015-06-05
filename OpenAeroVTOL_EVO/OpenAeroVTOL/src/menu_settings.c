@@ -40,7 +40,8 @@ void menu_rc_setup(uint8_t section);
 //************************************************************
 
 #define RCSTART 149 	// Start of Menu text items
-#define RCOFFSET 79		// LCD offsets
+#define RCOFFSET 77		// LCD offset position for values (RC)
+#define GENOFFSET 79	// LCD offset position for values (General)
 
 #define RCTEXT 62 		// Start of value text items
 #define GENERALTEXT	124
@@ -56,7 +57,7 @@ void menu_rc_setup(uint8_t section);
 	 
 const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 118, 105, 116, 105, 0, 0, 68, 0},		// RC setup
+	{RCTEXT, 118, 105, 130, 105, 0, 0, 68, 0},		// RC setup
 	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 273},	// General 
 };
 
@@ -64,10 +65,10 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 {
 	{
 		// RC setup (8)					// Min, Max, Increment, Style, Default
-		{CPPM_MODE,XTREME,1,1,SBUS},	// Receiver type
+		{CPPM_MODE,SRXL,1,1,SBUS},		// Receiver type
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
-		{JRSEQ,FUTABASEQ,1,1,JRSEQ}, 	// Channel order
+		{JRSEQ,MPXSEQ,1,1,JRSEQ},		// Channel order
 		{THROTTLE,AUX3,1,1,GEAR},		// Profile select channel
 		{0,40,1,0,0},					// TransitionSpeed 0 to 40
 		{1,99,1,0,50},					// Transition P1n point
@@ -106,6 +107,7 @@ void menu_rc_setup(uint8_t section)
 	uint8_t		i;
 	uint16_t	offset = 0;			// Index into channel structure
 	uint16_t	items= RCITEMS;		// Items in group
+	uint16_t	value_offset = RCOFFSET;
 	
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
@@ -121,8 +123,10 @@ void menu_rc_setup(uint8_t section)
 		switch(section)
 		{
 			case 1:				// RC setup menu
+				value_offset = RCOFFSET;
 				break;
 			case 2:				// General menu
+				value_offset = GENOFFSET;
 				offset = RCITEMSOFFSET;
 				items = GENERALITEMS;
 				value_ptr = &Config.Orientation;
@@ -135,7 +139,7 @@ void menu_rc_setup(uint8_t section)
 		Config.Preset = OPTIONS;
 
 		// Print menu - note that print_menu_items() updates button variable.
-		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, RCOFFSET, (const uint16_t*)RCMenuText[section - 1], cursor);
+		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, value_offset, (const uint16_t*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &sub_top, &menu_temp);
@@ -185,9 +189,13 @@ void menu_rc_setup(uint8_t section)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
 				}
-				else
+				else if (Config.TxSeq == JRSEQ)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
+				}
+				else
+				{
+					Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
 				}
 			}
 

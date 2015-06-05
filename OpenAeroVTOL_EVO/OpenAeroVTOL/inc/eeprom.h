@@ -13,3 +13,4 @@ extern void Load_eeprom_preset(uint8_t preset);
 
 extern uint8_t JR[];
 extern uint8_t FUTABA[];
+extern uint8_t MPX[];

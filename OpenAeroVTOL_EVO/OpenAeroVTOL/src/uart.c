@@ -35,6 +35,8 @@ void init_uart(void);
 #define USART_BAUDRATE_SPEKTRUM 115200
 #define BAUD_PRESCALE_SPEKTRUM ((F_CPU + USART_BAUDRATE_SPEKTRUM * 8L) / (USART_BAUDRATE_SPEKTRUM * 16L) - 1) // Default RX rate for Spektrum
 
+#define XBUS_CRC_POLY 0x1021
+
 // Initialise UART with adjusted bitrate
 void init_uart(void)
 {
@@ -78,7 +80,8 @@ void init_uart(void)
 			UCSR0B |=  (1 << RXCIE0);					// Enable serial interrupt
 			break;
 
-		// Spektrum 8N1 (8 data bits / No parity / 1 stop bit / 115.2Kbps)
+		// Spektrum 8N1 (8 data bits / No parity / 1 stop bit / 115.2Kbps) (Same for SRXL/UDI)
+		case SRXL:
 		case SPEKTRUM: 	
 			UCSR0A &=  ~(1 << U2X0);					// Clear the 2x flag
 			UBRR0H  =  (BAUD_PRESCALE_SPEKTRUM >> 8); 	// Actual = 113636, Error = -1.36%
@@ -102,3 +105,24 @@ void init_uart(void)
 	sei();
 }
 
+// CRC16 checksum
+uint16_t CRC16(uint16_t crc, uint8_t value)
+{
+	uint8_t i;
+	
+	crc = crc ^ (uint16_t)value << 8;
+	
+	for (i = 0; i < 8; i++)
+	{
+		if (crc & 0x8000)
+		{
+			crc = crc << 1 ^XBUS_CRC_POLY;
+		}
+		else
+		{
+			crc = crc << 1;
+		}
+	}
+
+	return crc;
+}

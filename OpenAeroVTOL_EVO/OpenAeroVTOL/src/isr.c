@@ -12,6 +12,7 @@
 #include "main.h"
 #include <stdlib.h>
 #include <string.h>
+#include <uart.h>
 
 //***********************************************************
 //* Prototypes
@@ -41,13 +42,21 @@ volatile uint16_t checksum;
 volatile uint8_t bytecount;
 volatile uint16_t TMR0_counter;		// Number of times Timer 0 has overflowed
 volatile uint16_t FrameRate;		// Updated frame rate for serial packets
-
+volatile uint8_t packet_size;
 
 #define SYNCPULSEWIDTH 6750			// CPPM sync pulse must be more than 2.7ms
 #define MINPULSEWIDTH 750			// Minimum CPPM pulse is 300us
 #define PACKET_TIMER 2500			// Serial RC packet start timer. Minimum gap 500/2500000 = 1.0ms
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
+#define SRXL_SYNCBYTE 0xA1			// SRXL/UDI sync byte
+#define XBUS_FRAME_SIZE_12 27		// Packet size for a 12-channel packet
+#define XBUS_FRAME_SIZE_16 35		// Packet size for a 16-channel packet	
+#define XBUS_CRC_BYTE_1 25
+#define XBUS_CRC_BYTE_2 26
+#define XBUS_CRC_AND_VALUE 0x8000
+#define XBUS_CRC_POLY 0x1021
+			
 //************************************************************
 //* Timer 0 overflow handler for extending TMR1
 //************************************************************
@@ -265,10 +274,14 @@ ISR(USART0_RX_vect)
 	uint8_t chan_mask = 0;	// Common variables
 	uint8_t chan_shift = 0;
 	uint8_t data_mask = 0;
+	uint8_t	packet_size = 0;
+	uint16_t crc = 0;
+	uint16_t checkcrc = 0;
+
 	
 	uint16_t Save_TCNT1;	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
-	uint16_t CurrentPeriod;
-
+	uint16_t CurrentPeriod;	
+	
 	//************************************************************
 	//* Common entry code
 	//************************************************************
@@ -693,6 +706,95 @@ ISR(USART0_RX_vect)
 		} // (Config.RxMode == SPEKTRUM)
 
 		//************************************************************
+		//* SRXL (XBUS/UDI Mode B) RX Data format 115200Kbit/s, 8 data bit, no parity, and one stop bit. 
+		//* Portions of code adopted from MultiWii and from GruffyPuffy/cleanflight.
+		//* 
+		//* First byte = vendor ID		0xA1 = 12-Ch SRXL
+		//*								0xA2 = 16-Ch SRXL
+		//*
+		//* Next 24/32 bytes = 12/16 channels of 16-bit servo data, high-byte first
+		//* Last 2 bytes = CRC value over first 25/33 bytes, using CRC-CCITT algorithm.
+		//*
+		//* Pulse length conversion from [0...4095] to 탎:
+		//*      800탎  -> 0x000
+		//*      1500탎 -> 0x800 (2048)
+		//*      2200탎 -> 0xFFF
+		//*
+		//* Total range is: 2200 - 800 = 1400 <==> 4096
+		//* Use formula: 800 + value * 1400 / 4096 (i.e. a shift by 12)
+		//*
+		//* The data values can range from 0 to 4095 to define a servo pulse width.
+		//* Each bit in servo data corresponds to pulse width change of 0.342탎. 
+		//* 
+		//* 0 		= 800us
+		//* 585		= 1000us
+		//* 2048 	= 1500us +/- 1463 for 1-2ms
+		//* 3511	= 2000us
+		//* 4095 	= 2200us		 
+		//*
+		//************************************************************
+		
+		// Handle SXRL format
+		if (Config.RxMode == SRXL)
+		{
+			// Work out the expected number of bytes based on the vendor ID (1st byte)
+			if (bytecount == 0)
+			{
+				// Process data when all packets received
+				if (sBuffer[0] == 0xA1)
+				{
+					packet_size = XBUS_FRAME_SIZE_12;
+				}
+				else
+				{
+					packet_size = XBUS_FRAME_SIZE_16;
+				}
+			}
+
+			// Check checksum when all data received
+			if (bytecount == (packet_size - 1))
+			{
+				crc = 0;
+				
+				// Add up checksum for all bytes up to but not including the checksum
+				for (j = 0; j < (packet_size - 2); j++)
+				{
+					crc = CRC16(crc, sBuffer[j]);
+				}
+			
+				// Extract the packet's own checksum
+				checkcrc = ((uint16_t)(sBuffer[packet_size - 2] << 8) | (uint16_t)(sBuffer[packet_size - 1]));
+				
+				// Compare with the calculated one and process data if ok
+				if (checkcrc == crc)
+				{
+					// RC sync established
+					Interrupted = true;
+
+					// Copy unconverted channel data
+					for (j = 0; j < MAX_RC_CHANNELS; j++)
+					{
+						// Combine bytes from buffer
+						RxChannel[j] = (sBuffer[(j << 1) + 1] << 8) | (sBuffer[(j << 1) + 2]);
+					}				
+					
+					// Convert to system values
+					for (j = 0; j < MAX_RC_CHANNELS; j++)
+					{
+						// Subtract SRXL offset
+						itemp16 = RxChannel[j] - 2048;
+						
+						// Expand into OpenAero2 units x0.6865 (0.6875)	(1000/1463)
+						itemp16 = (itemp16 >> 1) + (itemp16 >> 3) + (itemp16 >> 4);
+
+						// Add back in OpenAero2 offset
+						RxChannel[j] = itemp16 + 3750;
+					}
+				}
+			}
+		} // (Config.RxMode == SRXL)
+
+		//************************************************************
 		//* Common exit code
 		//************************************************************
 
@@ -779,6 +881,7 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
 			break;
 
+		case SRXL:
 		case XTREME:
 		case SBUS:
 		case SPEKTRUM:

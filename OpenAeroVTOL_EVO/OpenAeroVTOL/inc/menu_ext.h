@@ -31,7 +31,6 @@ extern  uint8_t button;
 
 // Menu frames, items
 extern void print_menu_frame(uint8_t style);
-//extern void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const unsigned char* text_link, uint16_t cursor);
 extern void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const uint16_t* text_link, uint16_t cursor);
 
 // Misc subroutines
