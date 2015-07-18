@@ -58,6 +58,9 @@ void reset_IMU(void);
 #define acc_1_15G_SQ		21668.0f	// (1.15 * ACCSENSITIVITY) * (1.15 * ACCSENSITIVITY)
 #define acc_0_85G_SQ		11837.0f	// (0.85 * ACCSENSITIVITY) * (0.85 * ACCSENSITIVITY)	
 
+#define acc_1_6G_SQ			41943.0f	// (1.60 * ACCSENSITIVITY) * (1.60 * ACCSENSITIVITY)
+#define acc_0_4G_SQ			2621.0f		// (0.40 * ACCSENSITIVITY) * (0.40 * ACCSENSITIVITY)	
+
 #define maxdeltaangle		0.2618f		// Limit possible instantaneous change in angle to +/-15 degrees (720 deg/s)
 
 
@@ -72,14 +75,11 @@ float VectorY = 0;
 float VectorZ = 1;
 
 float VectorNewA, VectorNewB;
-float GyroPitchVC, GyroRollVC;
+float GyroPitchVC, GyroRollVC, GyroYawVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
 int16_t	angle[2];						// Attitude in degrees - pitch and roll
-
-// Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
-//const uint8_t LPF_lookup[7] PROGMEM  = {23,12,6,4,3,2,1}; // 700Hz
 	
 // Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None	
 const float LPF_lookup[8] PROGMEM		= {23.0,11.58,5.85,3.1,1.82,1.35,1.24,1.0};	// 700Hz (All settings usable)
@@ -112,18 +112,6 @@ const float LPF_lookup_HS[8] PROGMEM	= {8.53,4.53,2.49,1.58,1.24,1.0,1.0,1.0};	/
 //		* = swapped axis
 //
 //************************************************************
-//
-//  Interesting code snippet for reading floats from PROGMEM
-//  
-//  union 
-//  {
-//  	float flt;
-//  	long lng;
-//  } both;
-//  
-//  both.lng = pgm_read_dword(&HTFN2[5]);
-//  float_var = both.flt;
-//
 //
 
 void imu_update(uint32_t period)
@@ -174,9 +162,11 @@ void imu_update(uint32_t period)
 	AccAngleRoll = accSmooth[ROLL] * SMALLANGLEFACTOR;		// KK2 - AccYfilter
 	AccAnglePitch = accSmooth[PITCH] * SMALLANGLEFACTOR;
 
-	// Copy/promote gyro values for rotate
-	GyroRollVC = gyroADC[ROLL];								// KK2 - GyroRoll
-	GyroPitchVC = gyroADC[PITCH];
+	// Alter the gyro sources to the IMU as required.
+	// Using gyroADCalt[] always assures that the right gyros are associated with the IMU
+	GyroRollVC = gyroADCalt[ROLL];
+	GyroPitchVC = gyroADCalt[PITCH];
+	GyroYawVC = gyroADCalt[YAW];
 
 	// Calculate acceleration magnitude.
 	roll_sq = (accADC[ROLL] * accADC[ROLL]);
@@ -185,13 +175,21 @@ void imu_update(uint32_t period)
 	AccMag = roll_sq + pitch_sq + yaw_sq;
 	
 	// Add acc correction if inside local acceleration bounds and not inverted according to VectorZ
+	// NB: new dual autolevel code needs acc correction at least temporarily when switching profiles.
 	// This is actually a kind of Complementary Filter
-	if	((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5))
+	//if ((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5)) // Original code
+	
+	// New test code - only adjust when in acc mag limits and when upright or dual AL code
+	if	(((AccMag > acc_0_85G_SQ) && (AccMag < acc_1_15G_SQ) && (VectorZ > 0.5) && (Config.P1_Reference == NO_ORIENT)) || // Same as always when "Same" 
+		 ((AccMag > acc_0_4G_SQ) && (AccMag < acc_1_6G_SQ) && (Config.P1_Reference != NO_ORIENT))) 
 	{
-		tempf = (EulerAngleRoll - AccAngleRoll) / (11 - Config.CF_factor); // Default Config.CF_factor is 7
+		// Default Config.CF_factor is 6 (1 - 10 = 10% to 100%, 6 = 60%)
+		tempf = (EulerAngleRoll - AccAngleRoll) / 10;
+		tempf = tempf * (12 - Config.CF_factor); 
 		GyroRollVC = GyroRollVC + tempf;
 		
-		tempf = (EulerAnglePitch - AccAnglePitch) /(11 - Config.CF_factor);
+		tempf = (EulerAnglePitch - AccAnglePitch) / 10;
+		tempf = tempf * (12 - Config.CF_factor);
 		GyroPitchVC = GyroPitchVC + tempf;
 	}
 
@@ -225,7 +223,7 @@ void Rotate3dVector(float intervalf)
 	VectorZ = VectorNewB;
 
 	// Rotate around Z axis (yaw)
-	theta = thetascale(gyroADC[YAW], intervalf);
+	theta = thetascale(GyroYawVC, intervalf);
 	VectorA = VectorX;
 	VectorB = VectorY;
 	RotateVector(theta);

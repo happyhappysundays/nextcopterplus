@@ -36,4 +36,7 @@ extern volatile uint16_t LoopStartTCNT1;
 extern volatile bool Overdue;
 extern volatile uint8_t	LoopCount;
 
+// Debug
+extern bool flip;
+
 

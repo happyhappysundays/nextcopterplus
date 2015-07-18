@@ -49,6 +49,13 @@ const uint16_t ServoMenuText[3][SERVOITEMS] PROGMEM =
 	{0,0,0,0,0,0,0,0},
 };
 
+const uint16_t ServoMenuOffsets[3][SERVOITEMS] PROGMEM =
+{
+	{SERVOOFFSET,80,80,80,80,80,80,80},
+	{80,80,80,80,80,80,80,80},
+	{80,80,80,80,80,80,80,80},
+};
+
 // As all of these are the same, a new range cloning menu option is used
 // to save a lot of PROGMEM sapce
 const menu_range_t servo_menu_ranges[3][1] PROGMEM = 
@@ -112,7 +119,7 @@ void menu_servo_setup(uint8_t section)
 		}
 
 		// Print menu
-		print_menu_items(sub_top, SERVOSTART, value_ptr, (const unsigned char*)servo_menu_ranges[section - 1], 1, SERVOOFFSET, (const uint16_t*)ServoMenuText[section - 1], cursor);
+		print_menu_items(sub_top, SERVOSTART, value_ptr, (const unsigned char*)servo_menu_ranges[section - 1], 1, (const uint16_t*)ServoMenuOffsets[section - 1], (const uint16_t*)ServoMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(SERVOITEMS, SERVOSTART, 0, button, &cursor, &sub_top, &menu_temp);

@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <util/delay.h>
+#include <stdlib.h>
 #include "io_cfg.h"
 #include "init.h"
 #include "mugui.h"
@@ -34,19 +35,36 @@ void menu_mixer(uint8_t i);
 //************************************************************
 
 #define MIXERITEMS 34	// Number of mixer menu items
-#define MIXERSTART 190 	// Start of Menu text items
-#define MIXOFFSET  89	// Value offsets
+#define MIXERSTARTE 190	// Start of Menu text items (Earth)
+#define MIXERSTARTM 346	// Start of Menu text items (Model)
+#define MIXOFFSET  92	// Value offsets
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint16_t MixerMenuText[MIXERITEMS] PROGMEM = 
+const uint16_t MixerMenuTextE[MIXERITEMS] PROGMEM =
 {
 	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
 	0,0,0,0,0,0,							// Flight controls (6)
 	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
 	238,0,238,0,238,0,238,0					// Other sources (8)
+};
+
+const uint16_t MixerMenuTextM[MIXERITEMS] PROGMEM =
+{
+	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
+	0,0,0,0,0,0,							// Flight controls (6)
+	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
+	380,0,238,0,380,0,238,0					// Other sources (8)
+};
+
+const uint16_t MixerMenuOffsets[MIXERITEMS] PROGMEM =
+{
+	MIXOFFSET,92,92,92,92,92,92,92,			// Motor control and offsets (8)
+	92,92,92,92,92,92,						// Flight controls (6)
+	92,92,92,92,92,92,92,92,92,92,92,92,	// Mixer ranges (12)
+	92,92,92,92,92,92,92,92					// Other sources (8)
 };
 
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
@@ -102,12 +120,31 @@ void menu_mixer(uint8_t i)
 {
 	int8_t *value_ptr;
 	menu_range_t range;
-	uint8_t text_link = 0;
+	uint16_t text_link = 0;
+	uint16_t reference;
 
+	// Set the correct text list for the selected reference
+	if (Config.P1_Reference != MODEL)
+	{
+		reference = MIXERSTARTE;
+	}
+	else
+	{
+		reference = MIXERSTARTM;
+	}
+	
 	// If sub-menu item has changed, reset sub-menu positions
 	if (menu_flag)
 	{
-		sub_top = MIXERSTART;
+		// Set the correct text list for the selected reference
+		if (Config.P1_Reference != MODEL)
+		{
+			sub_top = MIXERSTARTE;
+		}
+		else
+		{
+			sub_top = MIXERSTARTM;
+		}
 		menu_flag = 0;
 	}
 
@@ -116,16 +153,33 @@ void menu_mixer(uint8_t i)
 		value_ptr = &Config.Channel[i].Motor_marker;
 
 		// Print menu
-		print_menu_items(sub_top, MIXERSTART, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, MIXOFFSET, (const uint16_t*)MixerMenuText, cursor);
+		// Set the correct text list for the selected reference
+		if (Config.P1_Reference != MODEL)
+		{
+			print_menu_items(sub_top, reference, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, (const uint16_t*) MixerMenuOffsets, (const uint16_t*)MixerMenuTextE, cursor);
+		}
+		else
+		{
+			print_menu_items(sub_top, reference, value_ptr, (const unsigned char*)mixer_menu_ranges, 0, (const uint16_t*) MixerMenuOffsets, (const uint16_t*)MixerMenuTextM, cursor);
+		}
 
 		// Handle menu changes
-		update_menu(MIXERITEMS, MIXERSTART, 0, button, &cursor, &sub_top, &menu_temp);
-		range = get_menu_range ((const unsigned char*)mixer_menu_ranges, menu_temp - MIXERSTART);
+		update_menu(MIXERITEMS, reference, 0, button, &cursor, &sub_top, &menu_temp);
+		range = get_menu_range ((const unsigned char*)mixer_menu_ranges, menu_temp - reference);
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_word(&MixerMenuText[menu_temp - MIXERSTART]);
-			do_menu_item(menu_temp, value_ptr + (menu_temp - MIXERSTART), 1, range, 0, text_link, false, 0);
+			// Set the correct text list for the selected reference
+			if (Config.P1_Reference != MODEL)
+			{
+				text_link = pgm_read_word(&MixerMenuTextE[menu_temp - reference]);
+			}
+			else
+			{
+				text_link = pgm_read_word(&MixerMenuTextM[menu_temp - reference]);
+			}
+			
+			do_menu_item(menu_temp, value_ptr + (menu_temp - reference), 1, range, 0, text_link, false, 0);
 		}
 
 		// Update limits when exiting
@@ -137,7 +191,3 @@ void menu_mixer(uint8_t i)
 		}
 	}
 }
-
-
-
-

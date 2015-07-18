@@ -36,7 +36,7 @@ void Display_rcinput(void);
 
 void Display_rcinput(void)
 {
-	// Re-enable interrupts. High seed mode may have left them off
+	// Re-enable interrupts. High speed mode may have left them off
 	init_int();
 	
 	while(BUTTON1 != 0)

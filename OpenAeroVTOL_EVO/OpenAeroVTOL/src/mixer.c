@@ -93,6 +93,10 @@ void ProcessMixer(void)
 	int16_t	Step1 = 0;
 	int16_t	Step2 = 0;
 	int8_t	itemp8 = 0;
+	
+	int8_t	P1_acc_roll_volume_source = 0;
+	int8_t	P1_gyro_roll_volume_source = 0;
+	int8_t	P1_gyro_yaw_volume_source = 0;
 
 	// Copy the sensor data to an array for easy indexing - acc data is from accSmooth, increased to reasonable rates
 	temp1 = (int16_t)accSmooth[ROLL] << 3;
@@ -117,6 +121,34 @@ void ProcessMixer(void)
 		// Mix in gyros
 		//************************************************************ 
 
+		// If the user wants earth reference for tail-sitter hover, swap the related stick sources.
+		// The secret is understanding WHICH STICK is controlling movement on the AXIS in the selected REFERENCE
+		// Only need to do this if the orientations differ
+		if (Config.P1_Reference != NO_ORIENT)
+		{
+			// EARTH-Referenced tail-sitter
+			if (Config.P1_Reference == EARTH)
+			{
+				P1_acc_roll_volume_source = Config.Channel[i].P1_aileron_volume;
+				P1_gyro_roll_volume_source = Config.Channel[i].P1_aileron_volume;	// These are always the same
+				P1_gyro_yaw_volume_source = Config.Channel[i].P1_rudder_volume;		// These are always the same
+			}
+			// MODEL-Referenced tail-sitter
+			else
+			{
+				P1_acc_roll_volume_source = Config.Channel[i].P1_rudder_volume;
+				P1_gyro_roll_volume_source =  Config.Channel[i].P1_aileron_volume;
+				P1_gyro_yaw_volume_source =  Config.Channel[i].P1_rudder_volume;			
+			}
+		}
+		// Normal case
+		else
+		{
+			P1_acc_roll_volume_source =  Config.Channel[i].P1_aileron_volume;
+			P1_gyro_roll_volume_source =  Config.Channel[i].P1_aileron_volume;
+			P1_gyro_yaw_volume_source =  Config.Channel[i].P1_rudder_volume;
+		}
+		
 		// P1 gyros
 		if (transition < 100)
 		{
@@ -125,7 +157,7 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					if (Config.Channel[i].P1_aileron_volume < 0 )
+					if (P1_gyro_roll_volume_source < 0 )
 					{
 						P1_solution = P1_solution + PID_Gyros[P1][ROLL];		// Reverse if volume negative
 					}
@@ -135,7 +167,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5); 
+					P1_solution = P1_solution - scale32(PID_Gyros[P1][ROLL], P1_gyro_roll_volume_source * 5); 
 					break;
 				default:
 					break;	
@@ -167,7 +199,7 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					if (Config.Channel[i].P1_rudder_volume < 0 )
+					if (P1_gyro_yaw_volume_source < 0 )
 					{
 						P1_solution = P1_solution - PID_Gyros[P1][YAW];			// Reverse if volume negative
 					}
@@ -177,7 +209,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], Config.Channel[i].P1_rudder_volume * 5);
+					P1_solution = P1_solution + scale32(PID_Gyros[P1][YAW], P1_gyro_yaw_volume_source * 5);
 					break;
 				default:
 					break;
@@ -262,7 +294,7 @@ void ProcessMixer(void)
 				case OFF:
 					break;
 				case ON:
-					if (Config.Channel[i].P1_aileron_volume < 0 )
+					if (P1_acc_roll_volume_source < 0 )
 					{
 						P1_solution = P1_solution + PID_ACCs[P1][ROLL];			// Reverse if volume negative
 					}
@@ -272,7 +304,7 @@ void ProcessMixer(void)
 					}
 					break;
 				case SCALE:
-					P1_solution = P1_solution - scale32(PID_ACCs[P1][ROLL], Config.Channel[i].P1_aileron_volume * 5);
+					P1_solution = P1_solution - scale32(PID_ACCs[P1][ROLL], P1_acc_roll_volume_source * 5);
 					break;
 				default:
 					break;

@@ -6,6 +6,7 @@
 //* Includes
 //***********************************************************
 
+#include "compiledefs.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
@@ -21,7 +22,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 159 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -33,7 +34,7 @@ void print_menu_frame(uint8_t style);
 // Menu management
 void update_menu(uint16_t items, uint16_t start, uint16_t offset, uint8_t button, uint16_t* cursor, uint16_t* top, uint16_t* temp);
 void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
-void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const uint16_t* text_link, uint16_t cursor);
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, const uint16_t* MenuOffsets, const uint16_t* text_link, uint16_t cursor);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -113,12 +114,14 @@ void print_menu_frame(uint8_t style)
 // text_link = pointer to the text list for the values if not numeric
 // cursor = cursor position
 //**********************************************************************
-void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, uint16_t MenuOffsets, const uint16_t* text_link, uint16_t cursor)
+
+void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, const uint16_t* MenuOffsets, const uint16_t* text_link, uint16_t cursor)
 {
 	menu_range_t	range1;
 	uint16_t base = 0;
 	uint16_t offset = 0;
 	uint16_t text = 0;
+	uint8_t text_offset = 0;
 		
 	// Clear buffer before each update
 	clear_buffer(buffer);
@@ -146,7 +149,11 @@ void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsig
 		offset = values[top + i - start];
 		text = base + offset;
 		
-		print_menu_text((values[top+i - start]), range1.style, text, MenuOffsets, (uint8_t)pgm_read_byte(&lines[i]));
+		// Calculate horizontal offset of text to display
+		text_offset = (uint8_t)pgm_read_word(&MenuOffsets[top + i - start]);
+		
+		
+		print_menu_text((values[top+i - start]), range1.style, text, text_offset, (uint8_t)pgm_read_byte(&lines[i]));
 	}
 
 	print_cursor(cursor);	// Cursor
@@ -273,6 +280,13 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 				mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana14, &size);
 				LCD_Display_Text(text_link + value, (const unsigned char*)Verdana14,((128-size.x)/2),25);
+
+#ifdef DEBUG_ON
+				// Print the text item base and value 
+				mugui_lcd_puts(itoa(text_link,pBuffer,10),(const unsigned char*)Verdana8,0,43); // Index ref for item's value as text (currently wrong for Model ref)
+				mugui_lcd_puts(itoa(menuitem,pBuffer,10),(const unsigned char*)Verdana8,45,43); // Item name index
+				mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana8,90,43);	// Value of item 
+#endif
 			}
 
 			// Print appropriate menu frame

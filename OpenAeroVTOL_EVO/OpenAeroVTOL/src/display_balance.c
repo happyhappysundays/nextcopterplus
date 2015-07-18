@@ -21,8 +21,8 @@
 #include "menu_ext.h"
 #include "adc.h"
 #include "imu.h"
-
 #include "gyros.h"
+#include "rc.h"
 
 //************************************************************
 // Prototypes
@@ -45,6 +45,9 @@ void Display_balance(void)
 
 	while(BUTTON1 != 0)
 	{
+		RxGetChannels();						// Check state of transition switch
+		UpdateTransition();						// Update the transition variable
+
 		// Read accs
 		ReadAcc();
 

@@ -92,6 +92,14 @@ extern CONFIG_STRUCT Config;
 // Enumeration
 //***********************************************************
 
+enum Orientation	{UP_BACK = 0, UP_LEFT, UP_FRONT, UP_RIGHT,
+					BACK_DOWN, BACK_LEFT, BACK_UP, BACK_RIGHT,
+					DOWN_BACK, DOWN_RIGHT, DOWN_FRONT, DOWN_LEFT,
+					FRONT_DOWN, FRONT_RIGHT, FRONT_UP, FRONT_LEFT,
+					LEFT_DOWN, LEFT_FRONT, LEFT_UP, LEFT_BACK,
+					RIGHT_DOWN, RIGHT_BACK, RIGHT_UP, RIGHT_FRONT
+					};
+enum Old_Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS, PITCHUP};
 enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW};
 enum RX_Modes		{CPPM_MODE = 0, PWM, SBUS, SPEKTRUM, XTREME, SRXL};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, MPXSEQ};
@@ -99,7 +107,6 @@ enum Polarity 		{NORMAL = 0, REVERSED};
 enum KKoutputs 		{OUT1 = 0, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 enum RCchannels 	{THROTTLE = 0, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, NOCHAN};
 enum Availability	{OFF = 0, ON, SCALE, REVERSE, REVERSESCALE};
-enum Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS, PITCHUP};
 enum KK21ADCInputs 	{AIN_VCC1 = 0, AIN_ADC1, AIN_ADC2, AIN_VBAT1, AIN_ADC4, AIN_ADC5, AIN_PITOT, AIN_ADC7};
 enum Global_Status	{IDLE = 0, REQ_STATUS, WAITING_STATUS, PRESTATUS, STATUS, WAITING_TIMEOUT, WAITING_TIMEOUT_BD, PRESTATUS_TIMEOUT, STATUS_TIMEOUT, POSTSTATUS_TIMEOUT, MENU};
 enum Servo_rate		{LOW = 0, SYNC, FAST};
@@ -113,16 +120,16 @@ enum Curve			{LINEAR = 0, SINE, SQRTSINE};
 enum Filters		{HZ5 = 0, HZ10, HZ21, HZ44, HZ94, HZ184, HZ260, NOFILTER};
 enum Presets		{QUADX = 0, QUADP, TRICOPTER, BLANK, OPTIONS};
 enum Frames			{BASIC = 0, EDIT, ABORT, LOG};
-	
 enum Errors			{NOERR = 0, REBOOT, MANUAL, NOSIGNAL, TIMER};
+enum Reference		{NO_ORIENT = 0, EARTH, MODEL};
 
 //***********************************************************
 // Flags
 //***********************************************************
 
 enum GlobalError	{THROTTLE_HIGH = 0, NO_SIGNAL, DISARMED, LVA_ALARM, BUZZER_ON};
-enum FlightFlags	{RxActivity = 0};
-enum MainFlags		{inv_cal_done = 0, normal_cal_done};
+enum FlightFlags	{RxActivity = 0, ARM_blocker};
+enum MainFlags		{inv_cal_done_P1 = 0, normal_cal_done_P1, inv_cal_done_P2, normal_cal_done_P2};
 enum SensorFlags	{RollGyro = 0, PitchGyro, YawGyro, RollAcc, PitchAcc, ZDeltaAcc, MotorMarker};
 enum ScaleFlags		{RollScale = 0, PitchScale, YawScale, AccRollScale, AccPitchScale, AccZScale};
 enum ReverseFlags	{RollReverse = 0, PitchReverse, YawReverse, AccRollReverse, AccPitchReverse, AccZReverse};

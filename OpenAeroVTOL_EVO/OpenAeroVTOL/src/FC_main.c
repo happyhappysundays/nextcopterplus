@@ -1,7 +1,7 @@
  //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 Beta 7 - June 2015
+// Version: Release V1.2 RC 1 - July 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -123,20 +123,47 @@
 //			Display jumps immediately to IDLE once armed.
 // Beta 4	Updated vibration display calculation with HPF.
 // Beta 5	Fixed loss of control in RC Sync mode.
-//			Vibration screen persistence reduced.
+//			Vibration screen persistence reduced
 // Beta 6	Changed vibration mode HPF to 50Hz.
-// Beta 7	Added Multiplex channel order, SRXL/UDI (Mode B) serial input format.
-//
+// Beta 7	Added Multiplex channel order, SRLX/UDI Mode B serial input format
+// Beta 8	Added all possible flat board orientations
+//			Added automated board reorientation with transition (trial)
+//			Updated eeprom upgrade process to use purely offsets for future sanity.
+// Beta 9	Dual P1/P2 calibration (trial)
+// Beta 10	Added advanced menu item for tail-sitter requirements (P1 orientation, P1 reference)
+// Beta 11	Final update for eeprom upgrade architecture. Note that only V.0->V1.1 
+//			and V1.1 to the current Beta are supported. Settings menu bug fixed.
+//			gyroADCalt[] created to correctly support the IMU.
+// Beta 12	Fixed gyro calibrate issues.
+// Beta 13	Fixed accVert signal handling. Added AccVert to sensor display.
+//			Increase strength of AL Correct by 4. 
+// Beta 14	Change AL correct range of numbers. Range is currently 1-10 default 6. 
+//			Text/message typology clean-up. Dynamic references to Yaw AL, AccYaw etc. 
+//			Removed Advanced menu. P1 orientation now implicit from P2 via look-up table.
+//			Added auto-update from V1.1 B13. 
+//			Reset IMU when leaving P1 or P2 for dual orientation modes.
+// Beta 15	Coding rationalisation. Text updates and fixes.
+//			Automate AL Correct conversion when updating.
+//			Updated sensor display screen to include IMU output.
+//			Fixes from Ran's testing of Beta 14.
+// Beta 16	Suppressed debug log. Removed IMU reset on ARM as it causes a twitch with
+//			dual-orientation modes.
+// Beta 17	Reversed AL Correct sense. Scale now 1 to 10.
+//			Small tweaks to state machine to try and remove arming glitch.
+// Beta 18	Made SRXL/UDI a compile option until verified.
+//			AL Correct now 2-11 (seconds).
+// Beta 19	New attempt at removing PWM glitch on arming. (V1.2 Release candidate)
+//			Update settings update so that all older orientations are converted etc.
 //
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:
+// Bugs:    
 //	
 //
 // To do: 
-//			
+//		  
 //
 //***********************************************************
 //* Includes
@@ -206,7 +233,9 @@
 // Flight variables
 int16_t transition_counter = 0;
 uint8_t Transition_state = TRANS_P1;
+uint8_t Old_transition_state = TRANS_P1;
 int16_t	transition = 0; 
+int16_t	old_transition = 0; 
 
 // Flags
 volatile uint8_t	General_error = 0;
@@ -235,6 +264,9 @@ volatile uint16_t	InterruptCount = 0;
 volatile uint16_t	LoopStartTCNT1 = 0;
 volatile bool		Overdue = false;
 volatile uint8_t	LoopCount = 0;
+
+// debug	
+bool flip = false;
 			
 //************************************************************
 //* Main loop
@@ -289,7 +321,6 @@ int main(void)
 	uint8_t Menu_mode = STATUS_TIMEOUT;
 	int8_t	old_flight = 3;			// Old flight profile
 	int8_t	old_trans_mode = 0;		// Old transition mode
-	int16_t temp1 = 0;
 	uint16_t transition_time = 0;
 	uint8_t	old_alarms = 0;
 	uint8_t ServoFlag = 0;
@@ -495,15 +526,15 @@ int main(void)
 					// Switch to STATUS_TIMEOUT mode
 					Menu_mode = STATUS_TIMEOUT;
 				
-					// Enable PWM output
-					PWMOverride = false;
+					// Prevent PWM output going into STATUS_TIMEOUT
+					PWMOverride = true;
 					
 					// Clear Interrupted_Clone
 					Interrupted_Clone = false;
 				}
 				else
 				{
-					// Prevent PWM output
+					// Prevent PWM output until at least when next RC arrives
 					PWMOverride = true;
 				}
 				
@@ -540,7 +571,7 @@ int main(void)
 				}
 				else
 				{
-					// Enable PWM output
+					// Prevent PWM output until at least when next RC arrives
 					PWMOverride = true;			
 				}
 				
@@ -555,7 +586,7 @@ int main(void)
 				// Start the menu system
 				menu_main();
 				// Switch back to status screen when leaving menu
-				Menu_mode = STATUS;
+				Menu_mode = PRESTATUS;
 				// Reset timeout once back in status screen
 				Status_seconds = 0;
 				// Reset IMU on return from menu
@@ -645,12 +676,13 @@ int main(void)
 					General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
 					CalibrateGyrosSlow();					// Calibrate gyros
 					LED1 = 1;								// Signal that FC is ready
-					reset_IMU();							// Reset IMU just in case...
+
+					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while...
 
 					// Force Menu to IDLE immediately unless in vibration test mode
 					if (Config.Vibration == OFF)
 					{
-						Menu_mode = IDLE;
+						Menu_mode = PRESTATUS_TIMEOUT;		// Previously IDLE, which was wrong. 
 					}
 				}
 			}
@@ -708,6 +740,12 @@ add_log(TIMER);
 		//************************************************************
 		//* Get RC data
 		//************************************************************
+
+// Debug - receiver-less switch between P1 and P2
+if (BUTTON2 == 0)
+{
+	flip = !flip;
+}
 
 		// Update zeroed RC channel data
 		RxGetChannels();
@@ -796,19 +834,8 @@ add_log(TIMER);
 		// Convert number to percentage (0 to 100%)
 		if (Config.TransitionSpeed == 0)
 		{
-			// Offset RC input to (approx) -250 to 2250
-			temp1 = RCinputs[Config.FlightChan] + 1000;
-
-			// Trim lower end to zero (0 to 2250)
-			if (temp1 < 0) temp1 = 0;
-
-			// Convert 0 to 2250 to 0 to 125. Divide by 20
-			// Round to avoid truncation errors
-			transition = (temp1 + 10) / 20;
-
-			// transition now has a range of 0 to 101 for 0 to 2000 input
-			// Limit extent of transition value 0 to 100 (101 steps)
-			if (transition > 100) transition = 100;
+			// Update the transition variable based on the selected RC channel
+			UpdateTransition();
 		}
 		else
 		{
@@ -928,8 +955,38 @@ add_log(TIMER);
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
 		}
 		
+		//**********************************************************************
+		//* Reset the IMU when using two orientations and just leaving P1 or P2
+		//**********************************************************************
+		
+		if (Config.P1_Reference != NO_ORIENT)
+		{
+			// If Config.FlightSel has changed (switch based) and TransitionSpeed not set to zero, the transition state will change.
+			if ((Config.TransitionSpeed != 0) && (Transition_state != Old_transition_state) && ((Old_transition_state == TRANS_P1) || (Old_transition_state == TRANS_P2)))
+			{
+				reset_IMU();
+			}
+			
+			// If TransitionSpeed = 0, the state is always TRANSITIONING so we can't use the old/new state changes.
+			// If user is using a knob or TX-slowed switch, TransitionSpeed will be 0.
+			else if (
+						(Config.TransitionSpeed == 0) &&						// Manual transition mode and...
+						(((old_transition == 0) && (transition > 0)) ||			// Was in P1 or P2
+						((old_transition == 100) && (transition < 100)))		// Is not somewhere in-between.
+					)
+			{
+				reset_IMU();
+			}
+		}
+		
 		// Save current flight mode
 		old_flight = Config.FlightSel;
+		
+		// Save old transtion state;
+		Old_transition_state = Transition_state;
+		
+		// Save last transition value
+		old_transition = transition;
 				
 		//************************************************************
 		//* Update timers
@@ -1394,6 +1451,9 @@ add_log(TIMER);
 			else
 			{
 				output_servo_ppm(ServoFlag);		// Output servo signal			
+					
+				// Unblock motors if blocked
+				Flight_flags &= ~(1 << ARM_blocker);
 			}
 
 

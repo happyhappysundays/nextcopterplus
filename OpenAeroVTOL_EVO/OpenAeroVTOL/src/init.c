@@ -197,7 +197,6 @@ void init(void)
 
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
-		
 		RxChannel[i] = 3750;
 	}
 	

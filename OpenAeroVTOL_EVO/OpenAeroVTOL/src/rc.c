@@ -28,6 +28,7 @@
 void RxGetChannels(void);
 void RC_Deadband(void);
 void CenterSticks(void);
+void UpdateTransition(void);
 
 //************************************************************
 // Defines
@@ -57,7 +58,7 @@ void RxGetChannels(void)
 	}
 
 	// Special handling for monopolar throttle
-	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
+	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE]; // RxChannelZeroOffset[THROTTLE] = 2750 (-250 to 2250)
 
 	// Bipolar throttle must use the nominal mid-point
 	RCinputs[THROTTLE] = RxChannel[THROTTLE] - 3750; 
@@ -96,6 +97,18 @@ void RxGetChannels(void)
 	RCinputs[NOCHAN] = 0;
 
 	OldRxSum = RxSum;
+
+/*
+	// Debug! override the transition switch/knob
+	if (flip)
+	{
+		RCinputs[Config.FlightChan] = 1000; // Force to P2
+	}
+	else
+	{
+		RCinputs[Config.FlightChan] = -1000; // Force to P1
+	}
+*/
 }
 
 // Center sticks on request from Menu
@@ -106,7 +119,7 @@ void CenterSticks(void)
 
 	// Take an average of eight readings
 	// RxChannel will auto-update every RC frame (normally 46Hz or so)
-	for (i=0; i<8; i++)
+	for (i = 0; i < 8; i++)
 	{
 		for (j=0; j<MAX_RC_CHANNELS; j++)
 		{
@@ -123,3 +136,21 @@ void CenterSticks(void)
 	Save_Config_to_EEPROM();
 }
 
+void UpdateTransition(void)
+{
+	int16_t temp = 0;
+	
+	// Offset RC input to (approx) -250 to 2250
+	temp = RCinputs[Config.FlightChan] + 1000;
+
+	// Trim lower end to zero (0 to 2250)
+	if (temp < 0) temp = 0;
+
+	// Convert 0 to 2250 to 0 to 125. Divide by 20
+	// Round to avoid truncation errors
+	transition = (temp + 10) / 20;
+
+	// transition now has a range of 0 to 101 for 0 to 2000 input
+	// Limit extent of transition value 0 to 100 (101 steps)
+	if (transition > 100) transition = 100;
+}

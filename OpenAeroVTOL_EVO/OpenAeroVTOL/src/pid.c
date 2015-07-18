@@ -29,13 +29,12 @@
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
 #define STANDARDLOOP 3571.0			// T1 counts of 700Hz cycle time (2500000/700)
 
-#define SAMPLE_RATE 500				// Sample rate for high-pass filter (HPF)
-#define HPF_FC	50					// HPF cut-off frequency
-#define HPF_Q	1					// Q (Quality) factor of the HPF
+#define SAMPLE_RATE 500				// HPF filter constants
+#define HPF_FC	20
+#define HPF_Q	1
 #define HPF_O	(2 * M_PI * HPF_FC / SAMPLE_RATE)
 #define HPF_C	(HPF_Q / HPF_O)
 #define HPF_L	(1 / HPF_Q / HPF_O)
-
 
 //************************************************************
 // Notes
@@ -127,7 +126,7 @@ void Sensor_PID(uint32_t period)
 		fsample = (float)(gyroADC_raw[ROLL] + gyroADC_raw[PITCH] + gyroADC_raw[YAW]);
 
 		// HPF example from http://www.codeproject.com/Tips/681745/Csharp-Discrete-Time-RLC-Low-High-Pass-Filter-Rout
-		// Some values preset for a 50Hz cutoff at 500Hz sample rate
+		// Some values preset for a 10Hz cutoff at 500Hz sample rate
 		HPF_T = (fsample * HPF_O) - HPF_V;
 		HPF_V += (HPF_I + HPF_T) / HPF_C;
 		HPF_I += HPF_T / HPF_L;

@@ -28,13 +28,9 @@ void Save_Config_to_EEPROM(void);
 void Set_EEPROM_Default_Config(void);
 void eeprom_write_byte_changed(uint8_t *addr, uint8_t value);
 void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size);
-void Update_V1_0_to_V1_1_B7(void);
-void Update_V1_1_to_V1_1_B8(void);
-void Update_V1_1B8_to_V1_1_B10(void);
-void Update_V1_1B10_to_V1_1_B12(void);
-void Update_V1_1B12_to_V1_1_B18(void);
-
-uint8_t convert_filter_B8_B10(uint8_t);
+void Update_V1_0_to_V1_1(void);
+void Update_V1_1_to_V1_2(void);
+uint8_t convert_filter_V1_0_V1_1(uint8_t);
 
 void Load_eeprom_preset(uint8_t preset);
 
@@ -45,14 +41,27 @@ void Load_eeprom_preset(uint8_t preset);
 #define EEPROM_DATA_START_POS 0	// Make sure Rolf's signature is over-written for safety
 
 // eePROM signature - change for each eePROM structure change to force factory reset or upgrade
-#define V1_0_SIGNATURE 0x35		// EEPROM signature for V1.0 (old version)
-#define V1_1_B7_SIGNATURE 0x36	// EEPROM signature for V1.1 to Beta 7
-#define V1_1_B8_SIGNATURE 0x37	// EEPROM signature for V1.1 Beta 8-9
-#define V1_1_B10_SIGNATURE 0x38	// EEPROM signature for V1.1 Beta 10-11
-#define V1_1_B12_SIGNATURE 0x39	// EEPROM signature for V1.1 Beta 12+
-#define V1_2_B3_SIGNATURE 0x3A	// EEPROM signature for V1.2 Beta 3+
+#define V1_0_SIGNATURE 0x35		// EEPROM signature for V1.0 (V1.0 release)
+#define V1_1_SIGNATURE 0x39		// EEPROM signature for V1.1 (V1.1 release)
+#define V1_2_SIGNATURE 0x3D		// EEPROM signature for V1.2 (V1.2 release)
 
-#define MAGIC_NUMBER V1_2_B3_SIGNATURE // Set current signature to that of V1.3 Beta 3+
+#define MAGIC_NUMBER V1_2_SIGNATURE // Set current signature
+
+// eePROM data update locations
+#define RCITEMS_V1_0 41		// RAM location of start of RC items data in V1.0, 1.1 and 1.2
+#define GENITEMS_V1_0 136	// RAM location of start of General items data in V1.0, 1.1 and 1.2
+#define CHANNEL_V1_0 146	// RAM location of start of Channel data in V1.0, 1.1 and 1.2
+// V1.0
+#define SERVOREV_V1_0 378	// RAM location of Servo_reverse[] start for V1.0
+// V1.1
+#define ALCORRECT_V1_1 144 //  RAM location of AL Correct variable in V1.1
+#define SERVOREV_V1_1 450	// RAM location of Servo_reverse[] start for V1.1 and V1.2
+#define RUDDERPOL_V1_1 520	// RAM location of RudderPol for V1.1
+// V1.2
+#define V1_2_NEWDATA 522	// RAM location of new data area for V1.2 (size = 43 bytes)
+#define ADVANCED_V1_2B10 561// RAM location of Advanced block V1.2B10
+#define ADVANCED_V1_2B14 562// RAM location of Advanced block V1.2B14+
+
 
 //************************************************************
 // Code
@@ -71,13 +80,13 @@ void Save_Config_to_EEPROM(void)
 }
 
 // src is the address in RAM
-// dest is the address in eeprom (hence const)
+// dest is the address in eeprom
 void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size)
 { 
 	uint16_t len;
 	uint8_t value;
 
-	for (len=0; len < size; len++)
+	for (len = 0; len < size; len++)
 	{
 		// Get value at src
 		value = *src;
@@ -95,14 +104,13 @@ void eeprom_write_byte_changed(uint8_t *addr, uint8_t value)
 {
 	if (eeprom_read_byte(addr) != value)
 	{
-		// void eeprom_write_byte (uint8_t *__p, uint8_t __value);
 		eeprom_write_byte(addr, value);
 	}
 }
 
 bool Initial_EEPROM_Config_Load(void)
 {
-	bool	updated = false;
+	bool updated = false;
 	
 	// Read eeProm data into RAM
 	eeprom_read_block((void*)&Config, (const void*)EEPROM_DATA_START_POS, sizeof(CONFIG_STRUCT));
@@ -112,29 +120,19 @@ bool Initial_EEPROM_Config_Load(void)
 	switch(Config.setup)
 	{
 		case V1_0_SIGNATURE:				// V1.0 detected
-			Update_V1_0_to_V1_1_B7();
-			// Fall through...
-
-		case V1_1_B7_SIGNATURE:				// V1.1 Beta 7 (or below) detected
-			Update_V1_1_to_V1_1_B8();	
-			// Fall through...
-
-		case V1_1_B8_SIGNATURE:				// V1.1 Beta 8-9 detected
-			Update_V1_1B8_to_V1_1_B10();
-			// Fall through...
-
-		case V1_1_B10_SIGNATURE:			// V1.1 Beta 10+ detected
-			Update_V1_1B10_to_V1_1_B12();
-			// Fall through...
-
-		case V1_1_B12_SIGNATURE:			// V1.1 Beta 12 detected
-			Update_V1_1B12_to_V1_1_B18();
+			Update_V1_0_to_V1_1();
 			updated = true;
+			// Fall through...
 
-		case V1_2_B3_SIGNATURE:				// V1.2 Beta 3+ detected
+		case V1_1_SIGNATURE:				// V1.1 detected
+			Update_V1_1_to_V1_2();
+			updated = true;
+			// Fall through...
+			
+		case V1_2_SIGNATURE:				// V1.2 detected
 			// Fall through...
 			break;
-
+			
 		default:							// Unknown solution - restore to factory defaults
 			// Load factory defaults
 			Set_EEPROM_Default_Config();
@@ -151,14 +149,13 @@ bool Initial_EEPROM_Config_Load(void)
 //************************************************************
 // Config data restructure code
 //************************************************************
-
-// Upgrade V1.0 structure to V1.1 Beta 7 structure
-void Update_V1_0_to_V1_1_B7(void)
+// Upgrade V1.0 structure to V1.1 structure
+void Update_V1_0_to_V1_1(void)
 {
 	#define		OLDSIZE 29				// Old channel_t was 29 bytes
 	#define		NEWSIZE 38				// New channel_t is 38 bytes
 
-	uint8_t		i, j, temp;
+	uint8_t		i, j;
 	uint8_t		*src;
 	uint8_t		*dst;
 	uint8_t		mixer_buffer[NEWSIZE * 8]; // 304 bytes
@@ -168,26 +165,59 @@ void Update_V1_0_to_V1_1_B7(void)
 	int8_t		P1_scale;				// P1 sensor scale flags (6)
 	int8_t		P2_scale;				// P2 sensor scale flags (6)
 
-	// Save old P2 Source B volume. For some reason it gets clobbered.
-	// We mustn't use hard-coded values are these change each version.
-	// Use an offset from the current Config structure address
-	memcpy((void*)&temp,(void*)((&Config.setup) + (377)),1);
-	 
+	int8_t		buffer[12];
+	int8_t		temp = 0;
+	
+	// RC items
+	memcpy((void*)&buffer[0],(void*)((&Config.setup) + (RCITEMS_V1_0)),1);		// RxMode
+	memcpy((void*)&buffer[1],(void*)((&Config.setup) + (GENITEMS_V1_0 + 5)),1);	// Servo_rate
+	memcpy((void*)&buffer[2],(void*)((&Config.setup) + (RCITEMS_V1_0 + 1)),1);	// PWM_Sync
+	memcpy((void*)&buffer[3],(void*)((&Config.setup) + (RCITEMS_V1_0 + 2)),1);	// TxSeq
+	memcpy((void*)&buffer[4],(void*)((&Config.setup) + (RCITEMS_V1_0 + 3)),1);	// FlightChan
+	memcpy((void*)&buffer[5],(void*)((&Config.setup) + (RCITEMS_V1_0 + 7)),1);	// TransitionSpeed
+	memcpy((void*)&buffer[6],(void*)((&Config.setup) + (RCITEMS_V1_0 + 8)),1);	// Transition_P1n
+	memcpy((void*)&buffer[7],(void*)((&Config.setup) + (RCITEMS_V1_0 + 4)),1);	// AileronPol
+	memcpy((void*)&buffer[8],(void*)((&Config.setup) + (RCITEMS_V1_0 + 5)),1);	// ElevatorPol
+	memcpy((void*)&buffer[9],(void*)((&Config.setup) + (RCITEMS_V1_0 + 6)),1);	// RudderPol
+	
+	// Copy back to new RC items structure
+	memcpy((void*)((&Config.setup) + (RCITEMS_V1_0)), &buffer, 9);				// RxMode to ElevatorPol (9 items)
+		
+	// New General items - MPU6050LPF to AL correct (4 items)
+	memcpy((void*)&buffer[0],(void*)((&Config.setup) + (GENITEMS_V1_0 + 9)),1);	// MPU6050LPF
+	memcpy((void*)&buffer[1],(void*)((&Config.setup) + (GENITEMS_V1_0 + 6)),1);	// AccLPF
+	memcpy((void*)&buffer[2],(void*)((&Config.setup) + (GENITEMS_V1_0 + 7)),1);	// GyroLPF
+	memcpy((void*)&buffer[3],(void*)((&Config.setup) + (GENITEMS_V1_0 + 8)),1);	// AL correct
+	
+	// Copy back to new General items structure
+	memcpy((void*)((&Config.setup) + (GENITEMS_V1_0 + 5)), &buffer, 4);
+	
+	// "None" no longer an option for this channel, so set to AUX3
+	memcpy((void*)&temp,(void*)((&Config.setup) + (RCITEMS_V1_0 + 4)),1);		// FlightChan
+
+	if (temp == NOCHAN)
+	{
+		temp = AUX3;
+		memcpy((void*)((&Config.setup) + (RCITEMS_V1_0 + 4)), &temp, 1);
+	}
+
+	// Set mixer preset to default
+	memset((void*)((&Config.setup) + (GENITEMS_V1_0 + 9)), QUADX, 1);			// Preset
+	
 	// Move data that exists after the channel mixer to new location
-	// Hard-coded to V1.0 RAM offset	
-	memmove((void*)&Config.Servo_reverse, (void*)((&Config.setup) + (378)), 74);	// RAM location determined empirically
+	memmove((void*)((&Config.setup) + (SERVOREV_V1_1)), (void*)((&Config.setup) + (SERVOREV_V1_0)), 72); // (New channel_t size - old size = 72)
 	
 	// Copy the old channel[] structure into buffer, spaced out to match the new structure
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		src = (void*)Config.Channel;	// Same location as old one
+		src = (void*)((&Config.setup) + (CHANNEL_V1_0));
 		dst = (void*)mixer_buffer;
 		src += (i * OLDSIZE);			// Step to next old data in (corrupted) config structure
 		dst += (i * NEWSIZE);			// Step to next location for new data in the buffer
 		memcpy(dst, src, OLDSIZE);		// Move only the old (smaller) data
 	}
 
-	// Rearrange one output at a time	
+	// Rearrange one output at a time
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		// Move all bytes from the OLD P1_offset [4] up by one to make space for the Motor_marker byte
@@ -217,7 +247,6 @@ void Update_V1_0_to_V1_1_B7(void)
 		dst = &mixer_buffer[30 + (i * NEWSIZE)];
 		memmove(dst, src, 8);
 
-		
 		// Convert old "None" settings to new ones
 		// Skip every second byte
 		for (j = 0; j < 8; j += 2)
@@ -225,7 +254,7 @@ void Update_V1_0_to_V1_1_B7(void)
 			if (mixer_buffer[30 + (i * NEWSIZE) + j] == 13) // 13 was the old "None"
 			{
 				mixer_buffer[30 + (i * NEWSIZE) + j] = NOMIX;
-			}			
+			}
 		}
 
 		// Expand the old switches into new bytes
@@ -433,101 +462,122 @@ void Update_V1_0_to_V1_1_B7(void)
 			mixer_buffer[29 + (i * NEWSIZE)] = OFF;
 		}
 	}
-		
+	
 	// Copy buffer back into new structure
 	src = (void*)mixer_buffer;
-	dst = (void*)Config.Channel;
-	memcpy(dst, src, sizeof(mixer_buffer) - 1); // This appears to be spot on.
+	dst = (void*)((&Config.setup) + (CHANNEL_V1_0));
+	memcpy(dst, src, sizeof(mixer_buffer));
+	
+	// Convert old filter values to more appropriate ones
+	memcpy((void*)&temp,(void*)((&Config.setup) + (GENITEMS_V1_0 + 6)),1);		// Config.Acc_LPF
+	temp = convert_filter_V1_0_V1_1(temp);
+	memcpy((void*)((&Config.setup) + (GENITEMS_V1_0 + 6)), &temp, 1);
 
-	// Restore corrupted byte manually
-	Config.Channel[7].P2_source_b_volume = temp; 
-
-	// Set magic number to V1.1 Beta 7 signature
-	Config.setup = V1_1_B7_SIGNATURE;
+	memcpy((void*)&temp,(void*)((&Config.setup) + (GENITEMS_V1_0 + 7)),1);		// Config.Gyro_LPF
+	temp = convert_filter_V1_0_V1_1(temp);
+	memcpy((void*)((&Config.setup) + (GENITEMS_V1_0 + 7)), &temp, 1);	
+	
+	// Finally, copy the RudderPol value up into its new location
+	memcpy((void*)((&Config.setup) + (RUDDERPOL_V1_1)),(void*)&buffer[9],1);	// RudderPol
 }
 
-// Upgrade V1.1 beta 7 structure to V1.1 Beta 8 structure
-void Update_V1_1_to_V1_1_B8(void)
+// Upgrade V1.1 structure to V1.2
+void Update_V1_1_to_V1_2(void)
 {
-	int8_t	buffer[12];
+	int8_t	Orientation_P2 = 0;
 	int8_t	temp = 0;
-	
-	// RC items - working perfectly, but really mustn't use variable names 
-	// here as they MIGHT CHANGE LOCATION. Use an offset from the start instead
-	buffer[0] = Config.RxMode;			// RxMode. Same as old RxMode
-	buffer[1] = Config.MPU6050_LPF;		// Servo_rate
-	buffer[2] = Config.Servo_rate;		// PWM_Sync
-	buffer[3] = Config.PWM_Sync;		// TxSeq
-	buffer[4] = Config.TxSeq;			// FlightChan
-	buffer[5] = Config.AileronPol;		// TransitionSpeed
-	buffer[6] = Config.ElevatorPol;		// Transition_P1n
-	buffer[7] = Config.FlightChan;		// AileronPol
-	buffer[8] = Config.TransitionSpeed;	// ElevatorPol
-	
-	// General items
-	memcpy((void*)&temp,(void*)((&Config.CF_factor) + (1)),1);
-	buffer[9] = temp;					// Old MPU6050LPF value
-	buffer[10] = Config.Transition_P1n; // Old RudderPol value
-		
-	// Copy back to RC items structure
-	memcpy(&Config.RxMode, &buffer,9);
-	
-	// Copy back to General items structure
-	Config.MPU6050_LPF = buffer[9];
-	temp = buffer[10];					// Pass through the RudderPol value
-	memcpy((void*)((&Config.CF_factor) + (1)), (void*)&temp,1);
-	
-	// "None" no longer an option for this channel
-	if (Config.FlightChan == NOCHAN)
+
+	// Save old Config.CF_factor value
+	memcpy((void*)&temp,(void*)((&Config.setup) + (ALCORRECT_V1_1)),1);			// Config.CF_factor
+
+	// Convert old Config.CF_factor to new
+	// (old) 1 = 10% 2 = 11%, 3 = 12.5%, 4 = 14%, 5 = 17%, 60= 20%, 7 = 25%, 8 = 33%, 9 = 50%, 10 = 100%
+	// (newest) 11 = 10%, 10 = 20%, 9 = 30%, 8 = 40%, 7 = 50%, 6 = 60%, 5 = 70%, 4 = 80%, 3 = 90%, 2 = 100%
+	switch(temp)
 	{
-		Config.FlightChan = AUX3;
+		case 10:
+			temp = 2;
+			break;
+		case 9:
+			temp = 7;
+			break;
+		case 8:
+		case 7:
+			temp = 9;
+			break;
+		case 6:
+		case 5:
+			temp = 10;
+			break;
+		case 4:
+		case 3:
+		case 2:
+		case 1:
+			temp = 11;
+			break;	
+		default:
+			temp = 6;
+			break;		
 	}
 	
-	// Set magic number to V1.1 Beta 8 signature
-	Config.setup = V1_1_B8_SIGNATURE;
-}
-
-// Upgrade V1.1 B8 settings to V1.1 Beta 10 settings
-void Update_V1_1B8_to_V1_1_B10(void)
-{
-	// Reset filters to more appropriate values
-	Config.Acc_LPF = convert_filter_B8_B10(Config.Acc_LPF);
-	Config.Gyro_LPF = convert_filter_B8_B10(Config.Gyro_LPF);
-
-	// Set magic number to V1.1 Beta 10 signature
-	Config.setup = V1_1_B10_SIGNATURE;
-}
-
-
-// Upgrade V1.1 B10+ settings to V1.1 Beta 12 settings
-void Update_V1_1B10_to_V1_1_B12(void)
-{
-	// Copy old RudderPol value to new location
-	Config.AileronPol = Config.Preset;
+	// Write updated Config.CF_factor value
+	memcpy((void*)((&Config.setup) + (ALCORRECT_V1_1)),(void*)&temp,1);
+		
+	// Copy AileronPol from RCitems to its new location
+	memcpy((void*)((&Config.setup) + (RUDDERPOL_V1_1 + 1)),(void*)((&Config.setup) + (RCITEMS_V1_0 + 7)),1);
 	
-	// Set preset to default and load it
-	Config.Preset = QUADX;
+	// Set the new Vibe value to OFF
+	memset((void*)((&Config.setup) + (RCITEMS_V1_0 + 7)), OFF, 1);
 
-	// Set magic number to V1.1 Beta 11 signature
-	Config.setup = V1_1_B12_SIGNATURE;
-}
-
-
-// Upgrade V1.1 B12+ settings to V1.2 Beta 3 settings
-void Update_V1_1B12_to_V1_1_B18(void)
-{
-	// Copy old RudderPol value to new location
-	Config.RudderPol = Config.Preset;
+	// Update the orientation byte to be the P2 orientation
+	memcpy((void*)&Orientation_P2,(void*)((&Config.setup) + (GENITEMS_V1_0)),1);
 	
-	// Set magic number to V1.1 Beta 18 signature
-	Config.setup = V1_2_B3_SIGNATURE;
+	// Convert to new 24-orientation system
+	switch(Orientation_P2)
+	{
+		case HORIZONTAL:
+			Orientation_P2 = UP_BACK;
+			break;
+		case VERTICAL:
+			Orientation_P2 = RIGHT_DOWN;
+			break;
+		case UPSIDEDOWN:
+			Orientation_P2 = DOWN_BACK;
+			break;
+		case AFT:
+			Orientation_P2 = UP_FRONT;
+			break;
+		case SIDEWAYS:
+			Orientation_P2 = UP_RIGHT;
+			break;
+		case PITCHUP:
+			Orientation_P2 = BACK_DOWN;
+			break;
+		default:
+			Orientation_P2 = UP_BACK;
+			break;	
+	}
+
+	// Clear new data area at end of data											// Log pointer onwards
+	memset((void*)((&Config.setup) + (V1_2_NEWDATA)), 0, 43);
+	
+	// Move everything from Config.Contrast up by one byte to make room for Config.P1_Reference	
+	// AileronPol has already been moved up past RudderPol so we need to add one byte
+	memmove((void*)((&Config.setup) + (GENITEMS_V1_0 + 2)), (void*)((&Config.setup) + (GENITEMS_V1_0 + 1)), ((RUDDERPOL_V1_1 + 1) - (GENITEMS_V1_0 + 1))); // (520 + 1 - 136 + 1 = 386 bytes)
+
+	// Save updated orientation
+	memcpy((void*)((&Config.setup) + (GENITEMS_V1_0 )),(void*)&Orientation_P2,1);	// Updated P2 orientation value
+	memset((void*)((&Config.setup) + (GENITEMS_V1_0 + 1)), NO_ORIENT, 1);			// New P1_Reference
+	
+	// Set magic number to V1.2 signature
+	Config.setup = V1_2_SIGNATURE;
 }
 
-// Convert pre-V1.1 B10 filter settings
-uint8_t convert_filter_B8_B10(uint8_t old_filter)
+// Convert V1.0 filter settings
+uint8_t convert_filter_V1_0_V1_1(uint8_t old_filter)
 {
-	// B8 Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
-	// B10 Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None
+	// V1.0 Software LPF conversion table 5Hz, 10Hz, 21Hz, 32Hz, 44Hz, 74Hz, None
+	// V1.1 Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None
 	uint8_t new_filter;
 	
 	switch (old_filter)
@@ -573,6 +623,7 @@ void Set_EEPROM_Default_Config(void)
 	Config.setup = MAGIC_NUMBER;
 
 	// General
+	Config.Orientation_P2 = UP_BACK;
 	Config.RxMode = SBUS;
 	Config.FlightChan = GEAR;
 	Config.ArmMode = ARMABLE;
@@ -581,12 +632,17 @@ void Set_EEPROM_Default_Config(void)
 	Config.Acc_LPF = HZ21;
 	Config.Gyro_LPF = NOFILTER;
 	Config.MPU6050_LPF = HZ44;
-	Config.CF_factor = 7;
+	Config.CF_factor = 5;
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 	
+	// Advanced
+	Config.Orientation_P1 = UP_BACK;
+	Config.P1_Reference = NO_ORIENT;
+	
 	// Preset AccZeroNormZ
-	Config.AccZeroNormZ		= 128;
+	Config.AccZeroNormZ_P1		= 128;
+	Config.AccZeroNormZ_P2		= 128;
 
 	#ifdef KK2Mini
 	Config.Contrast = 30;				// Contrast (KK2 Mini)

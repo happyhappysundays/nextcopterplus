@@ -40,16 +40,16 @@ void menu_rc_setup(uint8_t section);
 //************************************************************
 
 #define RCSTART 149 	// Start of Menu text items
-#define RCOFFSET 77		// LCD offset position for values (RC)
-#define GENOFFSET 79	// LCD offset position for values (General)
-
-#define RCTEXT 62 		// Start of value text items
-#define GENERALTEXT	124
-#define RCITEMS 8 		// Number of menu items displayed
+#define RCTEXT 62 		// Start of "Receiver type" value text list
+#define RCITEMS 8 		// Number of menu items displayed	
 #define RCITEMSOFFSET 9 // Actual number of menu items
-#define GENERALITEMS 10
+#define RCOFFSET 65		// LCD offsets
 
-#define PRESETITEM 167	// Location of Preset menu item in list
+#define GENERALTEXT	295 // Start of "Orientations" value text list
+#define GENERALITEMS 11	// Number of menu items displayed
+#define GENOFFSET 70	// LCD offsets
+
+#define PRESETITEM 168	// Location of Preset menu item in list
 
 //************************************************************
 // RC menu items
@@ -57,15 +57,25 @@ void menu_rc_setup(uint8_t section);
 	 
 const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 118, 105, 130, 105, 0, 0, 68, 0},		// RC setup
-	{GENERALTEXT, 0, 53, 0, 0, 37, 37, 37, 0, 273},	// General 
+	{RCTEXT, 118, 105, 130, 105, 0, 0, 68, 0},						// RC setup
+	{GENERALTEXT, 320, 0, 53, 0, 0, 37, 37, 37, 0, 273},			// General 
+};
+
+const uint16_t RCMenuOffsets[2][GENERALITEMS] PROGMEM =
+{
+	{RCOFFSET, 65, 65, 60, 75, 75, 87, 95, 75},						// RC setup
+	{GENOFFSET, 67, 67, 67, 80, 80, 80, 80, 80, 80, 80},			// General
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
 {
 	{
 		// RC setup (8)					// Min, Max, Increment, Style, Default
-		{CPPM_MODE,SRXL,1,1,SBUS},		// Receiver type
+#ifdef SRXLUDI		
+		{CPPM_MODE,SRXL,1,1,SBUS},		// Receiver type (PWM to SRXL/UDI)
+#else
+		{CPPM_MODE,XTREME,1,1,SBUS},	// Receiver type (PWM to Xtreme)
+#endif
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,MPXSEQ,1,1,JRSEQ},		// Channel order
@@ -73,11 +83,11 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{0,40,1,0,0},					// TransitionSpeed 0 to 40
 		{1,99,1,0,50},					// Transition P1n point
 		{OFF,ON,1,1,OFF},				// Vibration display
-		{NORMAL,REVERSED,1,1,NORMAL},	// Elevator RC input polarity (not used)
 	},
 	{
-		// General (10)
-		{HORIZONTAL,PITCHUP,1,1,HORIZONTAL}, // Orientation
+		// General (11)
+		{UP_BACK,RIGHT_FRONT,1,1,UP_BACK},	// Orientation (P2)
+		{NO_ORIENT,MODEL,1,1,NO_ORIENT},	// Orientation usage (Tail sitter)
 		// Limit contrast range for KK2 Mini
 #ifdef KK2Mini
 		{26,34,1,0,30}, 				// Contrast (KK2 Mini)
@@ -90,10 +100,22 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{HZ5,HZ260,1,1,HZ44},			// MPU6050 LPF. Default is 44Hz
 		{HZ5,NOFILTER,1,1,HZ21},		// Acc. LPF 21Hz default	(5, 10, 21, 44, 94, 184, 260, None)
 		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
-		{1,10,1,0,7},					// AL correction
+		{2,11,1,0,6},					// AL correction
 		{QUADX,BLANK,1,4,QUADX},		// Mixer preset (note: style 4)
 	}
 };
+
+// These are the implied P1 orientations based on the user's P2 orientation.
+const int8_t P1_Orientation_LUT[NUMBEROFORIENTS] PROGMEM = 
+	{
+		BACK_DOWN,BACK_LEFT,BACK_UP,BACK_RIGHT,
+		DOWN_FRONT,DOWN_LEFT,DOWN_BACK,DOWN_RIGHT,
+		FRONT_DOWN,FRONT_RIGHT,FRONT_UP,FRONT_LEFT,
+		UP_FRONT,UP_RIGHT,UP_BACK,UP_LEFT,
+		LEFT_FRONT,LEFT_UP,LEFT_BACK,LEFT_DOWN,
+		RIGHT_FRONT,RIGHT_DOWN,RIGHT_BACK,RIGHT_UP
+	};
+
 //************************************************************
 // Main menu-specific setup
 //************************************************************
@@ -107,7 +129,6 @@ void menu_rc_setup(uint8_t section)
 	uint8_t		i;
 	uint16_t	offset = 0;			// Index into channel structure
 	uint16_t	items= RCITEMS;		// Items in group
-	uint16_t	value_offset = RCOFFSET;
 	
 	// If submenu item has changed, reset submenu positions
 	if (menu_flag)
@@ -119,17 +140,15 @@ void menu_rc_setup(uint8_t section)
 	while(button != BACK)
 	{
 		// Get menu offsets and load values from eeprom
-		// 1 = RC, 2 = General
+		// 1 = RC, 2 = General, 3 = Advanced
 		switch(section)
 		{
 			case 1:				// RC setup menu
-				value_offset = RCOFFSET;
 				break;
 			case 2:				// General menu
-				value_offset = GENOFFSET;
 				offset = RCITEMSOFFSET;
 				items = GENERALITEMS;
-				value_ptr = &Config.Orientation;
+				value_ptr = &Config.Orientation_P2;
 				break;
 			default:
 				break;
@@ -139,7 +158,7 @@ void menu_rc_setup(uint8_t section)
 		Config.Preset = OPTIONS;
 
 		// Print menu - note that print_menu_items() updates button variable.
-		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, value_offset, (const uint16_t*)RCMenuText[section - 1], cursor);
+		print_menu_items(sub_top + offset, RCSTART + offset, value_ptr, (const unsigned char*)rc_menu_ranges[section - 1], 0, (const uint16_t*)RCMenuOffsets[section - 1], (const uint16_t*)RCMenuText[section - 1], cursor);
 
 		// Handle menu changes
 		update_menu(items, RCSTART, offset, button, &cursor, &sub_top, &menu_temp);
@@ -211,6 +230,9 @@ void menu_rc_setup(uint8_t section)
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
 				LED1 = 0;
 			}
+
+			// Work out the P1 orientation from the user's P2 orientation setting
+			Config.Orientation_P1 = (int8_t)pgm_read_byte(&P1_Orientation_LUT[Config.Orientation_P2]);
 
 			// Return the preset to "Options" when going back to the General menu
 			Config.Preset = OPTIONS;

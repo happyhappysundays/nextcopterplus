@@ -47,7 +47,7 @@ void Wait_BUTTON4(void);
 
 uint16_t main_top = MAINSTART;
 uint16_t sub_top = 0;
-uint8_t menu_flag;
+uint8_t menu_flag = 1;
 
 void menu_main(void)
 {
@@ -114,13 +114,13 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_rc_setup(2); 		// 1.General
 			break;
 		case MAINSTART+1:
-			menu_rc_setup(1); 		// 2.RX setup	
+			menu_rc_setup(1); 		// 2.RX setup
 			break;
 		case MAINSTART+2:
 			Display_rcinput();		// 3.RX inputs
 			break;
 		case MAINSTART+3:
-			Display_sticks(); 		// 4.Stick polarity	
+			Display_sticks(); 		// 4.Stick polarity
 			break;
 		case MAINSTART+4:
 			Display_sensors();		// 5.Sensor calibration
@@ -171,7 +171,7 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_log();				// 20. Error log
 			break;
 		default:
-			break;
+			break;	
 	} // Switch
 }
 

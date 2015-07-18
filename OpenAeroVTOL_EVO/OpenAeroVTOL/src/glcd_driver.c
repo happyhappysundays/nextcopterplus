@@ -109,7 +109,7 @@ void st7565_init(void)
 // Set LCD brightness
 void st7565_set_brightness(uint8_t val) 
 {
-	st7565_command(CMD_SET_VOLUME_FIRST);					// 0x81
+	st7565_command(CMD_SET_VOLUME_FIRST);		// 0x81
 	st7565_command(val);
 }
 

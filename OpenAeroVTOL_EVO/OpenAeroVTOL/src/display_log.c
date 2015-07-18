@@ -31,7 +31,6 @@
 
 void menu_log(void);
 void add_log(uint8_t error);
-// enum Errors			{REBOOT = 0, MANUAL, NOSIGNAL, TIMER};
 
 //************************************************************
 // Code

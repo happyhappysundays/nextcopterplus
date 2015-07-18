@@ -58,10 +58,12 @@ void output_servo_ppm(uint8_t ServoFlag)
 	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
 
 	// Check for motor flags if throttle is below arming minimum or disarmed
-	// and set all motors to minimum throttle if so
+	// and set all motors to minimum throttle if so.
+	// Also, block if ARM_blocker set
 	if 	(
 			(MonopolarThrottle < THROTTLEIDLE) || 
-			(General_error & (1 << DISARMED))
+			(General_error & (1 << DISARMED)) ||
+			(Flight_flags & (1 << ARM_blocker))
 		)
 	{
 		// For each output

@@ -9,4 +9,10 @@
 //#define KK2Mini
 
 // Uncomment this to enable the error log
-#define ERROR_LOG
+//#define ERROR_LOG
+
+// Enable debugging messages
+//#define DEBUG_ON
+
+// Enable SRXL/UDI input
+//#define SRXLUDI
