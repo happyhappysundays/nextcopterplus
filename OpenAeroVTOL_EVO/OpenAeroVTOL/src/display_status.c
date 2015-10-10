@@ -90,7 +90,7 @@ void Display_status(void)
 		uint8_t x_loc = 45;		// X location of voltage display
 		uint8_t y_loc = 36;		// Y location of voltage display
 
-		LCD_Display_Text(133,(const unsigned char*)Verdana8,0,36); 	// Battery
+		LCD_Display_Text(289,(const unsigned char*)Verdana8,0,36); 	// Battery
 
 		vbat_temp = GetVbat();
 		temp = vbat_temp/100;	// Display whole decimal part first

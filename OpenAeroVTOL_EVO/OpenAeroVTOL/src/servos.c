@@ -31,10 +31,10 @@ volatile uint16_t ServoOut[MAX_OUTPUTS];
 
 void output_servo_ppm(uint8_t ServoFlag)
 {
-	uint32_t temp;
+	int32_t temp;
 	uint8_t i = 0;
 
-	// Re-span numbers from internal values to microseconds
+	// Re-span numbers from internal values to microseconds and check limits
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
 		temp = ServoOut[i];					// Promote to 32 bits
@@ -51,19 +51,25 @@ void output_servo_ppm(uint8_t ServoFlag)
 			temp = ((temp << 2) + 5) / 10; 	// Round and convert	
 		}
 		
+		// Enforce min, max travel limits in microseconds
+		if (temp > Config.Limits[i].maximum)
+		{
+			temp = Config.Limits[i].maximum;
+		}
+
+		else if (temp < Config.Limits[i].minimum)
+		{
+			temp = Config.Limits[i].minimum;
+		}
+
 		ServoOut[i] = (uint16_t)temp;
 	}
 
-	// Re-sample throttle value
-	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE];
-
 	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so.
-	// Also, block if ARM_blocker set
 	if 	(
 			(MonopolarThrottle < THROTTLEIDLE) || 
-			(General_error & (1 << DISARMED)) ||
-			(Flight_flags & (1 << ARM_blocker))
+			(General_error & (1 << DISARMED))
 		)
 	{
 		// For each output
@@ -80,7 +86,11 @@ void output_servo_ppm(uint8_t ServoFlag)
 
 	// Determine output rate based on device type
 	// Suppress outputs during throttle high error
-	if((General_error & (1 << THROTTLE_HIGH)) == 0)
+	// Also, block if ARM_blocker set
+	if (
+			((General_error & (1 << THROTTLE_HIGH)) == 0) &&
+			((Flight_flags & (1 << ARM_blocker)) == 0)
+	   )
 	{
 		// Reset JitterFlag immediately before PWM generation
 		JitterFlag = false;

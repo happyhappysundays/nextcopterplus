@@ -376,7 +376,7 @@ void init(void)
 	if (Interrupted)
 	{
 		RxGetChannels();
-		if (MonopolarThrottle > THROTTLEIDLE)
+		if (MonopolarThrottle > THROTTLEIDLE) // THROTTLEIDLE = 50
 		{
 			General_error |= (1 << THROTTLE_HIGH); 	// Set throttle high error bit
 		}

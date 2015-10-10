@@ -55,7 +55,7 @@
 // So with no division of stick value by "Axis rate", full stick would equate to (1000/368 * 360) = 978 deg/sec. 
 // With axis rate set to 2, the stick amount is quartered (250) or 244 deg/sec. A value of 3 would result in 122 deg/sec. 
 //
-// Stick rates: /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
+// Stick rates: /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244), /2 (488), /1 (976)
 		
 //************************************************************
 // Prototypes
@@ -140,7 +140,6 @@ void Sensor_PID(uint32_t period)
 		{
 			GyroAvgNoise = 999.0f;
 		}
-
 	}
 
 	for (axis = 0; axis <= YAW; axis ++)
@@ -149,11 +148,26 @@ void Sensor_PID(uint32_t period)
 		// Increment and limit gyro I-terms, handle heading hold nicely
 		//************************************************************
 		
-		// Work out stick rate divider. 0 is slowest, 4 is fastest.
-		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244)
-		stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
-		stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
-
+		// Work out stick rate divider. 0 is slowest, 7 is fastest.
+		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244), /2 (488), /1 (976), *2 (1952)
+		if (Stick_rates[P1][axis] <= 6)
+		{
+			stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
+		}
+		else
+		{
+			stick_P1 = RCinputsAxis[axis] << ((Stick_rates[P1][axis]) - 6);
+		}
+		
+		if (Stick_rates[P2][axis] <= 6)
+		{
+			stick_P2 = RCinputsAxis[axis] >> (4 - (Stick_rates[P2][axis] - 2));
+		}
+		else
+		{
+			stick_P2 = RCinputsAxis[axis] << ((Stick_rates[P2][axis]) - 6);
+		}		
+		
 		//************************************************************
 		// Gyro LPF
 		//************************************************************	

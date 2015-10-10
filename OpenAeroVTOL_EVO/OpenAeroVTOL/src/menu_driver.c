@@ -11,6 +11,7 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdlib.h>
+#include <string.h>
 #include "io_cfg.h"
 #include "glcd_driver.h"
 #include "mugui.h"
@@ -22,7 +23,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 162 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -35,6 +36,7 @@ void print_menu_frame(uint8_t style);
 void update_menu(uint16_t items, uint16_t start, uint16_t offset, uint8_t button, uint16_t* cursor, uint16_t* top, uint16_t* temp);
 void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
 void print_menu_items(uint16_t top, uint16_t start, int8_t values[], const unsigned char* menu_ranges, uint8_t rangetype, const uint16_t* MenuOffsets, const uint16_t* text_link, uint16_t cursor);
+void edit_curve_item(uint8_t curve, uint8_t type);
 
 // Misc
 void menu_beep(uint8_t beeps);
@@ -58,9 +60,13 @@ uint8_t button;
 uint16_t cursor = LINE0;
 uint16_t menu_temp = 0;
 
+// Defines
+#define CURVESTARTE 421
+#define CURVESTARTM 442
+
 //************************************************************
 // Print basic menu frame
-// style = menu style (0 = main, 1 = sub, 2 = alt)
+// style = menu style
 //************************************************************
 void print_menu_frame(uint8_t style)
 {
@@ -92,7 +98,22 @@ void print_menu_frame(uint8_t style)
 			LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
 			LCD_Display_Text(291, (const unsigned char*)Verdana8, 100, 54);	// Clear
 			break;			
-		
+
+		case CURVE:
+			// Curve edit screen
+			LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
+			LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); // Right
+			break;
+
+		case OFFSET:
+			// Offset curve edit screen
+			LCD_Display_Text(48, (const unsigned char*)Verdana8, 10, 54); 	// P1
+			LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
+			LCD_Display_Text(49, (const unsigned char*)Verdana8, 55, 54); 	// P1.n	
+			LCD_Display_Text(11, (const unsigned char*)Wingdings, 120, 57); // Right
+			LCD_Display_Text(50, (const unsigned char*)Verdana8, 107, 54);	// P2
+			break;		
+			
 		default:
 			break;
 	}
@@ -280,13 +301,6 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 
 				mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana14, &size);
 				LCD_Display_Text(text_link + value, (const unsigned char*)Verdana14,((128-size.x)/2),25);
-
-#ifdef DEBUG_ON
-				// Print the text item base and value 
-				mugui_lcd_puts(itoa(text_link,pBuffer,10),(const unsigned char*)Verdana8,0,43); // Index ref for item's value as text (currently wrong for Model ref)
-				mugui_lcd_puts(itoa(menuitem,pBuffer,10),(const unsigned char*)Verdana8,45,43); // Item name index
-				mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana8,90,43);	// Value of item 
-#endif
 			}
 
 			// Print appropriate menu frame
@@ -407,16 +421,16 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 		// Set servo position if required
 		// Ignore if the output is marked as a motor
 		if	(
-			(servo_enable) &&
-			(Config.Channel[servo_number].Motor_marker != MOTOR)
+				(servo_enable) &&
+				(Config.Channel[servo_number].Motor_marker != MOTOR)
 			)
 		{
 			servo_update = 0;
 
 			temp16 = scale_percent(value);	// Convert to servo position (from %)
 
-			// Scale servo from 2500~5000 to 875~2125
-			temp16 = ((temp16 - 3750) >> 1) + 1500; 
+			// Scale motor from 2500~5000 to 1000~2000
+			temp16 = ((temp16 << 2) + 5) / 10; 	// Round and convert
 
 			cli();
 			output_servo_ppm_asm3(servo_number, temp16);
@@ -432,6 +446,447 @@ void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t 
 	}
 
 	*values = (int8_t)value;
+}
+
+//************************************************************
+// Edit current curve points according to limits and increment
+// curve				= curve number to edit
+// type					= CURVE or OFFSET
+// Curves_menu_ranges	= pointer to list of ranges for this curve
+//************************************************************
+
+void edit_curve_item(uint8_t curve, uint8_t type)
+{
+	mugui_size16_t size;
+	int16_t value = 0;
+	uint8_t Point_ref = 0;				// Current focus
+	menu_range_t range;
+	int16_t Points[NUMBEROFPOINTS];
+	int8_t InterPoints[NUMBEROFPOINTS];
+	int8_t i = 0;
+	int8_t Point_x = 0;
+	int8_t Point_y = 0;
+	int8_t varbox_x = 0;
+	int8_t varbox_y = 0;
+	int8_t chanbox_y = 0;	
+	int8_t channel = THROTTLE;
+	uint16_t reference = CURVESTARTE;
+	
+	button = NONE;
+
+	// Set the correct text list for the selected reference
+	if (Config.P1_Reference != MODEL)
+	{
+		reference = CURVESTARTE;
+	}
+	else
+	{
+		reference = CURVESTARTM;
+	}
+
+	// This is a loop that cycles until Button 4 is pressed (Save) or an Abort button
+	while ((button != ENTER) && (button != ABORT))
+	{
+		// Handle offset curves differently
+		if (type == OFFSET)
+		{
+			// Get curve point ranges
+			range = get_menu_range ((const unsigned char*)Offsets_menu_ranges[curve], Point_ref);
+		}
+		else
+		{
+			range = get_menu_range ((const unsigned char*)Curves_menu_ranges[curve], Point_ref);
+		}
+
+		// Display update
+		clear_buffer(buffer);
+		
+		// Handle offset curves differently
+		if (type == OFFSET)
+		{
+			// Print graph frame
+			print_menu_frame(OFFSET);
+		}
+		else
+		{
+			// Print graph frame
+			print_menu_frame(CURVE);
+		}
+		
+		// Print axes
+		if (type == OFFSET)
+		{
+			drawline(buffer, 64, 0, 64, 52, 1);		// Vertical
+		}
+		else
+		{
+			drawline(buffer, 64, 0, 64, 57, 1);		// Vertical
+		}
+		
+		drawline(buffer, 0, 29, 128, 29, 1);	// Horizontal
+				
+		// Get the current curve's data
+		if (type == OFFSET)
+		{
+			Points[0] = Config.Offsets[curve].Point1;
+			Points[1] = Config.Offsets[curve].Point2;
+			Points[2] = Config.Offsets[curve].Point3;
+			Points[3] = Config.Offsets[curve].Point4;
+			Points[4] = Config.Offsets[curve].Point5;
+			Points[5] = Config.Offsets[curve].Point6;
+			Points[6] = Config.Offsets[curve].Point7;
+			channel	= Config.Offsets[curve].channel;
+		}
+		else
+		{
+			Points[0] = Config.Curve[curve].Point1;
+			Points[1] = Config.Curve[curve].Point2;
+			Points[2] = Config.Curve[curve].Point3;
+			Points[3] = Config.Curve[curve].Point4;
+			Points[4] = Config.Curve[curve].Point5;
+			Points[5] = Config.Curve[curve].Point6;
+			Points[6] = Config.Curve[curve].Point7;
+			channel	= Config.Curve[curve].channel;			
+		}
+
+		// Calculate and draw points
+		for (i = 0; i < 7; i++)
+		{
+			// Interpolate points for the offset graph
+			if (type == CURVE)
+			{
+				// Curves 0 to 100
+				if (curve < 2)
+				{
+					InterPoints[i] = (int8_t)(54 - ((Points[i] * 50) / 100));				
+				}
+				// Curves -100 to -100
+				else
+				{
+					InterPoints[i] = (int8_t)(29 - ((Points[i] * 50) / 200));			
+				}
+			}
+			// Curves -125 to -125
+			else
+			{
+				InterPoints[i] = (int8_t)(29 - ((Points[i] * 50) / 250));
+			}
+
+			// Draw boxes on the five points
+			switch(i)
+			{
+				case 0:
+					Point_x = 2;
+					break;
+				case 1:
+					Point_x = 22;
+					break;
+				case 2:
+					Point_x = 42;
+					break;
+				case 3:
+					Point_x = 62;
+					break;
+				case 4:
+					Point_x = 82;
+					break;
+				case 5:
+					Point_x = 102;
+					break;
+				case 6:
+					Point_x = 121;
+					break;
+			}
+			
+			// Black box surrounding point (vertical origin is offset by 2)
+			fillrect(buffer, Point_x, InterPoints[i] - 2, 5, 5, 1);
+		}
+
+		// Draw lines between the points
+		drawline(buffer, 4, InterPoints[0], 24, InterPoints[1], 1);
+		drawline(buffer, 24, InterPoints[1], 44, InterPoints[2], 1);
+		drawline(buffer, 44, InterPoints[2], 64, InterPoints[3], 1);
+		drawline(buffer, 64, InterPoints[3], 84, InterPoints[4], 1);
+		drawline(buffer, 84, InterPoints[4], 104, InterPoints[5], 1);
+		drawline(buffer, 104, InterPoints[5], 123, InterPoints[6], 1);
+
+		// Highlight the current point
+		switch(Point_ref)
+		{
+			case 0:
+			Point_x = 0;
+			break;
+			case 1:
+			Point_x = 20;
+			break;
+			case 2:
+			Point_x = 40;
+			break;
+			case 3:
+			Point_x = 60;
+			break;
+			case 4:
+			Point_x = 80;
+			break;
+			case 5:
+			Point_x = 100;
+			break;
+			case 6:
+			Point_x = 119;
+			break;
+			case 7:
+			Point_x = 119;
+			break;
+		}
+		
+		// Adjust box coordinates
+		Point_y = (InterPoints[Point_ref] - 4);
+
+		// Channel numbers are highlighted differently
+		if (Point_ref == 7)
+		{
+			pgm_mugui_scopy((char*)pgm_read_word(&text_menu[reference + Config.Curve[curve].channel]));		// Copy string to pBuffer
+			mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana8, &size);					// Calculate size
+			drawrect(buffer,(123 - size.x),(chanbox_y - 1 - size.y), (size.x + 5), (size.y + 4), 1);		// Outline
+		}
+		else
+		{
+			drawrect(buffer,Point_x,Point_y, 9, 9, 1);
+		}
+
+		// Print value of current object in a box somewhere
+		if (type == CURVE)
+		{
+			switch(Point_ref)
+			{
+				case 0:
+					value = Config.Curve[curve].Point1;
+					break;
+				case 1:
+					value = Config.Curve[curve].Point2;
+					break;
+				case 2:
+					value = Config.Curve[curve].Point3;
+					break;
+				case 3:
+					value = Config.Curve[curve].Point4;
+					break;
+				case 4:
+					value = Config.Curve[curve].Point5;
+					break;
+				case 5:
+					value = Config.Curve[curve].Point6;
+					break;
+				case 6:
+					value = Config.Curve[curve].Point7;
+					break;
+				case 7:
+					value = Config.Curve[curve].channel;
+					break;
+			}
+		}
+		// Offsets
+		else
+		{
+			switch(Point_ref)
+			{
+				case 0:
+					value = Config.Offsets[curve].Point1;
+					break;
+				case 1:
+					value = Config.Offsets[curve].Point2;
+					break;
+				case 2:
+					value = Config.Offsets[curve].Point3;
+					break;
+				case 3:
+					value = Config.Offsets[curve].Point4;
+					break;
+				case 4:
+					value = Config.Offsets[curve].Point5;
+					break;
+				case 5:
+					value = Config.Offsets[curve].Point6;
+					break;
+				case 6:
+					value = Config.Offsets[curve].Point7;
+					break;
+				case 7:
+					value = Config.Offsets[curve].channel;
+					break;
+			}
+		}
+		
+		// Move value box when point 1 is in the way
+		if (((Config.Curve[curve].Point1 < 50) && (type == CURVE)) || ((Config.Offsets[curve].Point1 < 50) && (type == OFFSET)))
+		{
+			varbox_y = 0;
+		}
+		else
+		{
+			varbox_y = 40;			
+		}
+
+		// Move channel box when points 6 and 7 are in the way
+		if (((Config.Curve[curve].Point6 + Config.Curve[curve].Point7) < 0) && (type == CURVE))
+		{
+			chanbox_y = 12;
+		}
+		else
+		{
+			chanbox_y = 51;
+		}
+		
+		// Print the graph point values
+		if (Point_ref < 7)
+		{
+			mugui_text_sizestring(itoa(value,pBuffer,10), (const unsigned char*)Verdana8, &size);			// Get dimensions of text
+			fillrect(buffer,varbox_x,varbox_y, (size.x + 5), (size.y + 4), 0);								// White box
+			drawrect(buffer,varbox_x,varbox_y, (size.x + 5), (size.y + 4), 1);								// Outline
+			mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana8,varbox_x + 3,varbox_y + 3);// Value
+		}
+		
+		// Print associated channel somewhere for the Generic curve
+		if ((curve >= 4) && (type == CURVE))
+		{
+			pgm_mugui_scopy((char*)pgm_read_word(&text_menu[reference + Config.Curve[curve].channel]));		// Copy string to pBuffer
+			mugui_text_sizestring((char*)pBuffer, (const unsigned char*)Verdana8, &size);					// Calculate size
+			fillrect(buffer,(124 - size.x),(chanbox_y - size.y), (size.x + 3), (size.y + 2), 0);			// White box
+			print_menu_text(0, 1, (reference + channel), (126 - size.x), (chanbox_y + 2 - size.y));			// Channel
+		}
+
+		// Write from buffer
+		write_buffer(buffer);
+
+		// Slow the loop rate
+		_delay_ms(100);		
+
+		// Poll buttons when idle. This updates the button multiplier
+		poll_buttons(true);
+	
+		// Handle cursor Up/Down limits
+		if (button == DOWN)
+		{
+			value = value - (range.increment * button_multiplier);
+			
+			// Limit values to set ranges
+			if (value <= range.lower)
+			{
+				value = range.lower;
+			}
+		}
+
+		if (button == UP)
+		{
+			value = value + (range.increment * button_multiplier);
+			
+			// Limit values to set ranges
+			if (value >= range.upper)
+			{
+				value = range.upper;
+			}
+		}
+
+		// Update values for next loop
+		if (type == CURVE)
+		{
+			switch(Point_ref)
+			{
+				case 0:
+					Config.Curve[curve].Point1 = value;
+					break;
+				case 1:
+					Config.Curve[curve].Point2 = value;
+					break;
+				case 2:
+					Config.Curve[curve].Point3 = value;
+					break;
+				case 3:
+					Config.Curve[curve].Point4 = value;
+					break;
+				case 4:
+					Config.Curve[curve].Point5 = value;
+					break;
+				case 5:
+					Config.Curve[curve].Point6 = value;
+					break;
+				case 6:
+					Config.Curve[curve].Point7 = value;
+					break;
+				case 7:
+					Config.Curve[curve].channel = value;
+					break;
+			}
+		}
+		else
+		{
+			switch(Point_ref)
+			{
+				case 0:
+					Config.Offsets[curve].Point1 = value;
+					break;
+				case 1:
+					Config.Offsets[curve].Point2 = value;
+					break;
+				case 2:
+					Config.Offsets[curve].Point3 = value;
+					break;
+				case 3:
+					Config.Offsets[curve].Point4 = value;
+					break;
+				case 4:
+					Config.Offsets[curve].Point5 = value;
+					break;
+				case 5:
+					Config.Offsets[curve].Point6 = value;
+					break;
+				case 6:
+					Config.Offsets[curve].Point7 = value;
+					break;
+				case 7:
+					Config.Offsets[curve].channel = value;
+					break;
+			}
+		}
+
+		// Handle button 4
+		if (button == ENTER)
+		{
+			// Cursor at far right
+			if  (
+					((Point_ref == (NUMBEROFPOINTS - 1)) && (curve < 4) && (type == CURVE)) ||
+					((Point_ref == NUMBEROFPOINTS) && (curve >= 4) && (type == CURVE)) ||
+					((Point_ref == (NUMBEROFPOINTS - 1)) && (type == OFFSET))
+				)
+			{
+				button = ENTER;
+			}
+			// Move cursor right
+			else
+			{
+				Point_ref++;
+				button = NONE;	
+			}
+		}
+
+		// Handle button 1
+		if (button == BACK)
+		{
+			// Cursor at far left
+			if (Point_ref == 0)
+			{
+				//button = ABORT;
+				button = ENTER;
+			}
+			// Move cursor left
+			else
+			{
+				Point_ref--;
+				button = NONE;
+			}
+		}
+
+	} // while ((button != ENTER) && (button != ABORT))
 }
 
 //************************************************************
@@ -613,6 +1068,7 @@ uint8_t poll_buttons(bool acceleration)
 
 	return buttons;
 }
+
 
 //************************************************************
 // Beep required number of times

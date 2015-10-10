@@ -206,6 +206,9 @@
     <Compile Include="src\display_balance.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\display_io.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\display_log.c">
       <SubType>compile</SubType>
     </Compile>
@@ -248,6 +251,12 @@
     <Compile Include="src\isr.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\menu_ch_order.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\menu_curves.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\menu_driver.c">
       <SubType>compile</SubType>
     </Compile>
@@ -258,6 +267,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\menu_mixer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\menu_offsets.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\menu_servos.c">

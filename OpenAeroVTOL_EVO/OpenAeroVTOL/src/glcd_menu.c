@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version:   1.2";	// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.3";			// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -70,18 +70,22 @@ const char MainMenuItem8[]  PROGMEM = "5. Sensor calibration";
 const char MainMenuItem10[] PROGMEM = "6. Level meter";
 const char MainMenuItem2[]  PROGMEM = "7. Flight profile 1";
 const char MainMenuItem3[]  PROGMEM = "8. Flight profile 2";
-const char MainMenuItem11[] PROGMEM = "9. OUT1 Mixer";
-const char MainMenuItem12[] PROGMEM = "10. OUT2 Mixer";
-const char MainMenuItem13[] PROGMEM = "11. OUT3 Mixer";
-const char MainMenuItem14[] PROGMEM = "12. OUT4 Mixer";
-const char MainMenuItem15[] PROGMEM = "13. OUT5 Mixer";
-const char MainMenuItem16[] PROGMEM = "14. OUT6 Mixer";
-const char MainMenuItem17[] PROGMEM = "15. OUT7 Mixer";
-const char MainMenuItem18[] PROGMEM = "16. OUT8 Mixer";
-const char MainMenuItem20[] PROGMEM = "17. Servo direction";
-const char MainMenuItem22[] PROGMEM = "18. Neg. Servo trvl. (%)";
-const char MainMenuItem23[] PROGMEM = "19. Pos. Servo trvl. (%)";
-const char MainMenuItem24[] PROGMEM = "20. Error log";
+const char MainMenuItem30[] PROGMEM = "9. Curves";
+const char MainMenuItem25[] PROGMEM = "10. Output offsets";
+const char MainMenuItem11[] PROGMEM = "11. OUT1 Mixer";
+const char MainMenuItem12[] PROGMEM = "12. OUT2 Mixer";
+const char MainMenuItem13[] PROGMEM = "13. OUT3 Mixer";
+const char MainMenuItem14[] PROGMEM = "14. OUT4 Mixer";
+const char MainMenuItem15[] PROGMEM = "15. OUT5 Mixer";
+const char MainMenuItem16[] PROGMEM = "16. OUT6 Mixer";
+const char MainMenuItem17[] PROGMEM = "17. OUT7 Mixer";
+const char MainMenuItem18[] PROGMEM = "18. OUT8 Mixer";
+const char MainMenuItem20[] PROGMEM = "19. Servo direction";
+const char MainMenuItem22[] PROGMEM = "20. Neg. Servo trvl. (%)";
+const char MainMenuItem23[] PROGMEM = "21. Pos. Servo trvl. (%)";
+const char MainMenuItem32[] PROGMEM = "22. Custom Ch. order";
+const char MainMenuItem31[] PROGMEM = "23. In/Out display";
+const char MainMenuItem24[] PROGMEM = "24. Error log";
 //
 const char PText15[] PROGMEM = "Gyro";		 				// Sensors text
 const char PText16[] PROGMEM = "Roll";
@@ -92,7 +96,7 @@ const char PText20[] PROGMEM = "IMU";
 const char SensorMenuItem1[]  PROGMEM = "Cal.";	
 const char SensorMenuItem2[]  PROGMEM = "Inv.";	
 //
-const char StabMenuItem13[]  PROGMEM = "Alt. damp:";
+const char StabMenuItem13[]  PROGMEM = "Alt. damp:";		// Profile
 const char AutoMenuItem1[]  PROGMEM = "Roll P:";
 const char StabMenuItem2[]  PROGMEM = "Roll I:"; 
 const char StabMenuItem10[]  PROGMEM = "Roll I limit:"; 
@@ -120,19 +124,25 @@ const char RCMenuItem20[] PROGMEM = "PWM sync:";
 const char RCMenuItem0[]  PROGMEM = "Ch. order:"; 	
 const char RCMenuItem2[]  PROGMEM = "Profile chan.:";
 const char Transition[] PROGMEM = "Transition:";
-const char Transition_P1n[] PROGMEM = "Transition P1n:";
+const char Transition_P1[] PROGMEM = "Transition low:";
+const char Transition_P1n[] PROGMEM = "Transition mid:";
+const char Transition_P2[] PROGMEM = "Transition high:";
 const char RCMenuItem30[] PROGMEM = "Vibration display:";
+const char TransitionOut[] PROGMEM = "Outbound trans.:";
+const char TransitionIn[] PROGMEM = "Inbound trans.:";
 //
 const char RXMode0[]  PROGMEM = "CPPM"; 					// RX mode text
 const char RXMode1[]  PROGMEM = "PWM";
 const char RXMode2[]  PROGMEM = "S-Bus";
 const char RXMode3[]  PROGMEM = "Spektrum";
 const char RXMode4[]  PROGMEM = "Xtreme";
-const char RXMode5[]  PROGMEM = "SRXL/UDI";
+const char RXMode5[]  PROGMEM = "Mode B/UDI";
+const char RXMode6[]  PROGMEM = "RAW";
 //
 const char RCMenuItem6[]  PROGMEM = "JR/Spektrum"; 			// Channel order
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
 const char RCMenuItem8[]  PROGMEM = "Multiplex"; 
+const char RCMenuItem9[]  PROGMEM = "Custom"; 
 //
 const char MixerMenuItem0[]  PROGMEM = "Orientation:";		// General text
 const char GeneralText100[]  PROGMEM = "Tail sitter:";		// “No”, “Earth ref.”, and “Vert AP ref.”
@@ -166,7 +176,7 @@ const char MixerItem35[] PROGMEM = "P1.n Offset:";
 const char MixerItem34[] PROGMEM = "P2 Offset:";
 const char MixerItem23[] PROGMEM = "P1 Thr. volume:";
 const char MixerItem33[] PROGMEM = "P2 Thr. volume:";
-const char Mixeritem50[] PROGMEM = "Throttle curve:";
+const char Mixeritem50[] PROGMEM = "Trans. curve:";
 //
 const char MixerItem51[] PROGMEM = "P1 Ail. volume:";
 const char MixerItem54[] PROGMEM = "P2 Ail. volume:";
@@ -203,9 +213,16 @@ const char MixerItem72[] PROGMEM = "GyroYaw";
 const char MixerItem73[] PROGMEM = "AccRoll";
 const char MixerItem730[] PROGMEM = "AccYaw";
 const char MixerItem74[] PROGMEM = "AccPitch";
+
+const char MixerItemP73[] PROGMEM = "Acc X";				// Alternate text for universal accs
+const char MixerItemP74[] PROGMEM = "Acc Y";
+const char MixerItemP730[] PROGMEM = "Acc Z";
+
 const char MixerItem80[] PROGMEM = "AL Roll";
 const char MixerItem81[] PROGMEM = "AL Pitch";
 const char MixerItem800[] PROGMEM = "AL Yaw";
+const char MixerItem420[] PROGMEM = "Alt. damp";
+
 //
 const char MixerItem40[] PROGMEM = "A.Servo";
 const char MixerItem41[] PROGMEM = "D.Servo";
@@ -358,6 +375,63 @@ const char Misc_Msg01[]  PROGMEM = "Alt. Damp:";
 const char Reference_0[] PROGMEM =  "Vert. AP ref.";		// “No”, “Earth ref.”, and “Vert AP ref.” ErrorText3 = "No"
 const char Reference_1[] PROGMEM =  "Earth ref.";
 
+// Curves
+const char Curve_0[] PROGMEM =  "P1 Throttle Curve";
+const char Curve_1[] PROGMEM =  "P2 Throttle Curve";
+const char Curve_2[] PROGMEM =  "P1 Collective Curve";
+const char Curve_3[] PROGMEM =  "P2 Collective Curve";
+const char Curve_4[] PROGMEM =  "Generic Curve C";
+const char Curve_5[] PROGMEM =  "Generic Curve D";
+
+// Misc
+const char Misc_1[] PROGMEM =  "CRC:";
+
+// Short channel names
+const char Chan0[] PROGMEM = "THR";							// RC channel text
+const char Chan1[] PROGMEM = "AIL";
+const char Chan2[] PROGMEM = "ELE";
+const char Chan3[] PROGMEM = "RUD";
+const char Chan4[] PROGMEM = "GEAR";
+const char Chan5[] PROGMEM = "AUX1";
+const char Chan6[] PROGMEM = "AUX2";
+const char Chan7[] PROGMEM = "AUX3";
+
+// New universal mixer items
+const char Uni1[] PROGMEM = "Collective";
+const char Uni3[] PROGMEM = "Curve C";
+const char Uni4[] PROGMEM = "Curve D";
+
+// IO
+const char I1[] PROGMEM = "1:";
+const char I2[] PROGMEM = "2:";
+const char I3[] PROGMEM = "3:";
+const char I4[] PROGMEM = "4:";
+const char I5[] PROGMEM = "5:";
+const char I6[] PROGMEM = "6:";
+const char I7[] PROGMEM = "7:";
+const char I8[] PROGMEM = "8:";
+const char I9[] PROGMEM = "Pn:";
+const char I10[] PROGMEM = "OUT:";
+
+const char O0[] PROGMEM = "THR:";
+const char O1[] PROGMEM = "AIL:";
+const char O2[] PROGMEM = "ELE:";
+const char O3[] PROGMEM = "RUD:";
+const char O4[] PROGMEM = "GER:";
+const char O5[] PROGMEM = "AX1:";
+const char O6[] PROGMEM = "AX2:";
+const char O7[] PROGMEM = "AX3:";
+
+// Custom channel inputs
+const char Ch1[] PROGMEM = "Ch.1 Function:";
+const char Ch2[] PROGMEM = "Ch.2 Function:";
+const char Ch3[] PROGMEM = "Ch.3 Function:";
+const char Ch4[] PROGMEM = "Ch.4 Function:";
+const char Ch5[] PROGMEM = "Ch.5 Function:";
+const char Ch6[] PROGMEM = "Ch.6 Function:";
+const char Ch7[] PROGMEM = "Ch.7 Function:";
+const char Ch8[] PROGMEM = "Ch.8 Function:";
+
 const char* const text_menu[] PROGMEM = 
 	{
 		AutoMenuItem11, VBAT32, VBAT33, VBAT34,	VBAT35, VBAT36, VBAT37, VBAT38, VBAT39,		// 0 to 8 Vbat cell voltages
@@ -406,19 +480,19 @@ const char* const text_menu[] PROGMEM =
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//
-		Dummy0, Dummy0, 
+		Misc_1, Dummy0,																		// 73 CRC:
 		//
 		ErrorText3, ErrorText4,																// 75 to 76 Error messages
 		//
 		MainMenuItem0, MainMenuItem1, MainMenuItem9, MainMenuItem7, MainMenuItem8, 
-		MainMenuItem10, MainMenuItem2, MainMenuItem3,										// 77 to 96 Main menu
-		MainMenuItem11,MainMenuItem12,MainMenuItem13,MainMenuItem14,
+		MainMenuItem10, MainMenuItem2, MainMenuItem3,MainMenuItem30,						// 77 to 100 Main menu
+		MainMenuItem25, MainMenuItem11,MainMenuItem12,MainMenuItem13,MainMenuItem14,
 		MainMenuItem15,MainMenuItem16,MainMenuItem17,MainMenuItem18,		
-		MainMenuItem20,MainMenuItem22, MainMenuItem23, MainMenuItem24, 
-		Dummy0, 
+		MainMenuItem20,MainMenuItem22, MainMenuItem23,MainMenuItem32, MainMenuItem31, 
+		MainMenuItem24, 
 		//
-		MPU6050LPF1, MPU6050LPF2, SWLPF4, SWLPF3, SWLPF2,									// 98 to 104 SW LPF (7) 5, 10, 17, 27, 38, 67, None
-		SWLPF1, ChannelRef8,
+		Dummy0, Dummy0,																		// 101 to 104 Spare
+		Dummy0, Dummy0,
 		//
 		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
@@ -433,9 +507,7 @@ const char* const text_menu[] PROGMEM =
 		MixerMenuItem2, MixerMenuItem3,	MixerMenuItem4,										// 124 to 129 H/V/UD/Aft/Sideways/PitchUp
 		MixerMenuItem5, MixerMenuItem6,	MixerMenuItem7,
 		//																
-		RCMenuItem6, RCMenuItem7, RCMenuItem8,												// 130 to 132 JR/Futaba/MPX
-		//
-		StatusText7,																		// 133 Battery:
+		RCMenuItem6, RCMenuItem7, RCMenuItem8, RCMenuItem9,									// 130 to 133 JR/Futaba/MPX/CUSTOM
 		//
 		Status3,																			// 134 Battery
 		//
@@ -449,31 +521,31 @@ const char* const text_menu[] PROGMEM =
 		//
 		PText16,PText17,PText18,															// 146 to 148 X/Y/Z
 		//
-		RCMenuItem1, GeneralText3, RCMenuItem20, RCMenuItem0, RCMenuItem2, 					// 149 to 157 RC menu
-		Transition, Transition_P1n,RCMenuItem30,
-		Dummy0, 
+		RCMenuItem1, GeneralText3, RCMenuItem20, RCMenuItem0, RCMenuItem2, 					// 149 to 159 RC menu
+		TransitionOut, TransitionIn, Transition_P1, Transition_P1n,
+		Transition_P2, RCMenuItem30,
 		//
-		MixerMenuItem0, GeneralText100, Contrast, AutoMenuItem2,							// 158 to 168 General
+		MixerMenuItem0, GeneralText100, Contrast, AutoMenuItem2,							// 160 to 170 General
 		GeneralText2, BattMenuItem2, GeneralText10, 
 		GeneralText6, GeneralText16, GeneralText7, 
-		GeneralText20,Dummy0, 
+		GeneralText20, 
 		//
-		//				 																	// 170 to 189 Flight menu (Earth)
+		// Special Model reference text
+		//
+		//				 																	// 171 to 190 Flight menu (Earth)
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro
 		AutoMenuItem20, AutoMenuItem7,														// Roll acc
 		AutoMenuItem4, StabMenuItem5, StabMenuItem11, StabMenuItem6, 						// Pitch gyro
 		AutoMenuItem21, AutoMenuItem8, 														// Pitch acc
 		StabMenuItem7, StabMenuItem8, StabMenuItem12, StabMenuItem9,	 					// Yaw gyro
 		StabMenuItem30,	StabMenuItem13,														// Yaw trim, Z-Acc, 
-
-		Dummy0, Dummy0,
-
+		Dummy0, 
+				
+		//
+		// Special Model reference texts --->
+		//
 		//																					// Mixer items (Earth)
-		MixerItem1,																			// 190 Motor marker (34 mixer items in total)
-		MixerItem20, 																		// Offset for P1
-		MixerItem36,																		// Position for P1.n	
-		MixerItem35,																		// Offset for P1.n
-		MixerItem34, 																		// Offset for P2
+		MixerItem1,																			// 190 Motor marker (30 mixer items in total)
 		MixerItem23,  																		// P1 Throttle
 		MixerItem33, 																		// P2 Throttle
 		Mixeritem50,																		// Throttle curve
@@ -490,6 +562,12 @@ const char* const text_menu[] PROGMEM =
 		MixerItem29, MixerItem30, 															// Source A and Volume P2
 		MixerItem21, MixerItem2, 															// Source B and Volume P1
 		MixerItem31, MixerItem30, 															// Source B and Volume P2
+		Dummy0, Dummy0,
+		Dummy0, Dummy0,
+		//
+		// <--- Special Model reference texts
+		//
+
 		Dummy0,Dummy0,  
 		
 		MixerItem40, MixerItem41, MixerItem49,												// 226 to 228 Device types - AServo/Dservo/Motor	
@@ -497,11 +575,16 @@ const char* const text_menu[] PROGMEM =
 		Misc_Msg01,																			// 229 AccVert
 		//
 		MOUT1, MOUT2, MOUT3, MOUT4, MOUT5, MOUT6, MOUT7, MOUT8, 							// 230 to 237 Sources OUT1- OUT8, 
-		// SRC1 to 17
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,									// 238 to 252 THR to RUDDER, (Earth)
-		ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,									// GEAR to AUX3 
-		MixerItem70, MixerItem71, MixerItem72, MixerItem73, MixerItem74,					// Roll gyro to pitch acc
-		MixerItem80, MixerItem81,															// AL Roll, AL Pitch
+		
+																							// Universal sources  (EARTH) (NOT USED - DELETE?)
+		//ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,								// 238 to 252 THR to RUDDER,
+		//ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,								// GEAR to AUX3 
+		//MixerItem70, MixerItem71, MixerItem72, MixerItem73, MixerItem74,					// Roll gyro to pitch acc
+		//MixerItem80, MixerItem81,															// AL Roll, AL Pitch
+
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,													// Spare
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,													// Spare
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,													// Spare
 		
 		ChannelRef8, 																		// 253 + NONE 
 		//
@@ -524,7 +607,8 @@ const char* const text_menu[] PROGMEM =
 		Dummy0,ERROR_0,ERROR_1,ERROR_2,ERROR_3,												// 283 Error messages
 		Dummy0, 
 		
-		Dummy0, Dummy0,	
+		StatusText7,																		// 289 Battery:
+		Dummy0,	
 		
 		ERROR_MSG_0,																		// 291 - 292 Log menu
 		Dummy0, 	
@@ -543,7 +627,7 @@ const char* const text_menu[] PROGMEM =
 		MixerMenuItem1, MixerMenuItem8,	AdvancedDummy0, AdvancedDummy1,						// 324 Advanced menu
 
 		//	
-		// Special Model reference texts
+		// Special Model reference text
 		//			 																		// 328 to 345 Flight menu (Model)
 		AutoMenuItem1, StabMenuItem2, StabMenuItem10, StabMenuItem3,						// Roll gyro
 		AutoMenuItem200, AutoMenuItem7,														// Roll acc
@@ -551,35 +635,69 @@ const char* const text_menu[] PROGMEM =
 		AutoMenuItem21, AutoMenuItem8, 														// Pitch acc
 		StabMenuItem7, StabMenuItem8, StabMenuItem12, StabMenuItem9,	 					// Yaw gyro
 		StabMenuItem30,	StabMenuItem13,														// Yaw trim, Z-Acc,
+		
+		//
+		// Special Model reference texts --->
 		//
 		//																					// Mixer items (Model)
 		MixerItem1,																			// 346 Motor marker (34 mixer items in total)
-		MixerItem20, 																		// Offset for P1
-		MixerItem36,																		// Position for P1.n
-		MixerItem35,																		// Offset for P1.n
-		MixerItem34, 																		// Offset for P2
 		MixerItem23,  																		// P1 Throttle
 		MixerItem33, 																		// P2 Throttle
 		Mixeritem50,																		// Throttle curve
-		//
 		//																					// 354 to 359 mixers P1 + P2
 		MixerItem51, MixerItem54,															// Aileron volume P1 + P2
 		MixerItem52, MixerItem55,															// Elevator volume P1 + P2
 		MixerItem53, MixerItem56,															// Rudder volume P1 + P2
-		//
 		MixerItem4, MixerItem24, MixerItem5, MixerItem25, MixerItem6, MixerItem26, 			// 360 Gyros and Acc P1 + P2
 		MixerItem700, MixerItem27, MixerItem3, MixerItem28, MixerItem42,MixerItem43,
-		//
 		MixerItem0, MixerItem2, 															// 372 Source A and Volume P1 (Model)
 		MixerItem29, MixerItem30, 															// Source A and Volume P2
 		MixerItem21, MixerItem2, 															// Source B and Volume P1
 		MixerItem31, MixerItem30, 															// Source B and Volume P2
-		// SRC1 to 17
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3,									// 380 to 394 THR to RUDDER, (Model)
-		ChannelRef4, ChannelRef5, ChannelRef6, ChannelRef7,									// GEAR to AUX3
-		MixerItem70, MixerItem71, MixerItem72, MixerItem730, MixerItem74,					// Roll gyro to pitch acc
-		MixerItem800, MixerItem81,															// AL Yaw, AL Pitch
-		ChannelRef8, 																		// 395 + NONE 
+		//
+		// <--- Special Model reference texts
+		//
+		Dummy0, Dummy0,	Dummy0,	Dummy0,	
+		Dummy0, Dummy0,	Dummy0,	Dummy0,														// 380 to 383 Spare
+		//
+		Ch1, Ch2, Ch3, Ch4,																	// 384 to 391 Spare												
+		Ch5, Ch6, Ch7, Ch8,		
+		
+		//	
+		Dummy0, Dummy0, Dummy0, Dummy0, 													// 392 to 395 Spare
+		
+		//
+		RXMode0, RXMode1, RXMode2, RXMode3,													// 396 to 402 RX mode
+		RXMode4, RXMode5, RXMode6, 
+		//
+		Curve_0,Curve_1,Curve_2,Curve_3,Curve_4,Curve_5,Dummy0,								// 403 Curves
+		//
+		Chan0,Chan1,Chan2,Chan3,Chan4,Chan5,Chan6,Chan7,ChannelRef8,						// 410 Short channel names
+		Dummy0,Dummy0,
+	
+		// Universal sources (EARTH)
+		// THROTTLE, CURVE A, CURVE B, COLLECTIVE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3,
+		// ROLLGYRO, PITCHGYO, YAWGYRO, ROLLSMOOTH, PITCHSMOOTH, ROLLACC, PITCHACC, NONE
+		Chan0,Uni3,Uni4,Uni1,																// 421 THR to Collective,
+		Chan0,Chan1,Chan2,Chan3,Chan4,Chan5,Chan6,Chan7,									// Throttle, Aileron to AUX3
+		MixerItem70, MixerItem71, MixerItem72, MixerItemP73, MixerItemP74,					// Roll gyro to pitch acc
+		MixerItem80, MixerItem81, MixerItem420, ChannelRef8, 								// AL Roll, AL Pitch, Alt. Damp, None +1
+
+		// Universal sources (MODEL)
+		// THROTTLE, CURVE A, CURVE B, COLLECTIVE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3,
+		// ROLLGYRO, PITCHGYO, YAWGYRO, YAWSMOOTH, PITCHSMOOTH, YAWACC, PITCHACC, NONE
+		Chan0,Uni3,Uni4,Uni1,																// 442 THR to Collective,
+		Chan0, Chan1,Chan2,Chan3,Chan4,Chan5,Chan6,Chan7,									// Throttle, Aileron to AUX3
+		MixerItem70, MixerItem71, MixerItem72, MixerItemP730, MixerItemP74,					// Roll gyro to pitch acc
+		MixerItem800, MixerItem81, MixerItem420, ChannelRef8,								// AL Roll, AL Pitch, Alt. Damp, None +1
+		//
+		//MPU6050LPF1, MPU6050LPF2, SWLPF4, SWLPF3, SWLPF2,									// 461 to 467 SW LPF (7) 5, 10, 17, 27, 38, 67, None (NOT USED - DELETE?)
+		//SWLPF1, ChannelRef8,
+		Dummy0,Dummy0,Dummy0,Dummy0,Dummy0,													// Spare
+		//
+		I1, I2, I3, I4, I5, I6, I7, I8, I9, I10,											// 468 to 477
+		//
+		O0, O1, O2, O3, O4, O5, O6, O7,														// 478 to 485
 	}; 
 
 //************************************************************

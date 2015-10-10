@@ -13,6 +13,7 @@ extern void Display_sensors(void);
 extern void Display_rcinput(void);
 extern void Display_sticks(void);
 extern void idle_screen(void);
+extern void Display_in_out(void);
 
 // Menus
 extern void menu_main(void);
@@ -26,6 +27,9 @@ extern void Wait_BUTTON1(void);
 extern void Wait_BUTTON4(void);
 extern void menu_log(void);
 extern void add_log(uint8_t error);
+extern void menu_curves(void);
+extern void menu_channel(void);
+extern void menu_offsets(void);
 
 extern  uint8_t button;
 
@@ -42,6 +46,7 @@ extern void print_cursor(uint8_t line);
 // Menu management
 extern void update_menu(uint16_t items, uint16_t start, uint16_t offset, uint8_t button, uint16_t* cursor, uint16_t* top, uint16_t* temp);
 extern void do_menu_item(uint16_t menuitem, int8_t *values, uint8_t mult, menu_range_t range, int8_t offset, uint16_t text_link, bool servo_enable, int16_t servo_number);
+extern void edit_curve_item(uint8_t curve, uint8_t type);
 
 // Special print routine - prints either numeric or text
 extern void print_menu_text(int16_t values, uint8_t style, uint16_t text_link, uint8_t x, uint8_t y);
@@ -49,6 +54,8 @@ extern menu_range_t get_menu_range (const unsigned char* menu_ranges, uint8_t me
 
 // Externs
 extern const char *text_menu[]; 
+extern const menu_range_t Curves_menu_ranges[NUMBEROFCURVES][NUMBEROFPOINTS+1] PROGMEM;
+extern const menu_range_t Offsets_menu_ranges[MAX_OUTPUTS][NUMBEROFPOINTS+1] PROGMEM;
 
 // Menu defines
 #define ITEMOFFSET 10	// Left edge of menu text
@@ -65,6 +72,7 @@ extern const char *text_menu[];
 #define ENTER	0xe0 	// S4 pressed
 #define NONE	0xf0 	// No button pressed
 #define ABORT	0xa0 	// Abort button pressed
+
 
 // Global menu variables
 extern uint16_t cursor;

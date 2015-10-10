@@ -13,6 +13,3 @@
 
 // Enable debugging messages
 //#define DEBUG_ON
-
-// Enable SRXL/UDI input
-//#define SRXLUDI

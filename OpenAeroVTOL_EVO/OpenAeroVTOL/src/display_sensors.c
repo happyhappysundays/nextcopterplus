@@ -105,7 +105,6 @@ void Display_sensors(void)
 		TMR0_counter = 0;
 		
 		// Refresh accSmooth values and AccVert
-		// Fake the IMU period as accSmooth doesn't need that
 		imu_update(interval);
 
 		LCD_Display_Text(26,(const unsigned char*)Verdana8,37,0); 	// Gyro

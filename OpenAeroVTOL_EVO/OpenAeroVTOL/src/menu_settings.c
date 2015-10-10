@@ -40,16 +40,16 @@ void menu_rc_setup(uint8_t section);
 //************************************************************
 
 #define RCSTART 149 	// Start of Menu text items
-#define RCTEXT 62 		// Start of "Receiver type" value text list
-#define RCITEMS 8 		// Number of menu items displayed	
-#define RCITEMSOFFSET 9 // Actual number of menu items
+#define RCTEXT 396 		// Start of "Receiver type" value text list
+#define RCITEMS 11 		// Number of menu items displayed	
+#define RCITEMSOFFSET 11// Actual number of menu items
 #define RCOFFSET 65		// LCD offsets
 
 #define GENERALTEXT	295 // Start of "Orientations" value text list
 #define GENERALITEMS 11	// Number of menu items displayed
 #define GENOFFSET 70	// LCD offsets
 
-#define PRESETITEM 168	// Location of Preset menu item in list
+#define PRESETITEM 170	// Location of Preset menu item in list
 
 //************************************************************
 // RC menu items
@@ -57,31 +57,30 @@ void menu_rc_setup(uint8_t section);
 	 
 const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
 {
-	{RCTEXT, 118, 105, 130, 105, 0, 0, 68, 0},						// RC setup
+	{RCTEXT, 118, 105, 130, 105, 0, 0, 0, 0, 0,68},					// RC setup
 	{GENERALTEXT, 320, 0, 53, 0, 0, 37, 37, 37, 0, 273},			// General 
 };
 
 const uint16_t RCMenuOffsets[2][GENERALITEMS] PROGMEM =
 {
-	{RCOFFSET, 65, 65, 60, 75, 75, 87, 95, 75},						// RC setup
+	{RCOFFSET, 65, 65, 60, 75, 95, 95, 95, 95, 95, 95},				// RC setup
 	{GENOFFSET, 67, 67, 67, 80, 80, 80, 80, 80, 80, 80},			// General
 };
 
 const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
 {
 	{
-		// RC setup (8)					// Min, Max, Increment, Style, Default
-#ifdef SRXLUDI		
-		{CPPM_MODE,SRXL,1,1,SBUS},		// Receiver type (PWM to SRXL/UDI)
-#else
-		{CPPM_MODE,XTREME,1,1,SBUS},	// Receiver type (PWM to Xtreme)
-#endif
+		// RC setup (11)				// Min, Max, Increment, Style, Default
+		{CPPM_MODE,MODEB,1,1,SBUS},		// Receiver type (PWM to MODEB/UDI)	
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
-		{JRSEQ,MPXSEQ,1,1,JRSEQ},		// Channel order
+		{JRSEQ,CUSTOM,1,1,JRSEQ},		// Channel order
 		{THROTTLE,AUX3,1,1,GEAR},		// Profile select channel
-		{0,40,1,0,0},					// TransitionSpeed 0 to 40
+		{0,40,1,0,0},					// Outbound TransitionSpeed 0 to 40
+		{0,40,1,0,0},					// Inbound TransitionSpeed 0 to 40
+		{0,99,1,0,0},					// Transition P1 point
 		{1,99,1,0,50},					// Transition P1n point
+		{1,100,1,0,100},				// Transition P2 point
 		{OFF,ON,1,1,OFF},				// Vibration display
 	},
 	{
@@ -212,9 +211,14 @@ void menu_rc_setup(uint8_t section)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
 				}
-				else
+				else if (Config.TxSeq == MPXSEQ)
 				{
 					Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
+				}
+				// Load from custom channel order
+				else
+				{
+					Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
 				}
 			}
 

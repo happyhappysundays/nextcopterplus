@@ -34,9 +34,9 @@ void Wait_BUTTON4(void);
 //************************************************************
 
 #ifdef ERROR_LOG
-#define MAINITEMS 20	// Number of menu items
+#define MAINITEMS 24	// Number of menu items
 #else
-#define MAINITEMS 19	// Number of menu items
+#define MAINITEMS 23	// Number of menu items
 #endif
 
 #define MAINSTART 77	// Start of Menu text items
@@ -135,40 +135,52 @@ void do_main_menu_item(uint8_t menuitem)
 			menu_flight(1); 		// 8.Flight profile 2
 			break;
 		case MAINSTART+8:
-			menu_mixer(0);			// 9.OUT1 Mixer
+			menu_curves();			// 9.Curves menu
 			break;
 		case MAINSTART+9:
-			menu_mixer(1);			// 10.OUT2 Mixer
+			menu_offsets();			// 10.Output offsets
 			break;
 		case MAINSTART+10:
-			menu_mixer(2);			// 11.OUT3 Mixer
+			menu_mixer(0);			// 11.OUT1 Mixer
 			break;
 		case MAINSTART+11:
-			menu_mixer(3);			// 12.OUT4 Mixer
+			menu_mixer(1);			// 12.OUT2 Mixer
 			break;
 		case MAINSTART+12:
-			menu_mixer(4);			// 13.OUT5 Mixer
+			menu_mixer(2);			// 13.OUT3 Mixer
 			break;
 		case MAINSTART+13:
-			menu_mixer(5);			// 14.OUT6 Mixer
+			menu_mixer(3);			// 14.OUT4 Mixer
 			break;
 		case MAINSTART+14:
-			menu_mixer(6);			// 15.OUT7 Mixer
+			menu_mixer(4);			// 15.OUT5 Mixer
 			break;
 		case MAINSTART+15:
-			menu_mixer(7);			// 16.OUT8 Mixer
+			menu_mixer(5);			// 16.OUT6 Mixer
 			break;
 		case MAINSTART+16:
-			menu_servo_setup(1);	// 17.Servo direction
+			menu_mixer(6);			// 17.OUT7 Mixer
 			break;
 		case MAINSTART+17:
-			menu_servo_setup(2); 	// 18.Neg. Servo trvl. (%)
+			menu_mixer(7);			// 18.OUT8 Mixer
 			break;
 		case MAINSTART+18:
-			menu_servo_setup(3); 	// 19.Pos. Servo trvl. (%)
+			menu_servo_setup(1);	// 19.Servo direction
 			break;
 		case MAINSTART+19:
-			menu_log();				// 20. Error log
+			menu_servo_setup(2); 	// 20.Neg. Servo trvl. (%)
+			break;
+		case MAINSTART+20:
+			menu_servo_setup(3); 	// 21.Pos. Servo trvl. (%)
+			break;
+		case MAINSTART+21:
+			menu_channel();			// 22.Custom Ch. order
+			break;
+		case MAINSTART+22:
+			Display_in_out();		// 23.IO menu
+			break;
+		case MAINSTART+23:
+			menu_log();				// 24.Error log
 			break;
 		default:
 			break;	

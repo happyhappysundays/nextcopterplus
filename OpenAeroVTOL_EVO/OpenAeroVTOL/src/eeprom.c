@@ -30,7 +30,12 @@ void eeprom_write_byte_changed(uint8_t *addr, uint8_t value);
 void eeprom_write_block_changes(uint8_t *src, uint8_t *dest, uint16_t size);
 void Update_V1_0_to_V1_1(void);
 void Update_V1_1_to_V1_2(void);
+void Update_V1_2_to_V1_3B1(void);
+void Update_V1_3B1_to_V1_3B14(void);
+void Update_V1_3B14_to_V1_3B15(void);
+void Update_V1_3B15_to_V1_3B17(void);
 uint8_t convert_filter_V1_0_V1_1(uint8_t);
+uint8_t convert_source_V1_2_V1_3(uint8_t old_source);
 
 void Load_eeprom_preset(uint8_t preset);
 
@@ -44,8 +49,12 @@ void Load_eeprom_preset(uint8_t preset);
 #define V1_0_SIGNATURE 0x35		// EEPROM signature for V1.0 (V1.0 release)
 #define V1_1_SIGNATURE 0x39		// EEPROM signature for V1.1 (V1.1 release)
 #define V1_2_SIGNATURE 0x3D		// EEPROM signature for V1.2 (V1.2 release)
+#define V1_3_B1_SIGNATURE 0x3E	// EEPROM signature for V1.3 (V1.3 Beta 1 to 13)
+#define V1_3_B14_SIGNATURE 0x3F	// EEPROM signature for V1.3 (V1.3 Beta 14)
+#define V1_3_B15_SIGNATURE 0x40	// EEPROM signature for V1.3 (V1.3 Beta 15)
+#define V1_3_B17_SIGNATURE 0x41	// EEPROM signature for V1.3 (V1.3 Beta 17+)
 
-#define MAGIC_NUMBER V1_2_SIGNATURE // Set current signature
+#define MAGIC_NUMBER V1_3_B15_SIGNATURE // Set current signature
 
 // eePROM data update locations
 #define RCITEMS_V1_0 41		// RAM location of start of RC items data in V1.0, 1.1 and 1.2
@@ -62,14 +71,31 @@ void Load_eeprom_preset(uint8_t preset);
 #define ADVANCED_V1_2B10 561// RAM location of Advanced block V1.2B10
 #define ADVANCED_V1_2B14 562// RAM location of Advanced block V1.2B14+
 
+// V1.3 B1
+#define CURVES_V1_3B1 563			// RAM location of start of curves data in V1.3 B1
+#define CUSTOM_CH_ORD_V1_3_B1 611	// RAM location of start of custom channel data in V1.3 B1
+#define CHANNEL_V1_3_B1 147			// RAM location of start of Channel data in V1.3B1
+
+// V1.3 B14
+#define LAST_BYTE_V1_3B14 619	// Last used byte for V1.3 B14
+#define SERVOREV_V1_3B14 452	// RAM location of Servo_reverse[] start for V1.3 B14
+#define CHANNEL_V1_3_B14 148	// RAM location of start of Channel data in V1.3 B14
+#define P1_THR_V1_3_B14 157		// RAM location of start of OUT1 P1_throttle_volume data in V1.3 B15
+
+// V1.3 B15
+#define SERVOREV_V1_3B15 420	// RAM location of Servo_reverse[] start for V1.3 B15
+#define CHANNEL_V1_3_B15 148	// RAM location of start of Channel data in V1.3 B15
+#define P1_THR_V1_3_B15 153		// RAM location of start of OUT1 P1_throttle_volume data in V1.3 B15
+#define OFFSETS_V1_3_B15 588	// RAM location of start of offset data in V1.3 B15
+#define LAST_BYTE_V1_3B15 653	// Last used byte for V1.3 B15
 
 //************************************************************
 // Code
 //************************************************************
 
-const uint8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
-const uint8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
-const uint8_t	MPX[MAX_RC_CHANNELS] PROGMEM	= {1,2,3,5,0,4,6,7}; 	// Multiplex channel sequence (AER1TG23)
+const int8_t	JR[MAX_RC_CHANNELS] PROGMEM 	= {0,1,2,3,4,5,6,7}; 	// JR/Spektrum channel sequence (TAERG123)
+const int8_t	FUTABA[MAX_RC_CHANNELS] PROGMEM = {1,2,0,3,4,5,6,7}; 	// Futaba channel sequence (AETRGF12)
+const int8_t	MPX[MAX_RC_CHANNELS] PROGMEM	= {1,2,3,5,0,4,6,7}; 	// Multiplex channel sequence (AER1TG23)
 	
 void Save_Config_to_EEPROM(void)
 {
@@ -128,10 +154,29 @@ bool Initial_EEPROM_Config_Load(void)
 			Update_V1_1_to_V1_2();
 			updated = true;
 			// Fall through...
-			
+
 		case V1_2_SIGNATURE:				// V1.2 detected
+			Update_V1_2_to_V1_3B1();
+			updated = true;
 			// Fall through...
-			break;
+
+		case V1_3_B1_SIGNATURE:				// V1.3 B1 detected
+			Update_V1_3B1_to_V1_3B14();
+			updated = true;
+			// Fall through...
+
+		case V1_3_B14_SIGNATURE:			// V1.3 B14 detected
+			Update_V1_3B14_to_V1_3B15();
+			updated = true;
+			// Fall through...
+			
+		case V1_3_B15_SIGNATURE:			// V1.3 B15 detected
+			Update_V1_3B15_to_V1_3B17();
+			updated = true;
+			// Fall through...
+
+		case V1_3_B17_SIGNATURE:			// V1.3 B15 detected
+			break;			
 			
 		default:							// Unknown solution - restore to factory defaults
 			// Load factory defaults
@@ -569,8 +614,166 @@ void Update_V1_1_to_V1_2(void)
 	memcpy((void*)((&Config.setup) + (GENITEMS_V1_0 )),(void*)&Orientation_P2,1);	// Updated P2 orientation value
 	memset((void*)((&Config.setup) + (GENITEMS_V1_0 + 1)), NO_ORIENT, 1);			// New P1_Reference
 	
-	// Set magic number to V1.2 signature
-	Config.setup = V1_2_SIGNATURE;
+}
+
+// Upgrade V1.2 structure to V1.3
+void Update_V1_2_to_V1_3B1(void)
+{
+	int8_t i = 0;
+	int8_t source = 0;
+	
+	// So why all this weird code? Rememeber we cannot use any structure references in *this code* to reference old structures.
+	// As such all references must be hard-coded with offsets to the version they were originally compiled with.
+	
+	// Update all source settings in output mixers
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		memcpy((void*)&source, (void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 30 + (i * 38))), 1);	// P1_source_a
+		memset((void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 30 + (i * 38))), convert_source_V1_2_V1_3(source), 1);
+
+		memcpy((void*)&source, (void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 32 + (i * 38))), 1);	// P2_source_a
+		memset((void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 32 + (i * 38))), convert_source_V1_2_V1_3(source), 1);
+
+		memcpy((void*)&source, (void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 34 + (i * 38))), 1);	// P1_source_b
+		memset((void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 34 + (i * 38))), convert_source_V1_2_V1_3(source), 1);
+
+		memcpy((void*)&source, (void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 36 + (i * 38))), 1);	// P2_source_b
+		memset((void*)((&Config.setup) + (CHANNEL_V1_3_B1 + 36 + (i * 38))), convert_source_V1_2_V1_3(source), 1);
+	}
+
+	// Set new data to defaults
+	// Curves 0 and 1
+	for (i = 0; i < 2; i++)
+	{
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 0 + (8 * i))), 0, 1);		// Config.Curve[i].Point1
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 1 + (8 * i))), 17, 1);	// Config.Curve[i].Point2
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 2 + (8 * i))), 33, 1);	// Config.Curve[i].Point3
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 3 + (8 * i))), 50, 1);	// Config.Curve[i].Point4
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 4 + (8 * i))), 67, 1);	// Config.Curve[i].Point5
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 5 + (8 * i))), 83, 1);	// Config.Curve[i].Point6
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 6 + (8 * i))), 100, 1);	// Config.Curve[i].Point7
+	}
+
+	// Curves 2 to 6
+	for (i = 2; i < NUMBEROFCURVES; i++)
+	{
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 0 + (8 * i))), -100, 1);	// Config.Curve[i].Point1
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 1 + (8 * i))), -67, 1);	// Config.Curve[i].Point2
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 2 + (8 * i))), -33, 1);	// Config.Curve[i].Point3
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 3 + (8 * i))), 0, 1);		// Config.Curve[i].Point4
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 4 + (8 * i))), 33, 1);	// Config.Curve[i].Point5
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 5 + (8 * i))), 67, 1);	// Config.Curve[i].Point6
+		memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 6 + (8 * i))), 100, 1);	// Config.Curve[i].Point7
+	}
+
+	// Set curve channel sources
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 7)), THROTTLE, 1);	// Config.Curve[0].channel
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 15)), THROTTLE, 1);	// Config.Curve[1].channel
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 23)), THROTTLE, 1);	// Config.Curve[2].channel
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 31)), THROTTLE, 1);	// Config.Curve[3].channel
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 39)), NOMIX, 1);		// Config.Curve[4].channel
+	memset((void*)((&Config.setup) + (CURVES_V1_3B1 + 47)), NOMIX, 1);		// Config.Curve[5].channel
+
+	// Preset custom channel order to JR
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		memset((void*)((&Config.setup) + (CUSTOM_CH_ORD_V1_3_B1 + i)), pgm_read_byte(&JR[i]), 1);
+	}
+}
+
+void Update_V1_3B1_to_V1_3B14(void)
+{
+	int8_t TransitionSpeedOut = 0;
+	
+	// Copy Config.TransitionSpeedOut locally
+	memcpy((void*)&TransitionSpeedOut, (void*)((&Config.setup) + (RCITEMS_V1_0 + 5)), 1);
+	
+	// Move everything from Config.Transition_P1n up by one byte to make room for Config.TransitionSpeedIn
+	memmove((void*)((&Config.setup) + (RCITEMS_V1_0 + 7)), (void*)((&Config.setup) + (RCITEMS_V1_0 + 6)), (LAST_BYTE_V1_3B14 - (RCITEMS_V1_0 + 6))); // 619 - (41 + 6) = 572 bytes)
+
+	// Preset new variable to same as TransitionSpeedOut;
+	Config.TransitionSpeedIn = TransitionSpeedOut;
+
+	// Set magic number to V1.3 B1 signature
+	Config.setup = V1_3_B14_SIGNATURE;
+}
+
+// Upgrade V1.3 B14 structure to V1.3 B15 structure
+void Update_V1_3B14_to_V1_3B15(void)
+{
+	#define		V1_3_OLDSIZE 38				// Old channel_t was 38 bytes
+	#define		V1_3_NEWSIZE 34				// New channel_t is 34 bytes
+
+	int8_t		Transition_P1n = 0;
+	uint8_t		i;
+	uint8_t		*src;
+	uint8_t		*dst;
+	uint8_t		mixer_buffer[V1_3_OLDSIZE * 8];	// 38 * 8 = 304 bytes
+
+	// Copy the old channel[] structure into buffer
+	memcpy((void*)mixer_buffer, (void*)((&Config.setup) + (CHANNEL_V1_3_B14)), (V1_3_OLDSIZE * 8)); // 148, 38
+
+	// Copy the old channel[] structure out of the buffer buffer, compressed to match the new (smaller) structure
+	// Start with the P1_value, P2_value and Motor_marker bytes (5 bytes)
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		dst = (void*)((&Config.setup) + (CHANNEL_V1_3_B15)); // 148
+		src = (void*)mixer_buffer;
+		dst += (i * V1_3_NEWSIZE);			// Step to next location for new data in the buffer
+		src += (i * V1_3_OLDSIZE);			// Step to next old data in (corrupted) config structure
+		memcpy(dst, src, 5);				// Move the five bytes (P1_value, P2_value and Motor_marker bytes)
+	}
+
+	// Copy the rest of the old channel[] structure out of the buffer buffer, compressed to match the new (smaller) structure
+	// Start with the P1_throttle_volume and end with the P2_source_b_volume byte (29 bytes)
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		dst = (void*)((&Config.setup) + (P1_THR_V1_3_B15)); // 153
+		src = (void*)mixer_buffer;
+		src += (P1_THR_V1_3_B14 - CHANNEL_V1_3_B15);	// 9 byte offset to P1_throttle_volume. 157 - 148 = 9
+		dst += (i * V1_3_NEWSIZE);						// Step to next location for new data in the buffer
+		src += (i * V1_3_OLDSIZE);						// Step to next old data in (corrupted) config structure
+		memcpy(dst, src, 29);							// Move the 29 bytes (P1_throttle_volume to end)
+	}
+
+	// Move data that exists after the B14 channel mixer to new location
+	memmove((void*)((&Config.setup) + (SERVOREV_V1_3B15)), (void*)((&Config.setup) + (SERVOREV_V1_3B14)), (LAST_BYTE_V1_3B14 - SERVOREV_V1_3B14)); // (619-452 = 167 bytes)
+
+	// Clear new offset curves to zero (flat)
+	memset((void*)((&Config.setup) + (OFFSETS_V1_3_B15)), 0, (sizeof(curve_t) * MAX_OUTPUTS));
+
+	// Adjust for new Config.Transition_P1, Config.Transition_P2 variables
+	// Copy Config.TransitionSpeedOut locally
+	memcpy((void*)&Transition_P1n, (void*)((&Config.setup) + (RCITEMS_V1_0 + 7)), 1);
+	
+	// Move everything from Config.Transition_P1n up by two bytes to make room for new variables
+	memmove((void*)((&Config.setup) + (RCITEMS_V1_0 + 9)), (void*)((&Config.setup) + (RCITEMS_V1_0 + 7)), (LAST_BYTE_V1_3B15 - (RCITEMS_V1_0 + 7))); // 653 - (41 + 7) = 605 bytes)
+
+	// Preset new variables
+	Config.Transition_P1 = 0;
+	Config.Transition_P1n = Transition_P1n;
+	Config.Transition_P2 = 100;
+		
+	// Set magic number to V1.3 B15 signature
+	Config.setup = V1_3_B15_SIGNATURE;
+}
+
+void Update_V1_3B15_to_V1_3B17(void)
+{
+	uint8_t		i;
+
+	// Fix any sources that have "NONE" to match new source list.
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		// V1.3 B15 "NONE" will read as "Alt. Damp in B17
+		if (Config.Channel[i].P1_source_a == SRC20) Config.Channel[i].P1_source_a = NOMIX;
+		if (Config.Channel[i].P1_source_b == SRC20) Config.Channel[i].P1_source_b = NOMIX;
+		if (Config.Channel[i].P2_source_a == SRC20) Config.Channel[i].P2_source_a = NOMIX;
+		if (Config.Channel[i].P2_source_b == SRC20) Config.Channel[i].P2_source_b = NOMIX;
+	}
+	
+	// Set magic number to V1.3 B17 signature
+	Config.setup = V1_3_B17_SIGNATURE;	
 }
 
 // Convert V1.0 filter settings
@@ -611,6 +814,24 @@ uint8_t convert_filter_V1_0_V1_1(uint8_t old_filter)
 	return new_filter;
 }
 
+// Convert V1.2 source settings to V1.3
+uint8_t convert_source_V1_2_V1_3(uint8_t old_source)
+{
+	uint8_t new_source;
+
+	// V1.2 Source list (16 items)
+	// THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, 
+	// ROLLGYRO, PITCHGYO, YAWGYRO, ACCSMOOTH, PITCHSMOOTH, ROLLACC, PITCHACC, NONE (15)
+
+	// V1.3 Source list (20 items)
+	// THROTTLE, CURVE A, CURVE B, COLLECTIVE, THROTTLE, AILERON, ELEVATOR, RUDDER, GEAR, AUX1, AUX2, AUX3, 
+	// ROLLGYRO, PITCHGYO, YAWGYRO, ACCSMOOTH, PITCHSMOOTH, ROLLACC, PITCHACC, NONE (19)
+
+	new_source = old_source + 4;
+	
+	return new_source;
+}
+
 // Force a factory reset
 void Set_EEPROM_Default_Config(void)
 {
@@ -632,10 +853,12 @@ void Set_EEPROM_Default_Config(void)
 	Config.Acc_LPF = HZ21;
 	Config.Gyro_LPF = NOFILTER;
 	Config.MPU6050_LPF = HZ44;
-	Config.CF_factor = 5;
+	Config.CF_factor = 6;
 	Config.Disarm_timer = 30;			// Default to 30 seconds
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
-	
+	Config.Transition_P1 = 0;
+	Config.Transition_P2 = 100;	
+
 	// Advanced
 	Config.Orientation_P1 = UP_BACK;
 	Config.P1_Reference = NO_ORIENT;
@@ -658,12 +881,12 @@ void Set_EEPROM_Default_Config(void)
 	}
 	
 	// Monopolar throttle is a special case. Set to -100% or -1000
+	// Otherwise the thorttle high alarm will go off on first power-up
 	Config.RxChannelZeroOffset[THROTTLE] = 2750;
 
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].P1n_position	= 50;
 		Config.Channel[i].P1_source_a 	= NOMIX;
 		Config.Channel[i].P1_source_b 	= NOMIX;
 		Config.Channel[i].P2_source_a 	= NOMIX;
@@ -672,6 +895,44 @@ void Set_EEPROM_Default_Config(void)
 		Config.max_travel[i] = 100;
 	}
 
+	// Curves 0 and 1
+	for (i = 0; i < 2; i++)
+	{
+		Config.Curve[i].Point1 = 0;
+		Config.Curve[i].Point2 = 17;
+		Config.Curve[i].Point3 = 33;
+		Config.Curve[i].Point4 = 50;
+		Config.Curve[i].Point5 = 67;
+		Config.Curve[i].Point6 = 83;
+		Config.Curve[i].Point7 = 100;
+	}
+
+	// Curves 2 to 6	
+	for (i = 2; i < 6; i++)
+	{
+		Config.Curve[i].Point1 = -100;
+		Config.Curve[i].Point2 = -67;
+		Config.Curve[i].Point3 = -33;
+		Config.Curve[i].Point4 = 0;
+		Config.Curve[i].Point5 = 33;
+		Config.Curve[i].Point6 = 67;
+		Config.Curve[i].Point7 = 100;
+	}
+
+	Config.Curve[0].channel = THROTTLE;
+	Config.Curve[1].channel = THROTTLE;
+	Config.Curve[2].channel = THROTTLE;
+	Config.Curve[3].channel = THROTTLE;
+	Config.Curve[4].channel = NOMIX;
+	Config.Curve[5].channel = NOMIX;
+	
+	// Preset custom channel order to JR
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		Config.CustomChannelOrder[i] = pgm_read_byte(&JR[i]);
+	}
+
+					
 	// Load manual defaults
 	Load_eeprom_preset(QUADX);
 	Config.Preset = OPTIONS; // Menu will display "Options"
@@ -691,7 +952,6 @@ void Load_eeprom_preset(uint8_t preset)
 	// Preset mixers to safe values
 	for (i = 0; i < MAX_OUTPUTS; i++)
 	{
-		Config.Channel[i].P1n_position	= 50;
 		Config.Channel[i].P1_source_a 	= NOMIX;
 		Config.Channel[i].P1_source_b 	= NOMIX;
 		Config.Channel[i].P2_source_a 	= NOMIX;
@@ -827,8 +1087,13 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.Channel[OUT7].P2_rudder_volume = 100;
 
 			// OUT8
-			Config.Channel[OUT8].P1_offset = -100;
-			Config.Channel[OUT8].P2_offset = 100;			
+			Config.Offsets[OUT8].Point1 = -100;
+			Config.Offsets[OUT8].Point2 = -67;
+			Config.Offsets[OUT8].Point3 = -33;
+			Config.Offsets[OUT8].Point4 = 0;
+			Config.Offsets[OUT8].Point5 = 33;
+			Config.Offsets[OUT8].Point6 = 67;
+			Config.Offsets[OUT8].Point7 = 100;	
 			break;
 				
 		case QUADX:
@@ -937,8 +1202,13 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.Channel[OUT7].P2_rudder_volume = 100;
 									
 			// OUT8
-			Config.Channel[OUT8].P1_offset = -100;
-			Config.Channel[OUT8].P2_offset = 100;
+			Config.Offsets[OUT8].Point1 = -100;
+			Config.Offsets[OUT8].Point2 = -67;
+			Config.Offsets[OUT8].Point3 = -33;
+			Config.Offsets[OUT8].Point4 = 0;
+			Config.Offsets[OUT8].Point5 = 33;
+			Config.Offsets[OUT8].Point6 = 67;
+			Config.Offsets[OUT8].Point7 = 100;
 			break;
 		
 		case TRICOPTER:
@@ -1052,8 +1322,13 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.Channel[OUT7].P2_rudder_volume = 100;
 
 			// OUT8
-			Config.Channel[OUT8].P1_offset = -100;
-			Config.Channel[OUT8].P2_offset = 100;
+			Config.Offsets[OUT8].Point1 = -100;
+			Config.Offsets[OUT8].Point2 = -67;
+			Config.Offsets[OUT8].Point3 = -33;
+			Config.Offsets[OUT8].Point4 = 0;
+			Config.Offsets[OUT8].Point5 = 33;
+			Config.Offsets[OUT8].Point6 = 67;
+			Config.Offsets[OUT8].Point7 = 100;
 			break;
 		
 		default:

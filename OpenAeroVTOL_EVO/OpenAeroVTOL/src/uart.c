@@ -80,8 +80,8 @@ void init_uart(void)
 			UCSR0B |=  (1 << RXCIE0);					// Enable serial interrupt
 			break;
 
-		// Spektrum 8N1 (8 data bits / No parity / 1 stop bit / 115.2Kbps) (Same for SRXL/UDI)
-		case SRXL:
+		// Spektrum 8N1 (8 data bits / No parity / 1 stop bit / 115.2Kbps) (Same for MODEB/UDI)
+		case MODEB:
 		case SPEKTRUM: 	
 			UCSR0A &=  ~(1 << U2X0);					// Clear the 2x flag
 			UBRR0H  =  (BAUD_PRESCALE_SPEKTRUM >> 8); 	// Actual = 113636, Error = -1.36%

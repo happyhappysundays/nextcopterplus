@@ -36,9 +36,15 @@ void Display_rcinput(void);
 
 void Display_rcinput(void)
 {
+#ifdef DEBUG_ON
+	int16_t itemp1 = 0;
+	int16_t value = 0;
+#endif	
+	
 	// Re-enable interrupts. High speed mode may have left them off
 	init_int();
-	
+
+	// Just normal RX display
 	while(BUTTON1 != 0)
 	{
 		if (BUTTON4 == 0)
@@ -68,6 +74,32 @@ void Display_rcinput(void)
 		mugui_lcd_puts(itoa(RCinputs[AUX2],pBuffer,10),(const unsigned char*)Verdana8,100,20);
 		mugui_lcd_puts(itoa(RCinputs[AUX3],pBuffer,10),(const unsigned char*)Verdana8,100,30);
 
+#ifdef DEBUG_ON
+		if (BUTTON2 == 0)
+		{
+			value--;
+		}
+		
+		if (BUTTON3 == 0)
+		{
+			value++;
+		}
+		
+		if (value < 0) value = 0;
+		if (value > 2000) value = 2000;
+		
+		/*
+		if (value < -1000) value = -1000;
+		if (value > 1000) value = 1000;
+		*/
+		
+		itemp1 = Process_curve(P1_THR_CURVE, MONOPOLAR, value);
+		//itemp = Process_curve(GEN_CURVE_C, BIPOLAR, value);
+		
+		//itemp = Process_curve(GEN_CURVE_C, BIPOLAR, RCinputs[GEAR]);
+		mugui_lcd_puts(itoa(itemp1,pBuffer,10),(const unsigned char*)Verdana8,100,40);
+		mugui_lcd_puts(itoa(value,pBuffer,10),(const unsigned char*)Verdana8,37,40);
+#endif
 		// Print bottom text and markers
 		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
 		LCD_Display_Text(60, (const unsigned char*)Verdana8, 110, 55); 	// Cal.

@@ -16,14 +16,19 @@
 #define MAX_ZGAIN 500					// Maximum amount of Z-based height dampening
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
+#define NUMBEROFCURVES 6				// Number of curves available
+#define NUMBEROFPOINTS 7				// Number of points on a curve
 #define NUMBEROFORIENTS 24				// Number board orientations
-#define	THROTTLEIDLE 50					// Throttle value below which is considered idle
+#define NUMBEROFSOURCES 21				// Number of universal input sources
 
+#define	THROTTLEIDLE 50					// Throttle value below which is considered idle
 #define MOTOR_100 1900					// PWM value to produce a 1.9ms throttle pulse regardless of pulse width mode
 #define MOTOR_0	1100					// PWM value to produce a 1.1ms throttle pulse regardless of pulse width mode
+#define MOTOR_0_SYSTEM 2750				// System value to produce a 1.1ms throttle pulse regardless of pulse width mode
 #define	MOTORMIN 1000					// PWM value for throttle cut. 1000 or 1.0ms regardless of pulse width mode
 
 #define SERVO_CENTER 1500				// Servo center position. 1500us
+#define SYSTEM_CENTER 3750				// System center position. 1500us
 #define	THROTTLEMIN 1000				// Minimum throttle input offset value. 3750-1000 = 2750 or 1.1ms.
 										// Not to be confused with MOTORMIN which is a PWM value.
 #define THROTTLEOFFSET 1250				// Mixer offset needed to reduce the output center to MOTORMIN
@@ -34,11 +39,24 @@
  * Type definitions
  ********************************************************************/
 
+// Curves (7)
+typedef struct
+{
+	int8_t		Point1;					// First point in the curve
+	int8_t		Point2;
+	int8_t		Point3;
+	int8_t		Point4;
+	int8_t		Point5;
+	int8_t		Point6;	
+	int8_t		Point7;					// Last point in the curve
+	int8_t		channel;				// Associated channel
+} curve_t;
+
 // Servo limits (4)
 typedef struct
 {
-	int16_t	minimum;
-	int16_t	maximum;
+	int16_t		minimum;
+	int16_t		maximum;
 } servo_limits_t;
 
 // Flight_control type (18)
@@ -65,19 +83,14 @@ typedef struct
 
 } flight_control_t;
 
-// Channel mixer definition 38 bytes
+// Channel mixer definition 34 bytes
 typedef struct
 {
 	int16_t		P1_value;				// Current value of this channel at P1
 	int16_t		P2_value;				// Current value of this channel at P2
 	
-	// Mixer menu (34 bytes, 34 items)
+	// Mixer menu (30 bytes, 30 items)
 	int8_t		Motor_marker;			// Motor/Servo marker
-
-	int8_t		P1_offset;				// P1 Offset for this output
-	int8_t		P1n_position;			// Position of P1.n offset for this output
-	int8_t		P1n_offset;				// P1.n Offset for this output
-	int8_t		P2_offset;				// P2 Offset for this output
 
 	int8_t		P1_throttle_volume;		// Percentage of throttle to use in P1
 	int8_t		P2_throttle_volume;		// Percentage of throttle to use in P2
@@ -122,7 +135,7 @@ typedef struct
 
 	// Menu adjustable items
 	// RC settings (8)[1]
-	uint8_t		ChannelOrder[MAX_RC_CHANNELS];	// Assign channel numbers to hard-coded channel order
+	int8_t		ChannelOrder[MAX_RC_CHANNELS];	// Assign channel numbers to hard-coded channel order
 										// OpenAero2 uses Thr, Ail, Ele, Rud, Gear, Aux1, Aux2, Aux3
 										// THROTTLE will always return the correct data for the assigned throttle channel
 										// AILERON will always return the correct data for the assigned aileron channel
@@ -131,28 +144,31 @@ typedef struct
 	// Servo travel limits (32)[9]
 	servo_limits_t	Limits[MAX_OUTPUTS];// Actual, respanned travel limits to save recalculation each loop
 
-	// RC items (9)[41]
+	// RC items (12)[41]
 	int8_t		RxMode;					// PWM, CPPM or serial types
 	int8_t		Servo_rate;				// PWM rate for (Low = ~50Hz, RCSync = as per RX, High = ~200Hz)
 	int8_t		PWM_Sync;				// Channel to sync to in PWM mode
 	int8_t		TxSeq;					// Channel order of transmitter (JR/Futaba etc)
 	int8_t		FlightChan;				// Channel number to select flight mode
-	int8_t		TransitionSpeed;		// Transition speed/channel 0 = tied to channel, 1 to 10 seconds.
-	int8_t		Transition_P1n;			// Transition SFF point as a percentage -100% to 100%
+	int8_t		TransitionSpeedOut;		// Outbound transition speed/channel 0 = tied to channel, 1 to 40 seconds.
+	int8_t		TransitionSpeedIn;		// Inbound transition  speed/channel 0 = tied to channel, 1 to 40 seconds.
+	int8_t		Transition_P1;			// Transition point as a percentage 0% to 99%
+	int8_t		Transition_P1n;			// Transition point as a percentage 1% to 99%
+	int8_t		Transition_P2;			// Transition point as a percentage 1% to 100%
 	int8_t		Vibration;				// Vibration test mode on/off
 	int8_t		ElevatorPol;			// Elevator RC input polarity (old location)
 	
-	// Flight mode settings (36)[50]
+	// Flight mode settings (36)[53]
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
 
-	// Servo travel limits (48)[86]
+	// Servo travel limits (48)[89]
 	int32_t		Raw_I_Limits[FLIGHT_MODES][NUMBEROFAXIS];		// Actual, unspanned I-term output limits to save recalculation each loop
 	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS];	// Actual, unspanned I-term input limits to save recalculation each loop
 
-	// Triggers (2)[134]
+	// Triggers (2)[137]
 	uint16_t	PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (11)[136]
+	// General items (11)[139]
 	int8_t		Orientation_P2;			// P2 orientation
 	int8_t		P1_Reference;			// Hover plane of reference	(NO, EARTH, VERT_AP)
 	int8_t		Contrast;				// Contrast setting
@@ -165,59 +181,72 @@ typedef struct
 	int8_t		CF_factor;				// Autolevel correction rate
 	int8_t		Preset;					// Mixer preset
 	
-	// Channel configuration (304)[147]
+	// Channel configuration (272)[150]
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
 
-	// Servo menu (24)[451]
+	// Servo menu (24)[422]
 	int8_t		Servo_reverse[MAX_OUTPUTS];	// Reversal of output channel
 	int8_t		min_travel[MAX_OUTPUTS];	// Minimum output value (-125 to 125)
 	int8_t		max_travel[MAX_OUTPUTS];	// Maximum output value (-125 to 125)
 
-	// RC inputs (16)[475]
+	// RC inputs (16)[446]
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
-	// P1 Acc zeros (12)[491]
+	// P1 Acc zeros (12)[462]
 	int16_t		AccZero_P1[NUMBEROFAXIS];	// P1 Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
 	int16_t		AccZeroNormZ_P1;			// Acc-Z zero for normal Z values
 	int16_t		AccZeroInvZ_P1;				// Acc-Z zero for inverted Z values
 	int16_t		AccZeroDiff_P1;				// Difference between normal and inverted Acc-Z zeros
 
-	// Gyro zeros (6)[503]
+	// Gyro zeros (6)[474]
 	int16_t		gyroZero_P1[NUMBEROFAXIS];		// NB. These are now for P1 only
 
-	// Airspeed zero (2)[509]
+	// Airspeed zero (2)[480]
 	int16_t		AirspeedZero;			// Zero airspeed sensor offset
 
-	// Flight mode (1)[511]
+	// Flight mode (1)[482]
 	int8_t		FlightSel;				// User set flight mode
 
-	// Adjusted trims (8)[512]
+	// Adjusted trims (8)[483]
 	int16_t		Rolltrim[FLIGHT_MODES];	// User set trims * 100
 	int16_t		Pitchtrim[FLIGHT_MODES];
 
-	// Sticky flags (1)[520]
+	// Sticky flags (1)[491]
 	uint8_t		Main_flags;				// Non-volatile flags
 
-	// Misc (2)[521]
+	// Misc (2)[492]
 	int8_t		RudderPol;				// Rudder RC input polarity (V1.1 stops here...)
 	int8_t		AileronPol;				// Aileron RC input polarity
 		
-	// Error log (21)[523]
+	// Error log (21)[494]
 	int8_t		log_pointer;
 	int8_t		Log[LOGLENGTH];
 	
-	// P2 Acc zeros (12)[544]
+	// P2 Acc zeros (12)[515]
 	int16_t		AccZero_P2[NUMBEROFAXIS];	// P2 Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
 	int16_t		AccZeroNormZ_P2;			// Acc-Z zero for normal Z values
 	int16_t		AccZeroInvZ_P2;				// Acc-Z zero for inverted Z values
 	int16_t		AccZeroDiff_P2;				// Difference between normal and inverted Acc-Z zeros
 	
-	// P2 Gyro zeros (6)[556]
+	// P2 Gyro zeros (6)[527]
 	int16_t		gyroZero_P2[NUMBEROFAXIS];		// NB. These are for P2 only
 
-	// Advanced items (1) [562]
+	// Advanced items (1) [533]
 	int8_t		Orientation_P1;			// P1 orientation
 	
+	// Curves (48) [534]
+	curve_t		Curve[NUMBEROFCURVES];
+	
+	// Custom channel order (8) [582]
+	int8_t		CustomChannelOrder[MAX_RC_CHANNELS];
+	
+	// Output offsets (64) [590]
+	curve_t		Offsets[MAX_OUTPUTS];
+
+	// [654]
+
+
+		
 } CONFIG_STRUCT;
 
 // Misc structures

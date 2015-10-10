@@ -41,6 +41,7 @@ C_SRCS +=  \
 ../src/acc.c \
 ../src/adc.c \
 ../src/display_balance.c \
+../src/display_io.c \
 ../src/display_log.c \
 ../src/display_rcinput.c \
 ../src/display_sensors.c \
@@ -55,10 +56,13 @@ C_SRCS +=  \
 ../src/imu.c \
 ../src/init.c \
 ../src/isr.c \
+../src/menu_ch_order.c \
+../src/menu_curves.c \
 ../src/menu_driver.c \
 ../src/menu_flight.c \
 ../src/menu_main.c \
 ../src/menu_mixer.c \
+../src/menu_offsets.c \
 ../src/menu_servos.c \
 ../src/menu_settings.c \
 ../src/mixer.c \
@@ -83,6 +87,7 @@ OBJS +=  \
 src/acc.o \
 src/adc.o \
 src/display_balance.o \
+src/display_io.o \
 src/display_log.o \
 src/display_rcinput.o \
 src/display_sensors.o \
@@ -97,10 +102,13 @@ src/i2c.o \
 src/imu.o \
 src/init.o \
 src/isr.o \
+src/menu_ch_order.o \
+src/menu_curves.o \
 src/menu_driver.o \
 src/menu_flight.o \
 src/menu_main.o \
 src/menu_mixer.o \
+src/menu_offsets.o \
 src/menu_servos.o \
 src/menu_settings.o \
 src/misc_asm.o \
@@ -118,6 +126,7 @@ OBJS_AS_ARGS +=  \
 src/acc.o \
 src/adc.o \
 src/display_balance.o \
+src/display_io.o \
 src/display_log.o \
 src/display_rcinput.o \
 src/display_sensors.o \
@@ -132,10 +141,13 @@ src/i2c.o \
 src/imu.o \
 src/init.o \
 src/isr.o \
+src/menu_ch_order.o \
+src/menu_curves.o \
 src/menu_driver.o \
 src/menu_flight.o \
 src/menu_main.o \
 src/menu_mixer.o \
+src/menu_offsets.o \
 src/menu_servos.o \
 src/menu_settings.o \
 src/misc_asm.o \
@@ -153,6 +165,7 @@ C_DEPS +=  \
 src/acc.d \
 src/adc.d \
 src/display_balance.d \
+src/display_io.d \
 src/display_log.d \
 src/display_rcinput.d \
 src/display_sensors.d \
@@ -167,10 +180,13 @@ src/i2c.d \
 src/imu.d \
 src/init.d \
 src/isr.d \
+src/menu_ch_order.d \
+src/menu_curves.d \
 src/menu_driver.d \
 src/menu_flight.d \
 src/menu_main.d \
 src/menu_mixer.d \
+src/menu_offsets.d \
 src/menu_servos.d \
 src/menu_settings.d \
 src/misc_asm.d \
@@ -188,6 +204,7 @@ C_DEPS_AS_ARGS +=  \
 src/acc.d \
 src/adc.d \
 src/display_balance.d \
+src/display_io.d \
 src/display_log.d \
 src/display_rcinput.d \
 src/display_sensors.d \
@@ -202,10 +219,13 @@ src/i2c.d \
 src/imu.d \
 src/init.d \
 src/isr.d \
+src/menu_ch_order.d \
+src/menu_curves.d \
 src/menu_driver.d \
 src/menu_flight.d \
 src/menu_main.d \
 src/menu_mixer.d \
+src/menu_offsets.d \
 src/menu_servos.d \
 src/menu_settings.d \
 src/misc_asm.d \
@@ -230,6 +250,14 @@ OUTPUT_FILE_DEP:= ./makedep.mk
 LIB_DEP+= 
 
 # AVR32/GNU C Compiler
+
+
+
+
+
+
+
+
 
 
 

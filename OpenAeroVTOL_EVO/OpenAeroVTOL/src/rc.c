@@ -58,9 +58,11 @@ void RxGetChannels(void)
 	}
 
 	// Special handling for monopolar throttle
-	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE]; // RxChannelZeroOffset[THROTTLE] = 2750 (-250 to 2250)
+	// Preset to RxChannelZeroOffset[THROTTLE] = 2750 (-250 to 2250) for safety. 
+	// Normally MonopolarThrottle is referenced to the lowest throttle position.
+	MonopolarThrottle = RxChannel[THROTTLE] - Config.RxChannelZeroOffset[THROTTLE]; 
 
-	// Bipolar throttle must use the nominal mid-point
+	// Bipolar throttle must use the nominal mid-point as calibration is done at throttle minimum
 	RCinputs[THROTTLE] = RxChannel[THROTTLE] - 3750; 
 
 	// Reverse primary channels as requested

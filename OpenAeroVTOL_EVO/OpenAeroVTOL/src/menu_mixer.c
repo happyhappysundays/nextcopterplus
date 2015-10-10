@@ -34,10 +34,10 @@ void menu_mixer(uint8_t i);
 // Defines
 //************************************************************
 
-#define MIXERITEMS 34	// Number of mixer menu items
+#define MIXERITEMS 30	// Number of mixer menu items
 #define MIXERSTARTE 190	// Start of Menu text items (Earth)
 #define MIXERSTARTM 346	// Start of Menu text items (Model)
-#define MIXOFFSET  92	// Value offsets
+#define MIXOFFSET  85	// Value offsets
 
 //************************************************************
 // RC menu items
@@ -45,36 +45,32 @@ void menu_mixer(uint8_t i);
 	 
 const uint16_t MixerMenuTextE[MIXERITEMS] PROGMEM =
 {
-	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
+	226,0,0,56,								// Motor control and offsets (4)
 	0,0,0,0,0,0,							// Flight controls (6)
 	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
-	238,0,238,0,238,0,238,0					// Other sources (8)
+	421,0,421,0,421,0,421,0					// Other sources (8)
 };
 
 const uint16_t MixerMenuTextM[MIXERITEMS] PROGMEM =
 {
-	226,0,0,0,0,0,0,56,						// Motor control and offsets (8)
+	226,0,0,56,								// Motor control and offsets (4)
 	0,0,0,0,0,0,							// Flight controls (6)
 	68,68,68,68,68,68,68,68,68,68,68,68,	// Mixer ranges (12)
-	380,0,238,0,380,0,238,0					// Other sources (8)
+	442,0,421,0,442,0,421,0					// Other sources (8)
 };
 
 const uint16_t MixerMenuOffsets[MIXERITEMS] PROGMEM =
 {
-	MIXOFFSET,92,92,92,92,92,92,92,			// Motor control and offsets (8)
+	MIXOFFSET,92,92,92,						// Motor control and offsets (4)
 	92,92,92,92,92,92,						// Flight controls (6)
 	92,92,92,92,92,92,92,92,92,92,92,92,	// Mixer ranges (12)
-	92,92,92,92,92,92,92,92					// Other sources (8)
+	77,77,77,77,77,77,77,77					// Other sources (8)
 };
 
 const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM = 
 {
-		// Motor control and offsets (8)
+		// Motor control and offsets (4)
 		{ASERVO,MOTOR,1,1,MOTOR},		// Motor marker (0)
-		{-125,125,1,0,0},				// P1 Offset (%)
-		{1,99,1,0,50},					// P1.n Position (%)
-		{-125,125,1,0,0},				// P1.n Offset (%)
-		{-125,125,1,0,0},				// P2 Offset (%)
 		{0,125,1,0,100},				// P1 throttle volume 
 		{0,125,1,0,100},				// P2 throttle volume
 		{LINEAR,SQRTSINE,1,1,LINEAR},	// Throttle curves
@@ -102,13 +98,13 @@ const menu_range_t mixer_menu_ranges[MIXERITEMS] PROGMEM =
 		{OFF, SCALE,1,1,OFF},			// P2 Z_delta_acc
 
 		// Sources (8)
-		{SRC1,NOMIX,1,1,NOMIX},			// P1 Source A (26)
+		{SRC2,NOMIX,1,1,NOMIX},			// P1 Source A (26)
 		{-125,125,1,0,0},				// P1 Source A volume
-		{SRC1,NOMIX,1,1,NOMIX},			// P2 Source A
+		{SRC2,NOMIX,1,1,NOMIX},			// P2 Source A
 		{-125,125,1,0,0},				// P2 Source A volume
-		{SRC1,NOMIX,1,1,NOMIX},			// P1 Source B
+		{SRC2,NOMIX,1,1,NOMIX},			// P1 Source B
 		{-125,125,1,0,0},				// P1 Source B volume
-		{SRC1,NOMIX,1,1,NOMIX},			// P2 Source B
+		{SRC2,NOMIX,1,1,NOMIX},			// P2 Source B
 		{-125,125,1,0,0},				// P2 Source B volume
 };
 

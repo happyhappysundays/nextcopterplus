@@ -32,6 +32,7 @@ volatile bool JitterGate;			// Area when we care about JitterFlag
 
 volatile uint16_t RxChannel[MAX_RC_CHANNELS];
 volatile uint16_t RxChannelStart[MAX_RC_CHANNELS];	
+volatile uint16_t TempRxChannel[MAX_RC_CHANNELS]; // Temp regs for UDI. Look to remove this in the future.
 volatile uint16_t PPMSyncStart;		// Sync pulse timer
 volatile uint8_t ch_num;			// Current channel number
 volatile uint8_t max_chan;			// Target channel number
@@ -49,7 +50,7 @@ volatile uint8_t packet_size;
 #define PACKET_TIMER 2500			// Serial RC packet start timer. Minimum gap 500/2500000 = 1.0ms
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
-#define SRXL_SYNCBYTE 0xA1			// SRXL/UDI sync byte
+#define MODEB_SYNCBYTE 0xA1			// MODEB/UDI sync byte
 #define XBUS_FRAME_SIZE_12 27		// Packet size for a 12-channel packet
 #define XBUS_FRAME_SIZE_16 35		// Packet size for a 16-channel packet	
 #define XBUS_CRC_BYTE_1 25
@@ -86,6 +87,9 @@ ISR(INT1_vect)
 		if (Config.PWM_Sync == AILERON) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
+			Servo_TCNT2 = TCNT2;					// Reset signal loss timer and Overdue state 
+			RC_Timeout = 0;
+			Overdue = false;
 		}
 	}
 }
@@ -104,6 +108,9 @@ ISR(INT0_vect)
 		if (Config.PWM_Sync == ELEVATOR) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
+			Servo_TCNT2 = TCNT2;					// Reset signal loss timer and Overdue state 
+			RC_Timeout = 0;
+			Overdue = false;
 		}
 	}
 }
@@ -122,6 +129,9 @@ ISR(PCINT3_vect)
 		if (Config.PWM_Sync == THROTTLE) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
+			Servo_TCNT2 = TCNT2;					// Reset signal loss timer and Overdue state 
+			RC_Timeout = 0;
+			Overdue = false;
 		}
 	}
 }
@@ -141,6 +151,9 @@ ISR(PCINT1_vect)
 		if (Config.PWM_Sync == GEAR) 
 		{
 			Interrupted = true;						// Signal that interrupt block has finished
+			Servo_TCNT2 = TCNT2;					// Reset signal loss timer and Overdue state 
+			RC_Timeout = 0;
+			Overdue = false;
 		}
 	}
 }
@@ -179,6 +192,9 @@ ISR(INT2_vect)
 			if (Config.PWM_Sync == RUDDER) 
 			{
 				Interrupted = true;					// Signal that interrupt block has finished
+				Servo_TCNT2 = TCNT2;				// Reset signal loss timer and Overdue state 
+				RC_Timeout = 0;
+				Overdue = false;
 			}
 		}
 	}
@@ -247,6 +263,9 @@ ISR(INT2_vect)
 		else if (ch_num == max_chan)
 		{
 			Interrupted = true;					// Signal that interrupt block has finished
+			Servo_TCNT2 = TCNT2;				// Reset signal loss timer and Overdue state 
+			RC_Timeout = 0;
+			Overdue = false;
 		}
 	
 		// If the signal is ever lost, reset measured max channel number
@@ -274,10 +293,8 @@ ISR(USART0_RX_vect)
 	uint8_t chan_mask = 0;	// Common variables
 	uint8_t chan_shift = 0;
 	uint8_t data_mask = 0;
-	uint8_t	packet_size = 0;
 	uint16_t crc = 0;
 	uint16_t checkcrc = 0;
-
 	
 	uint16_t Save_TCNT1;	// Timer1 (16bit) - run @ 2.5MHz (400ns) - max 26.2ms
 	uint16_t CurrentPeriod;	
@@ -342,6 +359,9 @@ ISR(USART0_RX_vect)
 
 			// Save frame rate to global
 			FrameRate = CurrentPeriod;
+			
+			// Clear buffer
+			memset(&sBuffer[0],0,SBUFFER_SIZE);
 		}
 
 		// Timestamp this interrupt
@@ -429,6 +449,11 @@ ISR(USART0_RX_vect)
 					// RC sync established
 					Interrupted = true;	
 
+					// Reset signal loss timer and Overdue state 
+					Servo_TCNT2 = TCNT2;
+					RC_Timeout = 0;
+					Overdue = false;
+			
 					// Set start of channel data per format
 					sindex = 4; // Channel data from byte 5
 
@@ -491,7 +516,7 @@ ISR(USART0_RX_vect)
 		//* 
 		//* 0 		= 880us
 		//* 224		= 1020us
-		//* 1024 	= 1520us +/- 800 for 1-2ms
+		//* 1024 	= 1520us +/-800 for 1-2ms (OAV = +/-1250)
 		//* 1824	= 2020us
 		//* 2047 	= 2160us
 		//*
@@ -504,63 +529,62 @@ ISR(USART0_RX_vect)
 			//if ((bytecount == 24) && ((temp == 0x00) || (temp == 0x04) || (temp == 0x14) || (temp == 0x24) || (temp == 0x34) || (temp == 0x08)))
 			if (bytecount == 24)
 			{
-				// If frame lost, ignore packet
-				if ((sBuffer[23] & 0x20) == 0)
+				// RC sync established
+				Interrupted = true;
+				Servo_TCNT2 = TCNT2;
+				RC_Timeout = 0;
+				Overdue = false;
+				
+				// Clear channel data
+				for (j = 0; j < MAX_RC_CHANNELS; j++)
 				{
-					// RC sync established
-					Interrupted = true;
+					RxChannel[j] = 0;
+				}
 
-					// Clear channel data
-					for (j = 0; j < MAX_RC_CHANNELS; j++)
+				// Start from second byte
+				sindex = 1;
+
+				// Deconstruct S-Bus data
+				// 8 channels * 11 bits = 88 bits
+				for (j = 0; j < 88; j++)
+				{
+					if (sBuffer[sindex] & (1<<chan_mask))
 					{
-						RxChannel[j] = 0;
+						// Place the RC data into the correct channel order for the transmitted system
+						RxChannel[Config.ChannelOrder[chan_shift]] |= (1<<data_mask);
 					}
 
-					// Start from second byte
-					sindex = 1;
+					chan_mask++;
+					data_mask++;
 
-					// Deconstruct S-Bus data
-					// 8 channels * 11 bits = 88 bits
-					for (j = 0; j < 88; j++)
+					// If we have done 8 bits, move to next byte in buffer
+					if (chan_mask == 8)
 					{
-						if (sBuffer[sindex] & (1<<chan_mask))
-						{
-							// Place the RC data into the correct channel order for the transmitted system
-							RxChannel[Config.ChannelOrder[chan_shift]] |= (1<<data_mask);
-						}
-
-						chan_mask++;
-						data_mask++;
-
-						// If we have done 8 bits, move to next byte in buffer
-						if (chan_mask == 8)
-						{
-							chan_mask =0;
-							sindex++;
-						}
-
-						// If we have reconstructed all 11 bits of one channel's data (2047)
-						// increment the channel number
-						if (data_mask == 11)
-						{
-							data_mask =0;
-							chan_shift++;
-						}
+						chan_mask = 0;
+						sindex++;
 					}
 
-					// Convert to  OpenAero2 values (0~2047 -> 2500~4999)
-					for (j = 0; j < MAX_RC_CHANNELS; j++)
+					// If we have reconstructed all 11 bits of one channel's data (2047)
+					// increment the channel number
+					if (data_mask == 11)
 					{
-						// Subtract Futaba offset
-						itemp16 = RxChannel[j] - 1024;
+						data_mask =0;
+						chan_shift++;
+					}
+				}
+
+				// Convert to  OpenAero2 values
+				for (j = 0; j < MAX_RC_CHANNELS; j++)
+				{
+					// Subtract Futaba offset
+					itemp16 = RxChannel[j] - 1024;
 						
-						// Expand into OpenAero2 units x1.25 (1.25)	(1000/800)
-						itemp16 = itemp16 + (itemp16 >> 2);
+					// Expand into OpenAero2 units x1.562 (1.562) (1250/800)
+					itemp16 = itemp16 + (itemp16 >> 1) + (itemp16 >> 4);
 
-						// Add back in OpenAero2 offset
-						RxChannel[j] = itemp16 + 3750;		
-					} 	
-				} // Frame lost check
+					// Add back in OpenAero2 offset
+					RxChannel[j] = itemp16 + 3750;		
+				} 	
 			
 			} // Packet ended flag
 	
@@ -622,7 +646,7 @@ ISR(USART0_RX_vect)
 		//* 
 		//* 0 		= 920us
 		//* 157		= 1010us
-		//* 1024 	= 1510us +/- 867.5 for 1-2ms
+		//* 1024 	= 1510us +/- 867.5 for 1-2ms or 0.576ns/bit
 		//* 1892	= 2010us
 		//* 2047 	= 2100us
 		//*
@@ -679,8 +703,8 @@ ISR(USART0_RX_vect)
 						}					
 
 						// Spektrum to System
-						// 1.1527 () (1000/867.5) x2 = 2.30547 (2.3047)
-						itemp16 = (itemp16 << 1) + (itemp16 >> 2) + (itemp16 >> 5) + (itemp16 >> 6) + (itemp16 >> 7);
+						// Expand into OpenAero2 units (1250/867.5) x2 = 2.8818 (2.875) 2+.5+.25-1/8
+						itemp16 = (itemp16 << 1) + (itemp16 >> 1) + (itemp16 >> 2) + (itemp16 >> 3);
 
 						if (chan_shift == 0x03) // 11-bit
 						{
@@ -700,17 +724,22 @@ ISR(USART0_RX_vect)
 			
 				// RC sync established
 				Interrupted = true;
-
+				
+				// Reset signal loss timer and Overdue state 
+				Servo_TCNT2 = TCNT2;
+				RC_Timeout = 0;
+				Overdue = false;
+			
 			} // Check end of data
 		
 		} // (Config.RxMode == SPEKTRUM)
 
 		//************************************************************
-		//* SRXL (XBUS/UDI Mode B) RX Data format 115200Kbit/s, 8 data bit, no parity, and one stop bit. 
+		//* XBUS Mode B/UDI RX Data format 115200Kbit/s, 8 data bit, no parity, and one stop bit. 
 		//* Portions of code adopted from MultiWii and from GruffyPuffy/cleanflight.
 		//* 
-		//* First byte = vendor ID		0xA1 = 12-Ch SRXL
-		//*								0xA2 = 16-Ch SRXL
+		//* First byte = vendor ID		0xA1 = 12-Ch Data
+		//*								0xA2 = 16-Ch Data
 		//*
 		//* Next 24/32 bytes = 12/16 channels of 16-bit servo data, high-byte first
 		//* Last 2 bytes = CRC value over first 25/33 bytes, using CRC-CCITT algorithm.
@@ -735,17 +764,17 @@ ISR(USART0_RX_vect)
 		//************************************************************
 		
 		// Handle SXRL format
-		if (Config.RxMode == SRXL)
+		if (Config.RxMode == MODEB)
 		{
 			// Work out the expected number of bytes based on the vendor ID (1st byte)
 			if (bytecount == 0)
 			{
 				// Process data when all packets received
-				if (sBuffer[0] == 0xA1)
+				if (sBuffer[0] == MODEB_SYNCBYTE)		// 12-channel packet
 				{
 					packet_size = XBUS_FRAME_SIZE_12;
 				}
-				else
+				else									// Probably a 16-channel packet
 				{
 					packet_size = XBUS_FRAME_SIZE_16;
 				}
@@ -755,7 +784,7 @@ ISR(USART0_RX_vect)
 			if (bytecount == (packet_size - 1))
 			{
 				crc = 0;
-				
+			
 				// Add up checksum for all bytes up to but not including the checksum
 				for (j = 0; j < (packet_size - 2); j++)
 				{
@@ -770,29 +799,34 @@ ISR(USART0_RX_vect)
 				{
 					// RC sync established
 					Interrupted = true;
-
+					
+					// Reset signal loss timer and Overdue state 					
+					Servo_TCNT2 = TCNT2;
+					RC_Timeout = 0;
+					Overdue = false;
+			
 					// Copy unconverted channel data
 					for (j = 0; j < MAX_RC_CHANNELS; j++)
 					{
 						// Combine bytes from buffer
-						RxChannel[j] = (sBuffer[(j << 1) + 1] << 8) | (sBuffer[(j << 1) + 2]);
-					}				
-					
+						TempRxChannel[j] = (uint16_t)(sBuffer[(j << 1) + 1] << 8) | (sBuffer[(j << 1) + 2]);
+					}
+
 					// Convert to system values
 					for (j = 0; j < MAX_RC_CHANNELS; j++)
 					{
-						// Subtract SRXL offset
-						itemp16 = RxChannel[j] - 2048;
+						// Subtract MODEB offset
+						itemp16 = TempRxChannel[j] - 2048;
 						
-						// Expand into OpenAero2 units x0.6865 (0.6875)	(1000/1463)
-						itemp16 = (itemp16 >> 1) + (itemp16 >> 3) + (itemp16 >> 4);
+						// Expand into OpenAero2 units x0.8544 (0.8555)	(1250/1463)
+						itemp16 = (itemp16 >> 1) + (itemp16 >> 2) + (itemp16 >> 4) + (itemp16 >> 5) + (itemp16 >> 7) + (itemp16 >> 8);
 
 						// Add back in OpenAero2 offset
-						RxChannel[j] = itemp16 + 3750;
+						RxChannel[Config.ChannelOrder[j]] = itemp16 + 3750;
 					}
 				}
 			}
-		} // (Config.RxMode == SRXL)
+		} // (Config.RxMode == MODEB)
 
 		//************************************************************
 		//* Common exit code
@@ -881,7 +915,7 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
 			break;
 
-		case SRXL:
+		case MODEB:
 		case XTREME:
 		case SBUS:
 		case SPEKTRUM:

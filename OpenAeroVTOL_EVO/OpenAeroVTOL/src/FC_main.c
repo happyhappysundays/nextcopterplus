@@ -1,7 +1,7 @@
- //**************************************************************************
+//**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.2 RC 1 - July 2015
+// Version: Release V1.3 - October 2015
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -155,14 +155,63 @@
 // Beta 19	New attempt at removing PWM glitch on arming. (V1.2 Release candidate)
 //			Update settings update so that all older orientations are converted etc.
 //
+// V1.3		Based on OpenAeroVTOL V1.2 code.
+//
+// Alpha 1	Added XBUS Mode.B/UDI code. Fixed packet_size bug. 
+//			Made checksum checking a compile option. Working on curve code.
+// Alpha 2	Cleaned up curves and changed to seven-points.
+// Alpha 3	Added another generic curve. Extended universal mixers.
+//			Generic curves now have a larger range of selectable inputs.
+// Beta 1	Curves now functional. Added settings update from V1.2
+//			I/O screen added.
+// Beta 2	Tidied up IO screen. Fixes from Ran.
+// Beta 3	More input from Ran. Fixing Throttle curve not working.
+// Beta 4	Optimised throttle curve mixing. Throttle cut shown on
+//			I/O display. Display changed to percentages.
+//			Sensors now affect results.
+// Beta 5	Fix travel percentage screw-up. Test limits after expansion for servos.
+//			Fix missing THR input for curves. Fix for curve issues after selecting NONE.
+// Beta 6	AL correct default corrected to 6. Feedback from Ran.
+// Beta 7	I/O display input ranges changed to show "100" for "1000" on the RC inputs display
+// Beta 8	Added bipolar throttle to selectable universal inputs.
+//			Adjusted eeprom upgrade to suit.
+// Beta 9	Adjusted eeprom upgrade from V1.2 such that new data is correctly set to defaults.
+//			Changed I/O screen format and added transition number. Throttle input is now monopolar
+//			throttle scaled 0-100.
+// Beta 10	Tweaks to the I/O display.
+// Beta 11	More tweaks to the I/O display.
+// Beta 12	Correction to V1.2 - V1.3 eeprom update code. Added custom channel order selection.
+//			Combine Mode.B/UDI code from Rene_6 branch. 
+// Beta 13	Move I/O display to the last position, and combine Mode.B/UDI code 
+//			from Rene_11 branch. 
+// Beta 14	Added variable out and in-bound transition speeds.
+//			Added settings update from V1.3 B13.
+// Beta 15	Increased maximum I-rates to 6. Added seven-point offset curves and menu.
+//			Added complicated settings update from V1.3 B14. Added settable transition 
+//			low and high points. Altered timed transition code to cope with P1, P1.n and P2 
+//			settings that are not strictly in the order of P1 < P1.n < P2.
+// Beta 16	Rearranged main menu items. Fixed broken orientation menu item.
+// Beta 17	FC no longer disarms on loss of signal. S.Bus frame loss bit ignored.
+//			Increased scale of roll and pitch trims by 10. Add "Alt. Damp" to universal mixers.
+//			New failsafe functionality that continues pulses with signal loss. 
+//			Rate matches previous rate. "No signal" trigger dropped from 500ms to 50ms.
+//			Motors now correctly set to 1.1ms on loss of signal. 
+//			Removed option of disabling CRC check on UDI mode. Updated settings migration.
+// Beta 18	Changed universal input AccRoll and AccPitch to Acc X/Z and Acc Y.
+//			Fixed I-term rate at throttle idle. Fixed Preset function.
+//			Fixed vibration display killing outputs.
+// Beta 19	Added bipolar throttle input to generic curves C and D
+//			Increase stick rate maximums to 7. Fixed Alt. Damp text in curve inputs.
+//			B19 is Release V1.3.
+//
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:    
-//	
+// Bugs:	Can't help last failsafe PWM colliding with incoming RC.
+//			
 //
-// To do: 
+// To do:	
 //		  
 //
 //***********************************************************
@@ -210,9 +259,12 @@
 //* Defines
 //***********************************************************
 
-#define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
+//#define	RC_OVERDUE 9765				// Number of T2 cycles before RC will be overdue = 9765 * 1/19531 = 500ms
+#define	RC_OVERDUE 977				// Number of T2 cycles before RC will be overdue = 977 * 1/19531 = 50ms
+
 #define	SLOW_RC_RATE 41667			// Slowest RC rate tolerable for Plan A syncing = 2500000/60 = 16ms
 #define	SERVO_RATE_LOW 300			// A.servo rate. 19531/65(Hz) = 300
+#define	SERVO_RATE_HIGH 217			// A.servo rate. 19531/90(Hz) = 217
 #define SECOND_TIMER 19531			// Unit of timing for seconds
 #define ARM_TIMER_RESET_1 960		// RC position to reset timer for aileron, elevator and rudder
 #define ARM_TIMER_RESET_2 50		// RC position to reset timer for throttle
@@ -264,6 +316,8 @@ volatile uint16_t	InterruptCount = 0;
 volatile uint16_t	LoopStartTCNT1 = 0;
 volatile bool		Overdue = false;
 volatile uint8_t	LoopCount = 0;
+volatile uint8_t	Servo_TCNT2 = 0;
+volatile uint16_t	RC_Timeout = 0;
 
 // debug	
 bool flip = false;
@@ -280,10 +334,12 @@ int main(void)
 	bool PWMBlocked = false;
 	bool RCInterruptsON = false;
 	bool ServoTick = false;
+	bool FastServoTick = false;
 	bool ResampleRCRate = false;
 	bool PWMOverride = false;
 	bool Interrupted_Clone = false;
 	bool SlowRC = true;
+	bool LastLoopOverdue = false;
 
 	// 32-bit timers
 	uint32_t Arm_timer = 0;
@@ -294,8 +350,9 @@ int main(void)
 	uint16_t Status_timeout = 0;
 	uint16_t UpdateStatus_timer = 0;
 	uint16_t Ticker_Count = 0;
-	uint16_t RC_Timeout = 0;
+	//uint16_t RC_Timeout = 0;
 	uint16_t Servo_Rate = 0;
+	uint16_t FastServo_Rate = 0;
 	uint16_t Transition_timeout = 0;
 	uint16_t Disarm_timer = 0;
 	uint16_t Save_TCNT1 = 0;
@@ -310,7 +367,7 @@ int main(void)
 	uint8_t Disarm_TCNT2 = 0;
 	uint8_t Arm_TCNT2 = 0;
 	uint8_t Ticker_TCNT2 = 0;
-	uint8_t Servo_TCNT2 = 0;
+	//uint8_t Servo_TCNT2 = 0;
 	uint8_t ServoRate_TCNT2 = 0;
 	uint8_t fast_sync_TCNT2 = 0;
 
@@ -327,6 +384,7 @@ int main(void)
 	uint8_t i = 0;
 	int16_t PWM_pulses = 3; 
 	uint32_t interval = 0;			// IMU interval
+	uint8_t transition_direction = P2;
 	
 	// Do all init tasks
 	init();
@@ -511,6 +569,9 @@ int main(void)
 				{
 					// Enable PWM output
 					PWMOverride = false;					
+
+					// Unblock motors if blocked
+					Flight_flags &= ~(1 << ARM_blocker);
 				}
 
 				break;
@@ -545,6 +606,10 @@ int main(void)
 			case STATUS_TIMEOUT:
 				// Pop up the Idle screen
 				idle_screen();
+				
+				// Make sure that these are cleared
+				Interrupted = false;
+				Interrupted_Clone = false;
 
 				// Switch to IDLE mode
 				Menu_mode = POSTSTATUS_TIMEOUT;
@@ -568,6 +633,9 @@ int main(void)
 					
 					// Clear Interrupted_Clone
 					Interrupted_Clone = false;
+														
+					// Unblock motors if blocked
+					Flight_flags &= ~(1 << ARM_blocker);
 				}
 				else
 				{
@@ -609,14 +677,14 @@ int main(void)
 		if (Overdue)
 		{
 			General_error |= (1 << NO_SIGNAL);		// Set NO_SIGNAL bit
-
+/*
 			// If FC is set to "armable" and is currently armed, disarm the FC
 			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
 			{
 				General_error |= (1 << DISARMED);	// Set flags to disarmed
 				LED1 = 0;							// Signal that FC is now disarmed
 			}
-
+*/
 		}
 		// RC signal received normally
 		else
@@ -677,7 +745,8 @@ int main(void)
 					CalibrateGyrosSlow();					// Calibrate gyros
 					LED1 = 1;								// Signal that FC is ready
 
-					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while...
+					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while to remove arm glitch
+					Servo_Rate = 0;
 
 					// Force Menu to IDLE immediately unless in vibration test mode
 					if (Config.Vibration == OFF)
@@ -696,6 +765,9 @@ int main(void)
 					Arm_timer = 0;
 					General_error |= (1 << DISARMED);		// Set flags to disarmed
 					LED1 = 0;								// Signal that FC is now disarmed
+					
+					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while to remove arm glitch
+					Servo_Rate = 0;
 #ifdef ERROR_LOG
 add_log(MANUAL);
 #endif			
@@ -750,16 +822,6 @@ if (BUTTON2 == 0)
 		// Update zeroed RC channel data
 		RxGetChannels();
 
-		// Check for throttle reset
-		if (MonopolarThrottle < THROTTLEIDLE)
-		{
-			// Clear throttle high error
-			General_error &= ~(1 << THROTTLE_HIGH);	
-
-			// Reset I-terms at throttle cut. Using memset saves code space
-			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6); 
-		}
-
 		//************************************************************
 		//* Flight profile / transition state selection
 		//*
@@ -796,13 +858,13 @@ if (BUTTON2 == 0)
 		//* Also, re-initialise if the transition setting is changed
 		//************************************************************
 
-		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeed))
+		if ((old_flight == 3) || (old_trans_mode != Config.TransitionSpeedOut))
 		{
 			switch(Config.FlightSel)
 			{
 				case 0:
 					Transition_state = TRANS_P1;
-					transition_counter = 0;
+					transition_counter = Config.Transition_P1;
 					break;
 				case 1:
 					Transition_state = TRANS_P1n;
@@ -810,13 +872,13 @@ if (BUTTON2 == 0)
 					break;
 				case 2:
 					Transition_state = TRANS_P2;
-					transition_counter = 100;
+					transition_counter = Config.Transition_P2;
 					break;
 				default:
 					break;
 			}		 
 			old_flight = Config.FlightSel;
-			old_trans_mode = Config.TransitionSpeed;
+			old_trans_mode = Config.TransitionSpeedOut;
 		}
 
 		//************************************************************
@@ -832,7 +894,7 @@ if (BUTTON2 == 0)
 
 		// Work out transition number when manually transitioning
 		// Convert number to percentage (0 to 100%)
-		if (Config.TransitionSpeed == 0)
+		if (Config.TransitionSpeedOut == 0)
 		{
 			// Update the transition variable based on the selected RC channel
 			UpdateTransition();
@@ -845,7 +907,7 @@ if (BUTTON2 == 0)
 
 		// Always in the TRANSITIONING state when Config.TransitionSpeed is 0
 		// This prevents state changes when controlled by a channel
-		if (Config.TransitionSpeed == 0)
+		if (Config.TransitionSpeedOut == 0)
 		{
 			Transition_state = TRANSITIONING;
 		}
@@ -857,11 +919,18 @@ if (BUTTON2 == 0)
 			Transition_state = (uint8_t)pgm_read_byte(&Trans_Matrix[Config.FlightSel][old_flight]);
 		}
 
-		// Calculate transition time from user's setting
-		transition_time = TRANSITION_TIMER * Config.TransitionSpeed;
+		// Calculate transition time from user's setting based on the direction of travel
+		if (transition_direction == P2)
+		{
+			transition_time = TRANSITION_TIMER * Config.TransitionSpeedOut; // Outbound transition speed	
+		}
+		else 
+		{
+			transition_time = TRANSITION_TIMER * Config.TransitionSpeedIn; // Inbound transition speed		
+		}
 		
 		// Update state, values and transition_counter every Config.TransitionSpeed if not zero.
-		if (((Config.TransitionSpeed != 0) && (Transition_timeout > transition_time)) ||
+		if (((Config.TransitionSpeedOut != 0) && (Transition_timeout > transition_time)) ||
 			// Update immediately
 			TransitionUpdated)
 		{
@@ -871,7 +940,7 @@ if (BUTTON2 == 0)
 			// Fixed, end-point states
 			if (Transition_state == TRANS_P1)
 			{
-				transition_counter = 0;
+				transition_counter = Config.Transition_P1;
 			}
 			else if (Transition_state == TRANS_P1n)
 			{
@@ -879,13 +948,13 @@ if (BUTTON2 == 0)
 			}
 			else if (Transition_state == TRANS_P2)
 			{
-				transition_counter = 100;
+				transition_counter = Config.Transition_P2;
 			}		
 
 			// Over-ride users requesting silly states
 			// If transition_counter is above P1.n but request is P1 to P1.n or 
 			// if transition_counter is below P1.n but request is P2 to P1.n...
-			if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
+/*			if ((Transition_state == TRANS_P1_to_P1n_start) && (transition_counter > Config.Transition_P1n))
 			{
 				// Reset state to a more appropriate one
 				Transition_state = TRANS_P2_to_P1n_start;
@@ -896,60 +965,132 @@ if (BUTTON2 == 0)
 				// Reset state to a more appropriate one
 				Transition_state = TRANS_P1_to_P1n_start;
 			}
-
+*/
 			// Handle timed transition towards P1
 			if ((Transition_state == TRANS_P1n_to_P1_start) || (Transition_state == TRANS_P2_to_P1_start))
 			{
-				transition_counter--;
-				if (transition_counter <= 0)
+				if (transition_counter > Config.Transition_P1)
 				{
-					transition_counter = 0;
-					Transition_state = TRANS_P1;
+					transition_counter--;
+					
+					// Check end point
+					if (transition_counter <= Config.Transition_P1)
+					{
+						transition_counter = Config.Transition_P1;
+						Transition_state = TRANS_P1;
+					}
 				}
+				else
+				{
+					transition_counter++;
+			
+					// Check end point
+					if (transition_counter >= Config.Transition_P1)
+					{
+						transition_counter = Config.Transition_P1;
+						Transition_state = TRANS_P1;
+					}
+				}
+				
+				transition_direction = P1;
 			}
 
-			// Handle timed transition between P1.n and P1
+			// Handle timed transition between P1 and P1.n
 			if (Transition_state == TRANS_P1_to_P1n_start)
 			{
-				transition_counter++;
-				if (transition_counter >= Config.Transition_P1n)
+				if (transition_counter > Config.Transition_P1n)
 				{
-					transition_counter = Config.Transition_P1n;
-					Transition_state = TRANS_P1n;
+					transition_counter--;
+					
+					// Check end point
+					if (transition_counter <= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
 				}
+				else
+				{
+					transition_counter++;
+					
+					// Check end point
+					if (transition_counter >= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
+				}
+
+				transition_direction = P2;
 			}			
 				
-			// Handle timed transition between P1.n and P2
+			// Handle timed transition between P2 and P1.n
 			if (Transition_state == TRANS_P2_to_P1n_start)
 			{
-				transition_counter--;
-				if (transition_counter <= Config.Transition_P1n)
+				if (transition_counter > Config.Transition_P1n)
 				{
-					transition_counter = Config.Transition_P1n;
-					Transition_state = TRANS_P1n;
+					transition_counter--;
+					
+					// Check end point
+					if (transition_counter <= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
 				}
+				else
+				{
+					transition_counter++;
+					
+					// Check end point
+					if (transition_counter >= Config.Transition_P1n)
+					{
+						transition_counter = Config.Transition_P1n;
+						Transition_state = TRANS_P1n;
+					}
+				}
+
+				transition_direction = P1;
 			}
 
 			// Handle timed transition towards P2
 			if ((Transition_state == TRANS_P1n_to_P2_start) || (Transition_state == TRANS_P1_to_P2_start))
 			{
-				transition_counter++;
-				if (transition_counter >= 100)
+				if (transition_counter > Config.Transition_P2)
 				{
-					transition_counter = 100;
-					Transition_state = TRANS_P2;
+					transition_counter--;
+					
+					// Check end point
+					if (transition_counter <= Config.Transition_P2)
+					{
+						transition_counter = Config.Transition_P2;
+						Transition_state = TRANS_P2;
+					}
 				}
+				else
+				{
+					transition_counter++;
+					
+					// Check end point
+					if (transition_counter >= Config.Transition_P2)
+					{
+						transition_counter = Config.Transition_P2;
+						Transition_state = TRANS_P2;
+					}
+				}
+
+				transition_direction = P2;
 			}
 
 		} // Update transition_counter
 
 		// Zero the I-terms of the opposite state so as to ensure a bump-less transition
-		if ((Transition_state == TRANS_P1) || (transition == 0))
+		if ((Transition_state == TRANS_P1) || (transition == Config.Transition_P1))
 		{
 			// Clear P2 I-term while fully in P1
 			memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
 		}
-		else if ((Transition_state == TRANS_P2) || (transition == 100))
+		else if ((Transition_state == TRANS_P2) || (transition == Config.Transition_P2))
 		{
 			// Clear P1 I-term while fully in P2
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
@@ -962,7 +1103,7 @@ if (BUTTON2 == 0)
 		if (Config.P1_Reference != NO_ORIENT)
 		{
 			// If Config.FlightSel has changed (switch based) and TransitionSpeed not set to zero, the transition state will change.
-			if ((Config.TransitionSpeed != 0) && (Transition_state != Old_transition_state) && ((Old_transition_state == TRANS_P1) || (Old_transition_state == TRANS_P2)))
+			if ((Config.TransitionSpeedOut != 0) && (Transition_state != Old_transition_state) && ((Old_transition_state == TRANS_P1) || (Old_transition_state == TRANS_P2)))
 			{
 				reset_IMU();
 			}
@@ -970,9 +1111,9 @@ if (BUTTON2 == 0)
 			// If TransitionSpeed = 0, the state is always TRANSITIONING so we can't use the old/new state changes.
 			// If user is using a knob or TX-slowed switch, TransitionSpeed will be 0.
 			else if (
-						(Config.TransitionSpeed == 0) &&						// Manual transition mode and...
-						(((old_transition == 0) && (transition > 0)) ||			// Was in P1 or P2
-						((old_transition == 100) && (transition < 100)))		// Is not somewhere in-between.
+						(Config.TransitionSpeedOut == 0) &&														// Manual transition mode and...
+						(((old_transition == Config.Transition_P1) && (transition > Config.Transition_P1)) ||	// Was in P1 or P2
+						((old_transition == Config.Transition_P2) && (transition < Config.Transition_P2)))		// Is not somewhere in-between.
 					)
 			{
 				reset_IMU();
@@ -1019,6 +1160,7 @@ if (BUTTON2 == 0)
 
 		// Sets the desired SERVO_RATE by flagging ServoTick when PWM due
 		Servo_Rate += (uint8_t)(TCNT2 - ServoRate_TCNT2);
+		FastServo_Rate += (uint8_t)(TCNT2 - ServoRate_TCNT2);
 		ServoRate_TCNT2 = TCNT2;
 		
 		// Signal RC overdue after RC_OVERDUE time (500ms)
@@ -1072,11 +1214,17 @@ if (BUTTON2 == 0)
 			Servo_Rate = 0;
 		}
 		
+		if (FastServo_Rate > SERVO_RATE_HIGH)
+		{
+			FastServoTick = true;	// Slow device is ready for output generation
+			FastServo_Rate = 0;
+		}
+		
 		//************************************************************
 		//* Measure incoming RC rate and flag no signal
 		//************************************************************
 
-		// Check to see if the RC input is overdue (500ms)
+		// Check to see if the RC input is overdue (500ms) // debug - now 50ms
 		if (RC_Timeout > RC_OVERDUE)
 		{
 #ifdef ERROR_LOG
@@ -1155,7 +1303,17 @@ if (BUTTON2 == 0)
 		//************************************************************
 
 		Sensor_PID(interval);
-		
+
+		// Check for throttle reset
+		if (MonopolarThrottle < THROTTLEIDLE)  // THROTTLEIDLE = 50
+		{
+			// Clear throttle high error
+			General_error &= ~(1 << THROTTLE_HIGH);
+
+			// Reset I-terms at throttle cut. Using memset saves code space
+			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6);
+		}	
+	
 		//************************************************************
 		//* This is where things start getting really tricky... 
 		//* Use the Interrupted state to measure the RC rate.
@@ -1291,12 +1449,6 @@ if (BUTTON2 == 0)
 			{
 				PWM_pulses = 1;
 			}
-
-			// Reset RC timeout now that Interrupt has been received.
-			RC_Timeout = 0;
-
-			// No longer overdue. This will cancel the "No signal" alarm
-			Overdue = false;
 			
 			// Reset rate timer once data received. Reset to current time.
 			RC_Rate_Timer = 0;
@@ -1350,7 +1502,8 @@ if (BUTTON2 == 0)
 		// Cases where we are ready to output
 		if	(
 				(Interrupted) ||											// Run at RC rate
-				((Config.Servo_rate == FAST) && (!PWMBlocked))				// Run at full loop rate if allowed
+				((Config.Servo_rate == FAST) && (!PWMBlocked)) ||			// Run at full loop rate if allowed
+				(Overdue)													// On loss of RX signal
 			)
 		{
 
@@ -1358,7 +1511,7 @@ if (BUTTON2 == 0)
 			//* The following code runs once when PWM generation is desired
 			//* The execution rates are:
 			//* The RC rate unless in FAST mode
-			//* High speed in FAST mode
+			//* High speed (loop rate) in FAST mode
 			//******************************************************************
 
 			if (Interrupted)
@@ -1377,12 +1530,40 @@ if (BUTTON2 == 0)
 			{
 				// Mark bits depending on the selected output type
 				if	(
+						// Frame rates regardless of signal presence/absence
+						(
 						((Config.Servo_rate == FAST) && (Config.Channel[i].Motor_marker == ASERVO) && ServoTick) ||					// At ServoTick for A.Servo in FAST mode
+						((Config.Servo_rate == FAST) && (Config.Channel[i].Motor_marker > ASERVO))									// Always for D.Servo and Motor in FAST modes when signal present
+						)
+						
+						||
+						
+						// Frame rates when signal present
+						(
+						(!Overdue) &&
+						(
 						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker == ASERVO) && (!SlowRC) && ServoTick) ||	// At ServoTick for A.Servo in SYNC with Fast RC
-						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker == ASERVO) && (SlowRC)) ||					// At RC rate for A.Servo with slow RC
-						((Config.Servo_rate >= SYNC) && (Config.Channel[i].Motor_marker > ASERVO)) ||								// Always for D.Servo and Motor in SYNC or FAST modes
+						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker == ASERVO) && (SlowRC)) ||					// At RC rate for A.Servo with slow RC when signal present
+						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker > ASERVO)) ||								// At RC rate for D.Servo and Motor when signal present
+
 						((Config.Servo_rate == LOW) && (!SlowRC) && ServoTick) ||													// All outputs at ServoTick in LOW mode with fast RC
-						((Config.Servo_rate == LOW) && (SlowRC))																	// All outputs at  RC rate in LOW mode with slow RC
+						((Config.Servo_rate == LOW) && (SlowRC))																	// All outputs at  RC rate in LOW mode with slow RC when signal present
+						)
+						)
+						
+						||
+						
+						// Rates when no signal
+						(
+						(Overdue) &&
+						(
+						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker == ASERVO) && ServoTick) ||					// At ServoTick for A.Servo when no signal present
+						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker > ASERVO) && (!SlowRC) && FastServoTick) ||	// At FastServoTick for A.Servo in SYNC with Fast RC
+						((Config.Servo_rate == SYNC) && (Config.Channel[i].Motor_marker > ASERVO) && (SlowRC) && ServoTick) ||		// At ServoTick for A.Servo in SYNC with slow RC
+	
+						((Config.Servo_rate == LOW) && ServoTick)																	// All outputs at ServoTick in LOW mode
+						)
+						)
 					)
 				{
 					ServoFlag |= (1 << i);
@@ -1396,6 +1577,14 @@ if (BUTTON2 == 0)
 				
 				// Reset the Servo rate counter here so that it doesn't force an unusually small gap next time
 				Servo_Rate = 0;
+			}
+
+			if (FastServoTick)
+			{
+				FastServoTick = false;
+				
+				// Reset the Servo rate counter here so that it doesn't force an unusually small gap next time
+				FastServo_Rate = 0;
 			}
 
 			// Block PWM generation after last PWM pulse
@@ -1423,7 +1612,8 @@ if (BUTTON2 == 0)
 			
 			Calculate_PID();						// Calculate PID values
 			ProcessMixer();							// Do all the mixer tasks - can be very slow
-			UpdateServos();							// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits				
+			UpdateServos();							// Transfer Config.Channel[i].value data to ServoOut[i] and check servo limits. 
+													// Note that values are now at system levels (were centered around zero, now centered around 3750).				
 
 			// Set motors to idle on loss of signal.
 			// Output LOW pulse (1.1ms) for each output that is set to MOTOR
@@ -1434,11 +1624,21 @@ if (BUTTON2 == 0)
 					// Check for motor marker
 					if (Config.Channel[i].Motor_marker == MOTOR)
 					{
-						// Set output to maximum pulse width
-						ServoOut[i] = MOTOR_0;
+						// Set output to motor idle pulse width
+						ServoOut[i] = MOTOR_0_SYSTEM;
 					}
 				}
 			}
+		
+			// Note: This is probably pointless as it's too late to save the PWM just mangled
+			// Has overdue become false this loop?
+			if (LastLoopOverdue && !Overdue)
+			{
+				Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while to remove glitch
+			}
+		
+			// Save Overdue status of current loop
+			LastLoopOverdue = Overdue;
 			
 			// If, for some reason, a higher power has banned PWM output for this cycle, 
 			// just fake a PWM interval. The PWM interval is currently 2.3ms, and doesn't vary.
@@ -1451,9 +1651,6 @@ if (BUTTON2 == 0)
 			else
 			{
 				output_servo_ppm(ServoFlag);		// Output servo signal			
-					
-				// Unblock motors if blocked
-				Flight_flags &= ~(1 << ARM_blocker);
 			}
 
 
@@ -1505,7 +1702,7 @@ if (BUTTON2 == 0)
 			
 		// Save current alarm state into old_alarms
 		old_alarms = General_error;
-	
+		
 	} // while loop
 } // main()
 

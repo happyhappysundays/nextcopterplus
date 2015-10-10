@@ -39,7 +39,7 @@
 ;
 ; regs = r24,25 (&ServoOut[0]), r22 (ServoFlag)
 ;
-; Servo inputs are 16-bit, 1000 to 2000. 1000 bits cover 1ms or 1us per step
+; Servo inputs are 16-bit, 1000 to 2000. 1000 counts cover 1ms or 1us per step
 ; Lower 3 bits are encoded using them as an offset into a jump table of 1us steps
 ; Pulses can be generated from below 900us to at least 2100us but unpredictable results
 ; can and will occur beyond this upper limit.

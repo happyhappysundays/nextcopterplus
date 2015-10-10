@@ -8,6 +8,8 @@ src\adc.c
 
 src\display_balance.c
 
+src\display_io.c
+
 src\display_log.c
 
 src\display_rcinput.c
@@ -36,6 +38,10 @@ src\init.c
 
 src\isr.c
 
+src\menu_ch_order.c
+
+src\menu_curves.c
+
 src\menu_driver.c
 
 src\menu_flight.c
@@ -43,6 +49,8 @@ src\menu_flight.c
 src\menu_main.c
 
 src\menu_mixer.c
+
+src\menu_offsets.c
 
 src\menu_servos.c
 
