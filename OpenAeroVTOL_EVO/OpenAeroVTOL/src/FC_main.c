@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.5 B3 - April 2016
+// Version: Release V1.4 Beta 8 - March 2016
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -218,15 +218,7 @@
 // Beta 7	Updates to default settings for presets and default buttons.
 // Beta 8	Add EEPROM update from V1.3 and V1.4B6. Note that the typedefs offsets were wrong - updated.
 //			Added buzzer control to menus.
-//			Beta 8 is Release V1.4
-//
-// V1.5		Based on OpenAeroVTOL V1.3 code.
-//
-// Beta 1	Add HoTT SUMD serial protocol first attempt.
-// Beta 2	Corrected Status screen RX type text.
-//			Fixed SUMD channel offset and freeze bugs.
-// Beta 3	Update: SUMD confirmed fully functional
-//			Updated firmware signature
+//			B8 is Release V1.4.
 //
 //***********************************************************
 //* Notes

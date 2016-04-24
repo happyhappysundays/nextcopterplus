@@ -14,6 +14,5 @@ extern void Load_eeprom_preset(uint8_t preset);
 extern const int8_t JR[];
 extern const int8_t FUTABA[];
 extern const int8_t MPX[];
-extern const int8_t HOTT[];
 extern const int8_t P1_Orientation_LUT[];
 

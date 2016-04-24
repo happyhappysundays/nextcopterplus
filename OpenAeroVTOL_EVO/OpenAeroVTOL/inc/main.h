@@ -8,7 +8,7 @@
 //***********************************************************
 
 #define	PBUFFER_SIZE 25 // Print buffer
-#define	SBUFFER_SIZE 70 // Serial input buffer (HoTT SUMD maximum is 69 bytes)
+#define	SBUFFER_SIZE 38 // Serial input buffer (Xtreme maximum is 37 bytes)
 
 //***********************************************************
 //* Externals

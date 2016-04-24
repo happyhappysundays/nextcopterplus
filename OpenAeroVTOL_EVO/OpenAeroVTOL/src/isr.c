@@ -51,8 +51,6 @@ volatile uint8_t packet_size;
 #define MAX_CPPM_CHANNELS 8			// Maximum number of channels via CPPM
 
 #define MODEB_SYNCBYTE 0xA1			// MODEB/UDI sync byte
-#define MAXSUMDPACKET 69			// Maximum possible HoTT SUMD packet size
-#define SUMD_SYNCBYTE 0xA8			// SUMD sync byte
 #define XBUS_FRAME_SIZE_12 27		// Packet size for a 12-channel packet
 #define XBUS_FRAME_SIZE_16 35		// Packet size for a 16-channel packet	
 #define XBUS_CRC_BYTE_1 25
@@ -383,7 +381,7 @@ ISR(USART0_RX_vect)
 		//* Byte 2: Mask 
  		//* 		The mask value determines the number of channels in the stream. 
 		//*			A 6 channel stream is going to have a mask of 0x003F (00000000 00111111) 
-		//*			if outputting all 6 channels.  It is possible to output only channels 2 
+		//*			if outputting all 6 channels.  It is possible to ouput only channels 2 
 		//*			and 4 in the stream (00000000 00001010).  In which case the first word 
 		//*			of data will be channel 2 and the 2nd word will be channel.
  		//*  
@@ -831,98 +829,6 @@ ISR(USART0_RX_vect)
 		} // (Config.RxMode == MODEB)
 
 		//************************************************************
-		//* HoTT SUMD RX Data format 115200Kbit/s, 8 data bit, no parity, and one stop bit. 
-		//* 
-		//* First byte = vendor ID		0xA8 
-		//* Second byte = status		0x01	Valid byte
-		//*								0x81	Valid byte with failsafe bit set
-		//* Third byte			0x02 to 0x20	Number of channels (2 to 32)
-		//*
-		//* Next 2 to 32 bytes = n channels of 16-bit servo data, high-byte first
-		//* Last 2 bytes = CRC value over first n*2 + 3 bytes (data + header), using CRC-CCITT algorithm.
-		//*
-		//* Pulse length conversion from [0...4095] to 탎:
-		//*      900탎  -> 0x1c20 (7200)
-		//*      1500탎 -> 0x2ee0 (12000)
-		//*      2100탎 -> 0x41a0 (16800)
-		//*
-		//* Total range is: 16800 - 7200 = 9600 or +/-4800 bits and +/- 600us
-		//*
-		//* The data values can range from 7200 to 16800 to define a servo pulse width.
-		//* Each bit in servo data corresponds to pulse width change of 125ns or 0.125us. 
-		//* 
-		//* 8000	= 1000us
-		//* 12000 	= 1500us +/- 4000 for 1-2ms
-		//* 16000	= 2000us
-		//*
-		//************************************************************
-		
-		// Handle HoTT SUMD format
-		if (Config.RxMode == SUMD)
-		{
-			// Work out the expected number of bytes based on the channel info (3rd byte)
-			if (bytecount == 2)
-			{
-				// Look at the number of channels x 2 + 2(CRC) + 3(Header)
-				packet_size = (sBuffer[2] << 1) + 5;
-				
-				// Sanity check for packet size
-				if (packet_size > MAXSUMDPACKET)
-				{
-					packet_size = MAXSUMDPACKET;
-				}
-			}
-
-			// Check checksum when all data received and packet size determined
-			if ((packet_size > 0) && (bytecount == (packet_size - 1)))
-			{
-				crc = 0;
-			
-				// Add up checksum for all bytes up to but not including the checksum
-				for (j = 0; j < (packet_size - 2); j++)
-				{
-					crc = CRC16(crc, sBuffer[j]);
-				}
-			
-				// Extract the packet's own checksum
-				checkcrc = ((uint16_t)(sBuffer[packet_size - 2] << 8) | (uint16_t)(sBuffer[packet_size - 1]));
-				
-				// Compare with the calculated one and process data if ok
-				if (checkcrc == crc)
-				{
-					// RC sync established
-					Interrupted = true;
-					
-					// Reset signal loss timer and Overdue state 					
-					Servo_TCNT2 = TCNT2;
-					RC_Timeout = 0;
-					Overdue = false;
-			
-					// Copy unconverted channel data
-					for (j = 0; j < MAX_RC_CHANNELS; j++)
-					{
-						// Combine bytes from buffer
-						TempRxChannel[j] = (uint16_t)(sBuffer[(j << 1) + 3] << 8) | (sBuffer[(j << 1) + 4]);
-					}
-
-					// Convert to system values
-					for (j = 0; j < MAX_RC_CHANNELS; j++)
-					{
-						// Subtract SUMD offset
-						itemp16 = TempRxChannel[j] - 12000;
-						
-						// Expand into OpenAero2 units x0.3125 (0.3125)	(1250/4000)
-						// 0.25 + 0.0625 (1/4 + 1/16)
-						itemp16 = (itemp16 >> 2) + (itemp16 >> 4);
-
-						// Add back in OpenAero2 offset
-						RxChannel[Config.ChannelOrder[j]] = itemp16 + 3750;
-					}
-				}
-			}
-		} // (Config.RxMode == SUMD)
-
-		//************************************************************
 		//* Common exit code
 		//************************************************************
 
@@ -1009,7 +915,6 @@ void init_int(void)
 			UCSR0B &= ~(1 << RXEN0);			// Disable receiver and flush buffer
 			break;
 
-		case SUMD:
 		case MODEB:
 		case XTREME:
 		case SBUS:
@@ -1022,9 +927,6 @@ void init_int(void)
 			// Enable serial receiver and interrupts
 			UCSR0B |= (1 << RXCIE0);			// Enable serial interrupt
 			UCSR0B |= (1 << RXEN0);				// Enable receiver
-			
-			packet_size = 0;					// Reset packet size until new data comes in
-			
 			break;
 
 		default:

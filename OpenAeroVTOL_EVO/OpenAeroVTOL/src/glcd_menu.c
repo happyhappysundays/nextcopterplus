@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.5 B3";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.4";			// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -140,7 +140,7 @@ const char RXMode2[]  PROGMEM = "S-Bus";
 const char RXMode3[]  PROGMEM = "Spektrum";
 const char RXMode4[]  PROGMEM = "Xtreme";
 const char RXMode5[]  PROGMEM = "Mode B/UDI";
-const char RXMode6[]  PROGMEM = "HoTT SUMD";
+const char RXMode6[]  PROGMEM = "RAW";
 //
 const char RCMenuItem6[]  PROGMEM = "JR/Spektrum"; 			// Channel order
 const char RCMenuItem7[]  PROGMEM = "Futaba"; 
@@ -480,8 +480,8 @@ const char* const text_menu[] PROGMEM =
 		//
 		PText4, 																			// 61 Failed
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0,														// 62 to 65 spare
-		Dummy0, Dummy0, 
+		RXMode0, RXMode1, RXMode2, RXMode3,													// 62 to 65 RX mode
+		RXMode4, RXMode5, 
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//
