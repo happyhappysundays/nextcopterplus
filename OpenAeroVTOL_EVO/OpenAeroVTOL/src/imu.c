@@ -63,6 +63,8 @@ void reset_IMU(void);
 
 #define maxdeltaangle		0.2618f		// Limit possible instantaneous change in angle to +/-15 degrees (720 deg/s)
 
+#define ZACCLPF				64.0f		// In HS mode, 256.0 would be about 0.4Hz
+
 
 //************************************************************
 // 	Globals
@@ -78,7 +80,10 @@ float VectorNewA, VectorNewB;
 float GyroPitchVC, GyroRollVC, GyroYawVC;
 float AccAnglePitch, AccAngleRoll, EulerAngleRoll, EulerAnglePitch;
 
+float		intervalf;					// Interval in seconds since the last loop
+
 float 	accSmooth[NUMBEROFAXIS];		// Filtered acc data
+//float	accVertZerof;					// Long-term Z acc average
 int16_t	angle[2];						// Attitude in degrees - pitch and roll
 	
 // Software LPF conversion table 5Hz, 10Hz, 21Hz, 44Hz, 94Hz, 184Hz, 260Hz, None	
@@ -117,7 +122,6 @@ const float LPF_lookup_HS[8] PROGMEM	= {8.53,4.53,2.49,1.58,1.24,1.0,1.0,1.0};	/
 void imu_update(uint32_t period)
 {
 	float		tempf, accADCf;
-	float		intervalf;						// Interval in seconds since the last loop
 	int8_t		axis;
 	uint32_t	roll_sq, pitch_sq, yaw_sq;
 	uint32_t 	AccMag = 0;
@@ -158,6 +162,9 @@ void imu_update(uint32_t period)
 		}
 	}
 	
+	// Z Acc LPF for long-term zero
+	//accVertZerof = ((accVertZerof * (ZACCLPF - 1.0f)) - accVertf) / ZACCLPF; // Heavy filter
+		
 	// Add correction data to gyro inputs based on difference between Euler angles and acc angles
 	AccAngleRoll = accSmooth[ROLL] * SMALLANGLEFACTOR;		// KK2 - AccYfilter
 	AccAnglePitch = accSmooth[PITCH] * SMALLANGLEFACTOR;

@@ -123,16 +123,14 @@ const int8_t Acc_Pol[NUMBEROFORIENTS][NUMBEROFAXIS] PROGMEM =
 int16_t accADC[NUMBEROFAXIS];		// Holds Acc ADC values - always in RPY order (Combined)
 int16_t accADC_P1[NUMBEROFAXIS];	// Holds Acc ADC values - always in RPY order (P1)
 int16_t accADC_P2[NUMBEROFAXIS];	// Holds Acc ADC values - always in RPY order (P2)
-int16_t accVert = 0;				// Holds the level-zeroed Z-acc value. Used for height damping in hover only.
-int16_t accVert_P1 = 0;
-int16_t accVert_P2 = 0;
+float accVertf = 0.0;				// Holds the level-zeroed Z-acc value. Used for height damping in hover only.
 
 void ReadAcc()
 {
 	uint8_t i;
 	int16_t temp1, temp2;
 
-	get_raw_accs();				// Updates accADC_P1[] and accADC_P2[] (RPY)
+	get_raw_accs();					// Updates accADC_P1[] and accADC_P2[] (RPY)
 
 	// P1
 	// Use default Config.AccZero for Acc-Z if inverse calibration not done yet
@@ -205,10 +203,10 @@ void ReadAcc()
 		accADC[YAW] = ((accADC_P2[YAW] * (int8_t)pgm_read_byte(&Acc_Pol[Config.Orientation_P2][YAW]) - Config.AccZero_P2[YAW]));
 	}
 		
-	// Recalculate current accVert using filtered acc value
+	// Recalculate current accVertf using filtered acc value
 	// Note that AccSmooth[YAW] is already zeroed around 1G so we have to re-add 
 	// the zero back here so that Config.AccZeroNormZ subtracts the correct amount
-	// accVert = accSmooth[YAW] + (Config.AccZeroNormZ - Config.AccZero[YAW]);
+	// accVertf = accSmooth[YAW] + (Config.AccZeroNormZ - Config.AccZero[YAW]);
 	
 	// Note also that accSmooth[] has already got the correct acc orientations, 
 	// so only needs the zeroing value merged from one to the other.
@@ -224,13 +222,13 @@ void ReadAcc()
 		temp1 = scale32(temp1, (100 - transition));
 		temp2 = scale32(temp2, transition);
 	 
-		accVert = temp1 + temp2;
+		accVertf = (float)temp1 + temp2;
 	}
 	// Just use the P2 value
 	else
 	{
 		// Calculate the correct Z-axis data based on the orientation
-		accVert = accSmooth[YAW] + (Config.AccZeroNormZ_P2 - Config.AccZero_P2[YAW]);		
+		accVertf = accSmooth[YAW] + (float)(Config.AccZeroNormZ_P2 - Config.AccZero_P2[YAW]);		
 	}
 }
 

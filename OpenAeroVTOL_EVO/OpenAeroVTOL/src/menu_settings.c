@@ -39,38 +39,38 @@ void menu_rc_setup(uint8_t section);
 // Defines
 //************************************************************
 
-#define RCSTART 149 	// Start of Menu text items
+#define RCSTART 146 	// Start of Menu text items
 #define RCTEXT 396 		// Start of "Receiver type" value text list
-#define RCITEMS 11 		// Number of menu items displayed	
-#define RCITEMSOFFSET 11// Actual number of menu items
+#define RCITEMS 12 		// Number of menu items displayed	
+#define RCITEMSOFFSET 12// Actual number of menu items
 #define RCOFFSET 65		// LCD offsets
 
 #define GENERALTEXT	295 // Start of "Orientations" value text list
-#define GENERALITEMS 11	// Number of menu items displayed
+#define GENERALITEMS 12	// Number of menu items displayed
 #define GENOFFSET 70	// LCD offsets
 
-#define PRESETITEM 170	// Location of Preset menu item in list
+#define PRESETITEM 171	// Location of Preset menu item in list
 
 //************************************************************
 // RC menu items
 //************************************************************
 	 
-const uint16_t RCMenuText[2][GENERALITEMS] PROGMEM = 
+const uint16_t RCMenuText[2][RCITEMS] PROGMEM = 
 {
-	{RCTEXT, 118, 105, 130, 105, 0, 0, 0, 0, 0,68},					// RC setup
-	{GENERALTEXT, 320, 0, 53, 0, 0, 37, 37, 37, 0, 273},			// General 
+	{RCTEXT, 118, 105, 130, 105, 0, 0, 0, 0, 0, 68, 0},				// RC setup
+	{GENERALTEXT, 320, 0, 53, 0, 0, 37, 37, 37, 0, 273, 68},		// General 
 };
 
-const uint16_t RCMenuOffsets[2][GENERALITEMS] PROGMEM =
+const uint16_t RCMenuOffsets[2][RCITEMS] PROGMEM =
 {
-	{RCOFFSET, 65, 65, 60, 75, 95, 95, 95, 95, 95, 95},				// RC setup
-	{GENOFFSET, 67, 67, 67, 80, 80, 80, 80, 80, 80, 80},			// General
+	{RCOFFSET, 65, 65, 60, 75, 95, 95, 95, 95, 95, 95, 95},			// RC setup
+	{GENOFFSET, 67, 67, 67, 80, 80, 80, 80, 80, 80, 80, 80},		// General
 };
 
-const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM = 
+const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM = 
 {
 	{
-		// RC setup (11)				// Min, Max, Increment, Style, Default
+		// RC setup (12)				// Min, Max, Increment, Style, Default
 		{CPPM_MODE,MODEB,1,1,SBUS},		// Receiver type (PWM to MODEB/UDI)	
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
@@ -82,9 +82,10 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{1,99,1,0,50},					// Transition P1n point
 		{1,100,1,0,100},				// Transition P2 point
 		{OFF,ON,1,1,OFF},				// Vibration display
+		{0,127,1,0,20},					// AccVert filter in 1/100th %
 	},
 	{
-		// General (11)
+		// General (12)
 		{UP_BACK,RIGHT_FRONT,1,1,UP_BACK},	// Orientation (P2)
 		{NO_ORIENT,MODEL,1,1,NO_ORIENT},	// Orientation usage (Tail sitter)
 		// Limit contrast range for KK2 Mini
@@ -101,6 +102,7 @@ const menu_range_t rc_menu_ranges[2][GENERALITEMS] PROGMEM =
 		{HZ5,NOFILTER,1,1,NOFILTER},	// Gyro LPF. No LPF default (5, 10, 21, 44, 94, 184, 260, None)
 		{2,11,1,0,6},					// AL correction
 		{QUADX,BLANK,1,4,QUADX},		// Mixer preset (note: style 4)
+		{OFF,ON,1,1,ON},				// Buzzer ON/OFF
 	}
 };
 
@@ -185,6 +187,7 @@ void menu_rc_setup(uint8_t section)
 			Config.Preset = OPTIONS;
 		}
 
+		// Post-processing on exit
 		if (button == ENTER)
 		{
 			init_int();				// In case RC type has changed, reinitialise interrupts

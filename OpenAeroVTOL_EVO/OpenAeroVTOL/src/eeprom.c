@@ -34,6 +34,8 @@ void Update_V1_2_to_V1_3B1(void);
 void Update_V1_3B1_to_V1_3B14(void);
 void Update_V1_3B14_to_V1_3B15(void);
 void Update_V1_3B15_to_V1_3B17(void);
+void Update_V1_3_to_V1_4B2(void);
+void Update_V1_4B2_to_V1_4B8(void);
 uint8_t convert_filter_V1_0_V1_1(uint8_t);
 uint8_t convert_source_V1_2_V1_3(uint8_t old_source);
 
@@ -52,9 +54,11 @@ void Load_eeprom_preset(uint8_t preset);
 #define V1_3_B1_SIGNATURE 0x3E	// EEPROM signature for V1.3 (V1.3 Beta 1 to 13)
 #define V1_3_B14_SIGNATURE 0x3F	// EEPROM signature for V1.3 (V1.3 Beta 14)
 #define V1_3_B15_SIGNATURE 0x40	// EEPROM signature for V1.3 (V1.3 Beta 15)
-#define V1_3_B17_SIGNATURE 0x41	// EEPROM signature for V1.3 (V1.3 Beta 17+)
+#define V1_3_B17_SIGNATURE 0x41	// EEPROM signature for V1.3 (V1.3 Beta 17+) (V1.3 release)
+#define V1_4_B2_SIGNATURE 0x42	// EEPROM signature for V1.4 (V1.4 Beta 2-7)
+#define V1_4_B8_SIGNATURE 0x43	// EEPROM signature for V1.4 (V1.4 Beta 8+)
 
-#define MAGIC_NUMBER V1_3_B15_SIGNATURE // Set current signature
+#define MAGIC_NUMBER V1_4_B8_SIGNATURE // Set current signature
 
 // eePROM data update locations
 #define RCITEMS_V1_0 41		// RAM location of start of RC items data in V1.0, 1.1 and 1.2
@@ -83,11 +87,32 @@ void Load_eeprom_preset(uint8_t preset);
 #define P1_THR_V1_3_B14 157		// RAM location of start of OUT1 P1_throttle_volume data in V1.3 B15
 
 // V1.3 B15
-#define SERVOREV_V1_3B15 420	// RAM location of Servo_reverse[] start for V1.3 B15
-#define CHANNEL_V1_3_B15 148	// RAM location of start of Channel data in V1.3 B15
-#define P1_THR_V1_3_B15 153		// RAM location of start of OUT1 P1_throttle_volume data in V1.3 B15
-#define OFFSETS_V1_3_B15 588	// RAM location of start of offset data in V1.3 B15
-#define LAST_BYTE_V1_3B15 653	// Last used byte for V1.3 B15
+#define SERVOREV_V1_3B15	420	// RAM location of Servo_reverse[] start for V1.3 B15
+#define CHANNEL_V1_3_B15	148	// RAM location of start of Channel data in V1.3 B15
+#define P1_THR_V1_3_B15		153	// RAM location of start of OUT1 P1_throttle_volume data in V1.3 B15
+#define OFFSETS_V1_3_B15	588	// RAM location of start of offset data in V1.3 B15
+#define LAST_BYTE_V1_3B15	653	// Last used byte for V1.3 B15
+
+// V1.3 B17 (no structure change from B15)
+#define POWER_TRIG_V1_3		137	// Power trigger
+#define ELE_POL_V1_3		52	// Elevator polarity
+#define SERVO_LIMS_V1_3		89	// Servo limits
+#define SERVO_CONS_V1_3		113	// Servo constraints
+#define P1_PROFILE_V1_3		53	// Profile P1
+#define P2_PROFILE_V1_3		71	// Profile P2
+
+// V1.4 B2-B8
+#define POWER_TRIG_V1_4		157	// Power trigger
+#define ELE_POL_V1_4B8		674	// Elevator polarity
+#define SERVO_LIMS_V1_4B8	93	// Servo limits
+#define SERVO_CONS_V1_4B8	125	// Servo constraints
+#define LAST_BYTE_V1_4B2	674	// Last used byte for V1.4 B2
+#define P1_PROFILE_V1_4B8	53	// Profile P1
+#define P2_PROFILE_V1_4B8	73	// Profile P2
+
+// V1.4 B8
+#define BUZZER_V1_4B2		170	// BUzzer entry in General
+#define LAST_BYTE_V1_4B8	675	// Last used byte for V1.4 B8
 
 //************************************************************
 // Code
@@ -175,8 +200,18 @@ bool Initial_EEPROM_Config_Load(void)
 			updated = true;
 			// Fall through...
 
-		case V1_3_B17_SIGNATURE:			// V1.3 B15 detected
-			break;			
+		case V1_3_B17_SIGNATURE:			// V1.3 B17 (V1.3 release) detected
+			Update_V1_3_to_V1_4B2();
+			updated = true;
+			// Fall through...
+
+		case V1_4_B2_SIGNATURE:				// V1.4 B2-7 detected (V1.4 Beta release)
+			Update_V1_4B2_to_V1_4B8();
+			updated = true;
+			// Fall through...
+
+		case V1_4_B8_SIGNATURE:				// V1.4 B8+ detected (Current)
+			break;
 			
 		default:							// Unknown solution - restore to factory defaults
 			// Load factory defaults
@@ -776,6 +811,63 @@ void Update_V1_3B15_to_V1_3B17(void)
 	Config.setup = V1_3_B17_SIGNATURE;	
 }
 
+void Update_V1_3_to_V1_4B2(void)
+{
+	int8_t elevator_polarity = 0;
+	
+	// Copy elevator_polarity locally
+	memcpy((void*)&elevator_polarity, (void*)((&Config.setup) + (ELE_POL_V1_3)), 1);
+	
+	// Set the new AccVertFilter to the default of 20 (old elevator polarity location)
+	memset((void*)((&Config.setup) + (ELE_POL_V1_3)), 20, 1);
+	
+	// Move everything from Config.PowerTriggerActual down by 12 bytes to make room for new variables
+	memmove((void*)((&Config.setup) + (POWER_TRIG_V1_4)), (void*)((&Config.setup) + (POWER_TRIG_V1_3)), (LAST_BYTE_V1_3B15 - POWER_TRIG_V1_3)); // 653 - 137 = 516 bytes
+	
+	// Move raw I constraints down 8 bytes
+	memmove((void*)((&Config.setup) + (SERVO_CONS_V1_4B8)), (void*)((&Config.setup) + (SERVO_CONS_V1_3)), 24); // 4 x [FLIGHT_MODES][NUMBEROFAXIS] = 24 bytes
+	
+	// Clear all the I-term constraints as they will be recalculated
+	memset((void*)((&Config.setup) + (SERVO_CONS_V1_4B8)), 0, 32);
+	
+	// Move raw I limits down 4 bytes
+	memmove((void*)((&Config.setup) + (SERVO_LIMS_V1_4B8)), (void*)((&Config.setup) + (SERVO_LIMS_V1_3)), 24); // 4 x [FLIGHT_MODES][NUMBEROFAXIS] = 24 bytes
+	
+	// Clear all the I-term limits as they will be recalculated
+	memset((void*)((&Config.setup) + (SERVO_LIMS_V1_4B8)), 0, 32);
+	
+	
+	// Move P2 profile down 2 bytes
+	memmove((void*)((&Config.setup) + (P2_PROFILE_V1_4B8)), (void*)((&Config.setup) + (P2_PROFILE_V1_3)), (P2_PROFILE_V1_4B8 - P1_PROFILE_V1_4B8)); // (73 - 53 = 18 bytes)
+
+	// Set the new Z parameters for P1
+	memset((void*)((&Config.setup) + (P1_PROFILE_V1_4B8 + 17)), 40, 1);
+	memset((void*)((&Config.setup) + (P1_PROFILE_V1_4B8 + 18)), 20, 1);
+	memset((void*)((&Config.setup) + (P1_PROFILE_V1_4B8 + 19)), 10, 1);
+
+	// Set the new Z parameters for P2
+	memset((void*)((&Config.setup) + (P2_PROFILE_V1_4B8 + 17)), 0, 3);
+			
+	// Preset new variable to same as elevator_polarity
+	memset((void*)((&Config.setup) + (ELE_POL_V1_4B8)), elevator_polarity, 1);
+	//Config.ElevatorPol = elevator_polarity;
+
+	// Set magic number to V1.4 B2 signature
+	Config.setup = V1_4_B2_SIGNATURE;	
+}
+
+void Update_V1_4B2_to_V1_4B8(void)
+{
+	// Move everything from Config.Buzzer down by 1 byte to make room for Config.Buzzer
+	memmove((void*)((&Config.setup) + (BUZZER_V1_4B2 + 1)), (void*)((&Config.setup) + (BUZZER_V1_4B2)), (LAST_BYTE_V1_4B2 - BUZZER_V1_4B2)); // 674 - 170 = 504 bytes
+
+	// Preset Buzzer to ON
+	memset((void*)((&Config.setup) + (BUZZER_V1_4B2)), ON, 1);
+
+	// Set magic number to V1.4 B8 signature
+	Config.setup = V1_4_B8_SIGNATURE;	
+}
+
 // Convert V1.0 filter settings
 uint8_t convert_filter_V1_0_V1_1(uint8_t old_filter)
 {
@@ -858,6 +950,8 @@ void Set_EEPROM_Default_Config(void)
 	Config.Transition_P1n = 50;			// Set P1.n point to 50%
 	Config.Transition_P1 = 0;
 	Config.Transition_P2 = 100;	
+	Config.AccVertFilter = 20;
+	Config.Buzzer = ON;
 
 	// Advanced
 	Config.Orientation_P1 = UP_BACK;
@@ -970,6 +1064,14 @@ void Load_eeprom_preset(uint8_t preset)
 		case QUADP:
 			// Preset mixing for primary channels
 			Config.ArmMode = ARMABLE;
+	
+			// Preset AccVertFilter
+			Config.AccVertFilter = 20;
+
+			// Preset Z-terms for all
+			Config.FlightMode[P1].A_Zed_P_mult = 40;
+			Config.FlightMode[P1].A_Zed_I_mult = 20;
+			Config.FlightMode[P1].A_Zed_limit = 10;
 			
 			// Profile 1 (Baseline)
 			Config.FlightMode[P1].Roll_P_mult = 50;
@@ -988,7 +1090,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P1].Yaw_I_mult = 40;
 			Config.FlightMode[P1].Yaw_limit = 25;
 			Config.FlightMode[P1].Yaw_Rate = 2;
-			Config.FlightMode[P1].A_Zed_P_mult = 50;
 			
 			// Profile 2 (For comparison)
 			Config.FlightMode[P2].Roll_P_mult = 40;
@@ -1007,7 +1108,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P2].Yaw_I_mult = 40;
 			Config.FlightMode[P2].Yaw_limit = 25;
 			Config.FlightMode[P2].Yaw_Rate = 3;
-			Config.FlightMode[P2].A_Zed_P_mult = 30;
 	
 			for (i = 0; i <= OUT4; i++)
 			{
@@ -1099,6 +1199,14 @@ void Load_eeprom_preset(uint8_t preset)
 		case QUADX:
 			// Preset mixing for primary channels
 			Config.ArmMode = ARMABLE;
+
+			// Preset AccVertFilter
+			Config.AccVertFilter = 20;
+
+			// Preset Z-terms for all
+			Config.FlightMode[P1].A_Zed_P_mult = 40;
+			Config.FlightMode[P1].A_Zed_I_mult = 20;
+			Config.FlightMode[P1].A_Zed_limit = 10;
 			
 			// Profile 1 (Baseline)
 			Config.FlightMode[P1].Roll_P_mult = 40;
@@ -1117,7 +1225,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P1].Yaw_I_mult = 40;
 			Config.FlightMode[P1].Yaw_limit = 25;
 			Config.FlightMode[P1].Yaw_Rate = 2;
-			Config.FlightMode[P1].A_Zed_P_mult = 50;
 	
 			// Profile 2 (For comparison)
 			Config.FlightMode[P2].Roll_P_mult = 40;
@@ -1136,7 +1243,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P2].Yaw_I_mult = 40;
 			Config.FlightMode[P2].Yaw_limit = 25;
 			Config.FlightMode[P2].Yaw_Rate = 2;
-			Config.FlightMode[P2].A_Zed_P_mult = 30;
 	
 			for (i = 0; i <= OUT4; i++)
 			{
@@ -1214,7 +1320,15 @@ void Load_eeprom_preset(uint8_t preset)
 		case TRICOPTER:
 			// Preset simple mixing for primary channels
 			Config.ArmMode = ARMABLE;
-		
+
+			// Preset AccVertFilter
+			Config.AccVertFilter = 20;
+
+			// Preset Z-terms for all
+			Config.FlightMode[P1].A_Zed_P_mult = 40;
+			Config.FlightMode[P1].A_Zed_I_mult = 20;
+			Config.FlightMode[P1].A_Zed_limit = 10;
+					
 			// Profile 1 (Baseline)
 			Config.FlightMode[P1].Roll_P_mult = 40;
 			Config.FlightMode[P1].Roll_I_mult = 10;
@@ -1232,7 +1346,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P1].Yaw_I_mult = 40;
 			Config.FlightMode[P1].Yaw_limit = 25;
 			Config.FlightMode[P1].Yaw_Rate = 2;
-			Config.FlightMode[P1].A_Zed_P_mult = 50;
 			
 			// Profile 2 (For comparison)
 			Config.FlightMode[P2].Roll_P_mult = 40;
@@ -1251,7 +1364,6 @@ void Load_eeprom_preset(uint8_t preset)
 			Config.FlightMode[P2].Yaw_I_mult = 40;
 			Config.FlightMode[P2].Yaw_limit = 25;
 			Config.FlightMode[P2].Yaw_Rate = 2;
-			Config.FlightMode[P2].A_Zed_P_mult = 30;
 		
 			for (i = 0; i <= OUT3; i++)
 			{

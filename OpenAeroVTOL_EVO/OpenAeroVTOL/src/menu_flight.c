@@ -34,44 +34,46 @@ void menu_flight(uint8_t i);
 // Defines
 //************************************************************
 
-#define FLIGHTSTARTE 171 // Start of Menu text items for EARTH
+#define FLIGHTSTARTE 172 // Start of Menu text items for EARTH
 #define FLIGHTSTARTM 328 // Start of Menu text items for MODEL
 #define FLIGHTOFFSET 85	// LCD offsets
 #define FLIGHTTEXT 38 	// Start of value text items
-#define FLIGHTITEMS 18 	// Number of menu items
+#define FLIGHTITEMS 20 	// Number of menu items
 
 //************************************************************
 // RC menu items
 //************************************************************
 
-const uint16_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const uint16_t FlightMenuText[FLIGHTITEMS] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
-const uint16_t FlightMenuOffsets[FLIGHTITEMS] PROGMEM = {FLIGHTOFFSET, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85};
+const uint16_t FlightMenuOffsets[FLIGHTITEMS] PROGMEM = {FLIGHTOFFSET, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85};
 
 const menu_range_t flight_menu_ranges[FLIGHTITEMS] PROGMEM = 
 {
-	// Flight (18)
+	// Flight (20)
 	{0,127,1,0,40},					// Roll gyro P
 	{0,127,1,0,10},					// Roll gyro I
-	{0,125,1,0,10},					// Roll gyro I-limits
+	{0,125,1,0,10},					// Roll gyro I-limit
 	{0,7,1,0,2},					// Roll gyro rate
 	{0,127,1,0,10},					// Roll Acc gain
 	{-127,127,1,0,0}, 				// Roll Acc trim
 
 	{0,127,1,0,40},					// Pitch gyro P
 	{0,127,1,0,10}, 				// Pitch gyro I
-	{0,125,1,0,10},					// Pitch gyro I-limits
+	{0,125,1,0,10},					// Pitch gyro I-limit
 	{0,7,1,0,2},					// Pitch gyro rate
 	{0,127,1,0,10},					// Pitch Acc gain			
 	{-127,127,1,0,0},				// Pitch Acc trim
 
 	{0,127,1,0,60},					// Yaw gyro P
 	{0,127,1,0,40},					// Yaw gyro I
-	{0,125,1,0,25},					// Yaw gyro I-limits
+	{0,125,1,0,25},					// Yaw gyro I-limit
 	{0,7,1,0,2},					// Yaw gyro rate
 	{-127,127,1,0,0},				// Yaw trim
 
-	{0,127,1,0,50},					// Z Acc P gain
+	{0,127,1,0,40},					// Z Acc P gain
+	{0,127,1,0,20},					// Z Acc I gain
+	{0,125,1,0,10},					// Z Acc I-limit
 };
 
 //************************************************************

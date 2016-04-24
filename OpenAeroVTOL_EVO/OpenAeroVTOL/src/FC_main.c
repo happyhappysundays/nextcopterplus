@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.3 - October 2015
+// Version: Release V1.4 Beta 8 - March 2016
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -9,7 +9,7 @@
 // **************************************************************************
 // * 						GNU GPL V3 notice
 // **************************************************************************
-// * Copyright (C) 2015 David Thompson
+// * Copyright (C) 2016 David Thompson
 // * 
 // * This program is free software: you can redistribute it and/or modify
 // * it under the terms of the GNU General Public License as published by
@@ -204,11 +204,27 @@
 //			Increase stick rate maximums to 7. Fixed Alt. Damp text in curve inputs.
 //			B19 is Release V1.3.
 //
+// V1.4		Based on OpenAeroVTOL V1.3 code.
+//
+// Beta 1	Add integrated Z-axis for height damping (vertical velocity damping).
+//			Add Z I-term and I-limit, HPF for Z-axis damping. Test only.
+// Beta 2	Fixed B17-B19 update detection bug. Zacc I-terms now functional.
+//			Added user-selectable switch for Z-Acc LPF.
+// Beta 3	Added Ran's 10s decimator. Sped up Z-acc filter.
+//			Removed Ran's 10s decimator. Added adjustable % decimator.
+// Beta 4	Decimator now correctly in 1/100ths of a percent.
+// Beta 5	Added buzzer active/muted toggle if user holds buttons 3 and 4 on power up. 
+// Beta 6	Added EEPROM settings handling update for GUI integration.
+// Beta 7	Updates to default settings for presets and default buttons.
+// Beta 8	Add EEPROM update from V1.3 and V1.4B6. Note that the typedefs offsets were wrong - updated.
+//			Added buzzer control to menus.
+//			B8 is Release V1.4.
+//
 //***********************************************************
 //* Notes
 //***********************************************************
 //
-// Bugs:	Can't help last failsafe PWM colliding with incoming RC.
+// Bugs:	
 //			
 //
 // To do:	
@@ -319,9 +335,6 @@ volatile uint8_t	LoopCount = 0;
 volatile uint8_t	Servo_TCNT2 = 0;
 volatile uint16_t	RC_Timeout = 0;
 
-// debug	
-bool flip = false;
-			
 //************************************************************
 //* Main loop
 //************************************************************
@@ -677,14 +690,6 @@ int main(void)
 		if (Overdue)
 		{
 			General_error |= (1 << NO_SIGNAL);		// Set NO_SIGNAL bit
-/*
-			// If FC is set to "armable" and is currently armed, disarm the FC
-			if ((Config.ArmMode == ARMABLE) && ((General_error & (1 << DISARMED)) == 0))
-			{
-				General_error |= (1 << DISARMED);	// Set flags to disarmed
-				LED1 = 0;							// Signal that FC is now disarmed
-			}
-*/
 		}
 		// RC signal received normally
 		else
@@ -702,7 +707,11 @@ int main(void)
 			  (Alarm_flags & (1 << BUZZER_ON))
 			) 
 		{
-			LVA = 1;
+			// Check buzzer mode first
+			if (Config.Buzzer == ON)
+			{
+				LVA = 1;
+			}
 		}
 		else 
 		{
@@ -812,12 +821,6 @@ add_log(TIMER);
 		//************************************************************
 		//* Get RC data
 		//************************************************************
-
-// Debug - receiver-less switch between P1 and P2
-if (BUTTON2 == 0)
-{
-	flip = !flip;
-}
 
 		// Update zeroed RC channel data
 		RxGetChannels();
@@ -1089,11 +1092,13 @@ if (BUTTON2 == 0)
 		{
 			// Clear P2 I-term while fully in P1
 			memset(&IntegralGyro[P2][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
+			IntegralAccVertf[P2] = 0.0;
 		}
 		else if ((Transition_state == TRANS_P2) || (transition == Config.Transition_P2))
 		{
 			// Clear P1 I-term while fully in P2
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * NUMBEROFAXIS);
+			IntegralAccVertf[P1] = 0.0;
 		}
 		
 		//**********************************************************************
@@ -1224,7 +1229,7 @@ if (BUTTON2 == 0)
 		//* Measure incoming RC rate and flag no signal
 		//************************************************************
 
-		// Check to see if the RC input is overdue (500ms) // debug - now 50ms
+		// Check to see if the RC input is overdue (50ms)
 		if (RC_Timeout > RC_OVERDUE)
 		{
 #ifdef ERROR_LOG
@@ -1312,6 +1317,8 @@ if (BUTTON2 == 0)
 
 			// Reset I-terms at throttle cut. Using memset saves code space
 			memset(&IntegralGyro[P1][ROLL], 0, sizeof(int32_t) * 6);
+			IntegralAccVertf[P1] = 0.0;
+			IntegralAccVertf[P2] = 0.0;
 		}	
 	
 		//************************************************************
@@ -1660,7 +1667,7 @@ if (BUTTON2 == 0)
 				PWM_pulses--;
 			}
 			
-			LoopCount = 0;						// Reset loop counter for averaging accVert
+			LoopCount = 0;						// Reset loop counter for averaging sensors
 		}
 		
 		// In FAST mode and in-between bursts, sync up with the RC so that the time from Interrupt to PWM is constant.

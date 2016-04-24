@@ -99,18 +99,6 @@ void RxGetChannels(void)
 	RCinputs[NOCHAN] = 0;
 
 	OldRxSum = RxSum;
-
-/*
-	// Debug! override the transition switch/knob
-	if (flip)
-	{
-		RCinputs[Config.FlightChan] = 1000; // Force to P2
-	}
-	else
-	{
-		RCinputs[Config.FlightChan] = -1000; // Force to P1
-	}
-*/
 }
 
 // Center sticks on request from Menu

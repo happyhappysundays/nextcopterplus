@@ -100,7 +100,7 @@ enum Orientation	{UP_BACK = 0, UP_LEFT, UP_FRONT, UP_RIGHT,
 					RIGHT_DOWN, RIGHT_BACK, RIGHT_UP, RIGHT_FRONT
 					};
 enum Old_Orientation	{HORIZONTAL = 0, VERTICAL, UPSIDEDOWN, AFT, SIDEWAYS, PITCHUP};
-enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW};
+enum RPYArrayIndex 	{ROLL = 0, PITCH, YAW, ZED};
 enum RX_Modes		{CPPM_MODE = 0, PWM, SBUS, SPEKTRUM, XTREME, MODEB};
 enum RX_Sequ		{JRSEQ = 0, FUTABASEQ, MPXSEQ, CUSTOM};
 enum Polarity 		{NORMAL = 0, REVERSED};

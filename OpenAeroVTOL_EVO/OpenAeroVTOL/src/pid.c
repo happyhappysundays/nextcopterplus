@@ -28,7 +28,6 @@
 
 #define PID_SCALE 6					// Empirical amount to reduce the PID values by to make them most useful
 #define STANDARDLOOP 3571.0			// T1 counts of 700Hz cycle time (2500000/700)
-
 #define SAMPLE_RATE 500				// HPF filter constants
 #define HPF_FC	20
 #define HPF_Q	1
@@ -73,8 +72,7 @@ int16_t PID_Gyros[FLIGHT_MODES][NUMBEROFAXIS];
 int16_t PID_ACCs[FLIGHT_MODES][NUMBEROFAXIS];
 int32_t	IntegralGyro[FLIGHT_MODES][NUMBEROFAXIS];	// PID I-terms (gyro) for each axis
 int32_t	GyroDTerm[NUMBEROFAXIS];					// Gyro D-terms for each axis
-
-int32_t PID_AvgAccVert = 0;							// Averaged Acc Z
+float	IntegralAccVertf[FLIGHT_MODES];				// Integrated Acc Z
 float 	gyroSmooth[NUMBEROFAXIS];					// Filtered gyro data
 int32_t PID_AvgGyro[NUMBEROFAXIS];					// Averaged gyro data over last x loops
 float 	GyroAvgNoise;								// Gyro noise value	
@@ -114,7 +112,6 @@ void Sensor_PID(uint32_t period)
 		{Config.FlightMode[P2].Roll_Rate, Config.FlightMode[P2].Pitch_Rate, Config.FlightMode[P2].Yaw_Rate}
 	};
 
-
 	//************************************************************
 	// Create a measure of gyro noise
 	//************************************************************
@@ -145,11 +142,10 @@ void Sensor_PID(uint32_t period)
 	for (axis = 0; axis <= YAW; axis ++)
 	{
 		//************************************************************
-		// Increment and limit gyro I-terms, handle heading hold nicely
-		//************************************************************
-		
 		// Work out stick rate divider. 0 is slowest, 7 is fastest.
 		// /64 (15.25), /32 (30.5), /16 (61*), /8 (122), /4 (244), /2 (488), /1 (976), *2 (1952)
+		//************************************************************
+
 		if (Stick_rates[P1][axis] <= 6)
 		{
 			stick_P1 = RCinputsAxis[axis] >> (4 - (Stick_rates[P1][axis] - 2));
@@ -192,7 +188,7 @@ void Sensor_PID(uint32_t period)
 		}
 		else
 		{
-			// Use raw gyroADC[axis] as source for gyro values when filter off
+			// Use raw gyroADC[axis] as source for gyro values when filter is off
 			gyroSmooth[axis] = gyroADCf;
 		}		
 		
@@ -204,6 +200,7 @@ void Sensor_PID(uint32_t period)
 		// This keeps the I-term and stick input constant over varying 
 		// loop rates 
 		//************************************************************
+
 		P1_temp = gyroADC[axis] + stick_P1;
 		P2_temp = gyroADC[axis] + stick_P2;
 		
@@ -219,6 +216,10 @@ void Sensor_PID(uint32_t period)
 		tempf2 = P2_temp;
 		tempf2 = tempf2 * factor;
 		P2_temp = (int32_t)tempf2;
+
+		//************************************************************
+		// Increment gyro I-terms
+		//************************************************************
 		
 		// Calculate I-term from gyro and stick data 
 		// These may look similar, but they are constrained quite differently.
@@ -228,6 +229,7 @@ void Sensor_PID(uint32_t period)
 		//************************************************************
 		// Limit the I-terms to the user-set limits
 		//************************************************************
+		
 		for (i = P1; i <= P2; i++)
 		{
 			if (IntegralGyro[i][axis] > Config.Raw_I_Constrain[i][axis])
@@ -248,9 +250,89 @@ void Sensor_PID(uint32_t period)
 		PID_AvgGyro[axis] += gyroADC[axis];
 	
 	} // for (axis = 0; axis <= YAW; axis ++)
+		
+	//************************************************************
+	// Calculate the Z-acc I-term 
+	// accVert is already smoothed by AccSmooth, but needs DC 
+	// offsets removed to minimize drift.
+	// Also, shrink the integral by a small fraction to temper 
+	// remaining offsets.
+	//************************************************************		
+/*
+	if (Config.AccVertFilter == ON)
+	{
+		IntegralAccVertf[P1] += (accVertf + accVertZerof);			// Remove current DC offset from accVert
+		IntegralAccVertf[P2] += (accVertf + accVertZerof);		
+	}
+
+	else
+	{
+*/		IntegralAccVertf[P1] += accVertf;
+		IntegralAccVertf[P2] += accVertf;		
+//	}
+
+/*		
+	// Calculate the correct decimator number so that the current max I value
+	// decimates in 10s. intervalf is the interval in seconds
 	
-	// Average accVert prior to Calculate_PID()
-	PID_AvgAccVert += accVert;
+	// Convert (period) from units of 400ns (1/2500000) to seconds (10s/400ns = 25000000)
+	tempf1 = period;					// Promote uint32_t to float
+	intervalf = tempf1/25000000.0f;		// This gives the period in 1/10 seconds
+		
+	tempf1 = Config.Raw_I_Constrain[P1][ZED];
+	tempf1 = tempf1 * intervalf;
+
+	tempf2 = Config.Raw_I_Constrain[P2][ZED];
+	tempf2 = tempf2 * intervalf;
+
+	if (IntegralAccVertf[P1] > 0)
+	{
+		IntegralAccVertf[P1] = IntegralAccVertf[P1] - (int32_t)tempf1;		// Decimator. Shrink integrals within 10s
+	}
+	else
+	{
+		IntegralAccVertf[P1] = IntegralAccVertf[P1] + (int32_t)tempf1;
+	}
+	
+	if (IntegralAccVertf[P2] > 0)
+	{
+		IntegralAccVertf[P2] = IntegralAccVertf[P2] - (int32_t)tempf2;	
+	}
+	else
+	{
+		IntegralAccVertf[P2] = IntegralAccVertf[P2] + (int32_t)tempf2;
+	}
+*/	
+
+/*	
+	IntegralAccVertf[P1] = IntegralAccVertf[P1] * 0.9995f;			// Decimator. Shrink integrals by .05%
+	IntegralAccVertf[P2] = IntegralAccVertf[P2] * 0.9995f;
+*/
+	tempf1 = Config.AccVertFilter;	// Promote AccVertfilter (0 to 127)
+	tempf1 = tempf1 / 10000.0f;
+	tempf1 = 1.0f - tempf1;
+	
+	IntegralAccVertf[P1] = IntegralAccVertf[P1] * tempf1;			// Decimator. Shrink integrals by user-set amount
+	IntegralAccVertf[P2] = IntegralAccVertf[P2] * tempf1;
+
+	
+	//************************************************************
+	// Limit the Z-acc I-terms to the user-set limits
+	//************************************************************
+	for (i = P1; i <= P2; i++)
+	{
+		tempf1 = Config.Raw_I_Constrain[i][ZED];	// Promote
+		
+		if (IntegralAccVertf[i] > tempf1)
+		{
+			IntegralAccVertf[i] = tempf1;
+		}
+			
+		if (IntegralAccVertf[i] < -tempf1)
+		{
+			IntegralAccVertf[i] = -tempf1;
+		}
+	}
 }
 
 // Run just before PWM output, using averaged data
@@ -258,10 +340,10 @@ void Calculate_PID(void)
 {
 	int32_t PID_gyro_temp1 = 0;				// P1
 	int32_t PID_gyro_temp2 = 0;				// P2
-	int32_t PID_acc_temp1 = 0;				// P1
+	int32_t PID_acc_temp1 = 0;				// P
+	int32_t PID_acc_temp2 = 0;				// I
 	int32_t PID_Gyro_I_actual1 = 0;			// Actual unbound i-terms P1
 	int32_t PID_Gyro_I_actual2 = 0;			// P2
-	int16_t AvAccVert = 0;
 	int8_t	axis = 0;
 	int8_t i = 0;
 
@@ -272,10 +354,10 @@ void Calculate_PID(void)
 		 	{Config.FlightMode[P2].Roll_P_mult, Config.FlightMode[P2].Pitch_P_mult, Config.FlightMode[P2].Yaw_P_mult}
 		};
 
-	int8_t 	I_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
+	int8_t 	I_gain[FLIGHT_MODES][NUMBEROFAXIS+1] = 
 		{
-			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
-			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
+			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult, Config.FlightMode[P1].A_Zed_I_mult},
+			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult, Config.FlightMode[P2].A_Zed_I_mult}
 		};
 
 	int8_t 	L_gain[FLIGHT_MODES][NUMBEROFAXIS] = 
@@ -290,10 +372,6 @@ void Calculate_PID(void)
 			{Config.Rolltrim[P1], Config.Pitchtrim[P1]},
 			{Config.Rolltrim[P2], Config.Pitchtrim[P2]}
 		};
-
-	// Average accVert
-	AvAccVert = (int16_t)(PID_AvgAccVert / LoopCount);
-	PID_AvgAccVert = 0;							// Reset average
 
 	//************************************************************
 	// PID loop
@@ -393,27 +471,32 @@ void Calculate_PID(void)
 	} // PID loop (axis)
 
 	//************************************************************
-	// Calculate an Acc-Z value 
+	// Calculate an Acc-Z PI value 
 	//************************************************************
 
 	// Do for P1 and P2
 	for (i = P1; i <= P2; i++)
 	{
-		PID_acc_temp1 = -AvAccVert;				// Get and copy Z-acc value. Negate to oppose G
+		// P-term
+		PID_acc_temp1 = (int32_t)-accVertf;					// Zeroed AccSmooth signal. Negate to oppose G
+		PID_acc_temp1 *= L_gain[i][YAW];					// Multiply P-term (Max gain of 127)
+		PID_acc_temp1 = PID_acc_temp1 * (int32_t)3;			// Multiply by 3
 
-		PID_acc_temp1 *= L_gain[i][YAW];		// Multiply P-term (Max gain of 127)
+		// I-term
+		PID_acc_temp2 = (int32_t)-IntegralAccVertf[i];		// Get and copy integrated Z-acc value. Negate to oppose G
+		PID_acc_temp2 *= I_gain[i][ZED];					// Multiply I-term (Max gain of 127)
+		PID_acc_temp2 = PID_acc_temp2 >> 2;					// Divide by 4
 
-		PID_acc_temp1 = PID_acc_temp1 >> 4;		// Moderate Z-acc to reasonable values
-
-		if (PID_acc_temp1 > MAX_ZGAIN)			// Limit to +/-MAX_ZGAIN
+		if (PID_acc_temp2 > Config.Raw_I_Limits[i][ZED])	// Limit I-term outputs to user-set percentage
 		{
-			PID_acc_temp1 = MAX_ZGAIN;
+			PID_acc_temp2 = Config.Raw_I_Limits[i][ZED];
 		}
-		if (PID_acc_temp1 < -MAX_ZGAIN)
+		if (PID_acc_temp2 < -Config.Raw_I_Limits[i][ZED])
 		{
-			PID_acc_temp1 = -MAX_ZGAIN;
+			PID_acc_temp2 = -Config.Raw_I_Limits[i][ZED];
 		}
 
-		PID_ACCs[i][YAW] = (int16_t)PID_acc_temp1; // Copy to global values
+		// Formulate PI value and scale
+		PID_ACCs[i][YAW] = (int16_t)((PID_acc_temp1 + PID_acc_temp2) >> PID_SCALE); // Copy to global values
 	}
 }

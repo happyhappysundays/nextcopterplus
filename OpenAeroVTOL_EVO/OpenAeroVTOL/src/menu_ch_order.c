@@ -96,7 +96,7 @@ void menu_channel(void)
 			do_menu_item(menu_temp, value_ptr + (menu_temp - reference), 1, range, 0, text_link, false, 0);
 		}
 
-		// Update limits when exiting
+		// Update when exiting
 		if (button == ENTER)
 		{
 			// Update current channel order with the custom one on exit

@@ -22,6 +22,9 @@
 #include "mixer.h"
 #include "imu.h"
 #include "init.h"
+#include "eeprom.h"
+#include "i2c.h"
+#include "MPU6050.h"
 
 //************************************************************
 // Prototypes
@@ -786,16 +789,18 @@ void UpdateLimits(void)
 	uint8_t i,j;
 	int32_t temp32, gain32;
 
-	int8_t limits[FLIGHT_MODES][NUMBEROFAXIS] = 
+	// RPY + Z damp
+	int8_t limits[FLIGHT_MODES][NUMBEROFAXIS+1] = 
 		{
-			{Config.FlightMode[P1].Roll_limit, Config.FlightMode[P1].Pitch_limit, Config.FlightMode[P1].Yaw_limit},
-			{Config.FlightMode[P2].Roll_limit, Config.FlightMode[P2].Pitch_limit, Config.FlightMode[P2].Yaw_limit}
+			{Config.FlightMode[P1].Roll_limit, Config.FlightMode[P1].Pitch_limit, Config.FlightMode[P1].Yaw_limit, Config.FlightMode[P1].A_Zed_limit},
+			{Config.FlightMode[P2].Roll_limit, Config.FlightMode[P2].Pitch_limit, Config.FlightMode[P2].Yaw_limit, Config.FlightMode[P2].A_Zed_limit}
 		};
 
-	int8_t gains[FLIGHT_MODES][NUMBEROFAXIS] = 
+	// RPY + Z damp
+	int8_t gains[FLIGHT_MODES][NUMBEROFAXIS+1] = 
 		{
-			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult},
-			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult}
+			{Config.FlightMode[P1].Roll_I_mult, Config.FlightMode[P1].Pitch_I_mult, Config.FlightMode[P1].Yaw_I_mult, Config.FlightMode[P1].A_Zed_I_mult},
+			{Config.FlightMode[P2].Roll_I_mult, Config.FlightMode[P2].Pitch_I_mult, Config.FlightMode[P2].Yaw_I_mult, Config.FlightMode[P2].A_Zed_I_mult}
 		};
 
 	// Update LVA trigger
@@ -859,7 +864,8 @@ void UpdateLimits(void)
 	// Update I_term input constraints for all profiles
 	for (j = 0; j < FLIGHT_MODES; j++)
 	{
-		for (i = 0; i < NUMBEROFAXIS; i++)
+		// Limits calculation is different for gyros and accs
+		for (i = 0; i < (NUMBEROFAXIS); i++)
 		{
 			temp32 	= limits[j][i]; 						// Promote limit %
 
@@ -871,7 +877,6 @@ void UpdateLimits(void)
 			// I-term source limits. These have to be different due to the I-term gain setting
 			// I-term = (gyro * gain) / 32, so the gyro count for a particular gain and limit is
 			// Gyro = (I-term * 32) / gain :) 
-
 			if (gains[j][i] != 0)
 			{
 				gain32 = gains[j][i];						// Promote gain value
@@ -882,6 +887,27 @@ void UpdateLimits(void)
 				Config.Raw_I_Constrain[j][i] = 0;
 			}
 		}
+		
+		// Accs
+		temp32 	= limits[j][ZED]; 						// Promote limit %
+
+		// I-term output (throw). Convert from % to actual count
+		// A value of 80,000 results in +/- 1250 or full throw at the output stage
+		// This is because the maximum signal value is +/-1250 after division by 64. 1250 * 64 = 80,000
+		Config.Raw_I_Limits[j][ZED] = temp32 * (int32_t)640;	// 80,000 / 125% = 640
+
+		// I-term source limits. These have to be different due to the I-term gain setting
+		// I-term = (gyro * gain) / 4, so the gyro count for a particular gain and limit is
+		// Gyro = (I-term * 4) / gain :)
+		if (gains[j][ZED] != 0)
+		{
+			gain32 = gains[j][ZED];						// Promote gain value
+			Config.Raw_I_Constrain[j][ZED] = (Config.Raw_I_Limits[j][ZED] << 2) / gain32;
+		}
+		else
+		{
+			Config.Raw_I_Constrain[j][ZED] = 0;
+		}	
 	}
 
 	// Update travel limits
@@ -899,6 +925,63 @@ void UpdateLimits(void)
 		Config.Rolltrim[i] = Config.FlightMode[i].AccRollZeroTrim * 100;
 		Config.Pitchtrim[i] = Config.FlightMode[i].AccPitchZeroTrim * 100;
 	}
+
+	// Additional tasks to ensure compatibility with the GUI
+	// Move any menu post-processing here so that it happens post-reboot
+
+	// Update channel sequence
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		if (Config.TxSeq == FUTABASEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
+		}
+		else if (Config.TxSeq == JRSEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
+		}
+		else if (Config.TxSeq == MPXSEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
+		}
+		// Load from custom channel order
+		else
+		{
+			Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
+		}
+	}
+
+	// See if mixer preset has changed. The only time it will ever NOT
+	// be "Options" is when the GUI has changed it.
+	if (Config.Preset != OPTIONS)
+	{
+		Load_eeprom_preset(Config.Preset);
+		
+		// Reset the mixer preset
+		Config.Preset = OPTIONS;
+	}
+	
+	// Update MPU6050 LPF and reverse sense of menu items
+	writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
+
+	// Check validity of RX type and PWM speed selection
+	// If illegal setting, drop down to RC Sync
+	if ((Config.RxMode < SBUS) && (Config.Servo_rate == FAST))
+	{
+		Config.Servo_rate = SYNC;
+	}
+		
+	// If mode switched to ARMABLE, make sure to disarm	
+	if (Config.ArmMode == ARMABLE)
+	{
+		General_error |= (1 << DISARMED);	// Set flags to disarmed
+		LED1 = 0;
+	}	
+
+	// Work out the P1 orientation from the user's P2 orientation setting
+	Config.Orientation_P1 = (int8_t)pgm_read_byte(&P1_Orientation_LUT[Config.Orientation_P2]);
+
+	Save_Config_to_EEPROM(); // Save values and return
 }
 
 // Update servos from the mixer Config.Channel[i].P1_value data, add offsets and enforce travel limits

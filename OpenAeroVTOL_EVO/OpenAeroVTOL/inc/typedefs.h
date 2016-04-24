@@ -13,7 +13,6 @@
 
 #define MAX_RC_CHANNELS 8				// Maximum input channels from RX
 #define MAX_OUTPUTS 8					// Maximum output channels
-#define MAX_ZGAIN 500					// Maximum amount of Z-based height dampening
 #define	FLIGHT_MODES 2					// Number of flight profiles
 #define NUMBEROFAXIS 3					// Number of axis (Roll, Pitch, Yaw)
 #define NUMBEROFCURVES 6				// Number of curves available
@@ -59,7 +58,7 @@ typedef struct
 	int16_t		maximum;
 } servo_limits_t;
 
-// Flight_control type (18)
+// Flight_control type (20)
 typedef struct
 {
 	int8_t		Roll_P_mult;			// Roll PI
@@ -79,7 +78,9 @@ typedef struct
 	int8_t		Yaw_limit;				// I-term limits (0 to 125%)
 	int8_t		Yaw_Rate;				// 0 to 4, 1 (Default)
 	int8_t		Yaw_trim;
-	int8_t		A_Zed_P_mult;
+	int8_t		A_Zed_P_mult;			// Vertical velocity damping
+	int8_t		A_Zed_I_mult;
+	int8_t		A_Zed_limit;
 
 } flight_control_t;
 
@@ -156,19 +157,21 @@ typedef struct
 	int8_t		Transition_P1n;			// Transition point as a percentage 1% to 99%
 	int8_t		Transition_P2;			// Transition point as a percentage 1% to 100%
 	int8_t		Vibration;				// Vibration test mode on/off
-	int8_t		ElevatorPol;			// Elevator RC input polarity (old location)
+	int8_t		AccVertFilter;			// Acc Z filter for I-terms in 1/100%
 	
-	// Flight mode settings (36)[53]
+	// Flight mode settings (40)[53]
 	flight_control_t FlightMode[FLIGHT_MODES];	// Flight control settings
 
-	// Servo travel limits (48)[89]
-	int32_t		Raw_I_Limits[FLIGHT_MODES][NUMBEROFAXIS];		// Actual, unspanned I-term output limits to save recalculation each loop
-	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS];	// Actual, unspanned I-term input limits to save recalculation each loop
+	// Servo travel limits (32)[93]
+	int32_t		Raw_I_Limits[FLIGHT_MODES][NUMBEROFAXIS+1];		// Actual, unspanned I-term output limits to save recalculation each loop (RPY + Z) 4 x 2 x 4 = 32
+	
+	// Servo constraints (32)[125]
+	int32_t		Raw_I_Constrain[FLIGHT_MODES][NUMBEROFAXIS+1];	// Actual, unspanned I-term input limits to save recalculation each loop (RPY + Z) 4 x 2 x 4 = 32
 
-	// Triggers (2)[137]
+	// Triggers (2)[157]
 	uint16_t	PowerTriggerActual;		// LVA alarm * 10;
 
-	// General items (11)[139]
+	// General items (12)[159]
 	int8_t		Orientation_P2;			// P2 orientation
 	int8_t		P1_Reference;			// Hover plane of reference	(NO, EARTH, VERT_AP)
 	int8_t		Contrast;				// Contrast setting
@@ -180,70 +183,74 @@ typedef struct
 	int8_t		Gyro_LPF;				// LPF for gyros
 	int8_t		CF_factor;				// Autolevel correction rate
 	int8_t		Preset;					// Mixer preset
+	int8_t		Buzzer;					// Buzzer control ON/OFF
 	
-	// Channel configuration (272)[150]
+	// Channel configuration (272)[171]
 	channel_t	Channel[MAX_OUTPUTS];	// Channel mixing data	
 
-	// Servo menu (24)[422]
+	// Servo menu (24)[443]
 	int8_t		Servo_reverse[MAX_OUTPUTS];	// Reversal of output channel
 	int8_t		min_travel[MAX_OUTPUTS];	// Minimum output value (-125 to 125)
 	int8_t		max_travel[MAX_OUTPUTS];	// Maximum output value (-125 to 125)
 
-	// RC inputs (16)[446]
+	// RC inputs (16)[467]
 	uint16_t 	RxChannelZeroOffset[MAX_RC_CHANNELS];	// RC channel offsets for actual radio channels
 
-	// P1 Acc zeros (12)[462]
+	// P1 Acc zeros (12)[483]
 	int16_t		AccZero_P1[NUMBEROFAXIS];	// P1 Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
 	int16_t		AccZeroNormZ_P1;			// Acc-Z zero for normal Z values
 	int16_t		AccZeroInvZ_P1;				// Acc-Z zero for inverted Z values
 	int16_t		AccZeroDiff_P1;				// Difference between normal and inverted Acc-Z zeros
 
-	// Gyro zeros (6)[474]
+	// Gyro zeros (6)[495]
 	int16_t		gyroZero_P1[NUMBEROFAXIS];		// NB. These are now for P1 only
 
-	// Airspeed zero (2)[480]
+	// Airspeed zero (2)[501]
 	int16_t		AirspeedZero;			// Zero airspeed sensor offset
 
-	// Flight mode (1)[482]
+	// Flight mode (1)[503]
 	int8_t		FlightSel;				// User set flight mode
 
-	// Adjusted trims (8)[483]
+	// Adjusted trims (8)[504]
 	int16_t		Rolltrim[FLIGHT_MODES];	// User set trims * 100
 	int16_t		Pitchtrim[FLIGHT_MODES];
 
-	// Sticky flags (1)[491]
+	// Sticky flags (1)[512]
 	uint8_t		Main_flags;				// Non-volatile flags
 
-	// Misc (2)[492]
+	// Misc (2)[513]
 	int8_t		RudderPol;				// Rudder RC input polarity (V1.1 stops here...)
 	int8_t		AileronPol;				// Aileron RC input polarity
 		
-	// Error log (21)[494]
+	// Error log (21)[515]
 	int8_t		log_pointer;
 	int8_t		Log[LOGLENGTH];
 	
-	// P2 Acc zeros (12)[515]
+	// P2 Acc zeros (12)[536]
 	int16_t		AccZero_P2[NUMBEROFAXIS];	// P2 Acc calibration results. Note: Acc-Z zero centered on 1G (about +124)
 	int16_t		AccZeroNormZ_P2;			// Acc-Z zero for normal Z values
 	int16_t		AccZeroInvZ_P2;				// Acc-Z zero for inverted Z values
 	int16_t		AccZeroDiff_P2;				// Difference between normal and inverted Acc-Z zeros
 	
-	// P2 Gyro zeros (6)[527]
+	// P2 Gyro zeros (6)[548]
 	int16_t		gyroZero_P2[NUMBEROFAXIS];		// NB. These are for P2 only
 
-	// Advanced items (1) [533]
+	// Advanced items (1) [554]
 	int8_t		Orientation_P1;			// P1 orientation
 	
-	// Curves (48) [534]
+	// Curves (48) [555]
 	curve_t		Curve[NUMBEROFCURVES];
 	
-	// Custom channel order (8) [582]
+	// Custom channel order (8) [603]
 	int8_t		CustomChannelOrder[MAX_RC_CHANNELS];
 	
-	// Output offsets (64) [590]
+	// Output offsets (64) [611]
 	curve_t		Offsets[MAX_OUTPUTS];
+	
+	// Misc (1)[675]
+	int8_t		ElevatorPol;			// Elevator RC input polarity
 
-	// [654]
+	// [676]
 
 
 		

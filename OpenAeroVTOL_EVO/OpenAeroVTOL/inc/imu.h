@@ -7,7 +7,10 @@
 //***********************************************************
 
 extern int16_t	angle[2];
+
 extern float accSmooth[NUMBEROFAXIS];
+//extern float accVertZerof;
+extern float intervalf;	
 
 extern void imu_update(uint32_t period);
 extern void reset_IMU(void);

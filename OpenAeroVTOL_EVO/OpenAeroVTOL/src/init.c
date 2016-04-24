@@ -217,7 +217,7 @@ void init(void)
 	//***********************************************************
 	
 	// Calibrate ESCs if ONLY buttons 1 and 4 pressed
-	if ((PINB & 0xf0) == 0x60)
+	if ((BUTTON1 == 0) && (BUTTON4 == 0))
 	{
 		// Display calibrating message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
@@ -282,7 +282,7 @@ void init(void)
 	_delay_ms(300);
 
 	// Reload default eeprom settings if middle two buttons are pressed
-	if ((PINB & 0xf0) == 0x90)
+	if ((BUTTON2 == 0) && (BUTTON3 == 0))
 	{
 		// Display reset message
 		st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
@@ -293,6 +293,8 @@ void init(void)
 		
 		// Reset EEPROM settings
 		Set_EEPROM_Default_Config();
+
+		// Save settings
 		Save_Config_to_EEPROM();
 
 		// Set contrast to the default value
@@ -386,9 +388,13 @@ void init(void)
 	reset_IMU();
 
 	// Beep that init is complete
-	LVA = 1;
-	_delay_ms(25);
-	LVA = 0;
+	// Check buzzer mode first
+	if (Config.Buzzer == ON)
+	{
+		LVA = 1;
+		_delay_ms(25);
+		LVA = 0;
+	}
 
 #ifdef ERROR_LOG	
 	// Log reboot

@@ -23,7 +23,7 @@
 #include <avr/interrupt.h>
 #include "mixer.h"
 
-#define CONTRAST 162 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
+#define CONTRAST 160 // Contrast item number <--- This sucks... move somewhere sensible!!!!!
 
 //************************************************************
 // Prototypes
@@ -1078,13 +1078,18 @@ void menu_beep(uint8_t beeps)
 {
 	uint8_t i;
 
-	for (i=0; i < beeps; i++)
-	{ 
-		LVA = 1;
-		_delay_ms(2);
-		LVA = 0;
-		_delay_ms(2);
+	// Check buzzer mode first
+	if (Config.Buzzer == ON)
+	{
+		for (i=0; i < beeps; i++)
+		{
+			LVA = 1;
+			_delay_ms(1);
+			LVA = 0;
+			_delay_ms(3);
+		}		
 	}
+
 }
 
 //************************************************************

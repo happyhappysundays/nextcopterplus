@@ -26,6 +26,7 @@
 #include "vbat.h"
 #include "imu.h"
 #include "rc.h"
+#include "pid.h"
 
 //************************************************************
 // Prototypes
@@ -107,6 +108,9 @@ void Display_sensors(void)
 		// Refresh accSmooth values and AccVert
 		imu_update(interval);
 
+		// Update I-terms, average gyro values each loop
+		Sensor_PID(interval);
+		
 		LCD_Display_Text(26,(const unsigned char*)Verdana8,37,0); 	// Gyro
 		LCD_Display_Text(30,(const unsigned char*)Verdana8,72,0); 	// Acc
 		LCD_Display_Text(31,(const unsigned char*)Verdana8,107,0); 	// IMU
@@ -123,23 +127,10 @@ void Display_sensors(void)
 		mugui_lcd_puts(itoa(accADC[YAW],pBuffer,10),(const unsigned char*)Verdana8,75,33);
 		mugui_lcd_puts(itoa(angle[ROLL]/100,pBuffer,10),(const unsigned char*)Verdana8,107,13);
 		mugui_lcd_puts(itoa(angle[PITCH]/100,pBuffer,10),(const unsigned char*)Verdana8,107,23);
-
-		// These are very useful for debugging the AccZ calibration
-		/*
-		mugui_lcd_puts(itoa(Config.AccZero_P1[YAW],pBuffer,10),(const unsigned char*)Verdana8,100,13);
-		mugui_lcd_puts(itoa(Config.AccZeroNormZ_P1,pBuffer,10),(const unsigned char*)Verdana8,100,23);
-		mugui_lcd_puts(itoa(Config.AccZeroInvZ_P1,pBuffer,10),(const unsigned char*)Verdana8,100,33);
-		mugui_lcd_puts(itoa(Config.AccZeroDiff_P1,pBuffer,10),(const unsigned char*)Verdana8,100,43);
 		
-		mugui_lcd_puts(itoa(Config.AccZero_P2[YAW],pBuffer,10),(const unsigned char*)Verdana8,105,13);
-		mugui_lcd_puts(itoa(Config.AccZeroNormZ_P2,pBuffer,10),(const unsigned char*)Verdana8,105,23);
-		mugui_lcd_puts(itoa(Config.AccZeroInvZ_P2,pBuffer,10),(const unsigned char*)Verdana8,105,33);
-		mugui_lcd_puts(itoa(Config.AccZeroDiff_P2,pBuffer,10),(const unsigned char*)Verdana8,105,43);
-		*/
-		
-		// AccVert
+		// AccVertf
 		LCD_Display_Text(229,(const unsigned char*)Verdana8,5,45);	// AccVert
-		mugui_lcd_puts(itoa(accVert,pBuffer,10),(const unsigned char*)Verdana8,60,45);
+		mugui_lcd_puts(itoa((int16_t)accVertf,pBuffer,10),(const unsigned char*)Verdana8,40,45);
 
 		// Print bottom markers
 		LCD_Display_Text(12, (const unsigned char*)Wingdings, 0, 57); 	// Left
@@ -178,6 +169,6 @@ void Display_sensors(void)
 			// Wait until button snap dissipated
 			_delay_ms(250);
 			CalibrateAcc(REVERSED);
-		}		
+		}
 	}
 }

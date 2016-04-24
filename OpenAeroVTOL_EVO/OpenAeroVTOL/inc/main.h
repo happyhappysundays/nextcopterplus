@@ -38,7 +38,4 @@ extern volatile uint8_t	LoopCount;
 extern volatile uint8_t	Servo_TCNT2;
 extern volatile uint16_t RC_Timeout;
 
-// Debug
-extern bool flip;
-
 

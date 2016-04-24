@@ -35,8 +35,8 @@ void menu_mixer(uint8_t i);
 //************************************************************
 
 #define MIXERITEMS 30	// Number of mixer menu items
-#define MIXERSTARTE 190	// Start of Menu text items (Earth)
-#define MIXERSTARTM 346	// Start of Menu text items (Model)
+#define MIXERSTARTE 192	// Start of Menu text items (Earth)
+#define MIXERSTARTM 348	// Start of Menu text items (Model)
 #define MIXOFFSET  85	// Value offsets
 
 //************************************************************

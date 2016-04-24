@@ -174,7 +174,7 @@ void menu_offsets(void)
 			button = NONE;
 		}
 
-		// Update limits when exiting
+		// Save and exit
 		if (button == ENTER)
 		{
 			Save_Config_to_EEPROM(); // Save value and return

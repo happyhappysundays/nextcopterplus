@@ -41,6 +41,11 @@ void Display_status(void)
 
 	clear_buffer(buffer);
 
+	//mugui_lcd_puts(itoa(((void*)&Config.PowerTriggerActual - (void*)&Config.setup),pBuffer,10),(const unsigned char*)Verdana8,0,0); // 157 - NG (not 149) out by 8
+	//mugui_lcd_puts(itoa(((void*)&Config.FlightMode[P1].Roll_P_mult - (void*)&Config.setup),pBuffer,10),(const unsigned char*)Verdana8,0,0); //53 - OK
+	//mugui_lcd_puts(itoa(((void*)&Config.Raw_I_Limits[P1][0] - (void*)&Config.setup),pBuffer,10),(const unsigned char*)Verdana8,0,0); // 93 - OK
+	//mugui_lcd_puts(itoa(((void*)&Config.Raw_I_Constrain[P1][0] - (void*)&Config.setup),pBuffer,10),(const unsigned char*)Verdana8,0,0); // 125 - NG (not 121) out by 4
+
 	// Display text
 	LCD_Display_Text(264,(const unsigned char*)Verdana8,0,0); 	// Version text
 	LCD_Display_Text(266,(const unsigned char*)Verdana8,0,12); 	// RX sync
