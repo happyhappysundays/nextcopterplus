@@ -57,7 +57,7 @@ void Display_status(void)
 	LCD_Display_Text(14,(const unsigned char*)Verdana8,10,55);	// Menu
 
 	// Display values
-	print_menu_text(0, 1, (62 + Config.RxMode), 45, 12); // Rx mode
+	print_menu_text(0, 1, (396 + Config.RxMode), 45, 12);		// Rx mode
 	mugui_lcd_puts(itoa(transition,pBuffer,10),(const unsigned char*)Verdana8,110,24); // Raw transition value
 
 	if (Config.RxMode == PWM)

@@ -71,7 +71,7 @@ const menu_range_t rc_menu_ranges[2][RCITEMS] PROGMEM =
 {
 	{
 		// RC setup (12)				// Min, Max, Increment, Style, Default
-		{CPPM_MODE,MODEB,1,1,SBUS},		// Receiver type (PWM to MODEB/UDI)	
+		{CPPM_MODE,SUMD,1,1,SBUS},		// Receiver type (PWM to SUMD)	
 		{LOW,FAST,1,1,FAST},			// Servo rate
 		{THROTTLE,GEAR,1,1,GEAR},		// PWM sync channel
 		{JRSEQ,CUSTOM,1,1,JRSEQ},		// Channel order

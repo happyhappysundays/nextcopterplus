@@ -56,9 +56,10 @@ void Load_eeprom_preset(uint8_t preset);
 #define V1_3_B15_SIGNATURE 0x40	// EEPROM signature for V1.3 (V1.3 Beta 15)
 #define V1_3_B17_SIGNATURE 0x41	// EEPROM signature for V1.3 (V1.3 Beta 17+) (V1.3 release)
 #define V1_4_B2_SIGNATURE 0x42	// EEPROM signature for V1.4 (V1.4 Beta 2-7)
-#define V1_4_B8_SIGNATURE 0x43	// EEPROM signature for V1.4 (V1.4 Beta 8+)
+#define V1_4_B8_SIGNATURE 0x43	// EEPROM signature for V1.4 (V1.4 Beta 8+) (V1.4 release)
+#define V1_5_B3_SIGNATURE 0x44	// EEPROM signature for V1.5 (V1.5 Beta 3+)
 
-#define MAGIC_NUMBER V1_4_B8_SIGNATURE // Set current signature
+#define MAGIC_NUMBER V1_5_B3_SIGNATURE // Set current signature
 
 // eePROM data update locations
 #define RCITEMS_V1_0 41		// RAM location of start of RC items data in V1.0, 1.1 and 1.2
@@ -210,7 +211,8 @@ bool Initial_EEPROM_Config_Load(void)
 			updated = true;
 			// Fall through...
 
-		case V1_4_B8_SIGNATURE:				// V1.4 B8+ detected (Current)
+		case V1_4_B8_SIGNATURE:				// V1.4 B8+ detected
+		case V1_5_B3_SIGNATURE:				// V1.5B3+
 			break;
 			
 		default:							// Unknown solution - restore to factory defaults
