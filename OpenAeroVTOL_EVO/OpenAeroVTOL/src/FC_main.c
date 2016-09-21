@@ -1,7 +1,7 @@
 //**************************************************************************
 // OpenAero VTOL software for KK2.1 and later boards
 // =================================================
-// Version: Release V1.5 B3 - April 2016
+// Version: Release V1.5 Release - September 2016
 //
 // Some receiver format decoding code from Jim Drew of XPS and the Paparazzi project.
 // OpenAero code by David Thompson, included open-source code as per quoted references.
@@ -220,13 +220,28 @@
 //			Added buzzer control to menus.
 //			Beta 8 is Release V1.4
 //
-// V1.5		Based on OpenAeroVTOL V1.3 code.
+// V1.5		Based on OpenAeroVTOL V1.4 code.
 //
 // Beta 1	Add HoTT SUMD serial protocol first attempt.
 // Beta 2	Corrected Status screen RX type text.
-//			Fixed SUMD channel offset and freeze bugs.
-// Beta 3	Update: SUMD confirmed fully functional
-//			Updated firmware signature
+//			Hopefully fixed SUMD channel offset and freeze bugs.
+// Beta 3	Fix for channel order bugs
+// Beta 4	Incorporate EEPROM version changes. 
+//			SUMD confirmed fully functional
+//			Updated firmware signature.
+//			Fix for DSMX reception format bug.
+// Beta 5	Add experimental 1.0ms pulse burst on all outputs for 0.5s on power-up
+// Beta 6	Tweaks to above
+// Beta 7	Fixed ServoFlag bug	
+// Beta 8	Updated WDT handling. Added BOD handling (experimental)
+//			Fixed BORF detection in isolation. Fixed BORF power-up sequence.
+//			Manual disarm doesn't update display in real time to "(Disarmed)" - FIXED
+// Beta 9	Removed error log.
+// Beta 10	Removed BOD and POR code, fixed arming hang bug.
+// Beta 11	Improved compatibility with those picky ESCs.
+// Beta 12	Re-arranged init to solve power-up issues
+// Beta 13	Changed back to the old bind timing method to solve power-up issues
+//			Beta 13 is Release V1.5
 //
 //***********************************************************
 //* Notes
@@ -234,7 +249,6 @@
 //
 // Bugs:	
 //			
-//
 // To do:	
 //		  
 //
@@ -406,6 +420,7 @@ int main(void)
 	int16_t PWM_pulses = 3; 
 	uint32_t interval = 0;			// IMU interval
 	uint8_t transition_direction = P2;
+	uint16_t j;
 	
 	// Do all init tasks
 	init();
@@ -533,7 +548,7 @@ int main(void)
 
 				// Update status screen
 				Display_status();
-				
+
 				// Prevent PWM output just after updating the LCD
 				PWMOverride = true;
 
@@ -681,6 +696,37 @@ int main(void)
 				// Reset IMU on return from menu
 				reset_IMU();
 				
+				//***********************************************************
+				// Experimental PWM output code
+				//***********************************************************
+					
+				cli();									// Disable interrupts
+				
+				ServoFlag = 0;							// Reset servo flag
+
+				for (i = 0; i < MAX_OUTPUTS; i++)		// For each output
+				{
+					// Check for motor marker
+					if (Config.Channel[i].Motor_marker == MOTOR)
+					{
+						// Set output to 1ms pulse width
+						ServoOut[i] = MOTORMIN;
+			
+						// Mark motor outputs
+						ServoFlag |= (1 << i);
+					}
+				}
+
+				for (j = 0; j < 249; j++)
+				{
+					// Pass address of ServoOut array and select only motor outputs
+					output_servo_ppm_asm(&ServoOut[0], ServoFlag);
+				}
+			
+				sei();									// Enable interrupts
+					
+				//***********************************************************			
+					
 				// Prevent PWM output
 				PWMOverride = true;
 								
@@ -735,7 +781,7 @@ int main(void)
 		{
 			// Manual arm/disarm
 			// If sticks not at extremes, reset manual arm/disarm timer
-			// Sticks down and centered = armed. Down and outside = disarmed
+			// Sticks down and inside = armed. Down and outside = disarmed
 			if (
 				((-ARM_TIMER_RESET_1 < RCinputs[AILERON]) && (RCinputs[AILERON] < ARM_TIMER_RESET_1)) ||
 				((-ARM_TIMER_RESET_1 < RCinputs[ELEVATOR]) && (RCinputs[ELEVATOR] < ARM_TIMER_RESET_1)) ||
@@ -758,12 +804,43 @@ int main(void)
 				if ((Arm_timer > ARM_TIMER) && (RCinputs[AILERON] < -ARM_TIMER_RESET_1))
 				{
 					Arm_timer = 0;
-					General_error &= ~(1 << DISARMED);		// Set flags to armed (negate disarmed)
-					CalibrateGyrosSlow();					// Calibrate gyros
+					General_error &= ~(1 << DISARMED);	// Set flags to armed (negate disarmed)
+					CalibrateGyrosSlow();					// Calibrate gyros (also saves to eeprom)
 					LED1 = 1;								// Signal that FC is ready
 
 					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while to remove arm glitch
 					Servo_Rate = 0;
+
+					//***********************************************************
+					// Experimental PWM output code
+					//***********************************************************
+					
+					cli();									// Disable interrupts
+
+					ServoFlag = 0;							// Reset servo flag
+
+					for (i = 0; i < MAX_OUTPUTS; i++)		// For each output
+					{
+						// Check for motor marker
+						if (Config.Channel[i].Motor_marker == MOTOR)
+						{
+							// Set output to 1ms pulse width
+							ServoOut[i] = MOTORMIN;
+			
+							// Mark motor outputs
+							ServoFlag |= (1 << i);
+						}
+					}
+
+					for (j = 0; j < 249; j++)
+					{
+						// Pass address of ServoOut array and select only motor outputs
+						output_servo_ppm_asm(&ServoOut[0], ServoFlag);
+					}
+
+					sei();									// Enable interrupts
+									
+					//***********************************************************
 
 					// Force Menu to IDLE immediately unless in vibration test mode
 					if (Config.Vibration == OFF)
@@ -772,7 +849,7 @@ int main(void)
 					}
 				}
 			}
-		
+	
 			// If armed, disarm if sticks held
 			else 
 			{
@@ -780,11 +857,17 @@ int main(void)
 				if ((Arm_timer > DISARM_TIMER) && (RCinputs[AILERON] > ARM_TIMER_RESET_1))
 				{
 					Arm_timer = 0;
-					General_error |= (1 << DISARMED);		// Set flags to disarmed
+					General_error |= (1 << DISARMED);	// Set flags to disarmed
 					LED1 = 0;								// Signal that FC is now disarmed
 					
 					Flight_flags |= (1 << ARM_blocker);		// Block motors for a little while to remove arm glitch
 					Servo_Rate = 0;
+					
+					// Force Menu to IDLE immediately unless in vibration test mode
+					if (Config.Vibration == OFF)
+					{
+						Menu_mode = PRESTATUS_TIMEOUT;	
+					}
 #ifdef ERROR_LOG
 add_log(MANUAL);
 #endif			
@@ -810,7 +893,7 @@ add_log(MANUAL);
 				if ((Disarm_seconds >= Config.Disarm_timer) && (Config.Disarm_timer >= 30))
 				{
 					// Disarm the FC
-					General_error |= (1 << DISARMED);		// Set flags to disarmed
+					General_error |= (1 << DISARMED);	// Set flags to disarmed
 					LED1 = 0;								// Signal that FC is now disarmed
 #ifdef ERROR_LOG
 add_log(TIMER);
@@ -822,7 +905,12 @@ add_log(TIMER);
 		// Arm when ArmMode is OFF
 		else 
 		{
-			General_error &= ~(1 << DISARMED);			// Set flags to armed
+			// If disarmed, arm
+			if (General_error & (1 << DISARMED))
+			{
+				General_error &= ~(1 << DISARMED);			// Set flags to armed
+			}
+			
 			LED1 = 1;
 		}
 

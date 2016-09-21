@@ -550,10 +550,10 @@ ISR(USART0_RX_vect)
 				// 8 channels * 11 bits = 88 bits
 				for (j = 0; j < 88; j++)
 				{
-					if (sBuffer[sindex] & (1<<chan_mask))
+					if (sBuffer[sindex] & (1 << chan_mask))
 					{
 						// Place the RC data into the correct channel order for the transmitted system
-						RxChannel[Config.ChannelOrder[chan_shift]] |= (1<<data_mask);
+						RxChannel[Config.ChannelOrder[chan_shift]] |= (1 << data_mask);
 					}
 
 					chan_mask++;
@@ -667,7 +667,7 @@ ISR(USART0_RX_vect)
 				sindex = 2; // Channel data from byte 3
 
 				// Work out if this is 10 or 11 bit data
-				if (sBuffer[1] & 0x10) 	// 0 for 10 bit resolution 1 for 11 bit resolution
+				if ((sBuffer[1] & 0xF0) != 0) 	// 0 for 10 bit resolution, otherwise 11 bit resolution
 				{
 					chan_mask = 0x78;	// 11 bit (2048)
 					data_mask = 0x07;

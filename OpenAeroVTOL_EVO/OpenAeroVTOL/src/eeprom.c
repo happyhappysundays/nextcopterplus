@@ -969,11 +969,12 @@ void Set_EEPROM_Default_Config(void)
 	Config.Contrast = 36;				// Contrast (Everything else)
 	#endif
 	
-	// Servo defaults
+	// Defaults
 	for (i = 0; i < MAX_RC_CHANNELS; i++)
 	{
-		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-		Config.RxChannelZeroOffset[i] = 3750;
+		Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);			// Preset channel order to JR
+		Config.CustomChannelOrder[i] = pgm_read_byte(&JR[i]);	// Preset custom channel order to JR
+		Config.RxChannelZeroOffset[i] = 3750;					// Reset RX channel offsets
 	}
 	
 	// Monopolar throttle is a special case. Set to -100% or -1000
@@ -1021,13 +1022,6 @@ void Set_EEPROM_Default_Config(void)
 	Config.Curve[3].channel = THROTTLE;
 	Config.Curve[4].channel = NOMIX;
 	Config.Curve[5].channel = NOMIX;
-	
-	// Preset custom channel order to JR
-	for (i = 0; i < MAX_RC_CHANNELS; i++)
-	{
-		Config.CustomChannelOrder[i] = pgm_read_byte(&JR[i]);
-	}
-
 					
 	// Load manual defaults
 	Load_eeprom_preset(QUADX);

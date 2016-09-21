@@ -68,7 +68,7 @@ void output_servo_ppm(uint8_t ServoFlag)
 	// Check for motor flags if throttle is below arming minimum or disarmed
 	// and set all motors to minimum throttle if so.
 	if 	(
-			(MonopolarThrottle < THROTTLEIDLE) || 
+			(MonopolarThrottle < THROTTLEIDLE) ||
 			(General_error & (1 << DISARMED))
 		)
 	{

@@ -42,7 +42,7 @@ void idle_screen(void);
 //************************************************************
 
 //															// Status menu
-const char StatusText0[]  PROGMEM = "Version: 1.5 B3";		// <-- Change version number here !!!
+const char StatusText0[]  PROGMEM = "Version: 1.5";			// <-- Change version number here !!!
 const char StatusText1[]  PROGMEM = "Mode:";
 const char StatusText3[]  PROGMEM = "Profile:";
 const char StatusText4[]  PROGMEM = ".";
@@ -255,6 +255,8 @@ const char ErrorText7[] PROGMEM = "Model";
 const char Status3[] 	PROGMEM = "Battery";
 const char ErrorText10[] PROGMEM =  "Low";
 const char Disarmed[]	PROGMEM = "Disarmed";
+const char ErrorText8[] PROGMEM = "Brownout";
+const char ErrorText9[] PROGMEM = "Occurred";
 //
 const char PText0[]  PROGMEM = "OpenAero2";					// Init
 const char PText1[]  PROGMEM = "Reset";	
@@ -368,8 +370,9 @@ const char WARNING_1[] PROGMEM =  "REMOVE PROPS";
 
 const char ERROR_0[] PROGMEM =  "Reboot";
 const char ERROR_1[] PROGMEM =  "Manual disarm";
-const char ERROR_2[] PROGMEM =  "No signal disarm";
+const char ERROR_2[] PROGMEM =  "No signal";
 const char ERROR_3[] PROGMEM =  "Disarm timer";
+const char ERROR_4[] PROGMEM =  "BOD reset";
 
 const char ERROR_MSG_0[] PROGMEM =  "Clear";
 
@@ -428,14 +431,14 @@ const char O6[] PROGMEM = "AX2:";
 const char O7[] PROGMEM = "AX3:";
 
 // Custom channel inputs
-const char Ch1[] PROGMEM = "Ch.1 Function:";
-const char Ch2[] PROGMEM = "Ch.2 Function:";
-const char Ch3[] PROGMEM = "Ch.3 Function:";
-const char Ch4[] PROGMEM = "Ch.4 Function:";
-const char Ch5[] PROGMEM = "Ch.5 Function:";
-const char Ch6[] PROGMEM = "Ch.6 Function:";
-const char Ch7[] PROGMEM = "Ch.7 Function:";
-const char Ch8[] PROGMEM = "Ch.8 Function:";
+const char Ch1[] PROGMEM = "TX chan. 1";
+const char Ch2[] PROGMEM = "TX chan. 2";
+const char Ch3[] PROGMEM = "TX chan. 3";
+const char Ch4[] PROGMEM = "TX chan. 4";
+const char Ch5[] PROGMEM = "TX chan. 5";
+const char Ch6[] PROGMEM = "TX chan. 6";
+const char Ch7[] PROGMEM = "TX chan. 7";
+const char Ch8[] PROGMEM = "TX chan. 8";
 
 const char* const text_menu[] PROGMEM = 
 	{
@@ -480,8 +483,10 @@ const char* const text_menu[] PROGMEM =
 		//
 		PText4, 																			// 61 Failed
 		//
-		Dummy0, Dummy0, Dummy0, Dummy0,														// 62 to 65 spare
-		Dummy0, Dummy0, 
+		ErrorText8, ErrorText9,																// 62, 63, "Brownout", "Occurred"
+		//
+		Dummy0, Dummy0,																		// 64 to 67 spare
+		Dummy0, Dummy0,
 		//
 		AutoMenuItem11, AutoMenuItem15, MixerItem15, MixerItem12, MixerItem16,				// 68 to 71 off/on/scale/rev/revscale 
 		//
@@ -499,7 +504,7 @@ const char* const text_menu[] PROGMEM =
 		Dummy0, Dummy0,																		// 101 to 104 Spare
 		Dummy0, Dummy0,
 		//
-		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. nums
+		ChannelRef0, ChannelRef1, ChannelRef2, ChannelRef3, ChannelRef4, 					// 105 to 115 Ch. names
 		ChannelRef5, ChannelRef6, ChannelRef7, ChannelRef8,		
 		ChannelRef10, ChannelRef12, 														// 114, 115 Ch.ref abbreviations
 		//
@@ -601,8 +606,8 @@ const char* const text_menu[] PROGMEM =
 		MenuFrame9,																			// 280 Abort
 		WARNING_0,	WARNING_1,																// 281 Warnings
 		
-		Dummy0,ERROR_0,ERROR_1,ERROR_2,ERROR_3,												// 283 Error messages
-		Dummy0, 
+		Dummy0,ERROR_0,ERROR_1,ERROR_2,ERROR_3,ERROR_4,										// 283 Error messages
+
 		
 		StatusText7,																		// 289 Battery:
 		Dummy0,	
@@ -658,7 +663,7 @@ const char* const text_menu[] PROGMEM =
 		Dummy0,	Dummy0,	
 		Dummy0, Dummy0,	Dummy0,	Dummy0,														// 378 to 383 Spare
 		//
-		Ch1, Ch2, Ch3, Ch4,																	// 384 to 391 Spare												
+		Ch1, Ch2, Ch3, Ch4,																	// 384 to 391 TX channel numbers												
 		Ch5, Ch6, Ch7, Ch8,		
 		
 		//	
@@ -720,35 +725,36 @@ void idle_screen(void)
 	clear_buffer(buffer);
 
 	// Change Status screen depending on arm mode
-	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 	// "Press"
-	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);	// "for status."
+	LCD_Display_Text(121,(const unsigned char*)Verdana14,41,3); 		// "Press"
+	LCD_Display_Text(122,(const unsigned char*)Verdana14,24,23);		// "for status."
 
 	// Display most important error
-	if (General_error & (1 << LVA_ALARM))							// Low voltage
+	if (General_error & (1 << LVA_ALARM))								// Low voltage
 	{
-		LCD_Display_Text(134,(const unsigned char*)Verdana14,12,43);// "Battery"
-		LCD_Display_Text(118,(const unsigned char*)Verdana14,80,43); // "Low"
+		LCD_Display_Text(134,(const unsigned char*)Verdana14,12,43);	// "Battery"
+		LCD_Display_Text(118,(const unsigned char*)Verdana14,80,43);	// "Low"
 	}
 	
-	else if (General_error & (1 << NO_SIGNAL))						// No signal
+	else if (General_error & (1 << NO_SIGNAL))							// No signal
 	{
-		LCD_Display_Text(75,(const unsigned char*)Verdana14,28,43); // "No"
-		LCD_Display_Text(76,(const unsigned char*)Verdana14,54,43); // "Signal"
+		LCD_Display_Text(75,(const unsigned char*)Verdana14,28,43);		// "No"
+		LCD_Display_Text(76,(const unsigned char*)Verdana14,54,43);		// "Signal"
 	}
 	
-	else if (General_error & (1 << THROTTLE_HIGH))					// Throttle high
+	else if (General_error & (1 << THROTTLE_HIGH))						// Throttle high
 	{
-		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43);// "Throttle"
-		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);	// "High"
+		LCD_Display_Text(105,(const unsigned char*)Verdana14,10,43)	;	// "Throttle"
+		LCD_Display_Text(55,(const unsigned char*)Verdana14,81,43);		// "High"
 	}
 	
-	else if (General_error & (1 << DISARMED))						// Disarmed
+	else if (General_error & (1 << DISARMED))							// Disarmed
 	{
-		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);// "(Disarmed)"
+		LCD_Display_Text(139,(const unsigned char*)Verdana14,20,43);	// "(Disarmed)"
 	}
+	
 	else
 	{
-		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);// "(Armed)"
+		LCD_Display_Text(138,(const unsigned char*)Verdana14,28,43);	// "(Armed)"
 	}
 
 	write_buffer(buffer);

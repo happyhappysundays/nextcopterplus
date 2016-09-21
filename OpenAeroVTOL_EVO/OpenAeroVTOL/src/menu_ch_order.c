@@ -22,6 +22,7 @@
 #include "eeprom.h"
 #include "mixer.h"
 #include "imu.h"
+#include "rc.h"
 
 //************************************************************
 // Prototypes
@@ -34,9 +35,9 @@ void menu_channel(void);
 // Defines
 //************************************************************
 
-#define CHSTART 384 // Start of Menu text items
-#define CHOFFSET 85	// LCD offsets
-#define CHTEXT 105 	// Start of value text items
+#define CHSTART 384 // Start of Menu text items (channel names)
+#define CHOFFSET 70	// LCD offsets for TX number text
+#define CHTEXT 105 	// Start of value text items (TX channel numbers)
 #define CHITEMS 8 	// Number of menu items
 
 //************************************************************
@@ -67,9 +68,7 @@ const menu_range_t Ch_menu_ranges[MAX_RC_CHANNELS] PROGMEM =
 void menu_channel(void)
 {
 	int8_t *value_ptr;
-	int8_t i = 0; 
 	menu_range_t range;
-	uint8_t text_link;
 	uint16_t reference = CHSTART;
 
 	// If sub-menu item has changed, reset sub-menu positions
@@ -92,21 +91,14 @@ void menu_channel(void)
 
 		if (button == ENTER)
 		{
-			text_link = pgm_read_word(&ChMenuText[menu_temp - reference]);
-			do_menu_item(menu_temp, value_ptr + (menu_temp - reference), 1, range, 0, text_link, false, 0);
+			do_menu_item(menu_temp, value_ptr + (menu_temp - reference), 1, range, 0, CHTEXT, false, 0);
 		}
 
 		// Update when exiting
 		if (button == ENTER)
 		{
-			// Update current channel order with the custom one on exit
-			if (Config.TxSeq == CUSTOM)
-			{
-				for (i = 0; i < MAX_RC_CHANNELS; i++)
-				{
-					Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
-				}
-			}
+			// Refresh channel order
+			UpdateChOrder();
 			
 			Save_Config_to_EEPROM(); // Save value and return
 			Wait_BUTTON4();			 // Wait for user's finger off the button

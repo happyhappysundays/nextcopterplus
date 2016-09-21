@@ -26,6 +26,7 @@
 #include "uart.h"
 #include "i2c.h"
 #include "isr.h"
+#include "rc.h"
 #include "MPU6050.h"
 
 //************************************************************
@@ -127,7 +128,6 @@ void menu_rc_setup(uint8_t section)
 
 	menu_range_t range;
 	uint16_t	text_link;
-	uint8_t		i;
 	uint16_t	offset = 0;			// Index into channel structure
 	uint16_t	items= RCITEMS;		// Items in group
 	
@@ -203,27 +203,8 @@ void menu_rc_setup(uint8_t section)
 			// Update MPU6050 LPF and reverse sense of menu items
 			writeI2Cbyte(MPU60X0_DEFAULT_ADDRESS, MPU60X0_RA_CONFIG, (6 - Config.MPU6050_LPF));
 
-			// Update channel sequence
-			for (i = 0; i < MAX_RC_CHANNELS; i++)
-			{
-				if (Config.TxSeq == FUTABASEQ)
-				{
-					Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
-				}
-				else if (Config.TxSeq == JRSEQ)
-				{
-					Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-				}
-				else if (Config.TxSeq == MPXSEQ)
-				{
-					Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
-				}
-				// Load from custom channel order
-				else
-				{
-					Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
-				}
-			}
+			// Refresh channel order
+			UpdateChOrder();
 
 			// Check validity of RX type and PWM speed selection
 			// If illegal setting, drop down to RC Sync

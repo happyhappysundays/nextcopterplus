@@ -40,8 +40,8 @@ void UpdateTransition(void);
 // Code
 //************************************************************
 
-volatile int16_t RCinputs[MAX_RC_CHANNELS + 1];	// Normalised RC inputs
-volatile int16_t MonopolarThrottle;				// Monopolar throttle
+volatile int16_t RCinputs[MAX_RC_CHANNELS + 1];						// Normalised RC inputs
+volatile int16_t MonopolarThrottle;									// Monopolar throttle
 
 // Get raw flight channel data (~2500 to 5000) and remove zero offset
 // Use channel mapping for reconfigurability
@@ -143,4 +143,33 @@ void UpdateTransition(void)
 	// transition now has a range of 0 to 101 for 0 to 2000 input
 	// Limit extent of transition value 0 to 100 (101 steps)
 	if (transition > 100) transition = 100;
+}
+
+// Update channel order
+void UpdateChOrder(void)
+{
+	uint8_t i;
+	
+	// Populate each channel number with the correct lookup channel
+	for (i = 0; i < MAX_RC_CHANNELS; i++)
+	{
+		// Update channel sequence
+		if (Config.TxSeq == FUTABASEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
+		}
+		else if (Config.TxSeq == JRSEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
+		}
+		else if (Config.TxSeq == MPXSEQ)
+		{
+			Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
+		}
+		// Otherwise load from custom channel order
+		else
+		{
+			Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
+		}
+	}
 }

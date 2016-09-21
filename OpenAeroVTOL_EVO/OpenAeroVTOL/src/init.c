@@ -35,6 +35,7 @@
 #include "i2cmaster.h"
 #include "i2c.h"
 #include "MPU6050.h"
+#include "glcd_driver.h"
 #include <avr/wdt.h>
 
 //************************************************************
@@ -44,6 +45,7 @@
 void init(void);
 
 // WDT reset prototype. Placed before main() in code to prevent wdt re-firing
+// Also allows inspection of the MCUSR after a reset
 void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
 
 void wdt_init(void)
@@ -63,7 +65,9 @@ uint16_t SystemVoltage = 0;		// Initial voltage measured.
 void init(void)
 {
 	uint8_t i;
+	uint16_t j;
 	bool	updated;
+	uint8_t ServoFlag = 0;
 	
 	//***********************************************************
 	// I/O setup
@@ -101,8 +105,8 @@ void init(void)
 	PIND	= 0x0C;			// Release RX pull up on PD0
 	_delay_ms(63);			// Pause while satellite wakes up
 							// and pull-ups have time to rise.
-							// Tweak until bind pulses about 68ms after power-up		
-		
+							// Tweak until bind pulses about 68ms after power-up
+				
 	// Bind as master if any single button pressed.
 	// NB: Have to wait until the button pull-ups rise before testing for a button press.
 	// Button 1
@@ -201,7 +205,7 @@ void init(void)
 	}
 	
 	RxChannel[THROTTLE] = 2500; // Min throttle
-	
+
 	//***********************************************************
 	// GLCD initialisation
 	//***********************************************************
@@ -279,7 +283,7 @@ void init(void)
 	//***********************************************************
 
 	// This delay prevents the GLCD flashing up a ghost image of old data
-	_delay_ms(300);
+	_delay_ms(300); // Turns out this only happens with programmer attached...
 
 	// Reload default eeprom settings if middle two buttons are pressed
 	if ((BUTTON2 == 0) && (BUTTON3 == 0))
@@ -311,8 +315,8 @@ void init(void)
 		LCD_Display_Text(259,(const unsigned char*)Verdana14,30,13); // "Updating"
 		LCD_Display_Text(260,(const unsigned char*)Verdana14,33,37); // "settings"
 		write_buffer(buffer);
-		clear_buffer(buffer);		
-		_delay_ms(1000);	
+		clear_buffer(buffer);
+		_delay_ms(1000);
 	}
 	else
 	{
@@ -320,12 +324,12 @@ void init(void)
 		write_buffer(buffer);
 		_delay_ms(1000);
 	}
-
+	
 	clear_buffer(buffer);
 	write_buffer(buffer);
-	
+		
 	st7565_init(); // Seems necessary for KK2 mini
-	
+
 	//***********************************************************
 	// i2c init
 	//***********************************************************	
@@ -342,7 +346,7 @@ void init(void)
 	clear_buffer(buffer);
 	st7565_command(CMD_SET_COM_NORMAL); 	// For text (not for logo)
 	LCD_Display_Text(263,(const unsigned char*)Verdana14,18,25);	// "Hold steady"
-	write_buffer(buffer);	
+	write_buffer(buffer);
 	clear_buffer(buffer);
 		
 	// Do startup tasks
@@ -357,7 +361,7 @@ void init(void)
 		LCD_Display_Text(61,(const unsigned char*)Verdana14,25,25); // "Cal. failed"
 		write_buffer(buffer);
 		_delay_ms(1000);
-		
+			
 		// Reset
 		cli();
 		wdt_enable(WDTO_15MS);				// Watchdog on, 15ms
@@ -396,9 +400,42 @@ void init(void)
 		LVA = 0;
 	}
 
-#ifdef ERROR_LOG	
-	// Log reboot
+	//***********************************************************
+	// Experimental PWM output code
+	//***********************************************************
+
+	cli();									// Disable interrupts
+
+	ServoFlag = 0;							// Reset servo flag
+
+	// For each output
+	for (i = 0; i < MAX_OUTPUTS; i++)
+	{
+		// Check for motor marker
+		if (Config.Channel[i].Motor_marker == MOTOR)
+		{
+			// Set output to 1ms pulse width
+			ServoOut[i] = MOTORMIN;
+			
+			// Mark motor outputs
+			ServoFlag |= (1 << i);
+		}
+	}
+
+	for (j = 0; j < 249; j++)
+	{
+		// Pass address of ServoOut array and select only motor outputs
+		output_servo_ppm_asm(&ServoOut[0], ServoFlag);
+	}
+	
+	sei();									// Enable interrupts
+	
+	//***********************************************************	
+
+	#ifdef ERROR_LOG
+	// If restart, log it as such
 	add_log(REBOOT);
-#endif
+	#endif
+	
 } // init()
 

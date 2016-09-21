@@ -929,27 +929,8 @@ void UpdateLimits(void)
 	// Additional tasks to ensure compatibility with the GUI
 	// Move any menu post-processing here so that it happens post-reboot
 
-	// Update channel sequence
-	for (i = 0; i < MAX_RC_CHANNELS; i++)
-	{
-		if (Config.TxSeq == FUTABASEQ)
-		{
-			Config.ChannelOrder[i] = pgm_read_byte(&FUTABA[i]);
-		}
-		else if (Config.TxSeq == JRSEQ)
-		{
-			Config.ChannelOrder[i] = pgm_read_byte(&JR[i]);
-		}
-		else if (Config.TxSeq == MPXSEQ)
-		{
-			Config.ChannelOrder[i] = pgm_read_byte(&MPX[i]);
-		}
-		// Load from custom channel order
-		else
-		{
-			Config.ChannelOrder[i] = Config.CustomChannelOrder[i];
-		}
-	}
+	// Refresh channel order
+	UpdateChOrder();
 
 	// See if mixer preset has changed. The only time it will ever NOT
 	// be "Options" is when the GUI has changed it.
